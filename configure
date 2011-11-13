@@ -1,0 +1,339 @@
+#!/bin/sh
+#
+# Installation script for PyXPlot version 0.9.0
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# 0. START CONSTRUCTING A MAKEFILE
+
+rm -f conf.*
+echo "" > Makefile
+echo "PATHLINK=/" > Makefile
+
+# 1. TEST THE ECHO COMMAND TO SEE WHICH VARIANT WE HAVE
+
+case `echo "testing\c"; echo 1,2,3`,`echo -n testing; echo 1,2,3` in
+  *c*,-n*) ECHO_N= ECHO_C='
+' ECHO_T='  ' ;;
+  *c*,*  ) ECHO_N=-n ECHO_C= ECHO_T= ;;
+  *)       ECHO_N= ECHO_C='\c' ECHO_T= ;;
+esac
+
+# 2. CHECK FOR LATEX
+
+echo $ECHO_N "Checking for latex             ............. $ECHO_C"
+whichout=`which latex 2> conf.stderr`
+rm -f conf.*
+if test "`echo $whichout | sed 's/\([a-z]*\).*/\1/'`" = "no" ; then whichout="" ; fi
+if test "$whichout" != "" ; then
+ echo "YES"
+ echo "LATEX_COMMAND=${whichout}" >> Makefile
+else
+ echo "NO" ; echo "ERROR: Required program latex could not be found." >&2 ; exit
+fi
+
+# 3. CHECK FOR CONVERT
+
+echo $ECHO_N "Checking for ImageMagick convert............ $ECHO_C"
+whichout=`which convert 2> conf.stderr`
+rm -f conf.*
+if test "`echo $whichout | sed 's/\([a-z]*\).*/\1/'`" = "no" ; then whichout="" ; fi
+if test "$whichout" != "" ; then
+ echo "YES"
+ echo "CONVERT_COMMAND=${whichout}" >> Makefile
+else 
+ echo "NO" ; echo "ERROR: Required program convert could not be found." >&2 ; exit
+fi
+
+# 4. CHECK FOR SED
+
+echo $ECHO_N "Checking for sed               ............. $ECHO_C"
+whichout=`which sed 2> conf.stderr`
+rm -f conf.*
+if test "`echo $whichout | sed 's/\([a-z]*\).*/\1/'`" = "no" ; then whichout="" ; fi
+if test "$whichout" != "" ; then
+ echo "YES"
+ echo "SED_COMMAND=${whichout}" >> Makefile
+else 
+ echo "NO" ; echo "ERROR: Required program sed could not be found." >&2 ; exit
+fi
+
+# 5. CHECK FOR GUNZIP
+
+echo $ECHO_N "Checking for gunzip            ............. $ECHO_C"
+whichout=`which gunzip 2> conf.stderr`
+rm -f conf.*
+if test "`echo $whichout | sed 's/\([a-z]*\).*/\1/'`" = "no" ; then whichout="" ; fi
+if test "$whichout" != "" ; then
+ echo "YES"
+ echo "GUNZIP_COMMAND=-D GUNZIP_COMMAND=\"\\\"${whichout} -c\\\"\"" >> Makefile
+else
+ echo "NO"
+ echo "GUNZIP_COMMAND=" >> Makefile
+ echo "WARNING: Gunzip could not be found. Installation will proceed, but PyXPlot will not be able to plot .gz files." >&2
+fi
+
+# 6. CHECK FOR WGET
+
+echo $ECHO_N "Checking for wget              ............. $ECHO_C"
+whichout=`which wget 2> conf.stderr`
+rm -f conf.*
+if test "`echo $whichout | sed 's/\([a-z]*\).*/\1/'`" = "no" ; then whichout="" ; fi
+if test "$whichout" != "" ; then
+ echo "YES"
+ echo "WGET_COMMAND=-D WGET_COMMAND=\"\\\"${whichout} -O -\\\"\"" >> Makefile
+else
+ echo "NO"
+ echo "WGET_COMMAND=" >> Makefile
+ echo "WARNING: wget could not be found. Installation will proceed, but PyXPlot will not be able to plot files directly from URLs." >&2
+fi
+
+# 7. CHECK FOR GHOSTSCRIPT
+
+echo $ECHO_N "Checking for ghostscript       ............. $ECHO_C"
+whichout=`which gs 2> conf.stderr`
+rm -f conf.*
+if test "`echo $whichout | sed 's/\([a-z]*\).*/\1/'`" = "no" ; then whichout="" ; fi
+if test "$whichout" != "" ; then
+ echo "YES"
+ echo "GS_COMMAND=${whichout}" >> Makefile
+else
+ echo "NO" ; echo "ERROR: Required program ghostscript could not be found." >&2 ; exit
+fi
+
+# 8. FIND GHOSTVIEW
+
+echo $ECHO_N "Checking for ghostview         ............. $ECHO_C"
+whichout_gv=`which gv 2> conf.stderr`
+rm -f conf.*
+if test "`echo $whichout_gv | sed 's/\([a-z]*\).*/\1/'`" = "no" ; then whichout_gv="" ; fi
+if test "$whichout_gv" != "" ; then
+ echo $ECHO_N "YES (gv$ECHO_C"
+ echo "GV_COMMAND=${whichout_gv}" >> Makefile 
+ if test "`gv --v 2> conf.stderr`" = "" ; then
+  rm -f conf.*
+  echo ", single hyphen options)" 
+  echo "GV_OPT=-" >> Makefile
+ else
+  rm -f conf.*
+  echo ", double hyphen options)" 
+  echo "GV_OPT=--" >> Makefile
+ fi
+else
+ echo "NO"
+ echo "GV_COMMAND=/bin/false" >> Makefile
+fi
+
+# 9. FIND GGV
+
+echo $ECHO_N "Checking for ggv               ............. $ECHO_C"
+whichout_ggv=`which ggv 2> conf.stderr`
+rm -f conf.*
+if test "`echo $whichout_ggv | sed 's/\([a-z]*\).*/\1/'`" = "no" ; then whichout_ggv="" ; fi
+if test "$whichout_ggv" != "" ; then
+ echo "YES (ggv, don't forget to set \"watch file\" in the viewer preferences!)"
+ echo "GGV_COMMAND=${whichout_ggv}" >> Makefile
+else
+ echo "NO"
+ echo "GGV_COMMAND=/bin/false" >> Makefile
+fi
+
+# 10. FIND MAKE
+
+echo $ECHO_N "Checking for GNU make          ............. $ECHO_C"
+whichout_make=`which make 2> conf.stderr`
+whichout_gmake=`which gmake 2> conf.stderr2`
+rm -f conf.*
+if test "`echo $whichout_make | sed 's/\([a-z]*\).*/\1/'`" = "no" ; then whichout_make="" ; fi
+if test "`echo $whichout_gmake | sed 's/\([a-z]*\).*/\1/'`" = "no" ; then whichout_gmake="" ; fi
+if test "$whichout_gmake" != "" ; then
+ echo "YES (gmake)"
+ echo "MAKE_COMMAND=${whichout_gmake}" >> Makefile
+ MAKE_COMMAND="gmake"
+elif test "$whichout_make" != "" ; then
+ echo "YES (make)"
+ echo "MAKE_COMMAND=${whichout_make}" >> Makefile
+ MAKE_COMMAND="make"
+else
+ echo "NO"
+ echo "ERROR: Required program 'make' could not be found." >&2
+ exit
+fi
+
+# 11. CHECK TO SEE WHETHER THIS SYSTEM HAS GCC INSTALLED
+
+echo $ECHO_N "Checking for gcc               ............. $ECHO_C"
+whichout=`which gcc 2> conf.stderr`
+rm -f conf.*
+if test "`echo $whichout | sed 's/\([a-z]*\).*/\1/'`" = "no" ; then whichout="" ; fi
+if test "$whichout" != "" ; then
+ echo "YES"
+else
+ echo "NO" ; echo "ERROR: Required program gcc could not be found." >&2 ; exit
+fi
+
+# 12. CHECK TO SEE WHETHER THIS SYSTEM HAS GNU READLINE HEADERS
+
+echo $ECHO_N "Checking for libreadline-dev   ............. $ECHO_C"
+if printf '#include <stdio.h>\n#include <readline/readline.h>\nint main() { return 0; }\n' | gcc -x c - -o conf.out > conf.stdout 2> conf.stderr
+then
+ rm -f conf.*
+ echo "YES"
+ echo "HAVE_READLINE=-D HAVE_READLINE=1" >> Makefile
+ echo "LINK_READLINE=-ltermcap -lreadline" >> Makefile
+else
+ rm -f conf.*
+ echo "NO"
+ echo "HAVE_READLINE=-D NOHAVE_READLINE=1" >> Makefile
+ echo "LINK_READLINE=" >> Makefile
+fi
+
+# 13. CHECK TO SEE WHETHER THIS SYSTEM HAS CFITSIO HEADERS
+
+echo $ECHO_N "Checking for libcfitsio-dev    ............. $ECHO_C"
+if printf '#include <fitsio.h>\nint main() { return 0; }\n' | gcc -x c - -o conf.out > conf.stdout 2> conf.stderr
+then
+ rm -f conf.*
+ echo "YES"
+ echo "HAVE_FITSIO=-D HAVE_FITSIO=1" >> Makefile
+ echo "LINK_FITSIO=-lcfitsio" >> Makefile
+else
+ rm -f conf.*
+ echo "NO"
+ echo "HAVE_FITSIO=-D NOHAVE_FITSIO=1" >> Makefile
+ echo "LINK_FITSIO=" >> Makefile
+fi
+
+# 14. CHECK TO SEE WHETHER THIS SYSTEM HAS GSL HEADERS
+
+echo $ECHO_N "Checking for libgsl0-dev       ............. $ECHO_C"
+if printf '#include <gsl/gsl_version.h>\nint main() { return 0; }\n' | gcc `gsl-config --cflags` -x c - -o conf.out > conf.stdout 2> conf.stderr
+then
+ rm -f conf.*
+ echo "YES"
+else
+ rm -f conf.*
+ echo "NO"
+ echo "ERROR: Header files for required library 'libgsl' could not be found." >&2
+ exit
+fi
+
+echo $ECHO_N "Checking version of libgsl0-dev ............ $ECHO_C"
+if expr `gsl-config --version` \>= 1.10 > conf.stdout
+then
+ rm -f conf.*
+ echo "YES"
+else
+ rm -f conf.*
+ echo "NO"
+ echo "ERROR: PyXPlot requires a version of gsl >= 1.10. Installed version is `gsl-config --version`." >&2
+ exit
+fi
+
+# 15. CHECK TO SEE WHETHER THIS SYSTEM HAS FFTW HEADERS
+
+echo $ECHO_N "Checking for libfftw3-dev      ............. $ECHO_C"
+if printf '#include <fftw3.h>\nint main() { return 0; }\n' | gcc -x c - -o conf.out > conf.stdout 2> conf.stderr
+then
+ rm -f conf.*
+ echo "YES"
+ echo "HAVE_FFTW3=-D HAVE_FFTW3=1" >> Makefile
+ echo "LINK_FFTW=-lfftw3" >> Makefile
+else
+ rm -f conf.*
+ echo "NO"
+ echo $ECHO_N "Checking for libfftw2-dev      ............. $ECHO_C"
+ if printf '#include <fftw.h>\nint main() { return 0; }\n' | gcc -x c - -o conf.out > conf.stdout 2> conf.stderr
+ then
+  rm -f conf.*
+  echo "YES"
+  echo "LINK_FFTW=-lfftw" >> Makefile
+ else
+  rm -f conf.*
+  echo "NO"
+  echo "ERROR: Header files for required library 'libfftw' could not be found." >&2
+  exit
+ fi
+fi
+
+# 16. CHECK TO SEE WHETHER THIS SYSTEM HAS LIBXML2 HEADERS
+
+echo $ECHO_N "Checking for libxml2-dev       ............. $ECHO_C"
+whichout=`which xml2-config 2> conf.stderr`
+rm -f conf.*
+if test "`echo $whichout | sed 's/\([a-z]*\).*/\1/'`" = "no" ; then whichout="" ; fi
+if test "$whichout" != "" ; then
+ echo "YES"
+else
+ echo "NO"
+ echo "ERROR: Header files for required library 'libxml2' could not be found." >&2
+ exit
+fi
+
+# 17. CHECK TO SEE WHETHER THIS SYSTEM HAS LIBPNG HEADERS
+
+echo $ECHO_N "Checking for libpng-dev        ............. $ECHO_C"
+if printf '#include <stdlib.h>\n#include <stdio.h>\n#include <png.h>\nint main() { return 0; }\n' | gcc -x c - -o conf.out > conf.stdout 2> conf.stderr
+then
+ rm -f conf.*
+ echo "YES"
+else
+ rm -f conf.*
+ echo "NO"
+ echo "ERROR: Header files for required library 'libpng' could not be found." >&2
+ exit
+fi
+
+# 18. CHECK TO SEE WHETHER THIS SYSTEM HAS KPATHSEA HEADERS
+
+echo $ECHO_N "Checking for libkpathsea-dev   ............. $ECHO_C"
+if printf '#include <stdlib.h>\n#include <stdio.h>\n#include <kpathsea/kpathsea.h>\nint main() { return 0; }\n' | gcc -x c - -o conf.out > conf.stdout 2> conf.stderr
+then
+ rm -f conf.*
+ echo "YES"
+ echo "HAVE_KPATHSEA=-D HAVE_KPATHSEA=1" >> Makefile
+ echo "LINK_KPATHSEA=-lkpathsea" >> Makefile
+ echo "KPSE_COMMAND=/dev/null" >> Makefile
+else
+ rm -f conf.*
+ echo "NO"
+ echo "HAVE_KPATHSEA=-D NOHAVE_KPATHSEA=1" >> Makefile
+ echo "LINK_KPATHSEA=" >> Makefile
+
+ # If we don't have libkpathsea, check that we do have kpsewhich
+ echo $ECHO_N "Checking for kpsewhich         ............. $ECHO_C"
+ whichout=`which kpsewhich 2> conf.stderr`
+ rm -f conf.*
+ if test "`echo $whichout | sed 's/\([a-z]*\).*/\1/'`" = "no" ; then whichout="" ; fi
+ if test "$whichout" != "" ; then
+  echo "YES"
+  echo "KPSE_COMMAND=${whichout}" >> Makefile
+ else
+  echo "NO" ; echo "ERROR: Neither the header files for the library 'libkpathsea-dev', nor the program kpsewhich could not be found." >&2 ; exit
+ fi
+fi
+
+# 19. OUTPUT MAKEFILE
+
+cat Makefile.skel >> Makefile
+
+echo "Configuration successful."
+echo "To continue installation, type '${MAKE_COMMAND}'."
+

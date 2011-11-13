@@ -1,0 +1,211 @@
+# MAKEFILE.SKEL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# Skeleton Makefile for PyXPlot... this is configured by running ./configure,
+# which adds a few lines of the form:
+#
+# GV_COMMAND=/usr/bin/gv
+
+# Location of final code. Change the value of USRDIR below to install PyXPlot
+# to a location other than /usr/local:
+
+USRDIR=/usr/local
+BINDIR=${DESTDIR}${USRDIR}/bin
+BINDIR_PRIVATE=${DESTDIR}${USRDIR}/lib/pyxplot
+SRCDIR=${DESTDIR}${USRDIR}/share/pyxplot
+DOCDIR=${DESTDIR}${USRDIR}/share/doc/pyxplot
+MANDIR=${DESTDIR}${USRDIR}/share/man/man1
+
+CWD=$(shell pwd)
+
+VERSION_MAJ = 0
+VERSION_MIN = 9
+VERSION_REV = 0
+DATE    = xx/xx/xxxx
+
+COMPILE = $(CC) -Wall -g `xml2-config --cflags` `gsl-config --cflags` -c -I $(CWD)/src
+LIBS    = $(LINK_FFTW) `xml2-config --libs` `gsl-config --libs` $(LINK_READLINE) -lz -lpng $(LINK_KPATHSEA) -lm
+LINK    = $(CC) -Wall -g
+
+OPTIMISATION = -O2
+
+DEBUG   = -D DEBUG=1 -D MEMDEBUG1=1 -D MEMDEBUG2=0
+NODEBUG = -D DEBUG=0 -D MEMDEBUG1=0 -D MEMDEBUG2=0
+
+LOCAL_SRCDIR = src
+LOCAL_OBJDIR = obj
+LOCAL_DOCDIR = doc
+LOCAL_BINDIR = bin
+
+PPL_FILES   = children.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/getPasswd.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c expressions/expCompile.c expressions/pplObj.c input.c mathsTools/dcfmath.c parser/cmdList.c pyxplot.c settings/epsColours.c settings/papersizes.c settings/settingsInit.c settings/settingTypes.c settings/textConstants.c settings/withWords.c stringTools/asciidouble.c
+
+PPL_HEADERS = children.h pplConstants.h coreUtils/dict.h coreUtils/errorReport.h coreUtils/getPasswd.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h expressions/expCompile.h expressions/pplObj.h expressions/pplObjUnits.h input.h mathsTools/dcfmath.h parser/cmdList.h pyxplot.h settings/arrows.h settings/labels.h settings/papersizes.h settings/settings.h settings/settingTypes.h settings/textConstants.h settings/withWords.h stringTools/asciidouble.h stringTools/strConstants.h
+
+PPLW_FILES   = helpers/pyxplot_watch.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c stringTools/asciidouble.c settings/settingTypes.c
+
+PPLW_HEADERS =                         coreUtils/dict.h coreUtils/errorReport.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h stringTools/asciidouble.h settings/settingTypes.h
+
+FITSHELP_FILES   = helpers/pyxplot_fitshelper.c stringTools/asciidouble.c
+FITSHELP_HEADERS =                              stringTools/asciidouble.h stringTools/strConstants.h
+
+PPL_SOURCES         = $(PPL_FILES:%.c=$(LOCAL_SRCDIR)/%.c)
+PPL_OBJECTS         = $(PPL_FILES:%.c=$(LOCAL_OBJDIR)/%.o)
+PPL_OBJECTS_DEBUG   = $(PPL_OBJECTS:%.o=%.debug.o)
+PPL_OBJECTS_INSTALL = $(PPL_OBJECTS:%.o=%.install.o)
+PPL_HFILES          = $(PPL_HEADERS:%.h=$(LOCAL_SRCDIR)/%.h) Makefile
+
+PPLW_SOURCES        = $(PPLW_FILES:%.c=$(LOCAL_SRCDIR)/%.c)
+PPLW_OBJECTS        = $(PPLW_FILES:%.c=$(LOCAL_OBJDIR)/%.o)
+PPLW_OBJECTS_DEBUG  = $(PPLW_OBJECTS:%.o=%.debug.o)
+PPLW_OBJECTS_INSTALL= $(PPLW_OBJECTS:%.o=%.install.o)
+PPLW_HFILES         = $(PPLW_HEADERS:%.h=$(LOCAL_SRCDIR)/%.h) Makefile
+
+FITSHELP_SOURCES    = $(FITSHELP_FILES:%.c=$(LOCAL_SRCDIR)/%.c)
+FITSHELP_OBJECTS    = $(FITSHELP_FILES:%.c=$(LOCAL_OBJDIR)/%.o)
+FITSHELP_OBJECTS_INSTALL = $(FITSHELP_OBJECTS:%.o=%.install.o)
+FITSHELP_HFILES     = $(FITSHELP_HEADERS:%.h=$(LOCAL_SRCDIR)/%.h) Makefile
+
+ALL_HFILES = $(PPL_HFILES) $(PPLW_HFILES) $(FITSHELP_HFILES)
+
+COMMON_SWITCHES = -D VERSION=\"$(VERSION_MAJ).$(VERSION_MIN).$(VERSION_REV)\"  -D VERSION_MAJ=$(VERSION_MAJ)  -D VERSION_MIN=$(VERSION_MIN)  -D VERSION_REV=$(VERSION_REV)  -D DATE=\"$(DATE)\"  -D PATHLINK=\"$(PATHLINK)\"  $(HAVE_READLINE)  $(HAVE_FFTW3)  $(HAVE_FITSIO)  $(HAVE_KPATHSEA)  -D LATEX_COMMAND=\"$(LATEX_COMMAND)\"  -D KPSE_COMMAND=\"$(KPSE_COMMAND)\"  -D CONVERT_COMMAND=\"$(CONVERT_COMMAND)\"  -D GHOSTSCRIPT_COMMAND=\"$(GS_COMMAND)\"  -D SED_COMMAND=\"$(SED_COMMAND)\"  $(GUNZIP_COMMAND)  $(WGET_COMMAND)  -D GHOSTVIEW_COMMAND=\"$(GV_COMMAND)\"  -D GHOSTVIEW_OPT=\"$(GV_OPT)\"  -D GGV_COMMAND=\"$(GGV_COMMAND)\"
+
+NOINSTALL_SWITCHES  = $(COMMON_SWITCHES) -D SRCDIR=\"$(CWD)/$(LOCAL_SRCDIR)/\"  -D DOCDIR=\"$(CWD)/$(LOCAL_DOCDIR)/\"  -D PPLBINARY=\"$(CWD)/$(LOCAL_BINDIR)/pyxplot\"  -D FITSHELPER=\"$(CWD)/$(LOCAL_BINDIR)/pyxplot_fitshelper\"  -D TIMEHELPER=\"$(CWD)/$(LOCAL_BINDIR)/pyxplot_timehelper\"
+INSTALL_SWITCHES    = $(COMMON_SWITCHES) -D SRCDIR=\"$(SRCDIR)\"   -D DOCDIR=\"$(DOCDIR)\"   -D PPLBINARY=\"$(BINDIR)/pyxplot\"  -D FITSHELPER=\"$(BINDIR_PRIVATE)/pyxplot_fitshelper\"  -D TIMEHELPER=\"$(BINDIR_PRIVATE)/pyxplot_timehelper\"
+DEBUG_SWITCHES      = $(COMMON_SWITCHES) -D SRCDIR=\"$(CWD)/$(LOCAL_SRCDIR)/\"  -D DOCDIR=\"$(CWD)/$(LOCAL_DOCDIR)/\"  -D PPLBINARY=\"$(CWD)/$(LOCAL_BINDIR)/debug/pyxplot\"  -D FITSHELPER=\"$(CWD)/$(LOCAL_BINDIR)/pyxplot_fitshelper\"  -D TIMEHELPER=\"$(CWD)/$(LOCAL_BINDIR)/pyxplot_timehelper\"
+
+all: $(LOCAL_BINDIR)/pyxplot $(LOCAL_BINDIR)/pyxplot_watch $(LOCAL_BINDIR)/pyxplot_fitshelper $(LOCAL_BINDIR)/pyxplot_timehelper $(LOCAL_BINDIR)/debug/pyxplot $(LOCAL_BINDIR)/debug/pyxplot_watch $(LOCAL_BINDIR)/install/pyxplot $(LOCAL_BINDIR)/install/pyxplot_watch $(LOCAL_BINDIR)/install/pyxplot_fitshelper $(LOCAL_BINDIR)/install/pyxplot_timehelper $(LOCAL_OBJDIR)/pyxplot.1 $(LOCAL_OBJDIR)/pyxplot_watch.1
+
+src/settings/epsColours.h: buildScripts/colourlistGenerate.py
+	python buildScripts/colourlistGenerate.py
+
+src/settings/epsColours.c: src/settings/epsColours.h
+
+#
+# General macros for the compile steps
+#
+
+$(LOCAL_OBJDIR)/%.o:         $(LOCAL_SRCDIR)/%.c $(ALL_HFILES)
+	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools
+	$(COMPILE) $(CFLAGS) $(OPTIMISATION) $(NODEBUG) $(NOINSTALL_SWITCHES) $< -o $@
+
+$(LOCAL_OBJDIR)/%.debug.o:   $(LOCAL_SRCDIR)/%.c $(ALL_HFILES)
+	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools
+	$(COMPILE) $(CFLAGS) $(OPTIMISATION) $(DEBUG)   $(DEBUG_SWITCHES)     $< -o $@
+
+$(LOCAL_OBJDIR)/%.install.o: $(LOCAL_SRCDIR)/%.c $(ALL_HFILES)
+	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools
+	$(COMPILE) $(CFLAGS) $(OPTIMISATION) $(NODEBUG) $(INSTALL_SWITCHES)   $< -o $@
+
+#
+# Make the pyxplot binaries
+#
+
+$(LOCAL_BINDIR)/pyxplot:         $(PPL_OBJECTS)
+	mkdir -p $(LOCAL_BINDIR)
+	$(LINK) $(LDFLAGS) $(PPL_OBJECTS)         $(LIBS) -o $(LOCAL_BINDIR)/pyxplot
+
+$(LOCAL_BINDIR)/debug/pyxplot:   $(PPL_OBJECTS_DEBUG)
+	mkdir -p $(LOCAL_BINDIR)/debug
+	echo "The files in this directory are binaries with debugging options enabled: they produce activity logs called 'pyxplot.log'. It should be noted that these binaries can up to ten times slower than non-debugging versions." > $(LOCAL_BINDIR)/debug/README
+	$(LINK) $(LDFLAGS) $(PPL_OBJECTS_DEBUG)   $(LIBS) -o $(LOCAL_BINDIR)/debug/pyxplot
+
+$(LOCAL_BINDIR)/install/pyxplot: $(PPL_OBJECTS_INSTALL)
+	mkdir -p $(LOCAL_BINDIR)/install
+	echo "The files in this directory are binaries intended to be installed with 'make install'. They should not be used in their present location, as they contain hard-coded links to files which are created by the 'make install' step." > $(LOCAL_BINDIR)/debug/README
+	$(LINK) $(LDFLAGS) $(PPL_OBJECTS_INSTALL) $(LIBS) -o $(LOCAL_BINDIR)/install/pyxplot
+
+#
+# Make the pyxplot_watch binaries
+#
+
+$(LOCAL_BINDIR)/pyxplot_watch:         $(PPLW_OBJECTS)
+	mkdir -p $(LOCAL_BINDIR)
+	$(LINK) $(LDFLAGS) $(PPLW_OBJECTS)         $(LIBS) -o $(LOCAL_BINDIR)/pyxplot_watch
+
+$(LOCAL_BINDIR)/debug/pyxplot_watch:   $(PPLW_OBJECTS_DEBUG)
+	mkdir -p $(LOCAL_BINDIR)/debug
+	$(LINK) $(LDFLAGS) $(PPLW_OBJECTS_DEBUG)   $(LIBS) -o $(LOCAL_BINDIR)/debug/pyxplot_watch
+
+$(LOCAL_BINDIR)/install/pyxplot_watch: $(PPLW_OBJECTS_INSTALL)
+	mkdir -p $(LOCAL_BINDIR)/install
+	$(LINK) $(LDFLAGS) $(PPLW_OBJECTS_INSTALL) $(LIBS) -o $(LOCAL_BINDIR)/install/pyxplot_watch
+
+#
+# Make fits helper binaries
+#
+
+$(LOCAL_BINDIR)/pyxplot_fitshelper:         $(FITSHELP_OBJECTS)
+	mkdir -p $(LOCAL_BINDIR)
+	$(LINK) $(LDFLAGS) $(FITSHELP_OBJECTS)         $(LINK_FITSIO) $(LIBS) -o $(LOCAL_BINDIR)/pyxplot_fitshelper
+
+$(LOCAL_BINDIR)/install/pyxplot_fitshelper: $(FITSHELP_OBJECTS_INSTALL)
+	mkdir -p $(LOCAL_BINDIR)/install
+	$(LINK) $(LDFLAGS) $(FITSHELP_OBJECTS_INSTALL) $(LINK_FITSIO) $(LIBS) -o $(LOCAL_BINDIR)/install/pyxplot_fitshelper
+
+#
+# Make time helper
+#
+
+$(LOCAL_BINDIR)/pyxplot_timehelper: $(LOCAL_SRCDIR)/helpers/pyxplot_timehelper.sh
+	mkdir -p $(LOCAL_BINDIR)
+	cp $(LOCAL_SRCDIR)/helpers/pyxplot_timehelper.sh $@
+
+$(LOCAL_BINDIR)/install/pyxplot_timehelper: $(LOCAL_SRCDIR)/helpers/pyxplot_timehelper.sh
+	mkdir -p $(LOCAL_BINDIR)/install
+	cp $(LOCAL_SRCDIR)/helpers/pyxplot_timehelper.sh $@
+
+#
+# Make man page
+#
+
+$(LOCAL_OBJDIR)/pyxplot.1: buildScripts/manpage_pyxplot.py
+	python buildScripts/manpage_pyxplot.py       ${DOCDIR}/pyxplot.pdf > $(LOCAL_OBJDIR)/pyxplot.1
+
+$(LOCAL_OBJDIR)/pyxplot_watch.1: buildScripts/manpage_pyxplot_watch.py
+	python buildScripts/manpage_pyxplot_watch.py ${DOCDIR}/pyxplot.pdf > $(LOCAL_OBJDIR)/pyxplot_watch.1
+
+
+#
+# Install step
+#
+
+install: all
+	install -d ${SRCDIR} ${BINDIR} ${BINDIR_PRIVATE} ${DOCDIR} ${MANDIR}
+	install -m644 ${LOCAL_SRCDIR}/ppl_help.xml               ${SRCDIR}
+	install -m755 ${LOCAL_BINDIR}/install/pyxplot            ${BINDIR}/pyxplot
+	install -m755 ${LOCAL_BINDIR}/install/pyxplot_watch      ${BINDIR}/pyxplot_watch
+	install -m755 ${LOCAL_BINDIR}/install/pyxplot_fitshelper ${BINDIR_PRIVATE}/pyxplot_fitshelper
+	install -m755 ${LOCAL_BINDIR}/install/pyxplot_timehelper ${BINDIR_PRIVATE}/pyxplot_timehelper
+	install -m644 doc/*.tex doc/pyxplot.pdf                  ${DOCDIR}
+	install -m644 $(LOCAL_OBJDIR)/pyxplot.1                  ${MANDIR}/pyxplot.1
+	install -m644 $(LOCAL_OBJDIR)/pyxplot_watch.1            ${MANDIR}/pyxplot_watch.1
+
+
+#
+# Clean macros
+#
+
+clean:
+	rm -f src/settings/epsColours.c src/settings/epsColours.h
+	rm -vfR $(LOCAL_OBJDIR) $(LOCAL_BINDIR)
+
+afresh: clean all
+

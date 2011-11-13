@@ -1,0 +1,164 @@
+ ____       __  ______  _       _      PYXPLOT
+|  _ \ _   _\ \/ /  _ \| | ___ | |_    Version 0.9.0
+| |_) | | | |\  /| |_) | |/ _ \| __|   xx/xx/xxxx
+|  __/| |_| |/  \|  __/| | (_) | |_
+|_|    \__, /_/\_\_|   |_|\___/ \__|   Copyright (C) 2006-2012 Dominic Ford
+       |___/                                         2008-2011 Ross Church
+                                                     2010-2011 Zoltan Voros
+
+Send comments, bug reports, feature requests and coffee supplies to:
+<coders@pyxplot.org.uk>
+
+-----
+
+1. INTRODUCTION
+
+PyXPlot is a multi-purpose command-line tool for performing simple data
+processing and for producing graphs and vector graphics. The central philosophy
+of PyXPlot's interface is that common tasks -- for example, plotting labelled
+graphs of data -- should be accessible via short, simple and intuitive commands
+which require minimal typing to produce a first draft result. At the same time,
+these commands also take a sufficient range of optional arguments and settings
+to allow these figures to be subsequently fine-tuned into a wide range of
+different styles, appropriate for inclusion in reports, talks or academic
+journals.
+
+As well as being a graph-plotting package, PyXPlot also has facilities for
+fitting mathematical functions to data, for numerically solving simple systems
+of equations, and for converting datafiles between different formats. Its
+mathematical environment can interpolate datasets, integrate and differentiate
+them, and take Fourier transforms. PyXPlot's ability to keep track of the
+physical units in which data are expressed, and to convert data between
+different units of measurement, mean that it can be used as a powerful desktop
+calculator.
+
+PyXPlot's interface bears some striking similarities to that of Gnuplot.
+Specifically, the commands used for plotting simple graphs in the two programs
+are virtually identical, though the syntax used for more advanced plotting
+often differs and PyXPlot's mathematical environment is hugely extended over
+that of Gnuplot. This means that Gnuplot users will have a head start with
+PyXPlot: simple Gnuplot scripts will often run in PyXPlot with minimal
+modification.
+
+A number of examples of the graphical output which PyXPlot can produce may be
+found on the PyXPlot website: <http://www.pyxplot.org.uk/>.
+
+
+
+2. SYSTEM REQUIREMENTS
+
+PyXPlot works on most UNIX-like operating systems. We have tested it under
+Linux, Solaris and MacOS X, and believe that it should work on other similar
+POSIX systems. We regret that it is not available for Microsoft Windows, and
+have no plans for porting it at this time. It requires that the following
+software packages (not included) be installed:
+
+- fftw                       (version 2 or, preferably, 3+)
+- gcc and make
+- Ghostscript
+- The Gnu Scientific Library (version 1.10+)
+- ImageMagick
+- LaTeX                      (version 2e)
+- libpng                     (version 1.2+)
+- libxml2                    (version 2.6+)
+- zlib
+
+It is also very strongly recommended that the following software packages be
+installed. In each case, PyXPlot tests for the availability of these packages
+upon installation, and issues a warning if the package is not found.
+Installation can proceed, but some of PyXPlot's features will be disabled. Once
+they have been added to the system, PyXPlot should be reinstalled to take
+advantage of their presence.
+
+- cfitsio -- required for PyXPlot to be able to plot datafiles in FITS format.
+- Ghostview (or ggv) -- required for PyXPlot to be able to display plots live
+  on the screen; PyXPlot remains able to generate image files on disk without
+  it. Alternatively, the set viewer within PyXPlot allows a different
+  postscript viewer to be used.
+- gunzip -- required for PyXPlot to be able to plot compressed datafiles in .gz
+  format.
+- The Gnu Readline Library (version 5+) -- required for PyXPlot to be able to
+  provide tab completion and command histories in PyXPlot's interactive
+  command-line interface.
+- libkpathsea -- required to efficiently find the fonts used by LaTeX.
+- wget -- required for PyXPlot to be able to plot datafiles directly from the
+  Internet.
+
+Debian and Ubuntu users can find the above software in the following packages:
+
+fftw3-dev, gcc, gs, gv, imagemagick, libc6-dev, libcfitsio3-dev, libgsl0-dev,
+libkpathsea-dev, libpng12-dev, libreadline5-dev, libxml2-dev, make,
+texlive-latex-extra, texlive-latex-recommended, texlive-fonts-extra,
+texlive-fonts-recommended, wget, zlib1g-dev.
+
+These packages may be installed from a command prompt by typing, all on one
+line:
+
+sudo apt-get install fftw3-dev gcc gs gv imagemagick libc6-dev libcfitsio3-dev libgsl0-dev libkpathsea-dev libpng12-dev libreadline5-dev libxml2-dev make texlive-latex-extra texlive-latex-recommended texlive-fonts-extra texlive-fonts-recommended wget zlib1g-dev
+
+Users of MacOS X can find the above software in the following MacPorts packages:
+
+cfitsio, fftw-3, ghostscript, gsl-devel, gv, ImageMagick, libpng, libxml2,
+readline-5, texlive, wget, zlib.
+
+It may then be necessary to run the command
+
+export C_INCLUDE_PATH=/opt/local/include
+
+before running the configure script below.
+
+
+3. INSTALLATION
+
+
+3A. INSTALLATION AS USER
+
+The following steps describe the installation of PyXPlot from a .tar.gz archive
+by a user without superuser (i.e. root) access to his machine. It is assumed
+that the packages listed above have already been installed; if they are not,
+you need to contact your system administrator.
+
+* Unpack the distributed .tar.gz:
+
+tar xvfz pyxplot_0.9.0.tar.gz
+cd pyxplot
+
+* Run the installation script:
+
+./configure
+make
+
+* Finally, start PyXPlot:
+
+./bin/pyxplot
+
+
+3B. SYSTEM-WIDE INSTALLATION
+
+Having completed the steps described above, PyXPlot may be installed
+system-wide by a superuser with the following additional step:
+
+make install
+
+By default, the PyXPlot executable installs to /usr/local/bin/pyxplot.  If
+desired, this installation path may be modified in the file Makefile.skel, by
+changing the variable USRDIR in the first line to an alternative desired
+installation location.
+
+PyXPlot may now be started by any system user, simply by typing:
+
+pyxplot
+
+
+
+4. FURTHER INFORMATION
+
+Full documentation can be found in doc/pyxplot.tex , or in doc/pyxplot.pdf
+after installation. This document is alternatively available from the PyXPlot
+website: <http://www.pyxplot.org.uk/>.
+
+----
+Dominic Ford
+Ross Church
+Zoltan Voros
+
