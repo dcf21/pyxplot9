@@ -254,20 +254,24 @@ LOOP_END
 
 int ppl_ProcessStatement(char *line)
  {
-  int end, errPos, i;
+  int end, errPos, bufflen=65536, tmplen=65536;
   char errText[LSTR_LENGTH];
-  unsigned char buff[65536];
-  expMarkup(line,&end,0,buff,&errPos,errText);
+  unsigned char buff[65536], tmp[65536];
+
+  ppl_expCompile(line,&end,0,(void *)buff,&bufflen,(void *)tmp,tmplen,&errPos,errText);
   if (errPos>=0)
    {
     printf("%d:%s\n",errPos,errText);
+    return 1;
    }
-  else
-   {
-    printf("%s\n",line);
-    for (i=0; i<end; i++) printf("%c",'@'+buff[i]);
-    printf("\n");
-   }
+
+  // Print tokens
+  ppl_tokenPrint(line, tmp, end);
+
+  // Print bytecode
+  ppl_reversePolishPrint(buff, ppl_tempErrStr);
+  ppl_report(ppl_tempErrStr);
+
   return 0;
  }
 

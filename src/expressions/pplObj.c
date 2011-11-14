@@ -32,7 +32,7 @@
 #include "expressions/pplObj.h"
 #include "expressions/pplObjUnits.h"
 
-char *pplObjTypeNames[] = {"number","string","date","color","dictionary","list","file handle","function","type","null","exception",NULL};
+char *pplObjTypeNames[] = {"number","string","boolean","date","color","dictionary","list","vector","matrix","file handle","function","type","null","exception",NULL};
 
 void *pplObjZero(pplObj *in, unsigned char amMalloced)
  {

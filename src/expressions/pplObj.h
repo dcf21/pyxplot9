@@ -27,16 +27,19 @@
 
 #define PPLOBJ_NUM   0
 #define PPLOBJ_STR   1
-#define PPLOBJ_DATE  2
-#define PPLOBJ_COL   3
-#define PPLOBJ_DICT  4
-#define PPLOBJ_LIST  5
-#define PPLOBJ_FILE  6
-#define PPLOBJ_FUNC  7
-#define PPLOBJ_TYPE  8
-#define PPLOBJ_NULL  9
-#define PPLOBJ_EXC  10
-#define PPLOBJ_USER 11
+#define PPLOBJ_BOOL  2
+#define PPLOBJ_DATE  3
+#define PPLOBJ_COL   4
+#define PPLOBJ_DICT  5
+#define PPLOBJ_LIST  6
+#define PPLOBJ_VEC   7
+#define PPLOBJ_MAT   8
+#define PPLOBJ_FILE  9
+#define PPLOBJ_FUNC 10
+#define PPLOBJ_TYPE 11
+#define PPLOBJ_NULL 12
+#define PPLOBJ_EXC  13
+#define PPLOBJ_USER 14
 
 #ifndef _PPLOBJ_C
 extern char *pplObjTypeNames[];

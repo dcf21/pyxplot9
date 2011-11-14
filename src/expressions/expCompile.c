@@ -25,11 +25,13 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "coreUtils/errorReport.h"
+
 #include "stringTools/asciidouble.h"
 
 #include "pplConstants.h"
 
-// expMarkup() -- Tokenise expressions
+// expTokenise() -- Tokenise expressions
 
 // A -- beginning of expression
 // B -- a string literal
@@ -78,14 +80,38 @@
 
 #define PGE_OVERFLOW { *errPos = scanpos; strcpy(errText, "Overflow Error: Algebraic expression too long"); *end = -1; return; }
 
-#define NEWSTATE(L) state=trialstate; for (i=0;i<L;i++) { out[scanpos++]=(unsigned char)(state-'@') ; if (scanpos>=ALGEBRA_MAXLENGTH) PGE_OVERFLOW; }
-#define SAMESTATE                                       { out[scanpos++]=(unsigned char)(state-'@') ; if (scanpos>=ALGEBRA_MAXLENGTH) PGE_OVERFLOW; }
+#define NEWSTATE(L,O,P) \
+ { \
+  int i; \
+  state=trialstate; \
+  opcode=O; \
+  precedence=P; \
+  for (i=0;i<L;i++) \
+   { \
+    out[outpos++]=(unsigned char)(state-'@'); \
+    out[outpos++]=opcode; \
+    out[outpos++]=precedence; \
+    if (outpos>=*outlen) PGE_OVERFLOW; \
+   } \
+  scanpos+=L; \
+ }
 
-void expMarkup(char *in, int *end, int dollarAllowed, unsigned char *out, int *errPos, char *errText)
+#define SAMESTATE \
+ { \
+  out[outpos++]=(unsigned char)(state-'@'); \
+  out[outpos++]=opcode; \
+  out[outpos++]=precedence; \
+  if (outpos>=*outlen) PGE_OVERFLOW; \
+  scanpos++; \
+ }
+
+void ppl_expTokenise(char *in, int *end, int dollarAllowed, int collectCommas, int isDict, unsigned char *out, int *outlen, int *errPos, char *errText)
  {
   const char *allowed[] = {"BEGHILMNO","CJKQU","BDGHILMNO","JKQU","JKQRU","JKU","FJKPQRSU","G","BEGHLMNO","BEGHILMNO","BEGHILMNO","JKU","JKQRU","JKQRU","ELT","JKPQRU","JKPQSU","G","BEGHILMNO","JKU",""};
+  int nCommaItems=1, nDictItems=0, tertiaryDepth=0;
   char state='A', oldstate, trialstate;
-  int scanpos=0, trialpos, i;
+  int scanpos=0, outpos=0, trialpos;
+  unsigned char opcode=0, precedence=0;
 
   while (state!='U')
    {
@@ -101,13 +127,13 @@ void expMarkup(char *in, int *end, int dollarAllowed, unsigned char *out, int *e
          {
           int j;
           for (j=1; ((in[scanpos+j]!='\0')&&((in[scanpos+j]!=quoteType)||(in[scanpos+j-1]=='\\'))); j++);
-          if (in[scanpos+j]==quoteType) { j++; NEWSTATE(j); }
-          else                          { *errPos = scanpos; strcpy(errText, "Syntax Error: Mismatched quote"); *end=-1; return; }
+          if (in[scanpos+j]==quoteType) { j++; NEWSTATE(j,0,0); }
+          else                          { *errPos = scanpos; strcpy(errText, "Syntax Error: Mismatched quote"); *end=-1; *outlen=0; return; }
          }
        }
       else if (trialstate=='C') // string substitution operator
        {
-        if (MARKUP_MATCH("%")) { NEWSTATE(1); }
+        if (MARKUP_MATCH("%")) { NEWSTATE(1,0x40,4); }
        }
       else if (   (trialstate=='D')   // a list of string substitutions
                || (trialstate=='E')   // a bracketed sub-expression
@@ -115,113 +141,173 @@ void expMarkup(char *in, int *end, int dollarAllowed, unsigned char *out, int *e
        {
         if (MARKUP_MATCH("("))
          {
-          int j;
-          ppl_strBracketMatch(in+scanpos,'(',')',NULL,NULL,&j,0);
-          if (j>0) { j++; NEWSTATE(j); }
-          else     { *errPos = scanpos; strcpy(errText, "Syntax Error: Mismatched ( )"); *end=-1; return; }
+          int j,k,l,m,n;
+          ppl_strBracketMatch(in+scanpos,'(',')',NULL,NULL,&j,0); // Search for a ) to match the (
+          if (j<=0) { *errPos = scanpos; strcpy(errText, "Syntax Error: Mismatched ( )"); *end=-1; *outlen=0; return; }
+          NEWSTATE(1,0,0); // Record the one character opening bracket
+          while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; } // Sop up whitespace
+          k=scanpos; l=outpos;
+          NEWSTATE(j-1,0,0); // Fast-forward to closing bracket
+          n=outpos-l+1;
+          if ((in[k]!=')')||(trialstate=='E'))
+           {
+            ppl_expTokenise(in+k,&m,dollarAllowed,(trialstate!='E'),0,out+l,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
+            if (*errPos>=0) { *errPos+=k; return; }
+           }
+          NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
          }
        }
-      else if ( (trialstate=='F') || // a unary post-lvalue operator
-                (trialstate=='H') )  // a unary pre-lvalue operator
+      else if (trialstate=='F') // a unary post-lvalue operator
        {
-        if ( (MARKUP_MATCH("--")) || (MARKUP_MATCH("++")) ) { NEWSTATE(2); }
+        if      (MARKUP_MATCH("--")) { NEWSTATE(2,0xA1,3); }
+        else if (MARKUP_MATCH("++")) { NEWSTATE(2,0xA2,3); }
+       }
+      else if (trialstate=='H')  // a unary pre-lvalue operator
+       {
+        if      (MARKUP_MATCH("--")) { NEWSTATE(2,0xA3,3); }
+        else if (MARKUP_MATCH("++")) { NEWSTATE(2,0xA4,3); }
        }
       else if ( (trialstate=='G') ||  // a variable name
                 (trialstate=='T') )   // a parameter name
        {
         if (isalpha(in[scanpos]))
          {
-          NEWSTATE(1);
+          NEWSTATE(1,0,0);
           while ((isalnum(in[scanpos])) || (in[scanpos]=='_')) { SAMESTATE; }
          }
        }
       else if (trialstate=='I') // a unary value-based operator
        {
-        if      (MARKUP_MATCH("-"  )) { NEWSTATE(1); }
-        else if (MARKUP_MATCH("+"  )) { NEWSTATE(1); }
-        else if (MARKUP_MATCH("~"  )) { NEWSTATE(1); }
-        else if (MARKUP_MATCH("!"  )) { NEWSTATE(1); }
-        else if (MARKUP_MATCH("not")) { NEWSTATE(3); }
-        else if (MARKUP_MATCH("NOT")) { NEWSTATE(3); }
+        if      (MARKUP_MATCH("-"  )) { NEWSTATE(1,0x25, 3); }
+        else if (MARKUP_MATCH("+"  )) { NEWSTATE(1,0x26, 3); }
+        else if (MARKUP_MATCH("~"  )) { NEWSTATE(1,0xA7, 3); }
+        else if (MARKUP_MATCH("!"  )) { NEWSTATE(1,0xA8, 3); }
+        else if (MARKUP_MATCH("not")) { NEWSTATE(3,0xA8, 3); }
+        else if (MARKUP_MATCH("NOT")) { NEWSTATE(3,0xA8, 3); }
        }
       else if (trialstate=='J') // a binary operator
        {
-        if      (MARKUP_MATCH("**" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH("*"  )) { NEWSTATE(1); }
-        else if (MARKUP_MATCH("/"  )) { NEWSTATE(1); }
-        else if (MARKUP_MATCH("%"  )) { NEWSTATE(1); }
-        else if (MARKUP_MATCH("+"  )) { NEWSTATE(1); }
-        else if (MARKUP_MATCH("-"  )) { NEWSTATE(1); }
-        else if (MARKUP_MATCH("<<" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH(">>" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH("<"  )) { NEWSTATE(1); }
-        else if (MARKUP_MATCH("<=" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH(">=" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH(">"  )) { NEWSTATE(1); }
-        else if (MARKUP_MATCH("==" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH("<>" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH("!=" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH("&"  )) { NEWSTATE(1); }
-        else if (MARKUP_MATCH("^"  )) { NEWSTATE(1); }
-        else if (MARKUP_MATCH("|"  )) { NEWSTATE(1); }
-        else if (MARKUP_MATCH("&&" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH("||" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH(","  )) { NEWSTATE(1); }
+        if      (MARKUP_MATCH("**" )) { NEWSTATE(2,0xC9, 2); }
+        else if (MARKUP_MATCH("*"  )) { NEWSTATE(1,0x4A, 5); }
+        else if (MARKUP_MATCH("/"  )) { NEWSTATE(1,0x4B, 5); }
+        else if (MARKUP_MATCH("%"  )) { NEWSTATE(1,0x4C, 5); }
+        else if (MARKUP_MATCH("+"  )) { NEWSTATE(1,0x4D, 6); }
+        else if (MARKUP_MATCH("-"  )) { NEWSTATE(1,0x4E, 6); }
+        else if (MARKUP_MATCH("<<" )) { NEWSTATE(2,0x4F, 7); }
+        else if (MARKUP_MATCH(">>" )) { NEWSTATE(2,0x50, 7); }
+        else if (MARKUP_MATCH("<"  )) { NEWSTATE(1,0x51, 8); }
+        else if (MARKUP_MATCH("<=" )) { NEWSTATE(2,0x52, 8); }
+        else if (MARKUP_MATCH(">=" )) { NEWSTATE(2,0x53, 8); }
+        else if (MARKUP_MATCH(">"  )) { NEWSTATE(1,0x54, 8); }
+        else if (MARKUP_MATCH("==" )) { NEWSTATE(2,0x55, 9); }
+        else if (MARKUP_MATCH("<>" )) { NEWSTATE(2,0x56,10); }
+        else if (MARKUP_MATCH("!=" )) { NEWSTATE(2,0x56,10); }
+        else if (MARKUP_MATCH("&"  )) { NEWSTATE(1,0x57,11); }
+        else if (MARKUP_MATCH("^"  )) { NEWSTATE(1,0x58,12); }
+        else if (MARKUP_MATCH("|"  )) { NEWSTATE(1,0x59,13); }
+        else if (MARKUP_MATCH("&&" )) { NEWSTATE(2,0x5A,14); }
+        else if (MARKUP_MATCH("||" )) { NEWSTATE(2,0x5B,15); }
+        else if (MARKUP_MATCH(","  ))
+         {
+          if ((!collectCommas)||(tertiaryDepth>0)) { NEWSTATE(1,0x5C,18); }
+          else
+           {
+            if (isDict && (nCommaItems>=2-(nDictItems==0))) { *errPos = scanpos; strcpy(errText, "Syntax Error: Expecting : followed by value for dictionary key"); *end=-1; *outlen=0; return; }
+            NEWSTATE(1,0x5F,18);
+            nCommaItems++;
+           }
+         }
        }
       else if (trialstate=='K') // a ternary operator
        {
-        if ( (MARKUP_MATCH("?")) || (MARKUP_MATCH(":")) ) { NEWSTATE(1); }
+        if      (MARKUP_MATCH("?")) { NEWSTATE(1,0xFD,16); tertiaryDepth++; }
+        else if (MARKUP_MATCH(":"))
+         {
+          if (isDict && (tertiaryDepth==0))
+           {
+            if (nCommaItems<2-(nDictItems==0)) { *errPos = scanpos; strcpy(errText, "Syntax Error: Expecting , to separate dictionary items"); *end=-1; *outlen=0; return; }
+            NEWSTATE(1,0x5F,18);
+            nCommaItems=1;
+            nDictItems++;
+           }
+          else
+           {
+            if (tertiaryDepth<=0) { *errPos = scanpos; strcpy(errText, "Syntax Error: No preceding ? to match with :"); *end=-1; *outlen=0; return; }
+            tertiaryDepth--;
+            NEWSTATE(1,0xFE,16);
+           }
+         }
        }
       else if (trialstate=='L') // a numeric literal
        {
         int j=0;
-        if (ppl_validFloat(in+scanpos,&j)) { NEWSTATE(j); }
+        if (ppl_validFloat(in+scanpos,&j)) { NEWSTATE(j,0,0); }
        }
       else if ( (trialstate=='M') || // a list literal
                 (trialstate=='Q') )  // an array dereference []
        {
         if (MARKUP_MATCH("["))
          {
-          int j;
-          ppl_strBracketMatch(in+scanpos,'[',']',NULL,NULL,&j,0);
-          if (j>0) { j++; NEWSTATE(j); }
-          else     { *errPos = scanpos; strcpy(errText, "Syntax Error: Mismatched [ ]"); *end=-1; return; }
+          int j,k,l,m,n;
+          ppl_strBracketMatch(in+scanpos,'[',']',NULL,NULL,&j,0); // Search for a ] to match the [
+          if (j<=0) { *errPos = scanpos; strcpy(errText, "Syntax Error: Mismatched [ ]"); *end=-1; *outlen=0; return; }
+          NEWSTATE(1,0,0); // Record the one character opening bracket
+          while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; } // Sop up whitespace
+          k=scanpos; l=outpos;
+          NEWSTATE(j-1,0,0); // Fast-forward to closing bracket
+          n=outpos-l+1;
+          if (in[k]!=']')
+           {
+            ppl_expTokenise(in+k,&m,dollarAllowed,1,0,out+l,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
+            if (*errPos>=0) { *errPos+=k; return; }
+           }
+          NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
          }
        }
       else if (trialstate=='N') // a dictionary literal
        {
-        if (MARKUP_MATCH("("))
+        if (MARKUP_MATCH("{"))
          {
-          int j;
-          ppl_strBracketMatch(in+scanpos,'{','}',NULL,NULL,&j,0);
-          if (j>0) { j++; NEWSTATE(j); }
-          else     { *errPos = scanpos; strcpy(errText, "Syntax Error: Mismatched { }"); *end=-1; return; }
+          int j,k,l,m,n;
+          ppl_strBracketMatch(in+scanpos,'{','}',NULL,NULL,&j,0); // Search for a } to match the {
+          if (j<=0) { *errPos = scanpos; strcpy(errText, "Syntax Error: Mismatched { }"); *end=-1; *outlen=0; return; }
+          NEWSTATE(1,0,0); // Record the one character opening bracket
+          while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; } // Sop up whitespace
+          k=scanpos; l=outpos;
+          NEWSTATE(j-1,0,0); // Fast-forward to closing bracket
+          n=outpos-l+1;
+          if (in[k]!='}')
+           {
+            ppl_expTokenise(in+k,&m,dollarAllowed,1,1,out+l,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
+            if (*errPos>=0) { *errPos+=k; return; }
+           }
+          NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
          }
        }
       else if (trialstate=='O') // a dollar sign
        {
-        if ((dollarAllowed)&&(MARKUP_MATCH("$"))) { NEWSTATE(1); }
+        if ((dollarAllowed)&&(MARKUP_MATCH("$"))) { NEWSTATE(1,0,0); }
        }
       else if (trialstate=='R') // the dot operator
        {
-        if (MARKUP_MATCH(".")) { NEWSTATE(1); }
+        if (MARKUP_MATCH(".")) { NEWSTATE(1,0,0); }
        }
       else if (trialstate=='S') // assignment operator
        {
-        if      (MARKUP_MATCH("="  )) { NEWSTATE(1); }
-        else if (MARKUP_MATCH("+=" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH("-=" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH("*=" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH("/=" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH("%=" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH("&=" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH("^=" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH("|=" )) { NEWSTATE(2); }
-        else if (MARKUP_MATCH("<<=")) { NEWSTATE(3); }
-        else if (MARKUP_MATCH(">>=")) { NEWSTATE(3); }
+        if      (MARKUP_MATCH("="  )) { NEWSTATE(1,0x40,17); }
+        else if (MARKUP_MATCH("+=" )) { NEWSTATE(2,0x41,17); }
+        else if (MARKUP_MATCH("-=" )) { NEWSTATE(2,0x42,17); }
+        else if (MARKUP_MATCH("*=" )) { NEWSTATE(2,0x43,17); }
+        else if (MARKUP_MATCH("/=" )) { NEWSTATE(2,0x44,17); }
+        else if (MARKUP_MATCH("%=" )) { NEWSTATE(2,0x45,17); }
+        else if (MARKUP_MATCH("&=" )) { NEWSTATE(2,0x46,17); }
+        else if (MARKUP_MATCH("^=" )) { NEWSTATE(2,0x47,17); }
+        else if (MARKUP_MATCH("|=" )) { NEWSTATE(2,0x48,17); }
+        else if (MARKUP_MATCH("<<=")) { NEWSTATE(3,0x49,17); }
+        else if (MARKUP_MATCH(">>=")) { NEWSTATE(3,0x4A,17); }
        }
       else if (trialstate=='U') // end of expression
-       { NEWSTATE(0); }
+       { NEWSTATE(0,0,0); }
       if (state != oldstate) break;
      }
     if (state == oldstate) break; // We've got stuck
@@ -229,19 +315,27 @@ void expMarkup(char *in, int *end, int dollarAllowed, unsigned char *out, int *e
 
   if (state=='U') // We reached state U... end of expression
    {
+    int i;
+    for (i=0; i<outpos; i+=3) if (out[i]=='O') out[i]='G'; // Remove dollars and merge into variable names
     *errPos = -1;
     *errText='\0';
-    out[scanpos]=0;
+    out[outpos]=0;
+    if      (isDict)        { out[outpos+1] = nDictItems >>8; out[outpos+2] = nDictItems &255; }
+    else if (collectCommas) { out[outpos+1] = nCommaItems>>8; out[outpos+2] = nCommaItems&255; }
+    else                    { out[outpos+1] = 0;              out[outpos+2] = 0;               }
+    outpos+=3;
     *end = scanpos;
+    *outlen = outpos;
     return;
    }
   else
    {
     // Error; we didn't reach state U
-    int j=0;
+    int i=0,j=0;
     int B=0,F=0,G=0,J=0,P=0;
     *errPos = scanpos;
     *end    = -1;
+    *outlen = 0;
     // Now we need to construct an error string
     strcpy(errText,"Syntax Error: At this point, was expecting ");
     i=strlen(errText);
@@ -268,5 +362,375 @@ void expMarkup(char *in, int *end, int dollarAllowed, unsigned char *out, int *e
     strcpy(errText+i,"."); i+=strlen(errText+i);
     return;
    }
+ }
+
+// ppl_tokenPrint() -- a debugging routine to display tokenised data
+
+void ppl_tokenPrint(char *in, unsigned char *tdat, int len)
+ {
+  int i,j;
+  for (i=0    ; i<len; i++     ) printf("  %c" ,in[i]);        printf("\n");
+  for (i=0,j=0; i<len; i++,j+=3) printf("  %c" ,'@'+tdat[j]);  printf("\n");
+  for (i=0,j=1; i<len; i++,j+=3) printf(" %02x",(int)tdat[j]); printf("\n");
+  for (i=0,j=2; i<len; i++,j+=3) printf(" %02x",(int)tdat[j]); printf("\n");
+  return;
+ }  
+
+// ppl_expCompile -- compile a textual expression into reverse Polish bytecode
+
+#define POP_STACK \
+ { \
+  char opType; \
+  while (opType = (stackpos>2) ? *(stack-stackpos+3) : '!'  ,  (opType=='o')||(opType=='a')) /* while the stack is not empty and has an operator at the top */ \
+   { \
+    int stackprec = *(stack-stackpos+1); \
+    if ( ((!rightAssoc)&&(precedence>=stackprec)) || ((rightAssoc)&&(precedence>stackprec)) ) /* pop operators with higher precedence from stack */ \
+     { \
+      unsigned char stacko   = *(stack-stackpos+2); /* operator number of the stack object */ \
+      unsigned char bytecode = 0; \
+      if      (opType=='a' ) bytecode = 12; /* assignment operator */ \
+      else if (stacko==0x40) bytecode = 14; /* string subst operator */ \
+      else if (stacko==0xA3) bytecode = 13; /* ++ lval operator */ \
+      else if (stacko==0xA4) bytecode = 13; /* -- lval operator */ \
+      else                   bytecode = 11; /* other operator */ \
+      if ((stacko!=0xFD)&&(stacko!=0x5F)) /* null operations get ignored (e.g. commas that collect items, and ? waiting for :s) */ \
+       { \
+        *(unsigned char *)(out+outpos++) = bytecode; \
+        *(unsigned char *)(out+outpos++) = stacko; \
+        if ((opType=='o')&&(stacko==0x40)) \
+         { \
+          *(int *)(out+outpos-1) = 1; /* string substitution operator with only one subst item (not a bracketed list) */ \
+          outpos += sizeof(int)-1; \
+         } \
+       } \
+      stackpos-=3; /* pop stack */ \
+     } \
+    else break; \
+   } \
+ }
+
+void ppl_expCompile(char *in, int *end, int dollarAllowed, void *out, int *outlen, void *tmp, int tmplen, int *errPos, char *errText)
+ {
+  unsigned char *stack = ( (unsigned char *)tmp ) + tmplen - 1;
+  unsigned char *tdata =   (unsigned char *)tmp;
+  int stackpos = 0;
+  int stacklen;
+  int tpos, ipos;
+  int tlen = tmplen;
+  int outpos = 0;
+
+  // First tokenise expression
+  ppl_expTokenise(in, end, dollarAllowed, 0, 0, tdata, &tlen, errPos, errText);
+  if (*errPos >= 0) return;
+  stacklen = tmplen - tlen;
+
+  // The stacking-yard algorithm
+  for (tpos=ipos=0; tpos<tlen; )
+   {
+    char o = tdata[tpos]+'@'; // Get tokenised markup state code
+    if (o=='C') // Process a string literal
+     {
+      int  i;
+      char quoteType=in[tpos];
+      *(unsigned char *)(out+outpos++) = 2; // bytecode op 2
+      for ( i=ipos+1 ; ((in[i]!=quoteType) || (in[i-1]=='\\')) ; i++ )
+       {
+        if (in[i]=='\0') { *errPos=i; strcpy(errText, "Internal error: Unexpected end of string."); *end=-1; return; }
+        if ((in[i]=='\\') && (in[i-1]!='\\')) continue; // We have a double backslash
+        *(char *)(out+outpos++) = in[i];
+       }
+      *(unsigned char *)(out+outpos++) = '\0';
+     }
+    else if ( (o=='C') || (o=='H') || (o=='I') || (o=='J') || (o=='K') || (o=='S') ) // Process an operator
+     {
+      unsigned char rightAssoc = (tdata[tpos+1] & 0x80) != 0;
+      unsigned char precedence = tdata[tpos+2];
+      POP_STACK;
+      *(stack-stackpos-0) = (o=='S')?'a':'o'; // push operator onto stack
+      *(stack-stackpos-1) = tdata[tpos+1];
+      *(stack-stackpos-2) = tdata[tpos+2];
+      stackpos+=3;
+     }
+    else if ( (o=='D') || (o=='E') || (o=='P') ) // Process ( )
+     {
+      char bracketType=in[ipos];
+      if (bracketType=='(') // open (
+       {
+        *(stack-stackpos-0) = '('; // push bracket onto stack
+        *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
+        stackpos+=3;
+       }
+      else // close )
+       {
+        unsigned char rightAssoc = 0;
+        unsigned char precedence = 255;
+        POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
+        if ( (stackpos<3) || (*(stack-stackpos+3)!='(') ) { *errPos=ipos; strcpy(errText, "Internal error: Could not match ) to an (."); *end=-1; return; }
+        stackpos-=3; // pop bracket
+        if (o=='D') // apply string substitution operator straight away
+         {
+          if ( (stackpos<3) || (*(stack-stackpos+2)!=0x40)) { *errPos=ipos; strcpy(errText, "Internal error: Could not match string substituion () to a %."); *end=-1; return; }
+          stackpos-=3; // pop stack
+          *(unsigned char *)(out+outpos++) = 14; // bytecode 14 -- string substitution operator
+          *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of string substitutions; stored with closing bracket in bytecode is number of collected ,-separated items
+          outpos += sizeof(int);
+         }
+        else if (o=='P') // make function call
+         {
+          *(unsigned char *)(out+outpos++) = 10; // bytecode 10 -- function call
+          *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of function arguments; stored with closing bracket in bytecode is number of collected ,-separated items
+          outpos += sizeof(int);
+         }
+       }
+     }
+    else if (o=='F') // a postfix ++ or -- operator
+     {
+      unsigned char rightAssoc = (tdata[tpos+1] & 0x80) != 0;
+      unsigned char precedence = tdata[tpos+2];
+      POP_STACK;
+      *(unsigned char *)(out+outpos++) = 13;
+      *(unsigned char *)(out+outpos++) = tdata[tpos+1];
+     }
+    else if ( (o=='G') || (o=='T') ) // a variable name or field dereferenced with the . operator
+     {
+      int  i;
+      *(unsigned char *)(out+outpos++) = 3;
+      for ( i=ipos ; (isalnum(in[i])) ; i++ )
+       {
+        if (in[i]=='\0') { *errPos=ipos; strcpy(errText, "Internal error: Unexpected end of variable name."); *end=-1; return; }
+        *(char *)(out+outpos++) = in[i];
+       }
+      *(unsigned char *)(out+outpos++) = '\0';
+     }
+    else if (o=='L') // a numeric literal
+     {
+      *(unsigned char *)(out+outpos++) = 1;
+      *(double *)(out+outpos) = ppl_getFloat(in+ipos,NULL);
+      outpos += sizeof(double);
+     }
+    else if (o=='M') // list literal
+     {
+      char bracketType=in[ipos];
+      if (bracketType=='[') // open [
+       {
+        *(stack-stackpos-0) = '['; // push bracket onto stack
+        *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
+        stackpos+=3;
+       }
+      else // close ]
+       {
+        unsigned char rightAssoc = 0;
+        unsigned char precedence = 255;
+        POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
+        if ( (stackpos<3) || (*(stack-stackpos+3)!='[') ) { *errPos=ipos; strcpy(errText, "Internal error: Could not match ] to an [."); *end=-1; return; }
+        stackpos-=3; // pop bracket
+        *(unsigned char *)(out+outpos++) = 9; // bytecode 9 -- make list
+        *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of list items; stored with closing bracket in bytecode is number of collected ,-separated items
+        outpos += sizeof(int);
+       }
+     }
+    else if (o=='N') // dictionary literal
+     {
+      char bracketType=in[ipos];
+      if (bracketType=='{') // open {
+       {
+        *(stack-stackpos-0) = '{'; // push bracket onto stack
+        *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
+        stackpos+=3;
+       }
+      else // close }
+       {
+        unsigned char rightAssoc = 0;
+        unsigned char precedence = 255;
+        POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
+        if ( (stackpos<3) || (*(stack-stackpos+3)!='{') ) { *errPos=ipos; strcpy(errText, "Internal error: Could not match } to an {."); *end=-1; return; }
+        stackpos-=3; // pop bracket
+        *(unsigned char *)(out+outpos++) = 8; // bytecode 8 -- make dict
+        *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of list items; stored with closing bracket in bytecode is number of collected ,-separated items
+        outpos += sizeof(int);
+       }
+     }
+    else if (o=='Q') // array dereference or slice
+     {
+     }
+    while ((tpos<tlen) && (tdata[tpos]+'@' == o)) { tpos+=3; ipos++; }
+   }
+
+  // Clean up stack
+  {
+   unsigned char rightAssoc = 0;
+   unsigned char precedence = 255;
+   POP_STACK;
+  }
+
+  // If there are still brackets on the stack, we've failed
+  if (stackpos!=0)
+   {
+    *errPos=0; strcpy(errText, "Internal error: Unexpected junk left on stack."); *end=-1; return;
+   }
+
+  // Store final return
+  *(unsigned char *)(out+outpos++) = 0;
+  *outlen = outpos;
+  return;
+ }
+
+// Debugging routine to produce a textual representation of reverse Polish bytecode
+
+void ppl_reversePolishPrint(void *in, char *out)
+ {
+  int i=0, j=0;
+  char op[32],optype[32],arg[1024];
+
+  while (1)
+   {
+    int o=(int)(*(unsigned char *)(in+j  ));
+    int t=(int)(*(unsigned char *)(in+j+1));
+    switch (o)
+     {
+      case 0:
+        strcpy (op,     "return");
+        strcpy (optype, "");
+        strcpy (arg,    "");
+        break;
+      case 1:
+        strcpy (op,     "push");
+        strcpy (optype, "numeric");
+        sprintf(arg,    "%.2e", *(double *)(in+j+1));
+        j+=1+sizeof(double);
+        break;
+      case 2:
+        strcpy (op,     "push");
+        strcpy (optype, "string");
+        sprintf(arg,    "\"%s\"", (char *)(in+j+1));
+        j+=1+strlen((char *)(in+j+1))+1;
+        break;
+      case 3:
+        strcpy (op,     "lookup");
+        strcpy (optype, "value");
+        sprintf(arg,    "\"%s\"", (char *)(in+j+1));
+        j+=1+strlen((char *)(in+j+1))+1;
+        break;
+      case 4:
+        strcpy (op,     "lookup");
+        strcpy (optype, "pointer");
+        sprintf(arg,    "\"%s\"", (char *)(in+j+1));
+        j+=1+strlen((char *)(in+j+1))+1;
+        break;
+      case 5:
+        strcpy (op,     "deref");
+        strcpy (optype, "value");
+        sprintf(arg,    "\"%s\"", (char *)(in+j+1));
+        j+=1+strlen((char *)(in+j+1))+1;
+        break;
+      case 6:
+        strcpy (op,     "deref");
+        strcpy (optype, "pointer");
+        sprintf(arg,    "\"%s\"", (char *)(in+j+1));
+        j+=1+strlen((char *)(in+j+1))+1;
+        break;
+      case 7:
+        strcpy (op,     "slice");
+        strcpy (optype, "");
+        sprintf(arg,    "[%d:%d]", *(int *)(in+j+1), *(int *)(in+j+1+sizeof(int)));
+        j+=1+2*sizeof(int);
+        break;
+      case 8:
+        strcpy (op,     "make");
+        strcpy (optype, "dict");
+        sprintf(arg,    "%d items", *(int *)(in+j+1));
+        j+=1+sizeof(int);
+        break;
+      case 9:
+        strcpy (op,     "make");
+        strcpy (optype, "list");
+        sprintf(arg,    "%d items", *(int *)(in+j+1));
+        j+=1+sizeof(int);
+        break;
+      case 10:
+        strcpy (op,     "call");
+        strcpy (optype, "");
+        sprintf(arg,    "%d args", *(int *)(in+j+1));
+        j+=1+sizeof(int);
+        break;
+      case 11:
+        strcpy (op,     "op");
+        if      (((t>>5)&3)==1) strcpy (optype, "unary");
+        else if (((t>>5)&3)==2) strcpy (optype, "binary");
+        else if (((t>>5)&3)==3) strcpy (optype, "ternary");
+        else                    strcpy (optype, "???");
+        if      (t==0x25) strcpy (arg, "-"  );
+        else if (t==0x26) strcpy (arg, "+"  );
+        else if (t==0xA7) strcpy (arg, "~"  );
+        else if (t==0xA8) strcpy (arg, "!"  );
+        else if (t==0xC9) strcpy (arg, "**" );
+        else if (t==0x4A) strcpy (arg, "*"  );
+        else if (t==0x4B) strcpy (arg, "/"  );
+        else if (t==0x4C) strcpy (arg, "%"  );
+        else if (t==0x4D) strcpy (arg, "+"  );
+        else if (t==0x4E) strcpy (arg, "-"  );
+        else if (t==0x4F) strcpy (arg, "<<" );
+        else if (t==0x50) strcpy (arg, ">>" );
+        else if (t==0x51) strcpy (arg, "<"  );
+        else if (t==0x52) strcpy (arg, "<=" );
+        else if (t==0x53) strcpy (arg, ">=" );
+        else if (t==0x54) strcpy (arg, ">"  );
+        else if (t==0x55) strcpy (arg, "==" );
+        else if (t==0x56) strcpy (arg, "!=" );
+        else if (t==0x57) strcpy (arg, "&"  );
+        else if (t==0x58) strcpy (arg, "^"  );
+        else if (t==0x59) strcpy (arg, "|"  );
+        else if (t==0x5A) strcpy (arg, "&&" );
+        else if (t==0x5B) strcpy (arg, "||" );
+        else if (t==0x5C) strcpy (arg, "swap-pop");
+        else if (t==0xFD) strcpy (arg, "nop (?)" );
+        else if (t==0xFE) strcpy (arg, "?:" );
+        else if (t==0x5F) strcpy (arg, "nop (collect)" );
+        else              strcpy (arg, "???");
+        j+=2;
+        break;
+      case 12:
+        strcpy (op,     "op");
+        strcpy (optype, "assign");
+        if      (t==0x40) strcpy (arg, "="  );
+        else if (t==0x41) strcpy (arg, "+=" );
+        else if (t==0x42) strcpy (arg, "-=" );
+        else if (t==0x43) strcpy (arg, "*=" );
+        else if (t==0x44) strcpy (arg, "/=" );
+        else if (t==0x45) strcpy (arg, "%=" );
+        else if (t==0x46) strcpy (arg, "&=" );
+        else if (t==0x47) strcpy (arg, "^=" );
+        else if (t==0x48) strcpy (arg, "|=" );
+        else if (t==0x49) strcpy (arg, "<<=");
+        else if (t==0x4A) strcpy (arg, ">>=");
+        else              strcpy (arg, "???");
+        j+=2;
+        break;
+      case 13:
+        strcpy (op,     "op");
+        strcpy (optype, "unary");
+        if ((t==0xA1)||(t==0xA3)) { strcpy (arg, "--"); }
+        else                      { strcpy (arg, "++"); }
+        j+=2;
+        break;
+      case 14:
+        strcpy (op,     "op");
+        strcpy (optype, "binary");
+        sprintf(arg,    "subst (%d items)", *(int *)(in+j+1));
+        j+=1+sizeof(int); 
+        break;
+      default:
+        strcpy (op,     "???");
+        strcpy (optype, "");
+        strcpy (arg,    "Illegal opcode");
+        o=0;
+        break;
+     }
+    sprintf(ppl_tempErrStr,"%10s %10s %s",op,optype,arg);
+    ppl_report(ppl_tempErrStr);
+    if (o==0) break;
+   }
+  out[i]='\0'; // null terminate string
+  return;
  }
 
