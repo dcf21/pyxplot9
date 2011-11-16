@@ -55,13 +55,13 @@ LOCAL_OBJDIR = obj
 LOCAL_DOCDIR = doc
 LOCAL_BINDIR = bin
 
-PPL_FILES   = children.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/getPasswd.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c expressions/expCompile.c expressions/pplObj.c input.c mathsTools/dcfmath.c parser/cmdList.c pyxplot.c settings/epsColours.c settings/papersizes.c settings/settingsInit.c settings/settingTypes.c settings/textConstants.c settings/withWords.c stringTools/asciidouble.c
+PPL_FILES   = children.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/getPasswd.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c expressions/expCompile.c input.c mathsTools/dcfmath.c parser/cmdList.c pyxplot.c settings/epsColours.c settings/papersizes.c settings/settingsInit.c settings/settingTypes.c settings/textConstants.c settings/withWords.c stringTools/asciidouble.c userspace/context.c userspace/pplObj.c
 
-PPL_HEADERS = children.h pplConstants.h coreUtils/dict.h coreUtils/errorReport.h coreUtils/getPasswd.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h expressions/expCompile.h expressions/pplObj.h expressions/pplObjUnits.h input.h mathsTools/dcfmath.h parser/cmdList.h pyxplot.h settings/arrows.h settings/labels.h settings/papersizes.h settings/settings.h settings/settingTypes.h settings/textConstants.h settings/withWords.h stringTools/asciidouble.h stringTools/strConstants.h
+PPL_HEADERS = children.h pplConstants.h coreUtils/dict.h coreUtils/errorReport.h coreUtils/getPasswd.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h expressions/expCompile.h input.h mathsTools/dcfmath.h parser/cmdList.h pyxplot.h settings/arrows.h settings/labels.h settings/papersizes.h settings/settings.h settings/settingTypes.h settings/textConstants.h settings/withWords.h stringTools/asciidouble.h stringTools/strConstants.h userspace/context.h userspace/pplObj.h userspace/pplObjUnits.h
 
-PPLW_FILES   = helpers/pyxplot_watch.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c stringTools/asciidouble.c settings/settingTypes.c
+PPLW_FILES   = helpers/pyxplot_watch.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c stringTools/asciidouble.c settings/settingTypes.c userspace/context.c
 
-PPLW_HEADERS =                         coreUtils/dict.h coreUtils/errorReport.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h stringTools/asciidouble.h settings/settingTypes.h
+PPLW_HEADERS =                         coreUtils/dict.h coreUtils/errorReport.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h stringTools/asciidouble.h settings/settingTypes.h userspace/context.h
 
 FITSHELP_FILES   = helpers/pyxplot_fitshelper.c stringTools/asciidouble.c
 FITSHELP_HEADERS =                              stringTools/asciidouble.h stringTools/strConstants.h
@@ -103,15 +103,15 @@ src/settings/epsColours.c: src/settings/epsColours.h
 #
 
 $(LOCAL_OBJDIR)/%.o:         $(LOCAL_SRCDIR)/%.c $(ALL_HFILES)
-	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools
+	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
 	$(COMPILE) $(CFLAGS) $(OPTIMISATION) $(NODEBUG) $(NOINSTALL_SWITCHES) $< -o $@
 
 $(LOCAL_OBJDIR)/%.debug.o:   $(LOCAL_SRCDIR)/%.c $(ALL_HFILES)
-	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools
+	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
 	$(COMPILE) $(CFLAGS) $(OPTIMISATION) $(DEBUG)   $(DEBUG_SWITCHES)     $< -o $@
 
 $(LOCAL_OBJDIR)/%.install.o: $(LOCAL_SRCDIR)/%.c $(ALL_HFILES)
-	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools
+	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
 	$(COMPILE) $(CFLAGS) $(OPTIMISATION) $(NODEBUG) $(INSTALL_SWITCHES)   $< -o $@
 
 #

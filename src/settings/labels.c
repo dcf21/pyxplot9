@@ -39,6 +39,8 @@
 #include "settings/labels.h"
 #include "settings/settings.h"
 
+#include "userspace/context.h"
+
 // -------------------------------------------
 // ROUTINES FOR MANIPULATING LABELS STRUCTURES
 // -------------------------------------------
@@ -49,8 +51,8 @@
     for (i=0; i<UNITS_MAX_BASEUNITS; i++) \
      if (VAR->exponent[i] != (i==UNIT_LENGTH)) \
       { \
-       sprintf(ppl_tempErrStr,"The gap size supplied to the 'set label' command must have dimensions of length. Supplied gap size input has units of <%s>.",ppl_units_GetUnitStr(VAR,NULL,NULL,1,1,0)); \
-       ppl_error(ERR_NUMERIC, -1, -1, ppl_tempErrStr); \
+       sprintf(context->errcontext.tempErrStr,"The gap size supplied to the 'set label' command must have dimensions of length. Supplied gap size input has units of <%s>.",ppl_units_GetUnitStr(VAR,NULL,NULL,1,1,0)); \
+       ppl_error(&context->errcontext,ERR_NUMERIC, -1, -1, context->errcontext.tempErrStr); \
        return; \
       } \
    } \
@@ -62,8 +64,8 @@
     for (i=0; i<UNITS_MAX_BASEUNITS; i++) \
      if (VAR->exponent[i] != (i==UNIT_ANGLE)) \
       { \
-       sprintf(ppl_tempErrStr,"The rotation angle supplied to the 'set label' command must have dimensions of angle. Supplied input has units of <%s>.",ppl_units_GetUnitStr(VAR,NULL,NULL,1,1,0)); \
-       ppl_error(ERR_NUMERIC, -1, -1, ppl_tempErrStr); \
+       sprintf(context->errcontext.tempErrStr,"The rotation angle supplied to the 'set label' command must have dimensions of angle. Supplied input has units of <%s>.",ppl_units_GetUnitStr(VAR,NULL,NULL,1,1,0)); \
+       ppl_error(&context->errcontext,ERR_NUMERIC, -1, -1, context->errcontext.tempErrStr); \
        return; \
       } \
    } \
@@ -71,7 +73,7 @@
 
 #define CMPVAL(X,Y) (ppl_units_DimEqual(&X,&Y) && ppl_units_DblEqual(X.real , Y.real))
 
-void ppllabel_add(ppllabel_object **inlist, dict *in)
+void ppllabel_add(ppl_context *context, ppllabel_object **inlist, dict *in)
  {
   int             *tempint, i, system_x, system_y, system_z;
   char            *tempstr, *label;
@@ -87,7 +89,7 @@ void ppllabel_add(ppllabel_object **inlist, dict *in)
 
   tempstr = (char *)ppl_dictLookup(in,"ppllabel_text");
   label = (char *)malloc(strlen(tempstr)+1);
-  if (label == NULL) { ppl_error(ERR_MEMORY, -1, -1, "Out of memory"); return; }
+  if (label == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1, "Out of memory"); return; }
   strcpy(label, tempstr);
 
   // Check for rotation modifier
@@ -107,7 +109,7 @@ void ppllabel_add(ppllabel_object **inlist, dict *in)
     ppl_withWordsDestroy(&out->style);
    } else {
     out = (ppllabel_object *)malloc(sizeof(ppllabel_object));
-    if (out == NULL) { ppl_error(ERR_MEMORY, -1, -1, "Out of memory"); return; }
+    if (out == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1, "Out of memory"); return; }
     out->id   = *tempint;
     out->next = *inlist;
     *inlist   = out;
@@ -135,7 +137,7 @@ void ppllabel_add(ppllabel_object **inlist, dict *in)
   return;
  }
 
-void ppllabel_remove(ppllabel_object **inlist, dict *in)
+void ppllabel_remove(ppl_context *context, ppllabel_object **inlist, dict *in)
  {
   int          *tempint;
   ppllabel_object *obj, **first;
@@ -161,15 +163,15 @@ void ppllabel_remove(ppllabel_object **inlist, dict *in)
       free(obj->text);
       free(obj);
      } else {
-      //sprintf(ppl_tempErrStr,"Label number %d is not defined", *tempint);
-      //ppl_error(ERR_GENERAL, -1, -1, ppl_tempErrStr);
+      //sprintf(context->errcontext.tempErrStr,"Label number %d is not defined", *tempint);
+      //ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, context->errcontext.tempErrStr);
      }
     ppl_listIterate(&listiter);
    }
   return;
  }
 
-void ppllabel_unset(ppllabel_object **inlist, dict *in)
+void ppllabel_unset(ppl_context *context, ppllabel_object **inlist, dict *in)
  {
   int             *tempint;
   ppllabel_object *obj, *new, **first;
@@ -194,11 +196,11 @@ void ppllabel_unset(ppllabel_object **inlist, dict *in)
       inlist = first;
       while ((*inlist != NULL) && ((*inlist)->id < *tempint)) inlist = &((*inlist)->next);
       new = (ppllabel_object *)malloc(sizeof(ppllabel_object));
-      if (new == NULL) { ppl_error(ERR_MEMORY, -1, -1,"Out of memory"); return; }
+      if (new == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); return; }
       *new = *obj;
       new->next = *inlist;
       new->text = (char *)malloc(strlen(obj->text)+1);
-      if (new->text == NULL) { ppl_error(ERR_MEMORY, -1, -1,"Out of memory"); free(new); return; }
+      if (new->text == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); free(new); return; }
       strcpy(new->text, obj->text);
       ppl_withWordsCpy(&new->style, &obj->style);
       *inlist = new;
@@ -208,7 +210,7 @@ void ppllabel_unset(ppllabel_object **inlist, dict *in)
   return;
  }
 
-unsigned char ppllabel_compare(ppllabel_object *a, ppllabel_object *b)
+unsigned char ppllabel_compare(ppl_context *context, ppllabel_object *a, ppllabel_object *b)
  {
   if (a->id!=b->id) return 0;
   if ( (!CMPVAL(a->x , b->x)) || (!CMPVAL(a->y , b->y)) || (!CMPVAL(a->z , b->z)) ) return 0;
@@ -219,17 +221,17 @@ unsigned char ppllabel_compare(ppllabel_object *a, ppllabel_object *b)
   return 1;
  }
 
-void ppllabel_list_copy(ppllabel_object **out, ppllabel_object **in)
+void ppllabel_list_copy(ppl_context *context, ppllabel_object **out, ppllabel_object **in)
  {
   *out = NULL;
   while (*in != NULL)
    {
     *out = (ppllabel_object *)malloc(sizeof(ppllabel_object));
-    if (*out == NULL) { ppl_error(ERR_MEMORY, -1, -1,"Out of memory"); return; }
+    if (*out == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); return; }
     **out = **in;
     (*out)->next = NULL;
     (*out)->text = (char *)malloc(strlen((*in)->text)+1);
-    if ((*out)->text == NULL) { ppl_error(ERR_MEMORY, -1, -1,"Out of memory"); free(*out); *out=NULL; return; }
+    if ((*out)->text == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); free(*out); *out=NULL; return; }
     strcpy((*out)->text, (*in)->text);
     ppl_withWordsCpy(&(*out)->style, &(*in)->style);
     in  = &((*in )->next);
@@ -238,7 +240,7 @@ void ppllabel_list_copy(ppllabel_object **out, ppllabel_object **in)
   return;
  }
 
-void ppllabel_list_destroy(ppllabel_object **inlist)
+void ppllabel_list_destroy(ppl_context *context, ppllabel_object **inlist)
  {
   ppllabel_object *obj, **first;
 
@@ -255,7 +257,7 @@ void ppllabel_list_destroy(ppllabel_object **inlist)
   return;
  }
 
-void ppllabel_print(ppllabel_object *in, char *out)
+void ppllabel_print(ppl_context *context, ppllabel_object *in, char *out)
  {
   int i;
   ppl_strEscapify(in->text, out);

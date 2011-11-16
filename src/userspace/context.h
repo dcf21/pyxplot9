@@ -1,4 +1,4 @@
-// expCompile.h
+// context.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,15 +19,24 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _EXPCOMPILE_H
-#define _EXPCOMPILE_H 1
+#ifndef _CONTEXT_H
+#define _CONTEXT_H 1
 
-#include "userspace/context.h"
+#include "stringTools/strConstants.h"
 
-void ppl_expTokenise       (ppl_context *context, char *in, int *end, int dollarAllowed, int collectCommas, int isDict, unsigned char *out, int *outlen, int *errPos, char *errText);
-void ppl_tokenPrint        (ppl_context *context, char *in, unsigned char *tdat, int len);
-void ppl_expCompile        (ppl_context *context, char *in, int *end, int dollarAllowed, void *out, int *outlen, void *tmp, int tmplen, int *errPos, char *errText);
-void ppl_reversePolishPrint(ppl_context *context, void *in, char *out);
+typedef struct ppl_context_struc
+ {
+  int       willBeInteractive;
+  char     *inputLineBuffer;
+  char     *inputLineAddBuffer;
+  int       shellExiting;
+  long int  historyNLinesWritten;
+  char      pplcsp_ghostView_fname[FNAME_LENGTH];
+  pplerr_context errcontext;
+ } ppl_context;
+
+ppl_context *ppl_contextInit();
+void         ppl_contextFree(ppl_context *in);
 
 #endif
 

@@ -31,23 +31,16 @@
 #include "settings/settings.h"
 #include "settings/settingTypes.h"
 
-static int  ppl_error_input_linenumber             = -1;
-static char ppl_error_input_filename[FNAME_LENGTH] = "";
-
-char ppl_error_source[16] = "main     "; // Identifier of the process producing log messages
-
 static char temp_stringA[LSTR_LENGTH], temp_stringB[LSTR_LENGTH], temp_stringC[LSTR_LENGTH], temp_stringD[LSTR_LENGTH], temp_stringE[LSTR_LENGTH];
 
-char ppl_tempErrStr[FNAME_LENGTH];
-
-void ppl_error_setstreaminfo(int linenumber,char *filename)
+void ppl_error_setstreaminfo(pplerr_context *context, int linenumber,char *filename)
  {
-  ppl_error_input_linenumber = linenumber;
-  if (filename != NULL) strcpy(ppl_error_input_filename, filename);
+  context->error_input_linenumber = linenumber;
+  if (filename != NULL) strcpy(context->error_input_filename, filename);
   return;
  }
 
-void ppl_error(int ErrType, int HighlightPos1, int HighlightPos2, char *msg)
+void ppl_error(pplerr_context *context, int ErrType, int HighlightPos1, int HighlightPos2, char *msg)
  {
   unsigned char ApplyHighlighting, reverse=0;
   int i=0, j;
@@ -60,9 +53,9 @@ void ppl_error(int ErrType, int HighlightPos1, int HighlightPos2, char *msg)
   if (ErrType != ERR_PREFORMED) // Do not prepend anything to pre-formed errors
    {
     // When processing scripts, print error location
-    if ((ppl_error_input_linenumber != -1) && (strcmp(ppl_error_input_filename, "") !=  0))
+    if ((context->error_input_linenumber != -1) && (strcmp(context->error_input_filename, "") !=  0))
      {
-      sprintf(temp_stringB+i, "%s:%d:", ppl_error_input_filename, ppl_error_input_linenumber);
+      sprintf(temp_stringB+i, "%s:%d:", context->error_input_filename, context->error_input_linenumber);
       i += strlen(temp_stringB+i);
       if (ErrType != ERR_STACKED) { temp_stringB[i++] = ' '; temp_stringB[i] = '\0'; }
      }
@@ -90,30 +83,30 @@ void ppl_error(int ErrType, int HighlightPos1, int HighlightPos2, char *msg)
   if (ApplyHighlighting && (reverse!=0)) { strcpy(temp_stringB+i, "\x1b[27m"); i+=strlen(temp_stringB+i); reverse=0; }
   temp_stringB[i] = '\0';
 
-  if (DEBUG) { ppl_log(temp_stringB); }
+  if (DEBUG) { ppl_log(context, temp_stringB); }
 
   // Print message in colour or monochrome
   if (ApplyHighlighting)
-   sprintf(temp_stringC, "%s%s%s\n", *(char **)FetchSettingName( pplset_session_default.colour_err , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)),
+   sprintf(temp_stringC, "%s%s%s\n", *(char **)FetchSettingName( context , pplset_session_default.colour_err , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)),
                                      temp_stringB,
-                                     *(char **)FetchSettingName( SW_TERMCOL_NOR                      , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)) );
+                                     *(char **)FetchSettingName( context , SW_TERMCOL_NOR                    , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)) );
   else
    sprintf(temp_stringC, "%s\n", temp_stringB);
   fputs(temp_stringC, stderr);
   return; 
  }
 
-void ppl_fatal(char *file, int line, char *msg)
+void ppl_fatal(pplerr_context *context, char *file, int line, char *msg)
  {
   char introline[FNAME_LENGTH];
   if (msg!=temp_stringE) strcpy(temp_stringE, msg);
   sprintf(introline, "Fatal Error encountered in %s at line %d: %s", file, line, temp_stringE);
-  ppl_error(ERR_PREFORMED, -1, -1, introline);
-  if (DEBUG) ppl_log("Terminating with error condition 1.");
+  ppl_error(context, ERR_PREFORMED, -1, -1, introline);
+  if (DEBUG) ppl_log(context, "Terminating with error condition 1.");
   exit(1);
  }
 
-void ppl_warning(int ErrType, char *msg)
+void ppl_warning(pplerr_context *context, int ErrType, char *msg)
  {
   int i=0;
 
@@ -124,9 +117,9 @@ void ppl_warning(int ErrType, char *msg)
   if (ErrType != ERR_PREFORMED) // Do not prepend anything to pre-formed errors
    {
     // When processing scripts, print error location
-    if ((ppl_error_input_linenumber != -1) && (strcmp(ppl_error_input_filename, "") !=  0))
+    if ((context->error_input_linenumber != -1) && (strcmp(context->error_input_filename, "") !=  0))
      {
-      sprintf(temp_stringB+i, "%s:%d:", ppl_error_input_filename, ppl_error_input_linenumber);
+      sprintf(temp_stringB+i, "%s:%d:", context->error_input_filename, context->error_input_linenumber);
       i += strlen(temp_stringB+i);
       if (ErrType != ERR_STACKED) { temp_stringB[i++] = ' '; temp_stringB[i] = '\0'; }
      }
@@ -146,34 +139,34 @@ void ppl_warning(int ErrType, char *msg)
 
   strcpy(temp_stringB+i, msg);
 
-  if (DEBUG) { ppl_log(temp_stringB); }
+  if (DEBUG) { ppl_log(context, temp_stringB); }
 
   // Print message in colour or monochrome
   if ((pplset_session_default.colour == SW_ONOFF_ON) && (isatty(STDERR_FILENO) == 1))
-   sprintf(temp_stringC, "%s%s%s\n", *(char **)FetchSettingName( pplset_session_default.colour_wrn , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)),
+   sprintf(temp_stringC, "%s%s%s\n", *(char **)FetchSettingName( context , pplset_session_default.colour_wrn , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)),
                                      temp_stringB,
-                                     *(char **)FetchSettingName( SW_TERMCOL_NOR                      , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)) );
+                                     *(char **)FetchSettingName( context , SW_TERMCOL_NOR                    , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)) );
   else
    sprintf(temp_stringC, "%s\n", temp_stringB);
   fputs(temp_stringC, stderr);
   return;
  }
 
-void ppl_report(char *msg)
+void ppl_report(pplerr_context *context, char *msg)
  {
   if (msg!=temp_stringA) strcpy(temp_stringA, msg);
-  if (DEBUG) { sprintf(temp_stringC, "%s%s", "Reporting:\n", temp_stringA); ppl_log(temp_stringC); }
+  if (DEBUG) { sprintf(temp_stringC, "%s%s", "Reporting:\n", temp_stringA); ppl_log(context, temp_stringC); }
   if ((pplset_session_default.colour == SW_ONOFF_ON) && (isatty(STDOUT_FILENO) == 1))
-   sprintf(temp_stringC, "%s%s%s\n", *(char **)FetchSettingName( pplset_session_default.colour_rep , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)),
+   sprintf(temp_stringC, "%s%s%s\n", *(char **)FetchSettingName( context , pplset_session_default.colour_rep , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)),
                                      temp_stringA,
-                                     *(char **)FetchSettingName( SW_TERMCOL_NOR                      , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)) );
+                                     *(char **)FetchSettingName( context , SW_TERMCOL_NOR                    , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)) );
   else
    sprintf(temp_stringC, "%s\n", temp_stringA);
   fputs(temp_stringC, stdout);
   return;
  }
 
-void ppl_log(char *msg)
+void ppl_log(pplerr_context *context, char *msg)
  {
   static FILE *logfile = NULL;
   static int   latch = 0;
@@ -185,12 +178,12 @@ void ppl_log(char *msg)
    {
     char LogFName[128];
     sprintf(LogFName,"pyxplot.%d.log",getpid());
-    if ((logfile=fopen(LogFName,"w")) == NULL) { ppl_fatal(__FILE__,__LINE__,"Could not open log file to write."); exit(1); }
+    if ((logfile=fopen(LogFName,"w")) == NULL) { ppl_fatal(context,__FILE__,__LINE__,"Could not open log file to write."); exit(1); }
     setvbuf(logfile, NULL, _IOLBF, 0); // Set log file to be line-buffered, so that log file is always up-to-date
    }
 
   if (msg!=temp_stringD) strcpy(temp_stringD, msg);
-  fprintf(logfile, "[%s] [%s] %s\n", ppl_strStrip(ppl_friendlyTimestring(), linebuffer), ppl_error_source, temp_stringD);
+  fprintf(logfile, "[%s] [%s] %s\n", ppl_strStrip(ppl_friendlyTimestring(), linebuffer), context->error_source, temp_stringD);
   latch = 0;
   return;
  }

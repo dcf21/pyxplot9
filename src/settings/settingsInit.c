@@ -45,7 +45,7 @@
 #include "settings/settingTypes.h"
 #include "settings/withWords.h"
 
-#include "expressions/pplObj.h"
+#include "userspace/pplObj.h"
 
 pplset_terminal pplset_term_default;
 pplset_terminal pplset_term_current;
@@ -82,7 +82,7 @@ dict             *pplset_filters;
 pplarrow_object     *pplarrow_list, *pplarrow_list_default;
 ppllabel_object     *ppllabel_list, *ppllabel_list_default;
 
-void pplset_makedefault()
+void pplset_makedefault(ppl_context *context)
  {
   FILE  *LocalePipe;
   int    Nchars,i;
@@ -177,10 +177,10 @@ void pplset_makedefault()
   for (i=0; i<MAX_CONTOURS; i++) pplset_graph_default.ContoursList[i] = 0.0;
   pplset_graph_default.ContoursN             = 12;
   pplObjZero(&pplset_graph_default.ContoursUnit,0);
-  ppl_withWordsZero(&(pplset_graph_default.DataStyle),1);
+  ppl_withWordsZero(context,&(pplset_graph_default.DataStyle),1);
   pplset_graph_default.DataStyle.linespoints = SW_STYLE_POINTS;
   pplset_graph_default.FontSize              = 1.0;
-  ppl_withWordsZero(&(pplset_graph_default.FuncStyle),1);
+  ppl_withWordsZero(context,&(pplset_graph_default.FuncStyle),1);
   pplset_graph_default.FuncStyle.linespoints = SW_STYLE_LINES;
   pplset_graph_default.grid                  = SW_ONOFF_OFF;
   for (i=0; i<MAX_AXES; i++) pplset_graph_default.GridAxisX[i] = 0;
@@ -338,8 +338,8 @@ void pplset_makedefault()
   ppllabel_list = ppllabel_list_default = NULL;
 
   // Set up array of plot styles
-  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsZero(&(pplset_plot_styles        [i]),1);
-  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsZero(&(pplset_plot_styles_default[i]),1);
+  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsZero(context,&(pplset_plot_styles        [i]),1);
+  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsZero(context,&(pplset_plot_styles_default[i]),1);
 
   // Set up current axes. Because default axis contains no malloced strings, we don't need to use AxisCopy() here.
   for (i=0; i<MAX_AXES; i++) XAxes[i] = YAxes[i] = ZAxes[i] = pplset_axis_default;
@@ -353,17 +353,17 @@ void pplset_makedefault()
   pplset_session_default.colour_rep= SW_TERMCOL_GRN;
   pplset_session_default.colour_wrn= SW_TERMCOL_BRN;
   pplset_session_default.colour_err= SW_TERMCOL_RED;
-  strcpy(pplset_session_default.homedir, ppl_unixGetHomeDir());
+  strcpy(pplset_session_default.homedir, ppl_unixGetHomeDir(&context->errcontext));
 
   // Estimate the machine precision of the floating point unit we are using
   ppl_makeMachineEpsilon();
 
   // Try and find out the default papersize from the locale command
   // Do this using the popen() command rather than direct calls to nl_langinfo(_NL_PAPER_WIDTH), because the latter is gnu-specific
-  if (DEBUG) ppl_log("Querying papersize from the locale command.");
+  if (DEBUG) ppl_log(&context->errcontext,"Querying papersize from the locale command.");
   if ((LocalePipe = popen("locale -c LC_PAPER 2> /dev/null","r"))==NULL)
    {
-    if (DEBUG) ppl_log("Failed to open a pipe to the locale command.");
+    if (DEBUG) ppl_log(&context->errcontext,"Failed to open a pipe to the locale command.");
    } else {
     ppl_file_readline(LocalePipe, ConfigFname, FNAME_LENGTH); // Should read LC_PAPER
     ppl_file_readline(LocalePipe, ConfigFname, FNAME_LENGTH); // Should quote the default paper width
@@ -372,50 +372,50 @@ void pplset_makedefault()
     ppl_file_readline(LocalePipe, ConfigFname, FNAME_LENGTH); // Should quote the default paper height
     PaperWidth  = ppl_getFloat(ConfigFname, &Nchars);
     if (Nchars != strlen(ConfigFname)) goto LC_PAPERSIZE_DONE;
-    if (DEBUG) { sprintf(ppl_tempErrStr, "Read papersize %f x %f", PaperWidth, PaperHeight); ppl_log(ppl_tempErrStr); }
+    if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Read papersize %f x %f", PaperWidth, PaperHeight); ppl_log(&context->errcontext,context->errcontext.tempErrStr); }
     pplset_term_default.PaperHeight.real   = PaperHeight/1000;
     pplset_term_default.PaperWidth.real    = PaperWidth /1000;
-    if (0) { LC_PAPERSIZE_DONE: if (DEBUG) ppl_log("Failed to read papersize from the locale command."); }
+    if (0) { LC_PAPERSIZE_DONE: if (DEBUG) ppl_log(&context->errcontext,"Failed to read papersize from the locale command."); }
     pclose(LocalePipe);
     ppl_GetPaperName(pplset_term_default.PaperName, &PaperHeight, &PaperWidth);
    }
 
   // Try and find out the default papersize from /etc/papersize
-  if (DEBUG) ppl_log("Querying papersize from /etc/papersize.");
+  if (DEBUG) ppl_log(&context->errcontext,"Querying papersize from /etc/papersize.");
   if ((LocalePipe = fopen("/etc/papersize","r"))==NULL)
    {
-    if (DEBUG) ppl_log("Failed to open /etc/papersize.");
+    if (DEBUG) ppl_log(&context->errcontext,"Failed to open /etc/papersize.");
    } else {
     ppl_file_readline(LocalePipe, ConfigFname, FNAME_LENGTH); // Should a papersize name
     ppl_PaperSizeByName(ConfigFname, &PaperHeight, &PaperWidth);
     if (PaperHeight > 0)
      {
-      if (DEBUG) { sprintf(ppl_tempErrStr, "Read papersize %s, with dimensions %f x %f", ConfigFname, PaperWidth, PaperHeight); ppl_log(ppl_tempErrStr); }
+      if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Read papersize %s, with dimensions %f x %f", ConfigFname, PaperWidth, PaperHeight); ppl_log(&context->errcontext,context->errcontext.tempErrStr); }
       pplset_term_default.PaperHeight.real   = PaperHeight/1000;
       pplset_term_default.PaperWidth.real    = PaperWidth /1000;
       ppl_GetPaperName(pplset_term_default.PaperName, &PaperHeight, &PaperWidth);
      } else {
-      if (DEBUG) ppl_log("/etc/papersize returned an unrecognised papersize.");
+      if (DEBUG) ppl_log(&context->errcontext,"/etc/papersize returned an unrecognised papersize.");
      }
     fclose(LocalePipe);
    }
 
   // Try and find out the default papersize from PAPERSIZE environment variable
-  if (DEBUG) ppl_log("Querying papersize from $PAPERSIZE");
+  if (DEBUG) ppl_log(&context->errcontext,"Querying papersize from $PAPERSIZE");
   PaperSizePtr = getenv("PAPERSIZE");
   if (PaperSizePtr == NULL)
    {
-    if (DEBUG) ppl_log("Environment variable $PAPERSIZE not set.");
+    if (DEBUG) ppl_log(&context->errcontext,"Environment variable $PAPERSIZE not set.");
    } else {
     ppl_PaperSizeByName(PaperSizePtr, &PaperHeight, &PaperWidth);
     if (PaperHeight > 0)
      {
-      if (DEBUG) { sprintf(ppl_tempErrStr, "Read papersize %s, with dimensions %f x %f", PaperSizePtr, PaperWidth, PaperHeight); ppl_log(ppl_tempErrStr); }
+      if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Read papersize %s, with dimensions %f x %f", PaperSizePtr, PaperWidth, PaperHeight); ppl_log(&context->errcontext,context->errcontext.tempErrStr); }
       pplset_term_default.PaperHeight.real   = PaperHeight/1000;
       pplset_term_default.PaperWidth.real    = PaperWidth /1000;
       ppl_GetPaperName(pplset_term_default.PaperName, &PaperHeight, &PaperWidth);
      } else {
-      if (DEBUG) ppl_log("$PAPERSIZE returned an unrecognised paper size.");
+      if (DEBUG) ppl_log(&context->errcontext,"$PAPERSIZE returned an unrecognised paper size.");
      }
    }
 

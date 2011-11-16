@@ -1,4 +1,4 @@
-// expCompile.h
+// context.c
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,15 +19,35 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _EXPCOMPILE_H
-#define _EXPCOMPILE_H 1
+#define _CONTEXT_C 1
+
+#include <stdlib.h>
+#include <string.h>
+
+#include "coreUtils/errorReport.h"
+#include "coreUtils/dict.h"
+
+#include "stringTools/strConstants.h"
 
 #include "userspace/context.h"
 
-void ppl_expTokenise       (ppl_context *context, char *in, int *end, int dollarAllowed, int collectCommas, int isDict, unsigned char *out, int *outlen, int *errPos, char *errText);
-void ppl_tokenPrint        (ppl_context *context, char *in, unsigned char *tdat, int len);
-void ppl_expCompile        (ppl_context *context, char *in, int *end, int dollarAllowed, void *out, int *outlen, void *tmp, int tmplen, int *errPos, char *errText);
-void ppl_reversePolishPrint(ppl_context *context, void *in, char *out);
+ppl_context *ppl_contextInit()
+ {
+  ppl_context *out = malloc(sizeof(ppl_context));
+  out->willBeInteractive = 1;
+  out->inputLineBuffer = NULL;
+  out->inputLineAddBuffer = NULL;
+  out->shellExiting = 0;
+  out->historyNLinesWritten = 0;
+  out->errcontext.error_input_linenumber = -1;
+  out->errcontext.error_input_filename[0] = '\0';
+  strcpy(out->errcontext.error_source,"main     ");
+  return out;
+ }
 
-#endif
+void ppl_contextFree(ppl_context *in)
+ {
+  free(in);
+  return;
+ }
 

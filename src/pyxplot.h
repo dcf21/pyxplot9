@@ -24,7 +24,6 @@
 
 #ifndef _PYXPLOT_C
 #include <setjmp.h>
-extern int         ppl_willBeInteractive;
 extern sigjmp_buf  ppl_sigjmpToMain;
 extern sigjmp_buf  ppl_sigjmpToInteractive;
 extern sigjmp_buf  ppl_sigjmpToDirective;

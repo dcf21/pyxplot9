@@ -38,13 +38,15 @@
 #include "settings/arrows.h"
 #include "settings/settings.h"
 
+#include "userspace/context.h"
+
 // -------------------------------------------
 // ROUTINES FOR MANIPULATING ARROWS STRUCTURES
 // -------------------------------------------
 
 #define CMPVAL(X,Y) (ppl_units_DimEqual(&X,&Y) && ppl_units_DblEqual(X.real , Y.real))
 
-void pplarrow_add(pplarrow_object **inlist, dict *in)
+void pplarrow_add(ppl_context *context, pplarrow_object **inlist, dict *in)
  {
   int             *tempint, i, system_x0, system_y0, system_z0, system_x1, system_y1, system_z1;
   char            *tempstr;
@@ -69,7 +71,7 @@ void pplarrow_add(pplarrow_object **inlist, dict *in)
     ppl_withWordsDestroy(&out->style);
    } else {
     out = (pplarrow_object *)malloc(sizeof(pplarrow_object));
-    if (out == NULL) { ppl_error(ERR_MEMORY, -1, -1, "Out of memory"); return; }
+    if (out == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1, "Out of memory"); return; }
     out->id     = *tempint;
     out->next   = *inlist;
     *inlist     = out;
@@ -96,7 +98,7 @@ void pplarrow_add(pplarrow_object **inlist, dict *in)
   return;
  }
 
-void pplarrow_remove(pplarrow_object **inlist, dict *in)
+void pplarrow_remove(ppl_context *context, pplarrow_object **inlist, dict *in)
  {
   int          *tempint;
   pplarrow_object *obj, **first;
@@ -121,15 +123,15 @@ void pplarrow_remove(pplarrow_object **inlist, dict *in)
       ppl_withWordsDestroy(&obj->style);
       free(obj);
      } else {
-      //sprintf(ppl_tempErrStr,"Arrow number %d is not defined", *tempint);
-      //ppl_error(ERR_GENERAL, -1, -1, ppl_tempErrStr);
+      //sprintf(context->errcontext.tempErrStr,"Arrow number %d is not defined", *tempint);
+      //ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, context->errcontext.tempErrStr);
      }
     ppl_listIterate(&listiter);
    }
   return;
  }
 
-void pplarrow_unset(pplarrow_object **inlist, dict *in)
+void pplarrow_unset(ppl_context *context, pplarrow_object **inlist, dict *in)
  {
   int          *tempint;
   pplarrow_object *obj, *new, **first;
@@ -154,7 +156,7 @@ void pplarrow_unset(pplarrow_object **inlist, dict *in)
       inlist = first;
       while ((*inlist != NULL) && ((*inlist)->id < *tempint)) inlist = &((*inlist)->next);
       new = (pplarrow_object *)malloc(sizeof(pplarrow_object));
-      if (new == NULL) { ppl_error(ERR_MEMORY, -1, -1,"Out of memory"); return; }
+      if (new == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); return; }
       *new = *obj;
       new->next = *inlist;
       ppl_withWordsCpy(&new->style, &obj->style);
@@ -165,7 +167,7 @@ void pplarrow_unset(pplarrow_object **inlist, dict *in)
   return;
  }
 
-unsigned char pplarrow_compare(pplarrow_object *a, pplarrow_object *b)
+unsigned char pplarrow_compare(ppl_context *context, pplarrow_object *a, pplarrow_object *b)
  {
   if (a->id!=b->id) return 0;
   if ( (!CMPVAL(a->x0 , b->x0)) || (!CMPVAL(a->y0 , b->y0)) || (!CMPVAL(a->z0 , b->z0)) ) return 0;
@@ -178,13 +180,13 @@ unsigned char pplarrow_compare(pplarrow_object *a, pplarrow_object *b)
   return 1;
  }
 
-void pplarrow_list_copy(pplarrow_object **out, pplarrow_object **in)
+void pplarrow_list_copy(ppl_context *context, pplarrow_object **out, pplarrow_object **in)
  {
   *out = NULL;
   while (*in != NULL)
    {
     *out = (pplarrow_object *)malloc(sizeof(pplarrow_object));
-    if (*out == NULL) { ppl_error(ERR_MEMORY, -1, -1,"Out of memory"); return; }
+    if (*out == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); return; }
     **out = **in;
     (*out)->next = NULL;
     ppl_withWordsCpy(&(*out)->style, &(*in)->style);
@@ -194,7 +196,7 @@ void pplarrow_list_copy(pplarrow_object **out, pplarrow_object **in)
   return;
  }
 
-void pplarrow_list_destroy(pplarrow_object **inlist)
+void pplarrow_list_destroy(ppl_context *context, pplarrow_object **inlist)
  {
   pplarrow_object *obj, **first;
 
@@ -210,7 +212,7 @@ void pplarrow_list_destroy(pplarrow_object **inlist)
   return;
  }
 
-void pplarrow_print(pplarrow_object *in, char *out)
+void pplarrow_print(ppl_context *context, pplarrow_object *in, char *out)
  {
   int i;
   sprintf(out, "from %s", *(char **)FetchSettingName(in->system_x0, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *)));

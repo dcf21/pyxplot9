@@ -53,9 +53,9 @@
 #include "settings/settingTypes.h"
 #include "settings/textConstants.h"
 
-#include "pyxplot.h"
+#include "userspace/context.h"
 
-int ppl_willBeInteractive;
+#include "pyxplot.h"
 
 // SIGINT Handling information
 
@@ -66,25 +66,26 @@ sigjmp_buf *ppl_sigjmpFromSigInt = NULL;
 
 int main(int argc, char **argv)
  {
-  int i,fail=0;
-  int tempdirnumber = 1;
-  char tempdirpath[FNAME_LENGTH];
-  char *EnvDisplay;
-  struct stat statinfo;
+  int          i,fail=0;
+  int          tempdirnumber = 1;
+  char         tempdirpath[FNAME_LENGTH];
+  char        *EnvDisplay;
+  ppl_context *context;
+  struct stat  statinfo;
 
   sigset_t sigs;
 
   struct timespec waitperiod, waitedperiod; // A time.h timespec specifier for a 50ms nanosleep wait
   waitperiod.tv_sec  = 0;
   waitperiod.tv_nsec = 50000000;
-  ppl_willBeInteractive  = 1;
 
   // Initialise sub-modules
-  if (DEBUG) ppl_log("Initialising PyXPlot.");
-  ppl_inputInit();
-  ppl_memAlloc_MemoryInit(&ppl_error, &ppl_log);
+  context = ppl_contextInit();
+  if (DEBUG) ppl_log(&context->errcontext,"Initialising PyXPlot.");
+  ppl_memAlloc_MemoryInit(&context->errcontext, &ppl_error, &ppl_log);
   ppl_PaperSizeInit();
-  pplset_makedefault();
+  ppl_inputInit(context);
+  pplset_makedefault(context);
   ppltxt_init();
 
   // Turn off GSL's automatic error handler
@@ -101,13 +102,13 @@ int main(int argc, char **argv)
   if      (strcmp(GHOSTVIEW_COMMAND, "/bin/false")!=0) pplset_term_current.viewer = pplset_term_default.viewer = SW_VIEWER_GV;
   else if (strcmp(GGV_COMMAND      , "/bin/false")!=0) pplset_term_current.viewer = pplset_term_default.viewer = SW_VIEWER_GGV;
   else                                                 pplset_term_current.viewer = pplset_term_default.viewer = SW_VIEWER_NULL;
-  if ( /* (ppl_termtype_set_in_configfile == 0) && */ ((ppl_willBeInteractive==0) ||
+  if ( /* (ppl_termtype_set_in_configfile == 0) && */ ((context->willBeInteractive==0) ||
                                                 (EnvDisplay==NULL) ||
                                                 (EnvDisplay[0]=='\0') ||
                                                 (pplset_term_default.viewer == SW_VIEWER_NULL) ||
                                                 (isatty(STDIN_FILENO) != 1)))
    {
-    if (DEBUG) ppl_log("Detected that we are running a non-interactive session; defaulting to the EPS terminal.");
+    if (DEBUG) ppl_log(&context->errcontext,"Detected that we are running a non-interactive session; defaulting to the EPS terminal.");
     pplset_term_current.TermType = pplset_term_default.TermType = SW_TERMTYPE_EPS;
    }
 
@@ -117,7 +118,7 @@ int main(int argc, char **argv)
     if (strlen(argv[i])==0) continue;
     if (argv[i][0]!='-')
      {
-      if (ppl_willBeInteractive==1) ppl_willBeInteractive=0;
+      if (context->willBeInteractive==1) context->willBeInteractive=0;
       continue;
      }
     if      (strcmp(argv[i], "-q"          )==0) pplset_session_default.splash = SW_ONOFF_OFF;
@@ -136,40 +137,40 @@ int main(int argc, char **argv)
     else if (strcmp(argv[i], "--mono"      )==0) pplset_session_default.colour = SW_ONOFF_OFF;
     else if (strcmp(argv[i], "-monochrome" )==0) pplset_session_default.colour = SW_ONOFF_OFF;
     else if (strcmp(argv[i], "--monochrome")==0) pplset_session_default.colour = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "-"           )==0) ppl_willBeInteractive=2;
+    else if (strcmp(argv[i], "-"           )==0) context->willBeInteractive=2;
     else if ((strcmp(argv[i], "-v")==0) || (strcmp(argv[i], "-version")==0) || (strcmp(argv[i], "--version")==0))
      {
       printf("%s\n",ppltxt_version);
-      if (DEBUG) ppl_log("Reported version number as requested.");
+      if (DEBUG) ppl_log(&context->errcontext,"Reported version number as requested.");
       ppl_memAlloc_FreeAll(0); ppl_memAlloc_MemoryStop();
       return 0;
      }
     else if ((strcmp(argv[i], "-h")==0) || (strcmp(argv[i], "-help")==0) || (strcmp(argv[i], "--help")==0))
      {
       printf("%s\n",ppltxt_help);
-      if (DEBUG) ppl_log("Reported help text as requested.");
+      if (DEBUG) ppl_log(&context->errcontext,"Reported help text as requested.");
       ppl_memAlloc_FreeAll(0); ppl_memAlloc_MemoryStop();
       return 0;
      }
     else
     {
-     sprintf(ppl_tempErrStr, "Received switch '%s' which was not recognised. Type 'pyxplot -help' for a list of available commandline options.", argv[i]);
-     ppl_error(ERR_PREFORMED, -1, -1, ppl_tempErrStr);
-     if (DEBUG) ppl_log("Received unexpected commandline switch.");
+     sprintf(context->errcontext.tempErrStr, "Received switch '%s' which was not recognised. Type 'pyxplot -help' for a list of available commandline options.", argv[i]);
+     ppl_error(&context->errcontext,ERR_PREFORMED, -1, -1, context->errcontext.tempErrStr);
+     if (DEBUG) ppl_log(&context->errcontext,"Received unexpected commandline switch.");
      ppl_memAlloc_FreeAll(0); ppl_memAlloc_MemoryStop();
      return 1;
     }
    }
 
   // Decide upon a path for a temporary directory for us to live in
-  if (DEBUG) ppl_log("Finding a filepath for a temporary directory.");
-  if (getcwd( pplset_session_default.cwd , FNAME_LENGTH ) == NULL) { ppl_fatal(__FILE__,__LINE__,"Could not read current working directory."); } // Store cwd
+  if (DEBUG) ppl_log(&context->errcontext,"Finding a filepath for a temporary directory.");
+  if (getcwd( pplset_session_default.cwd , FNAME_LENGTH ) == NULL) { ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Could not read current working directory."); } // Store cwd
   while (1) { sprintf(tempdirpath, "/tmp/pyxplot_%d_%d", getpid(), tempdirnumber); if (access(tempdirpath, F_OK) != 0) break; tempdirnumber++; } // Find an unused dir path
   strcpy(pplset_session_default.tempdir, tempdirpath); // Store our chosen temporary directory path
 
   // Launch child process
-  if (DEBUG) ppl_log("Launching the Child Support Process.");
-  pplcsp_init();
+  if (DEBUG) ppl_log(&context->errcontext,"Launching the Child Support Process.");
+  pplcsp_init(context);
 
   // Set up SIGINT handler
   if (sigsetjmp(ppl_sigjmpToMain, 1) == 0)
@@ -179,7 +180,7 @@ int main(int argc, char **argv)
     signal(SIGPIPE, SIG_IGN);
 
     // Wait for temporary directory to appear, and change directory into it
-    if (DEBUG) ppl_log("Waiting for temporary directory to appear.");
+    if (DEBUG) ppl_log(&context->errcontext,"Waiting for temporary directory to appear.");
     strcpy(tempdirpath, pplset_session_default.tempdir);
     for (i=0; i<100; i++) { if (access(tempdirpath, F_OK) == 0) break; nanosleep(&waitperiod,&waitedperiod); } // Wait for temp dir to be created by child process
     if (access(tempdirpath, F_OK) != 0) { fail=1; } // If it never turns up, fail.
@@ -189,11 +190,11 @@ int main(int argc, char **argv)
       if (!S_ISDIR(statinfo.st_mode)) fail=1;
       if (statinfo.st_uid != getuid()) fail=1;
      }
-    if (fail==1)                { ppl_fatal(__FILE__,__LINE__,"Failed to create temporary directory." ); }
+    if (fail==1)                { ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Failed to create temporary directory." ); }
 
     // Read GNU Readline history
 #ifdef HAVE_READLINE
-    if (DEBUG) ppl_log("Reading GNU Readline history.");
+    if (DEBUG) ppl_log(&context->errcontext,"Reading GNU Readline history.");
     sprintf(tempdirpath, "%s%s%s", pplset_session_default.homedir, PATHLINK, ".pyxplot_history");
     read_history(tempdirpath);
     stifle_history(1000);
@@ -205,43 +206,44 @@ int main(int argc, char **argv)
       if (strlen(argv[i])==0) continue;
       if (argv[i][0]=='-')
        {
-        if (argv[i][1]=='\0') ppl_interactiveSession();
+        if (argv[i][1]=='\0') ppl_interactiveSession(context);
         continue;
        }
-      ppl_processScript(argv[i], 0);
+      ppl_processScript(context, argv[i], 0);
      }
-    if (ppl_willBeInteractive==1) ppl_interactiveSession();
+    if (context->willBeInteractive==1) ppl_interactiveSession(context);
 
    // SIGINT longjmps to main return here
    } else {
     sigemptyset(&sigs);
     sigaddset(&sigs,SIGCHLD);
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
-    ppl_error(ERR_PREFORMED, -1, -1, "\nReceived SIGINT. Terminating.");
+    ppl_error(&context->errcontext,ERR_PREFORMED, -1, -1, "\nReceived SIGINT. Terminating.");
    }
 
   // Notify the CSP that we are about to quit
-  pplcsp_sendCommand("B\n");
+  pplcsp_sendCommand(context,"B\n");
 
   // Free all of the plot styles which are set
-  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsDestroy(&(pplset_plot_styles        [i]));
-  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsDestroy(&(pplset_plot_styles_default[i]));
+  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsDestroy(context, &(pplset_plot_styles        [i]));
+  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsDestroy(context, &(pplset_plot_styles_default[i]));
 
   // Save GNU Readline history
 #ifdef HAVE_READLINE
-  if (ppl_willBeInteractive>0)
+  if (context->willBeInteractive>0)
    {
-    if (DEBUG) ppl_log("Saving GNU Readline history.");
+    if (DEBUG) ppl_log(&context->errcontext,"Saving GNU Readline history.");
     sprintf(tempdirpath, "%s%s%s", pplset_session_default.homedir, PATHLINK, ".pyxplot_history");
     write_history(tempdirpath);
    }
 #endif
 
   // Terminate
-  if (signal(SIGCHLD, SIG_DFL) == SIG_ERR) ppl_fatal(__FILE__,__LINE__,"Main process could not unconfigure signal handler for SIGCHLD.");
+  if (signal(SIGCHLD, SIG_DFL) == SIG_ERR) ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Main process could not unconfigure signal handler for SIGCHLD.");
+  ppl_contextInit(context);
   ppl_memAlloc_FreeAll(0);
   ppl_memAlloc_MemoryStop();
-  if (DEBUG) ppl_log("Terminating normally.");
+  if (DEBUG) ppl_log(&context->errcontext,"Terminating normally.");
   return 0;
  }
 

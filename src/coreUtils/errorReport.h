@@ -3,7 +3,7 @@
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
 //
-// Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+// Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
 //               2008-2011 Ross Church
 //
 // $Id$
@@ -33,14 +33,21 @@
 #define ERR_STACKED  106
 #define ERR_PREFORMED 107
 
-extern char ppl_error_source[];
-extern char ppl_tempErrStr[];
+#include "stringTools/strConstants.h"
 
-void ppl_error_setstreaminfo(int linenumber,char *filename);
-void ppl_error(int ErrType, int HighlightPos1, int HighlightPos2, char *msg);
-void ppl_fatal(char *file, int line, char *msg);
-void ppl_warning(int ErrType, char *msg);
-void ppl_report(char *msg);
-void ppl_log(char *msg);
+typedef struct pplerr_context_s
+ {
+  int       error_input_linenumber;
+  char      error_input_filename[FNAME_LENGTH];
+  char      error_source[16]; // Identifier of the process producing log messages
+  char      tempErrStr[LSTR_LENGTH];
+ } pplerr_context;
+
+void ppl_error_setstreaminfo(pplerr_context *context, int linenumber,char *filename);
+void ppl_error(pplerr_context *context, int ErrType, int HighlightPos1, int HighlightPos2, char *msg);
+void ppl_fatal(pplerr_context *context, char *file, int line, char *msg);
+void ppl_warning(pplerr_context *context, int ErrType, char *msg);
+void ppl_report(pplerr_context *context, char *msg);
+void ppl_log(pplerr_context *context, char *msg);
 
 #endif

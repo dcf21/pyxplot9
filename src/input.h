@@ -23,17 +23,13 @@
 #ifndef _INPUT_H
 #define _INPUT_H 1
 
-#define _INPUT_C 1
-extern char    *pplinLineBuffer;
-extern char    *pplinLineAddBuffer;
-extern char    *pplinLineBufferPos;
-extern int      ppl_shellExiting;
-extern long int history_NLinesWritten;
-#endif
+#include "userspace/context.h"
 
-int  ppl_inputInit();
-void ppl_interactiveSession();
-void ppl_processScript     (char *input, int iterLevel);
-int  ppl_processLine       (char *in, int interactive, int iterLevel, int exitOnError);
-int  ppl_ProcessStatement  (char *line);
+int  ppl_inputInit         (ppl_context *context);
+void ppl_interactiveSession(ppl_context *context);
+void ppl_processScript     (ppl_context *context, char *input, int iterLevel);
+int  ppl_processLine       (ppl_context *context, char *in, int interactive, int iterLevel, int exitOnError);
+int  ppl_ProcessStatement  (ppl_context *context,char *line);
+
+#endif
 

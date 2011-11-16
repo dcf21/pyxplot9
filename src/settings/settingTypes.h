@@ -386,7 +386,9 @@ extern int   SW_PIEKEYPOS_ACL[];
 extern int   SW_PIEKEYPOS_INT[];
 #endif
 
-void *FetchSettingName      (int id, int *id_list, void *name_list, const int name_list_size);
-int   FetchSettingByName    (char *name, int *id_list, char **name_list);
+#include "coreUtils/errorReport.h"
+
+void *FetchSettingName      (pplerr_context *context, int id, int *id_list, void *name_list, const int name_list_size);
+int   FetchSettingByName    (pplerr_context *context, char *name, int *id_list, char **name_list);
 
 #endif

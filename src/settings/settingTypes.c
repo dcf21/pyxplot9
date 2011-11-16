@@ -126,7 +126,7 @@ char *SW_PIEKEYPOS_STR[] = {"auto"           , "inside"           , "key"       
 int   SW_PIEKEYPOS_INT[] = {SW_PIEKEYPOS_AUTO, SW_PIEKEYPOS_INSIDE, SW_PIEKEYPOS_KEY, SW_PIEKEYPOS_OUTSIDE, -1};
 int   SW_PIEKEYPOS_ACL[] = {1                , 1                  , 1               , 1                   , -1};
 
-void *FetchSettingName(int id, int *id_list, void *name_list, const int name_list_size)
+void *FetchSettingName(pplerr_context *context, int id, int *id_list, void *name_list, const int name_list_size)
  {
   int first;
   static int latch=0;
@@ -139,19 +139,19 @@ void *FetchSettingName(int id, int *id_list, void *name_list, const int name_lis
      {
       if (latch==1) return dummyout; // Prevent recursive calling
       latch=1;
-      sprintf(ppl_tempErrStr, "Setting with illegal value %d; should have had a value of type %d.", id, first);
-      ppl_fatal(__FILE__, __LINE__, ppl_tempErrStr);
+      sprintf(context->tempErrStr, "Setting with illegal value %d; should have had a value of type %d.", id, first);
+      ppl_fatal(context,__FILE__, __LINE__, context->tempErrStr);
      }
     id_list++; name_list+=name_list_size;
    }
   if (latch==1) return dummyout;
   latch=1;
-  sprintf(ppl_tempErrStr, "Setting has illegal value %d.", id);
-  ppl_fatal(__FILE__, __LINE__, ppl_tempErrStr);
+  sprintf(context->tempErrStr, "Setting has illegal value %d.", id);
+  ppl_fatal(context,__FILE__, __LINE__, context->tempErrStr);
   return NULL;
  }
 
-int FetchSettingByName(char *name, int *id_list, char **name_list)
+int FetchSettingByName(pplerr_context *context, char *name, int *id_list, char **name_list)
  {
   while(1)
    {

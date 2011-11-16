@@ -23,33 +23,32 @@
 #define _CHILDREN_H 1
 
 #include "coreUtils/list.h"
-
-extern char pplcsp_ghostView_fname[];
+#include "userspace/context.h"
 
 // Functions to be called from main PyXPlot process
 
-void  pplcsp_init                  ();
-void  pplcsp_checkForGvOutput      ();
-void  pplcsp_sendCommand           (char *cmd);
+void  pplcsp_init                  (ppl_context *context);
+void  pplcsp_checkForGvOutput      (ppl_context *context);
+void  pplcsp_sendCommand           (ppl_context *context, char *cmd);
 
 // Functions to be called from the Child Support Process
 
-void  pplcsp_main                  ();
+void  pplcsp_main                  (ppl_context *context);
 void  pplcsp_checkForChildExits    (int signo);
-void  pplcsp_checkForNewCommands   ();
-void  pplcsp_processCommand        (char *in);
-int   pplcsp_forkNewGv             (char *fname, list *gv_list);
-void  pplcsp_killAllGvs            ();
-void  pplcsp_killLatestSinglewindow();
+void  pplcsp_checkForNewCommands   (ppl_context *context);
+void  pplcsp_processCommand        (ppl_context *context, char *in);
+int   pplcsp_forkNewGv             (ppl_context *context, char *fname, list *gv_list);
+void  pplcsp_killAllGvs            (ppl_context *context);
+void  pplcsp_killLatestSinglewindow(ppl_context *context);
 
 // Functions for spawning helper processes
 
 void  pplcsp_checkForHelperExits   (int signo);
-void  pplcsp_killAllHelpers        ();
-void  pplcsp_forkSed               (char *cmd, int *fstdin, int *fstdout);
-void  pplcsp_forkLaTeX             (char *filename, int *PidOut, int *fstdin, int *fstdout);
-void  pplcsp_forkInputFilter       (char **cmd, int *fstdout);
-void  pplcsp_forkKpseWhich         (const char *ftype, int *fstdout);
+void  pplcsp_killAllHelpers        (ppl_context *context);
+void  pplcsp_forkSed               (ppl_context *context, char *cmd, int *fstdin, int *fstdout);
+void  pplcsp_forkLaTeX             (ppl_context *context, char *filename, int *PidOut, int *fstdin, int *fstdout);
+void  pplcsp_forkInputFilter       (ppl_context *context, char **cmd, int *fstdout);
+void  pplcsp_forkKpseWhich         (ppl_context *context, const char *ftype, int *fstdout);
 
 #endif
 

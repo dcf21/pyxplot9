@@ -30,7 +30,7 @@
 #include "coreUtils/errorReport.h"
 #include "pplConstants.h"
 
-struct passwd *UnixGetPwEntry()
+struct passwd *UnixGetPwEntry(pplerr_context *context)
  {
   int uid;
   struct passwd *ptr;
@@ -43,15 +43,15 @@ struct passwd *UnixGetPwEntry()
   return(ptr);
  }
 
-char *ppl_unixGetHomeDir()
+char *ppl_unixGetHomeDir(pplerr_context *context)
  {
   struct passwd *ptr;
-  ptr = UnixGetPwEntry();
-  if (ptr==NULL) ppl_fatal(__FILE__,__LINE__,"Could not find user's entry in /etc/passwd file.");
+  ptr = UnixGetPwEntry(context);
+  if (ptr==NULL) ppl_fatal(context,__FILE__,__LINE__,"Could not find user's entry in /etc/passwd file.");
   return ptr->pw_dir;
  }
 
-char *ppl_unixGetUserHomeDir(char *username)
+char *ppl_unixGetUserHomeDir(pplerr_context *context,char *username)
  {
   struct passwd *ptr;
   setpwent(); // Ditto memory leak comment above
@@ -62,30 +62,30 @@ char *ppl_unixGetUserHomeDir(char *username)
   return ptr->pw_dir;
  }
 
-char *ppl_unixGetIRLName()
+char *ppl_unixGetIRLName(pplerr_context *context)
  {
   struct passwd *ptr;
   int i;
-  ptr = UnixGetPwEntry();
-  if (ptr==NULL) ppl_fatal(__FILE__,__LINE__,"Could not find user's entry in /etc/passwd file.");
-  strcpy(ppl_tempErrStr, ptr->pw_gecos);
-  for (i=0; ppl_tempErrStr[i]!='\0'; i++) if (ppl_tempErrStr[i]==',') ppl_tempErrStr[i]='\0'; // Remove commas from in-real-life name
-  return ppl_tempErrStr;
+  ptr = UnixGetPwEntry(context);
+  if (ptr==NULL) ppl_fatal(context,__FILE__,__LINE__,"Could not find user's entry in /etc/passwd file.");
+  strcpy(context->tempErrStr, ptr->pw_gecos);
+  for (i=0; context->tempErrStr[i]!='\0'; i++) if (context->tempErrStr[i]==',') context->tempErrStr[i]='\0'; // Remove commas from in-real-life name
+  return context->tempErrStr;
  }
 
 // Expand out filenames line ~dcf21/script.ppl
-char *ppl_unixExpandUserHomeDir(char *in, char *cwd, char *out)
+char *ppl_unixExpandUserHomeDir(pplerr_context *context,char *in, char *cwd, char *out)
  {
   char UserName[1024];
   char *scan_in, *scan_out;
   if      (in[0] == '/') strcpy (out, in);
   else if (in[0] != '~') sprintf(out, "%s%s%s", cwd, PATHLINK, in);
-  else if (in[1] == '/') sprintf(out, "%s%s%s", ppl_unixGetHomeDir(), PATHLINK, in+2);
+  else if (in[1] == '/') sprintf(out, "%s%s%s", ppl_unixGetHomeDir(context), PATHLINK, in+2);
   else
    {
     for ( scan_in=in+1,scan_out=UserName ; ((*scan_in!='/') && (*scan_in!='\0')) ; *(scan_out++)=*(scan_in++) );
     *scan_out='\0';
-    scan_out = ppl_unixGetUserHomeDir(UserName);
+    scan_out = ppl_unixGetUserHomeDir(context,UserName);
     if (scan_out != NULL) sprintf(out, "%s%s", scan_out, scan_in);
     else                  strcpy (out, in);
    }

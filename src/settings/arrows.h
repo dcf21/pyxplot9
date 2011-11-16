@@ -23,8 +23,10 @@
 #define _PPLSET_ARROWS_H 1
 
 #include "coreUtils/dict.h"
-#include "expressions/pplObj.h"
 #include "settings/withWords.h"
+
+#include "userspace/pplObj.h"
+#include "userspace/context.h"
 
 typedef struct pplarrow_object {
  int        id;
@@ -36,14 +38,14 @@ typedef struct pplarrow_object {
  struct pplarrow_object *next;
  } pplarrow_object;
 
-void pplarrow_add         (pplarrow_object **inlist, dict *in);
-void pplarrow_remove      (pplarrow_object **inlist, dict *in);
-void pplarrow_unset       (pplarrow_object **inlist, dict *in);
-void pplarrow_default     (pplarrow_object **inlist, dict *in);
-unsigned char pplarrow_compare(pplarrow_object *a, pplarrow_object *b);
-void pplarrow_list_copy   (pplarrow_object **out, pplarrow_object **in);
-void pplarrow_list_destroy(pplarrow_object **inlist);
-void pplarrow_print       (pplarrow_object  *in, char *out);
+void pplarrow_add         (ppl_context *context, pplarrow_object **inlist, dict *in);
+void pplarrow_remove      (ppl_context *context, pplarrow_object **inlist, dict *in);
+void pplarrow_unset       (ppl_context *context, pplarrow_object **inlist, dict *in);
+void pplarrow_default     (ppl_context *context, pplarrow_object **inlist, dict *in);
+unsigned char pplarrow_compare(ppl_context *context, pplarrow_object *a, pplarrow_object *b);
+void pplarrow_list_copy   (ppl_context *context, pplarrow_object **out, pplarrow_object **in);
+void pplarrow_list_destroy(ppl_context *context, pplarrow_object **inlist);
+void pplarrow_print       (ppl_context *context, pplarrow_object  *in, char *out);
 
 
 #define pplarrow_add_get_system(X,Y) \

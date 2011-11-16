@@ -3,7 +3,7 @@
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
 //
-// Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+// Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
 //               2008-2011 Ross Church
 //
 // $Id$
@@ -24,7 +24,9 @@
 #ifndef _MEMALLOC_H
 #define _MEMALLOC_H 1
 
-void  ppl_memAlloc_MemoryInit            ( void(*mem_error_handler)(int, int, int, char *) , void(*mem_log_handler)(char *) );
+#include "coreUtils/errorReport.h"
+
+void  ppl_memAlloc_MemoryInit            ( pplerr_context *ec, void(*mem_error_handler)(pplerr_context *,int, int, int, char *) , void(*mem_log_handler)(pplerr_context *,char *) );
 void  ppl_memAlloc_MemoryStop            ();
 int   ppl_memAlloc_DescendIntoNewContext ();
 int   ppl_memAlloc_AscendOutOfContext    (int context);

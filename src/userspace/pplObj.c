@@ -29,8 +29,8 @@
 #include "coreUtils/list.h"
 #include "coreUtils/dict.h"
 
-#include "expressions/pplObj.h"
-#include "expressions/pplObjUnits.h"
+#include "userspace/pplObj.h"
+#include "userspace/pplObjUnits.h"
 
 char *pplObjTypeNames[] = {"number","string","boolean","date","color","dictionary","list","vector","matrix","file handle","function","type","null","exception",NULL};
 

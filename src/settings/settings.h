@@ -27,7 +27,7 @@
 #include "coreUtils/dict.h"
 
 #include "pplConstants.h"
-#include "expressions/pplObj.h"
+#include "userspace/pplObj.h"
 
 #include "settings/arrows.h"
 #include "settings/labels.h"
@@ -96,7 +96,7 @@ typedef struct pplset_axis {
  } pplset_axis;
 
 // Variable initialisation functions
-void  pplset_makedefault();
+void  pplset_makedefault(ppl_context *context);
 
 // Variables defined in settingsInit.c
 #ifndef _SETTINGSINIT_C

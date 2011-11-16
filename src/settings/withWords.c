@@ -35,11 +35,13 @@
 #include "settings/settings.h"
 #include "settings/settingTypes.h"
 
+#include "userspace/context.h"
+
 // -----------------------------------------------
 // ROUTINES FOR MANIPULATING WITH_WORDS STRUCTURES
 // -----------------------------------------------
 
-void ppl_withWordsZero(withWords *a, const unsigned char malloced)
+void ppl_withWordsZero(ppl_context *context, withWords *a, const unsigned char malloced)
  {
   a->colour = a->fillcolour = a->linespoints = a->linetype = a->pointtype = a->style = a->Col1234Space = a->FillCol1234Space = 0;
   a->linewidth = a->pointlinewidth = a->pointsize = 1.0;
@@ -52,9 +54,9 @@ void ppl_withWordsZero(withWords *a, const unsigned char malloced)
   return;
  }
 
-#define XWWMALLOC(X) (tmp = malloc(X)); if (tmp==NULL) { ppl_error(ERR_MEMORY, -1, -1,"Out of memory"); ppl_withWordsZero(out,1); return; }
+#define XWWMALLOC(X) (tmp = malloc(X)); if (tmp==NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); ppl_withWordsZero(context,out,1); return; }
 
-int ppl_withWordsCmp_zero(const withWords *a)
+int ppl_withWordsCmp_zero(ppl_context *context, const withWords *a)
  {
   if (a->STRlinetype != NULL) return 0;
   if (a->STRlinewidth != NULL) return 0;
@@ -83,7 +85,7 @@ int ppl_withWordsCmp_zero(const withWords *a)
   return 1;
  }
 
-int ppl_withWordsCmp(const withWords *a, const withWords *b)
+int ppl_withWordsCmp(ppl_context *context, const withWords *a, const withWords *b)
  {
   // Check that the range of items which are defined in both structures are the same
   if ((a->STRcolour1       ==NULL) != (b->STRcolour1       ==NULL)                                                                             ) return 0;
@@ -143,18 +145,18 @@ int ppl_withWordsCmp(const withWords *a, const withWords *b)
  }
 
 // a has highest priority; e has lowest priority
-void ppl_withWordsMerge(withWords *out, const withWords *a, const withWords *b, const withWords *c, const withWords *d, const withWords *e, const unsigned char ExpandStyles)
+void ppl_withWordsMerge(ppl_context *context, withWords *out, const withWords *a, const withWords *b, const withWords *c, const withWords *d, const withWords *e, const unsigned char ExpandStyles)
  {
   int i;
   const withWords *InputArray[25] = {a,b,c,d,e};
   unsigned char BlockStyleSubstitution[25] = {0,0,0,0,0};
   const withWords *x;
 
-  ppl_withWordsZero(out,0);
+  ppl_withWordsZero(context,out,0);
 
   for (i=4; i>=0; i--)
    {
-    if (i>24) { ppl_error(ERR_GENERAL, -1, -1, "Iteration depth exceeded whilst substituting plot styles. Infinite plot style loop suspected."); return; } // i can reach 24 when recursion happens
+    if (i>24) { ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, "Iteration depth exceeded whilst substituting plot styles. Infinite plot style loop suspected."); return; } // i can reach 24 when recursion happens
     x = InputArray[i];
     if (x == NULL) continue;
     if ((x->USEstyle) && (!BlockStyleSubstitution[i])) // Substitute for numbered plot styles
@@ -196,10 +198,10 @@ void ppl_withWordsMerge(withWords *out, const withWords *a, const withWords *b, 
 
 #define S_RGB(X,Y) (char *)ppl_numericDisplay(X,Y,pplset_term_current.SignificantFigures,(pplset_term_current.NumDisplay==SW_DISPLAY_L))
 
-void ppl_withWordsPrint(const withWords *defn, char *out)
+void ppl_withWordsPrint(ppl_context *context, const withWords *defn, char *out)
  {
   int i=0;
-  if      (defn->USElinespoints)          { sprintf(out+i, "%s "            , *(char **)FetchSettingName(defn->linespoints, SW_STYLE_INT , (void *)SW_STYLE_STR , sizeof(char *))); i += strlen(out+i); }
+  if      (defn->USElinespoints)          { sprintf(out+i, "%s "            , *(char **)FetchSettingName(&context->errcontext,defn->linespoints, SW_STYLE_INT , (void *)SW_STYLE_STR , sizeof(char *))); i += strlen(out+i); }
   if      (defn->STRcolour1!=NULL)
    {
     if      (defn->Col1234Space==SW_COLSPACE_RGB ) sprintf(out+i, "colour rgb%s:%s:%s "     , defn->STRcolour1, defn->STRcolour2, defn->STRcolour3);
@@ -214,7 +216,7 @@ void ppl_withWordsPrint(const withWords *defn, char *out)
     else if (defn->Col1234Space==SW_COLSPACE_CMYK) sprintf(out+i, "colour cmyk%s:%s:%s:%s " , S_RGB(defn->colour1,0), S_RGB(defn->colour2,1), S_RGB(defn->colour3,2), S_RGB(defn->colour4,3));
     i += strlen(out+i);
    }
-  else if (defn->USEcolour)               { sprintf(out+i, "colour %s "     , *(char **)FetchSettingName(defn->colour     , SW_COLOUR_INT, (void *)SW_COLOUR_STR, sizeof(char *))); i += strlen(out+i); }
+  else if (defn->USEcolour)               { sprintf(out+i, "colour %s "     , *(char **)FetchSettingName(&context->errcontext,defn->colour     , SW_COLOUR_INT, (void *)SW_COLOUR_STR, sizeof(char *))); i += strlen(out+i); }
   if      (defn->STRfillcolour1!=NULL)
    {
     if      (defn->Col1234Space==SW_COLSPACE_RGB ) sprintf(out+i, "fillcolour rgb%s:%s:%s " , defn->STRfillcolour1, defn->STRfillcolour2, defn->STRfillcolour3);
@@ -229,7 +231,7 @@ void ppl_withWordsPrint(const withWords *defn, char *out)
     else if (defn->Col1234Space==SW_COLSPACE_CMYK) sprintf(out+i, "fillcolour cmyk%s:%s:%s:%s " , S_RGB(defn->fillcolour1,0), S_RGB(defn->fillcolour2,1), S_RGB(defn->fillcolour3,2), S_RGB(defn->fillcolour4,2));
     i += strlen(out+i);
    }
-  else if (defn->USEfillcolour)           { sprintf(out+i, "fillcolour %s " , *(char **)FetchSettingName(defn->fillcolour , SW_COLOUR_INT, (void *)SW_COLOUR_STR, sizeof(char *))); i += strlen(out+i); }
+  else if (defn->USEfillcolour)           { sprintf(out+i, "fillcolour %s " , *(char **)FetchSettingName(&context->errcontext,defn->fillcolour , SW_COLOUR_INT, (void *)SW_COLOUR_STR, sizeof(char *))); i += strlen(out+i); }
   if      (defn->STRlinetype!=NULL)       { sprintf(out+i, "linetype %s "            , defn->STRlinetype);                                                                          i += strlen(out+i); }
   else if (defn->USElinetype)             { sprintf(out+i, "linetype %d "            , defn->linetype);                                                                             i += strlen(out+i); }
   if      (defn->STRlinewidth!=NULL)      { sprintf(out+i, "linewidth %s "           , defn->STRlinewidth);                                                                         i += strlen(out+i); }
@@ -245,7 +247,7 @@ void ppl_withWordsPrint(const withWords *defn, char *out)
   return;
  }
 
-void ppl_withWordsDestroy(withWords *a)
+void ppl_withWordsDestroy(ppl_context *context, withWords *a)
  {
   if (!a->malloced) return;
   if (a->STRlinetype       != NULL) { free(a->STRlinetype      ); a->STRlinetype       = NULL; }
@@ -264,7 +266,7 @@ void ppl_withWordsDestroy(withWords *a)
   return;
  }
 
-void ppl_withWordsCpy(withWords *out, const withWords *in)
+void ppl_withWordsCpy(ppl_context *context, withWords *out, const withWords *in)
  {
   void *tmp;
   *out = *in;

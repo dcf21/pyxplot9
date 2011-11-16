@@ -26,8 +26,9 @@
 #include <ctype.h>
 
 #include "coreUtils/errorReport.h"
-
 #include "stringTools/asciidouble.h"
+#include "userspace/context.h"
+#include "expressions/expCompile.h"
 
 #include "pplConstants.h"
 
@@ -105,7 +106,7 @@
   scanpos++; \
  }
 
-void ppl_expTokenise(char *in, int *end, int dollarAllowed, int collectCommas, int isDict, unsigned char *out, int *outlen, int *errPos, char *errText)
+void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed, int collectCommas, int isDict, unsigned char *out, int *outlen, int *errPos, char *errText)
  {
   const char *allowed[] = {"BEGHILMNO","CJKQU","BDGHILMNO","JKQU","JKQRU","JKU","FJKPQRSU","G","BEGHLMNO","BEGHILMNO","BEGHILMNO","JKU","JKQRU","JKQRU","ELT","JKPQRU","JKPQSU","G","BEGHILMNO","JKU",""};
   int nCommaItems=1, nDictItems=0, tertiaryDepth=0;
@@ -151,7 +152,7 @@ void ppl_expTokenise(char *in, int *end, int dollarAllowed, int collectCommas, i
           n=outpos-l+1;
           if ((in[k]!=')')||(trialstate=='E'))
            {
-            ppl_expTokenise(in+k,&m,dollarAllowed,(trialstate!='E'),0,out+l,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
+            ppl_expTokenise(context,in+k,&m,dollarAllowed,(trialstate!='E'),0,out+l,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
             if (*errPos>=0) { *errPos+=k; return; }
            }
           NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
@@ -258,7 +259,7 @@ void ppl_expTokenise(char *in, int *end, int dollarAllowed, int collectCommas, i
           n=outpos-l+1;
           if (in[k]!=']')
            {
-            ppl_expTokenise(in+k,&m,dollarAllowed,1,0,out+l,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
+            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,0,out+l,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
             if (*errPos>=0) { *errPos+=k; return; }
            }
           NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
@@ -278,7 +279,7 @@ void ppl_expTokenise(char *in, int *end, int dollarAllowed, int collectCommas, i
           n=outpos-l+1;
           if (in[k]!='}')
            {
-            ppl_expTokenise(in+k,&m,dollarAllowed,1,1,out+l,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
+            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,1,out+l,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
             if (*errPos>=0) { *errPos+=k; return; }
            }
           NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
@@ -366,7 +367,7 @@ void ppl_expTokenise(char *in, int *end, int dollarAllowed, int collectCommas, i
 
 // ppl_tokenPrint() -- a debugging routine to display tokenised data
 
-void ppl_tokenPrint(char *in, unsigned char *tdat, int len)
+void ppl_tokenPrint(ppl_context *context, char *in, unsigned char *tdat, int len)
  {
   int i,j;
   for (i=0    ; i<len; i++     ) printf("  %c" ,in[i]);        printf("\n");
@@ -409,7 +410,7 @@ void ppl_tokenPrint(char *in, unsigned char *tdat, int len)
    } \
  }
 
-void ppl_expCompile(char *in, int *end, int dollarAllowed, void *out, int *outlen, void *tmp, int tmplen, int *errPos, char *errText)
+void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed, void *out, int *outlen, void *tmp, int tmplen, int *errPos, char *errText)
  {
   unsigned char *stack = ( (unsigned char *)tmp ) + tmplen - 1;
   unsigned char *tdata =   (unsigned char *)tmp;
@@ -420,7 +421,7 @@ void ppl_expCompile(char *in, int *end, int dollarAllowed, void *out, int *outle
   int outpos = 0;
 
   // First tokenise expression
-  ppl_expTokenise(in, end, dollarAllowed, 0, 0, tdata, &tlen, errPos, errText);
+  ppl_expTokenise(context, in, end, dollarAllowed, 0, 0, tdata, &tlen, errPos, errText);
   if (*errPos >= 0) return;
   stacklen = tmplen - tlen;
 
@@ -577,7 +578,7 @@ void ppl_expCompile(char *in, int *end, int dollarAllowed, void *out, int *outle
 
 // Debugging routine to produce a textual representation of reverse Polish bytecode
 
-void ppl_reversePolishPrint(void *in, char *out)
+void ppl_reversePolishPrint(ppl_context *context, void *in, char *out)
  {
   int i=0, j=0;
   char op[32],optype[32],arg[1024];
@@ -726,8 +727,8 @@ void ppl_reversePolishPrint(void *in, char *out)
         o=0;
         break;
      }
-    sprintf(ppl_tempErrStr,"%10s %10s %s",op,optype,arg);
-    ppl_report(ppl_tempErrStr);
+    sprintf(context->errcontext.tempErrStr,"%10s %10s %s",op,optype,arg);
+    ppl_report(&context->errcontext, context->errcontext.tempErrStr);
     if (o==0) break;
    }
   out[i]='\0'; // null terminate string

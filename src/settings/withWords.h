@@ -22,6 +22,8 @@
 #ifndef _WITHWORDS_H
 #define _WITHWORDS_H 1
 
+#include "userspace/context.h"
+
 typedef struct withWords {
  int    colour, fillcolour, linespoints, linetype, pointtype, style; // Core style settings which can be placed after the 'with' modifier
  double linewidth, pointlinewidth, pointsize;
@@ -35,12 +37,12 @@ typedef struct withWords {
  unsigned char malloced; // Indicates whether we need to free strings
  } withWords;
 
-void  ppl_withWordsZero    (withWords *a, const unsigned char malloced);
-int   ppl_withWordsCmp     (const withWords *a, const withWords *b);
-int   ppl_withWordsCmp_zero(const withWords *a);
-void  ppl_withWordsMerge   (withWords *out, const withWords *a, const withWords *b, const withWords *c, const withWords *d, const withWords *e, const unsigned char ExpandStyles);
-void  ppl_withWordsPrint   (const withWords *defn, char *out);
-void  ppl_withWordsDestroy (withWords *a);
-void  ppl_withWordsCpy     (withWords *out, const withWords *in);
+void  ppl_withWordsZero    (ppl_context *context, withWords *a, const unsigned char malloced);
+int   ppl_withWordsCmp     (ppl_context *context, const withWords *a, const withWords *b);
+int   ppl_withWordsCmp_zero(ppl_context *context, const withWords *a);
+void  ppl_withWordsMerge   (ppl_context *context, withWords *out, const withWords *a, const withWords *b, const withWords *c, const withWords *d, const withWords *e, const unsigned char ExpandStyles);
+void  ppl_withWordsPrint   (ppl_context *context, const withWords *defn, char *out);
+void  ppl_withWordsDestroy (ppl_context *context, withWords *a);
+void  ppl_withWordsCpy     (ppl_context *context, withWords *out, const withWords *in);
 
 #endif
