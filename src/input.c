@@ -254,7 +254,7 @@ int ppl_ProcessStatement(ppl_context *context, char *line)
   char errText[LSTR_LENGTH];
   unsigned char buff[65536], tmp[65536];
 
-  ppl_expCompile(context,line,&end,0,(void *)buff,&bufflen,(void *)tmp,tmplen,&errPos,errText);
+  ppl_expCompile(context,line,&end,1,(void *)buff,&bufflen,(void *)tmp,tmplen,&errPos,errText);
   if (errPos>=0)
    {
     printf("%d:%s\n",errPos,errText);

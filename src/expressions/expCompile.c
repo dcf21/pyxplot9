@@ -53,29 +53,31 @@
 // Q -- an array dereference []
 // R -- the dot operator
 // S -- assignment operator
-// T -- parameter name
+// T -- dereference name
 // U -- end of expression
+// V -- parameter name after $
 
-// A can be followed by .B..E.GHI..LMNO......
-// B can be followed by ..C......JK.....Q...U
-// C can be followed by .B.D..GHI..LMNO......
-// D can be followed by .........JK.....Q...U
-// E can be followed by .........JK.....QR..U
-// F can be followed by .........JK.........U
-// G can be followed by .....F...JK....PQRS.U
-// H can be followed by ......G..............
-// I can be followed by .B..E.GH...LMNO......
-// J can be followed by .B..E.GHI..LMNO......
-// K can be followed by .B..E.GHI..LMNO......
-// L can be followed by .........JK.........U
-// M can be followed by .........JK.....QR..U
-// N can be followed by .........JK.....QR..U
-// O can be followed by ....E......L.......T.
-// P can be followed by .........JK....PQR..U
-// Q can be followed by .........JK....PQ.S.U
-// R can be followed by ......G..............
-// S can be followed by .B..E.GHI..LMNO......
-// T can be followed by .........JK.........U
+// A can be followed by .B..E.GHI..LMNO.......
+// B can be followed by ..C......JK.....Q...U.
+// C can be followed by .B.D..GHI..LMNO.......
+// D can be followed by .........JK.....Q...U.
+// E can be followed by .........JK.....QR..U.
+// F can be followed by .........JK.........U.
+// G can be followed by .....F...JK....PQRS.U.
+// H can be followed by ......G...............
+// I can be followed by .B..E.GH...LMNO.......
+// J can be followed by .B..E.GHI..LMNO.......
+// K can be followed by .B..E.GHI..LMNO.......
+// L can be followed by .........JK.........U.
+// M can be followed by .........JK.....QR..U.
+// N can be followed by .........JK.....QR..U.
+// O can be followed by ....E......L.........V
+// P can be followed by .........JK....PQR..U.
+// Q can be followed by .........JK....PQ.S.U.
+// R can be followed by ...................T..
+// S can be followed by .B..E.GHI..LMNO.......
+// T can be followed by .....F...JK....PQRS.U.
+// V can be followed by .........JK.........U.
 
 #define MARKUP_MATCH(A) (strncmp(in+scanpos,A,strlen(A))==0)
 
@@ -108,7 +110,7 @@
 
 void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed, int collectCommas, int isDict, unsigned char *out, int *outlen, int *errPos, char *errText)
  {
-  const char *allowed[] = {"BEGHILMNO","CJKQU","BDGHILMNO","JKQU","JKQRU","JKU","FJKPQRSU","G","BEGHLMNO","BEGHILMNO","BEGHILMNO","JKU","JKQRU","JKQRU","ELT","JKPQRU","JKPQSU","G","BEGHILMNO","JKU",""};
+  const char *allowed[] = {"BEGHILMNO","CJKQU","BDGHILMNO","JKQU","JKQRU","JKU","FJKPQRSU","G","BEGHLMNO","BEGHILMNO","BEGHILMNO","JKU","JKQRU","JKQRU","ELV","JKPQRU","JKPQSU","T","BEGHILMNO","FJKPQRSU","","JKU"};
   int nCommaItems=1, nDictItems=0, tertiaryDepth=0;
   char state='A', oldstate, trialstate;
   int scanpos=0, outpos=0, trialpos;
@@ -142,13 +144,13 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
        {
         if (MARKUP_MATCH("("))
          {
-          int j,k,l,m,n;
+          int j,k,l,m,n=1;
           ppl_strBracketMatch(in+scanpos,'(',')',NULL,NULL,&j,0); // Search for a ) to match the (
           if (j<=0) { *errPos = scanpos; strcpy(errText, "Syntax Error: Mismatched ( )"); *end=-1; *outlen=0; return; }
           NEWSTATE(1,0,0); // Record the one character opening bracket
-          while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; } // Sop up whitespace
+          while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; n++; } // Sop up whitespace
           k=scanpos; l=outpos;
-          NEWSTATE(j-1,0,0); // Fast-forward to closing bracket
+          NEWSTATE(j-n,0,0); // Fast-forward to closing bracket
           n=outpos-l+1;
           if ((in[k]!=')')||(trialstate=='E'))
            {
@@ -169,7 +171,8 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
         else if (MARKUP_MATCH("++")) { NEWSTATE(2,0xA4,3); }
        }
       else if ( (trialstate=='G') ||  // a variable name
-                (trialstate=='T') )   // a parameter name
+                (trialstate=='T') ||  // a dereference name
+                (trialstate=='V')   ) // a $parameter name
        {
         if (isalpha(in[scanpos]))
          {
@@ -316,8 +319,6 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
 
   if (state=='U') // We reached state U... end of expression
    {
-    int i;
-    for (i=0; i<outpos; i+=3) if (out[i]=='O') out[i]='G'; // Remove dollars and merge into variable names
     *errPos = -1;
     *errText='\0';
     out[outpos]=0;
@@ -379,23 +380,34 @@ void ppl_tokenPrint(ppl_context *context, char *in, unsigned char *tdat, int len
 
 // ppl_expCompile -- compile a textual expression into reverse Polish bytecode
 
+#define GET_POINTER \
+ { \
+  if (lastoutpos<0) { *errPos=ipos; strcpy(errText, "Internal error: Could not find variable name preceding assignment operator (1)."); *end=-1; return; } \
+  if      (*(unsigned char *)(out+lastoutpos)==3) *(unsigned char *)(out+lastoutpos)=4; \
+  else if (*(unsigned char *)(out+lastoutpos)==5) *(unsigned char *)(out+lastoutpos)=6; \
+  else if (*(unsigned char *)(out+lastoutpos)==7) *(unsigned char *)(out+lastoutpos)=16; \
+  else { printf("%d %d\n",lastoutpos,*(unsigned char *)(out+lastoutpos)); *errPos=ipos; strcpy(errText, "Internal error: Could not find variable name preceding assignment operator (2)."); *end=-1; return; } \
+ }
+
 #define POP_STACK \
  { \
   char opType; \
-  while (opType = (stackpos>2) ? *(stack-stackpos+3) : '!'  ,  (opType=='o')||(opType=='a')) /* while the stack is not empty and has an operator at the top */ \
+  while (opType = (stackpos>2) ? *(stack-stackpos+3) : '!'  ,  (opType=='o')||(opType=='a')||(opType=='$')) /* while the stack is not empty and has an operator at the top */ \
    { \
     int stackprec = *(stack-stackpos+1); \
     if ( ((!rightAssoc)&&(precedence>=stackprec)) || ((rightAssoc)&&(precedence>stackprec)) ) /* pop operators with higher precedence from stack */ \
      { \
       unsigned char stacko   = *(stack-stackpos+2); /* operator number of the stack object */ \
       unsigned char bytecode = 0; \
-      if      (opType=='a' ) bytecode = 12; /* assignment operator */ \
-      else if (stacko==0x40) bytecode = 14; /* string subst operator */ \
-      else if (stacko==0xA3) bytecode = 13; /* ++ lval operator */ \
-      else if (stacko==0xA4) bytecode = 13; /* -- lval operator */ \
-      else                   bytecode = 11; /* other operator */ \
+      if      (opType=='a' )   bytecode = 12;                /* assignment operator */ \
+      else if (opType=='$' )   bytecode = 15;                /* dollar operator */ \
+      else if (stacko==0x40)   bytecode = 14;                /* string subst operator */ \
+      else if (stacko==0xA3) { bytecode = 13; GET_POINTER; } /* ++ lval operator */ \
+      else if (stacko==0xA4) { bytecode = 13; GET_POINTER; } /* -- lval operator */ \
+      else                     bytecode = 11;                /* other operator */ \
       if ((stacko!=0xFD)&&(stacko!=0x5F)) /* null operations get ignored (e.g. commas that collect items, and ? waiting for :s) */ \
        { \
+        lastoutpos = outpos; \
         *(unsigned char *)(out+outpos++) = bytecode; \
         *(unsigned char *)(out+outpos++) = stacko; \
         if ((opType=='o')&&(stacko==0x40)) \
@@ -418,7 +430,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
   int stacklen;
   int tpos, ipos;
   int tlen = tmplen;
-  int outpos = 0;
+  int outpos = 0, lastoutpos = -1;
 
   // First tokenise expression
   ppl_expTokenise(context, in, end, dollarAllowed, 0, 0, tdata, &tlen, errPos, errText);
@@ -426,13 +438,14 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
   stacklen = tmplen - tlen;
 
   // The stacking-yard algorithm
-  for (tpos=ipos=0; tpos<tlen; )
+  for ( tpos=ipos=0; tpos<tlen; )
    {
     char o = tdata[tpos]+'@'; // Get tokenised markup state code
-    if (o=='C') // Process a string literal
+    if (o=='B') // Process a string literal
      {
       int  i;
-      char quoteType=in[tpos];
+      char quoteType=in[ipos];
+      lastoutpos = outpos;
       *(unsigned char *)(out+outpos++) = 2; // bytecode op 2
       for ( i=ipos+1 ; ((in[i]!=quoteType) || (in[i-1]=='\\')) ; i++ )
        {
@@ -447,6 +460,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       unsigned char rightAssoc = (tdata[tpos+1] & 0x80) != 0;
       unsigned char precedence = tdata[tpos+2];
       POP_STACK;
+      if (o=='S') { GET_POINTER; } // Turn variable lookup into pointer lookup now, because assignment operators are binary and operand is guaranteed to be the last thing on the stack
       *(stack-stackpos-0) = (o=='S')?'a':'o'; // push operator onto stack
       *(stack-stackpos-1) = tdata[tpos+1];
       *(stack-stackpos-2) = tdata[tpos+2];
@@ -472,12 +486,14 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
          {
           if ( (stackpos<3) || (*(stack-stackpos+2)!=0x40)) { *errPos=ipos; strcpy(errText, "Internal error: Could not match string substituion () to a %."); *end=-1; return; }
           stackpos-=3; // pop stack
+          lastoutpos = outpos;
           *(unsigned char *)(out+outpos++) = 14; // bytecode 14 -- string substitution operator
           *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of string substitutions; stored with closing bracket in bytecode is number of collected ,-separated items
           outpos += sizeof(int);
          }
         else if (o=='P') // make function call
          {
+          lastoutpos = outpos;
           *(unsigned char *)(out+outpos++) = 10; // bytecode 10 -- function call
           *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of function arguments; stored with closing bracket in bytecode is number of collected ,-separated items
           outpos += sizeof(int);
@@ -489,13 +505,18 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       unsigned char rightAssoc = (tdata[tpos+1] & 0x80) != 0;
       unsigned char precedence = tdata[tpos+2];
       POP_STACK;
+      GET_POINTER;
+      lastoutpos = outpos;
       *(unsigned char *)(out+outpos++) = 13;
       *(unsigned char *)(out+outpos++) = tdata[tpos+1];
      }
-    else if ( (o=='G') || (o=='T') ) // a variable name or field dereferenced with the . operator
+    else if ( (o=='G') || (o=='T') || (o=='V') ) // a variable name or field dereferenced with the . operator
      {
       int  i;
-      *(unsigned char *)(out+outpos++) = 3;
+      lastoutpos = outpos;
+      if      (o=='G') *(unsigned char *)(out+outpos++) = 3; // foo -- op 3: variable lookup "foo"
+      else if (o=='T') *(unsigned char *)(out+outpos++) = 5; // foo.bar -- op 5: dereference "bar"
+      else             *(unsigned char *)(out+outpos++) = 2; // $foo -- push "foo" onto stack as a string constant
       for ( i=ipos ; (isalnum(in[i])) ; i++ )
        {
         if (in[i]=='\0') { *errPos=ipos; strcpy(errText, "Internal error: Unexpected end of variable name."); *end=-1; return; }
@@ -505,6 +526,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
      }
     else if (o=='L') // a numeric literal
      {
+      lastoutpos = outpos;
       *(unsigned char *)(out+outpos++) = 1;
       *(double *)(out+outpos) = ppl_getFloat(in+ipos,NULL);
       outpos += sizeof(double);
@@ -525,6 +547,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
         POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
         if ( (stackpos<3) || (*(stack-stackpos+3)!='[') ) { *errPos=ipos; strcpy(errText, "Internal error: Could not match ] to an [."); *end=-1; return; }
         stackpos-=3; // pop bracket
+        lastoutpos = outpos;
         *(unsigned char *)(out+outpos++) = 9; // bytecode 9 -- make list
         *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of list items; stored with closing bracket in bytecode is number of collected ,-separated items
         outpos += sizeof(int);
@@ -546,15 +569,34 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
         POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
         if ( (stackpos<3) || (*(stack-stackpos+3)!='{') ) { *errPos=ipos; strcpy(errText, "Internal error: Could not match } to an {."); *end=-1; return; }
         stackpos-=3; // pop bracket
+        lastoutpos = outpos;
         *(unsigned char *)(out+outpos++) = 8; // bytecode 8 -- make dict
         *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of list items; stored with closing bracket in bytecode is number of collected ,-separated items
         outpos += sizeof(int);
        }
      }
+    else if (o=='O') // a dollar operator
+     {
+      *(stack-stackpos-0) = '$'; // push dollar onto stack
+      *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
+      stackpos+=3;
+     }
+    else if (o=='R') // a dot dereference
+     {
+      // Nop -- the work is done in the following T-state parameter.
+     }
     else if (o=='Q') // array dereference or slice
      {
      }
-    while ((tpos<tlen) && (tdata[tpos]+'@' == o)) { tpos+=3; ipos++; }
+    while ((tpos<tlen) && (tdata[tpos]+'@' == o))
+     {
+      tpos+=3; ipos++;
+      if (tpos>=tlen) break;
+      if ((o=='D') && (in[ipos]==')')) break; // Empty list ( ) of function arguments
+      if ((o=='P') && (in[ipos]==')')) break; // Empty list ( ) of function arguments
+      if ((o=='M') && (in[ipos]==']')) break; // Empty list [ ] is two tokens
+      if ((o=='N') && (in[ipos]=='}')) break; // Empty dictionary { } is two tokens
+     }
    }
 
   // Clean up stack
@@ -571,6 +613,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
    }
 
   // Store final return
+  lastoutpos = outpos;
   *(unsigned char *)(out+outpos++) = 0;
   *outlen = outpos;
   return;
@@ -632,7 +675,13 @@ void ppl_reversePolishPrint(ppl_context *context, void *in, char *out)
         break;
       case 7:
         strcpy (op,     "slice");
-        strcpy (optype, "");
+        strcpy (optype, "value");
+        sprintf(arg,    "[%d:%d]", *(int *)(in+j+1), *(int *)(in+j+1+sizeof(int)));
+        j+=1+2*sizeof(int);
+        break;
+      case 16:
+        strcpy (op,     "slice");
+        strcpy (optype, "pointer");
         sprintf(arg,    "[%d:%d]", *(int *)(in+j+1), *(int *)(in+j+1+sizeof(int)));
         j+=1+2*sizeof(int);
         break;
@@ -710,15 +759,23 @@ void ppl_reversePolishPrint(ppl_context *context, void *in, char *out)
       case 13:
         strcpy (op,     "op");
         strcpy (optype, "unary");
-        if ((t==0xA1)||(t==0xA3)) { strcpy (arg, "--"); }
-        else                      { strcpy (arg, "++"); }
+        if      (t==0xA1) { strcpy (arg, "-- (post-eval)"); }
+        else if (t==0xA2) { strcpy (arg, "++ (post-eval)"); }
+        else if (t==0xA3) { strcpy (arg, "-- (pre-eval)"); }
+        else              { strcpy (arg, "++ (pre-eval)"); }
         j+=2;
         break;
       case 14:
         strcpy (op,     "op");
         strcpy (optype, "binary");
-        sprintf(arg,    "subst (%d items)", *(int *)(in+j+1));
+        sprintf(arg,    "string subst (%d items)", *(int *)(in+j+1));
         j+=1+sizeof(int); 
+        break;
+      case 15:
+        strcpy (op,     "op");
+        strcpy (optype, "unary");
+        strcpy (arg,    "dollar -- column lookup");
+        j+=2;
         break;
       default:
         strcpy (op,     "???");
