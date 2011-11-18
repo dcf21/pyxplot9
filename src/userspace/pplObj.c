@@ -32,7 +32,8 @@
 #include "userspace/pplObj.h"
 #include "userspace/pplObjUnits.h"
 
-char *pplObjTypeNames[] = {"number","string","boolean","date","color","dictionary","list","vector","matrix","file handle","function","type","null","exception",NULL};
+// Items with ! should never be displayed because they are internal markers
+char *pplObjTypeNames[] = {"number","string","boolean","date","color","dictionary","module","list","vector","matrix","file handle","function","type","null","exception","!global","!zombie",NULL};
 
 void *pplObjZero(pplObj *in, unsigned char amMalloced)
  {
@@ -41,7 +42,7 @@ void *pplObjZero(pplObj *in, unsigned char amMalloced)
   in->dimensionless = 1;
   in->modified = in->FlagComplex = in->TempType = 0;
   in->objType = PPLOBJ_NUM;
-  in->auxil = in->objCustomType = NULL;
+  in->auxil = in->objCustomType = in->self_lval = NULL;
   in->auxilMalloced = 0;
   in->auxilLen = 0;
   in->amMalloced = amMalloced;
@@ -56,10 +57,10 @@ void *pplObjNullStr(pplObj *in, unsigned char amMalloced)
   in->dimensionless = 1;
   in->modified = in->FlagComplex = in->TempType = 0;
   in->objType = PPLOBJ_STR;
-  in->auxil = "";
+  in->auxil = (void *)"";
   in->auxilMalloced = 0;
   in->auxilLen = 0;
-  in->objCustomType = NULL;
+  in->objCustomType = in->self_lval = NULL;
   in->amMalloced = amMalloced;
   for (i=0; i<UNITS_MAX_BASEUNITS; i++) in->exponent[i]=0;
   return in;
@@ -76,6 +77,7 @@ pplObj *pplObjCpy(pplObj *in, unsigned char useMalloc)
   if (out==NULL) return out;
 
   memcpy(out, in, sizeof(pplObj));
+  out->self_lval  = out;
   out->amMalloced = useMalloc;
 
   switch(in->objType)

@@ -24,15 +24,32 @@
 
 #include "stringTools/strConstants.h"
 
+#include "coreUtils/dict.h"
+
+#include "pplConstants.h"
+
 typedef struct ppl_context_struc
  {
+
+  // Shell status
   int       willBeInteractive;
   char     *inputLineBuffer;
   char     *inputLineAddBuffer;
   int       shellExiting;
   long int  historyNLinesWritten;
+
+  // CSP status
   char      pplcsp_ghostView_fname[FNAME_LENGTH];
+
+  // Code position to report when ppl_error() is called
   pplerr_context errcontext;
+
+  // Buffers for parsing and evaluating expressions
+  unsigned char tokenBuff[ALGEBRA_MAXLEN];
+
+  // Namespace hierarchy
+  dict *namespaces[CONTEXT_DEPTH];
+
  } ppl_context;
 
 ppl_context *ppl_contextInit();

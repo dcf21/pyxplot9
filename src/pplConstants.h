@@ -22,23 +22,27 @@
 #ifndef _PPLCONSTANTS_H
 #define _PPLCONSTANTS_H 1
 
-#define ALGEBRA_MAXLENGTH 65536
+// Context buffer lengths
+
+#define ALGEBRA_MAXLEN    65536 /* Size of buffer for tokenising input expressions */
+#define CONTEXT_DEPTH       256 /* Maximum number of stacked local namespaces */
+
+#define DUMMYVAR_MAXLEN      16 /* Maximum number of characters in a dummy variable name for integration / differentiation */
+
+#define MAX_RECURSION_DEPTH 128 /* The maximum recursion depth */
+
+// Plot related structure sizes
 
 #define MULTIPLOT_MAXINDEX 32768
+#define PALETTE_LENGTH       512
+#define MAX_PLOTSTYLES       128 // The maximum number of plot styles (e.g. plot sin(x) with style 23) which are be defined. Similar to 'with linestyle 23' in gnuplot
+#define MAX_AXES             128
+#define MAX_CONTOURS         128 // Maximum number of contours in 'set contour'
 
-#define PALETTE_LENGTH 512
+// Command-specific options
 
-#define MAX_PLOTSTYLES 128 // The maximum number of plot styles (e.g. plot sin(x) with style 23) which are be defined. Similar to 'with linestyle 23' in gnuplot
+#define EQNSOLVE_MAXDIMS      16 // Maximum number of via variables when equation solving / fitting
 
-#define MAX_AXES 128
-
-#define MAX_RECURSION_DEPTH  50 // The maximum recursion depth
-
-#define DUMMYVAR_MAXLEN 16 // Maximum number of characters in a dummy variable name for integration / differentiation
-
-#define EQNSOLVE_MAXDIMS 16 // Maximum number of via variables when equation solving / fitting
-
-#define MAX_CONTOURS 128 // Maximum number of contours in 'set contour'
 
 #endif
 

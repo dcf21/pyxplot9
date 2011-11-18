@@ -250,11 +250,11 @@ LOOP_END
 
 int ppl_ProcessStatement(ppl_context *context, char *line)
  {
-  int end, errPos, bufflen=65536, tmplen=65536;
+  int end, errPos, bufflen=65536;
   char errText[LSTR_LENGTH];
-  unsigned char buff[65536], tmp[65536];
+  unsigned char buff[65536];
 
-  ppl_expCompile(context,line,&end,1,(void *)buff,&bufflen,(void *)tmp,tmplen,&errPos,errText);
+  ppl_expCompile(context,line,&end,1,(void *)buff,&bufflen,&errPos,errText);
   if (errPos>=0)
    {
     printf("%d:%s\n",errPos,errText);
@@ -262,7 +262,7 @@ int ppl_ProcessStatement(ppl_context *context, char *line)
    }
 
   // Print tokens
-  ppl_tokenPrint(context, line, tmp, end);
+  ppl_tokenPrint(context, line, end);
 
   // Print bytecode
   ppl_reversePolishPrint(context, buff, context->errcontext.tempErrStr);

@@ -24,9 +24,9 @@
 
 #include "userspace/context.h"
 
-void ppl_expTokenise       (ppl_context *context, char *in, int *end, int dollarAllowed, int collectCommas, int isDict, unsigned char *out, int *outlen, int *errPos, char *errText);
-void ppl_tokenPrint        (ppl_context *context, char *in, unsigned char *tdat, int len);
-void ppl_expCompile        (ppl_context *context, char *in, int *end, int dollarAllowed, void *out, int *outlen, void *tmp, int tmplen, int *errPos, char *errText);
+void ppl_expTokenise       (ppl_context *context, char *in, int *end, int dollarAllowed, int collectCommas, int isDict, int outOffset, int *outlen, int *errPos, char *errText);
+void ppl_tokenPrint        (ppl_context *context, char *in, int len);
+void ppl_expCompile        (ppl_context *context, char *in, int *end, int dollarAllowed, void *out, int *outlen, int *errPos, char *errText);
 void ppl_reversePolishPrint(ppl_context *context, void *in, char *out);
 
 #endif

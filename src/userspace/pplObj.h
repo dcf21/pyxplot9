@@ -25,21 +25,24 @@
 #ifndef _PPLOBJ_H
 #define _PPLOBJ_H 1
 
-#define PPLOBJ_NUM   0
-#define PPLOBJ_STR   1
-#define PPLOBJ_BOOL  2
-#define PPLOBJ_DATE  3
-#define PPLOBJ_COL   4
-#define PPLOBJ_DICT  5
-#define PPLOBJ_LIST  6
-#define PPLOBJ_VEC   7
-#define PPLOBJ_MAT   8
-#define PPLOBJ_FILE  9
-#define PPLOBJ_FUNC 10
-#define PPLOBJ_TYPE 11
-#define PPLOBJ_NULL 12
-#define PPLOBJ_EXC  13
-#define PPLOBJ_USER 14
+#define PPLOBJ_NUM   0 /* numeric value */
+#define PPLOBJ_STR   1 /* string value */
+#define PPLOBJ_BOOL  2 /* boolean */
+#define PPLOBJ_DATE  3 /* date/time */
+#define PPLOBJ_COL   4 /* colour */
+#define PPLOBJ_DICT  5 /* dictionary */
+#define PPLOBJ_MOD   6 /* module */
+#define PPLOBJ_LIST  7 /* list */
+#define PPLOBJ_VEC   8 /* vector (list of numerical values with common units) */
+#define PPLOBJ_MAT   9 /* matrix */
+#define PPLOBJ_FILE 10 /* file handle */
+#define PPLOBJ_FUNC 11 /* function */
+#define PPLOBJ_TYPE 12 /* data type */
+#define PPLOBJ_NULL 13 /* null value */
+#define PPLOBJ_EXC  14 /* exception type */
+#define PPLOBJ_GLOB 15 /* global variable marker */
+#define PPLOBJ_ZOM  16 /* zombie */
+#define PPLOBJ_USER 17 /* user-defined datatype */
 
 #ifndef _PPLOBJ_C
 extern char *pplObjTypeNames[];
@@ -54,6 +57,7 @@ typedef struct pplObj
   struct pplObj *objCustomType;
   void          *auxil;
   double         exponent[UNITS_MAX_BASEUNITS];
+  struct pplObj *self_lval;
  } pplObj;
 
 typedef struct pplFile { int iNodeCount; FILE   *file; int open; } pplFile;
