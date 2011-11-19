@@ -30,6 +30,7 @@
 #include "coreUtils/dict.h"
 
 #include "userspace/pplObj.h"
+#include "userspace/pplObjFunc.h"
 #include "userspace/pplObjUnits.h"
 
 // Items with ! should never be displayed because they are internal markers

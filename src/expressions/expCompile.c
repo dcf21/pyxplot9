@@ -108,7 +108,7 @@
   scanpos++; \
  }
 
-void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed, int collectCommas, int isDict, int outOffset, int *outlen, int *errPos, char *errText)
+void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed, int allowCommaOperator, int collectCommas, int isDict, int outOffset, int *outlen, int *errPos, char *errText)
  {
   const char    *allowed[] = {"BEGHILMNO","CJKQU","BDGHILMNO","JKQU","JKQRU","JKU","FJKPQRSU","G","BEGHLMNO","BEGHILMNO","BEGHILMNO","JKU","JKQRU","JKQRU","ELV","JKPQRU","JKPQSU","T","BEGHILMNO","FJKPQRSU","","JKU"};
   int            nCommaItems=1, nDictItems=0, tertiaryDepth=0;
@@ -151,12 +151,13 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
           if (j<=0) { *errPos = scanpos; strcpy(errText, "Syntax Error: Mismatched ( )"); *end=-1; *outlen=0; return; }
           NEWSTATE(1,0,0); // Record the one character opening bracket
           while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; n++; } // Sop up whitespace
-          k=scanpos; l=outpos;
-          NEWSTATE(j-n,0,0); // Fast-forward to closing bracket
+          k=scanpos; l=outpos; j-=n;
+          NEWSTATE(j,0,0); // Fast-forward to closing bracket
           if ((in[k]!=')')||(trialstate=='E'))
            {
-            ppl_expTokenise(context,in+k,&m,dollarAllowed,(trialstate!='E'),0,l+outOffset,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
+            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,(trialstate!='E'),0,l+outOffset,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
             if (*errPos>=0) { *errPos+=k; return; }
+            if (m!=j) { *errPos = m+k; strcpy(errText, "Syntax Error: Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
            }
           NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
          }
@@ -212,7 +213,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
         else if (MARKUP_MATCH("&"  )) { NEWSTATE(1,0x57,11); }
         else if (MARKUP_MATCH("^"  )) { NEWSTATE(1,0x58,12); }
         else if (MARKUP_MATCH("|"  )) { NEWSTATE(1,0x59,13); }
-        else if (MARKUP_MATCH(","  ))
+        else if((MARKUP_MATCH(","  ) && (collectCommas || allowCommaOperator || (tertiaryDepth>0))))
          {
           if ((!collectCommas)||(tertiaryDepth>0)) { NEWSTATE(1,0x5C,18); }
           else
@@ -237,9 +238,11 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
            }
           else
            {
-            if (tertiaryDepth<=0) { *errPos = scanpos; strcpy(errText, "Syntax Error: No preceding ? to match with :"); *end=-1; *outlen=0; return; }
-            tertiaryDepth--;
-            NEWSTATE(1,0xFE,16);
+            if (tertiaryDepth>0)
+             {
+              tertiaryDepth--;
+              NEWSTATE(1,0xFE,16);
+             }
            }
          }
        }
@@ -253,17 +256,18 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
        {
         if (MARKUP_MATCH("["))
          {
-          int j,k,l,m,n;
+          int j,k,l,m,n=1;
           ppl_strBracketMatch(in+scanpos,'[',']',NULL,NULL,&j,0); // Search for a ] to match the [
           if (j<=0) { *errPos = scanpos; strcpy(errText, "Syntax Error: Mismatched [ ]"); *end=-1; *outlen=0; return; }
           NEWSTATE(1,0,0); // Record the one character opening bracket
-          while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; } // Sop up whitespace
-          k=scanpos; l=outpos;
-          NEWSTATE(j-1,0,0); // Fast-forward to closing bracket
+          while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; n++; } // Sop up whitespace
+          k=scanpos; l=outpos; j-=n;
+          NEWSTATE(j,0,0); // Fast-forward to closing bracket
           if (in[k]!=']')
            {
-            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,0,l+outOffset,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
+            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,1,0,l+outOffset,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
             if (*errPos>=0) { *errPos+=k; return; }
+            if (m!=j) { *errPos = m+k; strcpy(errText, "Syntax Error: Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
            }
           NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
          }
@@ -272,17 +276,18 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
        {
         if (MARKUP_MATCH("{"))
          {
-          int j,k,l,m,n;
+          int j,k,l,m,n=1;
           ppl_strBracketMatch(in+scanpos,'{','}',NULL,NULL,&j,0); // Search for a } to match the {
           if (j<=0) { *errPos = scanpos; strcpy(errText, "Syntax Error: Mismatched { }"); *end=-1; *outlen=0; return; }
           NEWSTATE(1,0,0); // Record the one character opening bracket
-          while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; } // Sop up whitespace
-          k=scanpos; l=outpos;
-          NEWSTATE(j-1,0,0); // Fast-forward to closing bracket
+          while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; n++;} // Sop up whitespace
+          k=scanpos; l=outpos; j-=n;
+          NEWSTATE(j,0,0); // Fast-forward to closing bracket
           if (in[k]!='}')
            {
-            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,1,l+outOffset,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
+            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,1,1,l+outOffset,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
             if (*errPos>=0) { *errPos+=k; return; }
+            if (m!=j) { *errPos = m+k; strcpy(errText, "Syntax Error: Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
            }
           NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
          }
@@ -387,7 +392,12 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
   if (lastoutpos<0) { *errPos=ipos; strcpy(errText, "Internal error: Could not find variable name preceding assignment operator (1)."); *end=-1; return; } \
   if      (*(unsigned char *)(out+lastoutpos+sizeof(int))==3) *(unsigned char *)(out+lastoutpos+sizeof(int))=4; \
   else if (*(unsigned char *)(out+lastoutpos+sizeof(int))==5) *(unsigned char *)(out+lastoutpos+sizeof(int))=6; \
-  else if (*(unsigned char *)(out+lastoutpos+sizeof(int))==7) *(unsigned char *)(out+lastoutpos+sizeof(int))=16; \
+  else if (*(unsigned char *)(out+lastoutpos+sizeof(int))==7) \
+   { \
+    int f = (int)*(unsigned char *)(out+lastoutpos+sizeof(int)+1); \
+    if (!(f&1)) { *errPos=ipos; strcpy(errText, "Error: cannot apply an assignment operator to the output of a slice operator."); *end=-1; return; } \
+    *(unsigned char *)(out+lastoutpos+sizeof(int))=16; \
+   } \
  }
 
 #define POP_STACK \
@@ -439,7 +449,7 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
   *(int *)(out+lastoutpos) = outpos - lastoutpos; /* Write the length of the bytecode instruction we've just written */ \
  }
 
-void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed, void *out, int *outlen, int *errPos, char *errText)
+void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed, int allowCommaOperator, void *out, int *outlen, int *errPos, char *errText)
  {
   unsigned char *stack = context->tokenBuff + ALGEBRA_MAXLEN - 1;
   unsigned char *tdata = context->tokenBuff;
@@ -450,7 +460,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
   int            outpos = 0, lastoutpos = -1;
 
   // First tokenise expression
-  ppl_expTokenise(context, in, end, dollarAllowed, 0, 0, 0, &tlen, errPos, errText);
+  ppl_expTokenise(context, in, end, dollarAllowed, allowCommaOperator, 0, 0, 0, &tlen, errPos, errText);
   if (*errPos >= 0) return;
   stacklen = ALGEBRA_MAXLEN - tlen;
 
@@ -734,14 +744,20 @@ void ppl_reversePolishPrint(ppl_context *context, void *in, char *out)
         sprintf(arg,    "\"%s\"", (char *)(in+j));
         break;
       case 7:
+       {
+        int f = (int)*(unsigned char *)(in+j);
         strcpy (op,     "slice");
         strcpy (optype, "value");
-        sprintf(arg,    "[%d:%d]", *(int *)(in+j), *(int *)(in+j+sizeof(int)));
+        if       (f & 1)     sprintf(arg,    "[%d]"   , *(int *)(in+j+1));
+        else if ((f & 6)==6) sprintf(arg,    "[%d:%d]", *(int *)(in+j+1), *(int *)(in+j+1+sizeof(int)));
+        else if ((f & 6)==2) sprintf(arg,    "[:%d]"  , *(int *)(in+j+1+sizeof(int)));
+        else                 sprintf(arg,    "[%d:]"  , *(int *)(in+j+1));
         break;
+       }
       case 16:
         strcpy (op,     "slice");
         strcpy (optype, "pointer");
-        sprintf(arg,    "[%d:%d]", *(int *)(in+j), *(int *)(in+j+sizeof(int)));
+        sprintf(arg,    "[%d]"   , *(int *)(in+j+1));
         break;
       case 8:
         strcpy (op,     "make");

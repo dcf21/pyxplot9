@@ -60,10 +60,11 @@ typedef struct pplObj
   struct pplObj *self_lval;
  } pplObj;
 
+// Structures for describing files and types
 typedef struct pplFile { int iNodeCount; FILE   *file; int open; } pplFile;
 typedef struct pplType { int iNodeCount; pplObj *type; int id; } pplType;
-typedef struct pplFunc { int iNodeCount; } pplFunc;
 
+// Functions for acting on pplObjs
 void   *pplObjZero    (pplObj *in, unsigned char amMalloced);
 void   *pplObjNullStr (pplObj *in, unsigned char amMalloced);
 pplObj *pplObjCpy     (pplObj *in, unsigned char useMalloc);
