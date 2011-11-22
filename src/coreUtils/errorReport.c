@@ -28,7 +28,6 @@
 #include "stringTools/strConstants.h"
 
 #include "coreUtils/errorReport.h"
-#include "settings/settings.h"
 #include "settings/settingTypes.h"
 
 static char temp_stringA[LSTR_LENGTH], temp_stringB[LSTR_LENGTH], temp_stringC[LSTR_LENGTH], temp_stringD[LSTR_LENGTH], temp_stringE[LSTR_LENGTH];
@@ -45,7 +44,8 @@ void ppl_error(pplerr_context *context, int ErrType, int HighlightPos1, int High
   unsigned char ApplyHighlighting, reverse=0;
   int i=0, j;
 
-  ApplyHighlighting = ((pplset_session_default.colour == SW_ONOFF_ON) && (isatty(STDERR_FILENO) == 1));
+  if (msg==NULL) msg=context->tempErrStr;
+  ApplyHighlighting = ((context->session_default.colour == SW_ONOFF_ON) && (isatty(STDERR_FILENO) == 1));
   if (msg!=temp_stringA) { strcpy(temp_stringA, msg); msg = temp_stringA; }
 
   temp_stringB[i]='\0';
@@ -87,9 +87,9 @@ void ppl_error(pplerr_context *context, int ErrType, int HighlightPos1, int High
 
   // Print message in colour or monochrome
   if (ApplyHighlighting)
-   sprintf(temp_stringC, "%s%s%s\n", *(char **)FetchSettingName( context , pplset_session_default.colour_err , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)),
+   sprintf(temp_stringC, "%s%s%s\n", *(char **)FetchSettingName( context , context->session_default.colour_err , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)),
                                      temp_stringB,
-                                     *(char **)FetchSettingName( context , SW_TERMCOL_NOR                    , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)) );
+                                     *(char **)FetchSettingName( context , SW_TERMCOL_NOR                      , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)) );
   else
    sprintf(temp_stringC, "%s\n", temp_stringB);
   fputs(temp_stringC, stderr);
@@ -99,6 +99,7 @@ void ppl_error(pplerr_context *context, int ErrType, int HighlightPos1, int High
 void ppl_fatal(pplerr_context *context, char *file, int line, char *msg)
  {
   char introline[FNAME_LENGTH];
+  if (msg==NULL) msg=context->tempErrStr;
   if (msg!=temp_stringE) strcpy(temp_stringE, msg);
   sprintf(introline, "Fatal Error encountered in %s at line %d: %s", file, line, temp_stringE);
   ppl_error(context, ERR_PREFORMED, -1, -1, introline);
@@ -110,6 +111,7 @@ void ppl_warning(pplerr_context *context, int ErrType, char *msg)
  {
   int i=0;
 
+  if (msg==NULL) msg=context->tempErrStr;
   if (msg!=temp_stringA) { strcpy(temp_stringA, msg); msg = temp_stringA; }
 
   temp_stringB[i]='\0';
@@ -142,10 +144,10 @@ void ppl_warning(pplerr_context *context, int ErrType, char *msg)
   if (DEBUG) { ppl_log(context, temp_stringB); }
 
   // Print message in colour or monochrome
-  if ((pplset_session_default.colour == SW_ONOFF_ON) && (isatty(STDERR_FILENO) == 1))
-   sprintf(temp_stringC, "%s%s%s\n", *(char **)FetchSettingName( context , pplset_session_default.colour_wrn , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)),
+  if ((context->session_default.colour == SW_ONOFF_ON) && (isatty(STDERR_FILENO) == 1))
+   sprintf(temp_stringC, "%s%s%s\n", *(char **)FetchSettingName( context , context->session_default.colour_wrn , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)),
                                      temp_stringB,
-                                     *(char **)FetchSettingName( context , SW_TERMCOL_NOR                    , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)) );
+                                     *(char **)FetchSettingName( context , SW_TERMCOL_NOR                      , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)) );
   else
    sprintf(temp_stringC, "%s\n", temp_stringB);
   fputs(temp_stringC, stderr);
@@ -154,12 +156,13 @@ void ppl_warning(pplerr_context *context, int ErrType, char *msg)
 
 void ppl_report(pplerr_context *context, char *msg)
  {
+  if (msg==NULL) msg=context->tempErrStr;
   if (msg!=temp_stringA) strcpy(temp_stringA, msg);
   if (DEBUG) { sprintf(temp_stringC, "%s%s", "Reporting:\n", temp_stringA); ppl_log(context, temp_stringC); }
-  if ((pplset_session_default.colour == SW_ONOFF_ON) && (isatty(STDOUT_FILENO) == 1))
-   sprintf(temp_stringC, "%s%s%s\n", *(char **)FetchSettingName( context , pplset_session_default.colour_rep , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)),
+  if ((context->session_default.colour == SW_ONOFF_ON) && (isatty(STDOUT_FILENO) == 1))
+   sprintf(temp_stringC, "%s%s%s\n", *(char **)FetchSettingName( context , context->session_default.colour_rep , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)),
                                      temp_stringA,
-                                     *(char **)FetchSettingName( context , SW_TERMCOL_NOR                    , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)) );
+                                     *(char **)FetchSettingName( context , SW_TERMCOL_NOR                      , SW_TERMCOL_INT , (void *)SW_TERMCOL_TXT, sizeof(char *)) );
   else
    sprintf(temp_stringC, "%s\n", temp_stringA);
   fputs(temp_stringC, stdout);
@@ -182,6 +185,7 @@ void ppl_log(pplerr_context *context, char *msg)
     setvbuf(logfile, NULL, _IOLBF, 0); // Set log file to be line-buffered, so that log file is always up-to-date
    }
 
+  if (msg==NULL) msg=context->tempErrStr;
   if (msg!=temp_stringD) strcpy(temp_stringD, msg);
   fprintf(logfile, "[%s] [%s] %s\n", ppl_strStrip(ppl_friendlyTimestring(), linebuffer), context->error_source, temp_stringD);
   latch = 0;

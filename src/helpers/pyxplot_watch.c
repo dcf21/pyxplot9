@@ -37,14 +37,14 @@
 #include "settings/settingTypes.h"
 #include "settings/settings.h"
 
-pplset_session  pplset_session_default;
+pplset_session  context->errcontext.session_default;
 
 void RunPyXPlotOnFile(pplerr_context *context, char *fname)
  {
   char         LineBuffer[LSTR_LENGTH];
   int          interactive, status;
 
-  interactive = ((isatty(STDIN_FILENO) == 1) && (pplset_session_default.splash == SW_ONOFF_ON));
+  interactive = ((isatty(STDIN_FILENO) == 1) && (context->errcontext.session_default.splash == SW_ONOFF_ON));
 
   if (interactive)
    {
@@ -52,7 +52,7 @@ void RunPyXPlotOnFile(pplerr_context *context, char *fname)
     ppl_report(context,LineBuffer);
    }
 
-  sprintf(LineBuffer, "%s -q %s %s", PPLBINARY, (pplset_session_default.colour == SW_ONOFF_ON) ? "-c" : "-m", fname);
+  sprintf(LineBuffer, "%s -q %s %s", PPLBINARY, (context->errcontext.session_default.colour == SW_ONOFF_ON) ? "-c" : "-m", fname);
   status = system(LineBuffer);
 
   if (status && !interactive)
@@ -92,11 +92,11 @@ int main(int argc, char **argv)
   StatInfodict = ppl_dictInit(HASHSIZE_SMALL, 1);
 
   // Set up default session settings
-  pplset_session_default.splash    = SW_ONOFF_ON;
-  pplset_session_default.colour    = SW_ONOFF_ON;
-  pplset_session_default.colour_rep= SW_TERMCOL_GRN;
-  pplset_session_default.colour_wrn= SW_TERMCOL_BRN;
-  pplset_session_default.colour_err= SW_TERMCOL_RED;
+  context->errcontext.session_default.splash    = SW_ONOFF_ON;
+  context->errcontext.session_default.colour    = SW_ONOFF_ON;
+  context->errcontext.session_default.colour_rep= SW_TERMCOL_GRN;
+  context->errcontext.session_default.colour_wrn= SW_TERMCOL_BRN;
+  context->errcontext.session_default.colour_err= SW_TERMCOL_RED;
 
   // Make help and version strings
   sprintf(version_string, "\nPyXPlot Watch %s\n", VERSION);
@@ -142,22 +142,22 @@ Send comments, bug reports, feature requests and coffee supplies to:\n\
       HaveFilenames=1;
       continue;
      }
-    if      (strcmp(argv[i], "-q"          )==0) pplset_session_default.splash = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "-quiet"      )==0) pplset_session_default.splash = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "--quiet"     )==0) pplset_session_default.splash = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "-V"          )==0) pplset_session_default.splash = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "-verbose"    )==0) pplset_session_default.splash = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "--verbose"   )==0) pplset_session_default.splash = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "-c"          )==0) pplset_session_default.colour = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "-colour"     )==0) pplset_session_default.colour = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "--colour"    )==0) pplset_session_default.colour = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "-color"      )==0) pplset_session_default.colour = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "--color"     )==0) pplset_session_default.colour = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "-m"          )==0) pplset_session_default.colour = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "-mono"       )==0) pplset_session_default.colour = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "--mono"      )==0) pplset_session_default.colour = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "-monochrome" )==0) pplset_session_default.colour = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "--monochrome")==0) pplset_session_default.colour = SW_ONOFF_OFF;
+    if      (strcmp(argv[i], "-q"          )==0) context->errcontext.session_default.splash = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "-quiet"      )==0) context->errcontext.session_default.splash = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "--quiet"     )==0) context->errcontext.session_default.splash = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "-V"          )==0) context->errcontext.session_default.splash = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "-verbose"    )==0) context->errcontext.session_default.splash = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "--verbose"   )==0) context->errcontext.session_default.splash = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "-c"          )==0) context->errcontext.session_default.colour = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "-colour"     )==0) context->errcontext.session_default.colour = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "--colour"    )==0) context->errcontext.session_default.colour = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "-color"      )==0) context->errcontext.session_default.colour = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "--color"     )==0) context->errcontext.session_default.colour = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "-m"          )==0) context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "-mono"       )==0) context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "--mono"      )==0) context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "-monochrome" )==0) context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "--monochrome")==0) context->errcontext.session_default.colour = SW_ONOFF_OFF;
     else if ((strcmp(argv[i], "-v")==0) || (strcmp(argv[i], "-version")==0) || (strcmp(argv[i], "--version")==0))
      {
       ppl_report(context,version_string);
@@ -175,7 +175,7 @@ Send comments, bug reports, feature requests and coffee supplies to:\n\
     else
     {
      sprintf(context->tempErrStr, "Received switch '%s' which was not recognised. Type 'pyxplot_watch -help' for a list of available commandline options.", argv[i]);
-     ppl_error(context,ERR_PREFORMED, -1, -1, context->tempErrStr);
+     ppl_error(context,ERR_PREFORMED, -1, -1, NULL);
      if (DEBUG) ppl_log(context,"Received unexpected commandline switch.");
      ppl_memAlloc_FreeAll(0); ppl_memAlloc_MemoryStop();
      return 1;
@@ -183,7 +183,7 @@ Send comments, bug reports, feature requests and coffee supplies to:\n\
    }
 
   // Produce splash text
-  if ((isatty(STDIN_FILENO) == 1) && (pplset_session_default.splash == SW_ONOFF_ON)) ppl_report(context,init_string);
+  if ((isatty(STDIN_FILENO) == 1) && (context->errcontext.session_default.splash == SW_ONOFF_ON)) ppl_report(context,init_string);
 
   // Check that we have some filenames to watch
   if (!HaveFilenames)

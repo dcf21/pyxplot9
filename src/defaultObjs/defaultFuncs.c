@@ -45,12 +45,15 @@
 
 #include "coreUtils/dict.h"
 
-#include "userspace/airyFuncs.h"
-#include "userspace/defaultFuncs.h"
-#include "userspace/defaultFuncsMacros.h"
+#include "settings/settings.h"
+
 #include "userspace/pplObj.h"
 #include "userspace/pplObjFunc.h"
-#include "userspace/zetaRiemann.h"
+
+#include "defaultObjs/airyFuncs.h"
+#include "defaultObjs/defaultFuncs.h"
+#include "defaultObjs/defaultFuncsMacros.h"
+#include "defaultObjs/zetaRiemann.h"
 
 void ppl_addSystemFunc(dict *n, char *name, int minArgs, int maxArgs, int numOnly, int notNan, int realOnly, int dimlessOnly, void *fn, char *shortdesc, char *latex, char *desc)
  {
@@ -81,7 +84,7 @@ void ppl_addSystemFunc(dict *n, char *name, int minArgs, int maxArgs, int numOnl
   return;
  }
 
-void pplfunc_abs         (pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_abs         (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "abs(x)";
   IF_1COMPLEX { OUTPUT.real = hypot(in[0].real , in[0].imag); }
@@ -91,7 +94,7 @@ void pplfunc_abs         (pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_acos        (pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_acos        (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "acos(x)";
   gsl_complex z;
@@ -103,7 +106,7 @@ void pplfunc_acos        (pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_acosh       (pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_acosh       (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "acosh(x)";
   gsl_complex z;
@@ -113,7 +116,7 @@ void pplfunc_acosh       (pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_acot        (pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_acot        (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "acot(x)";
   gsl_complex z;
@@ -123,7 +126,7 @@ void pplfunc_acot        (pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_acoth       (pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_acoth       (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "acoth(x)";
   gsl_complex z;
@@ -133,7 +136,7 @@ void pplfunc_acoth       (pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_acsc        (pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_acsc        (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "acsc(x)";
   gsl_complex z;
@@ -145,7 +148,7 @@ void pplfunc_acsc        (pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_acsch       (pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_acsch       (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "acsch(x)";
   gsl_complex z;
@@ -155,7 +158,7 @@ void pplfunc_acsch       (pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_airy_ai     (pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_airy_ai     (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "airy_ai(x)";
   gsl_complex zi, z;
@@ -166,7 +169,7 @@ void pplfunc_airy_ai     (pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_airy_ai_diff(pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_airy_ai_diff(pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "airy_ai_diff(x)";
   gsl_complex zi,z;
@@ -177,7 +180,7 @@ void pplfunc_airy_ai_diff(pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_airy_bi     (pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_airy_bi     (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "airy_bi(x)";
   gsl_complex zi,z;
@@ -188,7 +191,7 @@ void pplfunc_airy_bi     (pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_airy_bi_diff(pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_airy_bi_diff(pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "airy_bi_diff(x)";
   gsl_complex zi,z;
@@ -199,7 +202,7 @@ void pplfunc_airy_bi_diff(pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_arg         (pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_arg         (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "arg(x)";
   gsl_complex z;
@@ -209,7 +212,7 @@ void pplfunc_arg         (pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_asec        (pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_asec        (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "asec(x)";
   gsl_complex z;
@@ -221,7 +224,7 @@ void pplfunc_asec        (pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_asech       (pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_asech       (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "asech(x)";
   gsl_complex z;
@@ -231,7 +234,7 @@ void pplfunc_asech       (pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_asin        (pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_asin        (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "asin(x)";
   gsl_complex z;
@@ -243,7 +246,7 @@ void pplfunc_asin        (pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_asinh       (pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_asinh       (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "asinh(x)";
   gsl_complex z;
@@ -253,7 +256,7 @@ void pplfunc_asinh       (pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_atan        (pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_atan        (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "atan(x)";
   gsl_complex z;
@@ -263,7 +266,7 @@ void pplfunc_atan        (pplObj *in, int nArgs, int *status, char *errText)
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_atanh       (pplObj *in, int nArgs, int *status, char *errText)
+void pplfunc_atanh       (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText)
  {
   char *FunctionDescription = "atanh(x)";
   gsl_complex z;

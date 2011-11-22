@@ -85,7 +85,6 @@ int main(int argc, char **argv)
   ppl_memAlloc_MemoryInit(&context->errcontext, &ppl_error, &ppl_log);
   ppl_PaperSizeInit();
   ppl_inputInit(context);
-  pplset_makedefault(context);
   ppltxt_init();
 
   // Turn off GSL's automatic error handler
@@ -99,17 +98,17 @@ int main(int argc, char **argv)
 
   // Set default terminal
   EnvDisplay = getenv("DISPLAY"); // Check whether the environment variable DISPLAY is set
-  if      (strcmp(GHOSTVIEW_COMMAND, "/bin/false")!=0) pplset_term_current.viewer = pplset_term_default.viewer = SW_VIEWER_GV;
-  else if (strcmp(GGV_COMMAND      , "/bin/false")!=0) pplset_term_current.viewer = pplset_term_default.viewer = SW_VIEWER_GGV;
-  else                                                 pplset_term_current.viewer = pplset_term_default.viewer = SW_VIEWER_NULL;
+  if      (strcmp(GHOSTVIEW_COMMAND, "/bin/false")!=0) context->set.term_current.viewer = context->set.term_default.viewer = SW_VIEWER_GV;
+  else if (strcmp(GGV_COMMAND      , "/bin/false")!=0) context->set.term_current.viewer = context->set.term_default.viewer = SW_VIEWER_GGV;
+  else                                                 context->set.term_current.viewer = context->set.term_default.viewer = SW_VIEWER_NULL;
   if ( /* (ppl_termtype_set_in_configfile == 0) && */ ((context->willBeInteractive==0) ||
                                                 (EnvDisplay==NULL) ||
                                                 (EnvDisplay[0]=='\0') ||
-                                                (pplset_term_default.viewer == SW_VIEWER_NULL) ||
+                                                (context->set.term_default.viewer == SW_VIEWER_NULL) ||
                                                 (isatty(STDIN_FILENO) != 1)))
    {
     if (DEBUG) ppl_log(&context->errcontext,"Detected that we are running a non-interactive session; defaulting to the EPS terminal.");
-    pplset_term_current.TermType = pplset_term_default.TermType = SW_TERMTYPE_EPS;
+    context->set.term_current.TermType = context->set.term_default.TermType = SW_TERMTYPE_EPS;
    }
 
   // Scan commandline options for any switches
@@ -121,22 +120,22 @@ int main(int argc, char **argv)
       if (context->willBeInteractive==1) context->willBeInteractive=0;
       continue;
      }
-    if      (strcmp(argv[i], "-q"          )==0) pplset_session_default.splash = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "-quiet"      )==0) pplset_session_default.splash = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "--quiet"     )==0) pplset_session_default.splash = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "-V"          )==0) pplset_session_default.splash = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "-verbose"    )==0) pplset_session_default.splash = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "--verbose"   )==0) pplset_session_default.splash = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "-c"          )==0) pplset_session_default.colour = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "-colour"     )==0) pplset_session_default.colour = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "--colour"    )==0) pplset_session_default.colour = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "-color"      )==0) pplset_session_default.colour = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "--color"     )==0) pplset_session_default.colour = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "-m"          )==0) pplset_session_default.colour = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "-mono"       )==0) pplset_session_default.colour = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "--mono"      )==0) pplset_session_default.colour = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "-monochrome" )==0) pplset_session_default.colour = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "--monochrome")==0) pplset_session_default.colour = SW_ONOFF_OFF;
+    if      (strcmp(argv[i], "-q"          )==0) context->errcontext.session_default.splash = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "-quiet"      )==0) context->errcontext.session_default.splash = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "--quiet"     )==0) context->errcontext.session_default.splash = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "-V"          )==0) context->errcontext.session_default.splash = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "-verbose"    )==0) context->errcontext.session_default.splash = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "--verbose"   )==0) context->errcontext.session_default.splash = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "-c"          )==0) context->errcontext.session_default.colour = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "-colour"     )==0) context->errcontext.session_default.colour = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "--colour"    )==0) context->errcontext.session_default.colour = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "-color"      )==0) context->errcontext.session_default.colour = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "--color"     )==0) context->errcontext.session_default.colour = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "-m"          )==0) context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "-mono"       )==0) context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "--mono"      )==0) context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "-monochrome" )==0) context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "--monochrome")==0) context->errcontext.session_default.colour = SW_ONOFF_OFF;
     else if (strcmp(argv[i], "-"           )==0) context->willBeInteractive=2;
     else if ((strcmp(argv[i], "-v")==0) || (strcmp(argv[i], "-version")==0) || (strcmp(argv[i], "--version")==0))
      {
@@ -155,7 +154,7 @@ int main(int argc, char **argv)
     else
     {
      sprintf(context->errcontext.tempErrStr, "Received switch '%s' which was not recognised. Type 'pyxplot -help' for a list of available commandline options.", argv[i]);
-     ppl_error(&context->errcontext,ERR_PREFORMED, -1, -1, context->errcontext.tempErrStr);
+     ppl_error(&context->errcontext,ERR_PREFORMED, -1, -1, NULL);
      if (DEBUG) ppl_log(&context->errcontext,"Received unexpected commandline switch.");
      ppl_memAlloc_FreeAll(0); ppl_memAlloc_MemoryStop();
      return 1;
@@ -164,9 +163,9 @@ int main(int argc, char **argv)
 
   // Decide upon a path for a temporary directory for us to live in
   if (DEBUG) ppl_log(&context->errcontext,"Finding a filepath for a temporary directory.");
-  if (getcwd( pplset_session_default.cwd , FNAME_LENGTH ) == NULL) { ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Could not read current working directory."); } // Store cwd
+  if (getcwd( context->errcontext.session_default.cwd , FNAME_LENGTH ) == NULL) { ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Could not read current working directory."); } // Store cwd
   while (1) { sprintf(tempdirpath, "/tmp/pyxplot_%d_%d", getpid(), tempdirnumber); if (access(tempdirpath, F_OK) != 0) break; tempdirnumber++; } // Find an unused dir path
-  strcpy(pplset_session_default.tempdir, tempdirpath); // Store our chosen temporary directory path
+  strcpy(context->errcontext.session_default.tempdir, tempdirpath); // Store our chosen temporary directory path
 
   // Launch child process
   if (DEBUG) ppl_log(&context->errcontext,"Launching the Child Support Process.");
@@ -181,7 +180,7 @@ int main(int argc, char **argv)
 
     // Wait for temporary directory to appear, and change directory into it
     if (DEBUG) ppl_log(&context->errcontext,"Waiting for temporary directory to appear.");
-    strcpy(tempdirpath, pplset_session_default.tempdir);
+    strcpy(tempdirpath, context->errcontext.session_default.tempdir);
     for (i=0; i<100; i++) { if (access(tempdirpath, F_OK) == 0) break; nanosleep(&waitperiod,&waitedperiod); } // Wait for temp dir to be created by child process
     if (access(tempdirpath, F_OK) != 0) { fail=1; } // If it never turns up, fail.
     else
@@ -195,7 +194,7 @@ int main(int argc, char **argv)
     // Read GNU Readline history
 #ifdef HAVE_READLINE
     if (DEBUG) ppl_log(&context->errcontext,"Reading GNU Readline history.");
-    sprintf(tempdirpath, "%s%s%s", pplset_session_default.homedir, PATHLINK, ".pyxplot_history");
+    sprintf(tempdirpath, "%s%s%s", context->errcontext.session_default.homedir, PATHLINK, ".pyxplot_history");
     read_history(tempdirpath);
     stifle_history(1000);
 #endif
@@ -225,15 +224,15 @@ int main(int argc, char **argv)
   pplcsp_sendCommand(context,"B\n");
 
   // Free all of the plot styles which are set
-  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsDestroy(context, &(pplset_plot_styles        [i]));
-  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsDestroy(context, &(pplset_plot_styles_default[i]));
+  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsDestroy(context, &(context->set.plot_styles        [i]));
+  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsDestroy(context, &(context->set.plot_styles_default[i]));
 
   // Save GNU Readline history
 #ifdef HAVE_READLINE
   if (context->willBeInteractive>0)
    {
     if (DEBUG) ppl_log(&context->errcontext,"Saving GNU Readline history.");
-    sprintf(tempdirpath, "%s%s%s", pplset_session_default.homedir, PATHLINK, ".pyxplot_history");
+    sprintf(tempdirpath, "%s%s%s", context->errcontext.session_default.homedir, PATHLINK, ".pyxplot_history");
     write_history(tempdirpath);
    }
 #endif

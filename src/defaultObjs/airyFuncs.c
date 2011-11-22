@@ -31,7 +31,7 @@
 #include <gsl/gsl_complex.h>
 #include <gsl/gsl_complex_math.h>
 
-#include "userspace/airyFuncs.h"
+#include "defaultObjs/airyFuncs.h"
 
 #define ADDON *dp = gsl_complex_add(*dp,gsl_complex_mul(f,c)); \
               *dq = gsl_complex_add(*dq,gsl_complex_mul(g,c)); \

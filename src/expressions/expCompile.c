@@ -871,7 +871,7 @@ void ppl_reversePolishPrint(ppl_context *context, void *in, char *out)
         break;
      }
     sprintf(context->errcontext.tempErrStr,"%4d %10s %10s %s",pos,op,optype,arg);
-    ppl_report(&context->errcontext, context->errcontext.tempErrStr);
+    ppl_report(&context->errcontext, NULL);
     if (o==0) break;
     j = pos+len;
    }

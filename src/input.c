@@ -63,7 +63,7 @@ void ppl_interactiveSession(ppl_context *context)
 
   if (DEBUG) ppl_log(&context->errcontext,"Starting an interactive session.");
 
-  if ((isatty(STDIN_FILENO) == 1) && (pplset_session_default.splash == SW_ONOFF_ON)) ppl_report(&context->errcontext,ppltxt_welcome);
+  if ((isatty(STDIN_FILENO) == 1) && (context->errcontext.session_default.splash == SW_ONOFF_ON)) ppl_report(&context->errcontext,ppltxt_welcome);
 
   context->shellExiting = 0;
   while (!context->shellExiting)
@@ -111,7 +111,7 @@ void ppl_interactiveSession(ppl_context *context)
       sigprocmask(SIG_UNBLOCK, &sigs, NULL);
       fprintf(stdout,"\n");
       if (context->inputLineAddBuffer != NULL) { free(context->inputLineAddBuffer); context->inputLineAddBuffer=NULL; }
-      if (chdir(pplset_session_default.cwd) < 0) { ppl_fatal(&context->errcontext, __FILE__,__LINE__,"chdir into cwd failed."); } // chdir out of temporary directory
+      if (chdir(context->errcontext.session_default.cwd) < 0) { ppl_fatal(&context->errcontext, __FILE__,__LINE__,"chdir into cwd failed."); } // chdir out of temporary directory
      }
    }
 
@@ -120,7 +120,7 @@ void ppl_interactiveSession(ppl_context *context)
   context->shellExiting = 0;
   if (isatty(STDIN_FILENO) == 1)
    {
-    if (pplset_session_default.splash == SW_ONOFF_ON) ppl_report(&context->errcontext,"\nGoodbye. Have a nice day.");
+    if (context->errcontext.session_default.splash == SW_ONOFF_ON) ppl_report(&context->errcontext,"\nGoodbye. Have a nice day.");
     else                                              ppl_report(&context->errcontext,""); // Make a new line
    }
   return;
@@ -135,12 +135,12 @@ void ppl_processScript(ppl_context *context, char *input, int iterLevel)
   char filename_description[FNAME_LENGTH];
   FILE *infile;
 
-  if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Processing input from the script file '%s'.", input); ppl_log(&context->errcontext, context->errcontext.tempErrStr); }
-  ppl_unixExpandUserHomeDir(&context->errcontext, input, pplset_session_default.cwd, full_filename);
+  if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Processing input from the script file '%s'.", input); ppl_log(&context->errcontext, NULL); }
+  ppl_unixExpandUserHomeDir(&context->errcontext, input, context->errcontext.session_default.cwd, full_filename);
   sprintf(filename_description, "file '%s'", input);
   if ((infile=fopen(full_filename,"r")) == NULL)
    {
-    sprintf(context->errcontext.tempErrStr, "Could not find command file '%s'. Skipping on to next command file.", full_filename); ppl_error(&context->errcontext, ERR_FILE, -1, -1, context->errcontext.tempErrStr);
+    sprintf(context->errcontext.tempErrStr, "Could not find command file '%s'. Skipping on to next command file.", full_filename); ppl_error(&context->errcontext, ERR_FILE, -1, -1, NULL);
     return;
    }
 

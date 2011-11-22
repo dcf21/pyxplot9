@@ -165,7 +165,7 @@ void ppl_withWordsMerge(ppl_context *context, withWords *out, const withWords *a
        {
         BlockStyleSubstitution[i  ] = 1; // Only do this once, to avoid infinite loop
         BlockStyleSubstitution[i+1] = 0; // Allow recursive substitutions
-        InputArray[i+1] = &(pplset_plot_styles[ x->style ]);
+        InputArray[i+1] = &(context->set->plot_styles[ x->style ]);
         i+=2; // Recurse
         continue;
        } else {
@@ -194,9 +194,9 @@ void ppl_withWordsMerge(ppl_context *context, withWords *out, const withWords *a
   return;
  }
 
-#define NUMDISP(X) ppl_numericDisplay(X,0,pplset_term_current.SignificantFigures,(pplset_term_current.NumDisplay==SW_DISPLAY_L))
+#define NUMDISP(X) ppl_numericDisplay(X,0,context->set->term_current.SignificantFigures,(context->set->term_current.NumDisplay==SW_DISPLAY_L))
 
-#define S_RGB(X,Y) (char *)ppl_numericDisplay(X,Y,pplset_term_current.SignificantFigures,(pplset_term_current.NumDisplay==SW_DISPLAY_L))
+#define S_RGB(X,Y) (char *)ppl_numericDisplay(X,Y,context->set->term_current.SignificantFigures,(context->set->term_current.NumDisplay==SW_DISPLAY_L))
 
 void ppl_withWordsPrint(ppl_context *context, const withWords *defn, char *out)
  {

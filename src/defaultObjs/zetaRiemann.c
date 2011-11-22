@@ -37,7 +37,7 @@
 #include <gsl/gsl_sf_result.h>
 #include <gsl/gsl_sf_gamma.h>
 
-#include "userspace/zetaRiemann.h"
+#include "defaultObjs/zetaRiemann.h"
 
 void riemann_zeta_complex__(double x, double y, gsl_complex *output, int *status, char *errtext)
  {

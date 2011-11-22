@@ -22,6 +22,8 @@
 #ifndef _CONTEXT_H
 #define _CONTEXT_H 1
 
+#include "settings/settings.h"
+
 #include "stringTools/strConstants.h"
 
 #include "coreUtils/dict.h"
@@ -47,6 +49,18 @@ typedef struct ppl_context_struc
 
   // Buffers for parsing and evaluating expressions
   unsigned char tokenBuff[ALGEBRA_MAXLEN];
+
+  // Settings
+  ppl_settings *set;
+
+  // Units settings
+  unit  *unit_database;
+  int    unit_pos = 0;
+  int    baseunit_pos = UNIT_FIRSTUSER;
+  list  *unit_PreferredUnits;
+  list  *unit_PreferredUnits_default;
+  double TempTypeMultiplier[8]; // These are filled in by ppl_userspace_init.c
+  double TempTypeOffset    [8]; // They store the offsets and multiplier for each of the units of temperature
 
   // Namespace hierarchy
   int   ns_ptr , ns_branch;

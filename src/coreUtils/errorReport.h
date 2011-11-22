@@ -35,12 +35,20 @@
 
 #include "stringTools/strConstants.h"
 
+typedef struct pplset_session {
+ int   splash, colour, colour_rep, colour_wrn, colour_err;
+ char  cwd[FNAME_LENGTH];
+ char  tempdir[FNAME_LENGTH];
+ char  homedir[FNAME_LENGTH];
+ } pplset_session;
+
 typedef struct pplerr_context_s
  {
   int       error_input_linenumber;
   char      error_input_filename[FNAME_LENGTH];
   char      error_source[16]; // Identifier of the process producing log messages
   char      tempErrStr[LSTR_LENGTH];
+  pplset_session session_default;
  } pplerr_context;
 
 void ppl_error_setstreaminfo(pplerr_context *context, int linenumber,char *filename);

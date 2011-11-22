@@ -60,13 +60,6 @@ typedef struct pplset_graph {
  withWords     DataStyle, FuncStyle;
  } pplset_graph;
 
-typedef struct pplset_session {
- int   splash, colour, colour_rep, colour_wrn, colour_err;
- char  cwd[FNAME_LENGTH];
- char  tempdir[FNAME_LENGTH];
- char  homedir[FNAME_LENGTH];
- } pplset_session;
-
 typedef struct pplset_axis {
  unsigned char atzero, enabled, invisible, linked, RangeReversed, topbottom, MTickMaxSet, MTickMinSet, MTickStepSet, TickMaxSet, TickMinSet, TickStepSet;
  int     ArrowType, LinkedAxisCanvasID, LinkedAxisToXYZ, LinkedAxisToNum, log, MaxSet, MinSet, MirrorType, MTickDir, TickDir, TickLabelRotation;
@@ -98,26 +91,27 @@ typedef struct pplset_axis {
 // Variable initialisation functions
 void  pplset_makedefault(ppl_context *context);
 
-// Variables defined in settingsInit.c
-#ifndef _SETTINGSINIT_C
-extern pplset_terminal  pplset_term_default;
-extern pplset_terminal  pplset_term_current;
-extern pplset_graph     pplset_graph_default;
-extern pplset_graph     pplset_graph_current;
-extern pplset_session   pplset_session_default;
-extern int              pplset_palette_current[], pplset_paletteS_current[];
-extern double           pplset_palette1_current[], pplset_palette2_current[], pplset_palette3_current[], pplset_palette4_current[];
-extern int              pplset_palette_default[], pplset_paletteS_default[];
-extern double           pplset_palette1_default[], pplset_palette2_default[], pplset_palette3_default[], pplset_palette4_default[];
-extern withWords        pplset_plot_styles[], pplset_plot_styles_default[];
-extern pplset_axis      pplset_axis_default;
-extern pplset_axis      XAxes[], XAxesDefault[];
-extern pplset_axis      YAxes[], YAxesDefault[];
-extern pplset_axis      ZAxes[], ZAxesDefault[];
-extern dict            *pplset_filters;
-extern pplarrow_object *pplarrow_list, *pplarrow_list_default;
-extern ppllabel_object *ppllabel_list, *ppllabel_list_default;
-#endif
+// Complete set of session settings
+typedef ppl_settings_struc
+ {
+  pplset_terminal  term_default;
+  pplset_terminal  term_current;
+  pplset_graph     graph_default;
+  pplset_graph     graph_current;
+  int              palette_current[PALETTE_LENGTH], paletteS_current[PALETTE_LENGTH];
+  double           palette1_current[PALETTE_LENGTH], palette2_current[PALETTE_LENGTH], palette3_current[PALETTE_LENGTH], palette4_current[PALETTE_LENGTH];
+  int              palette_default[PALETTE_LENGTH], paletteS_default[PALETTE_LENGTH];
+  double           palette1_default[PALETTE_LENGTH], palette2_default[PALETTE_LENGTH], palette3_default[PALETTE_LENGTH], palette4_default[PALETTE_LENGTH];
+  withWords        plot_styles[MAX_PLOTSTYLES], plot_styles_default[MAX_PLOTSTYLES];
+  pplset_axis      axis_default;
+  pplset_axis      XAxes[MAX_AXES], XAxesDefault[MAX_AXES];
+  pplset_axis      YAxes[MAX_AXES], YAxesDefault[MAX_AXES];
+  pplset_axis      ZAxes[MAX_AXES], ZAxesDefault[MAX_AXES];
+  dict            *filters;
+  pplarrow_object *pplarrow_list, *pplarrow_list_default;
+  ppllabel_object *ppllabel_list, *ppllabel_list_default;
+ }
+ppl_settings;
 
 #endif
 

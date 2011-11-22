@@ -37,7 +37,6 @@
 #include "coreUtils/memAlloc.h"
 #include "coreUtils/errorReport.h"
 
-#include "settings/settings.h"
 #include "settings/settingTypes.h"
 
 #include "children.h"
@@ -101,16 +100,16 @@ void  pplcsp_init(ppl_context *context)
 
   // Make temporary working directory
   fail=0;
-  if ((mkdir(pplset_session_default.tempdir , 0700) != 0) ||             // Create temporary working directory
-      (access(pplset_session_default.tempdir, F_OK) != 0) )  { fail=1; } // If temporary directory does not exist, fail.
+  if ((mkdir(context->errcontext.session_default.tempdir , 0700) != 0) ||             // Create temporary working directory
+      (access(context->errcontext.session_default.tempdir, F_OK) != 0) )  { fail=1; } // If temporary directory does not exist, fail.
   else
    {
-    if (stat(pplset_session_default.tempdir, &statinfo) <0) fail=1; // Otherwise stat it and make sure it's a directory we own
+    if (stat(context->errcontext.session_default.tempdir, &statinfo) <0) fail=1; // Otherwise stat it and make sure it's a directory we own
     if (!S_ISDIR(statinfo.st_mode)) fail=1;
     if (statinfo.st_uid != getuid()) fail=1;
    }
   if (fail==1)                                     { ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Failed to create temporary directory." ); }
-  if (chdir(pplset_session_default.tempdir) < 0) { ppl_fatal(&context->errcontext,__FILE__,__LINE__,"chdir into temporary directory failed."); } // chdir into temporary directory
+  if (chdir(context->errcontext.session_default.tempdir) < 0) { ppl_fatal(&context->errcontext,__FILE__,__LINE__,"chdir into temporary directory failed."); } // chdir into temporary directory
 
   // Enter CSP execution loop
   if (signal(SIGCHLD, pplcsp_checkForChildExits) == SIG_ERR) ppl_fatal(&context->errcontext,__FILE__,__LINE__,"CSP could not set up a signal handler for SIGCHLD.");
@@ -118,7 +117,7 @@ void  pplcsp_init(ppl_context *context)
   close(PipeCSP2MAIN[1]); // Close pipes
   close(PipeMAIN2CSP[0]);
   if (chdir("/") < 0) ppl_fatal(&context->errcontext,__FILE__,__LINE__,"chdir out of temporary directory failed."); // chdir out of temporary directory
-  sprintf(PipeOutputBuffer, "rm -Rf %s", pplset_session_default.tempdir);
+  sprintf(PipeOutputBuffer, "rm -Rf %s", context->errcontext.session_default.tempdir);
   if (system(PipeOutputBuffer) < 0) ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Removal of temporary directory failed."); // Remove temporary directory
   ppl_memAlloc_FreeAll(0);
   if (DEBUG) ppl_log(&context->errcontext,"CSP terminating normally.");
@@ -200,7 +199,7 @@ void pplcsp_checkForChildExits(int signo)
     gv_pid = (int *)ppl_listIterate(&iter);
     if (waitpid(*gv_pid,NULL,WNOHANG) != 0)
      {
-      if (DEBUG) { sprintf(context->errcontext.tempErrStr, "A ghostview process with pid %d has terminated.", *gv_pid); ppl_log(&context->errcontext,context->errcontext.tempErrStr); }
+      if (DEBUG) { sprintf(context->errcontext.tempErrStr, "A ghostview process with pid %d has terminated.", *gv_pid); ppl_log(&context->errcontext,NULL); }
       ppl_listRemove(GhostViews, (void *)gv_pid); // Stabat mater dolorosa
       if (GhostView_pid == *gv_pid) GhostView_pid = 0;
      }
@@ -211,7 +210,7 @@ void pplcsp_checkForChildExits(int signo)
     gv_pid = (int *)ppl_listIterate(&iter);
     if (waitpid(*gv_pid,NULL,WNOHANG) != 0)
      {
-      if (DEBUG) { sprintf(context->errcontext.tempErrStr, "A persistent ghostview process with pid %d has terminated.", *gv_pid); ppl_log(&context->errcontext,context->errcontext.tempErrStr); }
+      if (DEBUG) { sprintf(context->errcontext.tempErrStr, "A persistent ghostview process with pid %d has terminated.", *gv_pid); ppl_log(&context->errcontext,NULL); }
       ppl_listRemove(GhostView_Persists, (void *)gv_pid); // Stabat mater dolorosa
       if (GhostView_pid == *gv_pid) GhostView_pid = 0;
      }
@@ -281,7 +280,7 @@ void pplcsp_processCommand(ppl_context *context, char *in)
 
     if (GhostView_pid > 1)
      {
-      if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Received gv_singlewindow request. Putting into existing window with pid %d.", GhostView_pid); ppl_log(&context->errcontext,context->errcontext.tempErrStr); }
+      if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Received gv_singlewindow request. Putting into existing window with pid %d.", GhostView_pid); ppl_log(&context->errcontext,NULL); }
       sprintf(cmd, "cp -f %s %s", filename, context->pplcsp_ghostView_fname);
       if (system(cmd) != 0) if (DEBUG) { ppl_log(&context->errcontext,"Failed to copy postscript document into existing gv_singlewindow session.");}
      }
@@ -359,8 +358,8 @@ int pplcsp_forkNewGv(ppl_context *context, char *fname, list *gv_list)
     // Child process; about to run postscript viewer
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
     sprintf(context->errcontext.error_source, "GV%7d", getpid());
-    pplset_session_default.colour = SW_ONOFF_OFF;
-    if (DEBUG) { sprintf(context->errcontext.tempErrStr, "New postscript viewer process alive; going to view %s.", fname); ppl_log(&context->errcontext,context->errcontext.tempErrStr); }
+    context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    if (DEBUG) { sprintf(context->errcontext.tempErrStr, "New postscript viewer process alive; going to view %s.", fname); ppl_log(&context->errcontext,NULL); }
     if (PipeCSP2MAIN[1] != STDERR_FILENO) // Redirect stderr to pipe, so that GhostView doesn't spam terminal
      {
       if (dup2(PipeCSP2MAIN[1], STDERR_FILENO) != STDERR_FILENO) ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Could not redirect stderr to pipe.");
@@ -395,12 +394,12 @@ void pplcsp_killLatestSinglewindow(ppl_context *context)
  {
   if (GhostView_pid > 1)
    {
-    if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Killing latest ghostview singlewindow process with pid %d.", GhostView_pid); ppl_log(&context->errcontext,context->errcontext.tempErrStr); }
+    if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Killing latest ghostview singlewindow process with pid %d.", GhostView_pid); ppl_log(&context->errcontext,NULL); }
     kill(GhostView_pid, SIGTERM);
    }
   else
    {
-    if (DEBUG) { sprintf(context->errcontext.tempErrStr, "No ghostview singlewindow process to kill."); ppl_log(&context->errcontext,context->errcontext.tempErrStr); }
+    if (DEBUG) { sprintf(context->errcontext.tempErrStr, "No ghostview singlewindow process to kill."); ppl_log(&context->errcontext,NULL); }
    }
   GhostView_pid = 0;
   return;
@@ -479,8 +478,8 @@ void pplcsp_forkSed(ppl_context *context, char *cmd, int *fstdin, int *fstdout)
     close(PipeMAIN2CSP[1]);
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
     sprintf(context->errcontext.error_source, "SED%6d", getpid());
-    pplset_session_default.colour = SW_ONOFF_OFF;
-    if (DEBUG) { sprintf(context->errcontext.tempErrStr, "New sed process alive; going to run command \"%s\".", cmd); ppl_log(&context->errcontext,context->errcontext.tempErrStr); }
+    context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    if (DEBUG) { sprintf(context->errcontext.tempErrStr, "New sed process alive; going to run command \"%s\".", cmd); ppl_log(&context->errcontext,NULL); }
     if (fd0[0] != STDIN_FILENO) // Redirect stdin to pipe
      {
       if (dup2(fd0[0], STDIN_FILENO) != STDIN_FILENO) ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Could not redirect stdin to pipe.");
@@ -536,8 +535,8 @@ void pplcsp_forkLaTeX(ppl_context *context, char *filename, int *PidOut, int *fs
     close(PipeMAIN2CSP[1]);
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
     sprintf(context->errcontext.error_source, "TEX%6d", getpid());
-    pplset_session_default.colour = SW_ONOFF_OFF;
-    if (DEBUG) { sprintf(context->errcontext.tempErrStr, "New latex process alive; going to latex file \"%s\".", filename); ppl_log(&context->errcontext,context->errcontext.tempErrStr); }
+    context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    if (DEBUG) { sprintf(context->errcontext.tempErrStr, "New latex process alive; going to latex file \"%s\".", filename); ppl_log(&context->errcontext,NULL); }
     if (fd0[0] != STDIN_FILENO) // Redirect stdin to pipe
      {
       if (dup2(fd0[0], STDIN_FILENO) != STDIN_FILENO) ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Could not redirect stdin to pipe.");
@@ -590,8 +589,8 @@ void pplcsp_forkInputFilter(ppl_context *context, char **cmd, int *fstdout)
     close(PipeMAIN2CSP[1]);
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
     sprintf(context->errcontext.error_source, "IF %6d", getpid());
-    pplset_session_default.colour = SW_ONOFF_OFF;
-    if (DEBUG) { sprintf(context->errcontext.tempErrStr, "New input filter process alive; going to run command \"%s\".", cmd[0]); ppl_log(&context->errcontext,context->errcontext.tempErrStr); }
+    context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    if (DEBUG) { sprintf(context->errcontext.tempErrStr, "New input filter process alive; going to run command \"%s\".", cmd[0]); ppl_log(&context->errcontext,NULL); }
     if (fd0[1] != STDOUT_FILENO) // Redirect stdout to pipe
      {
       if (dup2(fd0[1], STDOUT_FILENO) != STDOUT_FILENO) ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Could not redirect stdout to pipe.");
@@ -604,7 +603,7 @@ void pplcsp_forkInputFilter(ppl_context *context, char **cmd, int *fstdout)
      }
     if (execvp(cmd[0], cmd)!=0) if (DEBUG) ppl_log(&context->errcontext,"Attempt to execute input filter returned error code."); // Execute input filter
     sprintf(context->errcontext.tempErrStr, "Execution of input filter '%s' failed.", cmd[0]);
-    ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, context->errcontext.tempErrStr); // execvp call should not return
+    ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, NULL); // execvp call should not return
     exit(1);
    }
   return;
@@ -642,8 +641,8 @@ void pplcsp_forkKpseWhich(ppl_context *context, const char *ftype, int *fstdout)
     close(PipeMAIN2CSP[1]);
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
     sprintf(context->errcontext.error_source, "KPS%6d", getpid());
-    pplset_session_default.colour = SW_ONOFF_OFF;
-    if (DEBUG) { sprintf(context->errcontext.tempErrStr, "New kpsewhich process alive; going to get paths for filetype \"%s\".", ftype); ppl_log(&context->errcontext,context->errcontext.tempErrStr); }
+    context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    if (DEBUG) { sprintf(context->errcontext.tempErrStr, "New kpsewhich process alive; going to get paths for filetype \"%s\".", ftype); ppl_log(&context->errcontext,NULL); }
     if (fd0[1] != STDOUT_FILENO) // Redirect stdout to pipe
      {
       if (dup2(fd0[1], STDOUT_FILENO) != STDOUT_FILENO) ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Could not redirect stdout to pipe.");

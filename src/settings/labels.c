@@ -52,7 +52,7 @@
      if (VAR->exponent[i] != (i==UNIT_LENGTH)) \
       { \
        sprintf(context->errcontext.tempErrStr,"The gap size supplied to the 'set label' command must have dimensions of length. Supplied gap size input has units of <%s>.",ppl_units_GetUnitStr(VAR,NULL,NULL,1,1,0)); \
-       ppl_error(&context->errcontext,ERR_NUMERIC, -1, -1, context->errcontext.tempErrStr); \
+       ppl_error(&context->errcontext,ERR_NUMERIC, -1, -1, NULL); \
        return; \
       } \
    } \
@@ -65,7 +65,7 @@
      if (VAR->exponent[i] != (i==UNIT_ANGLE)) \
       { \
        sprintf(context->errcontext.tempErrStr,"The rotation angle supplied to the 'set label' command must have dimensions of angle. Supplied input has units of <%s>.",ppl_units_GetUnitStr(VAR,NULL,NULL,1,1,0)); \
-       ppl_error(&context->errcontext,ERR_NUMERIC, -1, -1, context->errcontext.tempErrStr); \
+       ppl_error(&context->errcontext,ERR_NUMERIC, -1, -1, NULL); \
        return; \
       } \
    } \
@@ -118,10 +118,10 @@ void ppllabel_add(ppl_context *context, ppllabel_object **inlist, dict *in)
   // Check for halign or valign modifiers
   tempstr = (char *)ppl_dictLookup(in,"halign");
   if (tempstr != NULL) out->HAlign = FetchSettingByName(tempstr, SW_HALIGN_INT, SW_HALIGN_STR);
-  else                 out->HAlign = pplset_graph_current.TextHAlign;
+  else                 out->HAlign = context->set->graph_current.TextHAlign;
   tempstr = (char *)ppl_dictLookup(in,"valign");
   if (tempstr != NULL) out->VAlign = FetchSettingByName(tempstr, SW_VALIGN_INT, SW_VALIGN_STR);
-  else                 out->VAlign = pplset_graph_current.TextVAlign;
+  else                 out->VAlign = context->set->graph_current.TextVAlign;
 
   if (ang != NULL) out->rotation = ang->real;
   else             out->rotation = 0.0;
@@ -164,7 +164,7 @@ void ppllabel_remove(ppl_context *context, ppllabel_object **inlist, dict *in)
       free(obj);
      } else {
       //sprintf(context->errcontext.tempErrStr,"Label number %d is not defined", *tempint);
-      //ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, context->errcontext.tempErrStr);
+      //ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, NULL);
      }
     ppl_listIterate(&listiter);
    }
@@ -272,12 +272,12 @@ void ppllabel_print(ppl_context *context, ppllabel_object *in, char *out)
   if (in->system_z==SW_SYSTEM_AXISN) { sprintf(out+i, " %d",in->axis_z); i+=strlen(out+i); }
   sprintf(out+i, " %s", ppl_units_NumericDisplay(&(in->z),0,0,0)); i+=strlen(out+i);
   if (in->rotation!=0.0) { sprintf(out+i, " rotate %s",
-             NumericDisplay( in->rotation *180/M_PI , 0, pplset_term_current.SignificantFigures, (pplset_term_current.NumDisplay==SW_DISPLAY_L))
+             NumericDisplay( in->rotation *180/M_PI , 0, context->set->term_current.SignificantFigures, (context->set->term_current.NumDisplay==SW_DISPLAY_L))
            ); i+=strlen(out+i); }
   if (in->HAlign>0) { sprintf(out+i, " halign %s", *(char **)FetchSettingName(in->HAlign, SW_HALIGN_INT, (void *)SW_HALIGN_STR, sizeof(char *))); i+=strlen(out+i); }
   if (in->VAlign>0) { sprintf(out+i, " valign %s", *(char **)FetchSettingName(in->VAlign, SW_VALIGN_INT, (void *)SW_VALIGN_STR, sizeof(char *))); i+=strlen(out+i); }
   if (in->gap!=0.0) { sprintf(out+i, " gap %s",
-             NumericDisplay( in->gap * 100          , 0, pplset_term_current.SignificantFigures, (pplset_term_current.NumDisplay==SW_DISPLAY_L))
+             NumericDisplay( in->gap * 100          , 0, context->set->term_current.SignificantFigures, (context->set->term_current.NumDisplay==SW_DISPLAY_L))
            ); i+=strlen(out+i); }
   ppl_withWordsPrint(&in->style, out+i+6);
   if (strlen(out+i+6)>0) { sprintf(out+i, " with"); out[i+5]=' '; }

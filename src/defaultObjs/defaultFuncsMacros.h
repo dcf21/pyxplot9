@@ -26,6 +26,7 @@
 #include "settings/settingTypes.h"
 #include "userspace/pplObj.h"
 #include "userspace/pplObjUnits.h"
+#include "userspace/unitsDisp.h"
 
 #define OUTPUT in[nArgs]
 
@@ -34,13 +35,13 @@
 
 #define QUERY_OUT_OF_RANGE \
  { \
-  if (pplset_term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; sprintf(errText, "The function %s is not defined at the requested point in parameter space.", FunctionDescription); return; } \
+  if (term->ExplicitErrors == SW_ONOFF_ON) { *status=1; sprintf(errText, "The function %s is not defined at the requested point in parameter space.", FunctionDescription); return; } \
   else { NULL_OUTPUT; } \
  }
 
 #define QUERY_MUST_BE_REAL \
  { \
-  if (pplset_term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; sprintf(errText, "The function %s only accepts real arguments; the supplied arguments are complex.", FunctionDescription); return; } \
+  if (term->ExplicitErrors == SW_ONOFF_ON) { *status=1; sprintf(errText, "The function %s only accepts real arguments; the supplied arguments are complex.", FunctionDescription); return; } \
   else { NULL_OUTPUT; } \
  }
 
@@ -48,7 +49,7 @@
  { \
   if (((X)->flagComplex) || ((X)->real < 0) || ((X)->real >= LONG_MAX)) \
    { \
-    if (pplset_term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; sprintf(errText, "The %s %s in the range 0 <= %s < %ld.",FunctionDescription,DESCRIPTION,VAR,LONG_MAX); return; } \
+    if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; sprintf(errText, "The %s %s in the range 0 <= %s < %ld.",FunctionDescription,DESCRIPTION,VAR,LONG_MAX); return; } \
     else { NULL_OUTPUT; } \
    } \
  }
@@ -57,7 +58,7 @@
  { \
   if (((X)->flagComplex) || ((X)->real < 0) || ((X)->real >= INT_MAX)) \
    { \
-    if (pplset_term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; sprintf(errText, "The %s %s in the range 0 <= %s < %d.",FunctionDescription,DESCRIPTION,VAR,INT_MAX); return; } \
+    if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; sprintf(errText, "The %s %s in the range 0 <= %s < %d.",FunctionDescription,DESCRIPTION,VAR,INT_MAX); return; } \
     else { NULL_OUTPUT; } \
    } \
  }
@@ -66,7 +67,7 @@
  { \
   if (((X)->real <= INT_MIN) || ((X)->real >= INT_MAX)) \
    { \
-    if (pplset_term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; sprintf(errText, "The %s %s in the range %d <= %s < %d.",FunctionDescription,DESCRIPTION,INT_MIN,VAR,INT_MAX); return; } \
+    if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; sprintf(errText, "The %s %s in the range %d <= %s < %d.",FunctionDescription,DESCRIPTION,INT_MIN,VAR,INT_MAX); return; } \
     else { NULL_OUTPUT; } \
    } \
  }
@@ -79,21 +80,21 @@
 
 #define NAN_CHECK_FAIL \
  { \
-  if (pplset_term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; sprintf(errText, "The function %s has received a non-finite input.",FunctionDescription); return; } \
+  if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; sprintf(errText, "The function %s has received a non-finite input.",FunctionDescription); return; } \
   else { NULL_OUTPUT; } \
  }
 
 #define CHECK_1NOTNAN \
  { \
   WRAPPER_INIT; \
-  if ((pplset_term_current.ComplexNumbers == SW_ONOFF_OFF) && (in[0].flagComplex)) { NAN_CHECK_FAIL; } \
+  if ((term->ComplexNumbers == SW_ONOFF_OFF) && (in[0].flagComplex)) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[0].real)) || (!gsl_finite(in[0].imag))) { NAN_CHECK_FAIL; } \
  }
 
 #define CHECK_2NOTNAN \
  { \
   WRAPPER_INIT; \
-  if ((pplset_term_current.ComplexNumbers == SW_ONOFF_OFF) && ((in[0].flagComplex) || (in[1].flagComplex))) { NAN_CHECK_FAIL; } \
+  if ((term->ComplexNumbers == SW_ONOFF_OFF) && ((in[0].flagComplex) || (in[1].flagComplex))) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[0].real)) || (!gsl_finite(in[0].imag))) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[1].real)) || (!gsl_finite(in[1].imag))) { NAN_CHECK_FAIL; } \
  }
@@ -101,28 +102,28 @@
 #define CHECK_3NOTNAN \
  { \
   CHECK_2NOTNAN; \
-  if ((pplset_term_current.ComplexNumbers == SW_ONOFF_OFF) && (in[2].flagComplex)) { NAN_CHECK_FAIL; } \
+  if ((term->ComplexNumbers == SW_ONOFF_OFF) && (in[2].flagComplex)) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[2].real)) || (!gsl_finite(in[2].imag))) { NAN_CHECK_FAIL; } \
  }
 
 #define CHECK_4NOTNAN \
  { \
   CHECK_3NOTNAN; \
-  if ((pplset_term_current.ComplexNumbers == SW_ONOFF_OFF) && (in[3].flagComplex)) { NAN_CHECK_FAIL; } \
+  if ((term->ComplexNumbers == SW_ONOFF_OFF) && (in[3].flagComplex)) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[3].real)) || (!gsl_finite(in[3].imag))) { NAN_CHECK_FAIL; } \
  }
 
 #define CHECK_5NOTNAN \
  { \
   CHECK_4NOTNAN; \
-  if ((pplset_term_current.ComplexNumbers == SW_ONOFF_OFF) && (in[4].flagComplex)) { NAN_CHECK_FAIL; } \
+  if ((term->ComplexNumbers == SW_ONOFF_OFF) && (in[4].flagComplex)) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[4].real)) || (!gsl_finite(in[4].imag))) { NAN_CHECK_FAIL; } \
  }
 
 #define CHECK_6NOTNAN \
  { \
   CHECK_5NOTNAN; \
-  if ((pplset_term_current.ComplexNumbers == SW_ONOFF_OFF) && (in[5].flagComplex)) { NAN_CHECK_FAIL; } \
+  if ((term->ComplexNumbers == SW_ONOFF_OFF) && (in[5].flagComplex)) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[5].real)) || (!gsl_finite(in[5].imag))) { NAN_CHECK_FAIL; } \
  }
 
@@ -228,7 +229,7 @@
 
 
 #define CHECK_OUTPUT_OKAY \
- if ((!gsl_finite(OUTPUT.real)) || (!gsl_finite(OUTPUT.imag)) || ((OUTPUT.flagComplex) && (pplset_term_current.ComplexNumbers == SW_ONOFF_OFF))) \
+ if ((!gsl_finite(OUTPUT.real)) || (!gsl_finite(OUTPUT.imag)) || ((OUTPUT.flagComplex) && (term->ComplexNumbers == SW_ONOFF_OFF))) \
   { QUERY_OUT_OF_RANGE; }
 
 #endif

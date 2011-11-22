@@ -124,7 +124,7 @@ void pplarrow_remove(ppl_context *context, pplarrow_object **inlist, dict *in)
       free(obj);
      } else {
       //sprintf(context->errcontext.tempErrStr,"Arrow number %d is not defined", *tempint);
-      //ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, context->errcontext.tempErrStr);
+      //ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, NULL);
      }
     ppl_listIterate(&listiter);
    }
