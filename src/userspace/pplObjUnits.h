@@ -40,10 +40,10 @@ typedef struct unit
  {
   char         *nameAs, *nameAp, *nameLs, *nameLp, *nameFs, *nameFp, *alt1, *alt2, *alt3, *alt4, *comment, *quantity;
   double        multiplier, offset;
-  unsigned char si, cgs, imperial, us, planck, ancient, UserSel, NotToBeCompounded, modified, TempType;
-  int           MaxPrefix;
-  int           MinPrefix;
-  int           UserSelPrefix;
+  unsigned char si, cgs, imperial, us, planck, ancient, userSel, notToBeCompounded, modified, tempType;
+  int           maxPrefix;
+  int           minPrefix;
+  int           userSelPrefix;
   double        exponent[UNITS_MAX_BASEUNITS];
  } unit;
 

@@ -68,14 +68,14 @@ void ppl_makeDefaultUnits(ppl_context *context)
     unit_database[i].quantity   = NULL;
     unit_database[i].comment    = NULL;
     unit_database[i].multiplier = 1.0;
-    unit_database[i].TempType   = 0;
+    unit_database[i].tempType   = 0;
     unit_database[i].offset     = 0.0;
-    unit_database[i].UserSel    = 0;
-    unit_database[i].NotToBeCompounded = 0;
+    unit_database[i].userSel    = 0;
+    unit_database[i].notToBeCompounded = 0;
     unit_database[i].si         = unit_database[i].cgs       = unit_database[i].imperial  = unit_database[i].us = unit_database[i].planck =
-    unit_database[i].ancient    = unit_database[i].UserSel   = unit_database[i].modified  = 0;
-    unit_database[i].MaxPrefix  = unit_database[i].MinPrefix = 0;
-    unit_database[i].UserSelPrefix = 0;
+    unit_database[i].ancient    = unit_database[i].userSel   = unit_database[i].modified  = 0;
+    unit_database[i].maxPrefix  = unit_database[i].minPrefix = 0;
+    unit_database[i].userSelPrefix = 0;
     for (j=0; j<UNITS_MAX_BASEUNITS; j++) unit_database[i].exponent[j] = 0;
    }
 
@@ -118,8 +118,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "metres";
   unit_database[unit_pos].quantity   = "length";
   unit_database[unit_pos].si         = 1;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  = 3;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  = 3;
   unit_database[unit_pos].exponent[UNIT_LENGTH]=1;
   unit_pos++;
 
@@ -381,7 +381,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameLp     = unit_database[unit_pos].nameAp;
   unit_database[unit_pos].nameFs     = "light_year";
   unit_database[unit_pos].nameFp     = "light_years";
-  unit_database[unit_pos].MaxPrefix  = 9;
+  unit_database[unit_pos].maxPrefix  = 9;
   unit_database[unit_pos].quantity   = "length";
   unit_database[unit_pos].multiplier = GSL_CONST_MKSA_LIGHT_YEAR;
   unit_database[unit_pos].exponent[UNIT_LENGTH]=1;
@@ -395,7 +395,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "parsecs";
   unit_database[unit_pos].quantity   = "length";
   unit_database[unit_pos].multiplier = GSL_CONST_MKSA_PARSEC;
-  unit_database[unit_pos].MaxPrefix  = 9;
+  unit_database[unit_pos].maxPrefix  = 9;
   unit_database[unit_pos].exponent[UNIT_LENGTH]=1;
   unit_pos++;
 
@@ -459,7 +459,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].cgs        = 1;
   unit_database[unit_pos].imperial   = 1;
   unit_database[unit_pos].us         = 1;
-  unit_database[unit_pos].MinPrefix  = -24;
+  unit_database[unit_pos].minPrefix  = -24;
   unit_database[unit_pos].exponent[UNIT_TIME]=1;
   unit_pos++;
 
@@ -516,7 +516,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFs     = "year";
   unit_database[unit_pos].nameFp     = "years";
   unit_database[unit_pos].quantity   = "time";
-  unit_database[unit_pos].MaxPrefix  = 9;
+  unit_database[unit_pos].maxPrefix  = 9;
   unit_database[unit_pos].multiplier = 31557600;
   unit_database[unit_pos].ancient    = 1;
   unit_database[unit_pos].exponent[UNIT_TIME]=1;
@@ -552,7 +552,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "grammes";
   unit_database[unit_pos].quantity   = "mass";
   unit_database[unit_pos].multiplier = 1e-3;
-  unit_database[unit_pos].MinPrefix  = -24;
+  unit_database[unit_pos].minPrefix  = -24;
   unit_database[unit_pos].exponent[UNIT_MASS]=1;
   unit_pos++;
 
@@ -565,7 +565,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].quantity   = "mass";
   unit_database[unit_pos].multiplier = 1e-3;
   unit_database[unit_pos].cgs        = 1;
-  unit_database[unit_pos].MinPrefix  = -24;
+  unit_database[unit_pos].minPrefix  = -24;
   unit_database[unit_pos].exponent[UNIT_MASS]=1;
   unit_pos++;
 
@@ -808,8 +808,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].alt1       = "amp";
   unit_database[unit_pos].alt2       = "amps";
   unit_database[unit_pos].quantity   = "current";
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = unit_database[unit_pos].cgs = unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient    = 1;
   unit_database[unit_pos].exponent[UNIT_CURRENT]=1;
   unit_pos++;
@@ -821,13 +821,13 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFs     = "kelvin";
   unit_database[unit_pos].nameFp     = "kelvin";
   unit_database[unit_pos].quantity   = "temperature";
-  unit_database[unit_pos].TempType   = 1;
-  unit_database[unit_pos].MinPrefix  = -24;
+  unit_database[unit_pos].tempType   = 1;
+  unit_database[unit_pos].minPrefix  = -24;
   unit_database[unit_pos].si         = 1;
   unit_database[unit_pos].cgs        = 1;
   unit_database[unit_pos].exponent[UNIT_TEMPERATURE]=1;
-  TempTypeMultiplier[unit_database[unit_pos].TempType] = unit_database[unit_pos].multiplier;
-  TempTypeOffset    [unit_database[unit_pos].TempType] = unit_database[unit_pos].offset;
+  tempTypeMultiplier[unit_database[unit_pos].tempType] = unit_database[unit_pos].multiplier;
+  tempTypeOffset    [unit_database[unit_pos].tempType] = unit_database[unit_pos].offset;
   unit_pos++;
 
   unit_database[unit_pos].nameAs     = "R"; // Rankin
@@ -837,11 +837,11 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFs     = "rankin";
   unit_database[unit_pos].nameFp     = "rankin";
   unit_database[unit_pos].quantity   = "temperature";
-  unit_database[unit_pos].TempType   = 2;
+  unit_database[unit_pos].tempType   = 2;
   unit_database[unit_pos].multiplier = 5.0/9.0;
   unit_database[unit_pos].exponent[UNIT_TEMPERATURE]=1;
-  TempTypeMultiplier[unit_database[unit_pos].TempType] = unit_database[unit_pos].multiplier;
-  TempTypeOffset    [unit_database[unit_pos].TempType] = unit_database[unit_pos].offset;
+  tempTypeMultiplier[unit_database[unit_pos].tempType] = unit_database[unit_pos].multiplier;
+  tempTypeOffset    [unit_database[unit_pos].tempType] = unit_database[unit_pos].offset;
   unit_pos++;
 
   unit_database[unit_pos].nameAs     = "oC"; // oC
@@ -855,11 +855,11 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].alt3       = "centigrade";
   unit_database[unit_pos].alt4       = "celsius";
   unit_database[unit_pos].quantity   = "temperature";
-  unit_database[unit_pos].TempType   = 3;
+  unit_database[unit_pos].tempType   = 3;
   unit_database[unit_pos].offset     = 273.15;
   unit_database[unit_pos].exponent[UNIT_TEMPERATURE]=1;
-  TempTypeMultiplier[unit_database[unit_pos].TempType] = unit_database[unit_pos].multiplier;
-  TempTypeOffset    [unit_database[unit_pos].TempType] = unit_database[unit_pos].offset;
+  tempTypeMultiplier[unit_database[unit_pos].tempType] = unit_database[unit_pos].multiplier;
+  tempTypeOffset    [unit_database[unit_pos].tempType] = unit_database[unit_pos].offset;
   unit_pos++;
 
   unit_database[unit_pos].nameAs     = "oF"; // oF
@@ -870,13 +870,13 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "degrees_fahrenheit";
   unit_database[unit_pos].alt1       = "fahrenheit";
   unit_database[unit_pos].quantity   = "temperature";
-  unit_database[unit_pos].TempType   = 4;
+  unit_database[unit_pos].tempType   = 4;
   unit_database[unit_pos].multiplier = 5.0/9.0;
   unit_database[unit_pos].offset     = 459.67 * 5.0/9.0;
   unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient    = 1;
   unit_database[unit_pos].exponent[UNIT_TEMPERATURE]=1;
-  TempTypeMultiplier[unit_database[unit_pos].TempType] = unit_database[unit_pos].multiplier;
-  TempTypeOffset    [unit_database[unit_pos].TempType] = unit_database[unit_pos].offset;
+  tempTypeMultiplier[unit_database[unit_pos].tempType] = unit_database[unit_pos].multiplier;
+  tempTypeOffset    [unit_database[unit_pos].tempType] = unit_database[unit_pos].offset;
   unit_pos++;
 
   unit_database[unit_pos].nameAs     = "mol"; // mole
@@ -887,8 +887,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "moles";
   unit_database[unit_pos].quantity   = "moles";
   unit_database[unit_pos].multiplier = 1;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = unit_database[unit_pos].cgs = unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient    = 1;
   unit_database[unit_pos].exponent[UNIT_MOLE]=1;
   unit_pos++;
@@ -901,8 +901,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "candelas";
   unit_database[unit_pos].quantity   = "light_intensity";
   unit_database[unit_pos].multiplier = 1.0/683;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = 1;
   unit_database[unit_pos].exponent[UNIT_MASS]   = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH] = 2;
@@ -933,8 +933,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "lumens";
   unit_database[unit_pos].quantity   = "power";
   unit_database[unit_pos].multiplier = GSL_CONST_MKSA_LUMEN;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].exponent[UNIT_MASS]   = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH] = 2;
   unit_database[unit_pos].exponent[UNIT_TIME]   =-3;
@@ -948,8 +948,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "luxs";
   unit_database[unit_pos].quantity   = "power";
   unit_database[unit_pos].multiplier = GSL_CONST_MKSA_LUX;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].exponent[UNIT_MASS]   = 1;
   unit_database[unit_pos].exponent[UNIT_TIME]   =-3;
   unit_pos++;
@@ -962,8 +962,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "janskys";
   unit_database[unit_pos].quantity   = "flux_density";
   unit_database[unit_pos].multiplier = 1e-26;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].exponent[UNIT_MASS]   = 1; // Watt per square metre per Hz (NOT per steradian!)
   unit_database[unit_pos].exponent[UNIT_TIME]   =-2;
   unit_pos++;
@@ -1034,7 +1034,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "bits";
   unit_database[unit_pos].quantity   = "information_content";
   unit_database[unit_pos].multiplier = 1;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = unit_database[unit_pos].cgs = unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
   unit_database[unit_pos].exponent[UNIT_BIT]=1;
   unit_pos++;
@@ -1047,7 +1047,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "euros";
   unit_database[unit_pos].quantity   = "cost";
   unit_database[unit_pos].multiplier = 1;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = unit_database[unit_pos].cgs = unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
   unit_database[unit_pos].exponent[UNIT_COST]=1;
   unit_pos++;
@@ -1265,7 +1265,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFs     = "litre";
   unit_database[unit_pos].nameFp     = "litres";
   unit_database[unit_pos].quantity   = "volume";
-  unit_database[unit_pos].MinPrefix  = -3;
+  unit_database[unit_pos].minPrefix  = -3;
   unit_database[unit_pos].multiplier = 1e-3;
   unit_database[unit_pos].exponent[UNIT_LENGTH]=3;
   unit_pos++;
@@ -1524,7 +1524,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "hertz";
   unit_database[unit_pos].quantity   = "frequency";
   unit_database[unit_pos].multiplier = 1.0;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].NotToBeCompounded = 1;
   unit_database[unit_pos].si = unit_database[unit_pos].cgs = unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
   unit_database[unit_pos].exponent[UNIT_TIME]=-1;
@@ -1538,7 +1538,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "becquerel";
   unit_database[unit_pos].quantity   = "frequency";
   unit_database[unit_pos].multiplier = 1.0;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].exponent[UNIT_TIME]=-1;
   unit_pos++;
 
@@ -1550,7 +1550,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "bytes";
   unit_database[unit_pos].quantity   = "information_content";
   unit_database[unit_pos].multiplier = 8.0;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
   unit_database[unit_pos].exponent[UNIT_BIT]=1;
   unit_pos++;
@@ -1629,8 +1629,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "newtons";
   unit_database[unit_pos].quantity   = "force";
   unit_database[unit_pos].multiplier = 1;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = 1;
   unit_database[unit_pos].exponent[UNIT_MASS]   = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH] = 1;
@@ -1673,8 +1673,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "pascals";
   unit_database[unit_pos].quantity   = "pressure";
   unit_database[unit_pos].multiplier = 1;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = 1;
   unit_database[unit_pos].exponent[UNIT_MASS]   = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH] =-1;
@@ -1703,8 +1703,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "atmospheres";
   unit_database[unit_pos].quantity   = "pressure";
   unit_database[unit_pos].multiplier = GSL_CONST_MKSA_STD_ATMOSPHERE;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].ancient    = 1;
   unit_database[unit_pos].exponent[UNIT_MASS]   = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH] =-1;
@@ -1719,7 +1719,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "bars";
   unit_database[unit_pos].quantity   = "pressure";
   unit_database[unit_pos].multiplier = 1e5;
-  unit_database[unit_pos].MinPrefix  = -24;
+  unit_database[unit_pos].minPrefix  = -24;
   unit_database[unit_pos].exponent[UNIT_MASS]   = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH] =-1;
   unit_database[unit_pos].exponent[UNIT_TIME]   =-2;
@@ -1773,8 +1773,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "joules";
   unit_database[unit_pos].quantity   = "energy";
   unit_database[unit_pos].multiplier = 1;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = 1;
   unit_database[unit_pos].exponent[UNIT_MASS]   = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH] = 2;
@@ -1789,8 +1789,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "electronvolts";
   unit_database[unit_pos].quantity   = "energy";
   unit_database[unit_pos].multiplier = GSL_CONST_MKSA_ELECTRON_VOLT;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].exponent[UNIT_MASS]   = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH] = 2;
   unit_database[unit_pos].exponent[UNIT_TIME]   =-2;
@@ -1831,7 +1831,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "calories";
   unit_database[unit_pos].quantity   = "energy";
   unit_database[unit_pos].multiplier = GSL_CONST_MKSA_CALORIE;
-  unit_database[unit_pos].MaxPrefix  =  3;
+  unit_database[unit_pos].maxPrefix  =  3;
   unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
   unit_database[unit_pos].exponent[UNIT_MASS]   = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH] = 2;
@@ -1885,8 +1885,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "watts";
   unit_database[unit_pos].quantity   = "power";
   unit_database[unit_pos].multiplier = 1;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = 1;
   unit_database[unit_pos].exponent[UNIT_MASS]   = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH] = 2;
@@ -1929,7 +1929,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "clos";
   unit_database[unit_pos].quantity   = "thermal_insulation";
   unit_database[unit_pos].multiplier = 0.154;
-  unit_database[unit_pos].TempType   = 1;
+  unit_database[unit_pos].tempType   = 1;
   unit_database[unit_pos].exponent[UNIT_MASS]        =-1;
   unit_database[unit_pos].exponent[UNIT_TEMPERATURE] = 1;
   unit_database[unit_pos].exponent[UNIT_TIME]        = 3;
@@ -1943,7 +1943,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "togs";
   unit_database[unit_pos].quantity   = "thermal_insulation";
   unit_database[unit_pos].multiplier = 0.1;
-  unit_database[unit_pos].TempType   = 1;
+  unit_database[unit_pos].tempType   = 1;
   unit_database[unit_pos].exponent[UNIT_MASS]        =-1;
   unit_database[unit_pos].exponent[UNIT_TEMPERATURE] = 1;
   unit_database[unit_pos].exponent[UNIT_TIME]        = 3;
@@ -2020,8 +2020,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "coulombs";
   unit_database[unit_pos].quantity   = "charge";
   unit_database[unit_pos].multiplier = 1.0;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = unit_database[unit_pos].cgs = unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
   unit_database[unit_pos].exponent[UNIT_TIME]    = 1;
   unit_database[unit_pos].exponent[UNIT_CURRENT] = 1;
@@ -2035,8 +2035,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "volts";
   unit_database[unit_pos].quantity   = "potential";
   unit_database[unit_pos].multiplier = 1.0;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = unit_database[unit_pos].cgs = unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
   unit_database[unit_pos].exponent[UNIT_MASS]    = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH]  = 2;
@@ -2052,8 +2052,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "ohms";
   unit_database[unit_pos].quantity   = "resistance";
   unit_database[unit_pos].multiplier = 1.0;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = unit_database[unit_pos].cgs = unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
   unit_database[unit_pos].exponent[UNIT_MASS]    = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH]  = 2;
@@ -2069,8 +2069,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "siemens";
   unit_database[unit_pos].quantity   = "conductance";
   unit_database[unit_pos].multiplier = 1.0;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = unit_database[unit_pos].cgs = unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
   unit_database[unit_pos].exponent[UNIT_MASS]    =-1;
   unit_database[unit_pos].exponent[UNIT_LENGTH]  =-2;
@@ -2086,8 +2086,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "mhos";
   unit_database[unit_pos].quantity   = "conductance";
   unit_database[unit_pos].multiplier = 1.0;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].exponent[UNIT_MASS]    =-1;
   unit_database[unit_pos].exponent[UNIT_LENGTH]  =-2;
   unit_database[unit_pos].exponent[UNIT_TIME]    = 3;
@@ -2102,8 +2102,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "farad";
   unit_database[unit_pos].quantity   = "capacitance";
   unit_database[unit_pos].multiplier = 1.0;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = unit_database[unit_pos].cgs = unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH]  =-2;
   unit_database[unit_pos].exponent[UNIT_MASS]    =-1;
@@ -2119,8 +2119,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "henry";
   unit_database[unit_pos].quantity   = "inductance";
   unit_database[unit_pos].multiplier = 1.0;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = unit_database[unit_pos].cgs = unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH]  = 2;
   unit_database[unit_pos].exponent[UNIT_MASS]    = 1;
@@ -2136,8 +2136,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "tesla";
   unit_database[unit_pos].quantity   = "magnetic_field";
   unit_database[unit_pos].multiplier = 1.0;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = 1;
   unit_database[unit_pos].exponent[UNIT_MASS]    = 1;
   unit_database[unit_pos].exponent[UNIT_TIME]    =-2;
@@ -2152,8 +2152,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "gauss";
   unit_database[unit_pos].quantity   = "magnetic_field";
   unit_database[unit_pos].multiplier = 1e-4;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].cgs = unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
   unit_database[unit_pos].exponent[UNIT_MASS]    = 1;
   unit_database[unit_pos].exponent[UNIT_TIME]    =-2;
@@ -2168,8 +2168,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "weber";
   unit_database[unit_pos].quantity   = "magnetic_flux";
   unit_database[unit_pos].multiplier = 1.0;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].si = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH]  = 2;
   unit_database[unit_pos].exponent[UNIT_MASS]    = 1;
@@ -2185,8 +2185,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "maxwell";
   unit_database[unit_pos].quantity   = "magnetic_flux";
   unit_database[unit_pos].multiplier = 1e-8;
-  unit_database[unit_pos].MinPrefix  = -24;
-  unit_database[unit_pos].MaxPrefix  =  24;
+  unit_database[unit_pos].minPrefix  = -24;
+  unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].cgs = unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH]  = 2;
   unit_database[unit_pos].exponent[UNIT_MASS]    = 1;
