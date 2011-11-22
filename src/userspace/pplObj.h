@@ -29,7 +29,7 @@
 #define PPLOBJ_STR   1 /* string value */
 #define PPLOBJ_BOOL  2 /* boolean */
 #define PPLOBJ_DATE  3 /* date/time */
-#define PPLOBJ_COL   4 /* colour */
+#define PPLOBJ_COL   4 /* color */
 #define PPLOBJ_DICT  5 /* dictionary */
 #define PPLOBJ_MOD   6 /* module */
 #define PPLOBJ_LIST  7 /* list */
@@ -51,7 +51,7 @@ extern char *pplObjTypeNames[];
 typedef struct pplObj
  {
   double         real, imag;
-  unsigned char  dimensionless, FlagComplex, modified, TempType;
+  unsigned char  dimensionless, flagComplex, modified, TempType;
   unsigned char  amMalloced, auxilMalloced;
   int            objType, auxilLen;
   struct pplObj *objCustomType;
@@ -65,9 +65,10 @@ typedef struct pplFile { int iNodeCount; FILE   *file; int open; } pplFile;
 typedef struct pplType { int iNodeCount; pplObj *type; int id; } pplType;
 
 // Functions for acting on pplObjs
-void   *pplObjZero    (pplObj *in, unsigned char amMalloced);
-void   *pplObjNullStr (pplObj *in, unsigned char amMalloced);
-pplObj *pplObjCpy     (pplObj *in, unsigned char useMalloc);
+pplObj *pplObjZero    (pplObj *in, unsigned char amMalloced);
+pplObj *pplObjNullStr (pplObj *in, unsigned char amMalloced);
+pplObj *pplNewModule  (int frozen);
+pplObj *pplObjCpy     (pplObj *out, pplObj *in, unsigned char useMalloc);
 
 #endif
 

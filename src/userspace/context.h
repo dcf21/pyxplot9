@@ -25,6 +25,7 @@
 #include "stringTools/strConstants.h"
 
 #include "coreUtils/dict.h"
+#include "coreUtils/errorReport.h"
 
 #include "pplConstants.h"
 
@@ -48,6 +49,7 @@ typedef struct ppl_context_struc
   unsigned char tokenBuff[ALGEBRA_MAXLEN];
 
   // Namespace hierarchy
+  int   ns_ptr , ns_branch;
   dict *namespaces[CONTEXT_DEPTH];
 
  } ppl_context;

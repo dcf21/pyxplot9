@@ -47,15 +47,15 @@
 
 typedef struct FunctionDescriptor
  {
-  int     FunctionType, iNodeCount;
+  int     functionType, iNodeCount;
   int     minArgs , maxArgs;
-  void   *FunctionPtr;
-  char   *ArgList;
+  void   *functionPtr;
+  char   *argList;
   pplObj *min, *max; // Range of values over which this function definition can be used; used in function splicing
-  unsigned char *MinActive, *MaxActive, numOnly, realOnly, dimlessOnly;
+  unsigned char *minActive, *maxActive, numOnly, notNan, realOnly, dimlessOnly;
   struct FunctionDescriptor *next; // A linked list of spliced alternative function definitions
   char   *LaTeX;
-  char   *description;
+  char   *description, *descriptionShort;
  } pplFunc;
 
 typedef struct SplineDescriptor

@@ -37,7 +37,7 @@ list *ppl_listInit(int useMalloc)
   out->first  = NULL;
   out->last   = NULL;
   out->length = 0;
-  out->iNodeCount= 0;
+  out->iNodeCount= 1;
   out->useMalloc = useMalloc;
   out->memory_context = ppl_memAlloc_GetMemContext();
   return out;

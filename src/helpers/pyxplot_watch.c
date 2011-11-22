@@ -37,11 +37,9 @@
 #include "settings/settingTypes.h"
 #include "settings/settings.h"
 
-#include "userspace/context.h"
-
 pplset_session  pplset_session_default;
 
-void RunPyXPlotOnFile(ppl_context *context, char *fname)
+void RunPyXPlotOnFile(pplerr_context *context, char *fname)
  {
   char         LineBuffer[LSTR_LENGTH];
   int          interactive, status;
@@ -50,8 +48,8 @@ void RunPyXPlotOnFile(ppl_context *context, char *fname)
 
   if (interactive)
    {
-    sprintf(LineBuffer, "[%s] Running %s.", ppl_strStrip(ppl_friendlyTimestring(), context->errcontext.tempErrStr), fname);
-    ppl_report(&context->errcontext,LineBuffer);
+    sprintf(LineBuffer, "[%s] Running %s.", ppl_strStrip(ppl_friendlyTimestring(), context->tempErrStr), fname);
+    ppl_report(context,LineBuffer);
    }
 
   sprintf(LineBuffer, "%s -q %s %s", PPLBINARY, (pplset_session_default.colour == SW_ONOFF_ON) ? "-c" : "-m", fname);
@@ -59,14 +57,14 @@ void RunPyXPlotOnFile(ppl_context *context, char *fname)
 
   if (status && !interactive)
    {
-    sprintf(LineBuffer, "[%s] Encountered problem in script file %s.", ppl_strStrip(ppl_friendlyTimestring(), context->errcontext.tempErrStr), fname);
-    ppl_error(&context->errcontext,ERR_PREFORMED, -1, -1, LineBuffer);
+    sprintf(LineBuffer, "[%s] Encountered problem in script file %s.", ppl_strStrip(ppl_friendlyTimestring(), context->tempErrStr), fname);
+    ppl_error(context,ERR_PREFORMED, -1, -1, LineBuffer);
    }
 
   if (interactive)
    {
-    sprintf(LineBuffer, "[%s] Finished %s.", ppl_strStrip(ppl_friendlyTimestring(), context->errcontext.tempErrStr), fname);
-    ppl_report(&context->errcontext,LineBuffer);
+    sprintf(LineBuffer, "[%s] Finished %s.", ppl_strStrip(ppl_friendlyTimestring(), context->tempErrStr), fname);
+    ppl_report(context,LineBuffer);
    }
   return;
  }
@@ -77,15 +75,20 @@ int main(int argc, char **argv)
   char init_string[LSTR_LENGTH], help_string[LSTR_LENGTH], version_string[FNAME_LENGTH], version_string_underline[FNAME_LENGTH];
   int i, j, HaveFilenames, DoneWork;
   glob_t GlobData;
-  ppl_context *context;
+  pplerr_context *context;
 
   dict *StatInfodict;
   struct stat StatInfo, *StatInfoPtr;
 
   // Initialise sub-modules
-  context = ppl_contextInit();
-  if (DEBUG) ppl_log(&context->errcontext,"Initialising PyXPlot Watch.");
-  ppl_memAlloc_MemoryInit(&context->errcontext, &ppl_error, &ppl_log);
+  context = malloc(sizeof(pplerr_context));
+  if (context==NULL) { printf("malloc fail."); return 1; }
+  context->error_input_linenumber = -1;
+  context->error_input_filename[0] = '\0';
+  strcpy(context->error_source,"main     ");
+
+  if (DEBUG) ppl_log(context,"Initialising PyXPlot Watch.");
+  ppl_memAlloc_MemoryInit(context, &ppl_error, &ppl_log);
   StatInfodict = ppl_dictInit(HASHSIZE_SMALL, 1);
 
   // Set up default session settings
@@ -157,35 +160,35 @@ Send comments, bug reports, feature requests and coffee supplies to:\n\
     else if (strcmp(argv[i], "--monochrome")==0) pplset_session_default.colour = SW_ONOFF_OFF;
     else if ((strcmp(argv[i], "-v")==0) || (strcmp(argv[i], "-version")==0) || (strcmp(argv[i], "--version")==0))
      {
-      ppl_report(&context->errcontext,version_string);
-      if (DEBUG) ppl_log(&context->errcontext,"Reported version number as requested.");
+      ppl_report(context,version_string);
+      if (DEBUG) ppl_log(context,"Reported version number as requested.");
       ppl_memAlloc_FreeAll(0); ppl_memAlloc_MemoryStop();
       return 0;
      }
     else if ((strcmp(argv[i], "-h")==0) || (strcmp(argv[i], "-help")==0) || (strcmp(argv[i], "--help")==0))
      {
-      ppl_report(&context->errcontext,help_string);
-      if (DEBUG) ppl_log(&context->errcontext,"Reported help text as requested.");
+      ppl_report(context,help_string);
+      if (DEBUG) ppl_log(context,"Reported help text as requested.");
       ppl_memAlloc_FreeAll(0); ppl_memAlloc_MemoryStop();
       return 0;
      }
     else
     {
-     sprintf(context->errcontext.tempErrStr, "Received switch '%s' which was not recognised. Type 'pyxplot_watch -help' for a list of available commandline options.", argv[i]);
-     ppl_error(&context->errcontext,ERR_PREFORMED, -1, -1, context->errcontext.tempErrStr);
-     if (DEBUG) ppl_log(&context->errcontext,"Received unexpected commandline switch.");
+     sprintf(context->tempErrStr, "Received switch '%s' which was not recognised. Type 'pyxplot_watch -help' for a list of available commandline options.", argv[i]);
+     ppl_error(context,ERR_PREFORMED, -1, -1, context->tempErrStr);
+     if (DEBUG) ppl_log(context,"Received unexpected commandline switch.");
      ppl_memAlloc_FreeAll(0); ppl_memAlloc_MemoryStop();
      return 1;
     }
    }
 
   // Produce splash text
-  if ((isatty(STDIN_FILENO) == 1) && (pplset_session_default.splash == SW_ONOFF_ON)) ppl_report(&context->errcontext,init_string);
+  if ((isatty(STDIN_FILENO) == 1) && (pplset_session_default.splash == SW_ONOFF_ON)) ppl_report(context,init_string);
 
   // Check that we have some filenames to watch
   if (!HaveFilenames)
    {
-    ppl_error(&context->errcontext,ERR_PREFORMED, -1, -1, "No filenames were supplied to watch. PyXPlot Watch's commandline syntax is:\n\npyxplot_watch [options] filename_list\n\nAs PyXPlot Watch has no work to do, it is exiting...");
+    ppl_error(context,ERR_PREFORMED, -1, -1, "No filenames were supplied to watch. PyXPlot Watch's commandline syntax is:\n\npyxplot_watch [options] filename_list\n\nAs PyXPlot Watch has no work to do, it is exiting...");
     exit(1);
    }
 
@@ -222,6 +225,7 @@ Send comments, bug reports, feature requests and coffee supplies to:\n\
    }
 
   // Never get here...
+  free(context);
   return 0;
  }
 

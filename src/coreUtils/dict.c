@@ -42,7 +42,7 @@ dict *ppl_dictInit(int HashSize, int useMalloc)
   out->first     = NULL;
   out->last      = NULL;
   out->length    = 0;
-  out->iNodeCount= 0;
+  out->iNodeCount= 1;
   out->HashSize  = HashSize;
   if (useMalloc) out->HashTable = (dictItem **)malloc(HashSize * sizeof(dictItem *));
   else           out->HashTable = (dictItem **)ppl_memAlloc(HashSize * sizeof(dictItem *));

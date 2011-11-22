@@ -36,12 +36,12 @@
 // Items with ! should never be displayed because they are internal markers
 char *pplObjTypeNames[] = {"number","string","boolean","date","color","dictionary","module","list","vector","matrix","file handle","function","type","null","exception","!global","!zombie",NULL};
 
-void *pplObjZero(pplObj *in, unsigned char amMalloced)
+pplObj *pplObjZero(pplObj *in, unsigned char amMalloced)
  {
   int i;
   in->real = in->imag = 0.0;
   in->dimensionless = 1;
-  in->modified = in->FlagComplex = in->TempType = 0;
+  in->modified = in->flagComplex = in->TempType = 0;
   in->objType = PPLOBJ_NUM;
   in->auxil = in->objCustomType = in->self_lval = NULL;
   in->auxilMalloced = 0;
@@ -51,12 +51,12 @@ void *pplObjZero(pplObj *in, unsigned char amMalloced)
   return in;
  }
 
-void *pplObjNullStr(pplObj *in, unsigned char amMalloced)
+pplObj *pplObjNullStr(pplObj *in, unsigned char amMalloced)
  {
   int i;
   in->real = in->imag = 0.0;
   in->dimensionless = 1;
-  in->modified = in->FlagComplex = in->TempType = 0;
+  in->modified = in->flagComplex = in->TempType = 0;
   in->objType = PPLOBJ_STR;
   in->auxil = (void *)"";
   in->auxilMalloced = 0;
@@ -67,15 +67,33 @@ void *pplObjNullStr(pplObj *in, unsigned char amMalloced)
   return in;
  }
 
-pplObj *pplObjCpy(pplObj *in, unsigned char useMalloc)
+pplObj *pplNewModule(int frozen)
  {
-  pplObj *out=NULL;
+  pplObj *in = malloc(sizeof(pplObj));
+  if (in==NULL) return in;
+  in->real = in->imag = frozen;
+  in->dimensionless = 1;
+  in->modified = in->flagComplex = in->TempType = 0;
+  in->objType = PPLOBJ_MOD;
+  in->auxil = (void *)ppl_dictInit(HASHSIZE_LARGE,1);
+  if (in->auxil==NULL) { free(in); return NULL; }
+  in->auxilMalloced = 1;
+  in->auxilLen = 0;
+  in->objCustomType = in->self_lval = NULL;
+  in->amMalloced = 1;
+  return in;
+ }
 
+pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char useMalloc)
+ {
   if (in==NULL) return NULL;
 
-  if (useMalloc) out = (pplObj *)malloc  (sizeof(pplObj));
-  else           out = (pplObj *)ppl_memAlloc(sizeof(pplObj));
-  if (out==NULL) return out;
+  if (out==NULL)
+   {
+    if (useMalloc) out = (pplObj *)malloc  (sizeof(pplObj));
+    else           out = (pplObj *)ppl_memAlloc(sizeof(pplObj));
+    if (out==NULL) return out;
+   }
 
   memcpy(out, in, sizeof(pplObj));
   out->self_lval  = out;
@@ -104,6 +122,7 @@ pplObj *pplObjCpy(pplObj *in, unsigned char useMalloc)
       ((list *)(out->auxil))->iNodeCount++;
       break;
     case PPLOBJ_DICT:
+    case PPLOBJ_MOD:
     case PPLOBJ_USER: // copy pointer
       ((dict *)(out->auxil))->iNodeCount++;
       break;

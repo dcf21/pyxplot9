@@ -314,23 +314,23 @@ void pplset_makedefault(ppl_context *context)
   #ifdef HAVE_FITSIO
   tempval.auxil    = (void *)FITSHELPER;
   tempval.auxilLen = strlen(FITSHELPER);
-  ppl_dictAppend(pplset_filters, "*.fits", pplObjCpy(&tempval,0));
+  ppl_dictAppend(pplset_filters, "*.fits", pplObjCpy(NULL,&tempval,1));
   #endif
   #ifdef TIMEHELPER
   tempval.auxil = (void *)TIMEHELPER;
   tempval.auxilLen = strlen(TIMEHELPER);
-  ppl_dictAppend(pplset_filters, "*.log", pplObjCpy(&tempval,0));
+  ppl_dictAppend(pplset_filters, "*.log", pplObjCpy(NULL,&tempval,1));
   #endif
   #ifdef GUNZIP_COMMAND
   tempval.auxil = (void *)GUNZIP_COMMAND;
   tempval.auxilLen = strlen(GUNZIP_COMMAND);
-  ppl_dictAppend(pplset_filters, "*.gz", pplObjCpy(&tempval,0));
+  ppl_dictAppend(pplset_filters, "*.gz", pplObjCpy(NULL,&tempval,1));
   #endif
   #ifdef WGET_COMMAND
   tempval.auxil = (void *)WGET_COMMAND;
   tempval.auxilLen = strlen(WGET_COMMAND);
-  ppl_dictAppend(pplset_filters, "http://*", pplObjCpy(&tempval,0));
-  ppl_dictAppend(pplset_filters, "ftp://*", pplObjCpy(&tempval,0));
+  ppl_dictAppend(pplset_filters, "http://*", pplObjCpy(NULL,&tempval,1));
+  ppl_dictAppend(pplset_filters, "ftp://*", pplObjCpy(NULL,&tempval,1));
   #endif
 
   // Set up empty lists of arrows and labels

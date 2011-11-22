@@ -55,13 +55,13 @@ LOCAL_OBJDIR = obj
 LOCAL_DOCDIR = doc
 LOCAL_BINDIR = bin
 
-PPL_FILES   = children.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/getPasswd.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c expressions/expCompile.c input.c mathsTools/dcfmath.c parser/cmdList.c pyxplot.c settings/epsColours.c settings/papersizes.c settings/settingsInit.c settings/settingTypes.c settings/textConstants.c settings/withWords.c stringTools/asciidouble.c userspace/context.c userspace/pplObj.c
+PPL_FILES   = children.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/getPasswd.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c expressions/expCompile.c input.c mathsTools/dcfmath.c parser/cmdList.c pyxplot.c settings/epsColours.c settings/papersizes.c settings/settingsInit.c settings/settingTypes.c settings/textConstants.c settings/withWords.c stringTools/asciidouble.c userspace/airyFuncs.c userspace/context.c userspace/defaultFuncs.c userspace/garbageCollector.c userspace/pplObj.c userspace/zetaRiemann.c
 
-PPL_HEADERS = children.h pplConstants.h coreUtils/dict.h coreUtils/errorReport.h coreUtils/getPasswd.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h expressions/expCompile.h input.h mathsTools/dcfmath.h parser/cmdList.h pyxplot.h settings/arrows.h settings/labels.h settings/papersizes.h settings/settings.h settings/settingTypes.h settings/textConstants.h settings/withWords.h stringTools/asciidouble.h stringTools/strConstants.h userspace/context.h userspace/pplObj.h userspace/pplObjFunc.h userspace/pplObjUnits.h
+PPL_HEADERS = children.h pplConstants.h coreUtils/dict.h coreUtils/errorReport.h coreUtils/getPasswd.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h expressions/expCompile.h input.h mathsTools/dcfmath.h parser/cmdList.h pyxplot.h settings/arrows.h settings/labels.h settings/papersizes.h settings/settings.h settings/settingTypes.h settings/textConstants.h settings/withWords.h stringTools/asciidouble.h stringTools/strConstants.h userspace/airyFuncs.h userspace/context.h userspace/defaultFuncs.h userspace/defaultFuncsMacros.h userspace/garbageCollector.h userspace/pplObj.h userspace/pplObjFunc.h userspace/pplObjUnits.h userspace/zetaRiemann.h
 
-PPLW_FILES   = helpers/pyxplot_watch.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c stringTools/asciidouble.c settings/settingTypes.c userspace/context.c
+PPLW_FILES   = helpers/pyxplot_watch.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c stringTools/asciidouble.c settings/settingTypes.c
 
-PPLW_HEADERS =                         coreUtils/dict.h coreUtils/errorReport.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h stringTools/asciidouble.h settings/settingTypes.h userspace/context.h
+PPLW_HEADERS =                         coreUtils/dict.h coreUtils/errorReport.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h stringTools/asciidouble.h settings/settingTypes.h
 
 FITSHELP_FILES   = helpers/pyxplot_fitshelper.c stringTools/asciidouble.c
 FITSHELP_HEADERS =                              stringTools/asciidouble.h stringTools/strConstants.h
