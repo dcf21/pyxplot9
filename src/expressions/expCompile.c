@@ -73,7 +73,7 @@
 // N can be followed by .........JK.....QR..U.
 // O can be followed by ....E......L.........V
 // P can be followed by .........JK....PQR..U.
-// Q can be followed by .........JK....PQ.S.U.
+// Q can be followed by .....F...JK....PQ.S.U.
 // R can be followed by ...................T..
 // S can be followed by .B..E.GHI..LMNO.......
 // T can be followed by .....F...JK....PQRS.U.
@@ -108,9 +108,15 @@
   scanpos++; \
  }
 
+#define FFWSTATE(L) \
+ { \
+  outpos  += 3*(L); \
+  scanpos += (L); \
+ }
+
 void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed, int allowCommaOperator, int collectCommas, int isDict, int outOffset, int *outlen, int *errPos, int *errType, char *errText)
  {
-  const char    *allowed[] = {"BEGHILMNO","CJKQU","BDGHILMNO","JKQU","FJKQRU","JKU","FJKPQRSU","EG","BEGHLMNO","BEGHILMNO","BEGHILMNO","JKU","JKQRU","JKQRU","ELV","JKPQRU","JKPQSU","T","BEGHILMNO","FJKPQRSU","","JKU"};
+  const char    *allowed[] = {"BEGHILMNO","CJKQU","BDGHILMNO","JKQU","FJKQRU","JKU","FJKPQRSU","EG","BEGHLMNO","BEGHILMNO","BEGHILMNO","JKU","JKQRU","JKQRU","ELV","JKPQRU","FJKPQSU","T","BEGHILMNO","FJKPQRSU","","JKU"};
   int            nCommaItems=1, nDictItems=0, tertiaryDepth=0;
   char           state='A', oldstate, trialstate;
   int            scanpos=0, outpos=0, trialpos;
@@ -152,13 +158,13 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
           NEWSTATE(1,0,0); // Record the one character opening bracket
           while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; n++; } // Sop up whitespace
           k=scanpos; l=outpos; j-=n;
-          NEWSTATE(j,0,0); // Fast-forward to closing bracket
           if ((in[k]!=')')||(trialstate=='E'))
            {
             ppl_expTokenise(context,in+k,&m,dollarAllowed,1,(trialstate!='E'),0,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
             if (*errPos>=0) { *errPos+=k; return; }
             if (m!=j) { *errPos = m+k; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
            }
+          FFWSTATE(j); // Fast-forward to closing bracket
           NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
          }
        }
@@ -256,18 +262,44 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
        {
         if (MARKUP_MATCH("["))
          {
-          int j,k,l,m,n=1;
+          int j,k,l,m=0,n=1;
+          int slice=0,minSet=0,maxSet=0;
           ppl_strBracketMatch(in+scanpos,'[',']',NULL,NULL,&j,0); // Search for a ] to match the [
           if (j<=0) { *errPos = scanpos; *errType=ERR_SYNTAX; strcpy(errText, "Mismatched [ ]"); *end=-1; *outlen=0; return; }
           NEWSTATE(1,0,0); // Record the one character opening bracket
-          while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; n++; } // Sop up whitespace
-          k=scanpos; l=outpos; j-=n;
-          NEWSTATE(j,0,0); // Fast-forward to closing bracket
-          if (in[k]!=']')
+          if ((trialstate=='Q') && (in[scanpos]==':')) // slice of the form [:x]
            {
-            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,1,0,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
+            SAMESTATE; n++; slice=1;
+            while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; n++; } // Sop up whitespace
+           }
+          k=scanpos; l=outpos; j-=n;
+          if ((in[k]!=']') || ((trialstate=='Q')&&(!slice))) // [] is allowed as a list literal, but not as an array dereference
+           {
+            if (slice) maxSet=1;
+            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,trialstate!='Q',0,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
             if (*errPos>=0) { *errPos+=k; return; }
+            if ((trialstate=='Q')&&(!slice)&&(in[k+m]==':'))
+             {
+              slice = minSet = 1;
+              FFWSTATE(m); j-=m; // Fast-forward over first expression in range
+              trialstate='J'; NEWSTATE(1,0x5F,18); j--; // Treat : separating ranges as a , operator (collect items on stack)
+              while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; j--; } // Sop up whitespace
+              trialstate='Q';
+              k=scanpos; l=outpos; m=0;
+              if (j>0)
+               {
+                maxSet=1;
+                ppl_expTokenise(context,in+k,&m,dollarAllowed,1,trialstate!='Q',0,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
+                if (*errPos>=0) { *errPos+=k; return; }
+               }
+             }
             if (m!=j) { *errPos = m+k; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
+           }
+          FFWSTATE(j); // Fast-forward to closing bracket
+          if (trialstate=='Q')
+           {
+            out[outpos+1] = (((minSet<<1) + maxSet)<<1) + !slice;
+            out[outpos+2] = 0;
            }
           NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
          }
@@ -282,13 +314,13 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
           NEWSTATE(1,0,0); // Record the one character opening bracket
           while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; n++;} // Sop up whitespace
           k=scanpos; l=outpos; j-=n;
-          NEWSTATE(j,0,0); // Fast-forward to closing bracket
           if (in[k]!='}')
            {
             ppl_expTokenise(context,in+k,&m,dollarAllowed,1,1,1,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
             if (*errPos>=0) { *errPos+=k; return; }
             if (m!=j) { *errPos = m+k; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
            }
+          FFWSTATE(j); // Fast-forward to closing bracket
           NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
          }
        }
@@ -392,13 +424,13 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
 #define GET_POINTER \
  { \
   if (lastoutpos<0) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not find variable name preceding assignment operator."); *end=-1; return; } \
-  if      (*(unsigned char *)(out+lastoutpos+sizeof(int))==3) *(unsigned char *)(out+lastoutpos+sizeof(int))=4; \
-  else if (*(unsigned char *)(out+lastoutpos+sizeof(int))==5) *(unsigned char *)(out+lastoutpos+sizeof(int))=6; \
-  else if (*(unsigned char *)(out+lastoutpos+sizeof(int))==7) \
+  if      (*(unsigned char *)(out+lastoutpos+2*sizeof(int))==3) *(unsigned char *)(out+lastoutpos+2*sizeof(int))=4; \
+  else if (*(unsigned char *)(out+lastoutpos+2*sizeof(int))==5) *(unsigned char *)(out+lastoutpos+2*sizeof(int))=6; \
+  else if (*(unsigned char *)(out+lastoutpos+2*sizeof(int))==7) \
    { \
-    int f = (int)*(unsigned char *)(out+lastoutpos+sizeof(int)+1); \
+    int f = (int)*(unsigned char *)(out+lastoutpos+2*sizeof(int)+1); \
     if (!(f&1)) { *errPos=ipos; *errType=ERR_SYNTAX; strcpy(errText, "Cannot apply an assignment operator to the output of a slice operator."); *end=-1; return; } \
-    *(unsigned char *)(out+lastoutpos+sizeof(int))=16; \
+    *(unsigned char *)(out+lastoutpos+2*sizeof(int))=16; \
    } \
  }
 
@@ -644,6 +676,25 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
      }
     else if (o=='Q') // array dereference or slice
      {
+      char bracketType=in[ipos];
+      if (bracketType=='[') // open dereference brackets
+       {
+        *(stack-stackpos-0) = '<'; // push bracket onto stack
+        *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
+        stackpos+=3;
+       }
+      else // close ]
+       {
+        unsigned char rightAssoc = 0;
+        unsigned char precedence = 255;
+        POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
+        if ( (stackpos<3) || (*(stack-stackpos+3)!='<') ) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match ] to an [."); *end=-1; return; }
+        stackpos-=3; // pop bracket
+        BYTECODE_OP(7); // bytecode 7 -- slice object
+        *(unsigned char *)(out+outpos) = tdata[tpos+1]; // flags to distinguish [x], [x:], [:x], [x:y] and [:]
+        outpos += 1;
+        BYTECODE_ENDOP;
+       }
      }
     while ((tpos<tlen) && (tdata[tpos]+'@' == o))
      {
@@ -652,6 +703,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       if ((o=='D') && ((in[ipos]=='(')||(in[ipos]==')'))) break; // Empty list ( ) of function arguments
       if ((o=='P') && ((in[ipos]=='(')||(in[ipos]==')'))) break; // Empty list ( ) of function arguments
       if ((o=='M') && ((in[ipos]=='[')||(in[ipos]==']'))) break; // Empty list [ ] is two tokens
+      if ((o=='Q') && ((in[ipos]=='[')||(in[ipos]==']'))) break; // Empty list [ ] is two tokens
       if ((o=='N') && ((in[ipos]=='{')||(in[ipos]=='}'))) break; // Empty dictionary { } is two tokens
      }
    }
@@ -760,10 +812,11 @@ void ppl_reversePolishPrint(ppl_context *context, void *in, char *out)
         int f = (int)*(unsigned char *)(in+j);
         strcpy (op,     "slice");
         strcpy (optype, "value");
-        if       (f & 1)     sprintf(arg,    "[%d]"   , *(int *)(in+j+1));
-        else if ((f & 6)==6) sprintf(arg,    "[%d:%d]", *(int *)(in+j+1), *(int *)(in+j+1+sizeof(int)));
-        else if ((f & 6)==2) sprintf(arg,    "[:%d]"  , *(int *)(in+j+1+sizeof(int)));
-        else                 sprintf(arg,    "[%d:]"  , *(int *)(in+j+1));
+        if       (f & 1)     strcpy(arg,    "[--]"   );
+        else if ((f & 6)==6) strcpy(arg,    "[--:--]");
+        else if ((f & 6)==4) strcpy(arg,    "[--:]"  );
+        else if ((f & 6)==2) strcpy(arg,    "[:--]"  );
+        else                 strcpy(arg,    "[:]"    );
         break;
        }
       case 16:

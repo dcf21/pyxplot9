@@ -22,6 +22,9 @@
 #include <stdio.h>
 #include "userspace/pplObjUnits.h"
 
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_matrix.h>
+
 #ifndef _PPLOBJ_H
 #define _PPLOBJ_H 1
 
@@ -61,8 +64,10 @@ typedef struct pplObj
  } pplObj;
 
 // Structures for describing files and types
-typedef struct pplFile { int iNodeCount; FILE   *file; int open; } pplFile;
-typedef struct pplType { int iNodeCount; pplObj *type; int id; } pplType;
+typedef struct pplFile   { int iNodeCount; FILE   *file; int open; } pplFile;
+typedef struct pplType   { int iNodeCount; pplObj *type; int id; } pplType;
+typedef struct pplVector { int iNodeCount; gsl_vector *v; } pplVector;
+typedef struct pplMatrix { int iNodeCount; gsl_matrix *m; } pplMatrix;
 
 // Functions for acting on pplObjs
 pplObj *pplObjZero    (pplObj *in, unsigned char amMalloced);

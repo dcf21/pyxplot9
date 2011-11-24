@@ -96,7 +96,7 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char useMalloc)
    }
 
   memcpy(out, in, sizeof(pplObj));
-  out->self_lval  = out;
+  out->self_lval  = in;
   out->amMalloced = useMalloc;
 
   switch(in->objType)
@@ -109,22 +109,28 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char useMalloc)
       memcpy(out->auxil, in->auxil, in->auxilLen);
       out->auxilMalloced = useMalloc;
       break;
-    case PPLOBJ_FILE: // copy pointer
-      ((pplFile *)(out->auxil))->iNodeCount++; 
-      break;
-    case PPLOBJ_FUNC: // copy pointer
-      ((pplFunc *)(out->auxil))->iNodeCount++;
-      break;
-    case PPLOBJ_TYPE: // copy pointer
-      ((pplType *)(out->auxil))->iNodeCount++;
-      break;
-    case PPLOBJ_LIST: // copy pointer
-      ((list *)(out->auxil))->iNodeCount++;
-      break;
     case PPLOBJ_DICT:
     case PPLOBJ_MOD:
-    case PPLOBJ_USER: // copy pointer
+    case PPLOBJ_USER: // dictionary -- pass by pointer
       ((dict *)(out->auxil))->iNodeCount++;
+      break;
+    case PPLOBJ_LIST: // list
+      ((list *)(out->auxil))->iNodeCount++;
+      break;
+    case PPLOBJ_VEC: // vector
+      ((pplVector *)(out->auxil))->iNodeCount++;
+      break;
+    case PPLOBJ_MAT: // matrix
+      ((pplMatrix *)(out->auxil))->iNodeCount++;
+      break;
+    case PPLOBJ_FILE: // file handle
+      ((pplFile *)(out->auxil))->iNodeCount++; 
+      break;
+    case PPLOBJ_FUNC: // function pointer
+      ((pplFunc *)(out->auxil))->iNodeCount++;
+      break;
+    case PPLOBJ_TYPE: // data type
+      if (out->auxil!=NULL) ((pplType *)(out->auxil))->iNodeCount++;
       break;
    }
   return out;

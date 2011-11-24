@@ -83,8 +83,7 @@ int ppl_unitsDimEqual3(const unit *a, const unit *b)
 unsigned char ppl_tempTypeMatch(unsigned char a, unsigned char b)
  {
   if ((a<1)||(b<1)) return 1; // anything is compatible with something which doesn't have dimensions of temperature
-  if (a==b) return 1; // oC, oF and oR are only ever used when called for
-  return 0;
+  return (a==b);
  }
 
 // -------------------------------
@@ -103,7 +102,7 @@ void ppl_uaPow(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
   if (b->dimensionless == 0)
    {
     if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
-    else { sprintf(errText, "Exponent should be dimensionless, but instead has dimensions of <%s>.", ppl_printUnit(c, b, NULL, NULL, 0, 1, 0)); *status = 1; return; }
+    else { sprintf(errText, "Exponent should be dimensionless, but instead has dimensions of <%s>.", ppl_printUnit(c, b, NULL, NULL, 0, 1, 0)); *errType=ERR_UNIT; *status = 1; return; }
    }
 
   if (c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) // Real pow()
@@ -112,7 +111,7 @@ void ppl_uaPow(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
     else
      {
       o->real = pow(a->real, exponent);
-      if ((!gsl_finite(o->real))&&(c->set->term_current.ExplicitErrors == SW_ONOFF_ON)) { sprintf(errText, "Exponentiation operator produced an overflow error or a complex number result. To enable complex arithmetic, type 'set numerics complex'."); *status = 1; return; }
+      if ((!gsl_finite(o->real))&&(c->set->term_current.ExplicitErrors == SW_ONOFF_ON)) { sprintf(errText, "Exponentiation operator produced an overflow error or a complex number result. To enable complex arithmetic, type 'set numerics complex'."); *errType=ERR_NUMERIC; *status = 1; return; }
      }
     o->imag = 0.0;
     o->flagComplex=0;
@@ -122,7 +121,7 @@ void ppl_uaPow(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
     if ((a->dimensionless == 0) && (b->flagComplex))
      {
       if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
-      else { sprintf(errText, "Raising quantities with physical units to complex powers produces quantities with complex physical dimensions, which is forbidden. The operand in question has dimensions of <%s>.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0)); *status = 1; return; }
+      else { sprintf(errText, "Raising quantities with physical units to complex powers produces quantities with complex physical dimensions, which is forbidden. The operand in question has dimensions of <%s>.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0)); *errType=ERR_UNIT; *status = 1; return; }
      }
     else
      {
@@ -143,7 +142,7 @@ void ppl_uaPow(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
       if (!o->flagComplex) o->imag=0.0; // Enforce that real numbers have positive zero imaginary components
       if ((!gsl_finite(o->real))||(!gsl_finite(o->imag)))
        {
-        if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Exponentiation operator produced an overflow error."); *status = 1; return; }
+        if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Exponentiation operator produced an overflow error."); *errType=ERR_OVERFLOW; *status = 1; return; }
         else { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
        }
      }
@@ -158,7 +157,7 @@ void ppl_uaPow(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
     if (fabs(o->exponent[i]) > 20000 )
      {
       if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
-      else { sprintf(errText, "Overflow of physical dimensions of argument."); *status = 1; return; }
+      else { sprintf(errText, "Overflow of physical dimensions of argument."); *errType=ERR_OVERFLOW; *status = 1; return; }
      }
    }
   o->tempType = a->tempType;
@@ -187,7 +186,7 @@ void ppl_uaMul(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
       breal = breal + c->tempTypeOffset[b->tempType] - c->tempTypeOffset[a->tempType]; // Imaginary part needs to conversion... multiplication already done.
      }
     else
-     {*status = 1; sprintf(errText, "Attempt to multiply quantities with different temperature units: left operand has units of <%s>, while right operand has units of <%s>. These must be explicitly cast onto the same temperature scale before multiplication is allowed. Type 'help units temperatures' for more details.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0), ppl_printUnit(c, b, NULL, NULL, 1, 1, 0) );}
+     { *status = 1; *errType=ERR_UNIT; sprintf(errText, "Attempt to multiply quantities with different temperature units: left operand has units of <%s>, while right operand has units of <%s>. These must be explicitly cast onto the same temperature scale before multiplication is allowed. Type 'help units temperatures' for more details.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0), ppl_printUnit(c, b, NULL, NULL, 1, 1, 0) );}
    }
 
   // If one or other input has temperature dependence, we need to propagate which unit of temperature is being used.
@@ -216,7 +215,7 @@ void ppl_uaMul(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
 
   if ((!gsl_finite(o->real))||(!gsl_finite(o->imag)))
    {
-    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Multiplication produced an overflow error."); *status = 1; return; }
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Multiplication produced an overflow error."); *errType=ERR_OVERFLOW; *status = 1; return; }
     else { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
    }
 
@@ -229,7 +228,7 @@ void ppl_uaMul(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
     if (fabs(o->exponent[i]) > 20000 )
      {
       if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
-      else { sprintf(errText, "Overflow of physical dimensions of argument."); *status = 1; return; }
+      else { sprintf(errText, "Overflow of physical dimensions of argument."); *errType=ERR_OVERFLOW; *status = 1; return; }
      }
    }
   o->dimensionless = DimLess;
@@ -258,7 +257,7 @@ void ppl_uaDiv(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
       breal = breal + c->tempTypeOffset[b->tempType] - c->tempTypeOffset[a->tempType]; // Imaginary part needs to conversion... multiplication already done.
      }
     else
-     {*status = 1; sprintf(errText, "Attempt to divide quantities with different temperature units: left operand has units of <%s>, while right operand has units of <%s>. These must be explicitly cast onto the same temperature scale before division is allowed. Type 'help units temperatures' for more details.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0), ppl_printUnit(c, b, NULL, NULL, 1, 1, 0) );}
+     {* status = 1; *errType=ERR_UNIT; sprintf(errText, "Attempt to divide quantities with different temperature units: left operand has units of <%s>, while right operand has units of <%s>. These must be explicitly cast onto the same temperature scale before division is allowed. Type 'help units temperatures' for more details.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0), ppl_printUnit(c, b, NULL, NULL, 1, 1, 0) );}
    }
 
   // If one or other input has temperature dependence, we need to propagate which unit of temperature is being used.
@@ -271,7 +270,7 @@ void ppl_uaDiv(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
     else if (fabs(breal) < 1e-200)
      {
       if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; }
-      else                                                      { sprintf(errText, "Division by zero error."); *status = 1; return; }
+      else                                                      { sprintf(errText, "Division by zero error."); *errType=ERR_NUMERIC; *status = 1; return; }
      }
     else
      {
@@ -287,7 +286,7 @@ void ppl_uaDiv(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
     else if ((mag = pow(breal,2)+pow(bimag,2)) < 1e-200)
      {
       if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; }
-      else                                                      { sprintf(errText, "Division by zero error."); *status = 1; return; }
+      else                                                      { sprintf(errText, "Division by zero error."); *errType=ERR_NUMERIC; *status = 1; return; }
      }
     else
      {
@@ -301,7 +300,7 @@ void ppl_uaDiv(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
 
   if ((!gsl_finite(o->real))||(!gsl_finite(o->imag)))
    {
-    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Division produced an overflow error."); *status = 1; return; }
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Division produced an overflow error."); *errType=ERR_OVERFLOW; *status = 1; return; }
     else { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
    }
 
@@ -314,7 +313,7 @@ void ppl_uaDiv(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
     if (fabs(o->exponent[i]) > 20000 )
      {
       if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
-      else { sprintf(errText, "Overflow of physical dimensions of argument."); *status = 1; return; }
+      else { sprintf(errText, "Overflow of physical dimensions of argument."); *errType=ERR_UNIT; *status = 1; return; }
      }
    }
   o->dimensionless = DimLess;
@@ -336,11 +335,11 @@ void ppl_uaAdd(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
        { sprintf(errText, "Attempt to add quantities with conflicting dimensions: left operand has units of <%s>, while right operand is dimensionless.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0) ); }
       else
        { sprintf(errText, "Attempt to add quantities with conflicting dimensions: left operand has units of <%s>, while right operand has units of <%s>.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0), ppl_printUnit(c, b, NULL, NULL, 1, 1, 0) ); }
-      *status = 1; return;
+      *errType=ERR_UNIT; *status = 1; return;
      }
    }
   if (!ppl_tempTypeMatch(a->tempType, b->tempType))
-   { *status = 1; sprintf(errText, "Attempt to add quantities with different temperature units: left operand has units of <%s>, while right operand has units of <%s>. These must be explicitly cast onto the same temperature scale before addition is allowed. Type 'help units temperatures' for more details.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0), ppl_printUnit(c, b, NULL, NULL, 1, 1, 0) ); }
+   { *errType=ERR_UNIT; *status = 1; sprintf(errText, "Attempt to add quantities with different temperature units: left operand has units of <%s>, while right operand has units of <%s>. These must be explicitly cast onto the same temperature scale before addition is allowed. Type 'help units temperatures' for more details.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0), ppl_printUnit(c, b, NULL, NULL, 1, 1, 0) ); }
   if (a->flagComplex || b->flagComplex)
    {
     if (c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) { o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
@@ -351,7 +350,7 @@ void ppl_uaAdd(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
 
   if ((!gsl_finite(o->real))||(!gsl_finite(o->imag)))
    {
-    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Addition produced an overflow error."); *status = 1; return; }
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Addition produced an overflow error."); *errType=ERR_OVERFLOW; *status = 1; return; }
     else { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
    }
 
@@ -372,11 +371,11 @@ void ppl_uaSub(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
        { sprintf(errText, "Attempt to subtract quantities with conflicting dimensions: left operand has units of <%s>, while right operand is dimensionless.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0) ); }
       else
        { sprintf(errText, "Attempt to subtract quantities with conflicting dimensions: left operand has units of <%s>, while right operand has units of <%s>.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0), ppl_printUnit(c, b, NULL, NULL, 1, 1, 0) ); }
-      *status = 1; return;
+      *errType=ERR_UNIT; *status = 1; return;
      }
    }
   if (!ppl_tempTypeMatch(a->tempType, b->tempType))
-   { *status = 1; sprintf(errText, "Attempt to subtract quantities with different temperature units: left operand has units of <%s>, while right operand has units of <%s>. These must be explicitly cast onto the same temperature scale before subtraction is allowed. Type 'help units temperatures' for more details.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0), ppl_printUnit(c, b, NULL, NULL, 1, 1, 0) ); }
+   { *errType=ERR_UNIT; *status = 1; sprintf(errText, "Attempt to subtract quantities with different temperature units: left operand has units of <%s>, while right operand has units of <%s>. These must be explicitly cast onto the same temperature scale before subtraction is allowed. Type 'help units temperatures' for more details.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0), ppl_printUnit(c, b, NULL, NULL, 1, 1, 0) ); }
   if (a->flagComplex || b->flagComplex)
    {
     if (c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) { o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
@@ -387,7 +386,7 @@ void ppl_uaSub(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
 
   if ((!gsl_finite(o->real))||(!gsl_finite(o->imag)))
    {
-    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Subtraction produced an overflow error."); *status = 1; return; }
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Subtraction produced an overflow error."); *errType=ERR_OVERFLOW; *status = 1; return; }
     else { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
    }
 
@@ -408,21 +407,21 @@ void ppl_uaMod(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
        { sprintf(errText, "Attempt to apply mod operator to quantities with conflicting dimensions: left operand has units of <%s>, while right operand is dimensionless.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0) ); }
       else
        { sprintf(errText, "Attempt to apply mod operator to quantities with conflicting dimensions: left operand has units of <%s>, while right operand has units of <%s>.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0), ppl_printUnit(c, b, NULL, NULL, 1, 1, 0) ); }
-      *status = 1; return;
+      *errType=ERR_UNIT; *status = 1; return;
      }
    }
   if (!ppl_tempTypeMatch(a->tempType, b->tempType))
-   { *status = 1; sprintf(errText, "Attempt to apply mod operator to quantities with different temperature units: left operand has units of <%s>, while right operand has units of <%s>. These must be explicitly cast onto the same temperature scale before the use of the mod operator is allowed. Type 'help units temperatures' for more details.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0), ppl_printUnit(c, b, NULL, NULL, 1, 1, 0) ); }
+   { *errType=ERR_UNIT; *status = 1; sprintf(errText, "Attempt to apply mod operator to quantities with different temperature units: left operand has units of <%s>, while right operand has units of <%s>. These must be explicitly cast onto the same temperature scale before the use of the mod operator is allowed. Type 'help units temperatures' for more details.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0), ppl_printUnit(c, b, NULL, NULL, 1, 1, 0) ); }
   if (a->flagComplex || b->flagComplex)
    {
     if (c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) { o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
     sprintf(errText, "Mod operator can only be applied to real operands; complex operands supplied.");
-    *status = 1; return;
+    *errType=ERR_NUMERIC; *status = 1; return;
    }
 
   if ((!gsl_finite(o->real))||(!gsl_finite(o->imag)))
    {
-    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Modulo operator produced an overflow error."); *status = 1; return; }
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Modulo operator produced an overflow error."); *errType=ERR_OVERFLOW; *status = 1; return; }
     else { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
    }
 
