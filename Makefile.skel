@@ -55,9 +55,9 @@ LOCAL_OBJDIR = obj
 LOCAL_DOCDIR = doc
 LOCAL_BINDIR = bin
 
-PPL_FILES   = children.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/getPasswd.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c defaultObjs/airyFuncs.c defaultObjs/defaultFuncs.c defaultObjs/defaultUnits.c defaultObjs/defaultVars.c defaultObjs/zetaRiemann.c expressions/expCompile.c helpers/pyxplot_fitshelper.c helpers/pyxplot_watch.c input.c mathsTools/dcfmath.c parser/cmdList.c pyxplot.c settings/arrows.c settings/labels.c settings/papersizes.c settings/settingsInit.c settings/settingTypes.c settings/textConstants.c settings/withWords.c stringTools/asciidouble.c userspace/context.c userspace/garbageCollector.c userspace/pplObj.c userspace/unitsArithmetic.c userspace/unitsDisp.c
+PPL_FILES   = children.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/getPasswd.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c defaultObjs/airyFuncs.c defaultObjs/defaultFuncs.c defaultObjs/defaultUnits.c defaultObjs/defaultVars.c defaultObjs/zetaRiemann.c expressions/expCompile.c input.c mathsTools/dcfmath.c parser/cmdList.c pyxplot.c settings/arrows.c settings/colors.c settings/epsColors.c settings/labels.c settings/papersizes.c settings/settingsInit.c settings/settingTypes.c settings/textConstants.c settings/withWords.c stringTools/asciidouble.c userspace/context.c userspace/garbageCollector.c userspace/pplObj.c userspace/unitsArithmetic.c userspace/unitsDisp.c
 
-PPL_HEADERS = children.h coreUtils/dict.h coreUtils/errorReport.h coreUtils/getPasswd.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h defaultObjs/airyFuncs.h defaultObjs/defaultFuncs.h defaultObjs/defaultFuncsMacros.h defaultObjs/zetaRiemann.h expressions/expCompile.h input.h mathsTools/dcfmath.h parser/cmdList.h pplConstants.h pyxplot.h settings/arrows.h settings/epsColours.h settings/labels.h settings/papersizes.h settings/settings.h settings/settingTypes.h settings/textConstants.h settings/withWords.h stringTools/asciidouble.h stringTools/strConstants.h userspace/context.h userspace/garbageCollector.h userspace/pplObjFunc.h userspace/pplObj.h userspace/pplObjUnits.h
+PPL_HEADERS = children.h coreUtils/dict.h coreUtils/errorReport.h coreUtils/getPasswd.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h defaultObjs/airyFuncs.h defaultObjs/defaultFuncs.h defaultObjs/defaultFuncsMacros.h defaultObjs/zetaRiemann.h expressions/expCompile.h input.h mathsTools/dcfmath.h parser/cmdList.h pplConstants.h pyxplot.h settings/arrows.h settings/colors.h settings/arrows_fns.h settings/epsColors.h settings/labels.h settings/labels_fns.h settings/papersizes.h settings/settings.h settings/settingTypes.h settings/textConstants.h settings/withWords.h settings/withWords_fns.h stringTools/asciidouble.h stringTools/strConstants.h userspace/context.h userspace/garbageCollector.h userspace/pplObjFunc.h userspace/pplObj.h userspace/pplObjUnits.h userspace/unitsArithmetic.h userspace/unitsDisp.h
 
 PPLW_FILES   = helpers/pyxplot_watch.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c stringTools/asciidouble.c settings/settingTypes.c
 
@@ -93,25 +93,25 @@ DEBUG_SWITCHES      = $(COMMON_SWITCHES) -D SRCDIR=\"$(CWD)/$(LOCAL_SRCDIR)/\"  
 
 all: $(LOCAL_BINDIR)/pyxplot $(LOCAL_BINDIR)/pyxplot_watch $(LOCAL_BINDIR)/pyxplot_fitshelper $(LOCAL_BINDIR)/pyxplot_timehelper $(LOCAL_BINDIR)/debug/pyxplot $(LOCAL_BINDIR)/debug/pyxplot_watch $(LOCAL_BINDIR)/install/pyxplot $(LOCAL_BINDIR)/install/pyxplot_watch $(LOCAL_BINDIR)/install/pyxplot_fitshelper $(LOCAL_BINDIR)/install/pyxplot_timehelper $(LOCAL_OBJDIR)/pyxplot.1 $(LOCAL_OBJDIR)/pyxplot_watch.1
 
-src/settings/epsColours.h: buildScripts/colourlistGenerate.py
-	python buildScripts/colourlistGenerate.py
+src/settings/epsColors.h: buildScripts/colorlistGenerate.py
+	python buildScripts/colorlistGenerate.py
 
-src/settings/epsColours.c: src/settings/epsColours.h
+src/settings/epsColors.c: src/settings/epsColors.h
 
 #
 # General macros for the compile steps
 #
 
 $(LOCAL_OBJDIR)/%.o:         $(LOCAL_SRCDIR)/%.c $(ALL_HFILES)
-	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
+	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/defaultObjs $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
 	$(COMPILE) $(CFLAGS) $(OPTIMISATION) $(NODEBUG) $(NOINSTALL_SWITCHES) $< -o $@
 
 $(LOCAL_OBJDIR)/%.debug.o:   $(LOCAL_SRCDIR)/%.c $(ALL_HFILES)
-	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
+	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/defaultObjs $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
 	$(COMPILE) $(CFLAGS) $(OPTIMISATION) $(DEBUG)   $(DEBUG_SWITCHES)     $< -o $@
 
 $(LOCAL_OBJDIR)/%.install.o: $(LOCAL_SRCDIR)/%.c $(ALL_HFILES)
-	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
+	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/defaultObjs $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
 	$(COMPILE) $(CFLAGS) $(OPTIMISATION) $(NODEBUG) $(INSTALL_SWITCHES)   $< -o $@
 
 #
@@ -204,7 +204,7 @@ install: all
 #
 
 clean:
-	rm -f src/settings/epsColours.c src/settings/epsColours.h
+	rm -f src/settings/epsColors.c src/settings/epsColors.h
 	rm -vfR $(LOCAL_OBJDIR) $(LOCAL_BINDIR)
 
 afresh: clean all

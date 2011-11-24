@@ -22,11 +22,8 @@
 #ifndef _PPLSET_LABELS_H
 #define _PPLSET_LABELS_H 1
 
-#include "coreUtils/dict.h"
 #include "settings/withWords.h"
-
 #include "userspace/pplObj.h"
-#include "userspace/context.h"
 
 typedef struct ppllabel_object {
  int         id;
@@ -40,13 +37,5 @@ typedef struct ppllabel_object {
  struct ppllabel_object *next;
  } ppllabel_object;
 
-void ppllabel_add         (ppl_context *context, ppllabel_object **inlist, dict *in);
-void ppllabel_remove      (ppl_context *context, ppllabel_object **inlist, dict *in);
-void ppllabel_unset       (ppl_context *context, ppllabel_object **inlist, dict *in);
-void ppllabel_default     (ppl_context *context, ppllabel_object **inlist, dict *in);
-unsigned char ppllabel_compare(ppl_context *context, ppllabel_object *a, ppllabel_object *b);
-void ppllabel_list_copy   (ppl_context *context, ppllabel_object **out, ppllabel_object **in);
-void ppllabel_list_destroy(ppl_context *context, ppllabel_object **inlist);
-void ppllabel_print       (ppl_context *context, ppllabel_object  *in, char *out);
-
 #endif
+

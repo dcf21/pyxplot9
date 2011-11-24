@@ -49,9 +49,10 @@
 #include "input.h"
 #include "pplConstants.h"
 #include "settings/papersizes.h"
-#include "settings/settings.h"
+#include "settings/settings_fns.h"
 #include "settings/settingTypes.h"
 #include "settings/textConstants.h"
+#include "settings/withWords_fns.h"
 
 #include "userspace/context.h"
 
@@ -98,17 +99,17 @@ int main(int argc, char **argv)
 
   // Set default terminal
   EnvDisplay = getenv("DISPLAY"); // Check whether the environment variable DISPLAY is set
-  if      (strcmp(GHOSTVIEW_COMMAND, "/bin/false")!=0) context->set.term_current.viewer = context->set.term_default.viewer = SW_VIEWER_GV;
-  else if (strcmp(GGV_COMMAND      , "/bin/false")!=0) context->set.term_current.viewer = context->set.term_default.viewer = SW_VIEWER_GGV;
-  else                                                 context->set.term_current.viewer = context->set.term_default.viewer = SW_VIEWER_NULL;
-  if ( /* (ppl_termtype_set_in_configfile == 0) && */ ((context->willBeInteractive==0) ||
+  if      (strcmp(GHOSTVIEW_COMMAND, "/bin/false")!=0) context->set->term_current.viewer = context->set->term_default.viewer = SW_VIEWER_GV;
+  else if (strcmp(GGV_COMMAND      , "/bin/false")!=0) context->set->term_current.viewer = context->set->term_default.viewer = SW_VIEWER_GGV;
+  else                                                 context->set->term_current.viewer = context->set->term_default.viewer = SW_VIEWER_NULL;
+  if ( (context->termtypeSetInConfigfile == 0) && ((context->willBeInteractive==0) ||
                                                 (EnvDisplay==NULL) ||
                                                 (EnvDisplay[0]=='\0') ||
-                                                (context->set.term_default.viewer == SW_VIEWER_NULL) ||
+                                                (context->set->term_default.viewer == SW_VIEWER_NULL) ||
                                                 (isatty(STDIN_FILENO) != 1)))
    {
     if (DEBUG) ppl_log(&context->errcontext,"Detected that we are running a non-interactive session; defaulting to the EPS terminal.");
-    context->set.term_current.TermType = context->set.term_default.TermType = SW_TERMTYPE_EPS;
+    context->set->term_current.TermType = context->set->term_default.TermType = SW_TERMTYPE_EPS;
    }
 
   // Scan commandline options for any switches
@@ -126,16 +127,16 @@ int main(int argc, char **argv)
     else if (strcmp(argv[i], "-V"          )==0) context->errcontext.session_default.splash = SW_ONOFF_ON;
     else if (strcmp(argv[i], "-verbose"    )==0) context->errcontext.session_default.splash = SW_ONOFF_ON;
     else if (strcmp(argv[i], "--verbose"   )==0) context->errcontext.session_default.splash = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "-c"          )==0) context->errcontext.session_default.colour = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "-colour"     )==0) context->errcontext.session_default.colour = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "--colour"    )==0) context->errcontext.session_default.colour = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "-color"      )==0) context->errcontext.session_default.colour = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "--color"     )==0) context->errcontext.session_default.colour = SW_ONOFF_ON;
-    else if (strcmp(argv[i], "-m"          )==0) context->errcontext.session_default.colour = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "-mono"       )==0) context->errcontext.session_default.colour = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "--mono"      )==0) context->errcontext.session_default.colour = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "-monochrome" )==0) context->errcontext.session_default.colour = SW_ONOFF_OFF;
-    else if (strcmp(argv[i], "--monochrome")==0) context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "-c"          )==0) context->errcontext.session_default.color  = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "-colour"     )==0) context->errcontext.session_default.color  = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "--colour"    )==0) context->errcontext.session_default.color  = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "-color"      )==0) context->errcontext.session_default.color  = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "--color"     )==0) context->errcontext.session_default.color  = SW_ONOFF_ON;
+    else if (strcmp(argv[i], "-m"          )==0) context->errcontext.session_default.color  = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "-mono"       )==0) context->errcontext.session_default.color  = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "--mono"      )==0) context->errcontext.session_default.color  = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "-monochrome" )==0) context->errcontext.session_default.color  = SW_ONOFF_OFF;
+    else if (strcmp(argv[i], "--monochrome")==0) context->errcontext.session_default.color  = SW_ONOFF_OFF;
     else if (strcmp(argv[i], "-"           )==0) context->willBeInteractive=2;
     else if ((strcmp(argv[i], "-v")==0) || (strcmp(argv[i], "-version")==0) || (strcmp(argv[i], "--version")==0))
      {
@@ -224,8 +225,8 @@ int main(int argc, char **argv)
   pplcsp_sendCommand(context,"B\n");
 
   // Free all of the plot styles which are set
-  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsDestroy(context, &(context->set.plot_styles        [i]));
-  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsDestroy(context, &(context->set.plot_styles_default[i]));
+  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsDestroy(context, &(context->set->plot_styles        [i]));
+  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsDestroy(context, &(context->set->plot_styles_default[i]));
 
   // Save GNU Readline history
 #ifdef HAVE_READLINE

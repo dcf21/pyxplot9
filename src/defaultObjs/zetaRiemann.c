@@ -39,7 +39,7 @@
 
 #include "defaultObjs/zetaRiemann.h"
 
-void riemann_zeta_complex__(double x, double y, gsl_complex *output, int *status, char *errtext)
+void riemann_zeta_complex__(double x, double y, gsl_complex *output, int *status, char *errText)
  {
   gsl_complex a,am,b,c,d,e;
   double g,h;
@@ -125,7 +125,7 @@ void riemann_zeta_complex__(double x, double y, gsl_complex *output, int *status
   return;
  }
 
-void riemann_zeta_complex(gsl_complex in, gsl_complex *output, int *status, char *errtext)
+void riemann_zeta_complex(gsl_complex in, gsl_complex *output, int *status, char *errText)
  {
   double x,y;
   gsl_complex b,c;
@@ -137,7 +137,7 @@ void riemann_zeta_complex(gsl_complex in, gsl_complex *output, int *status, char
   if      ((x==1.0) && (y==0.0))
    {
     *status = 1; /* pole at z=1 */
-    strcpy(errtext, "The Riemann zeta function has a pole at z=1 and cannot be evaluated here.");
+    strcpy(errText, "The Riemann zeta function has a pole at z=1 and cannot be evaluated here.");
     return;
    }
   else if ((x==0.0) && (y==0.0))
@@ -149,13 +149,13 @@ void riemann_zeta_complex(gsl_complex in, gsl_complex *output, int *status, char
   else if (abs(y)>1000000.0)
    {
     *status = 1; /* would take too long to evaluate */
-    strcpy(errtext, "The Riemann zeta function takes a long time to evaluate for inputs with large complex components; operation cancelled.");
+    strcpy(errText, "The Riemann zeta function takes a long time to evaluate for inputs with large complex components; operation cancelled.");
     return;
    }
   else if (x<-300.0)
    {
     *status = 1; /* risk of overflow */
-    strcpy(errtext, "The Riemann zeta function cannot be evaluated for inputs with real parts below -300 due to numerical overflows.");
+    strcpy(errText, "The Riemann zeta function cannot be evaluated for inputs with real parts below -300 due to numerical overflows.");
     return;
    }
   else if ((y==0.0) && ((x/2)==((double) ((int) (x/2)))))
@@ -167,7 +167,7 @@ void riemann_zeta_complex(gsl_complex in, gsl_complex *output, int *status, char
   else if (x>=0.5)
    {
     *status=0;
-    riemann_zeta_complex__(x,y,output,status,errtext);
+    riemann_zeta_complex__(x,y,output,status,errText);
     return;
    }
   else
@@ -199,11 +199,11 @@ void riemann_zeta_complex(gsl_complex in, gsl_complex *output, int *status, char
     if(GSL_REAL(b)>660)
      {
       *status=1; /* risk of overflow */
-      sprintf(errtext, "The Riemann zeta function could not be evaluated due to a numerical overflow.");
+      sprintf(errText, "The Riemann zeta function could not be evaluated due to a numerical overflow.");
       return;
      }
     b = gsl_complex_exp(b);
-    riemann_zeta_complex__(1.0-x,-y,&c,status,errtext);
+    riemann_zeta_complex__(1.0-x,-y,&c,status,errText);
     b = gsl_complex_mul(b,c);
     *status = 0;
     *output = b;

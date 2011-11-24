@@ -28,14 +28,11 @@
 
 #include "pplConstants.h"
 #include "userspace/pplObj.h"
-
-#include "settings/arrows.h"
-#include "settings/labels.h"
 #include "settings/withWords.h"
 
 // Setting structures
 typedef struct pplset_terminal {
- int    backup, CalendarIn, CalendarOut, colour, ComplexNumbers, display, ExplicitErrors, landscape, multiplot, NumDisplay, SignificantFigures, TermAntiAlias, TermType, TermEnlarge, TermInvert, TermTransparent, UnitScheme, UnitDisplayPrefix, UnitDisplayAbbrev, UnitAngleDimless, viewer;
+ int    backup, CalendarIn, CalendarOut, color, ComplexNumbers, display, ExplicitErrors, landscape, multiplot, NumDisplay, SignificantFigures, TermAntiAlias, TermType, TermEnlarge, TermInvert, TermTransparent, UnitScheme, UnitDisplayPrefix, UnitDisplayAbbrev, UnitAngleDimless, viewer;
  long int RandomSeed;
  double dpi;
  unsigned char BinOriginAuto, BinWidthAuto;
@@ -88,11 +85,11 @@ typedef struct pplset_axis {
  char        **TickListStrings  , **MTickListStrings;
  } pplset_axis;
 
-// Variable initialisation functions
-void  pplset_makedefault(ppl_context *context);
+#include "settings/arrows.h"
+#include "settings/labels.h"
 
 // Complete set of session settings
-typedef ppl_settings_struc
+typedef struct ppl_settings_struc
  {
   pplset_terminal  term_default;
   pplset_terminal  term_current;

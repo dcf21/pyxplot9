@@ -51,7 +51,7 @@ extern int   SW_ONOFF_INT[];
 #define SW_VIEWER_NULL   10022
 #define SW_VIEWER_CUSTOM 10023
 
-// Colour spaces
+// Color spaces
 
 #define SW_COLSPACE_RGB  10031
 #define SW_COLSPACE_HSB  10032
@@ -98,7 +98,7 @@ extern int   SW_COLSPACE_INT[];
 #define SW_STYLE_ARROWS_NOHEAD  10131
 #define SW_STYLE_ARROWS_TWOHEAD 10132
 #define SW_STYLE_SURFACE        10133
-#define SW_STYLE_COLOURMAP      10134
+#define SW_STYLE_COLORMAP       10134
 #define SW_STYLE_CONTOURMAP     10135
 
 #ifndef _SETTINGTYPES_C
@@ -200,7 +200,7 @@ extern int   SW_KEYPOS_ACL[];
 extern int   SW_KEYPOS_INT[];
 #endif
 
-// Colour key position switches
+// Color key position switches
 
 #define SW_COLKEYPOS_T 14101
 #define SW_COLKEYPOS_B 14102
@@ -310,7 +310,7 @@ extern int   SW_VALIGN_ACL[];
 extern int   SW_VALIGN_INT[];
 #endif
 
-// Colours for displaying on terminals
+// Colors for displaying on terminals
 
 #define SW_TERMCOL_NOR 17001
 #define SW_TERMCOL_RED 17002
@@ -388,7 +388,7 @@ extern int   SW_PIEKEYPOS_INT[];
 
 #include "coreUtils/errorReport.h"
 
-void *FetchSettingName      (pplerr_context *context, int id, int *id_list, void *name_list, const int name_list_size);
-int   FetchSettingByName    (pplerr_context *context, char *name, int *id_list, char **name_list);
+void *ppl_fetchSettingName   (pplerr_context *context, int id, int *id_list, void *name_list, const int name_list_size);
+int   ppl_fetchSettingByName (pplerr_context *context, char *name, int *id_list, char **name_list);
 
 #endif

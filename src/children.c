@@ -358,7 +358,7 @@ int pplcsp_forkNewGv(ppl_context *context, char *fname, list *gv_list)
     // Child process; about to run postscript viewer
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
     sprintf(context->errcontext.error_source, "GV%7d", getpid());
-    context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    context->errcontext.session_default.color = SW_ONOFF_OFF;
     if (DEBUG) { sprintf(context->errcontext.tempErrStr, "New postscript viewer process alive; going to view %s.", fname); ppl_log(&context->errcontext,NULL); }
     if (PipeCSP2MAIN[1] != STDERR_FILENO) // Redirect stderr to pipe, so that GhostView doesn't spam terminal
      {
@@ -478,7 +478,7 @@ void pplcsp_forkSed(ppl_context *context, char *cmd, int *fstdin, int *fstdout)
     close(PipeMAIN2CSP[1]);
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
     sprintf(context->errcontext.error_source, "SED%6d", getpid());
-    context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    context->errcontext.session_default.color = SW_ONOFF_OFF;
     if (DEBUG) { sprintf(context->errcontext.tempErrStr, "New sed process alive; going to run command \"%s\".", cmd); ppl_log(&context->errcontext,NULL); }
     if (fd0[0] != STDIN_FILENO) // Redirect stdin to pipe
      {
@@ -535,7 +535,7 @@ void pplcsp_forkLaTeX(ppl_context *context, char *filename, int *PidOut, int *fs
     close(PipeMAIN2CSP[1]);
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
     sprintf(context->errcontext.error_source, "TEX%6d", getpid());
-    context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    context->errcontext.session_default.color = SW_ONOFF_OFF;
     if (DEBUG) { sprintf(context->errcontext.tempErrStr, "New latex process alive; going to latex file \"%s\".", filename); ppl_log(&context->errcontext,NULL); }
     if (fd0[0] != STDIN_FILENO) // Redirect stdin to pipe
      {
@@ -589,7 +589,7 @@ void pplcsp_forkInputFilter(ppl_context *context, char **cmd, int *fstdout)
     close(PipeMAIN2CSP[1]);
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
     sprintf(context->errcontext.error_source, "IF %6d", getpid());
-    context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    context->errcontext.session_default.color = SW_ONOFF_OFF;
     if (DEBUG) { sprintf(context->errcontext.tempErrStr, "New input filter process alive; going to run command \"%s\".", cmd[0]); ppl_log(&context->errcontext,NULL); }
     if (fd0[1] != STDOUT_FILENO) // Redirect stdout to pipe
      {
@@ -641,7 +641,7 @@ void pplcsp_forkKpseWhich(ppl_context *context, const char *ftype, int *fstdout)
     close(PipeMAIN2CSP[1]);
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
     sprintf(context->errcontext.error_source, "KPS%6d", getpid());
-    context->errcontext.session_default.colour = SW_ONOFF_OFF;
+    context->errcontext.session_default.color = SW_ONOFF_OFF;
     if (DEBUG) { sprintf(context->errcontext.tempErrStr, "New kpsewhich process alive; going to get paths for filetype \"%s\".", ftype); ppl_log(&context->errcontext,NULL); }
     if (fd0[1] != STDOUT_FILENO) // Redirect stdout to pipe
      {

@@ -35,13 +35,13 @@
 
 #define QUERY_OUT_OF_RANGE \
  { \
-  if (term->ExplicitErrors == SW_ONOFF_ON) { *status=1; sprintf(errText, "The function %s is not defined at the requested point in parameter space.", FunctionDescription); return; } \
+  if (term->ExplicitErrors == SW_ONOFF_ON) { *status=1; *errType=ERR_RANGE; sprintf(errText, "The function %s is not defined at the requested point in parameter space.", FunctionDescription); return; } \
   else { NULL_OUTPUT; } \
  }
 
 #define QUERY_MUST_BE_REAL \
  { \
-  if (term->ExplicitErrors == SW_ONOFF_ON) { *status=1; sprintf(errText, "The function %s only accepts real arguments; the supplied arguments are complex.", FunctionDescription); return; } \
+  if (term->ExplicitErrors == SW_ONOFF_ON) { *status=1; *errType=ERR_RANGE; sprintf(errText, "The function %s only accepts real arguments; the supplied arguments are complex.", FunctionDescription); return; } \
   else { NULL_OUTPUT; } \
  }
 
@@ -49,7 +49,7 @@
  { \
   if (((X)->flagComplex) || ((X)->real < 0) || ((X)->real >= LONG_MAX)) \
    { \
-    if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; sprintf(errText, "The %s %s in the range 0 <= %s < %ld.",FunctionDescription,DESCRIPTION,VAR,LONG_MAX); return; } \
+    if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The %s %s in the range 0 <= %s < %ld.",FunctionDescription,DESCRIPTION,VAR,LONG_MAX); return; } \
     else { NULL_OUTPUT; } \
    } \
  }
@@ -58,7 +58,7 @@
  { \
   if (((X)->flagComplex) || ((X)->real < 0) || ((X)->real >= INT_MAX)) \
    { \
-    if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; sprintf(errText, "The %s %s in the range 0 <= %s < %d.",FunctionDescription,DESCRIPTION,VAR,INT_MAX); return; } \
+    if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The %s %s in the range 0 <= %s < %d.",FunctionDescription,DESCRIPTION,VAR,INT_MAX); return; } \
     else { NULL_OUTPUT; } \
    } \
  }
@@ -67,7 +67,7 @@
  { \
   if (((X)->real <= INT_MIN) || ((X)->real >= INT_MAX)) \
    { \
-    if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; sprintf(errText, "The %s %s in the range %d <= %s < %d.",FunctionDescription,DESCRIPTION,INT_MIN,VAR,INT_MAX); return; } \
+    if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The %s %s in the range %d <= %s < %d.",FunctionDescription,DESCRIPTION,INT_MIN,VAR,INT_MAX); return; } \
     else { NULL_OUTPUT; } \
    } \
  }
@@ -80,7 +80,7 @@
 
 #define NAN_CHECK_FAIL \
  { \
-  if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; sprintf(errText, "The function %s has received a non-finite input.",FunctionDescription); return; } \
+  if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The function %s has received a non-finite input.",FunctionDescription); return; } \
   else { NULL_OUTPUT; } \
  }
 
@@ -132,6 +132,7 @@
   if (!(in[0].dimensionless)) \
    { \
     *status = 1; \
+    *errType=ERR_UNIT; \
     sprintf(errText, "The %s function can only act upon dimensionless inputs. Supplied input has dimensions of <%s>.", FunctionDescription, ppl_units_GetUnitStr(in, NULL, NULL, 1, 1, 0)); \
     return; \
    } \
@@ -142,6 +143,7 @@
   if (!(in[0].dimensionless && in[1].dimensionless)) \
    { \
     *status = 1; \
+    *errType=ERR_UNIT; \
     sprintf(errText, "The %s function can only act upon dimensionless inputs. Supplied inputs have dimensions of <%s> and <%s>.", FunctionDescription, ppl_units_GetUnitStr(in[0], NULL, NULL, 0, 1, 0), ppl_units_GetUnitStr(in[1], NULL, NULL, 1, 1, 0)); \
     return; \
    } \
@@ -152,6 +154,7 @@
   if (!(in[0].dimensionless && in[1].dimensionless && in[2].dimensionless)) \
    { \
     *status = 1; \
+    *errType=ERR_UNIT; \
     sprintf(errText, "The %s function can only act upon dimensionless inputs. Supplied inputs have dimensions of <%s>, <%s> and <%s>.", FunctionDescription, ppl_units_GetUnitStr(in[0], NULL, NULL, 0, 1, 0), ppl_units_GetUnitStr(in[1], NULL, NULL, 1, 1, 0), ppl_units_GetUnitStr(in[2], NULL, NULL, 2, 1, 0)); \
     return; \
    } \
@@ -162,6 +165,7 @@
   if (!(in[0].dimensionless && in[1].dimensionless && in[2].dimensionless && in[3].dimensionless)) \
    { \
     *status = 1; \
+    *errType=ERR_UNIT; \
     sprintf(errText, "The %s function can only act upon dimensionless inputs.", FunctionDescription); \
     return; \
    } \
@@ -172,6 +176,7 @@
   if (!(in[0].dimensionless && in[1].dimensionless && in[2].dimensionless && in[3].dimensionless && in[4].dimensionless)) \
    { \
     *status = 1; \
+    *errType=ERR_UNIT; \
     sprintf(errText, "The %s function can only act upon dimensionless inputs.", FunctionDescription); \
     return; \
    } \
@@ -181,6 +186,7 @@
   if (!(in[0].dimensionless && in[1].dimensionless && in[2].dimensionless && in[3].dimensionless && in[4].dimensionless && in[5].dimensionless)) \
    { \
     *status = 1; \
+    *errType=ERR_UNIT; \
     sprintf(errText, "The %s function can only act upon dimensionless inputs.", FunctionDescription); \
     return; \
    } \
@@ -191,6 +197,7 @@
   if ((!(in[0].dimensionless && in[1].dimensionless)) && (!(ppl_units_DimEqual(in[0], in[1])))) \
    { \
     *status = 1; \
+    *errType=ERR_UNIT; \
     sprintf(errText, "The %s function can only act upon inputs with matching dimensions. Supplied inputs have dimensions of <%s> and <%s>.", FunctionDescription, ppl_units_GetUnitStr(in[0], NULL, NULL, 0, 1, 0), ppl_units_GetUnitStr(in[1], NULL, NULL, 1, 1, 0)); \
     return; \
    } \
@@ -203,6 +210,7 @@
     if ((X)->exponent[i] != UNITN*(i==UNIT)) \
      { \
       *status = 1; \
+      *errType=ERR_UNIT; \
       sprintf(errText, "The %s argument to the %s function must be %s. Supplied input has dimensions of <%s>.", DESCRIPTION, FunctionDescription, UNITNAME, ppl_units_GetUnitStr((X), NULL, NULL, 1, 1, 0)); \
       return; \
      } \
@@ -220,7 +228,7 @@
 #define CLEANUP_GSLCOMPLEX \
   OUTPUT.real = GSL_REAL(z); \
   OUTPUT.imag = GSL_IMAG(z); \
-  OUTPUT.flagComplex = !ppl_units_DblEqual(OUTPUT.imag,0); \
+  OUTPUT.flagComplex = !ppl_dblEqual(OUTPUT.imag,0); \
   if (!OUTPUT.flagComplex) OUTPUT.imag=0.0;
 
 #define CLEANUP_APPLYUNIT(UNIT) \

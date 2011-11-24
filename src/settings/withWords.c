@@ -28,12 +28,13 @@
 #include "stringTools/asciidouble.h"
 #include "stringTools/strConstants.h"
 
-#include "settings/epsColours.h"
-
 #include "pplConstants.h"
 #include "coreUtils/errorReport.h"
+#include "settings/colors.h"
+#include "settings/epsColors.h"
 #include "settings/settings.h"
 #include "settings/settingTypes.h"
+#include "settings/withWords_fns.h"
 
 #include "userspace/context.h"
 
@@ -43,18 +44,78 @@
 
 void ppl_withWordsZero(ppl_context *context, withWords *a, const unsigned char malloced)
  {
-  a->colour = a->fillcolour = a->linespoints = a->linetype = a->pointtype = a->style = a->Col1234Space = a->FillCol1234Space = 0;
+  a->color = a->fillcolor = a->linespoints = a->linetype = a->pointtype = a->style = a->Col1234Space = a->FillCol1234Space = 0;
   a->linewidth = a->pointlinewidth = a->pointsize = 1.0;
-  a->colour1 = a->colour2 = a->colour3 = a->colour4 = a->fillcolour1 = a->fillcolour2 = a->fillcolour3 = a->fillcolour4 = 0.0;
+  a->color1 = a->color2 = a->color3 = a->color4 = a->fillcolor1 = a->fillcolor2 = a->fillcolor3 = a->fillcolor4 = 0.0;
   a->STRlinetype = a->STRlinewidth = a->STRpointlinewidth = a->STRpointsize = a->STRpointtype = NULL;
-  a->STRcolour = a->STRcolour1 = a->STRcolour2 = a->STRcolour3 = a->STRcolour4 = a->STRfillcolour = a->STRfillcolour1 = a->STRfillcolour2 = a->STRfillcolour3 = a->STRfillcolour4 = NULL;
-  a->USEcolour = a->USEfillcolour = a->USElinespoints = a->USElinetype = a->USElinewidth = a->USEpointlinewidth = a->USEpointsize = a->USEpointtype = a->USEstyle = a->USEcolour1234 = a->USEfillcolour1234 = 0;
-  a->AUTOcolour = a->AUTOlinetype = a->AUTOpointtype = 0;
+  a->STRcolor = a->STRcolor1 = a->STRcolor2 = a->STRcolor3 = a->STRcolor4 = a->STRfillcolor = a->STRfillcolor1 = a->STRfillcolor2 = a->STRfillcolor3 = a->STRfillcolor4 = NULL;
+  a->USEcolor = a->USEfillcolor = a->USElinespoints = a->USElinetype = a->USElinewidth = a->USEpointlinewidth = a->USEpointsize = a->USEpointtype = a->USEstyle = a->USEcolor1234 = a->USEfillcolor1234 = 0;
+  a->AUTOcolor = a->AUTOlinetype = a->AUTOpointtype = 0;
   a->malloced = malloced;
   return;
  }
 
 #define XWWMALLOC(X) (tmp = malloc(X)); if (tmp==NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); ppl_withWordsZero(context,out,1); return; }
+
+void ppl_withWordsFromDict(ppl_context *context, dict *in, withWords *out, const unsigned char MallocNew)
+ {
+  int    *tempint, i; // TO DO: Need to be able to read colors.
+  double *tempdbl;
+  char   *tempstr;
+  void   *tmp;
+  ppl_withWordsZero(context, out, MallocNew);
+
+  // read color names
+  ppl_colorFromDict(context, in,""    ,&out->color    ,&out->Col1234Space    ,&out->color1        ,&out->color2        ,&out->color3        ,&out->color4       ,
+                                                          &out->STRcolor     ,&out->STRcolor1     ,&out->STRcolor2     ,&out->STRcolor3     ,&out->STRcolor4    ,
+                    &out->USEcolor    ,&out->USEcolor1234    ,&i,MallocNew);
+  ppl_colorFromDict(context, in,"fill",&out->fillcolor,&out->FillCol1234Space,&out->fillcolor1    ,&out->fillcolor2    ,&out->fillcolor3    ,&out->fillcolor4   ,
+                                                       &out->STRfillcolor    ,&out->STRfillcolor1 ,&out->STRfillcolor2 ,&out->STRfillcolor3 ,&out->STRfillcolor4,
+                    &out->USEfillcolor,&out->USEfillcolor1234,&i,MallocNew);
+
+  // Other settings
+  tempint = (int *)ppl_dictLookup(in,"linetype");
+  if (tempint != NULL) { out->linetype = *tempint; out->USElinetype = 1; }
+  tempstr = (char *)ppl_dictLookup(in,"linetype_string");
+  if (tempstr != NULL) { if (!MallocNew) { out->STRlinetype       = tempstr; }
+                         else            { out->STRlinetype       = (char   *)XWWMALLOC(strlen(tempstr)+1); strcpy(out->STRlinetype      , tempstr); }
+                       }
+  tempdbl = (double *)ppl_dictLookup(in,"linewidth");
+  if (tempdbl != NULL) { out->linewidth = *tempdbl; out->USElinewidth = 1; }
+  tempstr = (char *)ppl_dictLookup(in,"linewidth_string");
+  if (tempstr != NULL) { if (!MallocNew) { out->STRlinewidth      = tempstr; }
+                         else            { out->STRlinewidth      = (char   *)XWWMALLOC(strlen(tempstr)+1); strcpy(out->STRlinewidth     , tempstr); }
+                       }
+  tempdbl = (double *)ppl_dictLookup(in,"pointsize");
+  if (tempdbl != NULL) { out->pointsize = *tempdbl; out->USEpointsize = 1; }
+  tempstr = (char *)ppl_dictLookup(in,"pointsize_string");
+  if (tempstr != NULL) { if (!MallocNew) { out->STRpointsize      = tempstr; }
+                         else            { out->STRpointsize      = (char   *)XWWMALLOC(strlen(tempstr)+1); strcpy(out->STRpointsize     , tempstr); }
+                       }
+  tempint = (int *)ppl_dictLookup(in,"pointtype");
+  if (tempint != NULL) { out->pointtype = *tempint; out->USEpointtype = 1; }
+  tempstr = (char *)ppl_dictLookup(in,"pointtype_string");
+  if (tempstr != NULL) { if (!MallocNew) { out->STRpointtype      = tempstr; }
+                         else            { out->STRpointtype      = (char   *)XWWMALLOC(strlen(tempstr)+1); strcpy(out->STRpointtype     , tempstr); }
+                       }
+  tempint = (int *)ppl_dictLookup(in,"style_number");
+  if (tempint != NULL) { out->style = *tempint; out->USEstyle = 1; }
+  tempdbl = (double *)ppl_dictLookup(in,"pointlinewidth");
+  if (tempdbl != NULL) { out->pointlinewidth = *tempdbl; out->USEpointlinewidth = 1; }
+  tempstr = (char *)ppl_dictLookup(in,"pointlinewidth_string");
+  if (tempstr != NULL) { if (!MallocNew) { out->STRpointlinewidth = tempstr; }
+                         else            { out->STRpointlinewidth = (char   *)XWWMALLOC(strlen(tempstr)+1); strcpy(out->STRpointlinewidth, tempstr); }
+                       }
+  tempstr = (char *)ppl_dictLookup(in,"style");
+  if (tempstr != NULL)
+   {
+    i = ppl_fetchSettingByName(&context->errcontext, tempstr, SW_STYLE_INT, SW_STYLE_STR);
+    out->linespoints = i;
+    out->USElinespoints = 1;
+   }
+  return;
+ }
+
 
 int ppl_withWordsCmp_zero(ppl_context *context, const withWords *a)
  {
@@ -63,16 +124,16 @@ int ppl_withWordsCmp_zero(ppl_context *context, const withWords *a)
   if (a->STRpointlinewidth != NULL) return 0;
   if (a->STRpointsize != NULL) return 0;
   if (a->STRpointtype != NULL) return 0;
-  if (a->STRcolour1 != NULL) return 0;
-  if (a->STRcolour2 != NULL) return 0;
-  if (a->STRcolour3 != NULL) return 0;
-  if (a->STRcolour4 != NULL) return 0;
-  if (a->STRfillcolour1 != NULL) return 0;
-  if (a->STRfillcolour2 != NULL) return 0;
-  if (a->STRfillcolour3 != NULL) return 0;
-  if (a->STRfillcolour4 !=NULL) return 0;
-  if (a->USEcolour) return 0;
-  if (a->USEfillcolour) return 0;
+  if (a->STRcolor1 != NULL) return 0;
+  if (a->STRcolor2 != NULL) return 0;
+  if (a->STRcolor3 != NULL) return 0;
+  if (a->STRcolor4 != NULL) return 0;
+  if (a->STRfillcolor1 != NULL) return 0;
+  if (a->STRfillcolor2 != NULL) return 0;
+  if (a->STRfillcolor3 != NULL) return 0;
+  if (a->STRfillcolor4 !=NULL) return 0;
+  if (a->USEcolor) return 0;
+  if (a->USEfillcolor) return 0;
   if (a->USElinespoints) return 0;
   if (a->USElinetype) return 0;
   if (a->USElinewidth) return 0;
@@ -80,54 +141,54 @@ int ppl_withWordsCmp_zero(ppl_context *context, const withWords *a)
   if (a->USEpointsize) return 0;
   if (a->USEpointtype) return 0;
   if (a->USEstyle) return 0;
-  if (a->USEcolour1234) return 0;
-  if (a->USEfillcolour1234) return 0;
+  if (a->USEcolor1234) return 0;
+  if (a->USEfillcolor1234) return 0;
   return 1;
  }
 
 int ppl_withWordsCmp(ppl_context *context, const withWords *a, const withWords *b)
  {
   // Check that the range of items which are defined in both structures are the same
-  if ((a->STRcolour1       ==NULL) != (b->STRcolour1       ==NULL)                                                                             ) return 0;
-  if ((a->STRcolour4       ==NULL) != (b->STRcolour4       ==NULL)                                                                             ) return 0;
-  if ((a->STRcolour1       ==NULL)                                 &&                            (a->USEcolour1234     != b->USEcolour1234    )) return 0;
-  if ((a->STRcolour1       ==NULL)                                 && ( a->USEcolour1234    ) && (a->Col1234Space      != b->Col1234Space     )) return 0;
-  if ((a->STRcolour1       ==NULL)                                 && (!a->USEcolour1234    ) && (a->USEcolour         != b->USEcolour        )) return 0;
-  if ((a->STRfillcolour1   ==NULL) != (b->STRfillcolour1   ==NULL)                                                                             ) return 0;
-  if ((a->STRfillcolour4   ==NULL) != (b->STRfillcolour4   ==NULL)                                                                             ) return 0;
-  if ((a->STRfillcolour1   ==NULL)                                 &&                            (a->USEfillcolour1234 != b->USEfillcolour1234)) return 0;
-  if ((a->STRfillcolour1   ==NULL)                                 && ( a->USEfillcolour1234) && (a->FillCol1234Space  != b->FillCol1234Space )) return 0;
-  if ((a->STRfillcolour1   ==NULL)                                 && (!a->USEfillcolour1234) && (a->USEfillcolour     != b->USEfillcolour    )) return 0;
-  if (                                                                                           (a->USElinespoints    != b->USElinespoints   )) return 0;
-  if ((a->STRlinetype      ==NULL) != (b->STRlinetype      ==NULL)                                                                             ) return 0;
-  if ((a->STRlinetype      ==NULL)                                                            && (a->USElinetype       != b->USElinetype      )) return 0;
-  if ((a->STRlinewidth     ==NULL) != (b->STRlinewidth     ==NULL)                                                                             ) return 0;
-  if ((a->STRlinewidth     ==NULL)                                                            && (a->USElinewidth      != b->USElinewidth     )) return 0;
-  if ((a->STRpointlinewidth==NULL) != (b->STRpointlinewidth==NULL)                                                                             ) return 0;
-  if ((a->STRpointlinewidth==NULL)                                                            && (a->USEpointlinewidth != b->USEpointlinewidth)) return 0;
-  if ((a->STRpointsize     ==NULL) != (b->STRpointsize     ==NULL)                                                                             ) return 0;
-  if ((a->STRpointsize     ==NULL)                                                            && (a->USEpointsize      != b->USEpointsize     )) return 0;
-  if ((a->STRpointtype     ==NULL) != (b->STRpointtype     ==NULL)                                                                             ) return 0;
-  if ((a->STRpointtype     ==NULL)                                                            && (a->USEpointtype      != b->USEpointtype     )) return 0;
-  if (                                                                                           (a->USEstyle          != b->USEstyle         )) return 0;
+  if ((a->STRcolor1        ==NULL) != (b->STRcolor1       ==NULL)                                                                             ) return 0;
+  if ((a->STRcolor4        ==NULL) != (b->STRcolor4       ==NULL)                                                                             ) return 0;
+  if ((a->STRcolor1        ==NULL)                                 &&                           (a->USEcolor1234      != b->USEcolor1234     )) return 0;
+  if ((a->STRcolor1        ==NULL)                                 && ( a->USEcolor1234    ) && (a->Col1234Space      != b->Col1234Space     )) return 0;
+  if ((a->STRcolor1        ==NULL)                                 && (!a->USEcolor1234    ) && (a->USEcolor          != b->USEcolor         )) return 0;
+  if ((a->STRfillcolor1    ==NULL) != (b->STRfillcolor1   ==NULL)                                                                             ) return 0;
+  if ((a->STRfillcolor4    ==NULL) != (b->STRfillcolor4   ==NULL)                                                                             ) return 0;
+  if ((a->STRfillcolor1    ==NULL)                                 &&                            (a->USEfillcolor1234 != b->USEfillcolor1234 )) return 0;
+  if ((a->STRfillcolor1    ==NULL)                                 && ( a->USEfillcolor1234) && (a->FillCol1234Space  != b->FillCol1234Space )) return 0;
+  if ((a->STRfillcolor1    ==NULL)                                 && (!a->USEfillcolor1234) && (a->USEfillcolor      != b->USEfillcolor     )) return 0;
+  if (                                                                                          (a->USElinespoints    != b->USElinespoints   )) return 0;
+  if ((a->STRlinetype      ==NULL) != (b->STRlinetype      ==NULL)                                                                            ) return 0;
+  if ((a->STRlinetype      ==NULL)                                                           && (a->USElinetype       != b->USElinetype      )) return 0;
+  if ((a->STRlinewidth     ==NULL) != (b->STRlinewidth     ==NULL)                                                                            ) return 0;
+  if ((a->STRlinewidth     ==NULL)                                                           && (a->USElinewidth      != b->USElinewidth     )) return 0;
+  if ((a->STRpointlinewidth==NULL) != (b->STRpointlinewidth==NULL)                                                                            ) return 0;
+  if ((a->STRpointlinewidth==NULL)                                                           && (a->USEpointlinewidth != b->USEpointlinewidth)) return 0;
+  if ((a->STRpointsize     ==NULL) != (b->STRpointsize     ==NULL)                                                                            ) return 0;
+  if ((a->STRpointsize     ==NULL)                                                           && (a->USEpointsize      != b->USEpointsize     )) return 0;
+  if ((a->STRpointtype     ==NULL) != (b->STRpointtype     ==NULL)                                                                            ) return 0;
+  if ((a->STRpointtype     ==NULL)                                                           && (a->USEpointtype      != b->USEpointtype     )) return 0;
+  if (                                                                                          (a->USEstyle          != b->USEstyle         )) return 0;
 
   // Check that the actual values are the same in both structures
-  if (a->STRcolour1 != NULL)
+  if (a->STRcolor1 != NULL)
    {
-    if ((strcmp(a->STRcolour1,b->STRcolour1)!=0)||(strcmp(a->STRcolour2,b->STRcolour2)!=0)||(strcmp(a->STRcolour3,b->STRcolour3)!=0)) return 0;
+    if ((strcmp(a->STRcolor1,b->STRcolor1)!=0)||(strcmp(a->STRcolor2,b->STRcolor2)!=0)||(strcmp(a->STRcolor3,b->STRcolor3)!=0)) return 0;
     if (a->Col1234Space!=b->Col1234Space) return 0;
-    if ((a->STRcolour4 != NULL) && ((strcmp(a->STRcolour4,b->STRcolour4)!=0))) return 0;
+    if ((a->STRcolor4 != NULL) && ((strcmp(a->STRcolor4,b->STRcolor4)!=0))) return 0;
    }
-  else if ((a->USEcolour1234          ) && ((a->colour1!=b->colour1)||(a->colour2!=b->colour2)||(a->colour3!=b->colour3)||(a->colour4!=b->colour4)||(a->Col1234Space!=b->Col1234Space))) return 0;
-  else if ((a->USEcolour              ) && ((a->colour !=b->colour ))) return 0;
-  if (a->STRfillcolour1 != NULL)
+  else if ((a->USEcolor1234           ) && ((a->color1!=b->color1)||(a->color2!=b->color2)||(a->color3!=b->color3)||(a->color4!=b->color4)||(a->Col1234Space!=b->Col1234Space))) return 0;
+  else if ((a->USEcolor               ) && ((a->color !=b->color ))) return 0;
+  if (a->STRfillcolor1 != NULL)
    {
-    if ((strcmp(a->STRfillcolour1,b->STRfillcolour1)!=0)||(strcmp(a->STRfillcolour2,b->STRfillcolour2)!=0)||(strcmp(a->STRfillcolour3,b->STRfillcolour3)!=0)) return 0;
+    if ((strcmp(a->STRfillcolor1,b->STRfillcolor1)!=0)||(strcmp(a->STRfillcolor2,b->STRfillcolor2)!=0)||(strcmp(a->STRfillcolor3,b->STRfillcolor3)!=0)) return 0;
     if (a->FillCol1234Space!=b->FillCol1234Space) return 0;
-    if ((a->STRfillcolour4 != NULL) && ((strcmp(a->STRfillcolour4,b->STRfillcolour4)!=0))) return 0;
+    if ((a->STRfillcolor4 != NULL) && ((strcmp(a->STRfillcolor4,b->STRfillcolor4)!=0))) return 0;
    }
-  else if ((a->USEfillcolour1234      ) && ((a->fillcolour1!=b->fillcolour1)||(a->fillcolour2!=b->fillcolour2)||(a->fillcolour3!=b->fillcolour3)||(a->fillcolour4!=b->fillcolour4)||(a->FillCol1234Space!=b->FillCol1234Space))) return 0;
-  else if ((a->USEfillcolour          ) && ((a->fillcolour    !=b->fillcolour    ))) return 0;
+  else if ((a->USEfillcolor1234       ) && ((a->fillcolor1!=b->fillcolor1)||(a->fillcolor2!=b->fillcolor2)||(a->fillcolor3!=b->fillcolor3)||(a->fillcolor4!=b->fillcolor4)||(a->FillCol1234Space!=b->FillCol1234Space))) return 0;
+  else if ((a->USEfillcolor           ) && ((a->fillcolor     !=b->fillcolor     ))) return 0;
   if      ((a->USElinespoints         ) && ((a->linespoints   !=b->linespoints   ))) return 0;
   if      ((a->STRlinetype      !=NULL) && ((strcmp(a->STRlinetype      ,b->STRlinetype      )!=0))) return 0;
   else if ((a->USElinetype            ) && ((a->linetype      !=b->linetype      ))) return 0;
@@ -172,13 +233,13 @@ void ppl_withWordsMerge(ppl_context *context, withWords *out, const withWords *a
         out->style = x->style; out->USEstyle = 1;
        }
      }
-    if (x->USEcolour1234          ) { out->colour1 = x->colour1; out->colour2 = x->colour2; out->colour3 = x->colour3; out->colour4 = x->colour4; out->Col1234Space = x->Col1234Space; out->USEcolour1234 = 1; out->USEcolour = 0; out->STRcolour1 = out->STRcolour2 = out->STRcolour3 = out->STRcolour4 = NULL; out->AUTOcolour = x->AUTOcolour; }
-    if (x->USEcolour              ) { out->colour = x->colour; out->USEcolour = 1; out->USEcolour1234 = 0; out->STRcolour1 = out->STRcolour2 = out->STRcolour3 = out->STRcolour4 = NULL; out->AUTOcolour = x->AUTOcolour; }
-    if (x->STRcolour        !=NULL) { out->STRcolour = x->STRcolour; }
-    if (x->STRcolour1       !=NULL) { out->STRcolour1 = x->STRcolour1; out->STRcolour2 = x->STRcolour2; out->STRcolour3 = x->STRcolour3; out->STRcolour4 = x->STRcolour4; out->Col1234Space = x->Col1234Space; }
-    if (x->STRfillcolour1   !=NULL) { out->STRfillcolour1 = x->STRfillcolour1; out->STRfillcolour2 = x->STRfillcolour2; out->STRfillcolour3 = x->STRfillcolour3; out->STRfillcolour4 = x->STRfillcolour4; out->FillCol1234Space = x->FillCol1234Space; out->USEfillcolour1234 = 0; out->USEfillcolour = 0; }
-    if (x->USEfillcolour1234      ) { out->fillcolour1 = x->fillcolour1; out->fillcolour2 = x->fillcolour2; out->fillcolour3 = x->fillcolour3; out->fillcolour4 = x->fillcolour4; out->FillCol1234Space = x->FillCol1234Space; out->USEfillcolour1234 = 1; out->USEfillcolour = 0; out->STRfillcolour1 = out->STRfillcolour2 = out->STRfillcolour3 = out->STRfillcolour4 = NULL; }
-    if (x->USEfillcolour          ) { out->fillcolour = x->fillcolour; out->USEfillcolour = 1; out->USEfillcolour1234 = 0; out->STRfillcolour1 = out->STRfillcolour2 = out->STRfillcolour3 = out->STRfillcolour4 = NULL; }
+    if (x->USEcolor1234          ) { out->color1 = x->color1; out->color2 = x->color2; out->color3 = x->color3; out->color4 = x->color4; out->Col1234Space = x->Col1234Space; out->USEcolor1234 = 1; out->USEcolor = 0; out->STRcolor1 = out->STRcolor2 = out->STRcolor3 = out->STRcolor4 = NULL; out->AUTOcolor = x->AUTOcolor; }
+    if (x->USEcolor              ) { out->color = x->color; out->USEcolor = 1; out->USEcolor1234 = 0; out->STRcolor1 = out->STRcolor2 = out->STRcolor3 = out->STRcolor4 = NULL; out->AUTOcolor = x->AUTOcolor; }
+    if (x->STRcolor        !=NULL) { out->STRcolor = x->STRcolor; }
+    if (x->STRcolor1       !=NULL) { out->STRcolor1 = x->STRcolor1; out->STRcolor2 = x->STRcolor2; out->STRcolor3 = x->STRcolor3; out->STRcolor4 = x->STRcolor4; out->Col1234Space = x->Col1234Space; }
+    if (x->STRfillcolor1   !=NULL) { out->STRfillcolor1 = x->STRfillcolor1; out->STRfillcolor2 = x->STRfillcolor2; out->STRfillcolor3 = x->STRfillcolor3; out->STRfillcolor4 = x->STRfillcolor4; out->FillCol1234Space = x->FillCol1234Space; out->USEfillcolor1234 = 0; out->USEfillcolor = 0; }
+    if (x->USEfillcolor1234      ) { out->fillcolor1 = x->fillcolor1; out->fillcolor2 = x->fillcolor2; out->fillcolor3 = x->fillcolor3; out->fillcolor4 = x->fillcolor4; out->FillCol1234Space = x->FillCol1234Space; out->USEfillcolor1234 = 1; out->USEfillcolor = 0; out->STRfillcolor1 = out->STRfillcolor2 = out->STRfillcolor3 = out->STRfillcolor4 = NULL; }
+    if (x->USEfillcolor          ) { out->fillcolor = x->fillcolor; out->USEfillcolor = 1; out->USEfillcolor1234 = 0; out->STRfillcolor1 = out->STRfillcolor2 = out->STRfillcolor3 = out->STRfillcolor4 = NULL; }
     if (x->USElinespoints         ) { out->linespoints = x->linespoints; out->USElinespoints = 1; }
     if (x->USElinetype            ) { out->linetype = x->linetype; out->USElinetype = 1; out->STRlinetype = NULL; out->AUTOlinetype = x->AUTOlinetype; }
     if (x->STRlinetype      !=NULL) { out->STRlinetype = x->STRlinetype; }
@@ -201,37 +262,37 @@ void ppl_withWordsMerge(ppl_context *context, withWords *out, const withWords *a
 void ppl_withWordsPrint(ppl_context *context, const withWords *defn, char *out)
  {
   int i=0;
-  if      (defn->USElinespoints)          { sprintf(out+i, "%s "            , *(char **)FetchSettingName(&context->errcontext,defn->linespoints, SW_STYLE_INT , (void *)SW_STYLE_STR , sizeof(char *))); i += strlen(out+i); }
-  if      (defn->STRcolour1!=NULL)
+  if      (defn->USElinespoints)          { sprintf(out+i, "%s "            , *(char **)ppl_fetchSettingName(&context->errcontext,defn->linespoints, SW_STYLE_INT , (void *)SW_STYLE_STR , sizeof(char *))); i += strlen(out+i); }
+  if      (defn->STRcolor1!=NULL)
    {
-    if      (defn->Col1234Space==SW_COLSPACE_RGB ) sprintf(out+i, "colour rgb%s:%s:%s "     , defn->STRcolour1, defn->STRcolour2, defn->STRcolour3);
-    else if (defn->Col1234Space==SW_COLSPACE_HSB ) sprintf(out+i, "colour hsb%s:%s:%s "     , defn->STRcolour1, defn->STRcolour2, defn->STRcolour3);
-    else if (defn->Col1234Space==SW_COLSPACE_CMYK) sprintf(out+i, "colour cmyk%s:%s:%s:%s "  , defn->STRcolour1, defn->STRcolour2, defn->STRcolour3, defn->STRcolour4);
+    if      (defn->Col1234Space==SW_COLSPACE_RGB ) sprintf(out+i, "color rgb%s:%s:%s "     , defn->STRcolor1, defn->STRcolor2, defn->STRcolor3);
+    else if (defn->Col1234Space==SW_COLSPACE_HSB ) sprintf(out+i, "color hsb%s:%s:%s "     , defn->STRcolor1, defn->STRcolor2, defn->STRcolor3);
+    else if (defn->Col1234Space==SW_COLSPACE_CMYK) sprintf(out+i, "color cmyk%s:%s:%s:%s "  , defn->STRcolor1, defn->STRcolor2, defn->STRcolor3, defn->STRcolor4);
     i += strlen(out+i);
    }
-  else if (defn->USEcolour1234)
+  else if (defn->USEcolor1234)
    {
-    if      (defn->Col1234Space==SW_COLSPACE_RGB ) sprintf(out+i, "colour rgb%s:%s:%s "     , S_RGB(defn->colour1,0), S_RGB(defn->colour2,1), S_RGB(defn->colour3,2));
-    else if (defn->Col1234Space==SW_COLSPACE_HSB ) sprintf(out+i, "colour hsb%s:%s:%s "     , S_RGB(defn->colour1,0), S_RGB(defn->colour2,1), S_RGB(defn->colour3,2));
-    else if (defn->Col1234Space==SW_COLSPACE_CMYK) sprintf(out+i, "colour cmyk%s:%s:%s:%s " , S_RGB(defn->colour1,0), S_RGB(defn->colour2,1), S_RGB(defn->colour3,2), S_RGB(defn->colour4,3));
+    if      (defn->Col1234Space==SW_COLSPACE_RGB ) sprintf(out+i, "color rgb%s:%s:%s "     , S_RGB(defn->color1,0), S_RGB(defn->color2,1), S_RGB(defn->color3,2));
+    else if (defn->Col1234Space==SW_COLSPACE_HSB ) sprintf(out+i, "color hsb%s:%s:%s "     , S_RGB(defn->color1,0), S_RGB(defn->color2,1), S_RGB(defn->color3,2));
+    else if (defn->Col1234Space==SW_COLSPACE_CMYK) sprintf(out+i, "color cmyk%s:%s:%s:%s " , S_RGB(defn->color1,0), S_RGB(defn->color2,1), S_RGB(defn->color3,2), S_RGB(defn->color4,3));
     i += strlen(out+i);
    }
-  else if (defn->USEcolour)               { sprintf(out+i, "colour %s "     , *(char **)FetchSettingName(&context->errcontext,defn->colour     , SW_COLOUR_INT, (void *)SW_COLOUR_STR, sizeof(char *))); i += strlen(out+i); }
-  if      (defn->STRfillcolour1!=NULL)
+  else if (defn->USEcolor)               { sprintf(out+i, "color %s "     , *(char **)ppl_fetchSettingName(&context->errcontext,defn->color     , SW_COLOR_INT, (void *)SW_COLOR_STR, sizeof(char *))); i += strlen(out+i); }
+  if      (defn->STRfillcolor1!=NULL)
    {
-    if      (defn->Col1234Space==SW_COLSPACE_RGB ) sprintf(out+i, "fillcolour rgb%s:%s:%s " , defn->STRfillcolour1, defn->STRfillcolour2, defn->STRfillcolour3);
-    else if (defn->Col1234Space==SW_COLSPACE_HSB ) sprintf(out+i, "fillcolour hsb%s:%s:%s " , defn->STRfillcolour1, defn->STRfillcolour2, defn->STRfillcolour3);
-    else if (defn->Col1234Space==SW_COLSPACE_CMYK) sprintf(out+i, "fillcolour cmyk%s:%s:%s:%s " , defn->STRfillcolour1, defn->STRfillcolour2, defn->STRfillcolour3, defn->STRfillcolour4);
+    if      (defn->Col1234Space==SW_COLSPACE_RGB ) sprintf(out+i, "fillcolor rgb%s:%s:%s " , defn->STRfillcolor1, defn->STRfillcolor2, defn->STRfillcolor3);
+    else if (defn->Col1234Space==SW_COLSPACE_HSB ) sprintf(out+i, "fillcolor hsb%s:%s:%s " , defn->STRfillcolor1, defn->STRfillcolor2, defn->STRfillcolor3);
+    else if (defn->Col1234Space==SW_COLSPACE_CMYK) sprintf(out+i, "fillcolor cmyk%s:%s:%s:%s " , defn->STRfillcolor1, defn->STRfillcolor2, defn->STRfillcolor3, defn->STRfillcolor4);
     i += strlen(out+i);
    }
-  else if (defn->USEfillcolour1234)
+  else if (defn->USEfillcolor1234)
    {
-    if      (defn->Col1234Space==SW_COLSPACE_RGB ) sprintf(out+i, "fillcolour rgb%s:%s:%s " , S_RGB(defn->fillcolour1,0), S_RGB(defn->fillcolour2,1), S_RGB(defn->fillcolour3,2));
-    else if (defn->Col1234Space==SW_COLSPACE_HSB ) sprintf(out+i, "fillcolour hsb%s:%s:%s " , S_RGB(defn->fillcolour1,0), S_RGB(defn->fillcolour2,1), S_RGB(defn->fillcolour3,2));
-    else if (defn->Col1234Space==SW_COLSPACE_CMYK) sprintf(out+i, "fillcolour cmyk%s:%s:%s:%s " , S_RGB(defn->fillcolour1,0), S_RGB(defn->fillcolour2,1), S_RGB(defn->fillcolour3,2), S_RGB(defn->fillcolour4,2));
+    if      (defn->Col1234Space==SW_COLSPACE_RGB ) sprintf(out+i, "fillcolor rgb%s:%s:%s " , S_RGB(defn->fillcolor1,0), S_RGB(defn->fillcolor2,1), S_RGB(defn->fillcolor3,2));
+    else if (defn->Col1234Space==SW_COLSPACE_HSB ) sprintf(out+i, "fillcolor hsb%s:%s:%s " , S_RGB(defn->fillcolor1,0), S_RGB(defn->fillcolor2,1), S_RGB(defn->fillcolor3,2));
+    else if (defn->Col1234Space==SW_COLSPACE_CMYK) sprintf(out+i, "fillcolor cmyk%s:%s:%s:%s " , S_RGB(defn->fillcolor1,0), S_RGB(defn->fillcolor2,1), S_RGB(defn->fillcolor3,2), S_RGB(defn->fillcolor4,2));
     i += strlen(out+i);
    }
-  else if (defn->USEfillcolour)           { sprintf(out+i, "fillcolour %s " , *(char **)FetchSettingName(&context->errcontext,defn->fillcolour , SW_COLOUR_INT, (void *)SW_COLOUR_STR, sizeof(char *))); i += strlen(out+i); }
+  else if (defn->USEfillcolor)            { sprintf(out+i, "fillcolor %s " , *(char **)ppl_fetchSettingName(&context->errcontext,defn->fillcolor , SW_COLOR_INT, (void *)SW_COLOR_STR, sizeof(char *))); i += strlen(out+i); }
   if      (defn->STRlinetype!=NULL)       { sprintf(out+i, "linetype %s "            , defn->STRlinetype);                                                                          i += strlen(out+i); }
   else if (defn->USElinetype)             { sprintf(out+i, "linetype %d "            , defn->linetype);                                                                             i += strlen(out+i); }
   if      (defn->STRlinewidth!=NULL)      { sprintf(out+i, "linewidth %s "           , defn->STRlinewidth);                                                                         i += strlen(out+i); }
@@ -255,14 +316,14 @@ void ppl_withWordsDestroy(ppl_context *context, withWords *a)
   if (a->STRpointlinewidth != NULL) { free(a->STRpointlinewidth); a->STRpointlinewidth = NULL; }
   if (a->STRpointsize      != NULL) { free(a->STRpointsize     ); a->STRpointsize      = NULL; }
   if (a->STRpointtype      != NULL) { free(a->STRpointtype     ); a->STRpointtype      = NULL; }
-  if (a->STRcolour1        != NULL) { free(a->STRcolour1       ); a->STRcolour1        = NULL; }
-  if (a->STRcolour2        != NULL) { free(a->STRcolour2       ); a->STRcolour2        = NULL; }
-  if (a->STRcolour3        != NULL) { free(a->STRcolour3       ); a->STRcolour3        = NULL; }
-  if (a->STRcolour4        != NULL) { free(a->STRcolour4       ); a->STRcolour4        = NULL; }
-  if (a->STRfillcolour1    != NULL) { free(a->STRfillcolour1   ); a->STRfillcolour1    = NULL; }
-  if (a->STRfillcolour2    != NULL) { free(a->STRfillcolour2   ); a->STRfillcolour2    = NULL; }
-  if (a->STRfillcolour3    != NULL) { free(a->STRfillcolour3   ); a->STRfillcolour3    = NULL; }
-  if (a->STRfillcolour4    != NULL) { free(a->STRfillcolour4   ); a->STRfillcolour4    = NULL; }
+  if (a->STRcolor1         != NULL) { free(a->STRcolor1        ); a->STRcolor1         = NULL; }
+  if (a->STRcolor2         != NULL) { free(a->STRcolor2        ); a->STRcolor2         = NULL; }
+  if (a->STRcolor3         != NULL) { free(a->STRcolor3        ); a->STRcolor3         = NULL; }
+  if (a->STRcolor4         != NULL) { free(a->STRcolor4        ); a->STRcolor4         = NULL; }
+  if (a->STRfillcolor1     != NULL) { free(a->STRfillcolor1    ); a->STRfillcolor1     = NULL; }
+  if (a->STRfillcolor2     != NULL) { free(a->STRfillcolor2    ); a->STRfillcolor2     = NULL; }
+  if (a->STRfillcolor3     != NULL) { free(a->STRfillcolor3    ); a->STRfillcolor3     = NULL; }
+  if (a->STRfillcolor4     != NULL) { free(a->STRfillcolor4    ); a->STRfillcolor4     = NULL; }
   return;
  }
 
@@ -276,14 +337,14 @@ void ppl_withWordsCpy(ppl_context *context, withWords *out, const withWords *in)
   if (in->STRpointlinewidth!= NULL) { out->STRpointlinewidth= (char   *)XWWMALLOC(strlen(in->STRpointlinewidth)+1); strcpy(out->STRpointlinewidth, in->STRpointlinewidth); }
   if (in->STRpointsize     != NULL) { out->STRpointsize     = (char   *)XWWMALLOC(strlen(in->STRpointsize     )+1); strcpy(out->STRpointsize     , in->STRpointsize     ); }
   if (in->STRpointtype     != NULL) { out->STRpointtype     = (char   *)XWWMALLOC(strlen(in->STRpointtype     )+1); strcpy(out->STRpointtype     , in->STRpointtype     ); }
-  if (in->STRcolour1       != NULL) { out->STRcolour1       = (char   *)XWWMALLOC(strlen(in->STRcolour1       )+1); strcpy(out->STRcolour1       , in->STRcolour1       ); }
-  if (in->STRcolour2       != NULL) { out->STRcolour2       = (char   *)XWWMALLOC(strlen(in->STRcolour2       )+1); strcpy(out->STRcolour2       , in->STRcolour2       ); }
-  if (in->STRcolour3       != NULL) { out->STRcolour3       = (char   *)XWWMALLOC(strlen(in->STRcolour3       )+1); strcpy(out->STRcolour3       , in->STRcolour3       ); }
-  if (in->STRcolour4       != NULL) { out->STRcolour4       = (char   *)XWWMALLOC(strlen(in->STRcolour4       )+1); strcpy(out->STRcolour4       , in->STRcolour4       ); }
-  if (in->STRfillcolour1   != NULL) { out->STRfillcolour1   = (char   *)XWWMALLOC(strlen(in->STRfillcolour1   )+1); strcpy(out->STRfillcolour1   , in->STRfillcolour1   ); }
-  if (in->STRfillcolour2   != NULL) { out->STRfillcolour2   = (char   *)XWWMALLOC(strlen(in->STRfillcolour2   )+1); strcpy(out->STRfillcolour2   , in->STRfillcolour2   ); }
-  if (in->STRfillcolour3   != NULL) { out->STRfillcolour3   = (char   *)XWWMALLOC(strlen(in->STRfillcolour3   )+1); strcpy(out->STRfillcolour3   , in->STRfillcolour3   ); }
-  if (in->STRfillcolour4   != NULL) { out->STRfillcolour4   = (char   *)XWWMALLOC(strlen(in->STRfillcolour4   )+1); strcpy(out->STRfillcolour4   , in->STRfillcolour4   ); }
+  if (in->STRcolor1        != NULL) { out->STRcolor1        = (char   *)XWWMALLOC(strlen(in->STRcolor1       )+1); strcpy(out->STRcolor1       , in->STRcolor1       ); }
+  if (in->STRcolor2        != NULL) { out->STRcolor2        = (char   *)XWWMALLOC(strlen(in->STRcolor2       )+1); strcpy(out->STRcolor2       , in->STRcolor2       ); }
+  if (in->STRcolor3        != NULL) { out->STRcolor3        = (char   *)XWWMALLOC(strlen(in->STRcolor3       )+1); strcpy(out->STRcolor3       , in->STRcolor3       ); }
+  if (in->STRcolor4        != NULL) { out->STRcolor4        = (char   *)XWWMALLOC(strlen(in->STRcolor4       )+1); strcpy(out->STRcolor4       , in->STRcolor4       ); }
+  if (in->STRfillcolor1    != NULL) { out->STRfillcolor1    = (char   *)XWWMALLOC(strlen(in->STRfillcolor1   )+1); strcpy(out->STRfillcolor1   , in->STRfillcolor1   ); }
+  if (in->STRfillcolor2    != NULL) { out->STRfillcolor2    = (char   *)XWWMALLOC(strlen(in->STRfillcolor2   )+1); strcpy(out->STRfillcolor2   , in->STRfillcolor2   ); }
+  if (in->STRfillcolor3    != NULL) { out->STRfillcolor3    = (char   *)XWWMALLOC(strlen(in->STRfillcolor3   )+1); strcpy(out->STRfillcolor3   , in->STRfillcolor3   ); }
+  if (in->STRfillcolor4    != NULL) { out->STRfillcolor4    = (char   *)XWWMALLOC(strlen(in->STRfillcolor4   )+1); strcpy(out->STRfillcolor4   , in->STRfillcolor4   ); }
   return;
  }
 

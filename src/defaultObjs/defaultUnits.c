@@ -45,12 +45,15 @@ void ppl_makeDefaultUnits(ppl_context *context)
   list *unit_PreferredUnits;
 
   context->unit_database = (unit *)malloc(UNITS_MAX*sizeof(unit));
-  if (context->unit_database == NULL) { ppl_fatal(context,__FILE__,__LINE__,"Out of memory error whilst trying to malloc units database."); exit(1); }
-  unit *unit_database = context->unit_database;
+  if (context->unit_database == NULL) { ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Out of memory error whilst trying to malloc units database."); exit(1); }
+  unit_database = context->unit_database;
 
-  context->unit_PreferredUnits = listInit(1);
-  if (context->unit_PreferredUnits == NULL) { ppl_fatal(context,__FILE__,__LINE__,"Out of memory error whilst trying to malloc units database."); exit(1); }
+  context->unit_PreferredUnits = ppl_listInit(1);
+  if (context->unit_PreferredUnits == NULL) { ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Out of memory error whilst trying to malloc units database."); exit(1); }
   unit_PreferredUnits = context->unit_PreferredUnits;
+
+  context->unit_pos     = 0;
+  context->baseunit_pos = UNIT_FIRSTUSER;
 
   // Set up database of known units
   for (i=0;i<UNITS_MAX;i++)
@@ -826,8 +829,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].si         = 1;
   unit_database[unit_pos].cgs        = 1;
   unit_database[unit_pos].exponent[UNIT_TEMPERATURE]=1;
-  tempTypeMultiplier[unit_database[unit_pos].tempType] = unit_database[unit_pos].multiplier;
-  tempTypeOffset    [unit_database[unit_pos].tempType] = unit_database[unit_pos].offset;
+  context->tempTypeMultiplier[unit_database[unit_pos].tempType] = unit_database[unit_pos].multiplier;
+  context->tempTypeOffset    [unit_database[unit_pos].tempType] = unit_database[unit_pos].offset;
   unit_pos++;
 
   unit_database[unit_pos].nameAs     = "R"; // Rankin
@@ -840,8 +843,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].tempType   = 2;
   unit_database[unit_pos].multiplier = 5.0/9.0;
   unit_database[unit_pos].exponent[UNIT_TEMPERATURE]=1;
-  tempTypeMultiplier[unit_database[unit_pos].tempType] = unit_database[unit_pos].multiplier;
-  tempTypeOffset    [unit_database[unit_pos].tempType] = unit_database[unit_pos].offset;
+  context->tempTypeMultiplier[unit_database[unit_pos].tempType] = unit_database[unit_pos].multiplier;
+  context->tempTypeOffset    [unit_database[unit_pos].tempType] = unit_database[unit_pos].offset;
   unit_pos++;
 
   unit_database[unit_pos].nameAs     = "oC"; // oC
@@ -858,8 +861,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].tempType   = 3;
   unit_database[unit_pos].offset     = 273.15;
   unit_database[unit_pos].exponent[UNIT_TEMPERATURE]=1;
-  tempTypeMultiplier[unit_database[unit_pos].tempType] = unit_database[unit_pos].multiplier;
-  tempTypeOffset    [unit_database[unit_pos].tempType] = unit_database[unit_pos].offset;
+  context->tempTypeMultiplier[unit_database[unit_pos].tempType] = unit_database[unit_pos].multiplier;
+  context->tempTypeOffset    [unit_database[unit_pos].tempType] = unit_database[unit_pos].offset;
   unit_pos++;
 
   unit_database[unit_pos].nameAs     = "oF"; // oF
@@ -875,8 +878,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].offset     = 459.67 * 5.0/9.0;
   unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient    = 1;
   unit_database[unit_pos].exponent[UNIT_TEMPERATURE]=1;
-  tempTypeMultiplier[unit_database[unit_pos].tempType] = unit_database[unit_pos].multiplier;
-  tempTypeOffset    [unit_database[unit_pos].tempType] = unit_database[unit_pos].offset;
+  context->tempTypeMultiplier[unit_database[unit_pos].tempType] = unit_database[unit_pos].multiplier;
+  context->tempTypeOffset    [unit_database[unit_pos].tempType] = unit_database[unit_pos].offset;
   unit_pos++;
 
   unit_database[unit_pos].nameAs     = "mol"; // mole
@@ -1525,7 +1528,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].quantity   = "frequency";
   unit_database[unit_pos].multiplier = 1.0;
   unit_database[unit_pos].maxPrefix  =  24;
-  unit_database[unit_pos].NotToBeCompounded = 1;
+  unit_database[unit_pos].notToBeCompounded = 1;
   unit_database[unit_pos].si = unit_database[unit_pos].cgs = unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
   unit_database[unit_pos].exponent[UNIT_TIME]=-1;
   unit_pos++;
@@ -2355,7 +2358,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_pos++;
 
   context->unit_pos = unit_pos;
-  if (DEBUG) { sprintf(context->errcocontext->errcontext.tempErrStr, "%d system default units loaded.", unit_pos); ppl_log(&context->errcontext,NULL); }
+  if (DEBUG) { sprintf(context->errcontext.tempErrStr, "%d system default units loaded.", unit_pos); ppl_log(&context->errcontext,NULL); }
 
   return;
  }

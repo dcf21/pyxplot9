@@ -27,24 +27,24 @@
 #include "userspace/pplObj.h"
 
 void ppl_addSystemFunc   (dict *n, char *name, int minArgs, int maxArgs, int numOnly, int notNan, int realOnly, int dimlessOnly, void *fn, char *shortdesc, char *latex, char *desc);
-void pplfunc_abs         (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_acos        (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_acosh       (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_acot        (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_acoth       (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_acsc        (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_acsch       (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_airy_ai     (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_airy_ai_diff(pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_airy_bi     (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_airy_bi_diff(pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_arg         (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_asec        (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_asech       (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_asin        (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_asinh       (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_atan        (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
-void pplfunc_atanh       (pplset_terminal *term, pplObj *in, int nArgs, int *status, char *errText);
+void pplfunc_abs         (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_acos        (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_acosh       (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_acot        (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_acoth       (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_acsc        (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_acsch       (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_airy_ai     (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_airy_ai_diff(pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_airy_bi     (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_airy_bi_diff(pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_arg         (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_asec        (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_asech       (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_asin        (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_asinh       (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_atan        (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_atanh       (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 
 #endif
 

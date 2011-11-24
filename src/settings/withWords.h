@@ -22,27 +22,17 @@
 #ifndef _WITHWORDS_H
 #define _WITHWORDS_H 1
 
-#include "userspace/context.h"
-
 typedef struct withWords {
- int    colour, fillcolour, linespoints, linetype, pointtype, style; // Core style settings which can be placed after the 'with' modifier
+ int    color, fillcolor, linespoints, linetype, pointtype, style; // Core style settings which can be placed after the 'with' modifier
  double linewidth, pointlinewidth, pointsize;
  int    Col1234Space, FillCol1234Space;
- double colour1, colour2, colour3, colour4; // Alternatives to the colour and fillcolour settings, RGB settings
- double fillcolour1, fillcolour2, fillcolour3, fillcolour4;
+ double color1, color2, color3, color4; // Alternatives to the color and fillcolor settings, RGB settings
+ double fillcolor1, fillcolor2, fillcolor3, fillcolor4;
  char  *STRlinetype, *STRlinewidth, *STRpointlinewidth, *STRpointsize, *STRpointtype; // Alternatives to the above, where expressions are evaluated per use, e.g. $4
- char  *STRcolour, *STRcolour1, *STRcolour2, *STRcolour3, *STRcolour4, *STRfillcolour, *STRfillcolour1, *STRfillcolour2, *STRfillcolour3, *STRfillcolour4;
- unsigned char USEcolour, USEfillcolour, USElinespoints, USElinetype, USElinewidth, USEpointlinewidth, USEpointsize, USEpointtype, USEstyle, USEcolour1234, USEfillcolour1234; // Set to 1 to indicate settings to be used
- int    AUTOcolour, AUTOlinetype, AUTOpointtype;
+ char  *STRcolor, *STRcolor1, *STRcolor2, *STRcolor3, *STRcolor4, *STRfillcolor, *STRfillcolor1, *STRfillcolor2, *STRfillcolor3, *STRfillcolor4;
+ unsigned char USEcolor, USEfillcolor, USElinespoints, USElinetype, USElinewidth, USEpointlinewidth, USEpointsize, USEpointtype, USEstyle, USEcolor1234, USEfillcolor1234; // Set to 1 to indicate settings to be used
+ int    AUTOcolor, AUTOlinetype, AUTOpointtype;
  unsigned char malloced; // Indicates whether we need to free strings
  } withWords;
-
-void  ppl_withWordsZero    (ppl_context *context, withWords *a, const unsigned char malloced);
-int   ppl_withWordsCmp     (ppl_context *context, const withWords *a, const withWords *b);
-int   ppl_withWordsCmp_zero(ppl_context *context, const withWords *a);
-void  ppl_withWordsMerge   (ppl_context *context, withWords *out, const withWords *a, const withWords *b, const withWords *c, const withWords *d, const withWords *e, const unsigned char ExpandStyles);
-void  ppl_withWordsPrint   (ppl_context *context, const withWords *defn, char *out);
-void  ppl_withWordsDestroy (ppl_context *context, withWords *a);
-void  ppl_withWordsCpy     (ppl_context *context, withWords *out, const withWords *in);
 
 #endif

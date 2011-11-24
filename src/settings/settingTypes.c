@@ -41,9 +41,9 @@ char *SW_COLSPACE_STR[] = {"rgb"           , "hsb"           , "cmyk"           
 int   SW_COLSPACE_ACL[] = {1               , 1               , 1                };
 int   SW_COLSPACE_INT[] = {SW_COLSPACE_RGB , SW_COLSPACE_HSB , SW_COLSPACE_CMYK , -1};
 
-char *SW_STYLE_STR[] = {"points"        , "lines"        , "LinesPoints"        , "XErrorBars"        , "YErrorBars"        , "ZErrorBars"        , "XYErrorBars"        , "XZErrorBars"        , "YZErrorBars"        , "XYZErrorBars"        , "XErrorRange"        , "YErrorRange"        , "ZErrorRange"        , "XYErrorRange"        , "XZErrorRange"        , "YZErrorRange"        , "XYZErrorRange"        , "FilledRegion"        , "YErrorShaded"        , "UpperLimits"        , "LowerLimits"        , "dots"        , "impulses"        , "boxes"        , "wboxes"        , "steps"        , "fsteps"        , "histeps"        , "stars"       , "arrows_head"        , "arrows_nohead"        , "arrows_twohead"        , "surface"        , "colourmap"        , "contourmap"        };
-int   SW_STYLE_ACL[] = {1               , 1              , 6                    , 1                   , 1                   , 1                   , 2                    , 2                    , 2                    , 3                     , 7                    , 7                    , 7                    , 8                     , 8                     , 8                     , 9                      , 3                     , 7                     , 1                    , 2                    , 1             , 1                 , 1              , 1               , 2              , 2               , 2                , 3             , 1                    , 7                      , 8                       , 2                , 3                  , 3                   , -1};
-int   SW_STYLE_INT[] = {SW_STYLE_POINTS , SW_STYLE_LINES , SW_STYLE_LINESPOINTS , SW_STYLE_XERRORBARS , SW_STYLE_YERRORBARS , SW_STYLE_ZERRORBARS , SW_STYLE_XYERRORBARS , SW_STYLE_XZERRORBARS , SW_STYLE_YZERRORBARS , SW_STYLE_XYZERRORBARS , SW_STYLE_XERRORRANGE , SW_STYLE_YERRORRANGE , SW_STYLE_ZERRORRANGE , SW_STYLE_XYERRORRANGE , SW_STYLE_XZERRORRANGE , SW_STYLE_YZERRORRANGE , SW_STYLE_XYZERRORRANGE , SW_STYLE_FILLEDREGION , SW_STYLE_YERRORSHADED , SW_STYLE_UPPERLIMITS , SW_STYLE_LOWERLIMITS , SW_STYLE_DOTS , SW_STYLE_IMPULSES , SW_STYLE_BOXES , SW_STYLE_WBOXES , SW_STYLE_STEPS , SW_STYLE_FSTEPS , SW_STYLE_HISTEPS , SW_STYLE_STARS, SW_STYLE_ARROWS_HEAD , SW_STYLE_ARROWS_NOHEAD , SW_STYLE_ARROWS_TWOHEAD , SW_STYLE_SURFACE , SW_STYLE_COLOURMAP , SW_STYLE_CONTOURMAP , -1};
+char *SW_STYLE_STR[] = {"points"        , "lines"        , "LinesPoints"        , "XErrorBars"        , "YErrorBars"        , "ZErrorBars"        , "XYErrorBars"        , "XZErrorBars"        , "YZErrorBars"        , "XYZErrorBars"        , "XErrorRange"        , "YErrorRange"        , "ZErrorRange"        , "XYErrorRange"        , "XZErrorRange"        , "YZErrorRange"        , "XYZErrorRange"        , "FilledRegion"        , "YErrorShaded"        , "UpperLimits"        , "LowerLimits"        , "dots"        , "impulses"        , "boxes"        , "wboxes"        , "steps"        , "fsteps"        , "histeps"        , "stars"       , "arrows_head"        , "arrows_nohead"        , "arrows_twohead"        , "surface"        , "colormap"        , "contourmap"        };
+int   SW_STYLE_ACL[] = {1               , 1              , 6                    , 1                   , 1                   , 1                   , 2                    , 2                    , 2                    , 3                     , 7                    , 7                    , 7                    , 8                     , 8                     , 8                     , 9                      , 3                     , 7                     , 1                    , 2                    , 1             , 1                 , 1              , 1               , 2              , 2               , 2                , 3             , 1                    , 7                      , 8                       , 2                , 3                 , 3                   , -1};
+int   SW_STYLE_INT[] = {SW_STYLE_POINTS , SW_STYLE_LINES , SW_STYLE_LINESPOINTS , SW_STYLE_XERRORBARS , SW_STYLE_YERRORBARS , SW_STYLE_ZERRORBARS , SW_STYLE_XYERRORBARS , SW_STYLE_XZERRORBARS , SW_STYLE_YZERRORBARS , SW_STYLE_XYZERRORBARS , SW_STYLE_XERRORRANGE , SW_STYLE_YERRORRANGE , SW_STYLE_ZERRORRANGE , SW_STYLE_XYERRORRANGE , SW_STYLE_XZERRORRANGE , SW_STYLE_YZERRORRANGE , SW_STYLE_XYZERRORRANGE , SW_STYLE_FILLEDREGION , SW_STYLE_YERRORSHADED , SW_STYLE_UPPERLIMITS , SW_STYLE_LOWERLIMITS , SW_STYLE_DOTS , SW_STYLE_IMPULSES , SW_STYLE_BOXES , SW_STYLE_WBOXES , SW_STYLE_STEPS , SW_STYLE_FSTEPS , SW_STYLE_HISTEPS , SW_STYLE_STARS, SW_STYLE_ARROWS_HEAD , SW_STYLE_ARROWS_NOHEAD , SW_STYLE_ARROWS_TWOHEAD , SW_STYLE_SURFACE , SW_STYLE_COLORMAP , SW_STYLE_CONTOURMAP , -1};
 
 char *SW_SYSTEM_STR[] = {"first"         , "second"         , "page"         , "graph"         , "axis"          };
 int   SW_SYSTEM_ACL[] = {1               , 1                , 1              , 1               , 1               };
@@ -126,7 +126,7 @@ char *SW_PIEKEYPOS_STR[] = {"auto"           , "inside"           , "key"       
 int   SW_PIEKEYPOS_INT[] = {SW_PIEKEYPOS_AUTO, SW_PIEKEYPOS_INSIDE, SW_PIEKEYPOS_KEY, SW_PIEKEYPOS_OUTSIDE, -1};
 int   SW_PIEKEYPOS_ACL[] = {1                , 1                  , 1               , 1                   , -1};
 
-void *FetchSettingName(pplerr_context *context, int id, int *id_list, void *name_list, const int name_list_size)
+void *ppl_fetchSettingName(pplerr_context *context, int id, int *id_list, void *name_list, const int name_list_size)
  {
   int first;
   static int latch=0;
@@ -151,7 +151,7 @@ void *FetchSettingName(pplerr_context *context, int id, int *id_list, void *name
   return NULL;
  }
 
-int FetchSettingByName(pplerr_context *context, char *name, int *id_list, char **name_list)
+int ppl_fetchSettingByName(pplerr_context *context, char *name, int *id_list, char **name_list)
  {
   while(1)
    {

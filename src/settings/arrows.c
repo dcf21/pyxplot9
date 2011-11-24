@@ -33,18 +33,19 @@
 #include "coreUtils/errorReport.h"
 
 #include "pplConstants.h"
-#include "settings/settingTypes.h"
 
-#include "settings/arrows.h"
-#include "settings/settings.h"
+#include "settings/arrows_fns.h"
+#include "settings/settingTypes.h"
+#include "settings/withWords_fns.h"
 
 #include "userspace/context.h"
+#include "userspace/unitsArithmetic.h"
 
 // -------------------------------------------
 // ROUTINES FOR MANIPULATING ARROWS STRUCTURES
 // -------------------------------------------
 
-#define CMPVAL(X,Y) (ppl_units_DimEqual(&X,&Y) && ppl_units_DblEqual(X.real , Y.real))
+#define CMPVAL(X,Y) (ppl_unitsDimEqual(&X,&Y) && ppl_dblEqual(X.real , Y.real))
 
 void pplarrow_add(ppl_context *context, pplarrow_object **inlist, dict *in)
  {
@@ -68,7 +69,7 @@ void pplarrow_add(ppl_context *context, pplarrow_object **inlist, dict *in)
   if ((*inlist != NULL) && ((*inlist)->id == *tempint))
    {
     out = *inlist;
-    ppl_withWordsDestroy(&out->style);
+    ppl_withWordsDestroy(context, &out->style);
    } else {
     out = (pplarrow_object *)malloc(sizeof(pplarrow_object));
     if (out == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1, "Out of memory"); return; }
@@ -80,11 +81,11 @@ void pplarrow_add(ppl_context *context, pplarrow_object **inlist, dict *in)
   // Check whether arrow head type has been specified
   tempstr = (char *)ppl_dictLookup(in,"pplarrow_style");
   if (tempstr==NULL) out->pplarrow_style = SW_ARROWTYPE_HEAD;
-  else               out->pplarrow_style = FetchSettingByName(tempstr, SW_ARROWTYPE_INT, SW_ARROWTYPE_STR);
+  else               out->pplarrow_style = ppl_fetchSettingByName(&context->errcontext, tempstr, SW_ARROWTYPE_INT, SW_ARROWTYPE_STR);
 
   // Check what style keywords have been specified in the 'with' clause
-  ppl_withWordsFromDict(in, &ww_temp1, 1);
-  ppl_withWordsCpy(&out->style, &ww_temp1);
+  ppl_withWordsFromDict(context, in, &ww_temp1, 1);
+  ppl_withWordsCpy(context, &out->style, &ww_temp1);
 
   out->system_x0 = system_x0; out->system_y0 = system_y0; out->system_z0 = system_z0;
   out->system_x1 = system_x1; out->system_y1 = system_y1; out->system_z1 = system_z1;
@@ -109,7 +110,7 @@ void pplarrow_remove(ppl_context *context, pplarrow_object **inlist, dict *in)
   first = inlist;
   templist = (list *)ppl_dictLookup(in,"pplarrow_list,");
   listiter = ppl_listIterateInit(templist);
-  if (listiter == NULL) pplarrow_list_destroy(inlist); // set noarrow with no number specified means all arrows deleted
+  if (listiter == NULL) pplarrow_list_destroy(context, inlist); // set noarrow with no number specified means all arrows deleted
   while (listiter != NULL)
    {
     tempdict = (dict *)listiter->data;
@@ -120,7 +121,7 @@ void pplarrow_remove(ppl_context *context, pplarrow_object **inlist, dict *in)
      {
       obj   = *inlist;
       *inlist = (*inlist)->next;
-      ppl_withWordsDestroy(&obj->style);
+      ppl_withWordsDestroy(context, &obj->style);
       free(obj);
      } else {
       //sprintf(context->errcontext.tempErrStr,"Arrow number %d is not defined", *tempint);
@@ -139,17 +140,17 @@ void pplarrow_unset(ppl_context *context, pplarrow_object **inlist, dict *in)
   dict         *tempdict;
   listIterator *listiter;
 
-  pplarrow_remove(inlist, in); // First of all, remove any arrows which we are unsetting
+  pplarrow_remove(context, inlist, in); // First of all, remove any arrows which we are unsetting
   first = inlist;
   templist = (list *)ppl_dictLookup(in,"pplarrow_list,");
   listiter = ppl_listIterateInit(templist);
 
-  if (listiter == NULL) pplarrow_list_copy(inlist, &pplarrow_list_default); // Check to see whether we are unsetting ALL arrows, and if so, use the copy command
+  if (listiter == NULL) pplarrow_list_copy(context, inlist, &context->set->pplarrow_list_default); // Check to see whether we are unsetting ALL arrows, and if so, use the copy command
   while (listiter != NULL)
    {
     tempdict = (dict *)listiter->data;
     tempint = (int *)ppl_dictLookup(tempdict,"pplarrow_id"); // Go through each pplarrow_id in supplied list and copy items from default list into current settings
-    obj  = pplarrow_list_default;
+    obj  = context->set->pplarrow_list_default;
     while ((obj != NULL) && (obj->id < *tempint)) obj = (obj->next);
     if ((obj != NULL) && (obj->id == *tempint))
      {
@@ -159,7 +160,7 @@ void pplarrow_unset(ppl_context *context, pplarrow_object **inlist, dict *in)
       if (new == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); return; }
       *new = *obj;
       new->next = *inlist;
-      ppl_withWordsCpy(&new->style, &obj->style);
+      ppl_withWordsCpy(context, &new->style, &obj->style);
       *inlist = new;
      }
     ppl_listIterate(&listiter);
@@ -176,7 +177,7 @@ unsigned char pplarrow_compare(ppl_context *context, pplarrow_object *a, pplarro
   if ( (a->system_x1!=b->system_x1) || (a->system_y1!=b->system_y1) || (a->system_z1!=b->system_z1) ) return 0;
   if ( (a->axis_x0!=b->axis_x0) || (a->axis_y0!=b->axis_y0) || (a->axis_z0!=b->axis_z0) ) return 0;
   if ( (a->axis_x1!=b->axis_x1) || (a->axis_y1!=b->axis_y1) || (a->axis_z1!=b->axis_z1) ) return 0;
-  if (!ppl_withWordsCmp(&a->style , &b->style)) return 0;
+  if (!ppl_withWordsCmp(context, &a->style , &b->style)) return 0;
   return 1;
  }
 
@@ -189,7 +190,7 @@ void pplarrow_list_copy(ppl_context *context, pplarrow_object **out, pplarrow_ob
     if (*out == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); return; }
     **out = **in;
     (*out)->next = NULL;
-    ppl_withWordsCpy(&(*out)->style, &(*in)->style);
+    ppl_withWordsCpy(context, &(*out)->style, &(*in)->style);
     in  = &((*in )->next);
     out = &((*out)->next);
    }
@@ -205,7 +206,7 @@ void pplarrow_list_destroy(ppl_context *context, pplarrow_object **inlist)
    {
     obj = *inlist;
     *inlist = (*inlist)->next;
-    ppl_withWordsDestroy(&obj->style);
+    ppl_withWordsDestroy(context, &obj->style);
     free(obj);
    }
   *first = NULL;
@@ -215,27 +216,27 @@ void pplarrow_list_destroy(ppl_context *context, pplarrow_object **inlist)
 void pplarrow_print(ppl_context *context, pplarrow_object *in, char *out)
  {
   int i;
-  sprintf(out, "from %s", *(char **)FetchSettingName(in->system_x0, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *)));
+  sprintf(out, "from %s", *(char **)ppl_fetchSettingName(&context->errcontext, in->system_x0, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *)));
   i = strlen(out);
   if (in->system_x0==SW_SYSTEM_AXISN) { sprintf(out+i, " %d",in->axis_x0); i+=strlen(out+i); }
-  sprintf(out+i, " %s,", ppl_units_NumericDisplay(&(in->x0),0,0,0)); i+=strlen(out+i);
-  sprintf(out+i, " %s", *(char **)FetchSettingName(in->system_y0, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *))); i+=strlen(out+i);
+  sprintf(out+i, " %s,", ppl_unitsNumericDisplay(context,&(in->x0),0,0,0)); i+=strlen(out+i);
+  sprintf(out+i, " %s", *(char **)ppl_fetchSettingName(&context->errcontext, in->system_y0, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *))); i+=strlen(out+i);
   if (in->system_y0==SW_SYSTEM_AXISN) { sprintf(out+i, " %d",in->axis_y0); i+=strlen(out+i); }
-  sprintf(out+i, " %s,", ppl_units_NumericDisplay(&(in->y0),0,0,0)); i+=strlen(out+i);
-  sprintf(out+i, " %s", *(char **)FetchSettingName(in->system_z0, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *))); i+=strlen(out+i);
+  sprintf(out+i, " %s,", ppl_unitsNumericDisplay(context,&(in->y0),0,0,0)); i+=strlen(out+i);
+  sprintf(out+i, " %s", *(char **)ppl_fetchSettingName(&context->errcontext, in->system_z0, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *))); i+=strlen(out+i);
   if (in->system_z0==SW_SYSTEM_AXISN) { sprintf(out+i, " %d",in->axis_z0); i+=strlen(out+i); }
-  sprintf(out+i, " %s ", ppl_units_NumericDisplay(&(in->z0),0,0,0)); i+=strlen(out+i);
-  sprintf(out+i, "to %s", *(char **)FetchSettingName(in->system_x1, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *))); i+=strlen(out+i);
+  sprintf(out+i, " %s ", ppl_unitsNumericDisplay(context,&(in->z0),0,0,0)); i+=strlen(out+i);
+  sprintf(out+i, "to %s", *(char **)ppl_fetchSettingName(&context->errcontext, in->system_x1, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *))); i+=strlen(out+i);
   if (in->system_x1==SW_SYSTEM_AXISN) { sprintf(out+i, " %d",in->axis_x1); i+=strlen(out+i); }
-  sprintf(out+i, " %s,", ppl_units_NumericDisplay(&(in->x1),0,0,0)); i+=strlen(out+i);
-  sprintf(out+i, " %s", *(char **)FetchSettingName(in->system_y1, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *))); i+=strlen(out+i);
+  sprintf(out+i, " %s,", ppl_unitsNumericDisplay(context,&(in->x1),0,0,0)); i+=strlen(out+i);
+  sprintf(out+i, " %s", *(char **)ppl_fetchSettingName(&context->errcontext, in->system_y1, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *))); i+=strlen(out+i);
   if (in->system_y1==SW_SYSTEM_AXISN) { sprintf(out+i, " %d",in->axis_y1); i+=strlen(out+i); }
-  sprintf(out+i, " %s,", ppl_units_NumericDisplay(&(in->y1),0,0,0)); i+=strlen(out+i);
-  sprintf(out+i, " %s", *(char **)FetchSettingName(in->system_z1, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *))); i+=strlen(out+i);
+  sprintf(out+i, " %s,", ppl_unitsNumericDisplay(context,&(in->y1),0,0,0)); i+=strlen(out+i);
+  sprintf(out+i, " %s", *(char **)ppl_fetchSettingName(&context->errcontext, in->system_z1, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *))); i+=strlen(out+i);
   if (in->system_z1==SW_SYSTEM_AXISN) { sprintf(out+i, " %d",in->axis_z1); i+=strlen(out+i); }
-  sprintf(out+i, " %s", ppl_units_NumericDisplay(&(in->z1),0,0,0)); i+=strlen(out+i);
-  sprintf(out+i, " with %s ", *(char **)FetchSettingName(in->pplarrow_style, SW_ARROWTYPE_INT, (void *)SW_ARROWTYPE_STR, sizeof(char *))); i+=strlen(out+i);
-  ppl_withWordsPrint(&in->style, out+i);
+  sprintf(out+i, " %s", ppl_unitsNumericDisplay(context,&(in->z1),0,0,0)); i+=strlen(out+i);
+  sprintf(out+i, " with %s ", *(char **)ppl_fetchSettingName(&context->errcontext, in->pplarrow_style, SW_ARROWTYPE_INT, (void *)SW_ARROWTYPE_STR, sizeof(char *))); i+=strlen(out+i);
+  ppl_withWordsPrint(context, &in->style, out+i);
   return;
  }
 

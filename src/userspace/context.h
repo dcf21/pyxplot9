@@ -27,6 +27,7 @@
 #include "stringTools/strConstants.h"
 
 #include "coreUtils/dict.h"
+#include "coreUtils/list.h"
 #include "coreUtils/errorReport.h"
 
 #include "pplConstants.h"
@@ -40,6 +41,7 @@ typedef struct ppl_context_struc
   char     *inputLineAddBuffer;
   int       shellExiting;
   long int  historyNLinesWritten;
+  int       termtypeSetInConfigfile;
 
   // CSP status
   char      pplcsp_ghostView_fname[FNAME_LENGTH];
@@ -55,12 +57,16 @@ typedef struct ppl_context_struc
 
   // Units settings
   unit  *unit_database;
-  int    unit_pos = 0;
-  int    baseunit_pos = UNIT_FIRSTUSER;
+  int    unit_pos;
+  int    baseunit_pos;
   list  *unit_PreferredUnits;
   list  *unit_PreferredUnits_default;
-  double TempTypeMultiplier[8]; // These are filled in by ppl_userspace_init.c
-  double TempTypeOffset    [8]; // They store the offsets and multiplier for each of the units of temperature
+  double tempTypeMultiplier[8]; // These are filled in by ppl_userspace_init.c
+  double tempTypeOffset    [8]; // They store the offsets and multiplier for each of the units of temperature
+
+  // Buffers used by ppl_printUnit()
+  char udBuffA[LSTR_LENGTH], udBuffB[LSTR_LENGTH], udBuffC[LSTR_LENGTH];
+  char udNumDispA[LSTR_LENGTH], udNumDispB[LSTR_LENGTH];
 
   // Namespace hierarchy
   int   ns_ptr , ns_branch;

@@ -35,11 +35,13 @@
 #include "pplConstants.h"
 #include "settings/settingTypes.h"
 
-#include "settings/arrows.h"
-#include "settings/labels.h"
+#include "settings/arrows_fns.h"
+#include "settings/labels_fns.h"
 #include "settings/settings.h"
+#include "settings/withWords_fns.h"
 
 #include "userspace/context.h"
+#include "userspace/unitsArithmetic.h"
 
 // -------------------------------------------
 // ROUTINES FOR MANIPULATING LABELS STRUCTURES
@@ -51,7 +53,7 @@
     for (i=0; i<UNITS_MAX_BASEUNITS; i++) \
      if (VAR->exponent[i] != (i==UNIT_LENGTH)) \
       { \
-       sprintf(context->errcontext.tempErrStr,"The gap size supplied to the 'set label' command must have dimensions of length. Supplied gap size input has units of <%s>.",ppl_units_GetUnitStr(VAR,NULL,NULL,1,1,0)); \
+       sprintf(context->errcontext.tempErrStr,"The gap size supplied to the 'set label' command must have dimensions of length. Supplied gap size input has units of <%s>.",ppl_printUnit(context,VAR,NULL,NULL,1,1,0)); \
        ppl_error(&context->errcontext,ERR_NUMERIC, -1, -1, NULL); \
        return; \
       } \
@@ -64,14 +66,14 @@
     for (i=0; i<UNITS_MAX_BASEUNITS; i++) \
      if (VAR->exponent[i] != (i==UNIT_ANGLE)) \
       { \
-       sprintf(context->errcontext.tempErrStr,"The rotation angle supplied to the 'set label' command must have dimensions of angle. Supplied input has units of <%s>.",ppl_units_GetUnitStr(VAR,NULL,NULL,1,1,0)); \
+       sprintf(context->errcontext.tempErrStr,"The rotation angle supplied to the 'set label' command must have dimensions of angle. Supplied input has units of <%s>.",ppl_printUnit(context,VAR,NULL,NULL,1,1,0)); \
        ppl_error(&context->errcontext,ERR_NUMERIC, -1, -1, NULL); \
        return; \
       } \
    } \
   else { VAR->real *= M_PI/180.0; } // By default, dimensionless angles are in degrees
 
-#define CMPVAL(X,Y) (ppl_units_DimEqual(&X,&Y) && ppl_units_DblEqual(X.real , Y.real))
+#define CMPVAL(X,Y) (ppl_unitsDimEqual(&X,&Y) && ppl_dblEqual(X.real , Y.real))
 
 void ppllabel_add(ppl_context *context, ppllabel_object **inlist, dict *in)
  {
@@ -106,7 +108,7 @@ void ppllabel_add(ppl_context *context, ppllabel_object **inlist, dict *in)
   if ((*inlist != NULL) && ((*inlist)->id == *tempint))
    {
     out = *inlist;
-    ppl_withWordsDestroy(&out->style);
+    ppl_withWordsDestroy(context, &out->style);
    } else {
     out = (ppllabel_object *)malloc(sizeof(ppllabel_object));
     if (out == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1, "Out of memory"); return; }
@@ -117,10 +119,10 @@ void ppllabel_add(ppl_context *context, ppllabel_object **inlist, dict *in)
 
   // Check for halign or valign modifiers
   tempstr = (char *)ppl_dictLookup(in,"halign");
-  if (tempstr != NULL) out->HAlign = FetchSettingByName(tempstr, SW_HALIGN_INT, SW_HALIGN_STR);
+  if (tempstr != NULL) out->HAlign = ppl_fetchSettingByName(&context->errcontext, tempstr, SW_HALIGN_INT, SW_HALIGN_STR);
   else                 out->HAlign = context->set->graph_current.TextHAlign;
   tempstr = (char *)ppl_dictLookup(in,"valign");
-  if (tempstr != NULL) out->VAlign = FetchSettingByName(tempstr, SW_VALIGN_INT, SW_VALIGN_STR);
+  if (tempstr != NULL) out->VAlign = ppl_fetchSettingByName(&context->errcontext, tempstr, SW_VALIGN_INT, SW_VALIGN_STR);
   else                 out->VAlign = context->set->graph_current.TextVAlign;
 
   if (ang != NULL) out->rotation = ang->real;
@@ -128,8 +130,8 @@ void ppllabel_add(ppl_context *context, ppllabel_object **inlist, dict *in)
   if (gap != NULL) out->gap      = gap->real;
   else             out->gap      = 0.0;
 
-  ppl_withWordsFromDict(in, &ww_temp1, 1);
-  ppl_withWordsCpy(&out->style, &ww_temp1);
+  ppl_withWordsFromDict(context, in, &ww_temp1, 1);
+  ppl_withWordsCpy(context, &out->style, &ww_temp1);
   out->text  = label;
   out->system_x = system_x; out->system_y = system_y; out->system_z = system_z;
   pplarrow_add_get_axis("x", out->axis_x); pplarrow_add_get_axis("y", out->axis_y); pplarrow_add_get_axis("z", out->axis_z);
@@ -148,7 +150,7 @@ void ppllabel_remove(ppl_context *context, ppllabel_object **inlist, dict *in)
   first = inlist;
   templist = (list *)ppl_dictLookup(in,"ppllabel_list,");
   listiter = ppl_listIterateInit(templist);
-  if (listiter == NULL) ppllabel_list_destroy(inlist); // set nolabel with no number specified means all labels deleted
+  if (listiter == NULL) ppllabel_list_destroy(context, inlist); // set nolabel with no number specified means all labels deleted
   while (listiter != NULL)
    {
     tempdict = (dict *)listiter->data;
@@ -159,7 +161,7 @@ void ppllabel_remove(ppl_context *context, ppllabel_object **inlist, dict *in)
      {
       obj   = *inlist;
       *inlist = (*inlist)->next;
-      ppl_withWordsDestroy(&obj->style);
+      ppl_withWordsDestroy(context, &obj->style);
       free(obj->text);
       free(obj);
      } else {
@@ -179,17 +181,17 @@ void ppllabel_unset(ppl_context *context, ppllabel_object **inlist, dict *in)
   dict            *tempdict;
   listIterator    *listiter;
 
-  ppllabel_remove(inlist, in); // First of all, remove any labels which we are unsetting
+  ppllabel_remove(context, inlist, in); // First of all, remove any labels which we are unsetting
   first = inlist;
   templist = (list *)ppl_dictLookup(in,"ppllabel_list,");
   listiter = ppl_listIterateInit(templist);
 
-  if (listiter == NULL) ppllabel_list_copy(inlist, &ppllabel_list_default); // Check to see whether we are unsetting ALL labels, and if so, use the copy command
+  if (listiter == NULL) ppllabel_list_copy(context, inlist, &context->set->ppllabel_list_default); // Check to see whether we are unsetting ALL labels, and if so, use the copy command
   while (listiter != NULL)
    {
     tempdict = (dict *)listiter->data;
     tempint = (int *)ppl_dictLookup(tempdict,"ppllabel_id"); // Go through each ppllabel_id in supplied list and copy items from default list into current settings
-    obj  = ppllabel_list_default;
+    obj  = context->set->ppllabel_list_default;
     while ((obj != NULL) && (obj->id < *tempint)) obj = (obj->next);
     if ((obj != NULL) && (obj->id == *tempint))
      {
@@ -202,7 +204,7 @@ void ppllabel_unset(ppl_context *context, ppllabel_object **inlist, dict *in)
       new->text = (char *)malloc(strlen(obj->text)+1);
       if (new->text == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); free(new); return; }
       strcpy(new->text, obj->text);
-      ppl_withWordsCpy(&new->style, &obj->style);
+      ppl_withWordsCpy(context, &new->style, &obj->style);
       *inlist = new;
      }
     ppl_listIterate(&listiter);
@@ -216,7 +218,7 @@ unsigned char ppllabel_compare(ppl_context *context, ppllabel_object *a, ppllabe
   if ( (!CMPVAL(a->x , b->x)) || (!CMPVAL(a->y , b->y)) || (!CMPVAL(a->z , b->z)) ) return 0;
   if ( (a->system_x!=b->system_x) || (a->system_y!=b->system_y) || (a->system_z!=b->system_z) ) return 0;
   if ( (a->axis_x!=b->axis_x) || (a->axis_y!=b->axis_y) || (a->axis_z!=b->axis_z) ) return 0;
-  if (!ppl_withWordsCmp(&a->style , &b->style)) return 0;
+  if (!ppl_withWordsCmp(context, &a->style , &b->style)) return 0;
   if (strcmp(a->text , b->text)!=0) return 0;
   return 1;
  }
@@ -233,7 +235,7 @@ void ppllabel_list_copy(ppl_context *context, ppllabel_object **out, ppllabel_ob
     (*out)->text = (char *)malloc(strlen((*in)->text)+1);
     if ((*out)->text == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); free(*out); *out=NULL; return; }
     strcpy((*out)->text, (*in)->text);
-    ppl_withWordsCpy(&(*out)->style, &(*in)->style);
+    ppl_withWordsCpy(context, &(*out)->style, &(*in)->style);
     in  = &((*in )->next);
     out = &((*out)->next);
    }
@@ -249,7 +251,7 @@ void ppllabel_list_destroy(ppl_context *context, ppllabel_object **inlist)
    {
     obj = *inlist;
     *inlist = (*inlist)->next;
-    ppl_withWordsDestroy(&obj->style);
+    ppl_withWordsDestroy(context, &obj->style);
     free(obj->text);
     free(obj);
    }
@@ -262,24 +264,24 @@ void ppllabel_print(ppl_context *context, ppllabel_object *in, char *out)
   int i;
   ppl_strEscapify(in->text, out);
   i = strlen(out);
-  sprintf(out+i, " at %s", *(char **)FetchSettingName(in->system_x, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *))); i+=strlen(out+i);
+  sprintf(out+i, " at %s", *(char **)ppl_fetchSettingName(&context->errcontext, in->system_x, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *))); i+=strlen(out+i);
   if (in->system_x==SW_SYSTEM_AXISN) { sprintf(out+i, " %d",in->axis_x); i+=strlen(out+i); }
-  sprintf(out+i, " %s,", ppl_units_NumericDisplay(&(in->x),0,0,0)); i+=strlen(out+i);
-  sprintf(out+i, " %s", *(char **)FetchSettingName(in->system_y, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *))); i+=strlen(out+i);
+  sprintf(out+i, " %s,", ppl_unitsNumericDisplay(context, &(in->x),0,0,0)); i+=strlen(out+i);
+  sprintf(out+i, " %s", *(char **)ppl_fetchSettingName(&context->errcontext, in->system_y, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *))); i+=strlen(out+i);
   if (in->system_y==SW_SYSTEM_AXISN) { sprintf(out+i, " %d",in->axis_y); i+=strlen(out+i); }
-  sprintf(out+i, " %s,", ppl_units_NumericDisplay(&(in->y),0,0,0)); i+=strlen(out+i);
-  sprintf(out+i, " %s", *(char **)FetchSettingName(in->system_z, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *))); i+=strlen(out+i);
+  sprintf(out+i, " %s,", ppl_unitsNumericDisplay(context, &(in->y),0,0,0)); i+=strlen(out+i);
+  sprintf(out+i, " %s", *(char **)ppl_fetchSettingName(&context->errcontext, in->system_z, SW_SYSTEM_INT, (void *)SW_SYSTEM_STR, sizeof(char *))); i+=strlen(out+i);
   if (in->system_z==SW_SYSTEM_AXISN) { sprintf(out+i, " %d",in->axis_z); i+=strlen(out+i); }
-  sprintf(out+i, " %s", ppl_units_NumericDisplay(&(in->z),0,0,0)); i+=strlen(out+i);
+  sprintf(out+i, " %s", ppl_unitsNumericDisplay(context, &(in->z),0,0,0)); i+=strlen(out+i);
   if (in->rotation!=0.0) { sprintf(out+i, " rotate %s",
-             NumericDisplay( in->rotation *180/M_PI , 0, context->set->term_current.SignificantFigures, (context->set->term_current.NumDisplay==SW_DISPLAY_L))
+             ppl_numericDisplay( in->rotation *180/M_PI , 0, context->set->term_current.SignificantFigures, (context->set->term_current.NumDisplay==SW_DISPLAY_L))
            ); i+=strlen(out+i); }
-  if (in->HAlign>0) { sprintf(out+i, " halign %s", *(char **)FetchSettingName(in->HAlign, SW_HALIGN_INT, (void *)SW_HALIGN_STR, sizeof(char *))); i+=strlen(out+i); }
-  if (in->VAlign>0) { sprintf(out+i, " valign %s", *(char **)FetchSettingName(in->VAlign, SW_VALIGN_INT, (void *)SW_VALIGN_STR, sizeof(char *))); i+=strlen(out+i); }
+  if (in->HAlign>0) { sprintf(out+i, " halign %s", *(char **)ppl_fetchSettingName(&context->errcontext, in->HAlign, SW_HALIGN_INT, (void *)SW_HALIGN_STR, sizeof(char *))); i+=strlen(out+i); }
+  if (in->VAlign>0) { sprintf(out+i, " valign %s", *(char **)ppl_fetchSettingName(&context->errcontext, in->VAlign, SW_VALIGN_INT, (void *)SW_VALIGN_STR, sizeof(char *))); i+=strlen(out+i); }
   if (in->gap!=0.0) { sprintf(out+i, " gap %s",
-             NumericDisplay( in->gap * 100          , 0, context->set->term_current.SignificantFigures, (context->set->term_current.NumDisplay==SW_DISPLAY_L))
+             ppl_numericDisplay( in->gap * 100          , 0, context->set->term_current.SignificantFigures, (context->set->term_current.NumDisplay==SW_DISPLAY_L))
            ); i+=strlen(out+i); }
-  ppl_withWordsPrint(&in->style, out+i+6);
+  ppl_withWordsPrint(context, &in->style, out+i+6);
   if (strlen(out+i+6)>0) { sprintf(out+i, " with"); out[i+5]=' '; }
   else                   { out[i]='\0'; }
   return;

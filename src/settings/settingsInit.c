@@ -37,13 +37,13 @@
 
 #include "mathsTools/dcfmath.h"
 
-#include "settings/epsColours.h"
+#include "settings/epsColors.h"
 
 #include "pplConstants.h"
 #include "settings/papersizes.h"
-#include "settings/settings.h"
+#include "settings/settings_fns.h"
 #include "settings/settingTypes.h"
-#include "settings/withWords.h"
+#include "settings/withWords_fns.h"
 
 #include "userspace/pplObj.h"
 
@@ -56,14 +56,15 @@ void pplset_makedefault(ppl_context *context)
   char   ConfigFname[FNAME_LENGTH];
   char  *PaperSizePtr;
   ppl_settings *s = context->set;
+  pplerr_context *se = &context->errcontext;
 
-  const int default_cols[] = {COLOUR_BLACK, COLOUR_RED, COLOUR_BLUE, COLOUR_MAGENTA, COLOUR_CYAN, COLOUR_BROWN, COLOUR_SALMON, COLOUR_GRAY, COLOUR_GREEN, COLOUR_NAVYBLUE, COLOUR_PERIWINKLE, COLOUR_PINEGREEN, COLOUR_SEAGREEN, COLOUR_GREENYELLOW, COLOUR_ORANGE, COLOUR_CARNATIONPINK, COLOUR_PLUM, -1};
+  const int default_cols[] = {COLOR_BLACK, COLOR_RED, COLOR_BLUE, COLOR_MAGENTA, COLOR_CYAN, COLOR_BROWN, COLOR_SALMON, COLOR_GRAY, COLOR_GREEN, COLOR_NAVYBLUE, COLOR_PERIWINKLE, COLOR_PINEGREEN, COLOR_SEAGREEN, COLOR_GREENYELLOW, COLOR_ORANGE, COLOR_CARNATIONPINK, COLOR_PLUM, -1};
 
   // Clear settings
   memset((void *)s, 0, sizeof(s));
 
   // Default palette
-  for (i=0; default_cols[i]>=0; i++) s->palette_default[i] = default_cols[i]
+  for (i=0; default_cols[i]>=0; i++) s->palette_default[i] = default_cols[i];
   s->palette_default[i] = -1;
 
   // Default Terminal Settings, used when these values are not changed by any configuration files
@@ -75,7 +76,7 @@ void pplset_makedefault(ppl_context *context)
   s->term_default.BinWidthAuto        = 1;
   s->term_default.CalendarIn          = SW_CALENDAR_BRITISH;
   s->term_default.CalendarOut         = SW_CALENDAR_BRITISH;
-  s->term_default.colour              = SW_ONOFF_ON;
+  s->term_default.color              = SW_ONOFF_ON;
   s->term_default.ComplexNumbers      = SW_ONOFF_OFF;
   s->term_default.display             = SW_ONOFF_ON;
   s->term_default.dpi                 = 300.0;
@@ -111,7 +112,7 @@ void pplset_makedefault(ppl_context *context)
   s->graph_default.zaspect               = 1.0;
   s->graph_default.AutoAspect            = SW_ONOFF_ON;
   s->graph_default.AutoZAspect           = SW_ONOFF_ON;
-  s->graph_default.AxesColour            = COLOUR_BLACK;
+  s->graph_default.AxesColour            = COLOR_BLACK;
   s->graph_default.AxesColour1           = 0.0;
   s->graph_default.AxesColour2           = 0.0;
   s->graph_default.AxesColour3           = 0.0;
@@ -164,12 +165,12 @@ void pplset_makedefault(ppl_context *context)
   s->graph_default.GridAxisX[1]  = 1;
   s->graph_default.GridAxisY[1]  = 1;
   s->graph_default.GridAxisZ[1]  = 1;
-  s->graph_default.GridMajColour = COLOUR_GREY60;
+  s->graph_default.GridMajColour = COLOR_GREY60;
   s->graph_default.GridMajColour1= 0;
   s->graph_default.GridMajColour2= 0;
   s->graph_default.GridMajColour3= 0;
   s->graph_default.GridMajColour4= 0;
-  s->graph_default.GridMinColour = COLOUR_GREY85;
+  s->graph_default.GridMinColour = COLOR_GREY85;
   s->graph_default.GridMinColour1= 0;
   s->graph_default.GridMinColour2= 0;
   s->graph_default.GridMinColour3= 0;
@@ -199,7 +200,7 @@ void pplset_makedefault(ppl_context *context)
   s->graph_default.SamplesY      = 40;
   s->graph_default.SamplesYAuto  = SW_BOOL_FALSE;
   s->graph_default.Sample2DMethod= SW_SAMPLEMETHOD_NEAREST;
-  s->graph_default.TextColour    = COLOUR_BLACK;
+  s->graph_default.TextColour    = COLOR_BLACK;
   s->graph_default.TextColour1   = 0;
   s->graph_default.TextColour2   = 0;
   s->graph_default.TextColour3   = 0;
@@ -309,26 +310,26 @@ void pplset_makedefault(ppl_context *context)
   #endif
 
   // Set up empty lists of arrows and labels
-  pplarrow_list = pplarrow_list_default = NULL;
-  ppllabel_list = ppllabel_list_default = NULL;
+  s->pplarrow_list = s->pplarrow_list_default = NULL;
+  s->ppllabel_list = s->ppllabel_list_default = NULL;
 
   // Set up array of plot styles
   for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsZero(context,&(s->plot_styles        [i]),1);
   for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsZero(context,&(s->plot_styles_default[i]),1);
 
   // Set up current axes. Because default axis contains no malloced strings, we don't need to use AxisCopy() here.
-  for (i=0; i<MAX_AXES; i++) XAxes[i] = YAxes[i] = ZAxes[i] = s->axis_default;
-  XAxes[1].enabled   = YAxes[1].enabled   = ZAxes[1].enabled   = 1; // By default, only axes 1 are enabled
-  XAxes[2].topbottom = YAxes[2].topbottom = ZAxes[2].topbottom = 1; // By default, axes 2 are opposite axes 1
-  for (i=0; i<MAX_AXES; i++) { XAxesDefault[i] = XAxes[i]; YAxesDefault[i] = YAxes[i]; ZAxesDefault[i] = ZAxes[i]; }
+  for (i=0; i<MAX_AXES; i++) s->XAxes[i] = s->YAxes[i] = s->ZAxes[i] = s->axis_default;
+  s->XAxes[1].enabled   = s->YAxes[1].enabled   = s->ZAxes[1].enabled   = 1; // By default, only axes 1 are enabled
+  s->XAxes[2].topbottom = s->YAxes[2].topbottom = s->ZAxes[2].topbottom = 1; // By default, axes 2 are opposite axes 1
+  for (i=0; i<MAX_AXES; i++) { s->XAxesDefault[i] = s->XAxes[i]; s->YAxesDefault[i] = s->YAxes[i]; s->ZAxesDefault[i] = s->ZAxes[i]; }
 
   // Setting which affect how we talk to the current interactive session
-  s->session_default.splash    = SW_ONOFF_ON;
-  s->session_default.colour    = SW_ONOFF_ON;
-  s->session_default.colour_rep= SW_TERMCOL_GRN;
-  s->session_default.colour_wrn= SW_TERMCOL_BRN;
-  s->session_default.colour_err= SW_TERMCOL_RED;
-  strcpy(s->session_default.homedir, ppl_unixGetHomeDir(&context->errcontext));
+  se->session_default.splash    = SW_ONOFF_ON;
+  se->session_default.color    = SW_ONOFF_ON;
+  se->session_default.color_rep= SW_TERMCOL_GRN;
+  se->session_default.color_wrn= SW_TERMCOL_BRN;
+  se->session_default.color_err= SW_TERMCOL_RED;
+  strcpy(se->session_default.homedir, ppl_unixGetHomeDir(&context->errcontext));
 
   // Estimate the machine precision of the floating point unit we are using
   ppl_makeMachineEpsilon();

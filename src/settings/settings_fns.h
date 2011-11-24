@@ -1,4 +1,4 @@
-// arrows.h
+// settings_fns.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,20 +19,14 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _PPLSET_ARROWS_H
-#define _PPLSET_ARROWS_H 1
+#ifndef _SETTINGS_FNS_H
+#define _SETTINGS_FNS_H 1
 
-#include "settings/withWords.h"
-#include "userspace/pplObj.h"
+#include "settings/settings.h"
+#include "userspace/context.h"
 
-typedef struct pplarrow_object {
- int        id;
- pplObj     x0       ,y0       ,z0       ,x1       ,y1       ,z1;
- int        system_x0,system_y0,system_z0,system_x1,system_y1,system_z1;
- int        axis_x0  ,axis_y0  ,axis_z0  ,axis_x1  ,axis_y1  ,axis_z1;
- int        pplarrow_style;
- withWords  style;
- struct pplarrow_object *next;
- } pplarrow_object;
+// Variable initialisation functions
+void  pplset_makedefault(ppl_context *context);
 
 #endif
+

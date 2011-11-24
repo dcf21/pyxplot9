@@ -41,7 +41,7 @@ pplObj *pplObjZero(pplObj *in, unsigned char amMalloced)
   int i;
   in->real = in->imag = 0.0;
   in->dimensionless = 1;
-  in->modified = in->flagComplex = in->TempType = 0;
+  in->modified = in->flagComplex = in->tempType = 0;
   in->objType = PPLOBJ_NUM;
   in->auxil = in->objCustomType = in->self_lval = NULL;
   in->auxilMalloced = 0;
@@ -56,7 +56,7 @@ pplObj *pplObjNullStr(pplObj *in, unsigned char amMalloced)
   int i;
   in->real = in->imag = 0.0;
   in->dimensionless = 1;
-  in->modified = in->flagComplex = in->TempType = 0;
+  in->modified = in->flagComplex = in->tempType = 0;
   in->objType = PPLOBJ_STR;
   in->auxil = (void *)"";
   in->auxilMalloced = 0;
@@ -73,7 +73,7 @@ pplObj *pplNewModule(int frozen)
   if (in==NULL) return in;
   in->real = in->imag = frozen;
   in->dimensionless = 1;
-  in->modified = in->flagComplex = in->TempType = 0;
+  in->modified = in->flagComplex = in->tempType = 0;
   in->objType = PPLOBJ_MOD;
   in->auxil = (void *)ppl_dictInit(HASHSIZE_LARGE,1);
   if (in->auxil==NULL) { free(in); return NULL; }

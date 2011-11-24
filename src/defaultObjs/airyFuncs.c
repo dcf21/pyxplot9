@@ -873,7 +873,7 @@ void airy_series_taylor(gsl_complex *dp, gsl_complex *dq, gsl_complex zd, gsl_co
   return;
  }
 
-void airy_ai(gsl_complex in, gsl_complex *out, int *status, char *errtext)
+void airy_ai(gsl_complex in, gsl_complex *out, int *status, char *errText)
  {
   int conjugate,i,max;
   double mod,arg;
@@ -915,7 +915,7 @@ void airy_ai(gsl_complex in, gsl_complex *out, int *status, char *errtext)
     if (log(mod)>440.0)
      {
       *status = 2; // calculation will overflow
-      sprintf(errtext,"Overflow error within Airy function");
+      sprintf(errText,"Overflow error within Airy function");
       return;
      }
     if (arg<-2.094395102393195492 || arg>2.094395102393195492)
@@ -941,7 +941,7 @@ void airy_ai(gsl_complex in, gsl_complex *out, int *status, char *errtext)
       if (GSL_IMAG(c)>650.0)
        {
         *status = 2; // risk of overflow
-        sprintf(errtext,"Overflow error within Airy function");
+        sprintf(errText,"Overflow error within Airy function");
         return;
        }
       dp = gsl_complex_mul(dp,gsl_complex_sin(c));
@@ -971,7 +971,7 @@ void airy_ai(gsl_complex in, gsl_complex *out, int *status, char *errtext)
       if (GSL_REAL(c)>650.0)
        {
         *status = 2; // risk of overflow
-        sprintf(errtext,"Overflow error within Airy function");
+        sprintf(errText,"Overflow error within Airy function");
         return;
        }
       d = gsl_complex_mul(d,gsl_complex_exp(c));
@@ -982,7 +982,7 @@ void airy_ai(gsl_complex in, gsl_complex *out, int *status, char *errtext)
    }
  }
 
-void airy_bi(gsl_complex in, gsl_complex *out, int *status, char *errtext)
+void airy_bi(gsl_complex in, gsl_complex *out, int *status, char *errText)
  {
   int conjugate,i,max;
   double mod,arg;
@@ -1024,7 +1024,7 @@ void airy_bi(gsl_complex in, gsl_complex *out, int *status, char *errtext)
     if (log(mod)>440.0)
      {
       *status = 2; // calculation will overflow
-      sprintf(errtext,"Overflow error within Airy function");
+      sprintf(errText,"Overflow error within Airy function");
       return;
      }
     if (arg<-1.63 || arg>1.63)
@@ -1050,7 +1050,7 @@ void airy_bi(gsl_complex in, gsl_complex *out, int *status, char *errtext)
       if (GSL_IMAG(c)>650.0)
        {
         *status = 2; // risk of overflow
-        sprintf(errtext,"Overflow error within Airy function");
+        sprintf(errText,"Overflow error within Airy function");
         return;
        }
       dp = gsl_complex_mul(dp,gsl_complex_cos(c));
@@ -1080,7 +1080,7 @@ void airy_bi(gsl_complex in, gsl_complex *out, int *status, char *errtext)
       if (GSL_REAL(c)>650.0)
        {
         *status = 2; // risk of overflow
-        sprintf(errtext,"Overflow error within Airy function");
+        sprintf(errText,"Overflow error within Airy function");
         return;
        }
       d = gsl_complex_mul(d,gsl_complex_exp(c));
@@ -1090,9 +1090,9 @@ void airy_bi(gsl_complex in, gsl_complex *out, int *status, char *errtext)
       /* The asymptotic expansion is poor here due to Stokes' Phenomenon. */
       c = gsl_complex_polar(1,2.094395102393195492);
       d = gsl_complex_conjugate(c);
-      airy_ai(gsl_complex_mul(in,c),&a,status,errtext);
+      airy_ai(gsl_complex_mul(in,c),&a,status,errText);
       if (*status==2) return;
-      airy_ai(gsl_complex_mul(in,d),&b,status,errtext);
+      airy_ai(gsl_complex_mul(in,d),&b,status,errText);
       if (*status==2) return;
       a = gsl_complex_mul(a,c);
       b = gsl_complex_mul(b,d);
@@ -1105,7 +1105,7 @@ void airy_bi(gsl_complex in, gsl_complex *out, int *status, char *errtext)
    }
  }
 
-void airy_ai_diff(gsl_complex in, gsl_complex *out, int *status, char *errtext)
+void airy_ai_diff(gsl_complex in, gsl_complex *out, int *status, char *errText)
  {
   int conjugate,i,max;
   double mod,arg;
@@ -1144,7 +1144,7 @@ void airy_ai_diff(gsl_complex in, gsl_complex *out, int *status, char *errtext)
     if (log(mod)>440.0)
      {
       *status = 2; // calculation will overflow
-      sprintf(errtext,"Overflow error within Airy function");
+      sprintf(errText,"Overflow error within Airy function");
       return;
      }
     if (arg<-2.094395102393195492 || arg>2.094395102393195492)
@@ -1170,7 +1170,7 @@ void airy_ai_diff(gsl_complex in, gsl_complex *out, int *status, char *errtext)
       if (GSL_IMAG(c)>650.0)
        {
         *status = 2; // risk of overflow
-        sprintf(errtext,"Overflow error within Airy function");
+        sprintf(errText,"Overflow error within Airy function");
         return;
        }
       dp = gsl_complex_mul(dp,gsl_complex_cos(c));
@@ -1200,7 +1200,7 @@ void airy_ai_diff(gsl_complex in, gsl_complex *out, int *status, char *errtext)
       if (GSL_REAL(c)>650.0)
        {
         *status = 2; // risk of overflow
-        sprintf(errtext,"Overflow error within Airy function");
+        sprintf(errText,"Overflow error within Airy function");
         return;
        }
       d = gsl_complex_mul(d,gsl_complex_exp(c));
@@ -1211,7 +1211,7 @@ void airy_ai_diff(gsl_complex in, gsl_complex *out, int *status, char *errtext)
    }
  }
 
-void airy_bi_diff(gsl_complex in, gsl_complex *out, int *status, char *errtext)
+void airy_bi_diff(gsl_complex in, gsl_complex *out, int *status, char *errText)
  {
   int conjugate,i,max;
   double mod,arg;
@@ -1253,7 +1253,7 @@ void airy_bi_diff(gsl_complex in, gsl_complex *out, int *status, char *errtext)
     if (log(mod)>440.0)
      {
       *status = 2; // calculation will overflow
-      sprintf(errtext,"Overflow error within Airy function");
+      sprintf(errText,"Overflow error within Airy function");
       return;
      }
     if (arg<-1.63 || arg>1.63)
@@ -1279,7 +1279,7 @@ void airy_bi_diff(gsl_complex in, gsl_complex *out, int *status, char *errtext)
       if (GSL_IMAG(c)>650.0)
        {
         *status = 2; // risk of overflow
-        sprintf(errtext,"Overflow error within Airy function");
+        sprintf(errText,"Overflow error within Airy function");
         return;
        }
       dp = gsl_complex_mul(dp,gsl_complex_sin(c));
@@ -1309,7 +1309,7 @@ void airy_bi_diff(gsl_complex in, gsl_complex *out, int *status, char *errtext)
       if (GSL_REAL(c)>650.0)
        {
         *status = 2; // risk of overflow
-        sprintf(errtext,"Overflow error within Airy function");
+        sprintf(errText,"Overflow error within Airy function");
         return;
        }
       d = gsl_complex_mul(d,gsl_complex_exp(c));
@@ -1318,9 +1318,9 @@ void airy_bi_diff(gsl_complex in, gsl_complex *out, int *status, char *errtext)
      {
       c = gsl_complex_polar(1,2.094395102393195492);
       d = gsl_complex_conjugate(c);
-      airy_ai_diff(gsl_complex_mul(in,c),&a,status,errtext);
+      airy_ai_diff(gsl_complex_mul(in,c),&a,status,errText);
       if (*status==2) return;
-      airy_ai_diff(gsl_complex_mul(in,d),&b,status,errtext);
+      airy_ai_diff(gsl_complex_mul(in,d),&b,status,errText);
       if (*status==2) return;
       a = gsl_complex_mul(a,d);
       b = gsl_complex_mul(b,c);

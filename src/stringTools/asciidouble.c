@@ -181,11 +181,18 @@ char *ppl_numericDisplay(double in, int N, int SigFig, int latex)
   return output;
  }
 
+// Useful function for checking whether two doubles are roughly equal to one another
 unsigned char ppl_dblEqual(double a, double b)
  {
   if ( (fabs(a) < 1e-100) && (fabs(b) < 1e-100) ) return 1;
-  if ( (fabs(a-b) < fabs(1e-7*a)) && (fabs(a-b) < fabs(1e-7*b)) ) return 1;
-  return 0;
+  if ( (fabs(a-b) > fabs(1e-7*a)) || (fabs(a-b) > fabs(1e-7*b)) ) return 0;
+  return 1;
+ }
+
+unsigned char ppl_dblApprox(double a, double b, double err)
+ {
+  if ( fabs(a-b) > (fabs(err)+1e-50) ) return 0;
+  return 1;
  }
 
 /* ppl_file_readline(): This remarkably useful function forwards a file to the next newline */

@@ -26,8 +26,9 @@
 
 #include "coreUtils/errorReport.h"
 #include "coreUtils/dict.h"
+#include "coreUtils/memAlloc.h"
 
-#include "settings/settings.h"
+#include "settings/settings_fns.h"
 
 #include "stringTools/strConstants.h"
 
@@ -50,6 +51,7 @@ ppl_context *ppl_contextInit()
   out->errcontext.error_input_linenumber = -1;
   out->errcontext.error_input_filename[0] = '\0';
   strcpy(out->errcontext.error_source,"main     ");
+  ppl_memAlloc_MemoryInit(&out->errcontext, &ppl_error, &ppl_log);
   pplset_makedefault(out);
 
   out->willBeInteractive = 1;
@@ -57,6 +59,7 @@ ppl_context *ppl_contextInit()
   out->inputLineAddBuffer = NULL;
   out->shellExiting = 0;
   out->historyNLinesWritten = 0;
+  out->termtypeSetInConfigfile = 0;
   out->errcontext.error_input_linenumber = -1;
   out->errcontext.error_input_filename[0] = '\0';
   strcpy(out->errcontext.error_source,"main     ");

@@ -51,7 +51,7 @@ extern char *pplObjTypeNames[];
 typedef struct pplObj
  {
   double         real, imag;
-  unsigned char  dimensionless, flagComplex, modified, TempType;
+  unsigned char  dimensionless, flagComplex, modified, tempType;
   unsigned char  amMalloced, auxilMalloced;
   int            objType, auxilLen;
   struct pplObj *objCustomType;

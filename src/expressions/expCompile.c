@@ -61,10 +61,10 @@
 // B can be followed by ..C......JK.....Q...U.
 // C can be followed by .B.D..GHI..LMNO.......
 // D can be followed by .........JK.....Q...U.
-// E can be followed by .........JK.....QR..U.
+// E can be followed by .....F...JK.....QR..U.
 // F can be followed by .........JK.........U.
 // G can be followed by .....F...JK....PQRS.U.
-// H can be followed by ......G...............
+// H can be followed by ....E.G...............
 // I can be followed by .B..E.GH...LMNO.......
 // J can be followed by .B..E.GHI..LMNO.......
 // K can be followed by .B..E.GHI..LMNO.......
@@ -81,7 +81,7 @@
 
 #define MARKUP_MATCH(A) (strncmp(in+scanpos,A,strlen(A))==0)
 
-#define PGE_OVERFLOW { *errPos = scanpos; strcpy(errText, "Overflow Error: Algebraic expression too long"); *end = -1; return; }
+#define PGE_OVERFLOW { *errPos = scanpos; *errType=ERR_OVERFLOW; strcpy(errText, "Algebraic expression too long"); *end = -1; return; }
 
 #define NEWSTATE(L,O,P) \
  { \
@@ -108,9 +108,9 @@
   scanpos++; \
  }
 
-void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed, int allowCommaOperator, int collectCommas, int isDict, int outOffset, int *outlen, int *errPos, char *errText)
+void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed, int allowCommaOperator, int collectCommas, int isDict, int outOffset, int *outlen, int *errPos, int *errType, char *errText)
  {
-  const char    *allowed[] = {"BEGHILMNO","CJKQU","BDGHILMNO","JKQU","JKQRU","JKU","FJKPQRSU","G","BEGHLMNO","BEGHILMNO","BEGHILMNO","JKU","JKQRU","JKQRU","ELV","JKPQRU","JKPQSU","T","BEGHILMNO","FJKPQRSU","","JKU"};
+  const char    *allowed[] = {"BEGHILMNO","CJKQU","BDGHILMNO","JKQU","FJKQRU","JKU","FJKPQRSU","EG","BEGHLMNO","BEGHILMNO","BEGHILMNO","JKU","JKQRU","JKQRU","ELV","JKPQRU","JKPQSU","T","BEGHILMNO","FJKPQRSU","","JKU"};
   int            nCommaItems=1, nDictItems=0, tertiaryDepth=0;
   char           state='A', oldstate, trialstate;
   int            scanpos=0, outpos=0, trialpos;
@@ -133,7 +133,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
           int j;
           for (j=1; ((in[scanpos+j]!='\0')&&((in[scanpos+j]!=quoteType)||(in[scanpos+j-1]=='\\'))); j++);
           if (in[scanpos+j]==quoteType) { j++; NEWSTATE(j,0,0); }
-          else                          { *errPos = scanpos; strcpy(errText, "Syntax Error: Mismatched quote"); *end=-1; *outlen=0; return; }
+          else                          { *errPos = scanpos; *errType=ERR_SYNTAX; strcpy(errText, "Mismatched quote"); *end=-1; *outlen=0; return; }
          }
        }
       else if (trialstate=='C') // string substitution operator
@@ -148,16 +148,16 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
          {
           int j,k,l,m,n=1;
           ppl_strBracketMatch(in+scanpos,'(',')',NULL,NULL,&j,0); // Search for a ) to match the (
-          if (j<=0) { *errPos = scanpos; strcpy(errText, "Syntax Error: Mismatched ( )"); *end=-1; *outlen=0; return; }
+          if (j<=0) { *errPos = scanpos; *errType=ERR_SYNTAX; strcpy(errText, "Mismatched ( )"); *end=-1; *outlen=0; return; }
           NEWSTATE(1,0,0); // Record the one character opening bracket
           while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; n++; } // Sop up whitespace
           k=scanpos; l=outpos; j-=n;
           NEWSTATE(j,0,0); // Fast-forward to closing bracket
           if ((in[k]!=')')||(trialstate=='E'))
            {
-            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,(trialstate!='E'),0,l+outOffset,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
+            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,(trialstate!='E'),0,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
             if (*errPos>=0) { *errPos+=k; return; }
-            if (m!=j) { *errPos = m+k; strcpy(errText, "Syntax Error: Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
+            if (m!=j) { *errPos = m+k; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
            }
           NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
          }
@@ -218,7 +218,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
           if ((!collectCommas)||(tertiaryDepth>0)) { NEWSTATE(1,0x5C,18); }
           else
            {
-            if (isDict && (nCommaItems>=2-(nDictItems==0))) { *errPos = scanpos; strcpy(errText, "Syntax Error: Expecting : followed by value for dictionary key"); *end=-1; *outlen=0; return; }
+            if (isDict && (nCommaItems>=2-(nDictItems==0))) { *errPos = scanpos; *errType=ERR_SYNTAX; strcpy(errText, "Expecting : followed by value for dictionary key"); *end=-1; *outlen=0; return; }
             NEWSTATE(1,0x5F,18);
             nCommaItems++;
            }
@@ -231,7 +231,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
          {
           if (isDict && (tertiaryDepth==0))
            {
-            if (nCommaItems<2-(nDictItems==0)) { *errPos = scanpos; strcpy(errText, "Syntax Error: Expecting , to separate dictionary items"); *end=-1; *outlen=0; return; }
+            if (nCommaItems<2-(nDictItems==0)) { *errPos = scanpos; *errType=ERR_SYNTAX; strcpy(errText, "Expecting , to separate dictionary items"); *end=-1; *outlen=0; return; }
             NEWSTATE(1,0x5F,18);
             nCommaItems=1;
             nDictItems++;
@@ -258,16 +258,16 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
          {
           int j,k,l,m,n=1;
           ppl_strBracketMatch(in+scanpos,'[',']',NULL,NULL,&j,0); // Search for a ] to match the [
-          if (j<=0) { *errPos = scanpos; strcpy(errText, "Syntax Error: Mismatched [ ]"); *end=-1; *outlen=0; return; }
+          if (j<=0) { *errPos = scanpos; *errType=ERR_SYNTAX; strcpy(errText, "Mismatched [ ]"); *end=-1; *outlen=0; return; }
           NEWSTATE(1,0,0); // Record the one character opening bracket
           while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; n++; } // Sop up whitespace
           k=scanpos; l=outpos; j-=n;
           NEWSTATE(j,0,0); // Fast-forward to closing bracket
           if (in[k]!=']')
            {
-            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,1,0,l+outOffset,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
+            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,1,0,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
             if (*errPos>=0) { *errPos+=k; return; }
-            if (m!=j) { *errPos = m+k; strcpy(errText, "Syntax Error: Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
+            if (m!=j) { *errPos = m+k; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
            }
           NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
          }
@@ -278,16 +278,16 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
          {
           int j,k,l,m,n=1;
           ppl_strBracketMatch(in+scanpos,'{','}',NULL,NULL,&j,0); // Search for a } to match the {
-          if (j<=0) { *errPos = scanpos; strcpy(errText, "Syntax Error: Mismatched { }"); *end=-1; *outlen=0; return; }
+          if (j<=0) { *errPos = scanpos; *errType=ERR_SYNTAX; strcpy(errText, "Mismatched { }"); *end=-1; *outlen=0; return; }
           NEWSTATE(1,0,0); // Record the one character opening bracket
           while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; n++;} // Sop up whitespace
           k=scanpos; l=outpos; j-=n;
           NEWSTATE(j,0,0); // Fast-forward to closing bracket
           if (in[k]!='}')
            {
-            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,1,1,l+outOffset,&n,errPos,errText); // Hierarchically tokenise the inside of the brackets
+            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,1,1,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
             if (*errPos>=0) { *errPos+=k; return; }
-            if (m!=j) { *errPos = m+k; strcpy(errText, "Syntax Error: Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
+            if (m!=j) { *errPos = m+k; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
            }
           NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
          }
@@ -324,6 +324,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
   if (state=='U') // We reached state U... end of expression
    {
     *errPos = -1;
+    *errType = 0;
     *errText='\0';
     out[outpos]=0;
     if      (isDict)        { out[outpos+1] = nDictItems >>8; out[outpos+2] = nDictItems &255; }
@@ -343,7 +344,8 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
     *end    = -1;
     *outlen = 0;
     // Now we need to construct an error string
-    strcpy(errText,"Syntax Error: At this point, was expecting ");
+    *errType = ERR_SYNTAX;
+    strcpy(errText,"At this point, was expecting ");
     i=strlen(errText);
     for (trialpos=0; ((trialstate=allowed[(int)(state-'A')][trialpos])!='\0'); trialpos++)
      {
@@ -389,13 +391,13 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
 
 #define GET_POINTER \
  { \
-  if (lastoutpos<0) { *errPos=ipos; strcpy(errText, "Internal error: Could not find variable name preceding assignment operator (1)."); *end=-1; return; } \
+  if (lastoutpos<0) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not find variable name preceding assignment operator."); *end=-1; return; } \
   if      (*(unsigned char *)(out+lastoutpos+sizeof(int))==3) *(unsigned char *)(out+lastoutpos+sizeof(int))=4; \
   else if (*(unsigned char *)(out+lastoutpos+sizeof(int))==5) *(unsigned char *)(out+lastoutpos+sizeof(int))=6; \
   else if (*(unsigned char *)(out+lastoutpos+sizeof(int))==7) \
    { \
     int f = (int)*(unsigned char *)(out+lastoutpos+sizeof(int)+1); \
-    if (!(f&1)) { *errPos=ipos; strcpy(errText, "Error: cannot apply an assignment operator to the output of a slice operator."); *end=-1; return; } \
+    if (!(f&1)) { *errPos=ipos; *errType=ERR_SYNTAX; strcpy(errText, "Cannot apply an assignment operator to the output of a slice operator."); *end=-1; return; } \
     *(unsigned char *)(out+lastoutpos+sizeof(int))=16; \
    } \
  }
@@ -409,7 +411,8 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
     if ((stackprec==2)&&(precedence==3)) stackprec=4; /* Magic treatment of x**-1 */ \
     if ( ((!rightAssoc)&&(precedence>=stackprec)) || ((rightAssoc)&&(precedence>stackprec)) ) /* pop operators with higher precedence from stack */ \
      { \
-      unsigned char stacko   = *(stack-stackpos+2); /* operator number of the stack object */ \
+      const unsigned char stacko   = *(stack-stackpos+2); /* operator number of the stack object */ \
+      const int           charpos  = *(int *)(stack-stackpos+4); \
       unsigned char bytecode = 0; \
       if      (opType=='a' ) bytecode = 12; /* assignment operator */ \
       else if (opType=='$' ) bytecode = 15; /* dollar operator */ \
@@ -417,11 +420,12 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
       else if (stacko==0xA3) bytecode = 13; /* ++ lval operator */ \
       else if (stacko==0xA4) bytecode = 13; /* -- lval operator */ \
       else                   bytecode = 11; /* other operator */ \
-      if      (stacko==0x5A) { int o=*(int *)(stack-stackpos+4); BYTECODE_OP(20); BYTECODE_ENDOP; *(int *)(out+o)=outpos; stackpos-=sizeof(int); } /* || operator */ \
-      else if (stacko==0x5B) { int o=*(int *)(stack-stackpos+4); BYTECODE_OP(20); BYTECODE_ENDOP; *(int *)(out+o)=outpos; stackpos-=sizeof(int); } /* && operator */ \
-      else if (stacko==0xFE) { int o=*(int *)(stack-stackpos+4);                                  *(int *)(out+o)=outpos; stackpos-=sizeof(int); } /* ?: operator, closing : */ \
+      if      (stacko==0x5A) { int o=*(int *)(stack-stackpos+4+sizeof(int)); BYTECODE_OP(20); BYTECODE_ENDOP; *(int *)(out+o)=outpos; stackpos-=sizeof(int); } /* || operator */ \
+      else if (stacko==0x5B) { int o=*(int *)(stack-stackpos+4+sizeof(int)); BYTECODE_OP(20); BYTECODE_ENDOP; *(int *)(out+o)=outpos; stackpos-=sizeof(int); } /* && operator */ \
+      else if (stacko==0xFE) { int o=*(int *)(stack-stackpos+4+sizeof(int));                                  *(int *)(out+o)=outpos; stackpos-=sizeof(int); } /* ?: operator, closing : */ \
       else if (stacko!=0x5F) /* null operations get ignored (e.g. commas that collect items) */ \
        { \
+        const int ipos = charpos; \
         BYTECODE_OP(bytecode); \
         *(unsigned char *)(out+outpos++) = stacko; \
         if ((opType=='o')&&(stacko==0x40)) \
@@ -431,7 +435,7 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
          } \
         BYTECODE_ENDOP; \
        } \
-      stackpos-=3; /* pop stack */ \
+      stackpos-=3+sizeof(int); /* pop stack */ \
      } \
     else break; \
    } \
@@ -441,6 +445,8 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
  { \
   lastoutpos = outpos; \
   outpos += sizeof(int); /* Save a place for the length of this instruction */ \
+  *(int *)(out+outpos) = ipos; /* Store character position of token for error reporting */ \
+  outpos += sizeof(int); \
   *(unsigned char *)(out+outpos++) = (X); \
  }
 
@@ -449,7 +455,7 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
   *(int *)(out+lastoutpos) = outpos - lastoutpos; /* Write the length of the bytecode instruction we've just written */ \
  }
 
-void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed, int allowCommaOperator, void *out, int *outlen, int *errPos, char *errText)
+void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed, int allowCommaOperator, void *out, int *outlen, int *errPos, int *errType, char *errText)
  {
   unsigned char *stack = context->tokenBuff + ALGEBRA_MAXLEN - 1;
   unsigned char *tdata = context->tokenBuff;
@@ -460,7 +466,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
   int            outpos = 0, lastoutpos = -1;
 
   // First tokenise expression
-  ppl_expTokenise(context, in, end, dollarAllowed, allowCommaOperator, 0, 0, 0, &tlen, errPos, errText);
+  ppl_expTokenise(context, in, end, dollarAllowed, allowCommaOperator, 0, 0, 0, &tlen, errPos, errType, errText);
   if (*errPos >= 0) return;
   stacklen = ALGEBRA_MAXLEN - tlen;
 
@@ -475,7 +481,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       BYTECODE_OP(2); // bytecode op 2
       for ( i=ipos+1 ; ((in[i]!=quoteType) || (in[i-1]=='\\')) ; i++ )
        {
-        if (in[i]=='\0') { *errPos=i; strcpy(errText, "Internal error: Unexpected end of string."); *end=-1; return; }
+        if (in[i]=='\0') { *errPos=i; *errType=ERR_INTERNAL; strcpy(errText, "Unexpected end of string."); *end=-1; return; }
         if ((in[i]=='\\') && (in[i-1]!='\\')) continue; // We have a double backslash
         *(char *)(out+outpos++) = in[i];
        }
@@ -494,10 +500,10 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
        {
         int o,precedence=999;
         POP_STACK;
-        if ( (stackpos<3) || (*(stack-stackpos+3)!='t') ) { *errPos=ipos; strcpy(errText, "Internal error: Could not match : to an ? in the ternary operator."); *end=-1; return; }
-        o=*(int *)(stack-stackpos+4);
+        if ( (stackpos<3) || (*(stack-stackpos+3)!='t') ) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match : to an ? in the ternary operator."); *end=-1; return; }
+        o=*(int *)(stack-stackpos+4+sizeof(int));
         *(int *)(out+o)=outpos + 1+2*sizeof(int);
-        stackpos-=3+sizeof(int); // pop ? from stack
+        stackpos-=3+2*sizeof(int); // pop ? from stack
        }
 
       if       (o=='S') { GET_POINTER; } // Turn variable lookup into pointer lookup now, because assignment operators are binary and operand is guaranteed to be the last thing on the stack
@@ -505,6 +511,9 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       else if ((o=='J')&&(opCode==0x5B)) { BYTECODE_OP(18); *(char *)(out+outpos++) = 0; *(int *)(stack-stackpos-sizeof(int)+1)=outpos; stackpos+=sizeof(int); outpos+=sizeof(int); BYTECODE_ENDOP; } // || operator compiles to if true  goto else pop
       else if ((o=='K')&&(opCode==0xFD)) { BYTECODE_OP(17); *(char *)(out+outpos++) = 1; *(int *)(stack-stackpos-sizeof(int)+1)=outpos; stackpos+=sizeof(int); outpos+=sizeof(int); BYTECODE_ENDOP; } // ? operator -- if false goto
       else if ((o=='K')&&(opCode==0xFE)) { BYTECODE_OP(19);                              *(int *)(stack-stackpos-sizeof(int)+1)=outpos; stackpos+=sizeof(int); outpos+=sizeof(int); BYTECODE_ENDOP; } // : operator -- goto
+
+      *(int*)(stack-stackpos-sizeof(int)+1) = ipos;
+      stackpos+=sizeof(int);
 
       if      (o=='S')       *(stack-stackpos-0) = 'a'; // push operator onto stack
       else if (opCode==0xFD) *(stack-stackpos-0) = 't';
@@ -527,12 +536,12 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
         unsigned char rightAssoc = 0;
         unsigned char precedence = 255;
         POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
-        if ( (stackpos<3) || (*(stack-stackpos+3)!='(') ) { *errPos=ipos; strcpy(errText, "Internal error: Could not match ) to an (."); *end=-1; return; }
+        if ( (stackpos<3) || (*(stack-stackpos+3)!='(') ) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match ) to an (."); *end=-1; return; }
         stackpos-=3; // pop bracket
         if (o=='D') // apply string substitution operator straight away
          {
-          if ( (stackpos<3) || (*(stack-stackpos+2)!=0x40)) { *errPos=ipos; strcpy(errText, "Internal error: Could not match string substituion () to a %."); *end=-1; return; }
-          stackpos-=3; // pop stack
+          if ( (stackpos<3) || (*(stack-stackpos+2)!=0x40)) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match string substituion () to a %."); *end=-1; return; }
+          stackpos-=3+sizeof(int); // pop stack
           BYTECODE_OP(14); // bytecode 14 -- string substitution operator
           *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of string substitutions; stored with closing bracket in bytecode is number of collected ,-separated items
           outpos += sizeof(int);
@@ -564,7 +573,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       else             BYTECODE_OP(2) // $foo -- push "foo" onto stack as a string constant
       for ( i=ipos ; (isalnum(in[i])) ; i++ )
        {
-        if (in[i]=='\0') { *errPos=ipos; strcpy(errText, "Internal error: Unexpected end of variable name."); *end=-1; return; }
+        if (in[i]=='\0') { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Unexpected end of variable name."); *end=-1; return; }
         *(char *)(out+outpos++) = in[i];
        }
       *(unsigned char *)(out+outpos++) = '\0';
@@ -591,7 +600,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
         unsigned char rightAssoc = 0;
         unsigned char precedence = 255;
         POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
-        if ( (stackpos<3) || (*(stack-stackpos+3)!='[') ) { *errPos=ipos; strcpy(errText, "Internal error: Could not match ] to an [."); *end=-1; return; }
+        if ( (stackpos<3) || (*(stack-stackpos+3)!='[') ) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match ] to an [."); *end=-1; return; }
         stackpos-=3; // pop bracket
         BYTECODE_OP(9); // bytecode 9 -- make list
         *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of list items; stored with closing bracket in bytecode is number of collected ,-separated items
@@ -613,7 +622,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
         unsigned char rightAssoc = 0;
         unsigned char precedence = 255;
         POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
-        if ( (stackpos<3) || (*(stack-stackpos+3)!='{') ) { *errPos=ipos; strcpy(errText, "Internal error: Could not match } to an {."); *end=-1; return; }
+        if ( (stackpos<3) || (*(stack-stackpos+3)!='{') ) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match } to an {."); *end=-1; return; }
         stackpos-=3; // pop bracket
         BYTECODE_OP(8); // bytecode 8 -- make dict
         *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of list items; stored with closing bracket in bytecode is number of collected ,-separated items
@@ -623,6 +632,8 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
      }
     else if (o=='O') // a dollar operator
      {
+      *(int*)(stack-stackpos-sizeof(int)+1) = ipos;
+      stackpos+=sizeof(int);
       *(stack-stackpos-0) = '$'; // push dollar onto stack
       *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
       stackpos+=3;
@@ -655,7 +666,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
   // If there are still brackets on the stack, we've failed
   if (stackpos!=0)
    {
-    *errPos=0; strcpy(errText, "Internal error: Unexpected junk left on stack."); *end=-1; return;
+    *errPos=0; *errType=ERR_INTERNAL; strcpy(errText, "Unexpected junk left on stack."); *end=-1; return;
    }
 
   // Optimise gotos that point directly at other gotos
@@ -701,11 +712,12 @@ void ppl_reversePolishPrint(ppl_context *context, void *in, char *out)
 
   while (1)
    {
-    int pos = j; // Position of start of instruction
-    int len = *(int *)(in+j); // length of bytecode instruction with data
-    int o=(int)(*(unsigned char *)(in+j+sizeof(int)  )); // Opcode number
-    int t=(int)(*(unsigned char *)(in+j+sizeof(int)+1)); // First data item after opcode
-    j+=sizeof(int)+1; // Leave j pointing to first data item after opcode
+    int pos     = j; // Position of start of instruction
+    int len     = *(int *)(in+j            ); // length of bytecode instruction with data
+    int charpos = *(int *)(in+j+sizeof(int)); // character position of token (for error reporting)
+    int o       = (int)(*(unsigned char *)(in+j+2*sizeof(int)  )); // Opcode number
+    int t       = (int)(*(unsigned char *)(in+j+2*sizeof(int)+1)); // First data item after opcode
+    j+=2*sizeof(int)+1; // Leave j pointing to first data item after opcode
     switch (o)
      {
       case 0:
@@ -870,7 +882,7 @@ void ppl_reversePolishPrint(ppl_context *context, void *in, char *out)
         o=0;
         break;
      }
-    sprintf(context->errcontext.tempErrStr,"%4d %10s %10s %s",pos,op,optype,arg);
+    sprintf(context->errcontext.tempErrStr,"%4d %4d %10s %10s %s",pos,charpos,op,optype,arg);
     ppl_report(&context->errcontext, NULL);
     if (o==0) break;
     j = pos+len;

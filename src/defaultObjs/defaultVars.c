@@ -19,8 +19,6 @@
 
 // ----------------------------------------------------------------------------
 
-#define _CONTEXT_C 1
-
 #include <stdlib.h>
 #include <string.h>
 
@@ -32,7 +30,8 @@
 #include "coreUtils/errorReport.h"
 #include "coreUtils/dict.h"
 
-#include "settings/epsColours.h"
+#include "settings/epsColors.h"
+#include "settings/settingTypes.h"
 
 #include "stringTools/strConstants.h"
 
@@ -108,13 +107,13 @@ void ppl_makeDefaultVars(ppl_context *out)
     pplObjZero(&v,1);
     v.objType  = PPLOBJ_COL;
     v.auxilLen = 0; // CMYK color
-    for (i=0; SW_COLOUR_INT[i]>=0; i++)
+    for (i=0; SW_COLOR_INT[i]>=0; i++)
      {
-      v.exponent[0] = SW_COLOUR_CMYK_C[i];
-      v.exponent[1] = SW_COLOUR_CMYK_M[i];
-      v.exponent[2] = SW_COLOUR_CMYK_Y[i];
-      v.exponent[3] = SW_COLOUR_CMYK_K[i];
-      ppl_dictAppendCpy(d2 , SW_COLOUR_STR[i] , (void *)&v , sizeof(v));
+      v.exponent[0] = SW_COLOR_CMYK_C[i];
+      v.exponent[1] = SW_COLOR_CMYK_M[i];
+      v.exponent[2] = SW_COLOR_CMYK_Y[i];
+      v.exponent[3] = SW_COLOR_CMYK_K[i];
+      ppl_dictAppendCpy(d2 , SW_COLOR_STR[i] , (void *)&v , sizeof(v));
      }
 
     // phy module

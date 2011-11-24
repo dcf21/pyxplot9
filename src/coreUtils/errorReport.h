@@ -32,11 +32,14 @@
 #define ERR_MEMORY   105
 #define ERR_STACKED  106
 #define ERR_PREFORMED 107
+#define ERR_RANGE    108
+#define ERR_UNIT     109
+#define ERR_OVERFLOW 110
 
 #include "stringTools/strConstants.h"
 
 typedef struct pplset_session {
- int   splash, colour, colour_rep, colour_wrn, colour_err;
+ int   splash, color, color_rep, color_wrn, color_err;
  char  cwd[FNAME_LENGTH];
  char  tempdir[FNAME_LENGTH];
  char  homedir[FNAME_LENGTH];
