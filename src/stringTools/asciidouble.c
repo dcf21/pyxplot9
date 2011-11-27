@@ -42,32 +42,46 @@ double ppl_getFloat(const char *str, int *Nchars)
   if ((str[pos+0]=='n') && (str[pos+1]=='a') && (str[pos+2]=='n') && (str[pos+3]>='\0') && (str[pos+3]<=' ')) { if (Nchars!=NULL) *Nchars=3; return GSL_NAN; }
   if ((str[pos+0]=='N') && (str[pos+1]=='A') && (str[pos+2]=='N') && (str[pos+3]>='\0') && (str[pos+3]<=' ')) { if (Nchars!=NULL) *Nchars=3; return GSL_NAN; }
 
-  if      (str[pos] == '-') { negative = 1; pos++; }  /* Deal with negatives */
-  else if (str[pos] == '+') {               pos++; }  /* Deal with e.g. 1E+09 */
+  if      (str[pos] == '-') { negative = 1; pos++; }  // Deal with negatives
+  else if (str[pos] == '+') {               pos++; }  // Deal with e.g. 1E+09
 
-  while (((str[pos]>='0') && (str[pos]<='9')) || (str[pos] == '.'))
+  if ((str[pos+0]=='0') && (str[pos+1]=='x')) // Hexadecimal
    {
-    if (str[pos] == '.')
+    pos+=2;
+    while (1)
      {
-      past_decimal_point = 1;
-     } else {
-      accumulator = ((10 * accumulator) + (((int)str[pos])-48));
-      if (past_decimal_point == 1) decimals++;
+      if      ((str[pos]>='0') && (str[pos]<='9')) accumulator = ((16 * accumulator) + (((int)str[pos])-48));
+      else if ((str[pos]>='A') && (str[pos]<='F')) accumulator = ((16 * accumulator) + (((int)str[pos])-55));
+      else if ((str[pos]>='a') && (str[pos]<='f')) accumulator = ((16 * accumulator) + (((int)str[pos])-87));
+      else                                         break;
+      pos++;
      }
-    pos++;
+    if (negative == 1) accumulator *= -1; // Deal with negatives
    }
-
-  while (decimals != 0)                                         /* Deals with decimals */
+  else
    {
-    decimals--;
-    accumulator /= 10;
+    while (((str[pos]>='0') && (str[pos]<='9')) || (str[pos] == '.'))
+     {
+      if (str[pos] == '.')
+       {
+        past_decimal_point = 1;
+       } else {
+        accumulator = ((10 * accumulator) + (((int)str[pos])-48));
+        if (past_decimal_point == 1) decimals++;
+       }
+      pos++;
+     }
+
+    while (decimals != 0) // Deals with decimals
+     {
+      decimals--;
+      accumulator /= 10;
+     }
+
+    if (negative == 1) accumulator *= -1; // Deals with negatives
+    if ((str[pos] == 'e') || (str[pos] == 'E')) accumulator *= pow(10.0,ppl_getFloat(str+pos+1 , &pos2)); /* Deals with exponents */
+    if (pos2   >     0) pos += (1+pos2); // Add on characters taken up by exponent, including one for the 'e' character.
    }
-
-  if (negative == 1) accumulator *= -1;                         /* Deals with negatives */
-
-  if ((str[pos] == 'e') || (str[pos] == 'E')) accumulator *= pow(10.0,ppl_getFloat(str+pos+1 , &pos2)); /* Deals with exponents */
-
-  if (pos2   >     0) pos += (1+pos2); // Add on characters taken up by exponent, including one for the 'e' character.
   if (pos    ==    0) pos = -1; // Alert the user that this was a blank string!
   if (Nchars != NULL) *Nchars = pos;
   return(accumulator);
@@ -87,26 +101,42 @@ int ppl_validFloat(const char *str, int *end)
   if      (str[pos] == '-') { pos++; }  /* Deal with negatives */
   else if (str[pos] == '+') { pos++; }  /* Deal with e.g. 1E+09 */
 
-  while (((str[pos]>='0') && (str[pos]<='9')) || (str[pos] == '.'))
+  if ((str[pos+0]=='0') && (str[pos+1]=='x')) // Hexadecimal
    {
-    if (str[pos] == '.')
+    pos+=2;
+    while (1)
      {
-      if (past_decimal_point) goto VALID_FLOAT_ENDED;
-      else                    past_decimal_point = 1;
+      if      ((str[pos]>='0') && (str[pos]<='9')) pos++;
+      else if ((str[pos]>='A') && (str[pos]<='F')) pos++;
+      else if ((str[pos]>='a') && (str[pos]<='f')) pos++;
+      else                                         break;
+      had_number = 1;
      }
-    else
-     { had_number = 1; }
-    pos++;
+    if (!had_number) return 0;
    }
-
-  if (!had_number) return 0;
-
-  if ((str[pos] == 'e') || (str[pos] == 'E')) /* Deals with exponents */
+  else
    {
-    expvalid = ppl_validFloat(str+pos+1 , &pos2);
-    pos += pos2+1;
-   }
+    while (((str[pos]>='0') && (str[pos]<='9')) || (str[pos] == '.'))
+     {
+      if (str[pos] == '.')
+       {
+        if (past_decimal_point) goto VALID_FLOAT_ENDED;
+        else                    past_decimal_point = 1;
+       }
+      else
+       { had_number = 1; }
+      pos++;
+     }
 
+    if (!had_number) return 0;
+
+    if ((str[pos] == 'e') || (str[pos] == 'E')) /* Deals with exponents */
+     {
+      expvalid = ppl_validFloat(str+pos+1 , &pos2);
+      pos += pos2+1;
+     }
+
+   }
   while ((str[pos]!='\0')&&(str[pos]<=' ')) pos++; /* Fast-forward over spaces at end */
 
 VALID_FLOAT_ENDED:
@@ -119,16 +149,11 @@ VALID_FLOAT_ENDED:
 
 /* ppl_numericDisplay(): Displays a double in either %f or %e formats */
 
-char *ppl_numericDisplay(double in, int N, int SigFig, int latex)
+char *ppl_numericDisplay(double in, char *output, int SigFig, int latex)
  {
-  static char format[16], outputA[128], outputB[128], outputC[128], outputD[128];
+  char   format[16];
   double x, AccLevel;
-  char *output;
-  int DecimalLevel, DPmax, i, j, k, l;
-  if      (N==0) output = outputA;
-  else if (N==1) output = outputB;
-  else if (N==2) output = outputC;
-  else           output = outputD;
+  int    DecimalLevel, DPmax, i, j, k, l;
   if ((fabs(in) < 1e10) && (fabs(in) > 1e-3))
    {
     x = fabs(in);

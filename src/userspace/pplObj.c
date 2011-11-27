@@ -34,7 +34,8 @@
 #include "userspace/pplObjUnits.h"
 
 // Items with ! should never be displayed because they are internal markers
-char *pplObjTypeNames[] = {"number","string","boolean","date","color","dictionary","module","list","vector","matrix","file handle","function","type","null","exception","!global","!zombie",NULL};
+const char *pplObjTypeNames[] = {"number","string","boolean","date","color","dictionary","module","list","vector","matrix","file handle","function","type","null","exception","!global","!zombie",NULL};
+const int   pplObjTypeOrder[] = { 1      , 3      , 1       , 1    , 2     , 6          , 4      , 4    , 4      , 5      , 7           , 8        , 9    , 0    , 10        , 0       , 0       };
 
 pplObj *pplObjZero(pplObj *in, unsigned char amMalloced)
  {
@@ -43,7 +44,10 @@ pplObj *pplObjZero(pplObj *in, unsigned char amMalloced)
   in->dimensionless = 1;
   in->modified = in->flagComplex = in->tempType = 0;
   in->objType = PPLOBJ_NUM;
-  in->auxil = in->objCustomType = in->self_lval = NULL;
+  in->auxil = NULL;
+  in->objCustomType = NULL;
+  in->self_lval = NULL;
+  in->self_dval = NULL;
   in->auxilMalloced = 0;
   in->auxilLen = 0;
   in->amMalloced = amMalloced;
@@ -61,7 +65,9 @@ pplObj *pplObjNullStr(pplObj *in, unsigned char amMalloced)
   in->auxil = (void *)"";
   in->auxilMalloced = 0;
   in->auxilLen = 0;
-  in->objCustomType = in->self_lval = NULL;
+  in->objCustomType = NULL;
+  in->self_lval = NULL;
+  in->self_dval = NULL;
   in->amMalloced = amMalloced;
   for (i=0; i<UNITS_MAX_BASEUNITS; i++) in->exponent[i]=0;
   return in;

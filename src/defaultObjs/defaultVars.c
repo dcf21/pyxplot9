@@ -82,6 +82,7 @@ void ppl_makeDefaultVars(ppl_context *out)
 
     pplObjNullStr(&v,0);
     v.auxil = (void *)VERSION;
+    v.auxilLen = strlen(VERSION)+1;
     ppl_dictAppendCpy(d  , "version"   , (void *)&v , sizeof(v)); // PyXPlot version string
 
     // types module

@@ -86,7 +86,7 @@ int ppl_dictLen(dict *in)
 
 #define alloc(X) ( in->useMalloc ? malloc(X) : ppl_memAlloc_incontext(X, in->memory_context) )
 
-int ppl_dictAppend(dict *in, char *key, void *item)
+int ppl_dictAppend(dict *in, const char *key, void *item)
  {
   dictItem *ptr=NULL, *ptrnew=NULL, *prev=NULL;
   int       cmp = -1, hash;
@@ -123,7 +123,7 @@ int ppl_dictAppend(dict *in, char *key, void *item)
   return 0;
  }
 
-int ppl_dictAppendCpy(dict *in, char *key, void *item, int size)
+int ppl_dictAppendCpy(dict *in, const char *key, void *item, int size)
  {
   dictItem *ptr=NULL, *ptrnew=NULL, *prev=NULL;
   void     *cpy;
@@ -167,13 +167,13 @@ int ppl_dictAppendCpy(dict *in, char *key, void *item, int size)
   return 0;
  }
 
-void *ppl_dictLookup(dict *in, char *key)
+void *ppl_dictLookup(dict *in, const char *key)
  {
   int hash = ppl_dictHash(key, in->HashSize);
   return ppl_dictLookupHash(in, key, hash);
  }
 
-void *ppl_dictLookupHash(dict *in, char *key, int hash)
+void *ppl_dictLookupHash(dict *in, const char *key, int hash)
  {
   dictItem *ptr;
 
@@ -253,7 +253,7 @@ void ppl_dictLookupWithWildcard(dict *in, dict *in_w, char *key, char *SubsStrin
   return;
  }
 
-int ppl_dictContains(dict *in, char *key)
+int ppl_dictContains(dict *in, const char *key)
  {
   int hash;
   dictItem *ptr;
@@ -275,7 +275,7 @@ int ppl_dictContains(dict *in, char *key)
   return 0;
  }
 
-int ppl_dictRemoveKey(dict *in, char *key)
+int ppl_dictRemoveKey(dict *in, const char *key)
  {
   int hash;
   dictItem *ptr;

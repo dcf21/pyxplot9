@@ -1,4 +1,4 @@
-// expEval.h
+// pplObjPrint.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,13 +19,12 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _EXPEVAL_H
-#define _EXPEVAL_H 1
+#ifndef _PPLOBJPRINT_H
+#define _PPLOBJPRINT_H 1
 
-#include "userspace/context.h"
 #include "userspace/pplObj.h"
 
-pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterDepth, int *errPos, int *errType, char *errText);
+void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, int internal, int modIterDepth);
 
 #endif
 

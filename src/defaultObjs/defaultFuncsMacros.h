@@ -28,7 +28,7 @@
 #include "userspace/pplObjUnits.h"
 #include "userspace/unitsDisp.h"
 
-#define OUTPUT in[nArgs]
+#define OUTPUT in[-1]
 
 #define NULL_OUTPUT \
  { OUTPUT.real = GSL_NAN; OUTPUT.imag = 0; OUTPUT.flagComplex=0; return; }

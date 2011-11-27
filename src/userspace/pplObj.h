@@ -48,7 +48,8 @@
 #define PPLOBJ_USER 17 /* user-defined datatype */
 
 #ifndef _PPLOBJ_C
-extern char *pplObjTypeNames[];
+extern const char *pplObjTypeNames[];
+extern const int   pplObjTypeOrder[];
 #endif
 
 typedef struct pplObj
@@ -61,6 +62,7 @@ typedef struct pplObj
   void          *auxil;
   double         exponent[UNITS_MAX_BASEUNITS];
   struct pplObj *self_lval;
+  double        *self_dval;
  } pplObj;
 
 // Structures for describing files and types

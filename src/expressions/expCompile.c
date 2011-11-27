@@ -116,7 +116,7 @@
 
 void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed, int allowCommaOperator, int collectCommas, int isDict, int outOffset, int *outlen, int *errPos, int *errType, char *errText)
  {
-  const char    *allowed[] = {"BEGHILMNO","CJKQU","BDGHILMNO","JKQU","FJKQRU","JKU","FJKPQRSU","EG","BEGHLMNO","BEGHILMNO","BEGHILMNO","JKU","JKQRU","JKQRU","ELV","JKPQRU","FJKPQSU","T","BEGHILMNO","FJKPQRSU","","JKU"};
+  const char    *allowed[] = {"BEHILMNOG","CJKQU","BDHILMNOG","JKQU","FJKQRU","JKU","SFJKPQRU","EG","BEHLMNOG","BEHILMNOG","BEHILMNOG","JKU","JKQRU","JKQRU","ELV","JKPQRU","SFJKPQU","T","BEHILMNOG","SFJKPQRU","","JKU"};
   int            nCommaItems=1, nDictItems=0, tertiaryDepth=0;
   char           state='A', oldstate, trialstate;
   int            scanpos=0, outpos=0, trialpos;
@@ -170,13 +170,13 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
        }
       else if (trialstate=='F') // a unary post-lvalue operator
        {
-        if      (MARKUP_MATCH("--")) { NEWSTATE(2,0xA1,3); }
-        else if (MARKUP_MATCH("++")) { NEWSTATE(2,0xA2,3); }
+        if      (MARKUP_MATCH("--")) { NEWSTATE(2,0x21,3); }
+        else if (MARKUP_MATCH("++")) { NEWSTATE(2,0x22,3); }
        }
       else if (trialstate=='H')  // a unary pre-lvalue operator
        {
-        if      (MARKUP_MATCH("--")) { NEWSTATE(2,0xA3,3); }
-        else if (MARKUP_MATCH("++")) { NEWSTATE(2,0xA4,3); }
+        if      (MARKUP_MATCH("--")) { NEWSTATE(2,0x23,3); }
+        else if (MARKUP_MATCH("++")) { NEWSTATE(2,0x24,3); }
        }
       else if ( (trialstate=='G') ||  // a variable name
                 (trialstate=='T') ||  // a dereference name
@@ -345,6 +345,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
         else if (MARKUP_MATCH("|=" )) { NEWSTATE(2,0x48,17); }
         else if (MARKUP_MATCH("<<=")) { NEWSTATE(3,0x49,17); }
         else if (MARKUP_MATCH(">>=")) { NEWSTATE(3,0x4A,17); }
+        else if (MARKUP_MATCH("**=")) { NEWSTATE(3,0x4B,17); }
        }
       else if (trialstate=='U') // end of expression
        { NEWSTATE(0,0,0); }
@@ -449,8 +450,8 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
       if      (opType=='a' ) bytecode = 12; /* assignment operator */ \
       else if (opType=='$' ) bytecode = 15; /* dollar operator */ \
       else if (stacko==0x40) bytecode = 14; /* string subst operator */ \
-      else if (stacko==0xA3) bytecode = 13; /* ++ lval operator */ \
-      else if (stacko==0xA4) bytecode = 13; /* -- lval operator */ \
+      else if (stacko==0x23) bytecode = 13; /* ++ lval operator */ \
+      else if (stacko==0x24) bytecode = 13; /* -- lval operator */ \
       else                   bytecode = 11; /* other operator */ \
       if      (stacko==0x5A) { int o=*(int *)(stack-stackpos+4+sizeof(int)); BYTECODE_OP(20); BYTECODE_ENDOP; *(int *)(out+o)=outpos; stackpos-=sizeof(int); } /* || operator */ \
       else if (stacko==0x5B) { int o=*(int *)(stack-stackpos+4+sizeof(int)); BYTECODE_OP(20); BYTECODE_ENDOP; *(int *)(out+o)=outpos; stackpos-=sizeof(int); } /* && operator */ \
@@ -538,7 +539,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
         stackpos-=3+2*sizeof(int); // pop ? from stack
        }
 
-      if       (o=='S') { GET_POINTER; } // Turn variable lookup into pointer lookup now, because assignment operators are binary and operand is guaranteed to be the last thing on the stack
+      if      ((o=='S')&&(opCode==0x40)) { GET_POINTER; } // Turn variable lookup into pointer lookup now, because assignment operators are binary and operand is guaranteed to be the last thing on the stack
       else if ((o=='J')&&(opCode==0x5A)) { BYTECODE_OP(17); *(char *)(out+outpos++) = 0; *(int *)(stack-stackpos-sizeof(int)+1)=outpos; stackpos+=sizeof(int); outpos+=sizeof(int); BYTECODE_ENDOP; } // && operator compiles to if false goto else pop
       else if ((o=='J')&&(opCode==0x5B)) { BYTECODE_OP(18); *(char *)(out+outpos++) = 0; *(int *)(stack-stackpos-sizeof(int)+1)=outpos; stackpos+=sizeof(int); outpos+=sizeof(int); BYTECODE_ENDOP; } // || operator compiles to if true  goto else pop
       else if ((o=='K')&&(opCode==0xFD)) { BYTECODE_OP(17); *(char *)(out+outpos++) = 1; *(int *)(stack-stackpos-sizeof(int)+1)=outpos; stackpos+=sizeof(int); outpos+=sizeof(int); BYTECODE_ENDOP; } // ? operator -- if false goto
@@ -721,6 +722,11 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
     *errPos=0; *errType=ERR_INTERNAL; strcpy(errText, "Unexpected junk left on stack."); *end=-1; return;
    }
 
+  // Store final return
+  BYTECODE_OP(0);
+  *outlen = outpos;
+  BYTECODE_ENDOP;
+
   // Optimise gotos that point directly at other gotos
    {
     int optimised;
@@ -748,10 +754,6 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
     while (optimised);
    }
 
-  // Store final return
-  BYTECODE_OP(0);
-  *outlen = outpos;
-  BYTECODE_ENDOP;
   return;
  }
 
@@ -888,14 +890,15 @@ void ppl_reversePolishPrint(ppl_context *context, void *in, char *out)
         else if (t==0x48) strcpy (arg, "|=" );
         else if (t==0x49) strcpy (arg, "<<=");
         else if (t==0x4A) strcpy (arg, ">>=");
+        else if (t==0x4B) strcpy (arg, "**=");
         else              strcpy (arg, "???");
         break;
       case 13:
         strcpy (op,     "op");
         strcpy (optype, "unary");
-        if      (t==0xA1) { strcpy (arg, "-- (post-eval)"); }
-        else if (t==0xA2) { strcpy (arg, "++ (post-eval)"); }
-        else if (t==0xA3) { strcpy (arg, "-- (pre-eval)"); }
+        if      (t==0x21) { strcpy (arg, "-- (post-eval)"); }
+        else if (t==0x22) { strcpy (arg, "++ (post-eval)"); }
+        else if (t==0x23) { strcpy (arg, "-- (pre-eval)"); }
         else              { strcpy (arg, "++ (pre-eval)"); }
         break;
       case 14:

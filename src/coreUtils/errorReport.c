@@ -63,15 +63,17 @@ void ppl_error(pplerr_context *context, int ErrType, int HighlightPos1, int High
     // Prepend error type
     switch (ErrType)
      {
-      case ERR_INTERNAL: sprintf(temp_stringB+i, "Internal Error: ");  break;
-      case ERR_MEMORY  :
-      case ERR_GENERAL : sprintf(temp_stringB+i, "Error: ");           break;
-      case ERR_SYNTAX  : sprintf(temp_stringB+i, "Syntax Error: ");    break;
-      case ERR_NUMERIC : sprintf(temp_stringB+i, "Numerical Error: "); break;
-      case ERR_FILE    : sprintf(temp_stringB+i, "File Error: ");      break;
-      case ERR_RANGE   : sprintf(temp_stringB+i, "Range Error: ");     break;
-      case ERR_UNIT    : sprintf(temp_stringB+i, "Unit Error: ");      break;
-      case ERR_OVERFLOW: sprintf(temp_stringB+i, "Overflow Error: ");  break;
+      case ERR_INTERNAL : sprintf(temp_stringB+i, "Internal Error: ");  break;
+      case ERR_MEMORY   :
+      case ERR_GENERAL  : sprintf(temp_stringB+i, "Error: ");           break;
+      case ERR_SYNTAX   : sprintf(temp_stringB+i, "Syntax Error: ");    break;
+      case ERR_NUMERIC  : sprintf(temp_stringB+i, "Numerical Error: "); break;
+      case ERR_FILE     : sprintf(temp_stringB+i, "File Error: ");      break;
+      case ERR_RANGE    : sprintf(temp_stringB+i, "Range Error: ");     break;
+      case ERR_UNIT     : sprintf(temp_stringB+i, "Unit Error: ");      break;
+      case ERR_OVERFLOW : sprintf(temp_stringB+i, "Overflow Error: ");  break;
+      case ERR_NAMESPACE: sprintf(temp_stringB+i, "Namespace Error: ");  break;
+      case ERR_TYPE     : sprintf(temp_stringB+i, "Type Error: ");       break;
      }
     i += strlen(temp_stringB+i);
    }
@@ -132,15 +134,17 @@ void ppl_warning(pplerr_context *context, int ErrType, char *msg)
     // Prepend error type
     switch (ErrType)
      {
-      case ERR_INTERNAL: sprintf(temp_stringB+i, "Internal Warning: ");  break;
-      case ERR_MEMORY  :
-      case ERR_GENERAL : sprintf(temp_stringB+i, "Warning: ");           break;
-      case ERR_SYNTAX  : sprintf(temp_stringB+i, "Syntax Warning: ");    break;
-      case ERR_NUMERIC : sprintf(temp_stringB+i, "Numerical Warning: "); break;
-      case ERR_FILE    : sprintf(temp_stringB+i, "File Warning: ");      break;
-      case ERR_RANGE   : sprintf(temp_stringB+i, "Range Warning: ");     break;
-      case ERR_UNIT    : sprintf(temp_stringB+i, "Unit Warning: ");      break;
-      case ERR_OVERFLOW: sprintf(temp_stringB+i, "Overflow Warning: ");  break;
+      case ERR_INTERNAL : sprintf(temp_stringB+i, "Internal Warning: ");  break;
+      case ERR_MEMORY   :
+      case ERR_GENERAL  : sprintf(temp_stringB+i, "Warning: ");           break;
+      case ERR_SYNTAX   : sprintf(temp_stringB+i, "Syntax Warning: ");    break;
+      case ERR_NUMERIC  : sprintf(temp_stringB+i, "Numerical Warning: "); break;
+      case ERR_FILE     : sprintf(temp_stringB+i, "File Warning: ");      break;
+      case ERR_RANGE    : sprintf(temp_stringB+i, "Range Warning: ");     break;
+      case ERR_UNIT     : sprintf(temp_stringB+i, "Unit Warning: ");      break;
+      case ERR_OVERFLOW : sprintf(temp_stringB+i, "Overflow Warning: ");  break;
+      case ERR_NAMESPACE: sprintf(temp_stringB+i, "Namespace Warning: ");  break;
+      case ERR_TYPE     : sprintf(temp_stringB+i, "Type Warning: ");       break;
      }
     i += strlen(temp_stringB+i);
    }

@@ -247,12 +247,15 @@ LOOP_END
  }
 
 #include "expressions/expCompile.h"
+#include "expressions/expEval.h"
+#include "userspace/pplObjPrint.h"
 
 int ppl_ProcessStatement(ppl_context *context, char *line)
  {
-  int end, errPos, errType, bufflen=65536;
+  int end, errPos, errType, lastOpAssign, bufflen=65536;
   char errText[LSTR_LENGTH];
   unsigned char buff[65536];
+  pplObj *out;
 
   ppl_expCompile(context,line,&end,1,1,(void *)buff,&bufflen,&errPos,&errType,errText);
   if (errPos>=0)
@@ -263,11 +266,25 @@ int ppl_ProcessStatement(ppl_context *context, char *line)
    }
 
   // Print tokens
-  ppl_tokenPrint(context, line, end);
+  //ppl_tokenPrint(context, line, end);
 
   // Print bytecode
-  ppl_reversePolishPrint(context, buff, context->errcontext.tempErrStr);
-  ppl_report(&context->errcontext, NULL);
+  //ppl_reversePolishPrint(context, (void *)buff, context->errcontext.tempErrStr);
+  //ppl_report(&context->errcontext, NULL);
+
+  // Execute bytecode
+  out = ppl_expEval(context, (void *)buff, &lastOpAssign, 0, &errPos, &errType, errText);
+  if (errPos>=0)
+   {
+    sprintf(context->errcontext.tempErrStr, "%d:%s\n",errPos,errText);
+    ppl_error(&context->errcontext, errType, -1, -1, NULL);
+    return 1;
+   }
+  else if (!lastOpAssign)
+   {
+    pplObjPrint(context, out, NULL, context->errcontext.tempErrStr, LSTR_LENGTH, 0, 0);
+    ppl_report(&context->errcontext, NULL);
+   }
 
   return 0;
  }

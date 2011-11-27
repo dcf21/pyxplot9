@@ -38,7 +38,7 @@ void ppl_garbageNamespace(dict *n)
     ptrnext = ptr->next;
     ppl_garbageObject((pplObj *)ptr->data);
     free(ptr->key);
-    free(ptr->data);
+    // free(ptr->data); -- already done by garbage collector
     free(ptr);
     ptr = ptrnext;
    }
@@ -55,7 +55,7 @@ void ppl_garbageList(list *l)
    {
     ptrnext = ptr->next;
     ppl_garbageObject((pplObj *)ptr->data);
-    free(ptr->data);
+    // free(ptr->data); -- already done by garbage collector
     free(ptr);
     ptr = ptrnext;
    }
@@ -116,6 +116,7 @@ void ppl_garbageObject(pplObj *o)
    }
 
   if (o->amMalloced) free(o);
+  else               o->objType = PPLOBJ_ZOM; // Object is now a zombie
   return;
  }
 

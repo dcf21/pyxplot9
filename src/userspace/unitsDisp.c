@@ -58,7 +58,7 @@ char *ppl_unitsNumericDisplay(ppl_context *c, pplObj *in, int N, int typeable, i
 
   if (NSigFigs <= 0) NSigFigs = c->set->term_current.SignificantFigures; // If number of significant figures not specified, use user-selected number
 
-  if ((c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && (in->flagComplex!=0)) return ppl_numericDisplay(GSL_NAN, N, NSigFigs, (typeable==SW_DISPLAY_L));
+  if ((c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && (in->flagComplex!=0)) return ppl_numericDisplay(GSL_NAN, c->numdispBuff[N], NSigFigs, (typeable==SW_DISPLAY_L));
 
   if (typeable==0) typeable = c->set->term_current.NumDisplay;
   unitstr = ppl_printUnit(c, in, &numberOutReal, &numberOutImag, N, 1, typeable);
@@ -66,7 +66,7 @@ char *ppl_unitsNumericDisplay(ppl_context *c, pplObj *in, int N, int typeable, i
   if (((c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && (in->flagComplex!=0)) || (!gsl_finite(numberOutReal)) || (!gsl_finite(numberOutImag)))
    {
     if (typeable == SW_DISPLAY_L) output[i++] = '$';
-    strcpy(output+i, ppl_numericDisplay(GSL_NAN, N, NSigFigs, (typeable==SW_DISPLAY_L)));
+    strcpy(output+i, ppl_numericDisplay(GSL_NAN, c->numdispBuff[N], NSigFigs, (typeable==SW_DISPLAY_L)));
     i+=strlen(output+i);
    }
   else
@@ -75,7 +75,7 @@ char *ppl_unitsNumericDisplay(ppl_context *c, pplObj *in, int N, int typeable, i
 
     if (typeable == SW_DISPLAY_L) output[i++] = '$';
     if ((fabs(numberOutReal) >= OoM) && (fabs(numberOutImag) > OoM)) output[i++] = '('; // open brackets on complex number
-    if (fabs(numberOutReal) >= OoM) { strcpy(output+i, ppl_numericDisplay(numberOutReal, N, NSigFigs, (typeable==SW_DISPLAY_L))); i+=strlen(output+i); }
+    if (fabs(numberOutReal) >= OoM) { strcpy(output+i, ppl_numericDisplay(numberOutReal, c->numdispBuff[N], NSigFigs, (typeable==SW_DISPLAY_L))); i+=strlen(output+i); }
     if ((fabs(numberOutReal) >= OoM) && (fabs(numberOutImag) > OoM) && (numberOutImag > 0)) output[i++] = '+';
     if (fabs(numberOutImag) > OoM)
      {
@@ -83,7 +83,7 @@ char *ppl_unitsNumericDisplay(ppl_context *c, pplObj *in, int N, int typeable, i
        {
         if (fabs(numberOutImag+1.0)>=OoM)
          {
-          strcpy(output+i, ppl_numericDisplay(numberOutImag, N, NSigFigs, (typeable==SW_DISPLAY_L)));
+          strcpy(output+i, ppl_numericDisplay(numberOutImag, c->numdispBuff[N], NSigFigs, (typeable==SW_DISPLAY_L)));
           i+=strlen(output+i);
          }
         else
@@ -380,8 +380,8 @@ char *ppl_printUnit(ppl_context *c, const pplObj *in, double *numberOutReal, dou
      {
       if (typeable==SW_DISPLAY_L) { output[OutputPos++]='^'; output[OutputPos++]='{'; }
       else                        { output[OutputPos++]='*'; output[OutputPos++]='*'; }
-      if ((first)||(!DivAllowed)) sprintf(output+OutputPos, "%s", ppl_numericDisplay(     UnitPow[j] , N, c->set->term_current.SignificantFigures, (typeable==SW_DISPLAY_L)));
-      else                        sprintf(output+OutputPos, "%s", ppl_numericDisplay(fabs(UnitPow[j]), N, c->set->term_current.SignificantFigures, (typeable==SW_DISPLAY_L)));
+      if ((first)||(!DivAllowed)) sprintf(output+OutputPos, "%s", ppl_numericDisplay(     UnitPow[j] , c->numdispBuff[N], c->set->term_current.SignificantFigures, (typeable==SW_DISPLAY_L)));
+      else                        sprintf(output+OutputPos, "%s", ppl_numericDisplay(fabs(UnitPow[j]), c->numdispBuff[N], c->set->term_current.SignificantFigures, (typeable==SW_DISPLAY_L)));
       OutputPos+=strlen(output+OutputPos);
       if (typeable==SW_DISPLAY_L) { output[OutputPos++]='}'; }
      }

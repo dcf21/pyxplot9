@@ -51,6 +51,8 @@ typedef struct ppl_context_struc
 
   // Buffers for parsing and evaluating expressions
   unsigned char tokenBuff[ALGEBRA_MAXLEN];
+  pplObj        stack    [ALGEBRA_STACK];
+  int           stackPtr;
 
   // Settings
   ppl_settings *set;
@@ -67,6 +69,7 @@ typedef struct ppl_context_struc
   // Buffers used by ppl_printUnit()
   char udBuffA[LSTR_LENGTH], udBuffB[LSTR_LENGTH], udBuffC[LSTR_LENGTH];
   char udNumDispA[LSTR_LENGTH], udNumDispB[LSTR_LENGTH];
+  char numdispBuff[4][128];
 
   // Namespace hierarchy
   int   ns_ptr , ns_branch;

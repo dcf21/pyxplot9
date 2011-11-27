@@ -58,6 +58,13 @@ typedef struct FunctionDescriptor
   char   *description, *descriptionShort;
  } pplFunc;
 
+typedef struct SubroutineDescriptor
+ {
+  int        nArgs;
+  char      *argList;
+ } SubroutineDescriptor;
+
+
 typedef struct SplineDescriptor
  {
   gsl_spline       *SplineObj;

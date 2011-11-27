@@ -255,9 +255,9 @@ void ppl_withWordsMerge(ppl_context *context, withWords *out, const withWords *a
   return;
  }
 
-#define NUMDISP(X) ppl_numericDisplay(X,0,context->set->term_current.SignificantFigures,(context->set->term_current.NumDisplay==SW_DISPLAY_L))
+#define NUMDISP(X) ppl_numericDisplay(X,context->numdispBuff[0],context->set->term_current.SignificantFigures,(context->set->term_current.NumDisplay==SW_DISPLAY_L))
 
-#define S_RGB(X,Y) (char *)ppl_numericDisplay(X,Y,context->set->term_current.SignificantFigures,(context->set->term_current.NumDisplay==SW_DISPLAY_L))
+#define S_RGB(X,Y) (char *)ppl_numericDisplay(X,context->numdispBuff[Y],context->set->term_current.SignificantFigures,(context->set->term_current.NumDisplay==SW_DISPLAY_L))
 
 void ppl_withWordsPrint(ppl_context *context, const withWords *defn, char *out)
  {

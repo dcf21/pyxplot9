@@ -54,6 +54,7 @@ ppl_context *ppl_contextInit()
   ppl_memAlloc_MemoryInit(&out->errcontext, &ppl_error, &ppl_log);
   pplset_makedefault(out);
 
+  out->stackPtr = 0;
   out->willBeInteractive = 1;
   out->inputLineBuffer = NULL;
   out->inputLineAddBuffer = NULL;
