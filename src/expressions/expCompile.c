@@ -477,6 +477,7 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
 #define BYTECODE_OP(X) \
  { \
   lastoutpos = outpos; \
+  *(int *)(out+outpos) = 0; /* Set length of instruction equals zero for the moment */ \
   outpos += sizeof(int); /* Save a place for the length of this instruction */ \
   *(int *)(out+outpos) = ipos; /* Store character position of token for error reporting */ \
   outpos += sizeof(int); \
@@ -533,9 +534,9 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
        {
         int o,precedence=999;
         POP_STACK;
-        if ( (stackpos<3) || (*(stack-stackpos+3)!='t') ) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match : to an ? in the ternary operator."); *end=-1; return; }
+        if ( (stackpos<3) || (*(stack-stackpos+3)!='t') ) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match : to a ? in the ternary operator."); *end=-1; return; }
         o=*(int *)(stack-stackpos+4+sizeof(int));
-        *(int *)(out+o)=outpos + 1+2*sizeof(int);
+        *(int *)(out+o)=outpos + 1+3*sizeof(int);
         stackpos-=3+2*sizeof(int); // pop ? from stack
        }
 
@@ -604,7 +605,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       if      (o=='G') BYTECODE_OP(3) // foo -- op 3: variable lookup "foo"
       else if (o=='T') BYTECODE_OP(5) // foo.bar -- op 5: dereference "bar"
       else             BYTECODE_OP(2) // $foo -- push "foo" onto stack as a string constant
-      for ( i=ipos ; (isalnum(in[i])) ; i++ )
+      for ( i=ipos ; (isalnum(in[i]) || (in[i]=='_')) ; i++ )
        {
         if (in[i]=='\0') { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Unexpected end of variable name."); *end=-1; return; }
         *(char *)(out+outpos++) = in[i];
@@ -735,18 +736,18 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       int i;
       for (optimised=i=0 ; ; i+=*(int *)(out+i))
        {
-        int o=(int)(*(unsigned char *)(out+i+sizeof(int))); // Opcode number
+        int o=(int)(*(unsigned char *)(out+i+2*sizeof(int))); // Opcode number
         if ((o==17)||(o==18))
          {
-          int o2    = (int)(*(unsigned char *)(out+i+1+sizeof(int)));
-          int to    = *(int *)(out+i+2+sizeof(int));
-          int to_o  = (int)(*(unsigned char *)(out+to+0+sizeof(int))); // Opcode branching to
-          int to_o2 = (int)(*(unsigned char *)(out+to+1+sizeof(int)));
+          int o2    = (int)(*(unsigned char *)(out+i+1+2*sizeof(int)));
+          int to    = *(int *)(out+i+2+2*sizeof(int));
+          int to_o  = (int)(*(unsigned char *)(out+to+0+2*sizeof(int))); // Opcode branching to
+          int to_o2 = (int)(*(unsigned char *)(out+to+1+2*sizeof(int)));
 
-          if ((o==17)&&(o2==0)&&(to_o==17)&&(to_o2==0)) { *(int *)(out+i+2+sizeof(int)) = *(int *)(out+to+2+sizeof(int)); optimised=1; }
-          if ((o==18)&&(o2==0)&&(to_o==18)&&(to_o2==0)) { *(int *)(out+i+2+sizeof(int)) = *(int *)(out+to+2+sizeof(int)); optimised=1; }
-          if ((o==17)         &&(to_o==19)            ) { *(int *)(out+i+2+sizeof(int)) = *(int *)(out+to+1+sizeof(int)); optimised=1; }
-          if ((o==18)         &&(to_o==19)            ) { *(int *)(out+i+2+sizeof(int)) = *(int *)(out+to+1+sizeof(int)); optimised=1; }
+          if ((o==17)&&(o2==0)&&(to_o==17)&&(to_o2==0)) { *(int *)(out+i+2+2*sizeof(int)) = *(int *)(out+to+2+2*sizeof(int)); optimised=1; }
+          if ((o==18)&&(o2==0)&&(to_o==18)&&(to_o2==0)) { *(int *)(out+i+2+2*sizeof(int)) = *(int *)(out+to+2+2*sizeof(int)); optimised=1; }
+          if ((o==17)         &&(to_o==19)            ) { *(int *)(out+i+2+2*sizeof(int)) = *(int *)(out+to+1+2*sizeof(int)); optimised=1; }
+          if ((o==18)         &&(to_o==19)            ) { *(int *)(out+i+2+2*sizeof(int)) = *(int *)(out+to+1+2*sizeof(int)); optimised=1; }
          }
         else if (o==0) break;
        }
