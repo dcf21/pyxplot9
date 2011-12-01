@@ -47,7 +47,7 @@
 
 #define CHECK_NEEDLONG(X, VAR, DESCRIPTION) \
  { \
-  if (((X)->flagComplex) || ((X)->real < 0) || ((X)->real >= LONG_MAX)) \
+  if (((X).flagComplex) || ((X).real < 0) || ((X).real >= LONG_MAX)) \
    { \
     if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The %s %s in the range 0 <= %s < %ld.",FunctionDescription,DESCRIPTION,VAR,LONG_MAX); return; } \
     else { NULL_OUTPUT; } \
@@ -56,7 +56,7 @@
 
 #define CHECK_NEEDINT(X, VAR, DESCRIPTION) \
  { \
-  if (((X)->flagComplex) || ((X)->real < 0) || ((X)->real >= INT_MAX)) \
+  if (((X).flagComplex) || ((X).real < 0) || ((X).real >= INT_MAX)) \
    { \
     if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The %s %s in the range 0 <= %s < %d.",FunctionDescription,DESCRIPTION,VAR,INT_MAX); return; } \
     else { NULL_OUTPUT; } \
@@ -65,7 +65,7 @@
 
 #define CHECK_NEEDSINT(X, VAR, DESCRIPTION) \
  { \
-  if (((X)->real <= INT_MIN) || ((X)->real >= INT_MAX)) \
+  if (((X).real <= INT_MIN) || ((X).real >= INT_MAX)) \
    { \
     if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The %s %s in the range %d <= %s < %d.",FunctionDescription,DESCRIPTION,INT_MIN,VAR,INT_MAX); return; } \
     else { NULL_OUTPUT; } \
@@ -133,7 +133,7 @@
    { \
     *status = 1; \
     *errType=ERR_UNIT; \
-    sprintf(errText, "The %s function can only act upon dimensionless inputs. Supplied input has dimensions of <%s>.", FunctionDescription, ppl_units_GetUnitStr(in, NULL, NULL, 1, 1, 0)); \
+    sprintf(errText, "The %s function can only act upon dimensionless inputs. Supplied input has dimensions of <%s>.", FunctionDescription, ppl_printUnit(in, NULL, NULL, 1, 1, 0)); \
     return; \
    } \
  }
@@ -144,7 +144,7 @@
    { \
     *status = 1; \
     *errType=ERR_UNIT; \
-    sprintf(errText, "The %s function can only act upon dimensionless inputs. Supplied inputs have dimensions of <%s> and <%s>.", FunctionDescription, ppl_units_GetUnitStr(in[0], NULL, NULL, 0, 1, 0), ppl_units_GetUnitStr(in[1], NULL, NULL, 1, 1, 0)); \
+    sprintf(errText, "The %s function can only act upon dimensionless inputs. Supplied inputs have dimensions of <%s> and <%s>.", FunctionDescription, ppl_printUnit(in[0], NULL, NULL, 0, 1, 0), ppl_printUnit(in[1], NULL, NULL, 1, 1, 0)); \
     return; \
    } \
  }
@@ -155,7 +155,7 @@
    { \
     *status = 1; \
     *errType=ERR_UNIT; \
-    sprintf(errText, "The %s function can only act upon dimensionless inputs. Supplied inputs have dimensions of <%s>, <%s> and <%s>.", FunctionDescription, ppl_units_GetUnitStr(in[0], NULL, NULL, 0, 1, 0), ppl_units_GetUnitStr(in[1], NULL, NULL, 1, 1, 0), ppl_units_GetUnitStr(in[2], NULL, NULL, 2, 1, 0)); \
+    sprintf(errText, "The %s function can only act upon dimensionless inputs. Supplied inputs have dimensions of <%s>, <%s> and <%s>.", FunctionDescription, ppl_printUnit(in[0], NULL, NULL, 0, 1, 0), ppl_printUnit(in[1], NULL, NULL, 1, 1, 0), ppl_printUnit(in[2], NULL, NULL, 2, 1, 0)); \
     return; \
    } \
  }
@@ -198,20 +198,20 @@
    { \
     *status = 1; \
     *errType=ERR_UNIT; \
-    sprintf(errText, "The %s function can only act upon inputs with matching dimensions. Supplied inputs have dimensions of <%s> and <%s>.", FunctionDescription, ppl_units_GetUnitStr(in[0], NULL, NULL, 0, 1, 0), ppl_units_GetUnitStr(in[1], NULL, NULL, 1, 1, 0)); \
+    sprintf(errText, "The %s function can only act upon inputs with matching dimensions. Supplied inputs have dimensions of <%s> and <%s>.", FunctionDescription, ppl_printUnit(context, &in[0], NULL, NULL, 0, 1, 0), ppl_printUnit(in[1], NULL, NULL, 1, 1, 0)); \
     return; \
    } \
  }
 
 #define CHECK_DIMLESS_OR_HAS_UNIT(X, DESCRIPTION, UNITNAME, UNIT, UNITN) \
  { \
-  if (!((X)->dimensionless)) \
+  if (!((X).dimensionless)) \
    for (i=0; i<UNITS_MAX_BASEUNITS; i++) \
-    if ((X)->exponent[i] != UNITN*(i==UNIT)) \
+    if ((X).exponent[i] != UNITN*(i==UNIT)) \
      { \
       *status = 1; \
       *errType=ERR_UNIT; \
-      sprintf(errText, "The %s argument to the %s function must be %s. Supplied input has dimensions of <%s>.", DESCRIPTION, FunctionDescription, UNITNAME, ppl_units_GetUnitStr((X), NULL, NULL, 1, 1, 0)); \
+      sprintf(errText, "The %s argument to the %s function must be %s. Supplied input has dimensions of <%s>.", DESCRIPTION, FunctionDescription, UNITNAME, ppl_printUnit(context, &X, NULL, NULL, 1, 1, 0)); \
       return; \
      } \
  } \
