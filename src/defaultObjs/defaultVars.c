@@ -42,6 +42,7 @@
 #include "defaultObjs/defaultFuncs.h"
 #include "defaultObjs/moduleAst.h"
 #include "defaultObjs/moduleFractals.h"
+#include "defaultObjs/moduleOs.h"
 #include "defaultObjs/modulePhy.h"
 #include "defaultObjs/moduleRandom.h"
 #include "defaultObjs/moduleStats.h"
@@ -56,7 +57,7 @@ void ppl_makeDefaultVars(ppl_context *out)
   // Default variables
    {
     pplObj  v, *m;
-    dict   *d, *d2;
+    dict   *d, *d2, *d3;
     int     i;
     const int frozen=1;
     ppl_dictAppendCpy(out->namespaces[1] , "defaults" , m=pplNewModule(frozen) , sizeof(v));
@@ -223,8 +224,30 @@ void ppl_makeDefaultVars(ppl_context *out)
     v.dimensionless = 0;
     v.exponent[UNIT_LENGTH] = 1; v.exponent[UNIT_TIME] =-2;
     ppl_dictAppendCpy(d2 , "g"         , (void *)&v , sizeof(v)); // The standard acceleration due to gravity on Earth
-    ppl_addSystemFunc(d2,"Bv"            ,2,2,1,1,1,0,(void *)&pplfunc_planck_Bv   , "", "\\mathrm{B_\\nu}@<@1,@2@>", "Bv(nu,T) returns the power emitted by a blackbody of temperature T per unit area, per unit solid angle, per unit frequency");
-    ppl_addSystemFunc(d2,"Bvmax"         ,1,1,1,1,1,0,(void *)&pplfunc_planck_Bvmax, "", "\\mathrm{B_{\\nu,max}}@<@1@>", "Bvmax(T) returns the frequency of the maximum of the function Bv(nu,T)");
+    ppl_addSystemFunc(d2,"Bv"            ,2,2,1,1,1,0,(void *)&pplfunc_planck_Bv   , "Bv(nu,T)", "\\mathrm{B_\\nu}@<@1,@2@>", "Bv(nu,T) returns the power emitted by a blackbody of temperature T per unit area, per unit solid angle, per unit frequency");
+    ppl_addSystemFunc(d2,"Bvmax"         ,1,1,1,1,1,0,(void *)&pplfunc_planck_Bvmax, "Bvmax(T)", "\\mathrm{B_{\\nu,max}}@<@1@>", "Bvmax(T) returns the frequency of the maximum of the function Bv(nu,T)");
+
+    // OS module
+    ppl_dictAppendCpy(d  , "os"        , m=pplNewModule(frozen) , sizeof(v));
+    d2 = (dict *)m->auxil;
+    ppl_addSystemFunc(d2,"getegid"       ,0,0,1,1,1,1,(void *)&pplfunc_osGetEgid , "getegid()" , "\\mathrm{getegid}@<@>", "getegid() returns the effective group id of the PyXPlot process");
+    ppl_addSystemFunc(d2,"geteuid"       ,0,0,1,1,1,1,(void *)&pplfunc_osGetEuid , "geteuid()" , "\\mathrm{geteuid}@<@>", "geteuid() returns the effective user id of the PyXPlot process");
+    ppl_addSystemFunc(d2,"getgid"        ,0,0,1,1,1,1,(void *)&pplfunc_osGetGid  , "getgid()"  , "\\mathrm{getgid}@<@>", "getgid() returns the group id of the PyXPlot process");
+    ppl_addSystemFunc(d2,"getpid"        ,0,0,1,1,1,1,(void *)&pplfunc_osGetPid  , "getpid()"  , "\\mathrm{getpid}@<@>", "getpid() returns the process id of the PyXPlot process");
+    ppl_addSystemFunc(d2,"getpgrp"       ,0,0,1,1,1,1,(void *)&pplfunc_osGetPgrp , "getpgrp()" , "\\mathrm{getpgrp}@<@>", "getpgrp() returns the process group id of the PyXPlot process");
+    ppl_addSystemFunc(d2,"getppid"       ,0,0,1,1,1,1,(void *)&pplfunc_osGetPpid , "getppid()" , "\\mathrm{getppid}@<@>", "getpid() returns the parent process id of the PyXPlot process");
+    ppl_addSystemFunc(d2,"getuid"        ,0,0,1,1,1,1,(void *)&pplfunc_osGetUid  , "getuid()"  , "\\mathrm{getuid}@<@>", "getuid() returns the user id of the PyXPlot process");
+    ppl_addSystemFunc(d2,"gethomedir"    ,0,0,1,1,1,1,(void *)&pplfunc_osGetHome , "gethomedir()" , "\\mathrm{gethomedir}@<@>", "gethomedir() returns the path of the user's home directory");
+    ppl_addSystemFunc(d2,"gethostname"   ,0,0,1,1,1,1,(void *)&pplfunc_osGetHost , "gethostname()", "\\mathrm{gethostname}@<@>", "gethostname() returns the system's host name");
+    ppl_addSystemFunc(d2,"getlogin"      ,0,0,1,1,1,1,(void *)&pplfunc_osGetLogin, "getlogin()", "\\mathrm{getlogin}@<@>", "getlogin() returns the system login of the user");
+    ppl_addSystemFunc(d2,"getrealname"   ,0,0,1,1,1,1,(void *)&pplfunc_osGetRealName, "getrealname()", "\\mathrm{getrealname}@<@>", "getrealname() returns the user's real name");
+    ppl_addSystemFunc(d2,"system"        ,1,1,0,0,0,0,(void *)&pplfunc_osSystem  , "system()", "\\mathrm{system}@<@>", "system() executes a command in a subshell");
+    ppl_dictAppendCpy(d2 , "path"      , m=pplNewModule(frozen) , sizeof(v));
+    d3 = (dict *)m->auxil;
+    ppl_addSystemFunc(d3,"exists"        ,1,1,0,0,0,0,(void *)&pplfunc_osPathExists, "os.path.exists(x)", "\\mathrm{os.path.exists}@<@0@>", "os.path.exists(x) returns a boolean flag indicating whether a file with pathname x exists");
+    ppl_addSystemFunc(d3,"expanduser"    ,1,1,0,0,0,0,(void *)&pplfunc_osPathExpandUser, "os.path.expanduser(x)", "\\mathrm{os.path.expanduser@<@0@>", "os.path.expanduser(x) returns its argument with ~s indicating home directories expanded");
+    ppl_addSystemFunc(d3,"join"          ,1,9999,0,0,0,0,(void *)&pplfunc_osPathJoin , "os.path.join(...)", "\\mathrm{os.path.join}@<@0@>", "os.path.join(...) joins a series of strings intelligently into a pathname");
+
 
     // Default maths functions
     ppl_addSystemFunc(d,"abs"           ,1,1,1,1,0,0,(void *)&pplfunc_abs         , "abs(z)", "\\mathrm{abs}@<@1@>", "abs(z) returns the absolute magnitude of z");

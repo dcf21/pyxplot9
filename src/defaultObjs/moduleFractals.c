@@ -44,7 +44,7 @@
 #include "defaultObjs/defaultFuncs.h"
 #include "defaultObjs/defaultFuncsMacros.h"
 
-void pplfunc_julia       (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_julia       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "julia(z,cz,MaxIter)";
   CHECK_NEEDLONG(in[2], "MaxIter", "function's third argument must be");
@@ -64,7 +64,7 @@ void pplfunc_julia       (pplset_terminal *term, pplObj *in, int nArgs, int *sta
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_mandelbrot  (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_mandelbrot  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "mandelbrot(z,MaxIter)";
   CHECK_NEEDLONG(in[1], "MaxIter", "function's second argument must be");

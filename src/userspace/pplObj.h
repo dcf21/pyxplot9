@@ -74,6 +74,7 @@ typedef struct pplMatrix { int iNodeCount; gsl_matrix *m; } pplMatrix;
 // Functions for acting on pplObjs
 pplObj *pplObjZero    (pplObj *in, unsigned char amMalloced);
 pplObj *pplObjNullStr (pplObj *in, unsigned char amMalloced);
+pplObj *pplObjBool    (pplObj *in, unsigned char amMalloced);
 pplObj *pplNewModule  (int frozen);
 pplObj *pplObjCpy     (pplObj *out, pplObj *in, unsigned char useMalloc);
 

@@ -22,18 +22,17 @@
 #ifndef _PPL_MODULE_RANDOM_H
 #define _PPL_MODULE_RANDOM_H 1
 
-#include "coreUtils/dict.h"
-#include "settings/settings.h"
+#include "userspace/context.h"
 #include "userspace/pplObj.h"
 
 void pplfunc_setRandomSeed(long i);
-void pplfunc_frandom   (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
-void pplfunc_frandombin(pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
-void pplfunc_frandomcs (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
-void pplfunc_frandomg  (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
-void pplfunc_frandomln (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
-void pplfunc_frandomp  (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
-void pplfunc_frandomt  (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_frandom   (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_frandombin(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_frandomcs (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_frandomg  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_frandomln (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_frandomp  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_frandomt  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 
 #endif
 

@@ -58,13 +58,13 @@ void pplfunc_setRandomSeed(long i)
   return;
  }
 
-void pplfunc_frandom   (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_frandom   (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   if (rndgen==NULL) { rndgen = gsl_rng_alloc(gsl_rng_default); gsl_rng_set(rndgen, 0); }
   OUTPUT.real = gsl_rng_uniform(rndgen);
  }
 
-void pplfunc_frandombin(pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_frandombin(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "random_binomial(p,n)";
   if (rndgen==NULL) { rndgen = gsl_rng_alloc(gsl_rng_default); gsl_rng_set(rndgen, 0); }
@@ -73,7 +73,7 @@ void pplfunc_frandombin(pplset_terminal *term, pplObj *in, int nArgs, int *statu
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_frandomcs (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_frandomcs (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "random_chisq(nu)";
   if (rndgen==NULL) { rndgen = gsl_rng_alloc(gsl_rng_default); gsl_rng_set(rndgen, 0); }
@@ -81,7 +81,7 @@ void pplfunc_frandomcs (pplset_terminal *term, pplObj *in, int nArgs, int *statu
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_frandomg  (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_frandomg  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "random_gaussian(sigma)";
   if (rndgen==NULL) { rndgen = gsl_rng_alloc(gsl_rng_default); gsl_rng_set(rndgen, 0); }
@@ -89,7 +89,7 @@ void pplfunc_frandomg  (pplset_terminal *term, pplObj *in, int nArgs, int *statu
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_frandomln (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_frandomln (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "random_lognormal(zeta,sigma)";
   if (rndgen==NULL) { rndgen = gsl_rng_alloc(gsl_rng_default); gsl_rng_set(rndgen, 0); }
@@ -98,10 +98,10 @@ void pplfunc_frandomln (pplset_terminal *term, pplObj *in, int nArgs, int *statu
   in--;
   OUTPUT.real = gsl_ran_lognormal(rndgen, in[0].real, in[1].real);
   CHECK_OUTPUT_OKAY;
-  ppl_units_DimCpy(OUTPUT, in[0]);
+  ppl_unitsDimCpy(&OUTPUT, &in[0]);
  }
 
-void pplfunc_frandomp  (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_frandomp  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "random_poisson(n)";
   if (rndgen==NULL) { rndgen = gsl_rng_alloc(gsl_rng_default); gsl_rng_set(rndgen, 0); }
@@ -109,7 +109,7 @@ void pplfunc_frandomp  (pplset_terminal *term, pplObj *in, int nArgs, int *statu
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_frandomt  (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_frandomt  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "random_tdist(nu)";
   if (rndgen==NULL) { rndgen = gsl_rng_alloc(gsl_rng_default); gsl_rng_set(rndgen, 0); }

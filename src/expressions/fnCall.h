@@ -1,4 +1,4 @@
-// modulePhy.h
+// fnCall.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,15 +19,13 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _PPL_MODULE_PHY_H
-#define _PPL_MODULE_PHY_H 1
+#ifndef _FNCALL_H
+#define _FNCALL_H 1
 
-#include "coreUtils/dict.h"
-#include "settings/settings.h"
+#include "userspace/context.h"
 #include "userspace/pplObj.h"
 
-void pplfunc_planck_Bv   (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
-void pplfunc_planck_Bvmax(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int IterDepth, int *status, int *errPos, int *errType, char *errText);
 
 #endif
 

@@ -22,12 +22,11 @@
 #ifndef _PPL_MODULE_FRACTALS_H
 #define _PPL_MODULE_FRACTALS_H 1
 
-#include "coreUtils/dict.h"
-#include "settings/settings.h"
+#include "userspace/context.h"
 #include "userspace/pplObj.h"
 
-void pplfunc_julia       (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
-void pplfunc_mandelbrot  (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_julia       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_mandelbrot  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 
 #endif
 

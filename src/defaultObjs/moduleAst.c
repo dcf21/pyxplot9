@@ -165,7 +165,7 @@ double Lcdm_z_from_t(double t, double H, double OmegaM, double OmegaL)
    { \
     *status = 1; \
     *errType = ERR_UNIT; \
-    sprintf(errText, "The %s function can only act upon dimensionless values for w_m and w_l. Supplied values have dimensions of <%s> and <%s>.", FunctionDescription, ppl_units_GetUnitStr(in[1], NULL, NULL, 0, 1, 0), ppl_units_GetUnitStr(in[2], NULL, NULL, 1, 1, 0)); \
+    sprintf(errText, "The %s function can only act upon dimensionless values for w_m and w_l. Supplied values have dimensions of <%s> and <%s>.", FunctionDescription, ppl_printUnit(c, &in[1], NULL, NULL, 0, 1, 0), ppl_printUnit(c, &in[2], NULL, NULL, 1, 1, 0)); \
     return; \
    } \
 
@@ -174,11 +174,11 @@ double Lcdm_z_from_t(double t, double H, double OmegaM, double OmegaL)
    { \
     *status = 1; \
     *errType = ERR_UNIT; \
-    sprintf(errText, "The %s function can only act upon dimensionless values for redshift. Supplied value has dimensions of <%s>.", FunctionDescription, ppl_units_GetUnitStr(in[3], NULL, NULL, 0, 1, 0)); \
+    sprintf(errText, "The %s function can only act upon dimensionless values for redshift. Supplied value has dimensions of <%s>.", FunctionDescription, ppl_printUnit(c, &in[3], NULL, NULL, 0, 1, 0)); \
     return; \
    } \
 
-void pplfunc_Lcdm_age     (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_Lcdm_age     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "Lcdm_age(H0,w_m,w_l)";
   int i;
@@ -188,7 +188,7 @@ void pplfunc_Lcdm_age     (pplset_terminal *term, pplObj *in, int nArgs, int *st
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_Lcdm_angscale(pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_Lcdm_angscale(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "Lcdm_age(z,H0,w_m,w_l)";
   int i;
@@ -200,7 +200,7 @@ void pplfunc_Lcdm_angscale(pplset_terminal *term, pplObj *in, int nArgs, int *st
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_Lcdm_DA      (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_Lcdm_DA      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "Lcdm_DA(z,H0,w_m,w_l)";
   int i;
@@ -211,7 +211,7 @@ void pplfunc_Lcdm_DA      (pplset_terminal *term, pplObj *in, int nArgs, int *st
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_Lcdm_DL      (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_Lcdm_DL      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "Lcdm_DL(z,H0,w_m,w_l)";
   int i;
@@ -222,7 +222,7 @@ void pplfunc_Lcdm_DL      (pplset_terminal *term, pplObj *in, int nArgs, int *st
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_Lcdm_DM      (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_Lcdm_DM      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "Lcdm_DM(z,H0,w_m,w_l)";
   int i;
@@ -233,7 +233,7 @@ void pplfunc_Lcdm_DM      (pplset_terminal *term, pplObj *in, int nArgs, int *st
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_Lcdm_t       (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_Lcdm_t       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "Lcdm_t(z,H0,w_m,w_l)";
   int i;
@@ -244,7 +244,7 @@ void pplfunc_Lcdm_t       (pplset_terminal *term, pplObj *in, int nArgs, int *st
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_Lcdm_z       (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_Lcdm_z       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "Lcdm_z(t,H0,w_m,w_l)";
   int i;

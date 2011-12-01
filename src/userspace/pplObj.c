@@ -73,6 +73,24 @@ pplObj *pplObjNullStr(pplObj *in, unsigned char amMalloced)
   return in;
  }
 
+pplObj *pplObjBool(pplObj *in, unsigned char amMalloced)
+ {
+  int i;
+  in->real = in->imag = 0.0;
+  in->dimensionless = 1;
+  in->modified = in->flagComplex = in->tempType = 0;
+  in->objType = PPLOBJ_BOOL;
+  in->auxil = NULL;
+  in->objCustomType = NULL;
+  in->self_lval = NULL;
+  in->self_dval = NULL;
+  in->auxilMalloced = 0;
+  in->auxilLen = 0;
+  in->amMalloced = amMalloced;
+  for (i=0; i<UNITS_MAX_BASEUNITS; i++) in->exponent[i]=0;
+  return in;
+ }
+
 pplObj *pplNewModule(int frozen)
  {
   pplObj *in = malloc(sizeof(pplObj));

@@ -32,6 +32,7 @@
 #include "coreUtils/errorReport.h"
 #include "coreUtils/list.h"
 #include "expressions/expEval.h"
+#include "expressions/fnCall.h"
 #include "settings/settingTypes.h"
 #include "stringTools/asciidouble.h"
 #include "userspace/context.h"
@@ -471,27 +472,10 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
        }
       case 10: // Execute function call
        {
-        int      nArgs = *(int *)(in+j);
-        pplFunc *fn;
+        int      nArgs = *(int *)(in+j) , stat=0;
         *lastOpAssign=0;
-        if (context->stackPtr<nArgs+1) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Attempt to call function with few items on the stack."); goto cleanup_on_error; }
-        if (context->stack[context->stackPtr-1-nArgs].objType != PPLOBJ_FUNC) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Object of type <%s> cannot be called as a function.",pplObjTypeNames[context->stack[context->stackPtr-1-nArgs].objType]); goto cleanup_on_error; }
-        fn = (pplFunc *)context->stack[context->stackPtr-1-nArgs].auxil;
-        ppl_garbageObject(&context->stack[context->stackPtr-1-nArgs]);
-        pplObjZero(&context->stack[context->stackPtr-1-nArgs] , 0);
-        switch (fn->functionType)
-         {
-          case PPL_FUNC_SYSTEM:
-           {
-            int status=0, i;
-            ((void(*)(pplset_terminal *, pplObj *, int, int *, int *, char *))fn->functionPtr)(&context->set->term_current, context->stack+context->stackPtr-nArgs, nArgs, &status, errType, errText);
-            if (status) { *errPos=charpos; goto cleanup_on_error; }
-            for (i=0; i<nArgs; i++) { context->stackPtr--; ppl_garbageObject(&context->stack[context->stackPtr]); }
-            break;
-           }
-          default:
-            { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Call of unsupported function type."); goto cleanup_on_error; }
-         }
+        ppl_fnCall(context, nArgs, charpos, IterDepth, &stat, errPos, errType, errText);
+        if (stat) goto cleanup_on_error;
         break;
        }
       case 11: // Operator

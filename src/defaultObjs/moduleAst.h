@@ -22,17 +22,16 @@
 #ifndef _PPL_MODULE_AST_H
 #define _PPL_MODULE_AST_H 1
 
-#include "coreUtils/dict.h"
-#include "settings/settings.h"
+#include "userspace/context.h"
 #include "userspace/pplObj.h"
 
-void pplfunc_Lcdm_age     (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
-void pplfunc_Lcdm_angscale(pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
-void pplfunc_Lcdm_DA      (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
-void pplfunc_Lcdm_DL      (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
-void pplfunc_Lcdm_DM      (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
-void pplfunc_Lcdm_t       (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
-void pplfunc_Lcdm_z       (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_Lcdm_age     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_Lcdm_angscale(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_Lcdm_DA      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_Lcdm_DL      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_Lcdm_DM      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_Lcdm_t       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_Lcdm_z       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 
 #endif
 

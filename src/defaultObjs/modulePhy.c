@@ -44,45 +44,44 @@
 #include "defaultObjs/defaultFuncs.h"
 #include "defaultObjs/defaultFuncsMacros.h"
 
-void pplfunc_planck_Bv   (pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_planck_Bv   (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "Bv(nu,T)";
   int i;
   pplObj kelvin;
 
-  CHECK_DIMLESS_OR_HAS_UNIT(in1, "first", "a frequency", UNIT_TIME, -1);
-  CHECK_DIMLESS_OR_HAS_UNIT(in2, "second", "a temperature", UNIT_TEMPERATURE, 1);
+  CHECK_DIMLESS_OR_HAS_UNIT(in[0], "first", "a frequency", UNIT_TIME, -1);
+  CHECK_DIMLESS_OR_HAS_UNIT(in[1], "second", "a temperature", UNIT_TEMPERATURE, 1);
   pplObjZero(&kelvin,0);
   kelvin.real = 1.0;
   kelvin.exponent[UNIT_TEMPERATURE] = 1;
-  kelvin.TempType = 1;
-  ppl_uaDiv(in2, &kelvin, &kelvin, status, errText); // Convert in2 into kelvin
+  kelvin.tempType = 1;
+  ppl_uaDiv(c, &in[1], &kelvin, &kelvin, status, errType, errText); // Convert in[1] into kelvin
   if (*status) kelvin.real = GSL_NAN;
-  output->dimensionless = 0;
-  output->exponent[UNIT_MASS] =  1;
-  output->exponent[UNIT_TIME] = -2;
-  output->exponent[UNIT_ANGLE]= -2;
-  output->real              =  2 * GSL_CONST_MKSA_PLANCKS_CONSTANT_H / pow(GSL_CONST_MKSA_SPEED_OF_LIGHT, 2) * pow(in1->real,3) / expm1(GSL_CONST_MKSA_PLANCKS_CONSTANT_H * in1->real / GSL_CONST_MKSA_BOLTZMANN / kelvin.real);
+  OUTPUT.dimensionless = 0;
+  OUTPUT.exponent[UNIT_MASS]  =  1;
+  OUTPUT.exponent[UNIT_TIME]  = -2;
+  OUTPUT.exponent[UNIT_ANGLE] = -2;
+  OUTPUT.real                 =  2 * GSL_CONST_MKSA_PLANCKS_CONSTANT_H / pow(GSL_CONST_MKSA_SPEED_OF_LIGHT, 2) * pow(in[0].real,3) / expm1(GSL_CONST_MKSA_PLANCKS_CONSTANT_H * in[0].real / GSL_CONST_MKSA_BOLTZMANN / kelvin.real);
   CHECK_OUTPUT_OKAY;
  }
 
-void pplfunc_planck_Bvmax(pplset_terminal *term, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplfunc_planck_Bvmax(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "Bvmax(T)";
   int i;
   pplObj kelvin;
 
-  CHECK_DIMLESS_OR_HAS_UNIT(in , "first" , "a temperature", UNIT_TEMPERATURE, 1);
+  CHECK_DIMLESS_OR_HAS_UNIT(in[0] , "first" , "a temperature", UNIT_TEMPERATURE, 1);
   pplObjZero(&kelvin,0);
   kelvin.real = 1.0;
   kelvin.exponent[UNIT_TEMPERATURE] = 1;
-  kelvin.TempType = 1;
-  ppl_uaDiv(in, &kelvin, &kelvin, status, errText); // Convert in into kelvin
+  kelvin.tempType = 1;
+  ppl_uaDiv(c, &in[0], &kelvin, &kelvin, status, errType, errText); // Convert in into kelvin
   if (*status) kelvin.real = GSL_NAN;
-  output->dimensionless = 0;
-  output->exponent[UNIT_TIME] = -1;
-  output->real = 2.821439 * GSL_CONST_MKSA_BOLTZMANN / GSL_CONST_MKSA_PLANCKS_CONSTANT_H * kelvin.real; // Wien displacement law
-  ENDIF
+  OUTPUT.dimensionless = 0;
+  OUTPUT.exponent[UNIT_TIME] = -1;
+  OUTPUT.real = 2.821439 * GSL_CONST_MKSA_BOLTZMANN / GSL_CONST_MKSA_PLANCKS_CONSTANT_H * kelvin.real; // Wien displacement law
   CHECK_OUTPUT_OKAY;
  }
 

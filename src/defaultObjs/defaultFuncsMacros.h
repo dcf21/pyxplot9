@@ -35,13 +35,13 @@
 
 #define QUERY_OUT_OF_RANGE \
  { \
-  if (term->ExplicitErrors == SW_ONOFF_ON) { *status=1; *errType=ERR_RANGE; sprintf(errText, "The function %s is not defined at the requested point in parameter space.", FunctionDescription); return; } \
+  if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errType=ERR_RANGE; sprintf(errText, "The function %s is not defined at the requested point in parameter space.", FunctionDescription); return; } \
   else { NULL_OUTPUT; } \
  }
 
 #define QUERY_MUST_BE_REAL \
  { \
-  if (term->ExplicitErrors == SW_ONOFF_ON) { *status=1; *errType=ERR_RANGE; sprintf(errText, "The function %s only accepts real arguments; the supplied arguments are complex.", FunctionDescription); return; } \
+  if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errType=ERR_RANGE; sprintf(errText, "The function %s only accepts real arguments; the supplied arguments are complex.", FunctionDescription); return; } \
   else { NULL_OUTPUT; } \
  }
 
@@ -49,7 +49,7 @@
  { \
   if (((X).flagComplex) || ((X).real < 0) || ((X).real >= LONG_MAX)) \
    { \
-    if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The %s %s in the range 0 <= %s < %ld.",FunctionDescription,DESCRIPTION,VAR,LONG_MAX); return; } \
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The %s %s in the range 0 <= %s < %ld.",FunctionDescription,DESCRIPTION,VAR,LONG_MAX); return; } \
     else { NULL_OUTPUT; } \
    } \
  }
@@ -58,7 +58,7 @@
  { \
   if (((X).flagComplex) || ((X).real < 0) || ((X).real >= INT_MAX)) \
    { \
-    if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The %s %s in the range 0 <= %s < %d.",FunctionDescription,DESCRIPTION,VAR,INT_MAX); return; } \
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The %s %s in the range 0 <= %s < %d.",FunctionDescription,DESCRIPTION,VAR,INT_MAX); return; } \
     else { NULL_OUTPUT; } \
    } \
  }
@@ -67,7 +67,7 @@
  { \
   if (((X).real <= INT_MIN) || ((X).real >= INT_MAX)) \
    { \
-    if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The %s %s in the range %d <= %s < %d.",FunctionDescription,DESCRIPTION,INT_MIN,VAR,INT_MAX); return; } \
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The %s %s in the range %d <= %s < %d.",FunctionDescription,DESCRIPTION,INT_MIN,VAR,INT_MAX); return; } \
     else { NULL_OUTPUT; } \
    } \
  }
@@ -80,21 +80,21 @@
 
 #define NAN_CHECK_FAIL \
  { \
-  if (term->ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The function %s has received a non-finite input.",FunctionDescription); return; } \
+  if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The function %s has received a non-finite input.",FunctionDescription); return; } \
   else { NULL_OUTPUT; } \
  }
 
 #define CHECK_1NOTNAN \
  { \
   WRAPPER_INIT; \
-  if ((term->ComplexNumbers == SW_ONOFF_OFF) && (in[0].flagComplex)) { NAN_CHECK_FAIL; } \
+  if ((c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && (in[0].flagComplex)) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[0].real)) || (!gsl_finite(in[0].imag))) { NAN_CHECK_FAIL; } \
  }
 
 #define CHECK_2NOTNAN \
  { \
   WRAPPER_INIT; \
-  if ((term->ComplexNumbers == SW_ONOFF_OFF) && ((in[0].flagComplex) || (in[1].flagComplex))) { NAN_CHECK_FAIL; } \
+  if ((c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && ((in[0].flagComplex) || (in[1].flagComplex))) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[0].real)) || (!gsl_finite(in[0].imag))) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[1].real)) || (!gsl_finite(in[1].imag))) { NAN_CHECK_FAIL; } \
  }
@@ -102,28 +102,28 @@
 #define CHECK_3NOTNAN \
  { \
   CHECK_2NOTNAN; \
-  if ((term->ComplexNumbers == SW_ONOFF_OFF) && (in[2].flagComplex)) { NAN_CHECK_FAIL; } \
+  if ((c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && (in[2].flagComplex)) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[2].real)) || (!gsl_finite(in[2].imag))) { NAN_CHECK_FAIL; } \
  }
 
 #define CHECK_4NOTNAN \
  { \
   CHECK_3NOTNAN; \
-  if ((term->ComplexNumbers == SW_ONOFF_OFF) && (in[3].flagComplex)) { NAN_CHECK_FAIL; } \
+  if ((c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && (in[3].flagComplex)) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[3].real)) || (!gsl_finite(in[3].imag))) { NAN_CHECK_FAIL; } \
  }
 
 #define CHECK_5NOTNAN \
  { \
   CHECK_4NOTNAN; \
-  if ((term->ComplexNumbers == SW_ONOFF_OFF) && (in[4].flagComplex)) { NAN_CHECK_FAIL; } \
+  if ((c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && (in[4].flagComplex)) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[4].real)) || (!gsl_finite(in[4].imag))) { NAN_CHECK_FAIL; } \
  }
 
 #define CHECK_6NOTNAN \
  { \
   CHECK_5NOTNAN; \
-  if ((term->ComplexNumbers == SW_ONOFF_OFF) && (in[5].flagComplex)) { NAN_CHECK_FAIL; } \
+  if ((c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && (in[5].flagComplex)) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[5].real)) || (!gsl_finite(in[5].imag))) { NAN_CHECK_FAIL; } \
  }
 
@@ -133,7 +133,7 @@
    { \
     *status = 1; \
     *errType=ERR_UNIT; \
-    sprintf(errText, "The %s function can only act upon dimensionless inputs. Supplied input has dimensions of <%s>.", FunctionDescription, ppl_printUnit(in, NULL, NULL, 1, 1, 0)); \
+    sprintf(errText, "The %s function can only act upon dimensionless inputs. Supplied input has dimensions of <%s>.", FunctionDescription, ppl_printUnit(c, &in[0], NULL, NULL, 1, 1, 0)); \
     return; \
    } \
  }
@@ -144,7 +144,7 @@
    { \
     *status = 1; \
     *errType=ERR_UNIT; \
-    sprintf(errText, "The %s function can only act upon dimensionless inputs. Supplied inputs have dimensions of <%s> and <%s>.", FunctionDescription, ppl_printUnit(in[0], NULL, NULL, 0, 1, 0), ppl_printUnit(in[1], NULL, NULL, 1, 1, 0)); \
+    sprintf(errText, "The %s function can only act upon dimensionless inputs. Supplied inputs have dimensions of <%s> and <%s>.", FunctionDescription, ppl_printUnit(c, &in[0], NULL, NULL, 0, 1, 0), ppl_printUnit(c, &in[1], NULL, NULL, 1, 1, 0)); \
     return; \
    } \
  }
@@ -155,7 +155,7 @@
    { \
     *status = 1; \
     *errType=ERR_UNIT; \
-    sprintf(errText, "The %s function can only act upon dimensionless inputs. Supplied inputs have dimensions of <%s>, <%s> and <%s>.", FunctionDescription, ppl_printUnit(in[0], NULL, NULL, 0, 1, 0), ppl_printUnit(in[1], NULL, NULL, 1, 1, 0), ppl_printUnit(in[2], NULL, NULL, 2, 1, 0)); \
+    sprintf(errText, "The %s function can only act upon dimensionless inputs. Supplied inputs have dimensions of <%s>, <%s> and <%s>.", FunctionDescription, ppl_printUnit(c, &in[0], NULL, NULL, 0, 1, 0), ppl_printUnit(c, &in[1], NULL, NULL, 1, 1, 0), ppl_printUnit(c, &in[2], NULL, NULL, 2, 1, 0)); \
     return; \
    } \
  }
@@ -194,11 +194,11 @@
 
 #define CHECK_2INPUT_DIMMATCH \
  { \
-  if ((!(in[0].dimensionless && in[1].dimensionless)) && (!(ppl_units_DimEqual(in[0], in[1])))) \
+  if ((!(in[0].dimensionless && in[1].dimensionless)) && (!(ppl_unitsDimEqual(&in[0], &in[1])))) \
    { \
     *status = 1; \
     *errType=ERR_UNIT; \
-    sprintf(errText, "The %s function can only act upon inputs with matching dimensions. Supplied inputs have dimensions of <%s> and <%s>.", FunctionDescription, ppl_printUnit(context, &in[0], NULL, NULL, 0, 1, 0), ppl_printUnit(in[1], NULL, NULL, 1, 1, 0)); \
+    sprintf(errText, "The %s function can only act upon inputs with matching dimensions. Supplied inputs have dimensions of <%s> and <%s>.", FunctionDescription, ppl_printUnit(c, &in[0], NULL, NULL, 0, 1, 0), ppl_printUnit(c, &in[1], NULL, NULL, 1, 1, 0)); \
     return; \
    } \
  }
@@ -211,7 +211,7 @@
      { \
       *status = 1; \
       *errType=ERR_UNIT; \
-      sprintf(errText, "The %s argument to the %s function must be %s. Supplied input has dimensions of <%s>.", DESCRIPTION, FunctionDescription, UNITNAME, ppl_printUnit(context, &X, NULL, NULL, 1, 1, 0)); \
+      sprintf(errText, "The %s argument to the %s function must be %s. Supplied input has dimensions of <%s>.", DESCRIPTION, FunctionDescription, UNITNAME, ppl_printUnit(c, &X, NULL, NULL, 1, 1, 0)); \
       return; \
      } \
  } \
@@ -237,7 +237,7 @@
 
 
 #define CHECK_OUTPUT_OKAY \
- if ((!gsl_finite(OUTPUT.real)) || (!gsl_finite(OUTPUT.imag)) || ((OUTPUT.flagComplex) && (term->ComplexNumbers == SW_ONOFF_OFF))) \
+ if ((!gsl_finite(OUTPUT.real)) || (!gsl_finite(OUTPUT.imag)) || ((OUTPUT.flagComplex) && (c->set->term_current.ComplexNumbers == SW_ONOFF_OFF))) \
   { QUERY_OUT_OF_RANGE; }
 
 #endif
