@@ -123,6 +123,8 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
   unsigned char  opcode=0, precedence=0;
   unsigned char *out = context->tokenBuff + outOffset;
   const int      buffSize = ALGEBRA_MAXLEN;
+  int            expOp = 0; // Was last named function one which acts on an expression -- e.g. unit() or int_dx()?
+  int            extraArg = 0; // Was last named function one which has a variable name encoded in it -- i.e. int_dx() or diff_dx()?
 
   while (state!='U')
    {
@@ -131,6 +133,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
 
     for (trialpos=0; ((trialstate=allowed[(int)(state-'A')][trialpos])!='\0'); trialpos++)
      {
+      if ((expOp)&&(trialstate!='P')) continue; // int_dx and diff_dx MUST be followed by arguments; they have already put one on the stack.
       if      (trialstate=='B') // string literal
        {
         char quoteType;
@@ -139,7 +142,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
           int j;
           for (j=1; ((in[scanpos+j]!='\0')&&((in[scanpos+j]!=quoteType)||(in[scanpos+j-1]=='\\'))); j++);
           if (in[scanpos+j]==quoteType) { j++; NEWSTATE(j,0,0); }
-          else                          { *errPos = scanpos; *errType=ERR_SYNTAX; strcpy(errText, "Mismatched quote"); *end=-1; *outlen=0; return; }
+          else                          { *errPos = scanpos; *errType=ERR_SYNTAX; strcpy(errText, "Mismatched quote."); *end=-1; *outlen=0; return; }
          }
        }
       else if (trialstate=='C') // string substitution operator
@@ -152,20 +155,32 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
        {
         if (MARKUP_MATCH("("))
          {
-          int j,k,l,m,n=1;
-          ppl_strBracketMatch(in+scanpos,'(',')',NULL,NULL,&j,0); // Search for a ) to match the (
+          int j,k,l,m,n=1,cp[3],cpl=3,extraStrArg=0;
+          ppl_strBracketMatch(in+scanpos,'(',')',cp,&cpl,&j,cpl); // Search for a ) to match the (
           if (j<=0) { *errPos = scanpos; *errType=ERR_SYNTAX; strcpy(errText, "Mismatched ( )"); *end=-1; *outlen=0; return; }
           NEWSTATE(1,0,0); // Record the one character opening bracket
           while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; n++; } // Sop up whitespace
+          if ((trialstate=='P')&&(expOp)&&(in[scanpos]!='\'')&&(in[scanpos]!='"')) // Function call acting on expression: save expression as string even though it's not quoted
+           {
+            int explen = cp[1]+(cpl!=1)-n;
+            if (cpl<1) { *errPos=scanpos; *errType=ERR_INTERNAL; strcpy(errText, "ppl_strBracketMatch returned fewer than two results."); *end=-1; *outlen=0; return; }
+            trialstate='B'; NEWSTATE(explen,0,0); trialstate='P';
+            n+=explen;
+            extraStrArg=(explen>0);
+           }
           k=scanpos; l=outpos; j-=n;
           if ((in[k]!=')')||(trialstate=='E'))
            {
             ppl_expTokenise(context,in+k,&m,dollarAllowed,1,(trialstate!='E'),0,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
             if (*errPos>=0) { *errPos+=k; return; }
-            if (m!=j) { *errPos = m+k; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
+            if (m!=j) { *errPos = m+k; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at end of expression."); *end=-1; *outlen=0; return; }
            }
           FFWSTATE(j); // Fast-forward to closing bracket
+          if (extraStrArg) { if (++(out[outpos+2])==0) out[outpos+1]++; }
+          if (extraArg)    { if (++(out[outpos+2])==0) out[outpos+1]++; }
           NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
+          extraArg=0;
+          expOp=0;
          }
        }
       else if (trialstate=='F') // a unary post-lvalue operator
@@ -184,8 +199,38 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
        {
         if (isalpha(in[scanpos]))
          {
-          NEWSTATE(1,0,0);
-          while ((isalnum(in[scanpos])) || (in[scanpos]=='_')) { SAMESTATE; }
+          const char tmp = trialstate;
+          if      ((strncmp(in+scanpos,"unit",4)==0) && (!isalnum(in[scanpos+4])) && (in[scanpos+4]!='_')) // unit() function
+           {
+            expOp = 1;
+            NEWSTATE(4,0,0);
+           }
+          else if (strncmp(in+scanpos,"int_d",5)==0) // int_d() function
+           {
+            if (!isalpha(in[scanpos+5])) { *errPos=scanpos; *errType=ERR_SYNTAX; strcpy(errText, "System function int_d should be followed by a variable name to integrate over."); *end=-1; *outlen=0; return; }
+            NEWSTATE(5,0,0);
+            trialstate='B'; NEWSTATE(1,0,0);
+            while ((isalnum(in[scanpos])) || (in[scanpos]=='_')) { SAMESTATE; }
+            trialstate=tmp; NEWSTATE(0,0,0);
+            expOp = 1;
+            extraArg=1;
+           }
+          else if (strncmp(in+scanpos,"diff_d",6)==0) // diff_d() function
+           {
+            if (!isalpha(in[scanpos+6])) { *errPos=scanpos; *errType=ERR_SYNTAX; strcpy(errText, "System function diff_d should be followed by a variable name to differentiate with respect to."); *end=-1; *outlen=0; return; }
+            NEWSTATE(6,0,0);
+            trialstate='B'; NEWSTATE(1,0,0);
+            while ((isalnum(in[scanpos])) || (in[scanpos]=='_')) { SAMESTATE; }
+            trialstate=tmp; NEWSTATE(0,0,0);
+            expOp = 1;
+            extraArg=1;
+           }
+          else
+           {
+            NEWSTATE(1,0,0);
+            while ((isalnum(in[scanpos])) || (in[scanpos]=='_')) { SAMESTATE; }
+            expOp = 0;
+           }
          }
        }
       else if (trialstate=='I') // a unary value-based operator
@@ -260,6 +305,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
       else if ( (trialstate=='M') || // a list literal
                 (trialstate=='Q') )  // an array dereference []
        {
+        expOp=0;
         if (MARKUP_MATCH("["))
          {
           int j,k,l,m=0,n=1;
@@ -382,6 +428,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
     i=strlen(errText);
     for (trialpos=0; ((trialstate=allowed[(int)(state-'A')][trialpos])!='\0'); trialpos++)
      {
+      if ((expOp)&&(trialstate!='P')) continue; // int_dx and diff_dx MUST be followed by arguments; they have already put one on the stack.
 
 #define W { if (j!=0) {strcpy(errText+i," or "); i+=strlen(errText+i);} else j=1; }
 
@@ -396,7 +443,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
                                 { W; strcpy(errText+i,"a variable name"); i+=strlen(errText+i); G=1; }
       else if ((!J)&&((trialstate=='J')||(trialstate=='K')||(trialstate=='S')))
                                 { W; strcpy(errText+i,"a binary/ternary operator"); i+=strlen(errText+i); J=1; }
-      else if (trialstate=='P') { strcpy(errText+i,"a list of function arguments"); i+=strlen(errText+i); }
+      else if (trialstate=='P') { W; strcpy(errText+i,"a list of function arguments"); i+=strlen(errText+i); }
       else if ((!P)&&((trialstate=='Q')||(trialstate=='R')))
                                 { W; strcpy(errText+i,"an object dereference"); i+=strlen(errText+i); P=1; }
      }
@@ -513,11 +560,24 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       int  i;
       char quoteType=in[ipos];
       BYTECODE_OP(2); // bytecode op 2
-      for ( i=ipos+1 ; ((in[i]!=quoteType) || (in[i-1]=='\\')) ; i++ )
+      if ((quoteType!='\'')&&(quoteType!='"')) // Unquoted string
        {
-        if (in[i]=='\0') { *errPos=i; *errType=ERR_INTERNAL; strcpy(errText, "Unexpected end of string."); *end=-1; return; }
-        if ((in[i]=='\\') && (in[i-1]!='\\')) continue; // We have a double backslash
-        *(char *)(out+outpos++) = in[i];
+        while ((tpos<tlen) && (tdata[tpos]+'@' == o))
+         {
+          *(char *)(out+outpos++) = in[ipos];
+          tpos+=3; ipos++;
+          if (tpos>=tlen) break;
+         }
+        if ((outpos>0)&&(*(unsigned char *)(out+outpos-1)==',')) outpos--;
+       }
+      else
+       {
+        for ( i=ipos+1 ; ((in[i]!=quoteType) || ((quoteType!='\0')&&(in[i-1]=='\\'))) ; i++ )
+         {
+          if (in[i]=='\0') { *errPos=i; *errType=ERR_INTERNAL; strcpy(errText, "Unexpected end of string."); *end=-1; return; }
+          if ((in[i]=='\\') && (in[i-1]!='\\')) continue; // We have a double backslash
+          *(char *)(out+outpos++) = in[i];
+         }
        }
       *(unsigned char *)(out+outpos++) = '\0';
       BYTECODE_ENDOP;
@@ -601,14 +661,15 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
      }
     else if ( (o=='G') || (o=='T') || (o=='V') ) // a variable name or field dereferenced with the . operator
      {
-      int  i;
       if      (o=='G') BYTECODE_OP(3) // foo -- op 3: variable lookup "foo"
       else if (o=='T') BYTECODE_OP(5) // foo.bar -- op 5: dereference "bar"
       else             BYTECODE_OP(2) // $foo -- push "foo" onto stack as a string constant
-      for ( i=ipos ; (isalnum(in[i]) || (in[i]=='_')) ; i++ )
+      while ((tpos<tlen) && (tdata[tpos]+'@' == o))
        {
-        if (in[i]=='\0') { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Unexpected end of variable name."); *end=-1; return; }
-        *(char *)(out+outpos++) = in[i];
+        if ((!isalnum(in[ipos])) && (in[ipos]!='_')) break;
+        *(char *)(out+outpos++) = in[ipos];
+        tpos+=3; ipos++;
+        if (tpos>=tlen) break;
        }
       *(unsigned char *)(out+outpos++) = '\0';
       BYTECODE_ENDOP;
