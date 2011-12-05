@@ -6,7 +6,7 @@
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
 //               2008-2011 Ross Church
 //
-// $Id: ppl_units.c 344 2009-09-04 00:46:52Z dcf21 $
+// $Id$
 //
 // PyXPlot is free software; you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software

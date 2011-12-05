@@ -1038,7 +1038,6 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].quantity   = "information_content";
   unit_database[unit_pos].multiplier = 1;
   unit_database[unit_pos].maxPrefix  =  24;
-  unit_database[unit_pos].si = unit_database[unit_pos].cgs = unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
   unit_database[unit_pos].exponent[UNIT_BIT]=1;
   unit_pos++;
 
@@ -1554,7 +1553,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].quantity   = "information_content";
   unit_database[unit_pos].multiplier = 8.0;
   unit_database[unit_pos].maxPrefix  =  24;
-  unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
+  unit_database[unit_pos].si = unit_database[unit_pos].cgs = unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient = 1;
   unit_database[unit_pos].exponent[UNIT_BIT]=1;
   unit_pos++;
 

@@ -387,6 +387,17 @@ void pplfunc_ceil        (ppl_context *c, pplObj *in, int nArgs, int *status, in
   CHECK_OUTPUT_OKAY;
  }
 
+void pplfunc_classOf     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObjCpy(&OUTPUT,in[0].objPrototype,0,1);
+  OUTPUT.self_lval = NULL;
+ }
+
+void pplfunc_cmyk        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObjColor(&OUTPUT,0,SW_COLSPACE_CMYK,in[0].real,in[1].real,in[2].real,in[3].real);
+ }
+
 void pplfunc_conjugate   (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "conjugate(z)";
@@ -560,6 +571,11 @@ void pplfunc_heaviside   (ppl_context *c, pplObj *in, int nArgs, int *status, in
   CHECK_OUTPUT_OKAY;
  }
 
+void pplfunc_hsb         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObjColor(&OUTPUT,0,SW_COLSPACE_HSB,in[0].real,in[1].real,in[2].real,0);
+ }
+
 void pplfunc_hyperg_0F1  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "hyperg_0F1(c,x)";
@@ -698,6 +714,25 @@ void pplfunc_logn        (ppl_context *c, pplObj *in, int nArgs, int *status, in
   CHECK_OUTPUT_OKAY;
  }
 
+void pplfunc_lrange       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char  *FunctionDescription = "lrange([f],l,[s])";
+  double start, end, step, n;
+  int    i;
+  if (nArgs>1) { CHECK_2INPUT_DIMMATCH; } 
+  if (nArgs>2) { in++; CHECK_2INPUT_DIMMATCH; in--; }
+  
+  if      (nArgs==1) { start=1; end=in[0].real; step=2; }
+  else if (nArgs==2) { start=in[0].real; end=in[1].real; step=2; }
+  else               { start=in[0].real; end=in[1].real; step=in[2].real; }
+  n = ceil(log(end/start) / log(step));
+  if ((!gsl_finite(n))||(n>INT_MAX)) { *status=1; *errType=ERR_NUMERIC; strcpy(errText,"Invalid step size."); return; }
+  if (n<0) n=0;
+  if (pplObjVector(&OUTPUT,0,1,n)==NULL) { *status=1; *errType=ERR_MEMORY; strcpy(errText,"Out of memory."); return; }
+  for (i=0; i<n; i++) ((pplVector *)OUTPUT.auxil)->v->data[i] = start * pow(step,i);
+  ppl_unitsDimCpy(&OUTPUT, &in[0]);
+ }
+
 void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
  }
@@ -717,6 +752,26 @@ void pplfunc_mod         (ppl_context *c, pplObj *in, int nArgs, int *status, in
   OUTPUT.real = fmod(in[0].real , in[1].real);
   CHECK_OUTPUT_OKAY;
   ppl_unitsDimCpy(&OUTPUT, &in[0]);
+ }
+
+void pplfunc_ordinal     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *FunctionDescription = "ordinal(n)";
+  char *out;
+  int n = (int)ceil(fabs(log10(in[0].real)));
+  int i = (int)in[0].real;
+  if (in[0].real<0) in[0].real=GSL_NAN;
+  if (n<2) n=2;
+  if (n>64) in[0].real=GSL_NAN;
+  CHECK_NEEDINT(in[0], "n", "function's input must be an integer");
+  out = (char *)malloc(n + 8);
+  if (out==NULL) { *status=1; sprintf(errText,"Out of memory."); return; }
+  if      (((i%100)<21) && ((i%100)>3)) sprintf(out, "%dth", i);
+  else if  ((i% 10)==1)                 sprintf(out, "%dst", i);
+  else if  ((i% 10)==2)                 sprintf(out, "%dnd", i);
+  else if  ((i% 10)==3)                 sprintf(out, "%drd", i);
+  else                                  sprintf(out, "%dth", i);
+  pplObjStr(&OUTPUT,0,1,out);
  }
 
 void pplfunc_pow         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -756,12 +811,36 @@ void pplfunc_radians     (ppl_context *c, pplObj *in, int nArgs, int *status, in
   CHECK_OUTPUT_OKAY;
  }
 
+void pplfunc_range       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char  *FunctionDescription = "range([f],l,[s])";
+  double start, end, step, n;
+  int    i;
+  if (nArgs>1) { CHECK_2INPUT_DIMMATCH; }
+  if (nArgs>2) { in++; CHECK_2INPUT_DIMMATCH; in--; }
+
+  if      (nArgs==1) { start=0; end=in[0].real; step=1; }
+  else if (nArgs==2) { start=in[0].real; end=in[1].real; step=1; }
+  else               { start=in[0].real; end=in[1].real; step=in[2].real; }
+  n = ceil((end-start) / step);
+  if ((!gsl_finite(n))||(n>INT_MAX)) { *status=1; *errType=ERR_NUMERIC; strcpy(errText,"Invalid step size."); return; }
+  if (n<0) n=0;
+  if (pplObjVector(&OUTPUT,0,1,n)==NULL) { *status=1; *errType=ERR_MEMORY; strcpy(errText,"Out of memory."); return; }
+  for (i=0; i<n; i++) ((pplVector *)OUTPUT.auxil)->v->data[i] = start+i*step;
+  ppl_unitsDimCpy(&OUTPUT, &in[0]);
+ }
+
 void pplfunc_real        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "Re(z)";
   OUTPUT.real = in[0].real;
   CHECK_OUTPUT_OKAY;
   ppl_unitsDimCpy(&OUTPUT, &in[0]);
+ }
+
+void pplfunc_rgb         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObjColor(&OUTPUT,0,SW_COLSPACE_RGB,in[0].real,in[1].real,in[2].real,0);
  }
 
 void pplfunc_root        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -907,6 +986,12 @@ void pplfunc_tophat      (ppl_context *c, pplObj *in, int nArgs, int *status, in
   char *FunctionDescription = "tophat(x,sigma)";
   CHECK_2INPUT_DIMMATCH;
   if ( fabs(in[0].real) <= fabs(in[1].real) ) OUTPUT.real = 1.0;
+ }
+
+void pplfunc_typeOf      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObjCpy(&OUTPUT,&pplObjPrototypes[in[0].objType],0,1);
+  OUTPUT.self_lval = NULL;
  }
 
 void pplfunc_zernike     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)

@@ -209,9 +209,13 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d2,"system"        ,1,1,0,0,0,0,(void *)&pplfunc_osSystem  , "system()", "\\mathrm{system}@<@>", "system() executes a command in a subshell");
     ppl_dictAppendCpy(d2 , "path"      , pplObjModule(&m,1,1,1) , sizeof(v));
     d3 = (dict *)m.auxil;
+    ppl_addSystemFunc(d3,"atime"         ,1,1,0,0,0,0,(void *)&pplfunc_osPathATime, "atime(x)", "\\mathrm{atime}@<@0@>", "atime(x) returns a date object representing the time of the last access of the file with pathname x");
+    ppl_addSystemFunc(d3,"ctime"         ,1,1,0,0,0,0,(void *)&pplfunc_osPathCTime, "ctime(x)", "\\mathrm{ctime}@<@0@>", "ctime(x) returns a date object representing the time of the last status change to the file with pathname x");
     ppl_addSystemFunc(d3,"exists"        ,1,1,0,0,0,0,(void *)&pplfunc_osPathExists, "exists(x)", "\\mathrm{exists}@<@0@>", "exists(x) returns a boolean flag indicating whether a file with pathname x exists");
     ppl_addSystemFunc(d3,"expanduser"    ,1,1,0,0,0,0,(void *)&pplfunc_osPathExpandUser, "expanduser(x)", "\\mathrm{expanduser@<@0@>", "expanduser(x) returns its argument with ~s indicating home directories expanded");
+    ppl_addSystemFunc(d3,"filesize"      ,1,1,0,0,0,0,(void *)&pplfunc_osPathFilesize, "filesize(x)", "\\mathrm{filesize}@<@0@>", "filesize(x) returns the size, in bytes, of the file with pathname x");
     ppl_addSystemFunc(d3,"join"          ,1,9999,0,0,0,0,(void *)&pplfunc_osPathJoin , "join(...)", "\\mathrm{join}@<@0@>", "join(...) joins a series of strings intelligently into a pathname");
+    ppl_addSystemFunc(d3,"mtime"         ,1,1,0,0,0,0,(void *)&pplfunc_osPathMTime, "mtime(x)", "\\mathrm{mtime}@<@0@>", "mtime(x) returns a date object representing the time of the last modification of the file with pathname x");
 
     // Default maths functions
     ppl_addSystemFunc(d,"abs"           ,1,1,1,1,0,0,(void *)&pplfunc_abs         , "abs(z)", "\\mathrm{abs}@<@1@>", "abs(z) returns the absolute magnitude of z");
@@ -243,6 +247,8 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"besselY"       ,2,2,1,1,1,1,(void *)&pplfunc_besselY     , "besselY(l,x)", "\\mathrm{besselY}@<@1,@2@>", "besselY(l,x) evaluates the lth irregular cylindrical Bessel function at x");
     ppl_addSystemFunc(d,"beta"          ,2,2,1,1,1,1,(void *)&pplfunc_beta        , "beta(a,b)", "\\mathrm{B}@<@1,@2@>", "beta(a,b) evaluates the beta function B(a,b)");
     ppl_addSystemFunc(d,"ceil"          ,1,1,1,1,1,1,(void *)&pplfunc_ceil        , "ceil(x)", "\\mathrm{ceil}@<@1@>", "ceil(x) returns the smallest integer value greater than or equal to x");
+    ppl_addSystemFunc(d,"classOf"       ,1,1,0,0,0,0,(void *)&pplfunc_classOf     , "classOf(x)", "\\mathrm{classOf}@<@1@>", "classOf(x) returns the class prototype of the object x");
+    ppl_addSystemFunc(d,"cmyk"          ,4,4,1,1,1,1,(void *)&pplfunc_cmyk        , "cmyk(c,m,y,k)", "\\mathrm{cmyk}@<@1,@2,@3,@4@>", "cmyk(c,m,y,k) returns a colour with specified CMYK components in the range 0-1");
     ppl_addSystemFunc(d,"conjugate"     ,1,1,1,1,0,0,(void *)&pplfunc_conjugate   , "conjugate(z)", "\\mathrm{conjugate}@<@1@>", "conjugate(z) returns the complex conjugate of z");
     ppl_addSystemFunc(d,"cos"           ,1,1,1,1,0,1,(void *)&pplfunc_cos         , "cos(z)", "\\mathrm{cos}@<@1@>", "cos(x) returns the cosine of x. If x is dimensionless, it is assumed to be measured in radians");
     ppl_addSystemFunc(d,"cosh"          ,1,1,1,1,0,1,(void *)&pplfunc_cosh        , "cosh(z)", "\\mathrm{cosh}@<@1@>", "cosh(x) returns the hyperbolic cosine of x. x may either be a dimensionless number or may have units of angle");
@@ -264,13 +270,14 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"floor"         ,1,1,1,1,1,1,(void *)&pplfunc_floor       , "floor(x)", "\\mathrm{floor}@<@1@>", "floor(x) returns the largest integer value smaller than or equal to x");
     ppl_addSystemFunc(d,"gamma"         ,1,1,1,1,1,1,(void *)&pplfunc_gamma       , "gamma(x)", "\\mathrm{\\Gamma}@<@1@>", "gamma(x) evaluates the gamma function at x");
     ppl_addSystemFunc(d,"heaviside"     ,1,1,1,1,1,0,(void *)&pplfunc_heaviside   , "heaviside(x)", "\\mathrm{heaviside}@<@1@>", "heaviside(x) returns the Heaviside function, defined to be one for x>=0 and zero otherwise");
+    ppl_addSystemFunc(d,"hsb"           ,3,3,1,1,1,1,(void *)&pplfunc_hsb         , "hsb(h,s,b)", "\\mathrm{hsb}@<@1,@2,@3@>", "hsb(h,s,b) returns a colour with specified hue, saturation and brightness in the range 0-1");
     ppl_addSystemFunc(d,"hyperg_0F1"    ,2,2,1,1,1,1,(void *)&pplfunc_hyperg_0F1  , "hyperg_0F1(c,x)", "\\mathrm{hyperg\\_}_0\\mathrm{F}_1}@<@1,@2@>", "hyperg_0F1(c,x) evaluates the hypergeometric function 0F1(c,x)");
     ppl_addSystemFunc(d,"hyperg_1F1"    ,3,3,1,1,1,1,(void *)&pplfunc_hyperg_1F1  , "hyperg_1F1(a,b,x)", "\\mathrm{hyperg\\_}_1\\mathrm{F}_1}@<@1,@2,@3@>", "hyperg_1F1(a,b,x) evaluates the confluent hypergeometric function 1F1(a,b,x)");
     ppl_addSystemFunc(d,"hyperg_2F0"    ,3,3,1,1,1,1,(void *)&pplfunc_hyperg_2F0  , "hyperg_2F0(a,b,x)", "\\mathrm{hyperg\\_}_2\\mathrm{F}_0}@<@1,@2,@3@>", "hyperg_2F0(a,b,x) evaluates the hypergeometric function 2F0(a,b,x)");
     ppl_addSystemFunc(d,"hyperg_2F1"    ,4,4,1,1,1,1,(void *)&pplfunc_hyperg_2F1  , "hyperg_2F1(a,b,c,x)", "\\mathrm{hyperg\\_}_2\\mathrm{F}_1}@<@1,@2,@3,@4@>", "hyperg_2F1(a,b,c,x) evaluates the Gauss hypergeometric function 2F1(a,b,c,x)");
     ppl_addSystemFunc(d,"hyperg_U"      ,3,3,1,1,1,1,(void *)&pplfunc_hyperg_U    , "hyperg_U(a,b,x)", "\\mathrm{hyperg\\_U}@<@1,@2,@3@>", "hyperg_U(a,b,x) evaluates the confluent hypergeometric function U(m,n,x)");
     ppl_addSystemFunc(d,"hypot"         ,2,2,1,1,0,0,(void *)&pplfunc_hypot       , "hypot(x,...)", "\\mathrm{hypot}@<@1,@2@>", "hypot(x,...) returns the quadrature sum of its arguments");
-    ppl_addSystemFunc(d,"imag"          ,1,1,1,1,0,0,(void *)&pplfunc_imag        , "Im(z)", "\\mathrm{Im}@<@1@>", "Im(z) returns the magnitude of the imaginary part of z");
+    ppl_addSystemFunc(d,"Im"            ,1,1,1,1,0,0,(void *)&pplfunc_imag        , "Im(z)", "\\mathrm{Im}@<@1@>", "Im(z) returns the magnitude of the imaginary part of z");
     ppl_addMagicFunction(d, "int_d", "int_d...(e,min,max)", "\\int_{@2}^{@3}@<@1@>\\,\\mathrm{d}@?", "int_d<v>(e,min,max) numerically integrates an expression e wrt <v> between min and max");
     ppl_addSystemFunc(d,"jacobi_cn"     ,2,2,1,1,1,1,(void *)&pplfunc_jacobi_cn   , "jacobi_cn(u,m)", "\\mathrm{jacobi\\_cn}@<@1,@2@>", "jacobi_cn(u,m) returns the Jacobi elliptic function cn(u,m)");
     ppl_addSystemFunc(d,"jacobi_dn"     ,2,2,1,1,1,1,(void *)&pplfunc_jacobi_dn   , "jacobi_dn(u,m)", "\\mathrm{jacobi\\_dn}@<@1,@2@>", "jacobi_dn(u,m) returns the Jacobi elliptic function dn(u,m)");
@@ -284,13 +291,17 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"log10"         ,1,1,1,1,0,1,(void *)&pplfunc_log10       , "log10(z)", "\\mathrm{log_{10}}@<@1@>", "log10(x) returns the logarithm of x to base 10");
     ppl_addSystemFunc(d,"logn"          ,2,2,1,1,0,1,(void *)&pplfunc_logn        , "logn(z,n)", "\\mathrm{log}_n@<@1@>", "logn(x,n) returns the logarithm of x to base n");
     ppl_addSystemFunc(d,"ln"            ,1,1,1,1,0,1,(void *)&pplfunc_log         , "ln(z)", "\\mathrm{ln}@<@1@>", "ln(x) is an alias for log(x): it returns the natural logarithm of x");
-    ppl_addSystemFunc(d,"max"           ,2,2,1,1,0,1,(void *)&pplfunc_max         , "max(x,...)", "\\mathrm{max}@<@1,@2@>", "max(x,...) returns the greatest of its arguments");
-    ppl_addSystemFunc(d,"min"           ,2,2,1,1,0,1,(void *)&pplfunc_min         , "min(x,...)", "\\mathrm{min}@<@1,@2@>", "min(x,...) returns the least of its arguments");
+    ppl_addSystemFunc(d,"lrange"        ,1,3,1,1,1,0,(void *)&pplfunc_lrange      , "lrange([f],l,[s])", "\\mathrm{lrange@<@0@>", "lrange([f],l,[s]) returns a vector of numbers between f and l with uniform multiplicative spacing s");
+    ppl_addSystemFunc(d,"max"           ,2,2,1,1,0,1,(void *)&pplfunc_max         , "max(x,...)", "\\mathrm{max}@<@0@>", "max(x,...) returns the greatest of its arguments");
+    ppl_addSystemFunc(d,"min"           ,2,2,1,1,0,1,(void *)&pplfunc_min         , "min(x,...)", "\\mathrm{min}@<@0@>", "min(x,...) returns the least of its arguments");
     ppl_addSystemFunc(d,"mod"           ,2,2,1,1,1,0,(void *)&pplfunc_mod         , "mod(x,y)", "\\mathrm{mod}@<@1,@2@>", "mod(x,y) returns the remainder of x/y");
+    ppl_addSystemFunc(d,"ordinal"       ,1,1,1,1,1,1,(void *)&pplfunc_ordinal     , "ordinal(n)", "\\mathrm{ordinal}@<@1@>", "ordinal(n) returns the ordinal string, e.g. '1st', '2nd', '3rd' for the positive integer n");
     ppl_addSystemFunc(d,"pow"           ,2,2,1,1,0,0,(void *)&pplfunc_pow         , "pow(x,y)", "\\mathrm{pow}@<@1,@2@>", "pow(x,y) returns x to the power of y");
     ppl_addSystemFunc(d,"prime"         ,1,1,1,1,1,1,(void *)&pplfunc_prime       , "prime(x)", "\\mathrm{prime}@<@1@>", "prime(x) returns one if floor(x) is a prime number; zero otherwise");
     ppl_addSystemFunc(d,"radians"       ,1,1,1,1,1,0,(void *)&pplfunc_radians     , "radians(x)", "\\mathrm{radians}@<@1@>", "radians(x) converts angles measured in degrees into radians");
-    ppl_addSystemFunc(d,"real"          ,1,1,1,1,0,0,(void *)&pplfunc_real        , "Re(z)", "\\mathrm{Re}@<@1@>", "Re(z) returns the magnitude of the real part of z");
+    ppl_addSystemFunc(d,"range"         ,1,3,1,1,1,0,(void *)&pplfunc_range       , "range([f],l,[s])", "\\mathrm{range@<@0@>", "range([f],l,[s]) returns a vector of uniformly-spaced numbers between f and l, with stepsize s");
+    ppl_addSystemFunc(d,"Re"            ,1,1,1,1,0,0,(void *)&pplfunc_real        , "Re(z)", "\\mathrm{Re}@<@1@>", "Re(z) returns the magnitude of the real part of z");
+    ppl_addSystemFunc(d,"rgb"           ,3,3,1,1,1,1,(void *)&pplfunc_rgb         , "rgb(r,g,b)", "\\mathrm{rgb}@<@1,@2,@3@>", "rgb(r,g,b) returns a colour with specified RGB components in the range 0-1");
     ppl_addSystemFunc(d,"root"          ,2,2,1,1,0,1,(void *)&pplfunc_root        , "root(z,n)", "\\mathrm{root}@<@1,@2@>", "root(z,n) returns the nth root of z");
     ppl_addSystemFunc(d,"sec"           ,1,1,1,1,0,0,(void *)&pplfunc_sec         , "sec(z)", "\\mathrm{sec}@<@1@>", "sec(x) returns the secant of x. If x is dimensionless, it is assumed to be measured in radians");
     ppl_addSystemFunc(d,"sech"          ,1,1,1,1,0,0,(void *)&pplfunc_sech        , "sech(z)", "\\mathrm{sech}@<@1@>", "sech(x) returns the hyperbolic secant of x. x may either be a dimensionless number or may have units of angle");
@@ -302,6 +313,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"tanh"          ,1,1,1,1,0,0,(void *)&pplfunc_tanh        , "tanh(z)", "\\mathrm{tanh}@<@1@>", "tanh(x) returns the hyperbolic tangent of x. x may either be a dimensionless number or may have units of angle");
     ppl_addMagicFunction(d, "texify", "texify(...)", "\\mathrm{texify}@<@0@>", "texify(str) converts an algebraic expression into a LaTeX command string representation");
     ppl_addSystemFunc(d,"tophat"        ,2,2,1,1,1,0,(void *)&pplfunc_tophat      , "tophat(x,sigma)", "\\mathrm{tophat}@<@1,@2@>", "tophat(x,sigma) returns one if |x| <= |sigma|, and zero otherwise");
+    ppl_addSystemFunc(d,"typeOf"        ,1,1,0,0,0,0,(void *)&pplfunc_typeOf      , "typeOf(x)", "\\mathrm{typeOf}@<@1@>", "typeof(x) returns the type of the object x");
     ppl_addMagicFunction(d, "unit", "unit(...)", "\\mathrm{unit}@<@0@>", "unit(...) multiplies a number by a physical unit");
     ppl_addSystemFunc(d,"zernike"       ,4,4,1,1,1,0,(void *)&pplfunc_zernike     , "zernike(n,m,r,phi)", "\\mathrm{zernike}@<@1,@2,@3,@4@>", "zernike(n,m,r,phi) evaluates the (n,m)th Zernike polynomial at radius r and position angle phi");
     ppl_addSystemFunc(d,"zernikeR"      ,3,3,1,1,1,1,(void *)&pplfunc_zernikeR    , "zernikeR(n,m,r)", "\\mathrm{zernikeR}@<@1,@2,@3@>", "zernikeR(n,m,r) evaluates the (n,m)th radial Zernike polynomial at radius r");
@@ -358,7 +370,16 @@ void ppl_makeDefaultVars(ppl_context *out)
     // Time module
     ppl_dictAppendCpy(d  , "time", pplObjModule(&m,1,1,1) , sizeof(v));
     d2 = (dict *)m.auxil;
+    ppl_addSystemFunc(d2,"fromCalendar"  ,6,6,1,1,1,1,(void *)&pplfunc_timefromCalendar, "fromCalendar(year,month,day,hour,min,sec)", "\\mathrm{fromCalendar@<@1@>", "fromCalendar(year,month,day,hour,min,sec) creates a date object from the specified calendar date. See also 'set calendar'");
+    ppl_addSystemFunc(d2,"fromJD"        ,1,1,1,1,1,1,(void *)&pplfunc_timefromJD  , "fromJD(t)", "\\mathrm{fromJD}@<@1@>", "fromJD(t) creates a date object from the specified Julian date");
+    ppl_addSystemFunc(d2,"fromMJD"       ,1,1,1,1,1,1,(void *)&pplfunc_timefromMJD , "fromMJD(t)", "\\mathrm{fromMJD}@<@1@>", "fromMJD(t) creates a date object from the specified modified Julian date");
+    ppl_addSystemFunc(d2,"fromUnix"      ,1,1,1,1,1,1,(void *)&pplfunc_timefromUnix, "fromUnix(t)", "\\mathrm{fromUnix}@<@1@>", "fromUnix(t) creates a date object from the specified unix time");
+    ppl_addSystemFunc(d2,"interval"      ,2,2,0,0,0,0,(void *)&pplfunc_timeInterval, "interval(t2,t1)", "\\mathrm{interval}@<@1,@2@>", "interval(t2,t1) returns the numerical time interval between date objects t1 and t2");
+    ppl_addSystemFunc(d2,"intervalStr"   ,2,3,0,0,0,0,(void *)&pplfunc_timeIntervalStr, "interval(t2,t1,<s>)", "\\mathrm{intervalStr}@<@0@>", "intervalStr(t2,t1,<s>) returns a string representation of the time interval between date objects t1 and t2; a format string may optionally be supplied");
     ppl_addSystemFunc(d2,"now"           ,0,0,1,1,1,1,(void *)&pplfunc_timenow     , "now()", "\\mathrm{now}@<@>", "now() returns a date object representing the current time");
+    ppl_addSystemFunc(d2,"sleep"         ,1,1,1,1,1,0,(void *)&pplfunc_sleep       , "sleep(t)", "\\mathrm{sleep}@<@1@>", "sleep(t) sleeps for t seconds, or for time period t if it has dimensions of time");
+    ppl_addSystemFunc(d2,"sleepUntil"    ,1,1,0,0,0,0,(void *)&pplfunc_sleepUntil  , "sleepUntil(d)", "\\mathrm{sleepUntil}@<@1@>", "sleepUntil(d) sleeps until the specified date and time. Its argument should be a date object");
+    ppl_addSystemFunc(d2,"string"        ,1,2,0,0,0,0,(void *)&pplfunc_timestring  , "string(t,<s>)", "\\mathrm{string}@<@0@>", "string(t,<s>) returns a string representation of the date object t; a format string may optionally be supplied");
    }
 
   return;

@@ -26,6 +26,9 @@
 #include <unistd.h>
 #include <math.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include "coreUtils/dict.h"
 #include "coreUtils/getPasswd.h"
 #include "settings/settings.h"
@@ -125,10 +128,57 @@ void pplfunc_osSystem(ppl_context *c, pplObj *in, int nArgs, int *status, int *e
   pplObjNum(&OUTPUT,0,  system((char*)in[0].auxil)  ,0);
  }
 
+// Path operations
+
 void pplfunc_osPathExists(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The os.path.exists() function requires a single string argument."); return; }
   pplObjBool(&OUTPUT,0,!access((char*)in[0].auxil , F_OK));
+ }
+
+void pplfunc_osPathFilesize(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  struct stat buffer;
+  int         st;
+
+  if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The os.path.filesize() function requires a single string argument."); return; }
+  st = stat((char*)in[0].auxil, &buffer);
+  if (st) { pplObjNull(&OUTPUT,0); return; }
+  pplObjNum(&OUTPUT,0,buffer.st_size*8,0);
+  CLEANUP_APPLYUNIT(UNIT_BIT);
+ }
+
+void pplfunc_osPathATime(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  struct stat buffer;
+  int         st;
+
+  if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The os.path.atime() function requires a single string argument."); return; }
+  st = stat((char*)in[0].auxil, &buffer);
+  if (st) { pplObjNull(&OUTPUT,0); return; }
+  pplObjDate(&OUTPUT,0,buffer.st_atime);
+ }
+
+void pplfunc_osPathCTime(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  struct stat buffer;
+  int         st;
+
+  if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The os.path.ctime() function requires a single string argument."); return; }
+  st = stat((char*)in[0].auxil, &buffer);
+  if (st) { pplObjNull(&OUTPUT,0); return; }
+  pplObjDate(&OUTPUT,0,buffer.st_ctime);
+ }
+
+void pplfunc_osPathMTime(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  struct stat buffer;
+  int         st;
+
+  if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The os.path.mtime() function requires a single string argument."); return; }
+  st = stat((char*)in[0].auxil, &buffer);
+  if (st) { pplObjNull(&OUTPUT,0); return; }
+  pplObjDate(&OUTPUT,0,buffer.st_mtime);
  }
 
 void pplfunc_osPathExpandUser(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
