@@ -36,18 +36,17 @@
 
 #define PPL_FUNC_USERDEF    32050
 #define PPL_FUNC_SYSTEM     32051
-#define PPL_FUNC_SPLINE     32052
-#define PPL_FUNC_INTERP2D   32053
-#define PPL_FUNC_BMPDATA    32054
-#define PPL_FUNC_HISTOGRAM  32055
-#define PPL_FUNC_FFT        32056
-#define PPL_FUNC_UNIT       32057
-#define PPL_FUNC_INT        32058
-#define PPL_FUNC_SUBROUTINE 32069
+#define PPL_FUNC_MAGIC      32052
+#define PPL_FUNC_SPLINE     32053
+#define PPL_FUNC_INTERP2D   32054
+#define PPL_FUNC_BMPDATA    32055
+#define PPL_FUNC_HISTOGRAM  32056
+#define PPL_FUNC_FFT        32057
+#define PPL_FUNC_SUBROUTINE 32058
 
 typedef struct FunctionDescriptor
  {
-  int     functionType, iNodeCount;
+  int     functionType, refCount;
   int     minArgs , maxArgs;
   void   *functionPtr;
   char   *argList;

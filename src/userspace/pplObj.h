@@ -25,6 +25,8 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 
+#include "coreUtils/dict.h"
+
 #ifndef _PPLOBJ_H
 #define _PPLOBJ_H 1
 
@@ -47,36 +49,30 @@
 #define PPLOBJ_ZOM  16 /* zombie */
 #define PPLOBJ_USER 17 /* user-defined datatype */
 
-#ifndef _PPLOBJ_C
-extern const char *pplObjTypeNames[];
-extern const int   pplObjTypeOrder[];
-#endif
-
 typedef struct pplObj
  {
   double         real, imag;
-  unsigned char  dimensionless, flagComplex, modified, tempType;
+  unsigned char  dimensionless, flagComplex, tempType, immutable;
   unsigned char  amMalloced, auxilMalloced;
   int            objType, auxilLen;
-  struct pplObj *objCustomType;
+  struct pplObj *objPrototype;
   void          *auxil;
   double         exponent[UNITS_MAX_BASEUNITS];
   struct pplObj *self_lval;
   double        *self_dval;
  } pplObj;
 
-// Structures for describing files and types
-typedef struct pplFile   { int iNodeCount; FILE   *file; int open; } pplFile;
-typedef struct pplType   { int iNodeCount; pplObj *type; int id; } pplType;
-typedef struct pplVector { int iNodeCount; gsl_vector *v; } pplVector;
-typedef struct pplMatrix { int iNodeCount; gsl_matrix *m; } pplMatrix;
+#ifndef _PPLOBJ_C
+extern const char *pplObjTypeNames[];
+extern const int   pplObjTypeOrder[];
+extern pplObj     *pplObjPrototypes;
+#endif
 
-// Functions for acting on pplObjs
-pplObj *pplObjZero    (pplObj *in, unsigned char amMalloced);
-pplObj *pplObjNullStr (pplObj *in, unsigned char amMalloced);
-pplObj *pplObjBool    (pplObj *in, unsigned char amMalloced);
-pplObj *pplNewModule  (int frozen);
-pplObj *pplObjCpy     (pplObj *out, pplObj *in, unsigned char useMalloc);
+// Structures for describing files and types
+typedef struct pplFile   { int refCount; FILE *file;    int open; } pplFile;
+typedef struct pplType   { int refCount; dict *methods; int id;   } pplType;
+typedef struct pplVector { int refCount; gsl_vector *v; } pplVector;
+typedef struct pplMatrix { int refCount; gsl_matrix *m; } pplMatrix;
 
 #endif
 

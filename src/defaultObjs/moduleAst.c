@@ -39,6 +39,7 @@
 #include "userspace/pplObjFunc.h"
 #include "userspace/unitsArithmetic.h"
 
+#include "defaultObjs/moduleAst.h"
 #include "defaultObjs/defaultFuncs.h"
 #include "defaultObjs/defaultFuncsMacros.h"
 

@@ -37,10 +37,11 @@
 
 #include "stringTools/asciidouble.h"
 
-#include "userspace/pplObj.h"
+#include "userspace/pplObj_fns.h"
 #include "userspace/pplObjFunc.h"
 #include "userspace/unitsArithmetic.h"
 
+#include "defaultObjs/modulePhy.h"
 #include "defaultObjs/defaultFuncs.h"
 #include "defaultObjs/defaultFuncsMacros.h"
 
@@ -52,8 +53,7 @@ void pplfunc_planck_Bv   (ppl_context *c, pplObj *in, int nArgs, int *status, in
 
   CHECK_DIMLESS_OR_HAS_UNIT(in[0], "first", "a frequency", UNIT_TIME, -1);
   CHECK_DIMLESS_OR_HAS_UNIT(in[1], "second", "a temperature", UNIT_TEMPERATURE, 1);
-  pplObjZero(&kelvin,0);
-  kelvin.real = 1.0;
+  pplObjNum(&kelvin,0,1,0);
   kelvin.exponent[UNIT_TEMPERATURE] = 1;
   kelvin.tempType = 1;
   ppl_uaDiv(c, &in[1], &kelvin, &kelvin, status, errType, errText); // Convert in[1] into kelvin
@@ -73,8 +73,7 @@ void pplfunc_planck_Bvmax(ppl_context *c, pplObj *in, int nArgs, int *status, in
   pplObj kelvin;
 
   CHECK_DIMLESS_OR_HAS_UNIT(in[0] , "first" , "a temperature", UNIT_TEMPERATURE, 1);
-  pplObjZero(&kelvin,0);
-  kelvin.real = 1.0;
+  pplObjNum(&kelvin,0,1,0);
   kelvin.exponent[UNIT_TEMPERATURE] = 1;
   kelvin.tempType = 1;
   ppl_uaDiv(c, &in[0], &kelvin, &kelvin, status, errType, errText); // Convert in into kelvin

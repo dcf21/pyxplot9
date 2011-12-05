@@ -41,6 +41,7 @@
 #include "settings/withWords_fns.h"
 
 #include "userspace/context.h"
+#include "userspace/pplObj_fns.h"
 #include "userspace/unitsArithmetic.h"
 
 // -------------------------------------------

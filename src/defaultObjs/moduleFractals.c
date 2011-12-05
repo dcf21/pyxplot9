@@ -1,4 +1,4 @@
-// modulePhy.c
+// moduleFractals.c
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -41,6 +41,7 @@
 #include "userspace/pplObjFunc.h"
 #include "userspace/unitsArithmetic.h"
 
+#include "defaultObjs/moduleFractals.h"
 #include "defaultObjs/defaultFuncs.h"
 #include "defaultObjs/defaultFuncsMacros.h"
 

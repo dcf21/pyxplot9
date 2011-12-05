@@ -32,7 +32,7 @@
 #include "stringTools/asciidouble.h"
 #include "settings/settingTypes.h"
 #include "userspace/context.h"
-#include "userspace/pplObj.h"
+#include "userspace/pplObj_fns.h"
 #include "userspace/pplObjUnits.h"
 #include "userspace/unitsDisp.h"
 #include "userspace/unitsArithmetic.h"
@@ -101,7 +101,7 @@ void ppl_uaPow(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
 
   if (b->dimensionless == 0)
    {
-    if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { pplObjNum(o, o->amMalloced, GSL_NAN, 0.0); return; }
     else { sprintf(errText, "Exponent should be dimensionless, but instead has dimensions of <%s>.", ppl_printUnit(c, b, NULL, NULL, 0, 1, 0)); *errType=ERR_UNIT; *status = 1; return; }
    }
 
@@ -120,7 +120,7 @@ void ppl_uaPow(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
    {
     if ((a->dimensionless == 0) && (b->flagComplex))
      {
-      if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
+      if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { pplObjNum(o, o->amMalloced, GSL_NAN, 0.0); return; }
       else { sprintf(errText, "Raising quantities with physical units to complex powers produces quantities with complex physical dimensions, which is forbidden. The operand in question has dimensions of <%s>.", ppl_printUnit(c, a, NULL, NULL, 0, 1, 0)); *errType=ERR_UNIT; *status = 1; return; }
      }
     else
@@ -143,7 +143,7 @@ void ppl_uaPow(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
       if ((!gsl_finite(o->real))||(!gsl_finite(o->imag)))
        {
         if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Exponentiation operator produced an overflow error."); *errType=ERR_OVERFLOW; *status = 1; return; }
-        else { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
+        else { pplObjNum(o, o->amMalloced, GSL_NAN, 0.0); return; }
        }
      }
    }
@@ -156,7 +156,7 @@ void ppl_uaPow(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
     if (ppl_dblEqual(o->exponent[i], 0) == 0) DimLess=0;
     if (fabs(o->exponent[i]) > 20000 )
      {
-      if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
+      if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { pplObjNum(o, o->amMalloced, GSL_NAN, 0.0); return; }
       else { sprintf(errText, "Overflow of physical dimensions of argument."); *errType=ERR_OVERFLOW; *status = 1; return; }
      }
    }
@@ -216,7 +216,7 @@ void ppl_uaMul(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
   if ((!gsl_finite(o->real))||(!gsl_finite(o->imag)))
    {
     if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Multiplication produced an overflow error."); *errType=ERR_OVERFLOW; *status = 1; return; }
-    else { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
+    else { pplObjNum(o, o->amMalloced, GSL_NAN, 0.0); return; }
    }
 
   if ((a->dimensionless != 0) && (b->dimensionless != 0)) { if ((o != a) && (o != b)) ppl_unitsDimCpy(o,a); return; }
@@ -227,7 +227,7 @@ void ppl_uaMul(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
     if (ppl_dblEqual(o->exponent[i], 0) == 0) DimLess=0;
     if (fabs(o->exponent[i]) > 20000 )
      {
-      if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
+      if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { pplObjNum(o, o->amMalloced, GSL_NAN, 0.0); return; }
       else { sprintf(errText, "Overflow of physical dimensions of argument."); *errType=ERR_OVERFLOW; *status = 1; return; }
      }
    }
@@ -301,7 +301,7 @@ void ppl_uaDiv(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
   if ((!gsl_finite(o->real))||(!gsl_finite(o->imag)))
    {
     if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Division produced an overflow error."); *errType=ERR_OVERFLOW; *status = 1; return; }
-    else { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
+    else { pplObjNum(o, o->amMalloced, GSL_NAN, 0.0); return; }
    }
 
   if ((a->dimensionless != 0) && (b->dimensionless != 0)) { if ((o != a) && (o != b)) ppl_unitsDimCpy(o,a); return; }
@@ -312,7 +312,7 @@ void ppl_uaDiv(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
     if (ppl_dblEqual(o->exponent[i], 0) == 0) DimLess=0;
     if (fabs(o->exponent[i]) > 20000 )
      {
-      if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
+      if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { pplObjNum(o, o->amMalloced, GSL_NAN, 0.0); return; }
       else { sprintf(errText, "Overflow of physical dimensions of argument."); *errType=ERR_UNIT; *status = 1; return; }
      }
    }
@@ -351,7 +351,7 @@ void ppl_uaAdd(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
   if ((!gsl_finite(o->real))||(!gsl_finite(o->imag)))
    {
     if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Addition produced an overflow error."); *errType=ERR_OVERFLOW; *status = 1; return; }
-    else { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
+    else { pplObjNum(o, o->amMalloced, GSL_NAN, 0.0); return; }
    }
 
   return;
@@ -387,7 +387,7 @@ void ppl_uaSub(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
   if ((!gsl_finite(o->real))||(!gsl_finite(o->imag)))
    {
     if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Subtraction produced an overflow error."); *errType=ERR_OVERFLOW; *status = 1; return; }
-    else { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
+    else { pplObjNum(o, o->amMalloced, GSL_NAN, 0.0); return; }
    }
 
   return;
@@ -422,7 +422,7 @@ void ppl_uaMod(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
   if ((!gsl_finite(o->real))||(!gsl_finite(o->imag)))
    {
     if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(errText, "Modulo operator produced an overflow error."); *errType=ERR_OVERFLOW; *status = 1; return; }
-    else { pplObjZero(o,o->amMalloced); o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
+    else { pplObjNum(o, o->amMalloced, GSL_NAN, 0.0); return; }
    }
 
   return;

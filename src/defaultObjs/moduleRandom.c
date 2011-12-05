@@ -46,6 +46,7 @@
 #include "userspace/pplObjFunc.h"
 #include "userspace/unitsArithmetic.h"
 
+#include "defaultObjs/moduleRandom.h"
 #include "defaultObjs/defaultFuncs.h"
 #include "defaultObjs/defaultFuncsMacros.h"
 
@@ -66,7 +67,7 @@ void pplfunc_frandom   (ppl_context *c, pplObj *in, int nArgs, int *status, int 
 
 void pplfunc_frandombin(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  char *FunctionDescription = "random_binomial(p,n)";
+  char *FunctionDescription = "binomial(p,n)";
   if (rndgen==NULL) { rndgen = gsl_rng_alloc(gsl_rng_default); gsl_rng_set(rndgen, 0); }
   CHECK_NEEDINT(in[1], "n", "function's second argument must be an integer in the range");
   OUTPUT.real = gsl_ran_binomial(rndgen, in[0].real, (unsigned int)in[1].real);
@@ -75,7 +76,7 @@ void pplfunc_frandombin(ppl_context *c, pplObj *in, int nArgs, int *status, int 
 
 void pplfunc_frandomcs (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  char *FunctionDescription = "random_chisq(nu)";
+  char *FunctionDescription = "chisq(nu)";
   if (rndgen==NULL) { rndgen = gsl_rng_alloc(gsl_rng_default); gsl_rng_set(rndgen, 0); }
   OUTPUT.real = gsl_ran_chisq(rndgen, in[0].real);
   CHECK_OUTPUT_OKAY;
@@ -83,7 +84,7 @@ void pplfunc_frandomcs (ppl_context *c, pplObj *in, int nArgs, int *status, int 
 
 void pplfunc_frandomg  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  char *FunctionDescription = "random_gaussian(sigma)";
+  char *FunctionDescription = "gaussian(sigma)";
   if (rndgen==NULL) { rndgen = gsl_rng_alloc(gsl_rng_default); gsl_rng_set(rndgen, 0); }
   OUTPUT.real = gsl_ran_gaussian(rndgen, in[0].real);
   CHECK_OUTPUT_OKAY;
@@ -91,7 +92,7 @@ void pplfunc_frandomg  (ppl_context *c, pplObj *in, int nArgs, int *status, int 
 
 void pplfunc_frandomln (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  char *FunctionDescription = "random_lognormal(zeta,sigma)";
+  char *FunctionDescription = "lognormal(zeta,sigma)";
   if (rndgen==NULL) { rndgen = gsl_rng_alloc(gsl_rng_default); gsl_rng_set(rndgen, 0); }
   in++;
   CHECK_1INPUT_DIMLESS; // THIS IS CORRECT. Only check in[1]
@@ -103,7 +104,7 @@ void pplfunc_frandomln (ppl_context *c, pplObj *in, int nArgs, int *status, int 
 
 void pplfunc_frandomp  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  char *FunctionDescription = "random_poisson(n)";
+  char *FunctionDescription = "poisson(n)";
   if (rndgen==NULL) { rndgen = gsl_rng_alloc(gsl_rng_default); gsl_rng_set(rndgen, 0); }
   OUTPUT.real = gsl_ran_poisson(rndgen, in[0].real);
   CHECK_OUTPUT_OKAY;
@@ -111,7 +112,7 @@ void pplfunc_frandomp  (ppl_context *c, pplObj *in, int nArgs, int *status, int 
 
 void pplfunc_frandomt  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  char *FunctionDescription = "random_tdist(nu)";
+  char *FunctionDescription = "tdist(nu)";
   if (rndgen==NULL) { rndgen = gsl_rng_alloc(gsl_rng_default); gsl_rng_set(rndgen, 0); }
   OUTPUT.real = gsl_ran_tdist(rndgen, in[0].real);
   CHECK_OUTPUT_OKAY;

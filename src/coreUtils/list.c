@@ -34,10 +34,10 @@ list *ppl_listInit(int useMalloc)
   if (useMalloc) out = (list *)malloc(sizeof(list));
   else           out = (list *)ppl_memAlloc(sizeof(list));
   if (out==NULL) return NULL;
-  out->first  = NULL;
-  out->last   = NULL;
-  out->length = 0;
-  out->iNodeCount= 1;
+  out->first     = NULL;
+  out->last      = NULL;
+  out->length    = 0;
+  out->refCount  = 1;
   out->useMalloc = useMalloc;
   out->memory_context = ppl_memAlloc_GetMemContext();
   return out;

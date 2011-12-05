@@ -34,7 +34,7 @@
 
 #include "userspace/context.h"
 #include "userspace/garbageCollector.h"
-#include "userspace/pplObj.h"
+#include "userspace/pplObj_fns.h"
 #include "userspace/pplObjUnits.h"
 
 #include "defaultObjs/defaultUnits.h"
@@ -65,9 +65,9 @@ ppl_context *ppl_contextInit()
   out->errcontext.error_input_filename[0] = '\0';
   strcpy(out->errcontext.error_source,"main     ");
 
+  pplObjInit(out);
   ppl_makeDefaultUnits(out);
   ppl_makeDefaultVars(out);
-
   return out;
  }
 

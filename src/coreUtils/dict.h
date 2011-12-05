@@ -19,7 +19,7 @@
 
 // ----------------------------------------------------------------------------
 
-// Data structures for linked lists
+// Data structures for dictionaries
 
 #ifndef _LT_DICT_H
 #define _LT_DICT_H 1
@@ -40,7 +40,8 @@ typedef struct dictS
  {
   struct dictItemS  *first;
   struct dictItemS  *last;
-  int                length, iNodeCount;
+  int                length, refCount;
+  unsigned char      immutable;
   int                HashSize;
   struct dictItemS **HashTable;
   int                useMalloc;

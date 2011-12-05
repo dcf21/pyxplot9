@@ -20,6 +20,7 @@
 // ----------------------------------------------------------------------------
 
 #include <stdlib.h>
+#include <math.h>
 #include <string.h>
 
 #include "coreUtils/errorReport.h"
@@ -57,33 +58,34 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
      else            strncpy(out, "true" , outlen);
      break;
     case PPLOBJ_DATE:
-     strncpy(out, "<Date>", outlen);
+     strncpy(out, "<date>", outlen);
      break;
     case PPLOBJ_COL:
      {
       int i=0,n;
-      if      (o->auxilLen == 0) { strncpy(out+i, "cmyk(", outlen-i); n=4; }
-      else if (o->auxilLen == 1) { strncpy(out+i, "rgb(" , outlen-i); n=3; }
-      else if (o->auxilLen == 2) { strncpy(out+i, "hsb(" , outlen-i); n=3; }
-      else                       { ppl_warning(&c->errcontext, ERR_INTERNAL, "Unknown colour space in pplObjPrint."); strncpy(out+i, "ERR(", outlen-i); n=0; }
+      int ct=floor(o->exponent[0]+0.01);
+      if      (ct == SW_COLSPACE_CMYK) { strncpy(out+i, "cmyk(", outlen-i); n=4; }
+      else if (ct == SW_COLSPACE_RGB)  { strncpy(out+i, "rgb(" , outlen-i); n=3; }
+      else if (ct == SW_COLSPACE_HSB)  { strncpy(out+i, "hsb(" , outlen-i); n=3; }
+      else                             { ppl_warning(&c->errcontext, ERR_INTERNAL, "Unknown colour space in pplObjPrint."); strncpy(out+i, "ERR(", outlen-i); n=0; }
       i+=strlen(out+i);
-      if (n>=1) {               strcpy(out+i,ppl_numericDisplay(o->exponent[0], c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L))); i+=strlen(out+i); }
-      if (n>=2) { out[i++]=','; strcpy(out+i,ppl_numericDisplay(o->exponent[1], c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L))); i+=strlen(out+i); }
-      if (n>=3) { out[i++]=','; strcpy(out+i,ppl_numericDisplay(o->exponent[2], c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L))); i+=strlen(out+i); }
-      if (n>=4) { out[i++]=','; strcpy(out+i,ppl_numericDisplay(o->exponent[3], c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L))); i+=strlen(out+i); }
+      if (n>=1) {               strcpy(out+i,ppl_numericDisplay(o->exponent[ 8], c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L))); i+=strlen(out+i); }
+      if (n>=2) { out[i++]=','; strcpy(out+i,ppl_numericDisplay(o->exponent[ 9], c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L))); i+=strlen(out+i); }
+      if (n>=3) { out[i++]=','; strcpy(out+i,ppl_numericDisplay(o->exponent[10], c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L))); i+=strlen(out+i); }
+      if (n>=4) { out[i++]=','; strcpy(out+i,ppl_numericDisplay(o->exponent[11], c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L))); i+=strlen(out+i); }
       strncpy(out+i, ")", outlen-i);
       break;
      }
     case PPLOBJ_DICT:
      {
-      int           i=0, first=1;
+      int           i=0, first=1, prevMod=0;
       dictIterator *iter = ppl_dictIterateInit((dict *)o->auxil);
       char         *key;
       pplObj       *item;
       out[i++]='{';
       while ((item = (pplObj *)ppl_dictIterate(&iter, &key))!=NULL)
        {
-        if (!first) { out[i++]=','; out[i++]=' '; }
+        if (!first) { out[i++]=','; if (prevMod) { out[i++]='\n'; } out[i++]=' '; }
         ppl_strEscapify(key, out+i);
         i+=strlen(out+i);
         sprintf(out+i,":");
@@ -92,6 +94,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
         i+=strlen(out+i);
         if (i>outlen-100) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
         first=0;
+        prevMod = item->objType = PPLOBJ_MOD;
        }
       strcpy(out+i,"}");
       break;
@@ -133,17 +136,18 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
      }
     case PPLOBJ_LIST:
      {
-      int           i=0, first=1;
+      int           i=0, first=1, prevMod=0;
       listIterator *iter = ppl_listIterateInit((list *)o->auxil);
       pplObj       *item;
       out[i++]='[';
       while ((item = (pplObj *)ppl_listIterate(&iter))!=NULL)
        {
-        if (!first) { out[i++]=','; out[i++]=' '; }
+        if (!first) { out[i++]=','; if (prevMod) { out[i++]='\n'; } out[i++]=' '; }
         pplObjPrint(c, item, NULL, out+i, outlen-i, 1, 0);
         i+=strlen(out+i);
         if (i>outlen-100) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
         first=0;
+        prevMod = item->objType = PPLOBJ_MOD;
        }
       strcpy(out+i,"]");
       break;

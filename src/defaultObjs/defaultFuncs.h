@@ -27,6 +27,7 @@
 #include "userspace/context.h"
 #include "userspace/pplObj.h"
 
+void ppl_addMagicFunction(dict *n, char *name, char *shortdesc, char *latex, char *desc);
 void ppl_addSystemFunc   (dict *n, char *name, int minArgs, int maxArgs, int numOnly, int notNan, int realOnly, int dimlessOnly, void *fn, char *shortdesc, char *latex, char *desc);
 void pplfunc_abs         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_acos        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);

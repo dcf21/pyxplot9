@@ -37,7 +37,7 @@
 #include "stringTools/asciidouble.h"
 #include "userspace/context.h"
 #include "userspace/garbageCollector.h"
-#include "userspace/pplObj.h"
+#include "userspace/pplObj_fns.h"
 #include "userspace/pplObjFunc.h"
 #include "userspace/pplObjPrint.h"
 #include "userspace/unitsArithmetic.h"
@@ -270,10 +270,7 @@ static void _stringSubs(ppl_context *context, int Nsubs, int *status, int *errTy
   out[outP]='\0';
 
   // Return output string
-  pplObjNullStr(&context->stack[context->stackPtr] , 0);
-  context->stack[context->stackPtr].auxilMalloced = 1;
-  context->stack[context->stackPtr].auxil = out;
-  context->stack[context->stackPtr].auxilLen = outP+1;
+  pplObjStr(&context->stack[context->stackPtr] , 0 , 1 , out);
   context->stackPtr++;
   return;
 
@@ -305,19 +302,17 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
         break;
       case 1: // Numeric literal
         *lastOpAssign=0;
-        pplObjZero(&context->stack[context->stackPtr] , 0);
-        context->stack[context->stackPtr].real = *(double *)(in+j);
+        pplObjNum(&context->stack[context->stackPtr] , 0 , *(double *)(in+j) , 0);
         context->stackPtr++;
         break;
       case 2: // String literal
        {
         int l = strlen((char *)(in+j));
+        char *out;
         *lastOpAssign=0;
-        pplObjNullStr(&context->stack[context->stackPtr] , 0);
-        if ((context->stack[context->stackPtr].auxil = malloc(l+1))==NULL) { *errPos=charpos; *errType=ERR_MEMORY; strcpy(errText,"Out of memory."); goto cleanup_on_error; }
-        context->stack[context->stackPtr].auxilMalloced = 1;
-        strcpy((char *)(context->stack[context->stackPtr].auxil) , (char *)(in+j));
-        context->stack[context->stackPtr].auxilLen = l+1;
+        if ((out = (char *)malloc(l+1))==NULL) { *errPos=charpos; *errType=ERR_MEMORY; strcpy(errText,"Out of memory."); goto cleanup_on_error; }
+        strcpy(out , (char *)(in+j));
+        pplObjStr(&context->stack[context->stackPtr] , 0 , 1 , out);
         context->stackPtr++;
         break;
        }
@@ -332,10 +327,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
           if (obj==NULL) continue;
           if (obj->objType==PPLOBJ_GLOB) { if (i<=2) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Variable declared global in global namespace."); goto cleanup_on_error; } i=2; continue; }
           if (obj->objType==PPLOBJ_ZOM ) continue;
-          pplObjCpy(&context->stack[context->stackPtr] , obj , 1);
-          context->stack[context->stackPtr].amMalloced = 0;
-          context->stack[context->stackPtr].self_lval = obj;
-          context->stack[context->stackPtr].self_dval = NULL;
+          pplObjCpy(&context->stack[context->stackPtr] , obj , 0 , 1);
           context->stackPtr++;
           got=1;
           break;
@@ -353,17 +345,14 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
           pplObj *obj = (pplObj *)ppl_dictLookup(context->namespaces[i] , key);
           if (obj==NULL)
            {
-            pplObjZero(&context->stack[context->stackPtr] , 0);
+            pplObjNum(&context->stack[context->stackPtr] , 0 , 0 , 0);
             context->stack[context->stackPtr].objType=PPLOBJ_ZOM; // Create a temporary zombie for now
             ppl_dictAppendCpy(context->namespaces[i] , key , &context->stack[context->stackPtr] , sizeof(pplObj));
             obj = (pplObj *)ppl_dictLookup(context->namespaces[i] , key);
             if (obj==NULL) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Out of memory."); goto cleanup_on_error; }
            }
           if (obj->objType==PPLOBJ_GLOB) { if (i<=2) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Variable declared global in global namespace."); goto cleanup_on_error; } i=2; continue; }
-          pplObjCpy(&context->stack[context->stackPtr] , obj , 1);
-          context->stack[context->stackPtr].amMalloced = 0;
-          context->stack[context->stackPtr].self_lval = obj;
-          context->stack[context->stackPtr].self_dval = NULL;
+          pplObjCpy(&context->stack[context->stackPtr] , obj , 0 , 1);
           context->stackPtr++;
           break;
          }
@@ -380,10 +369,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
           pplObj *obj = (pplObj *)ppl_dictLookup(d , key);
           if ((obj==NULL) || (obj->objType==PPLOBJ_ZOM) || (obj->objType==PPLOBJ_GLOB)) { *errPos=charpos; *errType=ERR_NAMESPACE; sprintf(errText,"No such method '%s'.",key); goto cleanup_on_error; }
           ppl_garbageObject(&context->stack[context->stackPtr-1]);
-          pplObjCpy(&context->stack[context->stackPtr-1] , obj , 1);
-          context->stack[context->stackPtr-1].amMalloced = 0;
-          context->stack[context->stackPtr-1].self_lval = obj;
-          context->stack[context->stackPtr-1].self_dval = NULL;
+          pplObjCpy(&context->stack[context->stackPtr-1] , obj , 0 , 1);
           break;
          }
         else
@@ -403,17 +389,14 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
           pplObj *obj = (pplObj *)ppl_dictLookup(d , key);
           if (obj==NULL)
            {
-            pplObjZero(&context->stack[context->stackPtr] , 0);
+            pplObjNum(&context->stack[context->stackPtr] , 0 , 0 , 0);
             context->stack[context->stackPtr].objType=PPLOBJ_ZOM; // Create a temporary zombie for now
             ppl_dictAppendCpy(d , key , &context->stack[context->stackPtr] , sizeof(pplObj));
             obj = (pplObj *)ppl_dictLookup(d , key);
             if (obj==NULL) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Out of memory."); goto cleanup_on_error; }
            }
           ppl_garbageObject(&context->stack[context->stackPtr-1]);
-          pplObjCpy(&context->stack[context->stackPtr-1] , obj , 1);
-          context->stack[context->stackPtr-1].amMalloced = 0;
-          context->stack[context->stackPtr-1].self_lval = obj;
-          context->stack[context->stackPtr-1].self_dval = NULL;
+          pplObjCpy(&context->stack[context->stackPtr-1] , obj , 0 , 1);
           break;
          }
         else
@@ -431,7 +414,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
         *lastOpAssign=0;
         if (d==NULL) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Out of memory."); goto cleanup_on_error; }
         if (context->stackPtr<2*len) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Attempt to make dictionary with too few items on the stack."); goto cleanup_on_error; }
-        pplObjZero(&context->stack[tmp] , 0);
+        pplObjNum(&context->stack[tmp] , 0 , 0 , 0);
         context->stack[tmp].objType       = PPLOBJ_DICT;
         context->stack[tmp].auxil         = (void *)d;
         context->stack[tmp].auxilMalloced = 1;
@@ -456,7 +439,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
         *lastOpAssign=0;
         if (l==NULL) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Out of memory."); goto cleanup_on_error; }
         if (context->stackPtr<len) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Attempt to make list with too few items on the stack."); goto cleanup_on_error; }
-        pplObjZero(&context->stack[tmp] , 0);
+        pplObjNum(&context->stack[tmp] , 0 , 0 , 0);
         context->stack[tmp].objType       = PPLOBJ_LIST;
         context->stack[tmp].auxil         = (void *)l;
         context->stack[tmp].auxilMalloced = 1;
@@ -482,7 +465,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
        {
         int t = (int)*(unsigned char *)(in+j);
         *lastOpAssign=0;
-        pplObjZero(&context->stack[context->stackPtr], 0);
+        pplObjNum(&context->stack[context->stackPtr], 0 , 0 , 0);
         switch (t)
          {
           case 0x25: // -
@@ -665,8 +648,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
             context->stack[context->stackPtr-2].self_lval->amMalloced = 0;
             ppl_garbageObject(&context->stack[context->stackPtr-2]);
             ppl_garbageObject( context->stack[context->stackPtr-2].self_lval);
-            pplObjCpy(context->stack[context->stackPtr-2].self_lval , &context->stack[context->stackPtr-1] , 1);
-            context->stack[context->stackPtr-2].self_lval->amMalloced = om;
+            pplObjCpy(context->stack[context->stackPtr-2].self_lval , &context->stack[context->stackPtr-1] , om , 1);
            }
           else // Assign vector or matrix element
            {
@@ -691,8 +673,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
           context->stack[context->stackPtr-2].self_lval->auxilLen = l;
           ppl_garbageObject(&context->stack[context->stackPtr-1]);
           ppl_garbageObject(&context->stack[context->stackPtr-2]);
-          pplObjCpy(&context->stack[context->stackPtr-2] , context->stack[context->stackPtr-2].self_lval , 1);
-          context->stack[context->stackPtr-2].amMalloced = 0;
+          pplObjCpy(&context->stack[context->stackPtr-2] , context->stack[context->stackPtr-2].self_lval , 0 , 1);
           context->stackPtr--;
          }
         else
@@ -700,7 +681,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
           int status=0;
           if (o->objType != PPLOBJ_NUM) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The fused operator-assignment operators can only be applied to numeric variables."); goto cleanup_on_error; }
           CAST_TO_NUM(-1);
-          pplObjZero(&context->stack[context->stackPtr], 0);
+          pplObjNum(&context->stack[context->stackPtr], 0 , 0 , 0);
           switch (t)
            {
             case 0x41: // +=
@@ -751,8 +732,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
             context->stack[context->stackPtr-2].self_lval->amMalloced = 0;
             ppl_garbageObject(&context->stack[context->stackPtr-2]);
             ppl_garbageObject( context->stack[context->stackPtr-2].self_lval);
-            pplObjCpy(context->stack[context->stackPtr-2].self_lval , &context->stack[context->stackPtr] , 1);
-            context->stack[context->stackPtr-2].self_lval->amMalloced = om;
+            pplObjCpy(context->stack[context->stackPtr-2].self_lval , &context->stack[context->stackPtr] , om , 1);
            }
           else // Assign vector or matrix element
            {

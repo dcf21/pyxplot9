@@ -47,7 +47,7 @@
 #include "settings/settings.h"
 #include "stringTools/asciidouble.h"
 
-#include "userspace/pplObj.h"
+#include "userspace/pplObj_fns.h"
 #include "userspace/pplObjFunc.h"
 #include "userspace/unitsArithmetic.h"
 
@@ -56,13 +56,38 @@
 #include "defaultObjs/defaultFuncsMacros.h"
 #include "defaultObjs/zetaRiemann.h"
 
+void ppl_addMagicFunction(dict *n, char *name, char *shortdesc, char *latex, char *desc)
+ {
+  pplObj   v;
+  pplFunc *f = malloc(sizeof(pplFunc));
+  if (f==NULL) return;
+  f->functionType = PPL_FUNC_MAGIC;
+  f->refCount   = 1;
+  f->minArgs      = 0;
+  f->maxArgs      = 0;;
+  f->functionPtr  = NULL;
+  f->argList      = NULL;
+  f->minActive    = NULL;
+  f->maxActive    = NULL;
+  f->numOnly      = 0;
+  f->notNan       = 0;
+  f->realOnly     = 0;
+  f->dimlessOnly  = 0;
+  f->next         = NULL;
+  f->LaTeX        = latex;
+  f->descriptionShort = shortdesc;
+  f->description  = desc;
+  if (pplObjFunc(&v,1,1,f)!=NULL) ppl_dictAppendCpy(n , name , (void *)&v , sizeof(v));
+  return;
+ }
+
 void ppl_addSystemFunc(dict *n, char *name, int minArgs, int maxArgs, int numOnly, int notNan, int realOnly, int dimlessOnly, void *fn, char *shortdesc, char *latex, char *desc)
  {
   pplObj   v;
   pplFunc *f = malloc(sizeof(pplFunc));
   if (f==NULL) return;
   f->functionType = PPL_FUNC_SYSTEM;
-  f->iNodeCount   = 1;
+  f->refCount     = 1;
   f->minArgs      = minArgs;
   f->maxArgs      = maxArgs;
   f->functionPtr  = fn;
@@ -77,11 +102,7 @@ void ppl_addSystemFunc(dict *n, char *name, int minArgs, int maxArgs, int numOnl
   f->LaTeX        = latex;
   f->descriptionShort = shortdesc;
   f->description  = desc;
-  pplObjZero(&v,1);
-  v.objType       = PPLOBJ_FUNC;
-  v.auxilLen      = sizeof(f);
-  v.auxil         = (void *)f;
-  ppl_dictAppendCpy(n , name , (void *)&v , sizeof(v));
+  if (pplObjFunc(&v,1,1,f)!=NULL) ppl_dictAppendCpy(n , name , (void *)&v , sizeof(v));
   return;
  }
 
@@ -757,10 +778,9 @@ void pplfunc_root        (ppl_context *c, pplObj *in, int nArgs, int *status, in
     if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; sprintf(errText, "The %s %s in the range 2 <= n < %d.",FunctionDescription,"function's second argument must be an integer in the range",INT_MAX); return; }
     else { NULL_OUTPUT; }
    }
-  pplObjZero(&x2,0);
   x1=in[0];
   if (x1.real < 0.0) { negated=1; x1.real=-x1.real; if (x1.imag!=0.0) x1.imag=-x1.imag; }
-  x2.real = 1.0 / floor(in[1].real);
+  pplObjNum(&x2, 0, 1.0 / floor(in[1].real), 0);
   ppl_uaPow(c, &x1, &x2, &OUTPUT, status, errType, errText);
   if (*status) return;
   if (negated)

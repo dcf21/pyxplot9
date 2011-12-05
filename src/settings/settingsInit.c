@@ -45,7 +45,7 @@
 #include "settings/settingTypes.h"
 #include "settings/withWords_fns.h"
 
-#include "userspace/pplObj.h"
+#include "userspace/pplObj_fns.h"
 
 void pplset_makedefault(ppl_context *context)
  {
@@ -69,9 +69,9 @@ void pplset_makedefault(ppl_context *context)
 
   // Default Terminal Settings, used when these values are not changed by any configuration files
   s->term_default.backup              = SW_ONOFF_OFF;
-  pplObjZero(&(s->term_default.BinOrigin),0);
+  pplObjNum(&(s->term_default.BinOrigin),0,0.0,0.0);
   s->term_default.BinOriginAuto       = 1;
-  pplObjZero(&(s->term_default.BinWidth),0);
+  pplObjNum(&(s->term_default.BinWidth),0,0.0,0.0);
   s->term_default.BinWidth.real       = 1.0;
   s->term_default.BinWidthAuto        = 1;
   s->term_default.CalendarIn          = SW_CALENDAR_BRITISH;
@@ -86,11 +86,11 @@ void pplset_makedefault(ppl_context *context)
   s->term_default.multiplot           = SW_ONOFF_OFF;
   s->term_default.NumDisplay          = SW_DISPLAY_N;
   strcpy(s->term_default.output, "");
-  pplObjZero(&(s->term_default.PaperHeight),0);
+  pplObjNum(&(s->term_default.PaperHeight),0,0.0,0.0);
   s->term_default.PaperHeight.real    = 297.30178 / 1000;
   s->term_default.PaperHeight.dimensionless = 0; s->term_default.PaperHeight.exponent[UNIT_LENGTH] = 1;
   strcpy(s->term_default.PaperName, "a4");
-  pplObjZero(&(s->term_default.PaperWidth),0);
+  pplObjNum(&(s->term_default.PaperWidth),0,0.0,0.0);
   s->term_default.PaperWidth.real     = 210.2241 / 1000;
   s->term_default.PaperWidth.dimensionless = 0; s->term_default.PaperWidth.exponent[UNIT_LENGTH] = 1;
   s->term_default.RandomSeed          = 0;
@@ -119,9 +119,9 @@ void pplset_makedefault(ppl_context *context)
   s->graph_default.AxesColour4           = 0.0;
   s->graph_default.AxisUnitStyle         = SW_AXISUNITSTY_RATIO;
   s->graph_default.bar                   = 1.0;
-  pplObjZero(&(s->graph_default.BoxFrom),0);
+  pplObjNum(&(s->graph_default.BoxFrom),0,0.0,0.0);
   s->graph_default.BoxFromAuto           = 1;
-  pplObjZero(&(s->graph_default.BoxWidth),0);
+  pplObjNum(&(s->graph_default.BoxWidth),0,0.0,0.0);
   s->graph_default.BoxWidthAuto          = 1;
   strcpy(s->graph_default.c1format, "");
   s->graph_default.c1formatset           = 0;
@@ -133,9 +133,9 @@ void pplset_makedefault(ppl_context *context)
   for (i=0; i<4; i++)
    {
     s->graph_default.Clog[i]             = SW_BOOL_FALSE;
-    pplObjZero(&s->graph_default.Cmax[i],0);
+    pplObjNum(&s->graph_default.Cmax[i],0,0.0,0.0);
     s->graph_default.Cmaxauto[i]         = SW_BOOL_TRUE;
-    pplObjZero(&s->graph_default.Cmin[i],0);
+    pplObjNum(&s->graph_default.Cmin[i],0,0.0,0.0);
     s->graph_default.Cminauto[i]         = SW_BOOL_TRUE;
     s->graph_default.Crenorm[i]          = SW_BOOL_TRUE;
     s->graph_default.Creverse[i]         = SW_BOOL_FALSE;
@@ -152,7 +152,7 @@ void pplset_makedefault(ppl_context *context)
   s->graph_default.ContoursListLen       = -1;
   for (i=0; i<MAX_CONTOURS; i++) s->graph_default.ContoursList[i] = 0.0;
   s->graph_default.ContoursN             = 12;
-  pplObjZero(&s->graph_default.ContoursUnit,0);
+  pplObjNum(&s->graph_default.ContoursUnit,0,0.0,0.0);
   ppl_withWordsZero(context,&(s->graph_default.DataStyle),1);
   s->graph_default.DataStyle.linespoints = SW_STYLE_POINTS;
   s->graph_default.FontSize              = 1.0;
@@ -178,17 +178,17 @@ void pplset_makedefault(ppl_context *context)
   s->graph_default.key           = SW_ONOFF_ON;
   s->graph_default.KeyColumns    = 0;
   s->graph_default.KeyPos        = SW_KEYPOS_TR;
-  pplObjZero(&(s->graph_default.KeyXOff),0);
+  pplObjNum(&(s->graph_default.KeyXOff),0,0.0,0.0);
   s->graph_default.KeyXOff.real  = 0.0;
   s->graph_default.KeyXOff.dimensionless = 0; s->graph_default.KeyXOff.exponent[UNIT_LENGTH] = 1;
-  pplObjZero(&(s->graph_default.KeyYOff),0);
+  pplObjNum(&(s->graph_default.KeyYOff),0,0.0,0.0);
   s->graph_default.KeyYOff.real  = 0.0;
   s->graph_default.KeyYOff.dimensionless = 0; s->graph_default.KeyYOff.exponent[UNIT_LENGTH] = 1;
   s->graph_default.LineWidth     = 1.0;
-  pplObjZero(&(s->graph_default.OriginX),0);
+  pplObjNum(&(s->graph_default.OriginX),0,0.0,0.0);
   s->graph_default.OriginX.real  = 0.0;
   s->graph_default.OriginX.dimensionless = 0; s->graph_default.OriginX.exponent[UNIT_LENGTH] = 1;
-  pplObjZero(&(s->graph_default.OriginY),0);
+  pplObjNum(&(s->graph_default.OriginY),0,0.0,0.0);
   s->graph_default.OriginY.real  = 0.0;
   s->graph_default.OriginY.dimensionless = 0; s->graph_default.OriginY.exponent[UNIT_LENGTH] = 1;
   s->graph_default.PointSize     = 1.0;
@@ -208,35 +208,35 @@ void pplset_makedefault(ppl_context *context)
   s->graph_default.TextHAlign    = SW_HALIGN_LEFT;
   s->graph_default.TextVAlign = SW_VALIGN_BOT;
   strcpy(s->graph_default.title, "");
-  pplObjZero(&(s->graph_default.TitleXOff),0);
+  pplObjNum(&(s->graph_default.TitleXOff),0,0.0,0.0);
   s->graph_default.TitleXOff.real= 0.0;
   s->graph_default.TitleXOff.dimensionless = 0; s->graph_default.TitleXOff.exponent[UNIT_LENGTH] = 1;
-  pplObjZero(&(s->graph_default.TitleYOff),0);
+  pplObjNum(&(s->graph_default.TitleYOff),0,0.0,0.0);
   s->graph_default.TitleYOff.real= 0.0;
   s->graph_default.TitleYOff.dimensionless = 0; s->graph_default.TitleYOff.exponent[UNIT_LENGTH] = 1;
   s->graph_default.Tlog          = SW_BOOL_FALSE;
-  pplObjZero(&(s->graph_default.Tmin),0);
-  pplObjZero(&(s->graph_default.Tmax),0);
+  pplObjNum(&(s->graph_default.Tmin),0,0.0,0.0);
+  pplObjNum(&(s->graph_default.Tmax),0,0.0,0.0);
   s->graph_default.Tmin.real     = 0.0;
   s->graph_default.Tmax.real     = 1.0;
   s->graph_default.USE_T_or_uv   = 1;
   s->graph_default.Ulog          = SW_BOOL_FALSE;
-  pplObjZero(&(s->graph_default.Umin),0);
-  pplObjZero(&(s->graph_default.Umax),0);
+  pplObjNum(&(s->graph_default.Umin),0,0.0,0.0);
+  pplObjNum(&(s->graph_default.Umax),0,0.0,0.0);
   s->graph_default.Umin.real     = 0.0;
   s->graph_default.Umax.real     = 1.0;
   s->graph_default.Vlog          = SW_BOOL_FALSE;
-  pplObjZero(&(s->graph_default.Vmin),0);
-  pplObjZero(&(s->graph_default.Vmax),0);
+  pplObjNum(&(s->graph_default.Vmin),0,0.0,0.0);
+  pplObjNum(&(s->graph_default.Vmax),0,0.0,0.0);
   s->graph_default.Vmin.real     = 0.0;
   s->graph_default.Vmax.real     = 1.0;
-  pplObjZero(&(s->graph_default.width),0);
+  pplObjNum(&(s->graph_default.width),0,0.0,0.0);
   s->graph_default.width.real    = 0.08; // 8cm
   s->graph_default.width.dimensionless = 0; s->graph_default.width.exponent[UNIT_LENGTH] = 1;
-  pplObjZero(&(s->graph_default.XYview),0);
+  pplObjNum(&(s->graph_default.XYview),0,0.0,0.0);
   s->graph_default.XYview.real   = 60.0 * M_PI / 180; // 60 degrees
   s->graph_default.XYview.dimensionless = 0; s->graph_default.XYview.exponent[UNIT_ANGLE] = 1;
-  pplObjZero(&(s->graph_default.YZview),0);
+  pplObjNum(&(s->graph_default.YZview),0,0.0,0.0);
   s->graph_default.YZview.real   = 30.0 * M_PI / 180; // 30 degrees
   s->graph_default.YZview.dimensionless = 0; s->graph_default.YZview.exponent[UNIT_ANGLE] = 1;
 
@@ -282,31 +282,26 @@ void pplset_makedefault(ppl_context *context)
   s->axis_default.TickList    = NULL;
   s->axis_default.MTickStrs   = NULL;
   s->axis_default.TickStrs    = NULL;
-  pplObjZero(&(s->axis_default.unit),0);
+  pplObjNum(&(s->axis_default.unit),0,0.0,0.0);
 
   // Set up list of input filters
   s->filters = ppl_dictInit(HASHSIZE_SMALL,0);
-  pplObjNullStr(&tempval,0);
   #ifdef HAVE_FITSIO
-  tempval.auxil    = (void *)FITSHELPER;
-  tempval.auxilLen = strlen(FITSHELPER);
-  ppl_dictAppend(s->filters, "*.fits", pplObjCpy(NULL,&tempval,1));
+  pplObjStr(&tempval,0,0,FITSHELPER);
+  ppl_dictAppend(s->filters, "*.fits", pplObjCpy(NULL,&tempval,1,1));
   #endif
   #ifdef TIMEHELPER
-  tempval.auxil = (void *)TIMEHELPER;
-  tempval.auxilLen = strlen(TIMEHELPER);
-  ppl_dictAppend(s->filters, "*.log", pplObjCpy(NULL,&tempval,1));
+  pplObjStr(&tempval,0,0,TIMEHELPER);
+  ppl_dictAppend(s->filters, "*.log", pplObjCpy(NULL,&tempval,1,1));
   #endif
   #ifdef GUNZIP_COMMAND
-  tempval.auxil = (void *)GUNZIP_COMMAND;
-  tempval.auxilLen = strlen(GUNZIP_COMMAND);
-  ppl_dictAppend(s->filters, "*.gz", pplObjCpy(NULL,&tempval,1));
+  pplObjStr(&tempval,0,0,GUNZIP_COMMAND);
+  ppl_dictAppend(s->filters, "*.gz", pplObjCpy(NULL,&tempval,1,1));
   #endif
   #ifdef WGET_COMMAND
-  tempval.auxil = (void *)WGET_COMMAND;
-  tempval.auxilLen = strlen(WGET_COMMAND);
-  ppl_dictAppend(s->filters, "http://*", pplObjCpy(NULL,&tempval,1));
-  ppl_dictAppend(s->filters, "ftp://*", pplObjCpy(NULL,&tempval,1));
+  pplObjStr(&tempval,0,0,WGET_COMMAND);
+  ppl_dictAppend(s->filters, "http://*", pplObjCpy(NULL,&tempval,1,1));
+  ppl_dictAppend(s->filters, "ftp://*", pplObjCpy(NULL,&tempval,1,1));
   #endif
 
   // Set up empty lists of arrows and labels

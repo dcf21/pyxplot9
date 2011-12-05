@@ -67,7 +67,7 @@ void pplarrow_print       (ppl_context *context, pplarrow_object  *in, char *out
 #define pplarrow_add_check_dimensions(X,Y) \
  { \
   tempval = (pplObj *)ppl_dictLookup(in,X); \
-  if (tempval == NULL) { tempval = &tempvalobj; pplObjZero(tempval,0); } \
+  if (tempval == NULL) { tempval = &tempvalobj; pplObjNum(tempval,0,0,0); } \
   if ((Y == SW_SYSTEM_GRAPH) || (Y == SW_SYSTEM_PAGE)) \
    if (!tempval->dimensionless) \
     for (i=0; i<UNITS_MAX_BASEUNITS; i++) if (tempval->exponent[i] != (i==UNIT_LENGTH)) \
@@ -84,7 +84,7 @@ void pplarrow_print       (ppl_context *context, pplarrow_object  *in, char *out
 #define pplarrow_add_copy_coordinate(X,Y,Z) \
  { \
   tempval = (pplObj *)ppl_dictLookup(in,X); \
-  if (tempval == NULL) { tempval = &tempvalobj; pplObjZero(tempval,0); } \
+  if (tempval == NULL) { tempval = &tempvalobj; pplObjNum(tempval,0,0,0); } \
   if ((Y == SW_SYSTEM_GRAPH) || (Y == SW_SYSTEM_PAGE)) \
    if (tempval->dimensionless) { tempval->dimensionless=0; tempval->exponent[UNIT_LENGTH]=1; tempval->real /= 100; } \
   Z = *tempval; \

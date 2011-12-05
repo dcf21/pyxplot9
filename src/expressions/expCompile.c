@@ -163,6 +163,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
           if ((trialstate=='P')&&(expOp)&&(in[scanpos]!='\'')&&(in[scanpos]!='"')) // Function call acting on expression: save expression as string even though it's not quoted
            {
             int explen = cp[1]+(cpl!=1)-n;
+            if (expOp>1) explen=j-n; // texify receives all arguments as a string
             if (cpl<1) { *errPos=scanpos; *errType=ERR_INTERNAL; strcpy(errText, "ppl_strBracketMatch returned fewer than two results."); *end=-1; *outlen=0; return; }
             trialstate='B'; NEWSTATE(explen,0,0); trialstate='P';
             n+=explen;
@@ -204,6 +205,11 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
            {
             expOp = 1;
             NEWSTATE(4,0,0);
+           }
+          else if ((strncmp(in+scanpos,"texify",6)==0) && (!isalnum(in[scanpos+6])) && (in[scanpos+6]!='_')) // texify() function
+           {
+            expOp = 2;
+            NEWSTATE(6,0,0);
            }
           else if (strncmp(in+scanpos,"int_d",5)==0) // int_d() function
            {

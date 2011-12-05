@@ -36,7 +36,7 @@
 #include "stringTools/asciidouble.h"
 #include "userspace/context.h"
 #include "userspace/garbageCollector.h"
-#include "userspace/pplObj.h"
+#include "userspace/pplObj_fns.h"
 #include "userspace/pplObjFunc.h"
 #include "userspace/pplObjPrint.h"
 #include "userspace/unitsArithmetic.h"
@@ -53,7 +53,7 @@ void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int IterDepth, int
   if (context->stack[context->stackPtr-1-nArgs].objType != PPLOBJ_FUNC) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Object of type <%s> cannot be called as a function.",pplObjTypeNames[context->stack[context->stackPtr-1-nArgs].objType]); return; }
   fn = (pplFunc *)context->stack[context->stackPtr-1-nArgs].auxil;
   ppl_garbageObject(&context->stack[context->stackPtr-1-nArgs]);
-  pplObjZero(&context->stack[context->stackPtr-1-nArgs] , 0);
+  pplObjNum(&context->stack[context->stackPtr-1-nArgs] , 0 , 0.0 , 0.0);
 
   if (fn->minArgs == fn->maxArgs)
    {

@@ -32,64 +32,56 @@
 #include "stringTools/asciidouble.h"
 
 #include "userspace/context.h"
-#include "userspace/pplObj.h"
+#include "userspace/pplObj_fns.h"
 #include "userspace/pplObjFunc.h"
 
+#include "defaultObjs/moduleOs.h"
 #include "defaultObjs/defaultFuncs.h"
 #include "defaultObjs/defaultFuncsMacros.h"
 
 void pplfunc_osGetEgid (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  pplObjZero(&OUTPUT,0);
-  OUTPUT.real = getegid();
+  pplObjNum(&OUTPUT,0,getegid(),0);
  }
 
 void pplfunc_osGetEuid (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  pplObjZero(&OUTPUT,0);
-  OUTPUT.real = geteuid();
+  pplObjNum(&OUTPUT,0,geteuid(),0);
  }
 
 void pplfunc_osGetGid  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  pplObjZero(&OUTPUT,0);
-  OUTPUT.real = getgid();
+  pplObjNum(&OUTPUT,0,getgid(),0);
  }
 
 void pplfunc_osGetPid  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  pplObjZero(&OUTPUT,0);
-  OUTPUT.real = getpid();
+  pplObjNum(&OUTPUT,0,getpid(),0);
  }
 
 void pplfunc_osGetPgrp (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  pplObjZero(&OUTPUT,0);
-  OUTPUT.real = getpgrp();
+  pplObjNum(&OUTPUT,0,getpgrp(),0);
  }
 
 void pplfunc_osGetPpid (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  pplObjZero(&OUTPUT,0);
-  OUTPUT.real = getppid();
+  pplObjNum(&OUTPUT,0,getppid(),0);
  }
 
 void pplfunc_osGetUid  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  pplObjZero(&OUTPUT,0);
-  OUTPUT.real = getuid();
+  pplObjNum(&OUTPUT,0,getuid(),0);
  }
 
 void pplfunc_osGetHome(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *out,*tmp;
-  pplObjNullStr(&OUTPUT,0);
   tmp = ppl_unixGetHomeDir(&c->errcontext);
   out = (char *)malloc(strlen(tmp)+1);
   if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); }
   strcpy(out, tmp);
-  OUTPUT.auxil = out;
-  OUTPUT.auxilLen = strlen(out)+1;
+  pplObjStr(&OUTPUT,0,1,out);
   return;
  }
 
@@ -101,50 +93,42 @@ void pplfunc_osGetHost(ppl_context *c, pplObj *in, int nArgs, int *status, int *
   if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); }
   gethostname(out,outlen);
   out[outlen-1]='\0';
-  pplObjNullStr(&OUTPUT,0);
-  OUTPUT.auxil = out;
-  OUTPUT.auxilLen = strlen(out)+1;
+  pplObjStr(&OUTPUT,0,1,out);
   return;
  }
 
 void pplfunc_osGetLogin(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {   
   char *out,*tmp;
-  pplObjNullStr(&OUTPUT,0);
   tmp = getlogin();
   out = (char *)malloc(strlen(tmp)+1);
   if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); }
   strcpy(out, tmp);
-  OUTPUT.auxil = out;
-  OUTPUT.auxilLen = strlen(out)+1;
+  pplObjStr(&OUTPUT,0,1,out);
   return;
  }
 
 void pplfunc_osGetRealName(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *out,*tmp;
-  pplObjNullStr(&OUTPUT,0);
   tmp = ppl_unixGetIRLName(&c->errcontext);
   out = (char *)malloc(strlen(tmp)+1);
   if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); }
   strcpy(out, tmp);
-  OUTPUT.auxil = out;
-  OUTPUT.auxilLen = strlen(out)+1;
+  pplObjStr(&OUTPUT,0,1,out);
   return;
  }
 
 void pplfunc_osSystem(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  pplObjZero(&OUTPUT,0);
   if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The os.system() function requires a single string argument."); return; }
-  OUTPUT.real = system((char*)in[0].auxil);
+  pplObjNum(&OUTPUT,0,  system((char*)in[0].auxil)  ,0);
  }
 
 void pplfunc_osPathExists(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  pplObjBool(&OUTPUT,0);
   if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The os.path.exists() function requires a single string argument."); return; }
-  OUTPUT.real = !access((char*)in[0].auxil , F_OK);
+  pplObjBool(&OUTPUT,0,!access((char*)in[0].auxil , F_OK));
  }
 
 void pplfunc_osPathExpandUser(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -156,9 +140,7 @@ void pplfunc_osPathExpandUser(ppl_context *c, pplObj *in, int nArgs, int *status
   if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); }
   ppl_unixExpandUserHomeDir(&c->errcontext, (char*)in[0].auxil , c->errcontext.session_default.cwd , out);
   out[outlen-1]='\0';
-  pplObjNullStr(&OUTPUT,0);
-  OUTPUT.auxil = out;
-  OUTPUT.auxilLen = strlen(out)+1;
+  pplObjStr(&OUTPUT,0,1,out);
   return;
  }
 
@@ -167,7 +149,6 @@ void pplfunc_osPathJoin(ppl_context *c, pplObj *in, int nArgs, int *status, int 
   const int outstep=FNAME_LENGTH;
   int outlen=outstep, newlen, j=0;
   char *out;
-  pplObjNullStr(&OUTPUT,0);
   if (nArgs<1) return;
   out = (char *)malloc(outlen);
   if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); }
@@ -206,8 +187,7 @@ void pplfunc_osPathJoin(ppl_context *c, pplObj *in, int nArgs, int *status, int 
       while ((j>0)&&(out[j-1]==PATHLINK[0])) out[--j]='\0';
      }
    }
-  OUTPUT.auxil = out;
-  OUTPUT.auxilLen = j+1;
+  pplObjStr(&OUTPUT,0,1,out);
   return;
  }
 

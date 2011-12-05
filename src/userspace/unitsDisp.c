@@ -36,7 +36,7 @@
 #include "settings/settingTypes.h"
 #include "stringTools/asciidouble.h"
 #include "userspace/context.h"
-#include "userspace/pplObj.h"
+#include "userspace/pplObj_fns.h"
 #include "userspace/pplObjUnits.h"
 #include "userspace/unitsArithmetic.h"
 #include "userspace/unitsDisp.h"
@@ -415,7 +415,7 @@ void ppl_unitsStringEvaluate(ppl_context *c, char *in, pplObj *out, int *end, in
  {
   int i=0,j=0,k,l,m,p;
   double power=1.0, powerneg=1.0, multiplier;
-  pplObjZero(out,out->amMalloced);
+  pplObjNum(out,out->amMalloced,0.0,0.0);
 
   while ((in[i]<=' ')&&(in[i]!='\0')) i++;
   out->real = ppl_getFloat(in+i , &j); // Unit strings can have numbers out the front
