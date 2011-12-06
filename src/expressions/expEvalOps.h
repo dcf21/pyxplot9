@@ -25,10 +25,10 @@
 #include "userspace/context.h"
 #include "userspace/pplObj.h"
 
-void ppl_opAdd(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int *status, int *errType, char *errText);
-void ppl_opSub(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int *status, int *errType, char *errText);
-void ppl_opMul(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int *status, int *errType, char *errText);
-void ppl_opDiv(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int *status, int *errType, char *errText);
+void ppl_opAdd(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invertible, int *status, int *errType, char *errText);
+void ppl_opSub(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invertible, int *status, int *errType, char *errText);
+void ppl_opMul(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invertible, int *status, int *errType, char *errText);
+void ppl_opDiv(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invertible, int *status, int *errType, char *errText);
 
 #endif
 

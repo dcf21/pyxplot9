@@ -51,6 +51,20 @@ double ppl_min(double x, double y)
   return y;
  }
 
+double ppl_max3(double x, double y, double z)
+ {
+  double o = x>y?x:y;
+  if (o>z) return o;
+  return z;
+ }
+
+double ppl_min3(double x, double y, double z)
+ {
+  double o = x<y?x:y;
+  if (o<z) return z;
+  return z;
+ }
+
 int ppl_sgn(double x)
  {
   if (x==0) return  0;

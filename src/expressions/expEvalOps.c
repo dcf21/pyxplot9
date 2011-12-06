@@ -35,7 +35,7 @@
 
 #include "pplConstants.h"
 
-void ppl_opAdd(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int *status, int *errType, char *errText)
+void ppl_opAdd(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invertible, int *status, int *errType, char *errText)
  {
   int t1 = a->objType;
   int t2 = b->objType;
@@ -61,7 +61,7 @@ void ppl_opAdd(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int *statu
   cast_fail: *status=1;
  }
 
-void ppl_opSub(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int *status, int *errType, char *errText)
+void ppl_opSub(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invertible, int *status, int *errType, char *errText)
  {
   CAST_TO_NUM(a); CAST_TO_NUM(b);
   ppl_uaSub(context, a, b, o, status, errType, errText);
@@ -69,7 +69,7 @@ void ppl_opSub(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int *statu
   cast_fail: *status=1;
  }
 
-void ppl_opMul(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int *status, int *errType, char *errText)
+void ppl_opMul(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invertible, int *status, int *errType, char *errText)
  {
   CAST_TO_NUM(a); CAST_TO_NUM(b);
   ppl_uaMul(context, a, b, o, status, errType, errText);
@@ -77,7 +77,7 @@ void ppl_opMul(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int *statu
   cast_fail: *status=1;
  }
 
-void ppl_opDiv(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int *status, int *errType, char *errText)
+void ppl_opDiv(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invertible, int *status, int *errType, char *errText)
  {
   CAST_TO_NUM(a); CAST_TO_NUM(b);
   ppl_uaDiv(context, a, b, o, status, errType, errText);

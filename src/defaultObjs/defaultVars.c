@@ -93,7 +93,7 @@ void ppl_makeDefaultVars(ppl_context *out)
      if ((i!=PPLOBJ_GLOB)&&(i!=PPLOBJ_ZOM))
       {
        pplObjCpy(&v, &pplObjPrototypes[i], 1, 1);
-       ppl_dictAppend(d2 , pplObjTypeNames[i] , &v);
+       ppl_dictAppendCpy(d2, pplObjTypeNames[i], (void *)&v, sizeof(v));
       }
 
     // colors module
@@ -292,8 +292,8 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"logn"          ,2,2,1,1,0,1,(void *)&pplfunc_logn        , "logn(z,n)", "\\mathrm{log}_n@<@1@>", "logn(x,n) returns the logarithm of x to base n");
     ppl_addSystemFunc(d,"ln"            ,1,1,1,1,0,1,(void *)&pplfunc_log         , "ln(z)", "\\mathrm{ln}@<@1@>", "ln(x) is an alias for log(x): it returns the natural logarithm of x");
     ppl_addSystemFunc(d,"lrange"        ,1,3,1,1,1,0,(void *)&pplfunc_lrange      , "lrange([f],l,[s])", "\\mathrm{lrange@<@0@>", "lrange([f],l,[s]) returns a vector of numbers between f and l with uniform multiplicative spacing s");
-    ppl_addSystemFunc(d,"max"           ,2,2,1,1,0,1,(void *)&pplfunc_max         , "max(x,...)", "\\mathrm{max}@<@0@>", "max(x,...) returns the greatest of its arguments");
-    ppl_addSystemFunc(d,"min"           ,2,2,1,1,0,1,(void *)&pplfunc_min         , "min(x,...)", "\\mathrm{min}@<@0@>", "min(x,...) returns the least of its arguments");
+    ppl_addSystemFunc(d,"max"           ,0,1e9,0,0,0,0,(void *)&pplfunc_max       , "max(x,...)", "\\mathrm{max}@<@0@>", "max(x,...) returns the greatest of its arguments");
+    ppl_addSystemFunc(d,"min"           ,0,1e9,0,0,0,0,(void *)&pplfunc_min       , "min(x,...)", "\\mathrm{min}@<@0@>", "min(x,...) returns the least of its arguments");
     ppl_addSystemFunc(d,"mod"           ,2,2,1,1,1,0,(void *)&pplfunc_mod         , "mod(x,y)", "\\mathrm{mod}@<@1,@2@>", "mod(x,y) returns the remainder of x/y");
     ppl_addSystemFunc(d,"ordinal"       ,1,1,1,1,1,1,(void *)&pplfunc_ordinal     , "ordinal(n)", "\\mathrm{ordinal}@<@1@>", "ordinal(n) returns the ordinal string, e.g. '1st', '2nd', '3rd' for the positive integer n");
     ppl_addSystemFunc(d,"pow"           ,2,2,1,1,0,0,(void *)&pplfunc_pow         , "pow(x,y)", "\\mathrm{pow}@<@1,@2@>", "pow(x,y) returns x to the power of y");
@@ -309,6 +309,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"sinc"          ,1,1,1,1,0,0,(void *)&pplfunc_sinc        , "sinc(z)", "\\mathrm{sinc}@<@1@>", "sinc(x) returns the function sin(pi*x)/(pi*x). If x is dimensionless, it is assumed to be measured in radians. The output is dimensionless.");
     ppl_addSystemFunc(d,"sinh"          ,1,1,1,1,0,0,(void *)&pplfunc_sinh        , "sinh(z)", "\\mathrm{sinh}@<@1@>", "sinh(x) returns the hyperbolic sine of x. x may either be a dimensionless number or may have units of angle");
     ppl_addSystemFunc(d,"sqrt"          ,1,1,1,1,0,0,(void *)&pplfunc_sqrt        , "sqrt(z)", "\\sqrt{@1}", "sqrt(x) returns the square root of x");
+    ppl_addSystemFunc(d,"sum"           ,0,1e9,0,0,0,0,(void *)&pplfunc_sum       , "sum(...)", "\\mathrm{sum}@<@0@>", "sum(...) returns the sum of its arguments");
     ppl_addSystemFunc(d,"tan"           ,1,1,1,1,0,0,(void *)&pplfunc_tan         , "tan(z)", "\\mathrm{tan}@<@1@>", "tan(x) returns the tangent of x. If x is dimensionless, it is assumed to be measured in radians");
     ppl_addSystemFunc(d,"tanh"          ,1,1,1,1,0,0,(void *)&pplfunc_tanh        , "tanh(z)", "\\mathrm{tanh}@<@1@>", "tanh(x) returns the hyperbolic tangent of x. x may either be a dimensionless number or may have units of angle");
     ppl_addMagicFunction(d, "texify", "texify(...)", "\\mathrm{texify}@<@0@>", "texify(str) converts an algebraic expression into a LaTeX command string representation");

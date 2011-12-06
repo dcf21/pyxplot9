@@ -30,6 +30,7 @@
 #include "settings/settingTypes.h"
 #include "stringTools/asciidouble.h"
 
+#include "userspace/calendars.h"
 #include "userspace/context.h"
 #include "userspace/pplObj.h"
 #include "userspace/pplObjFunc.h"
@@ -50,15 +51,27 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
      strncpy(out, ppl_unitsNumericDisplay(c, o, 0, internal?SW_DISPLAY_T:typeable, NSigFigs), outlen);
      break;
     case PPLOBJ_STR:
-     if (!internal) strncpy(out, o->auxil, outlen);
-     else           ppl_strEscapify(o->auxil, out);
+     if (internal || (typeable==SW_DISPLAY_T)) ppl_strEscapify(o->auxil, out);
+     else                                      strncpy(out, o->auxil, outlen);
      break;
     case PPLOBJ_BOOL:
      if (o->real==0) strncpy(out, "false", outlen);
      else            strncpy(out, "true" , outlen);
      break;
     case PPLOBJ_DATE:
-     strncpy(out, "<date>", outlen);
+     if (internal || (typeable==SW_DISPLAY_T))
+      {
+       int status=0;
+       int year, month, day, hour, minute;
+       double second;
+       ppl_fromUnixTime(c, o->real, &year, &month, &day, &hour, &minute, &second, &status, c->errcontext.tempErrStr);
+       sprintf(out,"time.fromCalendar(%d,%d,%d,%d,%d,%.4f)",year,month,day,hour,minute,second);
+      }
+     else
+      {
+       int status=0;
+       ppl_dateString(c, out, o->real, NULL, &status, c->errcontext.tempErrStr);
+      }
      break;
     case PPLOBJ_COL:
      {
@@ -94,7 +107,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
         i+=strlen(out+i);
         if (i>outlen-100) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
         first=0;
-        prevMod = item->objType = PPLOBJ_MOD;
+        prevMod = item->objType == PPLOBJ_MOD;
        }
       strcpy(out+i,"}");
       break;
@@ -147,7 +160,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
         i+=strlen(out+i);
         if (i>outlen-100) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
         first=0;
-        prevMod = item->objType = PPLOBJ_MOD;
+        prevMod = item->objType == PPLOBJ_MOD;
        }
       strcpy(out+i,"]");
       break;
@@ -227,6 +240,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
         switch (t)
          {
           case PPL_FUNC_SYSTEM:
+          case PPL_FUNC_MAGIC:
             strcpy(out+i, f->description);
             i+=strlen(out+i);
             break;
@@ -312,7 +326,11 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
      }
     case PPLOBJ_EXC:
      {
-      strcpy(out, "<exception>");
+      int i=0;
+      strcpy (out  , "<exception: ");     i+=strlen(out+i);
+      strncpy(out+i, o->auxil, outlen-i); i+=strlen(out+i);
+      strncpy(out+i, ">", outlen-i);
+      out[outlen-1]='\0';
       break;
      }
     case PPLOBJ_GLOB:

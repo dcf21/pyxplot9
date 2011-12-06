@@ -386,7 +386,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
        }
       else if (trialstate=='S') // assignment operator
        {
-        if      (MARKUP_MATCH("="  )) { NEWSTATE(1,0x40,17); }
+        if     ((MARKUP_MATCH("="  )&&(in[scanpos+1]!='='))) { NEWSTATE(1,0x40,17); } // Match = but not ==
         else if (MARKUP_MATCH("+=" )) { NEWSTATE(2,0x41,17); }
         else if (MARKUP_MATCH("-=" )) { NEWSTATE(2,0x42,17); }
         else if (MARKUP_MATCH("*=" )) { NEWSTATE(2,0x43,17); }
@@ -592,7 +592,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
      {
       unsigned char opCode     = tdata[tpos+1];
       unsigned char precedence = tdata[tpos+2];
-      unsigned char rightAssoc = (opCode & 0x80) != 0;
+      unsigned char rightAssoc = ((opCode & 0x80) != 0) || (o=='S'); // All assignment operators (S) are right-left associative
       POP_STACK;
 
       // : operator part of ? : ... pop the ? from the stack now

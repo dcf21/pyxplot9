@@ -39,6 +39,7 @@
 #include "userspace/context.h"
 #include "userspace/garbageCollector.h"
 #include "userspace/pplObj_fns.h"
+#include "userspace/pplObjCmp.h"
 #include "userspace/pplObjFunc.h"
 #include "userspace/pplObjPrint.h"
 #include "userspace/unitsArithmetic.h"
@@ -440,7 +441,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
           case 0x4A: // *
            {
             int status=0;
-            ppl_opMul(context, stk-2, stk-1, stk, &status, errType, errText);
+            ppl_opMul(context, stk-2, stk-1, stk, 1, &status, errType, errText);
             if (status) { *errPos=charpos; goto cleanup_on_error; }
             ppl_garbageObject(stk-2);
             ppl_garbageObject(stk-1);
@@ -451,7 +452,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
           case 0x4B: // div
            {
             int status=0;
-            ppl_opDiv(context, stk-2, stk-1, stk, &status, errType, errText);
+            ppl_opDiv(context, stk-2, stk-1, stk, 1, &status, errType, errText);
             if (status) { *errPos=charpos; goto cleanup_on_error; }
             ppl_garbageObject(stk-2);
             ppl_garbageObject(stk-1);
@@ -472,7 +473,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
           case 0x4D: // add
            {
             int status=0;
-            ppl_opAdd(context, stk-2, stk-1, stk, &status, errType, errText);
+            ppl_opAdd(context, stk-2, stk-1, stk, 1, &status, errType, errText);
             if (status) { *errPos=charpos; goto cleanup_on_error; }
             ppl_garbageObject(stk-2);
             ppl_garbageObject(stk-1);
@@ -483,7 +484,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
           case 0x4E: // sub
            {
             int status=0;
-            ppl_opSub(context, stk-2, stk-1, stk, &status, errType, errText);
+            ppl_opSub(context, stk-2, stk-1, stk, 1, &status, errType, errText);
             if (status) { *errPos=charpos; goto cleanup_on_error; }
             ppl_garbageObject(stk-2);
             ppl_garbageObject(stk-1);
@@ -534,17 +535,22 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
             break;
            }
           case 0x51: // <
+          case 0x52: // <=
           case 0x53: // >=
+          case 0x54: // >
+          case 0x55: // ==
+          case 0x56: // !=
            {
-            int t1  = (stk-2)->objType;
-            int t2  = (stk-1)->objType;
-            int t1o = pplObjTypeOrder[t1];
-            int t2o = pplObjTypeOrder[t2];
-            if      (t1o < t2o) (stk-2)->real = 1;
-            else if (t1o > t2o) (stk-2)->real = 0;
-            (stk-2)->real = 0;
-            (stk-2)->objType = PPLOBJ_BOOL;
-            if (o==0x53) (stk-2)->real = !(stk-2)->real;
+            int stat , cmp = pplObjCmp(context, stk-2, stk-1);
+            if      (t==0x51) stat = (cmp == -1);
+            else if (t==0x52) stat = (cmp == -1) || (cmp==0);
+            else if (t==0x53) stat = (cmp ==  1) || (cmp==0);
+            else if (t==0x54) stat = (cmp ==  1);
+            else if (t==0x55) stat = (cmp ==  0);
+            else              stat = (cmp !=  0);
+            ppl_garbageObject(stk-2);
+            ppl_garbageObject(stk-1);
+            pplObjBool(stk-2,0,stat);
             context->stackPtr--;
             break;
            }
@@ -587,7 +593,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
         else if (t==0x41) // +=
          {
           int status=0;
-          ppl_opAdd(context, o, in, tmp, &status, errType, errText);
+          ppl_opAdd(context, o, in, tmp, 0, &status, errType, errText);
           if (status) { *errPos=charpos; goto cleanup_on_error; }
           pplObjCpy(o->self_lval, tmp, 0, 1);
           ppl_garbageObject(o);
@@ -599,7 +605,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
         else if (t==0x42) // -=
          {
           int status=0;
-          ppl_opSub(context, o, in, tmp, &status, errType, errText);
+          ppl_opSub(context, o, in, tmp, 0, &status, errType, errText);
           if (status) { *errPos=charpos; goto cleanup_on_error; }
           pplObjCpy(o->self_lval, tmp, 0, 1);
           ppl_garbageObject(o);
@@ -611,7 +617,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
         else if (t==0x43) // *=
          {
           int status=0;
-          ppl_opMul(context, o, in, tmp, &status, errType, errText);
+          ppl_opMul(context, o, in, tmp, 0, &status, errType, errText);
           if (status) { *errPos=charpos; goto cleanup_on_error; }
           pplObjCpy(o->self_lval, tmp, 0, 1);
           ppl_garbageObject(o);
@@ -623,7 +629,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
         else if (t==0x44) // /=
          {
           int status=0;
-          ppl_opDiv(context, o, in, tmp, &status, errType, errText);
+          ppl_opDiv(context, o, in, tmp, 0, &status, errType, errText);
           if (status) { *errPos=charpos; goto cleanup_on_error; }
           pplObjCpy(o->self_lval, tmp, 0, 1);
           ppl_garbageObject(o);

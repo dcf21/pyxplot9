@@ -47,7 +47,10 @@
 #include "settings/settings.h"
 #include "stringTools/asciidouble.h"
 
+#include "expressions/expEvalOps.h"
+#include "userspace/garbageCollector.h"
 #include "userspace/pplObj_fns.h"
+#include "userspace/pplObjCmp.h"
 #include "userspace/pplObjFunc.h"
 #include "userspace/unitsArithmetic.h"
 
@@ -735,10 +738,98 @@ void pplfunc_lrange       (ppl_context *c, pplObj *in, int nArgs, int *status, i
 
 void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
+  if (nArgs==0) { pplObjNull(&OUTPUT,0); return; }
+  if ((nArgs==1)&&(in[0].objType==PPLOBJ_LIST))
+   {
+    pplObj *item, *best=NULL;
+    listIterator *li = ppl_listIterateInit((list *)in[0].auxil);
+    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL) if ((best==NULL)||(pplObjCmp(c, item, best)==1)) best=item;
+    if (best==NULL) pplObjNull(&OUTPUT,0);
+    else            pplObjCpy (&OUTPUT,best,0,1);
+   }
+  else if ((nArgs==1)&&((in[0].objType==PPLOBJ_DICT)||(in[0].objType==PPLOBJ_MOD)||(in[0].objType==PPLOBJ_USER)))
+   {
+    char *key;
+    pplObj *item, *best=NULL;
+    dictIterator *di = ppl_dictIterateInit((dict *)in[0].auxil);
+    while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL) if ((best==NULL)||(pplObjCmp(c, item, best)==1)) best=item;
+    if (best==NULL) pplObjNull(&OUTPUT,0);
+    else            pplObjCpy (&OUTPUT,best,0,1);
+   }
+  else if ((nArgs==1)&&(in[0].objType==PPLOBJ_VEC))
+   {
+    int i;
+    double *best=NULL;
+    gsl_vector *v=((pplVector *)(in[0].auxil))->v;
+    for (i=0; i<v->size; i++) if ((best==NULL)||(v->data[i]>*best)) best=&v->data[i];
+    if (best==NULL) pplObjNull(&OUTPUT,0);
+    else            pplObjNum (&OUTPUT,0,*best,0);
+   }
+  else if ((nArgs==1)&&(in[0].objType==PPLOBJ_MAT))
+   {
+    int i,j;
+    double *best=NULL;
+    gsl_matrix *m=((pplMatrix *)(in[0].auxil))->m;
+    for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) if ((best==NULL)||(m->data[i*m->tda+j]>*best)) best=&m->data[i*m->tda+j];
+    if (best==NULL) pplObjNull(&OUTPUT,0);
+    else            pplObjNum (&OUTPUT,0,*best,0);
+   }
+  else
+   {
+    int i;
+    pplObj *best = in;
+    for (i=1; i<nArgs; i++) if (pplObjCmp(c, &in[i], best)==1) best=&in[i];
+    if (best==NULL) pplObjNull(&OUTPUT,0);
+    else            pplObjCpy (&OUTPUT,best,0,1);
+   }
  }
 
 void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
+  if (nArgs==0) { pplObjNull(&OUTPUT,0); return; }
+  if ((nArgs==1)&&(in[0].objType==PPLOBJ_LIST))
+   {
+    pplObj *item, *best=NULL;
+    listIterator *li = ppl_listIterateInit((list *)in[0].auxil);
+    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL) if ((best==NULL)||(pplObjCmp(c, item, best)==-1)) best=item;
+    if (best==NULL) pplObjNull(&OUTPUT,0);
+    else            pplObjCpy (&OUTPUT,best,0,1);
+   }
+  else if ((nArgs==1)&&((in[0].objType==PPLOBJ_DICT)||(in[0].objType==PPLOBJ_MOD)||(in[0].objType==PPLOBJ_USER)))
+   {
+    char *key;
+    pplObj *item, *best=NULL;
+    dictIterator *di = ppl_dictIterateInit((dict *)in[0].auxil);
+    while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL) if ((best==NULL)||(pplObjCmp(c, item, best)==-1)) best=item;
+    if (best==NULL) pplObjNull(&OUTPUT,0);
+    else            pplObjCpy (&OUTPUT,best,0,1);
+   }
+  else if ((nArgs==1)&&(in[0].objType==PPLOBJ_VEC))
+   {
+    int i;
+    double *best=NULL;
+    gsl_vector *v=((pplVector *)(in[0].auxil))->v;
+    for (i=0; i<v->size; i++) if ((best==NULL)||(v->data[i]<*best)) best=&v->data[i];
+    if (best==NULL) pplObjNull(&OUTPUT,0);
+    else            pplObjNum (&OUTPUT,0,*best,0);
+   }
+  else if ((nArgs==1)&&(in[0].objType==PPLOBJ_MAT))
+   {
+    int i,j;
+    double *best=NULL;
+    gsl_matrix *m=((pplMatrix *)(in[0].auxil))->m;
+    for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) if ((best==NULL)||(m->data[i*m->tda+j]<*best)) best=&m->data[i*m->tda+j];
+    if (best==NULL) pplObjNull(&OUTPUT,0);
+    else            pplObjNum (&OUTPUT,0,*best,0);
+   }
+  else
+   {
+    int i;
+    pplObj *best = in;
+    for (i=1; i<nArgs; i++) if (pplObjCmp(c, &in[i], best)==-1) best=&in[i];
+    if (best==NULL) pplObjNull(&OUTPUT,0);
+    else            pplObjCpy (&OUTPUT,best,0,1);
+   }
  }
 
 void pplfunc_mod         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -955,6 +1046,88 @@ void pplfunc_sqrt        (ppl_context *c, pplObj *in, int nArgs, int *status, in
   OUTPUT.dimensionless = in[0].dimensionless;
   OUTPUT.tempType      = in[0].tempType;
   for (i=0; i<UNITS_MAX_BASEUNITS; i++) OUTPUT.exponent[i] = in[0].exponent[i] / 2;
+ }
+
+void pplfunc_sum         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  if (nArgs==0) { pplObjNum(&OUTPUT,0,0,0); return; }
+  if ((nArgs==1)&&(in[0].objType==PPLOBJ_LIST))
+   {
+    int first=1;
+    pplObj acc, acc2, *item;
+    listIterator *li = ppl_listIterateInit((list *)in[0].auxil);
+    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
+     {
+      if (first)
+       {
+        pplObjCpy(&acc2, item, 0, 1);
+        memcpy(&acc, &acc2, sizeof(pplObj));
+        first=0;
+       }
+      else
+       {
+        ppl_opAdd(c, &acc, item, &acc2, 1, status, errType, errText);
+        if (*status) { ppl_garbageObject(&acc); return; }
+        memcpy(&acc, &acc2, sizeof(pplObj));
+       }
+     }
+    if (first) pplObjNum(&OUTPUT,0,0,0);
+    else       memcpy(&OUTPUT, &acc, sizeof(pplObj));
+   }
+  else if ((nArgs==1)&&((in[0].objType==PPLOBJ_DICT)||(in[0].objType==PPLOBJ_MOD)||(in[0].objType==PPLOBJ_USER)))
+   {
+    int first=1;
+    pplObj acc, acc2, *item;
+    char *key;
+    dictIterator *di = ppl_dictIterateInit((dict *)in[0].auxil);
+    while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
+     {
+      if (first)
+       {
+        pplObjCpy(&acc2, item, 0, 1);
+        memcpy(&acc, &acc2, sizeof(pplObj));
+        first=0;
+       }
+      else
+       {
+        ppl_opAdd(c, &acc, item, &acc2, 1, status, errType, errText);
+        if (*status) { ppl_garbageObject(&acc); return; }
+        memcpy(&acc, &acc2, sizeof(pplObj));
+       }
+     }
+    if (first) pplObjNum(&OUTPUT,0,0,0);
+    else       memcpy(&OUTPUT, &acc, sizeof(pplObj));
+   }
+  else if ((nArgs==1)&&(in[0].objType==PPLOBJ_VEC))
+   {
+    int i;
+    double acc=0;
+    gsl_vector *v=((pplVector *)(in[0].auxil))->v;
+    for (i=0; i<v->size; i++) acc += v->data[i];
+    pplObjNum(&OUTPUT,0,acc,0);
+   }
+  else if ((nArgs==1)&&(in[0].objType==PPLOBJ_MAT))
+   {
+    int i,j;
+    double acc=0;
+    gsl_matrix *m=((pplMatrix *)(in[0].auxil))->m;
+    for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) acc += m->data[i*m->tda+j];
+    pplObjNum(&OUTPUT,0,acc,0);
+   }
+  else
+   {
+    int i;
+    pplObj acc, acc2;
+    pplObjCpy(&acc2, &in[0], 0, 1);
+    memcpy(&acc, &acc2, sizeof(pplObj));
+    for (i=1; i<nArgs; i++)
+     {
+      ppl_opAdd(c, &acc, &in[i], &acc2, 1, status, errType, errText);
+      if (*status) { ppl_garbageObject(&acc); return; }
+      memcpy(&acc, &acc2, sizeof(pplObj));
+     }
+    memcpy(&OUTPUT,&acc,sizeof(pplObj));
+   }
  }
 
 void pplfunc_tan         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)

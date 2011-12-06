@@ -37,7 +37,7 @@
 
 // Items with ! should never be displayed because they are internal markers
 const char *pplObjTypeNames[] = {"number","string","boolean","date","color","dictionary","module","list","vector","matrix","file handle","function","type","null","exception","!global","!zombie","instance",NULL};
-const int   pplObjTypeOrder[] = { 1      , 3      , 1       , 1    , 2     , 7          , 4      , 4    , 4      , 6      , 8           , 9        , 10    , 0    , 11        , 0       , 0       , 5        };
+const int   pplObjTypeOrder[] = { 2      , 4      , 1       , 3    , 5     ,  9          , 11    , 7    , 6      , 8      , 13          , 12       , 14    , 0   , 15        , 0       , 0       , 10       };
 pplObj     *pplObjPrototypes;
 
 void pplObjInit(ppl_context *c)
@@ -50,7 +50,7 @@ void pplObjInit(ppl_context *c)
   pplObjPrototypes  = (pplObj  *)malloc(n * sizeof(pplObj));
   if ((typeObjs==NULL)||(pplObjPrototypes==NULL)) ppl_fatal(&c->errcontext,__FILE__,__LINE__,"Out of memory.");
   pplObjMethodsInit(c);
-  for (i=0; i<=n; i++)
+  for (i=0; i<n; i++)
    {
     typeObjs[i].refCount = 1;
     typeObjs[i].id       = i;
@@ -82,7 +82,7 @@ pplObj *pplObjStr(pplObj *in, unsigned char amMalloced, unsigned char auxilMallo
   in->objType = PPLOBJ_ZOM; // In case we get interrupted
   in->auxil = (void *)str;
   in->auxilMalloced = auxilMalloced;
-  in->auxilLen = strlen(str+1);
+  in->auxilLen = strlen(str)+1;
   in->objPrototype = &pplObjPrototypes[PPLOBJ_STR];
   in->self_lval = NULL; in->self_dval = NULL;
   in->amMalloced = amMalloced;
@@ -260,7 +260,7 @@ pplObj *pplObjType(pplObj *in, unsigned char amMalloced, unsigned char auxilMall
   in->objPrototype = &pplObjPrototypes[PPLOBJ_TYPE];
   in->self_lval = NULL; in->self_dval = NULL;
   in->amMalloced = amMalloced;
-  in->immutable = 0;
+  in->immutable = 1; // Types are always immutable
   in->objType       = PPLOBJ_TYPE;
   return in;
  }

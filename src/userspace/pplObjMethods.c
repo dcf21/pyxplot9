@@ -42,7 +42,7 @@ void pplObjMethodsInit(ppl_context *c)
   const int n = PPLOBJ_USER+1;
   pplObjMethods = (dict **)malloc(n * sizeof(dict *));
   if (pplObjMethods==NULL) ppl_fatal(&c->errcontext,__FILE__,__LINE__,"Out of memory.");
-  for (i=0; i<=n; i++)
+  for (i=0; i<n; i++)
    {
     pplObjMethods[i] = ppl_dictInit(HASHSIZE_LARGE,1);
     if (pplObjMethods[i]==NULL) ppl_fatal(&c->errcontext,__FILE__,__LINE__,"Out of memory.");

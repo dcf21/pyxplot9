@@ -117,6 +117,7 @@ void pplfunc_sin         (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_sinc        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_sinh        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_sqrt        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_sum         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_tan         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_tanh        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_tophat      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);

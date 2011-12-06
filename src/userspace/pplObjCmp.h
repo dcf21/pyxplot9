@@ -1,4 +1,4 @@
-// dcfmath.h
+// pplObjCmp.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,23 +19,18 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _DCFMATH_H
-#define _DCFMATH_H 1
+#ifndef _PPLOBJCMP_H
+#define _PPLOBJCMP_H 1
 
-#ifndef _DCFMATH_C
-extern double ppl_machineEpsilon;
-#endif
+#include "userspace/context.h"
+#include "userspace/pplObj.h"
 
-void   ppl_makeMachineEpsilon();
-double ppl_max      (double x, double y);
-double ppl_min      (double x, double y);
-double ppl_max3     (double x, double y, double z);
-double ppl_min3     (double x, double y, double z);
-int    ppl_sgn      (double x);
-void   ppl_linRaster(double *out, double min, double max, int Nsteps);
-void   ppl_logRaster(double *out, double min, double max, int Nsteps);
-double ppl_degs     (double rad);
-double ppl_rads     (double degrees);
+void pplcol_RGBtoHSB(double ri, double gi, double bi, double *ho, double *so, double *bo);
+void pplcol_CMYKtoRGB(double ci, double mi, double yi, double ki, double *ro, double *go, double *bo);
+void pplcol_HSBroRGB(double hi, double si, double bi, double *ro, double *go, double *bo);
+void pplcol_CMYKtoHSB(double ci, double mi, double yi, double ki, double *ho, double *so, double *bo);
+
+int pplObjCmp(ppl_context *c, pplObj *a, pplObj *b);
 
 #endif
 
