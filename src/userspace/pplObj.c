@@ -134,10 +134,11 @@ pplObj *pplObjColor(pplObj *in, unsigned char amMalloced, int scheme, double c1,
   return in;
  }
 
-pplObj *pplObjDict(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced)
+pplObj *pplObjDict(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, dict *d)
  {
   in->objType = PPLOBJ_ZOM;
-  in->auxil = (void *)ppl_dictInit(HASHSIZE_LARGE,auxilMalloced);
+  if (d==NULL) in->auxil = (void *)ppl_dictInit(HASHSIZE_LARGE,auxilMalloced);
+  else         in->auxil = (void *)d;
   if (in->auxil==NULL) return NULL;
   in->auxilMalloced = auxilMalloced;
   in->auxilLen = 0;
@@ -165,10 +166,11 @@ pplObj *pplObjModule(pplObj *in, unsigned char amMalloced, unsigned char auxilMa
   return in;
  }
 
-pplObj *pplObjList(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced)
+pplObj *pplObjList(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, list *l)
  {
   in->objType = PPLOBJ_ZOM;
-  in->auxil = (void *)ppl_listInit(auxilMalloced);
+  if (l==NULL) in->auxil = (void *)ppl_listInit(auxilMalloced);
+  else         in->auxil = (void *)l;
   if (in->auxil==NULL) return NULL;
   in->auxilMalloced = auxilMalloced;
   in->auxilLen = 0;

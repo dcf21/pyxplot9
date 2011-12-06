@@ -32,6 +32,7 @@
 #include "coreUtils/errorReport.h"
 #include "coreUtils/list.h"
 #include "expressions/expEval.h"
+#include "expressions/expEvalOps.h"
 #include "expressions/fnCall.h"
 #include "settings/settingTypes.h"
 #include "stringTools/asciidouble.h"
@@ -45,79 +46,18 @@
 
 #include "pplConstants.h"
 
-#define CASTO(X) context->stack[context->stackPtr+(X)]
-
-#define CAST_TO_NUM(X) \
- { \
-  int t=(CASTO(X)).objType; \
-  if (t!=PPLOBJ_NUM) \
-   { \
-    switch (t) \
-     { \
-      case PPLOBJ_BOOL: (CASTO(X)).real = ((CASTO(X)).real!=0); (CASTO(X)).imag=0; (CASTO(X)).flagComplex=0; break; \
-      case PPLOBJ_STR : \
-       { \
-        int len; char *c=(char *)(CASTO(X)).auxil; \
-        (CASTO(X)).real = ppl_getFloat(c, &len); \
-        if (len>0) { while ((c[len]>'\0')&&(c[len]<=' ')) len++; } \
-        if ((len<0)||(c[len]!='\0')) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Attempt to implicitly cast string to number failed: string is not a valid number."); goto cleanup_on_error; } \
-        break; \
-       } \
-      default: \
-        { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Cannot implicitly cast an object of type <%s> to a number.",pplObjTypeNames[t]); goto cleanup_on_error; } \
-     } \
-    ppl_garbageObject(&(CASTO(X))); \
-    (CASTO(X)).objType = PPLOBJ_NUM; \
-   } \
- }
-
-#define CAST_TO_REAL(X,OP) \
- { \
-  CAST_TO_NUM(X); \
-  if ((CASTO(X)).flagComplex) { *errPos=charpos; *errType=ERR_RANGE; sprintf(errText,"The %s operator can only act on real numbers.",OP); goto cleanup_on_error; } \
- }
-
-#define CAST_TO_INT(X,OP) \
- { \
-  CAST_TO_REAL(X,OP); \
-  if (((CASTO(X)).real < INT_MIN) || ((CASTO(X)).real > INT_MAX)) { *errPos=charpos; *errType=ERR_RANGE; sprintf(errText,"The %s operator can only act on integers in the range %d to %d.",OP,INT_MIN,INT_MAX); goto cleanup_on_error; } \
- }
-
-#define CAST_TO_BOOL(X) \
- { \
-  int t=(CASTO(X)).objType; \
-  if (t!=PPLOBJ_BOOL) \
-   { \
-    switch (t) \
-     { \
-      case PPLOBJ_NUM : (CASTO(X)).real = (((CASTO(X)).real!=0)||((CASTO(X)).imag!=0)); break; \
-      case PPLOBJ_STR : (CASTO(X)).real = ((char *)(CASTO(X)).auxil)[0]!='\0'; break; \
-      case PPLOBJ_ZOM : \
-      case PPLOBJ_EXC : \
-      case PPLOBJ_NULL: (CASTO(X)).real = 0; break; \
-      case PPLOBJ_DICT: (CASTO(X)).real = (((dict *)(CASTO(X)).auxil)->length!=0); break; \
-      case PPLOBJ_LIST: (CASTO(X)).real = (((list *)(CASTO(X)).auxil)->length!=0); break; \
-      case PPLOBJ_VEC : (CASTO(X)).real = (((pplVector *)(CASTO(X)).auxil)->v->size!=0); break; \
-      case PPLOBJ_MAT : (CASTO(X)).real = (((pplMatrix *)(CASTO(X)).auxil)->m->size1!=0) || (((pplMatrix *)(CASTO(X)).auxil)->m->size2!=0); break; \
-      case PPLOBJ_FILE: (CASTO(X)).real = (((pplFile *)(CASTO(X)).auxil)->open!=0); break; \
-      default         : (CASTO(X)).real = 1; break; \
-     } \
-    ppl_garbageObject(&(CASTO(X))); \
-    (CASTO(X)).objType = PPLOBJ_BOOL; \
-   } \
- }
-
-static void _stringSubs(ppl_context *context, int Nsubs, int *status, int *errType, char *errText)
+static void expEval_stringSubs(ppl_context *context, int Nsubs, int *status, int *errType, char *errText)
  {
   const char allowedFormats[] = "cdieEfgGosSxX%"; // These tokens are allowed after a % format specifier
-  char  formatToken[512];
-  char *format = (char *)context->stack[context->stackPtr-Nsubs-1].auxil;
-  int   outlen = 65536;
-  int   inP    = 0;
-  int   outP   = 0;
-  int   argP   = -Nsubs;
-  int   inP2, requiredArgs, l, arg1i, arg2i;
-  char *out    = (char *)malloc(outlen);
+  char       formatToken[512];
+  pplObj    *obj = &context->stack[context->stackPtr];
+  int        argP   = -Nsubs;
+  char      *format = (char *)((obj+argP-1)->auxil);
+  int        outlen = 65536;
+  int        inP    = 0;
+  int        outP   = 0;
+  int        inP2, requiredArgs, l, arg1i, arg2i;
+  char      *out    = (char *)malloc(outlen);
 
   if (out==NULL) { *status=1; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); return; }
 
@@ -160,8 +100,8 @@ static void _stringSubs(ppl_context *context, int Nsubs, int *status, int *errTy
       ppl_strSlice(format, formatToken, inP, inP2+1);
 
       // If token required extra integer arguments, read these now
-      if (requiredArgs > 1) { const int charpos=1; int *errPos=status; CAST_TO_INT(argP,"%"); arg1i = (int)(context->stack[context->stackPtr+argP].real); argP++; }
-      if (requiredArgs > 2) { const int charpos=1; int *errPos=status; CAST_TO_INT(argP,"%"); arg2i = (int)(context->stack[context->stackPtr+argP].real); argP++; }
+      if (requiredArgs > 1) { CAST_TO_INT(obj+argP,"%"); arg1i = (int)((obj+argP)->real); argP++; }
+      if (requiredArgs > 2) { CAST_TO_INT(obj+argP,"%"); arg2i = (int)((obj+argP)->real); argP++; }
 
       // Print a string
       if ((allowedFormats[l]=='c') || (allowedFormats[l]=='s') || (allowedFormats[l]=='S'))
@@ -169,7 +109,7 @@ static void _stringSubs(ppl_context *context, int Nsubs, int *status, int *errTy
         const int tmpbufflen = 65536;
         char *tmpbuff = (char *)malloc(tmpbufflen);
         if (tmpbuff==NULL) { free(out); *status=1; *errType=ERR_MEMORY; sprintf(errText, "Out of memory."); return; }
-        pplObjPrint(context, &context->stack[context->stackPtr+argP], NULL, tmpbuff, tmpbufflen, 0, 0);
+        pplObjPrint(context, obj+argP, NULL, tmpbuff, tmpbufflen, 0, 0);
         formatToken[inP2-inP] = 's';
         if (requiredArgs==1) snprintf(out+outP, outlen-outP, formatToken, tmpbuff); // Print a string variable
         if (requiredArgs==2) snprintf(out+outP, outlen-outP, formatToken, arg1i, tmpbuff);
@@ -179,8 +119,8 @@ static void _stringSubs(ppl_context *context, int Nsubs, int *status, int *errTy
        }
       else
        {
-        pplObj *o = &context->stack[context->stackPtr+argP];
-        { const int charpos=1; int *errPos=status; CAST_TO_NUM(argP); } // Make object into a number
+        pplObj *o = obj+argP;
+        CAST_TO_NUM(obj+argP); // Make object into a number
         if ((!gsl_finite(o->real)) || ((context->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && (o->flagComplex!=0))) { strcpy(out+outP, "nan"); }
         else
          {
@@ -270,19 +210,21 @@ static void _stringSubs(ppl_context *context, int Nsubs, int *status, int *errTy
   out[outP]='\0';
 
   // Return output string
-  pplObjStr(&context->stack[context->stackPtr] , 0 , 1 , out);
+  pplObjStr(obj, 0, 1, out);
   context->stackPtr++;
   return;
 
-cleanup_on_error:
-  if (out!=NULL) free(out);
-  return;
+  cast_fail:
+    *status = 1;
+    if (out!=NULL) free(out);
+    return;
  }
 
 pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterDepth, int *errPos, int *errType, char *errText)
  {
   int j=0;
   int initialStackPtr;
+  int charpos=0;
 
   // If at bottom iteration depth, clean up stack now if there is any left-over junk
   if (IterDepth==0) for ( ; context->stackPtr>0 ; ) { context->stackPtr--; ppl_garbageObject(&context->stack[context->stackPtr]); }
@@ -291,10 +233,11 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
 
   while (1)
    {
-    int pos     = j; // Position of start of instruction
-    int len     = *(int *)(in+j            ); // length of bytecode instruction with data
-    int charpos = *(int *)(in+j+sizeof(int)); // character position of token (for error reporting)
-    int o       = (int)(*(unsigned char *)(in+j+2*sizeof(int)  )); // Opcode number
+    pplObj *stk     = &context->stack[context->stackPtr];
+    int     pos     = j; // Position of start of instruction
+    int     len     = *(int *)(in+j            ); // length of bytecode instruction with data
+    int     o       = (int)(*(unsigned char *)(in+j+2*sizeof(int)  )); // Opcode number
+    charpos = *(int *)(in+j+sizeof(int)); // character position of token (for error reporting)
     j+=2*sizeof(int)+1; // Leave j pointing to first data item after opcode
     switch (o)
      {
@@ -302,7 +245,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
         break;
       case 1: // Numeric literal
         *lastOpAssign=0;
-        pplObjNum(&context->stack[context->stackPtr] , 0 , *(double *)(in+j) , 0);
+        pplObjNum(stk , 0 , *(double *)(in+j) , 0);
         context->stackPtr++;
         break;
       case 2: // String literal
@@ -312,7 +255,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
         *lastOpAssign=0;
         if ((out = (char *)malloc(l+1))==NULL) { *errPos=charpos; *errType=ERR_MEMORY; strcpy(errText,"Out of memory."); goto cleanup_on_error; }
         strcpy(out , (char *)(in+j));
-        pplObjStr(&context->stack[context->stackPtr] , 0 , 1 , out);
+        pplObjStr(stk , 0 , 1 , out);
         context->stackPtr++;
         break;
        }
@@ -321,13 +264,13 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
         int i , got=0;
         char *key = (char *)(in+j);
         *lastOpAssign=0;
-        for (i=context->ns_ptr; i>=0; i--)
+        for (i=context->ns_ptr ; i>=0 ; i=(i>1)?1:i-1)
          {
           pplObj *obj = (pplObj *)ppl_dictLookup(context->namespaces[i] , key);
           if (obj==NULL) continue;
-          if (obj->objType==PPLOBJ_GLOB) { if (i<=2) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Variable declared global in global namespace."); goto cleanup_on_error; } i=2; continue; }
-          if (obj->objType==PPLOBJ_ZOM ) continue;
-          pplObjCpy(&context->stack[context->stackPtr] , obj , 0 , 1);
+          if ((obj->objType==PPLOBJ_GLOB)||(obj->objType==PPLOBJ_ZOM)) continue;
+          pplObjCpy(stk , obj , 0 , 1);
+          stk->immutable = stk->immutable || context->namespaces[i]->immutable;
           context->stackPtr++;
           got=1;
           break;
@@ -340,19 +283,19 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
         int i;
         char *key = (char *)(in+j);
         *lastOpAssign=0;
-        for (i=context->ns_ptr; i>=0; i--)
+        for (i=context->ns_ptr ; ; i=1)
          {
           pplObj *obj = (pplObj *)ppl_dictLookup(context->namespaces[i] , key);
-          if (obj==NULL)
+          if ((obj==NULL)&&(!context->namespaces[i]->immutable))
            {
-            pplObjNum(&context->stack[context->stackPtr] , 0 , 0 , 0);
-            context->stack[context->stackPtr].objType=PPLOBJ_ZOM; // Create a temporary zombie for now
-            ppl_dictAppendCpy(context->namespaces[i] , key , &context->stack[context->stackPtr] , sizeof(pplObj));
+            pplObjZom(stk , 0); // Create a temporary zombie for now
+            ppl_dictAppendCpy(context->namespaces[i] , key , stk , sizeof(pplObj));
             obj = (pplObj *)ppl_dictLookup(context->namespaces[i] , key);
             if (obj==NULL) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Out of memory."); goto cleanup_on_error; }
            }
-          if (obj->objType==PPLOBJ_GLOB) { if (i<=2) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Variable declared global in global namespace."); goto cleanup_on_error; } i=2; continue; }
-          pplObjCpy(&context->stack[context->stackPtr] , obj , 0 , 1);
+          if ((obj==NULL)||((context->namespaces[i]->immutable)&&(obj->objType!=PPLOBJ_GLOB))) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Cannot modify variable in immutable namespace."); goto cleanup_on_error; }
+          if (obj->objType==PPLOBJ_GLOB) { if (i<2) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Variable declared global in global namespace."); goto cleanup_on_error; } continue; }
+          pplObjCpy(stk , obj , 0 , 1);
           context->stackPtr++;
           break;
          }
@@ -361,15 +304,17 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
       case 5: // Dereference value
        {
         char *key = (char *)(in+j);
-        int   t   = context->stack[context->stackPtr-1].objType;
-        dict *d   = (dict *)context->stack[context->stackPtr-1].auxil;
+        int   t   = (stk-1)->objType;
+        int   imm = (stk-1)->immutable;
+        dict *d   = (dict *)((stk-1)->auxil);
         *lastOpAssign=0;
         if ((t==PPLOBJ_MOD)||(t==PPLOBJ_USER))
          {
           pplObj *obj = (pplObj *)ppl_dictLookup(d , key);
           if ((obj==NULL) || (obj->objType==PPLOBJ_ZOM) || (obj->objType==PPLOBJ_GLOB)) { *errPos=charpos; *errType=ERR_NAMESPACE; sprintf(errText,"No such method '%s'.",key); goto cleanup_on_error; }
-          ppl_garbageObject(&context->stack[context->stackPtr-1]);
-          pplObjCpy(&context->stack[context->stackPtr-1] , obj , 0 , 1);
+          ppl_garbageObject(stk-1);
+          pplObjCpy(stk-1 , obj , 0 , 1);
+          (stk-1)->immutable = (stk-1)->immutable || imm;
           break;
          }
         else
@@ -381,22 +326,22 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
       case 6: // Dereference value (pointer)
        {
         char *key = (char *)(in+j);
-        int   t   = context->stack[context->stackPtr-1].objType;
-        dict *d   = (dict *)context->stack[context->stackPtr-1].auxil;
+        int   t   = (stk-1)->objType;
+        dict *d   = (dict *)((stk-1)->auxil);
         *lastOpAssign=0;
+        if ((stk-1)->immutable) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Cannot modify variable in immutable namespace."); goto cleanup_on_error; }
         if ((t==PPLOBJ_MOD)||(t==PPLOBJ_USER))
          {
           pplObj *obj = (pplObj *)ppl_dictLookup(d , key);
           if (obj==NULL)
            {
-            pplObjNum(&context->stack[context->stackPtr] , 0 , 0 , 0);
-            context->stack[context->stackPtr].objType=PPLOBJ_ZOM; // Create a temporary zombie for now
-            ppl_dictAppendCpy(d , key , &context->stack[context->stackPtr] , sizeof(pplObj));
+            pplObjZom(stk , 0); // Create a temporary zombie for now
+            ppl_dictAppendCpy(d , key , stk , sizeof(pplObj));
             obj = (pplObj *)ppl_dictLookup(d , key);
             if (obj==NULL) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Out of memory."); goto cleanup_on_error; }
            }
-          ppl_garbageObject(&context->stack[context->stackPtr-1]);
-          pplObjCpy(&context->stack[context->stackPtr-1] , obj , 0 , 1);
+          ppl_garbageObject(stk-1);
+          pplObjCpy(stk-1 , obj , 0 , 1);
           break;
          }
         else
@@ -409,24 +354,19 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
        {
         int k;
         int len = *(int *)(in+j);
-        int tmp = context->stackPtr;
         dict *d = ppl_dictInit(HASHSIZE_LARGE,1);
         *lastOpAssign=0;
         if (d==NULL) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Out of memory."); goto cleanup_on_error; }
         if (context->stackPtr<2*len) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Attempt to make dictionary with too few items on the stack."); goto cleanup_on_error; }
-        pplObjNum(&context->stack[tmp] , 0 , 0 , 0);
-        context->stack[tmp].objType       = PPLOBJ_DICT;
-        context->stack[tmp].auxil         = (void *)d;
-        context->stack[tmp].auxilMalloced = 1;
-        for (k=0; k<len; k++) if (context->stack[context->stackPtr-2*(len-k)].objType!=PPLOBJ_STR) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Dictionary keys must be strings; supplied key has type <%s>.",pplObjTypeNames[context->stack[context->stackPtr-2*(len-k)].objType]); goto cleanup_on_error; }
+        for (k=0; k<len; k++) if ((stk-2*(len-k))->objType!=PPLOBJ_STR) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Dictionary keys must be strings; supplied key has type <%s>.",pplObjTypeNames[(stk-2*(len-k))->objType]); goto cleanup_on_error; }
         for (k=0; k<len; k++)
          {
-          context->stack[context->stackPtr-2*(len-k)+1].amMalloced = 1;
-          ppl_dictAppendCpy( d , (char *)context->stack[context->stackPtr-2*(len-k)].auxil , (void *)&(context->stack[context->stackPtr-2*(len-k)+1]) , sizeof(pplObj) );
+          (stk-2*(len-k)+1)->amMalloced = 1;
+          ppl_dictAppendCpy( d , (char *)((stk-2*(len-k))->auxil) , (void *)(stk-2*(len-k)+1) , sizeof(pplObj) );
          }
-        for (k=0; k<len; k++) free(context->stack[context->stackPtr-2*(len-k)].auxil); // Free key strings
+        for (k=0; k<len; k++) free((stk-2*(len-k))->auxil); // Free key strings
         context->stackPtr -= 2*len; // Don't garbage collect, as objects have gone into dictionary
-        if (len>0) memcpy(&context->stack[context->stackPtr] , &context->stack[tmp] , sizeof(pplObj));
+        pplObjDict(&context->stack[context->stackPtr] , 0 , 1 , d);
         context->stackPtr++;
         break;
        }
@@ -434,28 +374,23 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
        {
         int k;
         int len = *(int *)(in+j);
-        int tmp = context->stackPtr;
         list *l = ppl_listInit(1);
         *lastOpAssign=0;
         if (l==NULL) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Out of memory."); goto cleanup_on_error; }
         if (context->stackPtr<len) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Attempt to make list with too few items on the stack."); goto cleanup_on_error; }
-        pplObjNum(&context->stack[tmp] , 0 , 0 , 0);
-        context->stack[tmp].objType       = PPLOBJ_LIST;
-        context->stack[tmp].auxil         = (void *)l;
-        context->stack[tmp].auxilMalloced = 1;
         for (k=0; k<len; k++)
          {
-          context->stack[context->stackPtr-len+k].amMalloced = 1;
-          ppl_listAppendCpy( l , (void *)&(context->stack[context->stackPtr-len+k]) , sizeof(pplObj) );
+          (stk-len+k)->amMalloced = 1;
+          ppl_listAppendCpy( l , (void *)(stk-len+k) , sizeof(pplObj) );
          }
         context->stackPtr -= len; // Don't garbage collect, as objects have gone into list
-        if (len>0) memcpy(&context->stack[context->stackPtr] , &context->stack[tmp] , sizeof(pplObj));
+        pplObjList(&context->stack[context->stackPtr] , 0 , 1 , l);
         context->stackPtr++;
         break;
        }
       case 10: // Execute function call
        {
-        int      nArgs = *(int *)(in+j) , stat=0;
+        int nArgs = *(int *)(in+j) , stat=0;
         *lastOpAssign=0;
         ppl_fnCall(context, nArgs, charpos, IterDepth, &stat, errPos, errType, errText);
         if (stat) goto cleanup_on_error;
@@ -465,164 +400,151 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
        {
         int t = (int)*(unsigned char *)(in+j);
         *lastOpAssign=0;
-        pplObjNum(&context->stack[context->stackPtr], 0 , 0 , 0);
+        pplObjNum(stk, 0, 0, 0);
         switch (t)
          {
           case 0x25: // -
            {
-            CAST_TO_NUM(-1);
-            context->stack[context->stackPtr-1].real *= -1;
-            if (context->stack[context->stackPtr-1].flagComplex) context->stack[context->stackPtr-1].imag *=-1;
+            CAST_TO_NUM(stk-1);
+            (stk-1)->real *= -1;
+            if ((stk-1)->flagComplex) (stk-1)->imag *=-1;
             break;
            }
           case 0x26: // +
            {
-            CAST_TO_NUM(-1);
+            CAST_TO_NUM(stk-1);
             break;
            }
           case 0xA7: // ~
            {
-            CAST_TO_INT(-1,"~");
-            context->stack[context->stackPtr-1].real = ~(int)context->stack[context->stackPtr-1].real;
+            CAST_TO_INT(stk-1,"~");
+            (stk-1)->real = ~(int)((stk-1)->real);
             break;
            }
           case 0xA8: // !
            {
-            CAST_TO_BOOL(-1);
-            context->stack[context->stackPtr-1].real = !context->stack[context->stackPtr-1].real;
+            CAST_TO_BOOL(stk-1);
+            (stk-1)->real = !(stk-1)->real;
             break;
            }
           case 0xC9: // **
            {
             int status=0;
-            CAST_TO_NUM(-1); CAST_TO_NUM(-2);
-            ppl_uaPow(context, &context->stack[context->stackPtr-2], &context->stack[context->stackPtr-1], &context->stack[context->stackPtr], &status, errType, errText);
+            CAST_TO_NUM(stk-1); CAST_TO_NUM(stk-2);
+            ppl_uaPow(context, stk-2, stk-1, stk, &status, errType, errText);
             if (status) { *errPos=charpos; goto cleanup_on_error; }
-            memcpy(&context->stack[context->stackPtr-2], &context->stack[context->stackPtr], sizeof(pplObj));
+            memcpy(stk-2, stk, sizeof(pplObj));
             context->stackPtr--;
             break;
            }
           case 0x4A: // *
            {
             int status=0;
-            CAST_TO_NUM(-1); CAST_TO_NUM(-2);
-            ppl_uaMul(context, &context->stack[context->stackPtr-2], &context->stack[context->stackPtr-1], &context->stack[context->stackPtr], &status, errType, errText);
+            ppl_opMul(context, stk-2, stk-1, stk, &status, errType, errText);
             if (status) { *errPos=charpos; goto cleanup_on_error; }
-            memcpy(&context->stack[context->stackPtr-2], &context->stack[context->stackPtr], sizeof(pplObj));
+            ppl_garbageObject(stk-2);
+            ppl_garbageObject(stk-1);
+            memcpy(stk-2, stk, sizeof(pplObj));
             context->stackPtr--;
             break;
            }
           case 0x4B: // div
            {
             int status=0;
-            CAST_TO_NUM(-1); CAST_TO_NUM(-2);
-            ppl_uaDiv(context, &context->stack[context->stackPtr-2], &context->stack[context->stackPtr-1], &context->stack[context->stackPtr], &status, errType, errText);
+            ppl_opDiv(context, stk-2, stk-1, stk, &status, errType, errText);
             if (status) { *errPos=charpos; goto cleanup_on_error; }
-            memcpy(&context->stack[context->stackPtr-2], &context->stack[context->stackPtr], sizeof(pplObj));
+            ppl_garbageObject(stk-2);
+            ppl_garbageObject(stk-1);
+            memcpy(stk-2, stk, sizeof(pplObj));
             context->stackPtr--;
             break;
            }
           case 0x4C: // mod
            {
             int status=0;
-            CAST_TO_NUM(-1); CAST_TO_NUM(-2);
-            ppl_uaMod(context, &context->stack[context->stackPtr-2], &context->stack[context->stackPtr-1], &context->stack[context->stackPtr], &status, errType, errText);
+            CAST_TO_NUM(stk-1); CAST_TO_NUM(stk-2);
+            ppl_uaMod(context, stk-2, stk-1, stk, &status, errType, errText);
             if (status) { *errPos=charpos; goto cleanup_on_error; }
-            memcpy(&context->stack[context->stackPtr-2], &context->stack[context->stackPtr], sizeof(pplObj));
+            memcpy(stk-2, stk, sizeof(pplObj));
             context->stackPtr--;
             break;
            }
           case 0x4D: // add
            {
-            int t1 = context->stack[context->stackPtr-2].objType;
-            int t2 = context->stack[context->stackPtr-1].objType;
-            if ((t1==PPLOBJ_STR)&&(t2==PPLOBJ_STR)) // adding strings: concatenate
-             {
-              char **i2, *tmp;
-              int    l1 = strlen((char *)context->stack[context->stackPtr-2].auxil);
-              int    l2 = strlen((char *)context->stack[context->stackPtr-1].auxil);
-              int    l  = l1+l2+1;
-              tmp = *(i2 = (char **)&context->stack[context->stackPtr-2].auxil);
-              *i2 = (char *)realloc( (void *)*i2 , l );
-              if (*i2==NULL) { *i2=tmp; *errPos=charpos; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); goto cleanup_on_error; }
-              strcpy(*i2+l1 , (char *)context->stack[context->stackPtr-1].auxil);
-              context->stack[context->stackPtr-2].auxilLen = l;
-              ppl_garbageObject(&context->stack[context->stackPtr-1]);
-             }
-            else // adding numbers
-             {
-              int status=0;
-              CAST_TO_NUM(-1); CAST_TO_NUM(-2);
-              ppl_uaAdd(context, &context->stack[context->stackPtr-2], &context->stack[context->stackPtr-1], &context->stack[context->stackPtr], &status, errType, errText);
-              if (status) { *errPos=charpos; goto cleanup_on_error; }
-              memcpy(&context->stack[context->stackPtr-2], &context->stack[context->stackPtr], sizeof(pplObj));
-             }
+            int status=0;
+            ppl_opAdd(context, stk-2, stk-1, stk, &status, errType, errText);
+            if (status) { *errPos=charpos; goto cleanup_on_error; }
+            ppl_garbageObject(stk-2);
+            ppl_garbageObject(stk-1);
+            memcpy(stk-2, stk, sizeof(pplObj));
             context->stackPtr--;
             break;
            }
           case 0x4E: // sub
            {
             int status=0;
-            CAST_TO_NUM(-1); CAST_TO_NUM(-2);
-            ppl_uaSub(context, &context->stack[context->stackPtr-2], &context->stack[context->stackPtr-1], &context->stack[context->stackPtr], &status, errType, errText);
+            ppl_opSub(context, stk-2, stk-1, stk, &status, errType, errText);
             if (status) { *errPos=charpos; goto cleanup_on_error; }
-            memcpy(&context->stack[context->stackPtr-2], &context->stack[context->stackPtr], sizeof(pplObj));
+            ppl_garbageObject(stk-2);
+            ppl_garbageObject(stk-1);
+            memcpy(stk-2, stk, sizeof(pplObj));
             context->stackPtr--;
             break;
            }
           case 0x4F: // <<
            {
-            CAST_TO_INT(-1,"<<"); CAST_TO_INT(-2,"<<");
-            context->stack[context->stackPtr-2].real = ((int)context->stack[context->stackPtr-2].real) << ((int)context->stack[context->stackPtr-1].real);
+            CAST_TO_INT(stk-1,"<<"); CAST_TO_INT(stk-2,"<<");
+            (stk-2)->real = ((int)(stk-2)->real) << ((int)(stk-1)->real);
             context->stackPtr--;
             break;
            }
           case 0x50: // >>
            {
-            CAST_TO_INT(-1,">>"); CAST_TO_INT(-2,">>");
-            context->stack[context->stackPtr-2].real = ((int)context->stack[context->stackPtr-2].real) >> ((int)context->stack[context->stackPtr-1].real);
+            CAST_TO_INT(stk-1,">>"); CAST_TO_INT(stk-2,">>");
+            (stk-2)->real = ((int)(stk-2)->real) >> ((int)(stk-1)->real);
             context->stackPtr--;
             break;
            }
           case 0x57: // &
            {
-            CAST_TO_INT(-1,"&"); CAST_TO_INT(-2,"&");
-            context->stack[context->stackPtr-2].real = ((int)context->stack[context->stackPtr-2].real) & ((int)context->stack[context->stackPtr-1].real);
+            CAST_TO_INT(stk-1,"&"); CAST_TO_INT(stk-2,"&");
+            (stk-2)->real = ((int)(stk-2)->real) & ((int)(stk-1)->real);
             context->stackPtr--;
             break;
            }
           case 0x58: // ^
            {
-            CAST_TO_INT(-1,"^"); CAST_TO_INT(-2,"^");
-            context->stack[context->stackPtr-2].real = ((int)context->stack[context->stackPtr-2].real) ^ ((int)context->stack[context->stackPtr-1].real);
+            CAST_TO_INT(stk-1,"^"); CAST_TO_INT(stk-2,"^");
+            (stk-2)->real = ((int)(stk-2)->real) ^ ((int)(stk-1)->real);
             context->stackPtr--;
             break;
            }
           case 0x59: // |
            {
-            CAST_TO_INT(-1,"|"); CAST_TO_INT(-2,"|");
-            context->stack[context->stackPtr-2].real = ((int)context->stack[context->stackPtr-2].real) | ((int)context->stack[context->stackPtr-1].real);
+            CAST_TO_INT(stk-1,"|"); CAST_TO_INT(stk-2,"|");
+            (stk-2)->real = ((int)(stk-2)->real) | ((int)(stk-1)->real);
             context->stackPtr--;
             break;
            }
           case 0x5C: // swap-pop
            {
-            memcpy( &context->stack[context->stackPtr-2].real , &context->stack[context->stackPtr-1].real , sizeof(pplObj));
+            ppl_garbageObject(stk-2);
+            memcpy(stk-2, stk-1, sizeof(pplObj));
             context->stackPtr--;
             break;
            }
           case 0x51: // <
           case 0x53: // >=
            {
-            int t1  = context->stack[context->stackPtr-2].objType;
-            int t2  = context->stack[context->stackPtr-1].objType;
+            int t1  = (stk-2)->objType;
+            int t2  = (stk-1)->objType;
             int t1o = pplObjTypeOrder[t1];
             int t2o = pplObjTypeOrder[t2];
-            if      (t1o < t2o) context->stack[context->stackPtr-2].real = 1;
-            else if (t1o > t2o) context->stack[context->stackPtr-2].real = 0;
-            context->stack[context->stackPtr-2].real = 0;
-            context->stack[context->stackPtr-2].objType = PPLOBJ_BOOL;
-            if (o==0x53) context->stack[context->stackPtr-2].real = !context->stack[context->stackPtr-2].real;
+            if      (t1o < t2o) (stk-2)->real = 1;
+            else if (t1o > t2o) (stk-2)->real = 0;
+            (stk-2)->real = 0;
+            (stk-2)->objType = PPLOBJ_BOOL;
+            if (o==0x53) (stk-2)->real = !(stk-2)->real;
             context->stackPtr--;
             break;
            }
@@ -634,114 +556,136 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
       case 12: // assignment operator
        {
         int t  = (int)*(unsigned char *)(in+j);
-        int t1 = context->stack[context->stackPtr-2].objType;
-        int t2 = context->stack[context->stackPtr-1].objType;
-        pplObj *o = &context->stack[context->stackPtr-2];
+        pplObj *o  = stk-2;
+        pplObj *in = stk-1;
+        pplObj *tmp= stk;
+        int t2 = in->objType;
         *lastOpAssign=1;
         if (context->stackPtr < 2) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Too few items on stack for assignment operator."); goto cleanup_on_error; }
-        if (o->self_lval == NULL)  { *errPos=charpos; *errType=ERR_TYPE;     sprintf(errText,"Assignment operators can only be applied to variables."); goto cleanup_on_error; }
+        if (o->self_lval == NULL)  { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Assignment operators can only be applied to variables."); goto cleanup_on_error; }
+        if (o->immutable) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Cannot assign to an immutable object."); goto cleanup_on_error; }
         if (t==0x40) // =
          {
-          if (context->stack[context->stackPtr-2].self_dval==NULL)
+          if (o->self_dval==NULL)
            {
-            int om = context->stack[context->stackPtr-2].self_lval->amMalloced;
-            context->stack[context->stackPtr-2].self_lval->amMalloced = 0;
-            ppl_garbageObject(&context->stack[context->stackPtr-2]);
-            ppl_garbageObject( context->stack[context->stackPtr-2].self_lval);
-            pplObjCpy(context->stack[context->stackPtr-2].self_lval , &context->stack[context->stackPtr-1] , om , 1);
+            int om = o->self_lval->amMalloced;
+            o->self_lval->amMalloced = 0;
+            ppl_garbageObject(o->self_lval);
+            pplObjCpy(o->self_lval, in, om, 1);
+            ppl_garbageObject(o);
            }
           else // Assign vector or matrix element
            {
-            if ((t2!=PPLOBJ_NUM) || (context->stack[context->stackPtr-1].flagComplex) || (context->stack[context->stackPtr-1].dimensionless))
+            if ((t2!=PPLOBJ_NUM) || (in->flagComplex) || (in->dimensionless))
               { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Object elements can only represent real dimensionless numbers."); goto cleanup_on_error; }
-            ppl_garbageObject(&context->stack[context->stackPtr-2]);
-            *context->stack[context->stackPtr-2].self_dval = context->stack[context->stackPtr-1].real;
+            *o->self_dval = in->real;
+            ppl_garbageObject(o);
            }
-          memcpy(&context->stack[context->stackPtr-2] , &context->stack[context->stackPtr-1] , sizeof(pplObj)); // swap-pop
+          memcpy(o , in , sizeof(pplObj)); // swap-pop
           context->stackPtr--;
          }
-        else if ((t==0x41)&&(t1==PPLOBJ_STR)&&(t2==PPLOBJ_STR)) // += acting on strings
+        else if (t==0x41) // +=
          {
-          char **i2, *tmp;
-          int    l1 = strlen((char *)context->stack[context->stackPtr-2].auxil);
-          int    l2 = strlen((char *)context->stack[context->stackPtr-1].auxil);
-          int    l  = l1+l2+1;
-          tmp = *(i2 = (char **)&context->stack[context->stackPtr-2].self_lval->auxil);
-          *i2 = (char *)realloc( (void *)*i2 , l );
-          if (*i2==NULL) { *i2=tmp; *errPos=charpos; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); goto cleanup_on_error; }
-          strcpy(*i2+l1 , (char *)context->stack[context->stackPtr-1].auxil);
-          context->stack[context->stackPtr-2].self_lval->auxilLen = l;
-          ppl_garbageObject(&context->stack[context->stackPtr-1]);
-          ppl_garbageObject(&context->stack[context->stackPtr-2]);
-          pplObjCpy(&context->stack[context->stackPtr-2] , context->stack[context->stackPtr-2].self_lval , 0 , 1);
+          int status=0;
+          ppl_opAdd(context, o, in, tmp, &status, errType, errText);
+          if (status) { *errPos=charpos; goto cleanup_on_error; }
+          pplObjCpy(o->self_lval, tmp, 0, 1);
+          ppl_garbageObject(o);
+          ppl_garbageObject(in);
+          memcpy(o, tmp, sizeof(pplObj));
           context->stackPtr--;
+          break;
+         }
+        else if (t==0x42) // -=
+         {
+          int status=0;
+          ppl_opSub(context, o, in, tmp, &status, errType, errText);
+          if (status) { *errPos=charpos; goto cleanup_on_error; }
+          pplObjCpy(o->self_lval, tmp, 0, 1);
+          ppl_garbageObject(o);
+          ppl_garbageObject(in);
+          memcpy(o, tmp, sizeof(pplObj));
+          context->stackPtr--;
+          break;
+         }
+        else if (t==0x43) // *=
+         {
+          int status=0;
+          ppl_opMul(context, o, in, tmp, &status, errType, errText);
+          if (status) { *errPos=charpos; goto cleanup_on_error; }
+          pplObjCpy(o->self_lval, tmp, 0, 1);
+          ppl_garbageObject(o);
+          ppl_garbageObject(in);
+          memcpy(o, tmp, sizeof(pplObj));
+          context->stackPtr--;
+          break;
+         }
+        else if (t==0x44) // /=
+         {
+          int status=0;
+          ppl_opDiv(context, o, in, tmp, &status, errType, errText);
+          if (status) { *errPos=charpos; goto cleanup_on_error; }
+          pplObjCpy(o->self_lval, tmp, 0, 1);
+          ppl_garbageObject(o);
+          ppl_garbageObject(in);
+          memcpy(o, tmp, sizeof(pplObj));
+          context->stackPtr--;
+          break;
          }
         else
          {
           int status=0;
           if (o->objType != PPLOBJ_NUM) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The fused operator-assignment operators can only be applied to numeric variables."); goto cleanup_on_error; }
-          CAST_TO_NUM(-1);
-          pplObjNum(&context->stack[context->stackPtr], 0 , 0 , 0);
+          CAST_TO_NUM(stk-1);
+          pplObjNum(stk, 0, 0, 0);
           switch (t)
            {
-            case 0x41: // +=
-              ppl_uaAdd(context, &context->stack[context->stackPtr-2], &context->stack[context->stackPtr-1], &context->stack[context->stackPtr], &status, errType, errText);
-              break;
-            case 0x42: // -=
-              ppl_uaSub(context, &context->stack[context->stackPtr-2], &context->stack[context->stackPtr-1], &context->stack[context->stackPtr], &status, errType, errText);
-              break;
-            case 0x43: // *=
-              ppl_uaMul(context, &context->stack[context->stackPtr-2], &context->stack[context->stackPtr-1], &context->stack[context->stackPtr], &status, errType, errText);
-              break;
-            case 0x44: // /=
-              ppl_uaDiv(context, &context->stack[context->stackPtr-2], &context->stack[context->stackPtr-1], &context->stack[context->stackPtr], &status, errType, errText);
-              break;
             case 0x45: // %=
-              ppl_uaMod(context, &context->stack[context->stackPtr-2], &context->stack[context->stackPtr-1], &context->stack[context->stackPtr], &status, errType, errText);
+              ppl_uaMod(context, stk-2, stk-1, stk, &status, errType, errText);
               break;
             case 0x46: // &=
-              CAST_TO_INT(-1,"&="); CAST_TO_INT(-2,"&=");
-              context->stack[context->stackPtr].real = ((int)context->stack[context->stackPtr-2].real) & ((int)context->stack[context->stackPtr-1].real);
+              CAST_TO_INT(stk-1,"&="); CAST_TO_INT(stk-2,"&=");
+              stk->real = ((int)(stk-2)->real) & ((int)(stk-1)->real);
               break;
             case 0x47: // ^=
-              CAST_TO_INT(-1,"^="); CAST_TO_INT(-2,"^=");
-              context->stack[context->stackPtr].real = ((int)context->stack[context->stackPtr-2].real) ^ ((int)context->stack[context->stackPtr-1].real);
+              CAST_TO_INT(stk-1,"^="); CAST_TO_INT(stk-2,"^=");
+              stk->real = ((int)(stk-2)->real) ^ ((int)(stk-1)->real);
               break;
             case 0x48: // |=
-              CAST_TO_INT(-1,"|="); CAST_TO_INT(-2,"|=");
-              context->stack[context->stackPtr].real = ((int)context->stack[context->stackPtr-2].real) | ((int)context->stack[context->stackPtr-1].real);
+              CAST_TO_INT(stk-1,"|="); CAST_TO_INT(stk-2,"|=");
+              stk->real = ((int)(stk-2)->real) | ((int)(stk-1)->real);
               break;
             case 0x49: // <<=
-              CAST_TO_INT(-1,"<<="); CAST_TO_INT(-2,"<<=");
-              context->stack[context->stackPtr].real = ((int)context->stack[context->stackPtr-2].real) << ((int)context->stack[context->stackPtr-1].real);
+              CAST_TO_INT(stk-1,"<<="); CAST_TO_INT(stk-2,"<<=");
+              stk->real = ((int)(stk-2)->real) << ((int)(stk-1)->real);
               break;
             case 0x4A: // >>=
-              CAST_TO_INT(-1,">>="); CAST_TO_INT(-2,">>=");
-              context->stack[context->stackPtr].real = ((int)context->stack[context->stackPtr-2].real) >> ((int)context->stack[context->stackPtr-1].real);
+              CAST_TO_INT(stk-1,">>="); CAST_TO_INT(stk-2,">>=");
+              stk->real = ((int)(stk-2)->real) >> ((int)(stk-1)->real);
               break;
             case 0x4B: // **=
-              ppl_uaPow(context, &context->stack[context->stackPtr-2], &context->stack[context->stackPtr-1], &context->stack[context->stackPtr], &status, errType, errText);
+              ppl_uaPow(context, stk-2, stk-1, stk, &status, errType, errText);
               break;
             default:
              *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Unknown fused operator-assignment operator with id=%d.",t); goto cleanup_on_error;
            }
           if (status) { *errPos=charpos; goto cleanup_on_error; }
-          if (context->stack[context->stackPtr-2].self_dval==NULL)
+          if ((stk-2)->self_dval==NULL)
            {
-            int om = context->stack[context->stackPtr-2].self_lval->amMalloced;
-            context->stack[context->stackPtr-2].self_lval->amMalloced = 0;
-            ppl_garbageObject(&context->stack[context->stackPtr-2]);
-            ppl_garbageObject( context->stack[context->stackPtr-2].self_lval);
-            pplObjCpy(context->stack[context->stackPtr-2].self_lval , &context->stack[context->stackPtr] , om , 1);
+            int om = (stk-2)->self_lval->amMalloced;
+            (stk-2)->self_lval->amMalloced = 0;
+            ppl_garbageObject((stk-2)->self_lval);
+            pplObjCpy((stk-2)->self_lval, stk, om, 1);
+            ppl_garbageObject(stk-2);
            }
           else // Assign vector or matrix element
            {
-            if ((t2!=PPLOBJ_NUM) || (context->stack[context->stackPtr].flagComplex) || (context->stack[context->stackPtr].dimensionless))
+            if ((t2!=PPLOBJ_NUM) || (stk->flagComplex) || (stk->dimensionless))
               { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Object elements can only represent real dimensionless numbers."); goto cleanup_on_error; }
-            ppl_garbageObject(&context->stack[context->stackPtr-2]);
-            *context->stack[context->stackPtr-2].self_dval = context->stack[context->stackPtr].real;
+            *(stk-2)->self_dval = stk->real;
+            ppl_garbageObject(stk-2);
            }
-          memcpy(&context->stack[context->stackPtr-2], &context->stack[context->stackPtr], sizeof(pplObj)); // swap-pop
+          memcpy(stk-2, stk, sizeof(pplObj)); // swap-pop
           context->stackPtr--;
           break;
          }
@@ -750,11 +694,12 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
       case 13: // increment and decrement operators
        {
         int     t = (int)*(unsigned char *)(in+j);
-        pplObj *o = &context->stack[context->stackPtr-1];
+        pplObj *o = stk-1;
         *lastOpAssign=1;
         if (context->stackPtr < 1)    { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Too few items on stack for -- or ++ operator."); goto cleanup_on_error; }
         if (o->self_lval == NULL)     { *errPos=charpos; *errType=ERR_TYPE;     sprintf(errText,"The -- and ++ operators can only be applied to variables."); goto cleanup_on_error; }
         if (o->objType != PPLOBJ_NUM) { *errPos=charpos; *errType=ERR_TYPE;     sprintf(errText,"The -- and ++ operators can only be applied to numeric variables."); goto cleanup_on_error; }
+        if (o->immutable) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Cannot modify an immutable object."); goto cleanup_on_error; }
         switch (t)
          {
           case 0x21: // -- (post-eval)
@@ -779,14 +724,13 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
         int status = 0;
         int Nsubs  = *(int *)(in+j);
         int i;
-        int tptr=context->stackPtr;
         if (context->stackPtr < Nsubs+1) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Too few items on stack for string substitution operator."); goto cleanup_on_error; }
-        if (context->stack[context->stackPtr-Nsubs-1].objType != PPLOBJ_STR) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Attempt to apply string substitution operator to a non-string."); goto cleanup_on_error; }
-        _stringSubs(context, Nsubs, &status, errType, errText);
+        if ((stk-Nsubs-1)->objType != PPLOBJ_STR) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Attempt to apply string substitution operator to a non-string."); goto cleanup_on_error; }
+        expEval_stringSubs(context, Nsubs, &status, errType, errText);
         if (status) {  *errPos=charpos; goto cleanup_on_error; }
         context->stackPtr--;
         for (i=0; i<Nsubs+1; i++) { context->stackPtr--; ppl_garbageObject(&context->stack[context->stackPtr]); }
-        memcpy(&context->stack[context->stackPtr] , &context->stack[tptr] , sizeof(pplObj));
+        memcpy(&context->stack[context->stackPtr] , stk , sizeof(pplObj));
         context->stackPtr++;
         break;
        }
@@ -794,8 +738,8 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
        {
         int branch;
         *lastOpAssign=0;
-        CAST_TO_BOOL(-1);
-        branch = (context->stack[context->stackPtr-1].real == 0);
+        CAST_TO_BOOL(stk-1);
+        branch = (stk-1)->real == 0;
         if (branch) { len = *(int *)(in+j+1)-pos; if (*(unsigned char *)(in+j)) context->stackPtr--; }
         else        { context->stackPtr--; }
         break;
@@ -804,8 +748,8 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
        {
         int branch;
         *lastOpAssign=0;
-        CAST_TO_BOOL(-1);
-        branch = (context->stack[context->stackPtr-1].real != 0);
+        CAST_TO_BOOL(stk-1);
+        branch = (stk-1)->real != 0;
         if (branch) { len = *(int *)(in+j+1)-pos; if (*(unsigned char *)(in+j)) context->stackPtr--; }
         else        { context->stackPtr--; }
         break;
@@ -819,7 +763,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
       case 20: // make boolean
        {
         *lastOpAssign=0;
-        CAST_TO_BOOL(-1);
+        CAST_TO_BOOL(stk-1);
         break;
        }
       default:
@@ -832,8 +776,9 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
   if (context->stackPtr != initialStackPtr+1) ppl_warning(&context->errcontext, ERR_INTERNAL, "Unexpected junk on stack in expEval.");
   return &context->stack[context->stackPtr-1];
 
-cleanup_on_error:
-  for ( ; context->stackPtr>initialStackPtr ; ) { context->stackPtr--; ppl_garbageObject(&context->stack[context->stackPtr]); }
-  return NULL;
+  cast_fail:         *errPos = charpos;
+  cleanup_on_error:
+    for ( ; context->stackPtr>initialStackPtr ; ) { context->stackPtr--; ppl_garbageObject(&context->stack[context->stackPtr]); }
+    return NULL;
  }
 

@@ -34,9 +34,9 @@ pplObj *pplObjStr      (pplObj *in, unsigned char amMalloced, unsigned char auxi
 pplObj *pplObjBool     (pplObj *in, unsigned char amMalloced, int stat);
 pplObj *pplObjDate     (pplObj *in, unsigned char amMalloced, double unixTime);
 pplObj *pplObjColor    (pplObj *in, unsigned char amMalloced, int scheme, double c1, double c2, double c3, double c4);
-pplObj *pplObjDict     (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced);
+pplObj *pplObjDict     (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, dict *d);
 pplObj *pplObjModule   (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, unsigned char frozen);
-pplObj *pplObjList     (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced);
+pplObj *pplObjList     (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, list *l);
 pplObj *pplObjVector   (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, int size);
 pplObj *pplObjMatrix   (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, int size1, int size2);
 pplObj *pplObjFile     (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, FILE *f);

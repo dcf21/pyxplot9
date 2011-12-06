@@ -25,6 +25,67 @@
 #include "userspace/context.h"
 #include "userspace/pplObj.h"
 
+#define CAST_TO_NUM(X) \
+ { \
+  double d=0; \
+  int t=(X)->objType; \
+  if (t!=PPLOBJ_NUM) \
+   { \
+    switch (t) \
+     { \
+      case PPLOBJ_BOOL: d = ((X)->real!=0); break; \
+      case PPLOBJ_STR : \
+       { \
+        int len; char *c=(char *)(X)->auxil; \
+        d = ppl_getFloat(c, &len); \
+        if (len>0) { while ((c[len]>'\0')&&(c[len]<=' ')) len++; } \
+        if ((len<0)||(c[len]!='\0')) { *errType=ERR_TYPE; sprintf(errText,"Attempt to implicitly cast string to number failed: string is not a valid number."); goto cast_fail; } \
+        break; \
+       } \
+      default: \
+        { *errType=ERR_TYPE; sprintf(errText,"Cannot implicitly cast an object of type <%s> to a number.",pplObjTypeNames[t]); goto cast_fail; } \
+     } \
+    ppl_garbageObject(X); \
+    pplObjNum(X,0,d,0); \
+   } \
+ }
+
+#define CAST_TO_REAL(X,OP) \
+ { \
+  CAST_TO_NUM(X); \
+  if ((X)->flagComplex) { *errType=ERR_RANGE; sprintf(errText,"The %s operator can only act on real numbers.",OP); goto cast_fail; } \
+ }
+
+#define CAST_TO_INT(X,OP) \
+ { \
+  CAST_TO_REAL(X,OP); \
+  if (((X)->real < INT_MIN) || ((X)->real > INT_MAX)) { *errType=ERR_RANGE; sprintf(errText,"The %s operator can only act on integers in the range %d to %d.",OP,INT_MIN,INT_MAX); goto cast_fail; } \
+ }
+
+#define CAST_TO_BOOL(X) \
+ { \
+  int t=(X)->objType, s; \
+  if (t!=PPLOBJ_BOOL) \
+   { \
+    switch (t) \
+     { \
+      case PPLOBJ_NUM : s = (((X)->real!=0)||((X)->imag!=0)) && gsl_finite((X)->real) && gsl_finite((X)->imag) && (((X)->imag==0)||(context->set->term_current.ComplexNumbers == SW_ONOFF_ON)); break; \
+      case PPLOBJ_STR : s = ((char *)(X)->auxil)[0]!='\0'; break; \
+      case PPLOBJ_ZOM : \
+      case PPLOBJ_EXC : \
+      case PPLOBJ_NULL: s = 0; break; \
+      case PPLOBJ_DICT: s = (((dict *)(X)->auxil)->length!=0); break; \
+      case PPLOBJ_LIST: s = (((list *)(X)->auxil)->length!=0); break; \
+      case PPLOBJ_VEC : s = (((pplVector *)(X)->auxil)->v->size!=0); break; \
+      case PPLOBJ_MAT : s = (((pplMatrix *)(X)->auxil)->m->size1!=0) || (((pplMatrix *)(X)->auxil)->m->size2!=0); break; \
+      case PPLOBJ_FILE: s = (((pplFile *)(X)->auxil)->open!=0); break; \
+      default         : s = 1; break; \
+     } \
+    ppl_garbageObject(X); \
+    pplObjBool(X,0,s); \
+   } \
+ }
+
 pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterDepth, int *errPos, int *errType, char *errText);
 
 #endif
