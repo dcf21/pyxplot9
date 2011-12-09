@@ -59,15 +59,15 @@
 #include "defaultObjs/defaultFuncsMacros.h"
 #include "defaultObjs/zetaRiemann.h"
 
-void ppl_addMagicFunction(dict *n, char *name, char *shortdesc, char *latex, char *desc)
+void ppl_addMagicFunction(dict *n, char *name, int id, char *shortdesc, char *latex, char *desc)
  {
   pplObj   v;
   pplFunc *f = malloc(sizeof(pplFunc));
   if (f==NULL) return;
   f->functionType = PPL_FUNC_MAGIC;
-  f->refCount   = 1;
-  f->minArgs      = 0;
-  f->maxArgs      = 0;;
+  f->refCount     = 1;
+  f->minArgs      = id;
+  f->maxArgs      = 0;
   f->functionPtr  = NULL;
   f->argList      = NULL;
   f->minActive    = NULL;
@@ -616,6 +616,33 @@ void pplfunc_hyperg_U    (ppl_context *c, pplObj *in, int nArgs, int *status, in
 
 void pplfunc_hypot       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
+  char *FunctionDescription = "hypot(...)";
+  int i;
+  double acc=0, *buffer;
+  if (nArgs<1) { pplObjNum(&OUTPUT,0,0,0); return; }
+  for (i=1; i<nArgs; i++) // Check matching dimensions
+   if (!ppl_unitsDimEqual(&in[0], &in[i]))
+   {
+    *status = 1;
+    *errType=ERR_UNIT;
+    sprintf(errText, "The %s function can only act upon inputs with matching dimensions. Input 1 has dimensions of <%s>, but input %d has dimensions of <%s>.", FunctionDescription, ppl_printUnit(c, &in[0], NULL, NULL, 0, 1, 0), i+1, ppl_printUnit(c, &in[i], NULL, NULL, 1, 1, 0));
+    return;
+   }
+  buffer = (double *)malloc(nArgs * sizeof(double));
+  if (buffer==NULL) { *status = 1; *errType=ERR_MEMORY; sprintf(errText, "Out of memory."); return; }
+  for (i=0; i<nArgs; i++) buffer[i] = hypot(in[i].real, in[i].imag);
+  qsort((void *)buffer, sizeof(double), nArgs, ppl_dblSort);
+  for (i=0; i<nArgs; i++) acc += gsl_pow_2(buffer[i]);
+  free(buffer);
+  OUTPUT.real = sqrt(acc);
+  CHECK_OUTPUT_OKAY;
+  ppl_unitsDimCpy(&OUTPUT, in);
+ }
+
+void pplfunc_globals     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObjDict(&OUTPUT, 0, 1, c->namespaces[1]);
+  c->namespaces[1]->refCount++;
  }
 
 void pplfunc_imag        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -690,6 +717,24 @@ void pplfunc_legendreQ   (ppl_context *c, pplObj *in, int nArgs, int *status, in
   CHECK_OUTPUT_OKAY;
  }
 
+void pplfunc_len         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  int t = in->objType;
+  if      ((t==PPLOBJ_DICT)||(t==PPLOBJ_MOD)||(t==PPLOBJ_USER)) OUTPUT.real = ((dict *)in->auxil)->length;
+  else if  (t==PPLOBJ_LIST)                                     OUTPUT.real = ((list *)in->auxil)->length;
+  else if ((t==PPLOBJ_STR)||(t==PPLOBJ_EXC))                    OUTPUT.real = strlen((char *)in->auxil);
+  else if  (t==PPLOBJ_VEC)                                      OUTPUT.real = ((pplVector *)in->auxil)->v->size;
+  else if  (t==PPLOBJ_MAT)                                      OUTPUT.real = ((pplMatrix *)in->auxil)->m->size1;
+  else { *status=1; *errType=ERR_TYPE; sprintf(errText, "Object of type <%s> is not a compound object and has no property of length", pplObjTypeNames[t]); return; }
+  return;
+ }
+
+void pplfunc_locals      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObjDict(&OUTPUT, 0, 1, c->namespaces[c->ns_ptr]);
+  c->namespaces[c->ns_ptr]->refCount++;
+ }
+
 void pplfunc_log         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "log(z)";
@@ -722,9 +767,9 @@ void pplfunc_lrange       (ppl_context *c, pplObj *in, int nArgs, int *status, i
   char  *FunctionDescription = "lrange([f],l,[s])";
   double start, end, step, n;
   int    i;
-  if (nArgs>1) { CHECK_2INPUT_DIMMATCH; } 
+  if (nArgs>1) { CHECK_2INPUT_DIMMATCH; }
   if (nArgs>2) { in++; CHECK_2INPUT_DIMMATCH; in--; }
-  
+ 
   if      (nArgs==1) { start=1; end=in[0].real; step=2; }
   else if (nArgs==2) { start=in[0].real; end=in[1].real; step=2; }
   else               { start=in[0].real; end=in[1].real; step=in[2].real; }
@@ -743,7 +788,11 @@ void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, in
    {
     pplObj *item, *best=NULL;
     listIterator *li = ppl_listIterateInit((list *)in[0].auxil);
-    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL) if ((best==NULL)||(pplObjCmp(c, item, best)==1)) best=item;
+    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
+     {
+      if ((best==NULL)||(pplObjCmp(c, item, best, status, errType, errText)==1)) best=item;
+      if (status) return;
+     }
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjCpy (&OUTPUT,best,0,1);
    }
@@ -752,7 +801,11 @@ void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     char *key;
     pplObj *item, *best=NULL;
     dictIterator *di = ppl_dictIterateInit((dict *)in[0].auxil);
-    while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL) if ((best==NULL)||(pplObjCmp(c, item, best)==1)) best=item;
+    while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
+     {
+      if ((best==NULL)||(pplObjCmp(c, item, best, status, errType, errText)==1)) best=item;
+      if (status) return;
+     }
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjCpy (&OUTPUT,best,0,1);
    }
@@ -778,7 +831,11 @@ void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, in
    {
     int i;
     pplObj *best = in;
-    for (i=1; i<nArgs; i++) if (pplObjCmp(c, &in[i], best)==1) best=&in[i];
+    for (i=1; i<nArgs; i++)
+     {
+      if (pplObjCmp(c, &in[i], best, status, errType, errText)==1) best=&in[i];
+      if (status) return;
+     }
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjCpy (&OUTPUT,best,0,1);
    }
@@ -791,7 +848,11 @@ void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, in
    {
     pplObj *item, *best=NULL;
     listIterator *li = ppl_listIterateInit((list *)in[0].auxil);
-    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL) if ((best==NULL)||(pplObjCmp(c, item, best)==-1)) best=item;
+    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
+     {
+      if ((best==NULL)||(pplObjCmp(c, item, best, status, errType, errText)==-1)) best=item;
+      if (status) return;
+     }
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjCpy (&OUTPUT,best,0,1);
    }
@@ -800,7 +861,11 @@ void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     char *key;
     pplObj *item, *best=NULL;
     dictIterator *di = ppl_dictIterateInit((dict *)in[0].auxil);
-    while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL) if ((best==NULL)||(pplObjCmp(c, item, best)==-1)) best=item;
+    while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
+     {
+      if ((best==NULL)||(pplObjCmp(c, item, best, status, errType, errText)==-1)) best=item;
+      if (status) return;
+     }
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjCpy (&OUTPUT,best,0,1);
    }
@@ -826,7 +891,11 @@ void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, in
    {
     int i;
     pplObj *best = in;
-    for (i=1; i<nArgs; i++) if (pplObjCmp(c, &in[i], best)==-1) best=&in[i];
+    for (i=1; i<nArgs; i++)
+     {
+      if (pplObjCmp(c, &in[i], best, status, errType, errText)==-1) best=&in[i];
+      if (status) return;
+     }
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjCpy (&OUTPUT,best,0,1);
    }
@@ -843,6 +912,19 @@ void pplfunc_mod         (ppl_context *c, pplObj *in, int nArgs, int *status, in
   OUTPUT.real = fmod(in[0].real , in[1].real);
   CHECK_OUTPUT_OKAY;
   ppl_unitsDimCpy(&OUTPUT, &in[0]);
+ }
+
+void pplfunc_open        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  FILE *f;
+  char *mode;
+  if ((nArgs<1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The open() function requires string arguments."); return; }
+  if ((nArgs>1)&&(in[1].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The open() function requires string arguments."); return; }
+  if (nArgs>1) mode=(char*)in[1].auxil;
+  else         mode="r";
+  f = fopen((char*)in[0].auxil,mode);
+  if (f==NULL) { *status=1; *errType=ERR_FILE; sprintf(errText,"File open error."); return; }
+  pplObjFile(&OUTPUT,0,1,f);
  }
 
 void pplfunc_ordinal     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)

@@ -29,6 +29,8 @@
 #include "settings/settingTypes.h"
 #include "userspace/context.h"
 #include "userspace/pplObj.h"
+#include "userspace/unitsArithmetic.h"
+#include "userspace/unitsDisp.h"
 
 void pplcol_RGBtoHSB(double ri, double gi, double bi, double *ho, double *so, double *bo)
  {
@@ -42,6 +44,7 @@ void pplcol_RGBtoHSB(double ri, double gi, double bi, double *ho, double *so, do
   *ho /= 6.0;
   *so = C/M;
   *bo = M;
+  if (!gsl_finite(*so)) *so=0;
   if (*ho<0) *ho=0; if (*ho>1) *ho=1;
   if (*so<0) *so=0; if (*so>1) *so=1;
   if (*bo<0) *bo=0; if (*bo>1) *bo=1;
@@ -57,7 +60,7 @@ void pplcol_CMYKtoRGB(double ci, double mi, double yi, double ki, double *ro, do
   if (*bo<0) *bo=0; if (*bo>1) *bo=1;
  }
 
-void pplcol_HSBroRGB(double hi, double si, double bi, double *ro, double *go, double *bo)
+void pplcol_HSBtoRGB(double hi, double si, double bi, double *ro, double *go, double *bo)
  {
   double ch  = si*bi;
   double h2;
@@ -89,7 +92,7 @@ void pplcol_CMYKtoHSB(double ci, double mi, double yi, double ki, double *ho, do
   pplcol_RGBtoHSB(r,g,b,ho,so,bo);
  }
 
-int pplObjCmp(ppl_context *c, pplObj *a, pplObj *b)
+int pplObjCmp(ppl_context *c, pplObj *a, pplObj *b, int *status, int *errType, char *errText)
  {
   int t1  = a->objType;
   int t2  = b->objType;
@@ -98,9 +101,20 @@ int pplObjCmp(ppl_context *c, pplObj *a, pplObj *b)
   if (t1o < t2o) return -1;
   if (t1o > t2o) return  1;
   if  (t1o==0) return -2; // 0 - nulls are never equal
-  if  (t1o==2) // 1 - numbers
+  if  (t1o==2) // 2 - numbers
    {
     double av,bv;
+    if (ppl_unitsDimEqual(a,b)==0)
+     {
+      *status=1; *errType=ERR_UNIT;
+      if (a->dimensionless)
+       sprintf(errText, "Attempt to compare a quantity which is dimensionless with one with dimensions of <%s>.", ppl_printUnit(c,b,NULL,NULL,1,1,0));
+      else if (b->dimensionless)
+       sprintf(errText, "Attempt to compare a quantity with dimensions of <%s> with one which is dimensionless.", ppl_printUnit(c,a,NULL,NULL,0,1,0));
+      else
+       sprintf(errText, "Attempt to compare a quantity with dimensions of <%s> with one with dimensions of <%s>.", ppl_printUnit(c,a,NULL,NULL,0,1,0), ppl_printUnit(c,b,NULL,NULL,1,1,0));
+      return -2;
+     }
     if ((c->set->term_current.ComplexNumbers==SW_ONOFF_OFF)&&((a->flagComplex)||(b->flagComplex))) return -2;
     if ((!gsl_finite(a->real))||(!gsl_finite(a->imag))||(!gsl_finite(b->real))||(!gsl_finite(b->imag))) return -2;
     av = hypot(a->real,a->imag);
@@ -110,7 +124,7 @@ int pplObjCmp(ppl_context *c, pplObj *a, pplObj *b)
     if (av==bv) return  0;
     return -2;
    }
-  else if ((t1o==1) || (t1o==3)) // 2 - booleans; 3 - dates
+  else if ((t1o==2) || (t1o==3)) // 2 - booleans; 3 - dates
    {
     if (a->real <b->real) return -1;
     if (a->real >b->real) return  1;

@@ -541,7 +541,8 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
           case 0x55: // ==
           case 0x56: // !=
            {
-            int stat , cmp = pplObjCmp(context, stk-2, stk-1);
+            int stat=0 , cmp = pplObjCmp(context, stk-2, stk-1, &stat, errType, errText);
+            if (stat) { *errPos=charpos; goto cleanup_on_error; }
             if      (t==0x51) stat = (cmp == -1);
             else if (t==0x52) stat = (cmp == -1) || (cmp==0);
             else if (t==0x53) stat = (cmp ==  1) || (cmp==0);

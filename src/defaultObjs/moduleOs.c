@@ -21,13 +21,16 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <glob.h>
 #include <limits.h>
+#include <math.h>
 #include <string.h>
 #include <unistd.h>
-#include <math.h>
+#include <wordexp.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/utsname.h>
 
 #include "coreUtils/dict.h"
 #include "coreUtils/getPasswd.h"
@@ -41,6 +44,28 @@
 #include "defaultObjs/moduleOs.h"
 #include "defaultObjs/defaultFuncs.h"
 #include "defaultObjs/defaultFuncsMacros.h"
+
+#define COPYSTR(X,Y) \
+ { \
+  X = (char *)malloc(strlen(Y)+1); \
+  if (X==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; } \
+  strcpy(X, Y); \
+ }
+
+void pplfunc_osChdir  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The os.chdir() function requires a single string argument."); return; }
+  if (chdir((char*)in[0].auxil)!=0) { *status=1; *errType=ERR_FILE; sprintf(errText,"The os.chdir() encountered an error: %s",strerror(errno)); return; }
+  strncpy(c->errcontext.session_default.cwd , (char*)in[0].auxil , FNAME_LENGTH);
+  c->errcontext.session_default.cwd[FNAME_LENGTH-1]='\0';
+ }
+
+void pplfunc_osGetCwd  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *tmp;
+  COPYSTR(tmp, c->errcontext.session_default.cwd);
+  pplObjStr(&OUTPUT,0,1,tmp);
+ }
 
 void pplfunc_osGetEgid (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
@@ -82,7 +107,7 @@ void pplfunc_osGetHome(ppl_context *c, pplObj *in, int nArgs, int *status, int *
   char *out,*tmp;
   tmp = ppl_unixGetHomeDir(&c->errcontext);
   out = (char *)malloc(strlen(tmp)+1);
-  if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); }
+  if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   strcpy(out, tmp);
   pplObjStr(&OUTPUT,0,1,out);
   return;
@@ -93,7 +118,7 @@ void pplfunc_osGetHost(ppl_context *c, pplObj *in, int nArgs, int *status, int *
   const int outlen=FNAME_LENGTH;
   char *out;
   out = (char *)malloc(outlen);
-  if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); }
+  if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   gethostname(out,outlen);
   out[outlen-1]='\0';
   pplObjStr(&OUTPUT,0,1,out);
@@ -105,7 +130,7 @@ void pplfunc_osGetLogin(ppl_context *c, pplObj *in, int nArgs, int *status, int 
   char *out,*tmp;
   tmp = getlogin();
   out = (char *)malloc(strlen(tmp)+1);
-  if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); }
+  if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   strcpy(out, tmp);
   pplObjStr(&OUTPUT,0,1,out);
   return;
@@ -116,9 +141,78 @@ void pplfunc_osGetRealName(ppl_context *c, pplObj *in, int nArgs, int *status, i
   char *out,*tmp;
   tmp = ppl_unixGetIRLName(&c->errcontext);
   out = (char *)malloc(strlen(tmp)+1);
-  if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); }
+  if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   strcpy(out, tmp);
   pplObjStr(&OUTPUT,0,1,out);
+  return;
+ }
+
+void pplfunc_osGlob(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  wordexp_t  w;
+  glob_t     g;
+  pplObj     v;
+  list      *l;
+  char      *tmp;
+  int        i,j;
+  if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The os.glob() function requires a single string argument."); return; }
+  if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  l = (list *)OUTPUT.auxil;
+  if (wordexp((char*)in[0].auxil, &w, 0) != 0) return; // No matches; return empty list
+  for (i=0; i<w.we_wordc; i++)
+   {
+    if (glob(w.we_wordv[i], 0, NULL, &g) != 0) continue;
+    for (j=0; j<g.gl_pathc; j++)
+     {
+      COPYSTR(tmp,g.gl_pathv[j]);
+      pplObjStr(&v,0,1,tmp);
+      ppl_listAppendCpy(l, &v, sizeof(v));
+     }
+    globfree(&g);
+   }
+  wordfree(&w);
+  return;
+ }
+
+void pplfunc_osStat(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *tmp, permissions[]="---------";
+  dict *d;
+  pplObj v;
+  struct stat s;
+  if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The os.stat() function requires a single string argument."); return; }
+  if (stat((char*)in[0].auxil,&s)!=0) { pplObjNull(&OUTPUT,0); return; }
+  tmp = (char *)malloc(LSTR_LENGTH);
+  if (pplObjDict(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  d = (dict *)OUTPUT.auxil;
+  pplObjDate(&v,0,s.st_atime   ); ppl_dictAppendCpy(d, "atime", &v, sizeof(v));
+  pplObjNum (&v,0,s.st_gid   ,0); ppl_dictAppendCpy(d, "gid"  , &v, sizeof(v));
+  pplObjDate(&v,0,s.st_ctime   ); ppl_dictAppendCpy(d, "ctime", &v, sizeof(v));
+  pplObjNum (&v,0,s.st_ino   ,0); ppl_dictAppendCpy(d, "ino"  , &v, sizeof(v));
+  pplObjNum (&v,0,s.st_mode  ,0); ppl_dictAppendCpy(d, "mode" , &v, sizeof(v));
+  pplObjDate(&v,0,s.st_mtime   ); ppl_dictAppendCpy(d, "mtime", &v, sizeof(v));
+  pplObjNum (&v,0,s.st_nlink ,0); ppl_dictAppendCpy(d, "nlink", &v, sizeof(v));
+  pplObjNum (&v,0,s.st_size*8,0); v.exponent[UNIT_BIT]=1; v.dimensionless=0; ppl_dictAppendCpy(d, "size", &v, sizeof(v));
+  pplObjNum (&v,0,s.st_uid   ,0); ppl_dictAppendCpy(d, "uid"  , &v, sizeof(v));
+  if      (S_ISREG (s.st_mode)) { COPYSTR(tmp,"regular file"); }
+  else if (S_ISDIR (s.st_mode)) { COPYSTR(tmp,"directory"); }
+  else if (S_ISCHR (s.st_mode)) { COPYSTR(tmp,"character special"); }
+  else if (S_ISBLK (s.st_mode)) { COPYSTR(tmp,"block special"); }
+  else if (S_ISFIFO(s.st_mode)) { COPYSTR(tmp,"fifo"); }
+  else if (S_ISLNK (s.st_mode)) { COPYSTR(tmp,"symbolic link"); }
+  else if (S_ISSOCK(s.st_mode)) { COPYSTR(tmp,"socket"); }
+  else                          { COPYSTR(tmp,"other"); }
+  pplObjStr(&v,0,1,tmp); ppl_dictAppendCpy(d, "type", &v, sizeof(v));
+  if (s.st_mode & S_IRUSR) permissions[0] = 'r';
+  if (s.st_mode & S_IWUSR) permissions[1] = 'w';
+  if (s.st_mode & S_IXUSR) permissions[2] = 'x';
+  if (s.st_mode & S_IRGRP) permissions[3] = 'r';
+  if (s.st_mode & S_IWGRP) permissions[4] = 'w';
+  if (s.st_mode & S_IXGRP) permissions[5] = 'x';
+  if (s.st_mode & S_IROTH) permissions[6] = 'r';
+  if (s.st_mode & S_IWOTH) permissions[7] = 'w';
+  if (s.st_mode & S_IXOTH) permissions[8] = 'x';
+  COPYSTR(tmp,permissions); pplObjStr(&v,0,1,tmp); ppl_dictAppendCpy(d, "permissions", &v, sizeof(v));
   return;
  }
 
@@ -126,6 +220,29 @@ void pplfunc_osSystem(ppl_context *c, pplObj *in, int nArgs, int *status, int *e
  {
   if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The os.system() function requires a single string argument."); return; }
   pplObjNum(&OUTPUT,0,  system((char*)in[0].auxil)  ,0);
+ }
+
+void pplfunc_osTmpfile(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObjFile(&OUTPUT,0,1,tmpfile());
+ }
+
+void pplfunc_osUname(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *tmp;
+  dict *d;
+  pplObj v;
+  struct utsname u;
+  if (uname(&u)) { *status=1; *errType=ERR_INTERNAL; sprintf(errText,"The uname() function failed."); return; }
+  tmp = (char *)malloc(LSTR_LENGTH);
+  if (pplObjDict(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  d = (dict *)OUTPUT.auxil;
+  COPYSTR(tmp,u.sysname ); pplObjStr(&v,0,1,tmp); ppl_dictAppendCpy(d, "sysname" , &v, sizeof(v));
+  COPYSTR(tmp,u.nodename); pplObjStr(&v,0,1,tmp); ppl_dictAppendCpy(d, "nodename", &v, sizeof(v));
+  COPYSTR(tmp,u.release ); pplObjStr(&v,0,1,tmp); ppl_dictAppendCpy(d, "release" , &v, sizeof(v));
+  COPYSTR(tmp,u.version ); pplObjStr(&v,0,1,tmp); ppl_dictAppendCpy(d, "version" , &v, sizeof(v));
+  COPYSTR(tmp,u.machine ); pplObjStr(&v,0,1,tmp); ppl_dictAppendCpy(d, "machine" , &v, sizeof(v));
+  return;
  }
 
 // Path operations

@@ -59,6 +59,7 @@
 #define CAST_TO_INT(X,OP) \
  { \
   CAST_TO_REAL(X,OP); \
+  if (!(X)->dimensionless) { *errType=ERR_UNIT; sprintf(errText,"The %s operator is an integer operator which can only act on dimensionless numbers: supplied operand has units of <%s>.",OP,ppl_printUnit(context,X,NULL,NULL,0,1,0)); goto cast_fail; } \
   if (((X)->real < INT_MIN) || ((X)->real > INT_MAX)) { *errType=ERR_RANGE; sprintf(errText,"The %s operator can only act on integers in the range %d to %d.",OP,INT_MIN,INT_MAX); goto cast_fail; } \
  }
 

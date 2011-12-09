@@ -71,6 +71,7 @@ pplObj *pplObjNum(pplObj *in, unsigned char amMalloced, double real, double imag
   in->flagComplex = in->tempType = 0;
   in->objPrototype = &pplObjPrototypes[PPLOBJ_NUM];
   in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
   in->amMalloced = amMalloced;
   in->immutable = 0;
   for (i=0; i<UNITS_MAX_BASEUNITS; i++) in->exponent[i]=0;
@@ -85,6 +86,7 @@ pplObj *pplObjStr(pplObj *in, unsigned char amMalloced, unsigned char auxilMallo
   in->auxilLen = strlen(str)+1;
   in->objPrototype = &pplObjPrototypes[PPLOBJ_STR];
   in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
   in->amMalloced = amMalloced;
   in->immutable = 0;
   in->objType = PPLOBJ_STR;
@@ -98,6 +100,7 @@ pplObj *pplObjBool(pplObj *in, unsigned char amMalloced, int stat)
   in->auxil = NULL;
   in->objPrototype = &pplObjPrototypes[PPLOBJ_BOOL];
   in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
   in->auxilMalloced = 0;
   in->auxilLen = 0;
   in->amMalloced = amMalloced;
@@ -111,6 +114,7 @@ pplObj *pplObjDate(pplObj *in, unsigned char amMalloced, double unixTime)
   in->auxil = NULL;
   in->objPrototype = &pplObjPrototypes[PPLOBJ_DATE];
   in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
   in->auxilMalloced = 0;
   in->auxilLen = 0;
   in->amMalloced = amMalloced;
@@ -119,10 +123,15 @@ pplObj *pplObjDate(pplObj *in, unsigned char amMalloced, double unixTime)
 
 pplObj *pplObjColor(pplObj *in, unsigned char amMalloced, int scheme, double c1, double c2, double c3, double c4)
  {
+  if (c1<0) c1=0; if (c1>1) c1=1;
+  if (c2<0) c2=0; if (c2>1) c2=1;
+  if (c3<0) c3=0; if (c3>1) c3=1;
+  if (c4<0) c4=0; if (c4>1) c4=1;
   in->objType = PPLOBJ_COL;
   in->auxil = NULL;
   in->objPrototype = &pplObjPrototypes[PPLOBJ_COL];
   in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
   in->auxilMalloced = 0;
   in->auxilLen = 0; 
   in->amMalloced = amMalloced;
@@ -144,6 +153,7 @@ pplObj *pplObjDict(pplObj *in, unsigned char amMalloced, unsigned char auxilMall
   in->auxilLen = 0;
   in->objPrototype = &pplObjPrototypes[PPLOBJ_DICT];
   in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
   in->amMalloced = amMalloced;
   in->immutable = 0;
   in->objType = PPLOBJ_DICT;
@@ -160,6 +170,7 @@ pplObj *pplObjModule(pplObj *in, unsigned char amMalloced, unsigned char auxilMa
   in->auxilLen = 0;
   in->objPrototype = &pplObjPrototypes[PPLOBJ_MOD];
   in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
   in->amMalloced = amMalloced;
   in->immutable = frozen;
   in->objType = PPLOBJ_MOD;
@@ -176,6 +187,7 @@ pplObj *pplObjList(pplObj *in, unsigned char amMalloced, unsigned char auxilMall
   in->auxilLen = 0;
   in->objPrototype = &pplObjPrototypes[PPLOBJ_LIST];
   in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
   in->amMalloced = amMalloced;
   in->immutable = 0;
   in->objType = PPLOBJ_LIST;
@@ -184,6 +196,7 @@ pplObj *pplObjList(pplObj *in, unsigned char amMalloced, unsigned char auxilMall
 
 pplObj *pplObjVector(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, int size)
  {
+  int i;
   in->objType = PPLOBJ_ZOM;
   if (auxilMalloced) in->auxil = (void *)malloc      (sizeof(pplVector));
   else               in->auxil = (void *)ppl_memAlloc(sizeof(pplVector));
@@ -194,14 +207,18 @@ pplObj *pplObjVector(pplObj *in, unsigned char amMalloced, unsigned char auxilMa
   in->auxilLen = sizeof(pplMatrix);
   in->objPrototype = &pplObjPrototypes[PPLOBJ_VEC];
   in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
   in->amMalloced = amMalloced;
   in->immutable = 0;
+  in->dimensionless = 1;
+  for (i=0; i<UNITS_MAX_BASEUNITS; i++) in->exponent[i]=0;
   in->objType = PPLOBJ_VEC;
   return in;
  }
 
 pplObj *pplObjMatrix(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, int size1, int size2)
  {
+  int i;
   in->objType = PPLOBJ_ZOM;
   if (auxilMalloced) in->auxil = (void *)malloc      (sizeof(pplMatrix));
   else               in->auxil = (void *)ppl_memAlloc(sizeof(pplMatrix));
@@ -212,8 +229,11 @@ pplObj *pplObjMatrix(pplObj *in, unsigned char amMalloced, unsigned char auxilMa
   in->auxilLen = sizeof(pplMatrix);
   in->objPrototype = &pplObjPrototypes[PPLOBJ_MAT];
   in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
   in->amMalloced = amMalloced;
   in->immutable = 0;
+  in->dimensionless = 1;
+  for (i=0; i<UNITS_MAX_BASEUNITS; i++) in->exponent[i]=0;
   in->objType = PPLOBJ_MAT;
   return in;
  }
@@ -231,6 +251,7 @@ pplObj *pplObjFile(pplObj *in, unsigned char amMalloced, unsigned char auxilMall
   in->auxilLen = sizeof(pplFile);
   in->objPrototype = &pplObjPrototypes[PPLOBJ_FILE];
   in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
   in->amMalloced = amMalloced;
   in->immutable = 0;
   in->objType = PPLOBJ_FILE;
@@ -245,6 +266,7 @@ pplObj *pplObjFunc(pplObj *in, unsigned char amMalloced, unsigned char auxilMall
   in->auxilMalloced = auxilMalloced;
   in->objPrototype = &pplObjPrototypes[PPLOBJ_FUNC];
   in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
   in->amMalloced = amMalloced;
   in->immutable = 0;
   in->objType       = PPLOBJ_FUNC;
@@ -259,6 +281,7 @@ pplObj *pplObjType(pplObj *in, unsigned char amMalloced, unsigned char auxilMall
   in->auxilMalloced = auxilMalloced;
   in->objPrototype = &pplObjPrototypes[PPLOBJ_TYPE];
   in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
   in->amMalloced = amMalloced;
   in->immutable = 1; // Types are always immutable
   in->objType       = PPLOBJ_TYPE;
@@ -282,6 +305,7 @@ pplObj *pplObjException(pplObj *in, unsigned char amMalloced, unsigned char auxi
   in->auxilLen = strlen(str+1);
   in->objPrototype = &pplObjPrototypes[PPLOBJ_EXC];
   in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
   in->amMalloced = amMalloced;
   in->immutable = 0;
   in->objType = PPLOBJ_EXC;
@@ -320,6 +344,7 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char outMalloced, unsigned c
   memcpy(out, in, sizeof(pplObj));
   out->self_lval  = in;
   out->self_dval  = NULL;
+  out->self_this  = NULL;
   out->amMalloced = outMalloced;
 
   switch(in->objType)

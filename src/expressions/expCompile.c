@@ -176,6 +176,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
             if (*errPos>=0) { *errPos+=k; return; }
             if (m!=j) { *errPos = m+k; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at end of expression."); *end=-1; *outlen=0; return; }
            }
+          else out[outpos+2] = out[outpos+1] = 0;
           FFWSTATE(j); // Fast-forward to closing bracket
           if (extraStrArg) { if (++(out[outpos+2])==0) out[outpos+1]++; }
           if (extraArg)    { if (++(out[outpos+2])==0) out[outpos+1]++; }
@@ -347,6 +348,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
              }
             if (m!=j) { *errPos = m+k; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
            }
+          else out[outpos+2] = out[outpos+1] = 0;
           FFWSTATE(j); // Fast-forward to closing bracket
           if (trialstate=='Q')
            {
@@ -372,6 +374,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
             if (*errPos>=0) { *errPos+=k; return; }
             if (m!=j) { *errPos = m+k; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
            }
+          else out[outpos+2] = out[outpos+1] = 0;
           FFWSTATE(j); // Fast-forward to closing bracket
           NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
          }

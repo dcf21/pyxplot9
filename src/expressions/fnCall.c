@@ -46,77 +46,120 @@
 
 void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int IterDepth, int *status, int *errPos, int *errType, char *errText)
  {
-  int i;
-  pplFunc *fn;
+  pplObj  *out  = &context->stack[context->stackPtr-1-nArgs];
   pplObj  *args = context->stack+context->stackPtr-nArgs;
+  pplObj   called;
+  pplFunc *fn;
+  int      i;
+  int      t = out->objType;
   if (context->stackPtr<nArgs+1) { *status=1; *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Attempt to call function with few items on the stack."); return; }
-  if (context->stack[context->stackPtr-1-nArgs].objType != PPLOBJ_FUNC) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Object of type <%s> cannot be called as a function.",pplObjTypeNames[context->stack[context->stackPtr-1-nArgs].objType]); return; }
-  fn = (pplFunc *)context->stack[context->stackPtr-1-nArgs].auxil;
-  ppl_garbageObject(&context->stack[context->stackPtr-1-nArgs]);
-  pplObjNum(&context->stack[context->stackPtr-1-nArgs] , 0 , 0.0 , 0.0);
+  memcpy(&called, out, sizeof(pplObj));
+  pplObjNum(&context->stack[context->stackPtr-1-nArgs] , 0 , 0.0 , 0.0); // Overwrite function object on stack, but don't garbage collect it yet
 
-  if (fn->minArgs == fn->maxArgs)
+  // Attempt to call a module to general a class instance?
+  if ((t == PPLOBJ_MOD) || (t == PPLOBJ_USER))
    {
-    if (nArgs != fn->maxArgs) 
+
+   }
+
+  // Attempt to call a type object as a constructor?
+  else if (t == PPLOBJ_TYPE)
+   {
+
+   }
+
+  // Otherwise object being called must be a function object
+  if (t != PPLOBJ_FUNC) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Object of type <%s> cannot be called as a function.",pplObjTypeNames[t]); goto cleanup; }
+  fn = (pplFunc *)called.auxil;
+
+  if (fn->functionType==PPL_FUNC_MAGIC)
+   {
+    if (fn->minArgs==1) // unit()
      {
-      if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Function takes exactly %d arguments; %d supplied.",fn->maxArgs,nArgs); return; }
-      else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; return; }
+      int     end;
+      char   *u = (char*)context->stack[context->stackPtr-1].auxil;
+      pplObj *o = &context->stack[context->stackPtr-1-nArgs];
+      if (nArgs != 1) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The unit() function takes exactly one argument; %d supplied.",nArgs); goto cleanup; }
+      ppl_unitsStringEvaluate(context, u, o, &end, errPos, errText);
+      if (*errPos>=0) { *errType=ERR_UNIT; goto cleanup; }
+      if (end!=strlen(u)) { *errType=ERR_UNIT; *errPos=charpos; sprintf(errText,"Unexpected trailing matter after unit string."); goto cleanup; }
+     }
+    else if (fn->minArgs==2) // diff_d()
+     {
+     }
+    else if (fn->minArgs==3) // int_d()
+     {
+     }
+    else if (fn->minArgs==4) // texify()
+     {
      }
    }
-  else if (nArgs < fn->minArgs) 
+  else
    {
-    if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Function takes a minimum of %d arguments; %d supplied.",fn->minArgs,nArgs); return; }
-    else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; return; }
-   }
-  else if (nArgs > fn->maxArgs) 
-   {
-    if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Function takes a maximum of %d arguments; %d supplied.",fn->maxArgs,nArgs); return; }
-    else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; return; }
-   }
-
-  if (fn->numOnly)
-   for (i=0; i<nArgs; i++) if (args[i].objType!=PPLOBJ_NUM) 
-    {
-     if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Function required numeric arguments; argument %d has type <%s>.",i+1,pplObjTypeNames[args[i].objType]); return; }
-     else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; return; }
-    }
-
-  if (fn->realOnly)
-   for (i=0; i<nArgs; i++) if (args[i].flagComplex) 
-    {
-     if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Function requires real arguments; argument %d is complex.",i+1); return; }
-     else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; return; }
-    }
-
-
-  if (fn->dimlessOnly)
-   for (i=0; i<nArgs; i++) if (!args[i].dimensionless)
-    {
-     if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Function requires dimensionless arguments; argument %d has dimensions of <%s>.",i+1,ppl_printUnit(context, &args[i], NULL, NULL, 1, 1, 0)); return; }
-     else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; return; }
-    }
-
-  if (fn->notNan)
-   for (i=0; i<nArgs; i++)
-    if ((!gsl_finite(args[i].real)) || (!gsl_finite(args[i].imag)))
+    if (fn->minArgs == fn->maxArgs)
      {
-      if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Function requires finite arguments; argument %d is not finite.",i+1); return; }
-      else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; return; }
+      if (nArgs != fn->maxArgs) 
+       {
+        if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Function takes exactly %d arguments; %d supplied.",fn->maxArgs,nArgs); goto cleanup; }
+        else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; goto cleanup; }
+       }
+     }
+    else if (nArgs < fn->minArgs) 
+     {
+      if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Function takes a minimum of %d arguments; %d supplied.",fn->minArgs,nArgs); goto cleanup; }
+      else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; goto cleanup; }
+     }
+    else if (nArgs > fn->maxArgs) 
+     {
+      if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Function takes a maximum of %d arguments; %d supplied.",fn->maxArgs,nArgs); goto cleanup; }
+      else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; goto cleanup; }
      }
 
-  switch (fn->functionType)
-   {
-    case PPL_FUNC_SYSTEM:
+    if (fn->numOnly)
+     for (i=0; i<nArgs; i++) if (args[i].objType!=PPLOBJ_NUM) 
+      {
+       if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Function required numeric arguments; argument %d has type <%s>.",i+1,pplObjTypeNames[args[i].objType]); goto cleanup; }
+       else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; goto cleanup; }
+      }
+
+    if (fn->realOnly)
+     for (i=0; i<nArgs; i++) if (args[i].flagComplex) 
+      {
+       if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Function requires real arguments; argument %d is complex.",i+1); goto cleanup; }
+       else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; goto cleanup; }
+      }
+
+    if (fn->dimlessOnly)
+     for (i=0; i<nArgs; i++) if (!args[i].dimensionless)
+      {
+       if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Function requires dimensionless arguments; argument %d has dimensions of <%s>.",i+1,ppl_printUnit(context, &args[i], NULL, NULL, 1, 1, 0)); goto cleanup; }
+       else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; goto cleanup; }
+      }
+
+    if (fn->notNan)
+     for (i=0; i<nArgs; i++)
+      if ((!gsl_finite(args[i].real)) || (!gsl_finite(args[i].imag)))
+       {
+        if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Function requires finite arguments; argument %d is not finite.",i+1); goto cleanup; }
+        else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; goto cleanup; }
+       }
+
+    switch (fn->functionType)
      {
-      int stat=0, i;
-      ((void(*)(ppl_context *, pplObj *, int, int *, int *, char *))fn->functionPtr)(context, args, nArgs, &stat, errType, errText);
-      if (stat) { *status=1; *errPos=charpos; return; }
-      for (i=0; i<nArgs; i++) { context->stackPtr--; ppl_garbageObject(&context->stack[context->stackPtr]); }
-      break;
+      case PPL_FUNC_SYSTEM:
+       {
+        int stat=0;
+        ((void(*)(ppl_context *, pplObj *, int, int *, int *, char *))fn->functionPtr)(context, args, nArgs, &stat, errType, errText);
+        if (stat) { *status=1; *errPos=charpos; goto cleanup; }
+        break;
+       }
+      default:
+        { *status=1; *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Call of unsupported function type."); goto cleanup; }
      }
-    default:
-      { *status=1; *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Call of unsupported function type."); return; }
    }
+cleanup:
+  ppl_garbageObject(&called);
+  for (i=0; i<nArgs; i++) { context->stackPtr--; ppl_garbageObject(&context->stack[context->stackPtr]); }
   return;
  }
 

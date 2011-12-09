@@ -100,3 +100,12 @@ double ppl_rads(double degrees)
   return degrees*M_PI/180;
  }
 
+int ppl_dblSort(const void *a, const void *b)
+ {
+  const double *da = (const double *)a;
+  const double *db = (const double *)b;
+  if (da<db) return -1;
+  if (da>db) return  1;
+  return 0;
+ }
+

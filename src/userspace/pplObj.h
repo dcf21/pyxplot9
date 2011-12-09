@@ -60,6 +60,7 @@ typedef struct pplObj
   double         exponent[UNITS_MAX_BASEUNITS];
   struct pplObj *self_lval;
   double        *self_dval;
+  struct pplObj *self_this;
  } pplObj;
 
 #ifndef _PPLOBJ_C

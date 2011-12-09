@@ -70,6 +70,7 @@ void ppl_garbageObject(pplObj *o)
  {
   int objType = o->objType;
   o->objType = PPLOBJ_ZOM; // Object is now a zombie
+  if ((o->objType==PPLOBJ_ZOM)&&(o->self_this!=NULL)) ppl_garbageObject(o->self_this);
   switch(objType)
    {
     case PPLOBJ_STR:

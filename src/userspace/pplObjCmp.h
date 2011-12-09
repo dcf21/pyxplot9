@@ -27,10 +27,10 @@
 
 void pplcol_RGBtoHSB(double ri, double gi, double bi, double *ho, double *so, double *bo);
 void pplcol_CMYKtoRGB(double ci, double mi, double yi, double ki, double *ro, double *go, double *bo);
-void pplcol_HSBroRGB(double hi, double si, double bi, double *ro, double *go, double *bo);
+void pplcol_HSBtoRGB(double hi, double si, double bi, double *ro, double *go, double *bo);
 void pplcol_CMYKtoHSB(double ci, double mi, double yi, double ki, double *ho, double *so, double *bo);
 
-int pplObjCmp(ppl_context *c, pplObj *a, pplObj *b);
+int pplObjCmp(ppl_context *c, pplObj *a, pplObj *b, int *status, int *errType, char *errText);
 
 #endif
 
