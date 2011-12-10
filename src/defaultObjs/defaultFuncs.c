@@ -41,6 +41,7 @@
 #include <gsl/gsl_sf_lambert.h>
 #include <gsl/gsl_sf_legendre.h>
 #include <gsl/gsl_sf_zeta.h>
+#define GSL_RANGE_CHECK_OFF 1
 
 #include "coreUtils/dict.h"
 #include "mathsTools/dcfmath.h"
@@ -777,7 +778,7 @@ void pplfunc_lrange       (ppl_context *c, pplObj *in, int nArgs, int *status, i
   if ((!gsl_finite(n))||(n>INT_MAX)) { *status=1; *errType=ERR_NUMERIC; strcpy(errText,"Invalid step size."); return; }
   if (n<0) n=0;
   if (pplObjVector(&OUTPUT,0,1,n)==NULL) { *status=1; *errType=ERR_MEMORY; strcpy(errText,"Out of memory."); return; }
-  for (i=0; i<n; i++) ((pplVector *)OUTPUT.auxil)->v->data[i] = start * pow(step,i);
+  for (i=0; i<n; i++) gsl_vector_set(((pplVector *)OUTPUT.auxil)->v, i, start * pow(step,i));
   ppl_unitsDimCpy(&OUTPUT, &in[0]);
  }
 
@@ -814,7 +815,7 @@ void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     int i;
     double *best=NULL;
     gsl_vector *v=((pplVector *)(in[0].auxil))->v;
-    for (i=0; i<v->size; i++) if ((best==NULL)||(v->data[i]>*best)) best=&v->data[i];
+    for (i=0; i<v->size; i++) if ((best==NULL)||(gsl_vector_get(v,i)>*best)) best=gsl_vector_ptr(v,i);
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjNum (&OUTPUT,0,*best,0);
    }
@@ -823,7 +824,7 @@ void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     int i,j;
     double *best=NULL;
     gsl_matrix *m=((pplMatrix *)(in[0].auxil))->m;
-    for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) if ((best==NULL)||(m->data[i*m->tda+j]>*best)) best=&m->data[i*m->tda+j];
+    for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) if ((best==NULL)||(gsl_matrix_get(m,i,j)>*best)) best=gsl_matrix_ptr(m,i,j);
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjNum (&OUTPUT,0,*best,0);
    }
@@ -874,7 +875,7 @@ void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     int i;
     double *best=NULL;
     gsl_vector *v=((pplVector *)(in[0].auxil))->v;
-    for (i=0; i<v->size; i++) if ((best==NULL)||(v->data[i]<*best)) best=&v->data[i];
+    for (i=0; i<v->size; i++) if ((best==NULL)||(gsl_vector_get(v,i)<*best)) best=gsl_vector_ptr(v,i);
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjNum (&OUTPUT,0,*best,0);
    }
@@ -883,7 +884,7 @@ void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     int i,j;
     double *best=NULL;
     gsl_matrix *m=((pplMatrix *)(in[0].auxil))->m;
-    for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) if ((best==NULL)||(m->data[i*m->tda+j]<*best)) best=&m->data[i*m->tda+j];
+    for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) if ((best==NULL)||(gsl_matrix_get(m,i,j)<*best)) best=gsl_matrix_ptr(m,i,j);
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjNum (&OUTPUT,0,*best,0);
    }
@@ -999,7 +1000,7 @@ void pplfunc_range       (ppl_context *c, pplObj *in, int nArgs, int *status, in
   if ((!gsl_finite(n))||(n>INT_MAX)) { *status=1; *errType=ERR_NUMERIC; strcpy(errText,"Invalid step size."); return; }
   if (n<0) n=0;
   if (pplObjVector(&OUTPUT,0,1,n)==NULL) { *status=1; *errType=ERR_MEMORY; strcpy(errText,"Out of memory."); return; }
-  for (i=0; i<n; i++) ((pplVector *)OUTPUT.auxil)->v->data[i] = start+i*step;
+  for (i=0; i<n; i++) gsl_vector_set(((pplVector *)OUTPUT.auxil)->v, i, start+i*step);
   ppl_unitsDimCpy(&OUTPUT, &in[0]);
  }
 
@@ -1185,7 +1186,7 @@ void pplfunc_sum         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     int i;
     double acc=0;
     gsl_vector *v=((pplVector *)(in[0].auxil))->v;
-    for (i=0; i<v->size; i++) acc += v->data[i];
+    for (i=0; i<v->size; i++) acc += gsl_vector_get(v,i);
     pplObjNum(&OUTPUT,0,acc,0);
    }
   else if ((nArgs==1)&&(in[0].objType==PPLOBJ_MAT))
@@ -1193,7 +1194,7 @@ void pplfunc_sum         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     int i,j;
     double acc=0;
     gsl_matrix *m=((pplMatrix *)(in[0].auxil))->m;
-    for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) acc += m->data[i*m->tda+j];
+    for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) acc += gsl_matrix_get(m,i,j);
     pplObjNum(&OUTPUT,0,acc,0);
    }
   else

@@ -111,24 +111,28 @@ void ppl_garbageObject(pplObj *o)
      }
     case PPLOBJ_VEC:
      {
-      pplVector *v = (pplVector *)(o->auxil);
+      pplVector    *v  = (pplVector *)(o->auxil);
+      pplVectorRaw *vr = v->raw;
       o->auxil = NULL;
-      if ((v!=NULL)&&(--v->refCount <= 0))
+      if ((vr!=NULL)&&(--vr->refCount <= 0))
        {
-        gsl_vector_free(v->v);
-        if (o->auxilMalloced) free(v);
+        gsl_vector_free(vr->v);
+        if (o->auxilMalloced) free(vr);
        }
+      if ((v!=NULL)&&(--v->refCount <= 0)&&(o->auxilMalloced)) free(v);
       break;
      }
     case PPLOBJ_MAT:
      {
-      pplMatrix *m = (pplMatrix *)(o->auxil);
+      pplMatrix    *m  = (pplMatrix *)(o->auxil);
+      pplMatrixRaw *mr = m->raw;
       o->auxil = NULL;
-      if ((m!=NULL)&&(--m->refCount <= 0))
+      if ((mr!=NULL)&&(--mr->refCount <= 0))
        {
-        gsl_matrix_free(m->m);
-        if (o->auxilMalloced) free(m);
+        gsl_matrix_free(mr->m);
+        if (o->auxilMalloced) free(mr);
        }
+      if ((m!=NULL)&&(--m->refCount <= 0)&&(o->auxilMalloced)) free(m);
       break;
      }
     case PPLOBJ_USER:

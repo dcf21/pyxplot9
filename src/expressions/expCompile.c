@@ -58,7 +58,7 @@
 // V -- parameter name after $
 
 // A can be followed by .B..E.GHI..LMNO.......
-// B can be followed by ..C......JK.....Q...U.
+// B can be followed by ..C......JK.....QR..U.
 // C can be followed by .B.D..GHI..LMNO.......
 // D can be followed by .........JK.....Q...U.
 // E can be followed by .....F...JK.....QR..U.
@@ -116,7 +116,7 @@
 
 void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed, int allowCommaOperator, int collectCommas, int isDict, int outOffset, int *outlen, int *errPos, int *errType, char *errText)
  {
-  const char    *allowed[] = {"BEHILMNOG","CJKQU","BDHILMNOG","JKQU","FJKQRU","JKU","SFJKPQRU","EG","BEHLMNOG","BEHILMNOG","BEHILMNOG","JKU","JKQRU","JKQRU","ELV","JKPQRU","SFJKPQU","T","BEHILMNOG","SFJKPQRU","","JKU"};
+  const char    *allowed[] = {"BEHILMNOG","CJKQRU","BDHILMNOG","JKQU","FJKQRU","JKU","SFJKPQRU","EG","BEHLMNOG","BEHILMNOG","BEHILMNOG","JKU","JKQRU","JKQRU","ELV","JKPQRU","SFJKPQU","T","BEHILMNOG","SFJKPQRU","","JKU"};
   int            nCommaItems=1, nDictItems=0, tertiaryDepth=0;
   char           state='A', oldstate, trialstate;
   int            scanpos=0, outpos=0, trialpos;

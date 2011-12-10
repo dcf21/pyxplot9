@@ -197,12 +197,20 @@ pplObj *pplObjList(pplObj *in, unsigned char amMalloced, unsigned char auxilMall
 pplObj *pplObjVector(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, int size)
  {
   int i;
+  pplVector *pv;
+  pplVectorRaw *pvr;
   in->objType = PPLOBJ_ZOM;
-  if (auxilMalloced) in->auxil = (void *)malloc      (sizeof(pplVector));
-  else               in->auxil = (void *)ppl_memAlloc(sizeof(pplVector));
-  if (in->auxil==NULL) return NULL;
-  ((pplVector *)in->auxil)->refCount = 1;
-  if ((((pplVector *)in->auxil)->v = gsl_vector_calloc(size))==NULL) { if (auxilMalloced) free(in->auxil); return NULL; }
+  if (auxilMalloced) pv = (pplVector *)(in->auxil = malloc      (sizeof(pplVector)));
+  else               pv = (pplVector *)(in->auxil = ppl_memAlloc(sizeof(pplVector)));
+  if (pv==NULL) return NULL;
+  if (auxilMalloced) pvr = pv->raw = (pplVectorRaw *)malloc      (sizeof(pplVectorRaw));
+  else               pvr = pv->raw = (pplVectorRaw *)ppl_memAlloc(sizeof(pplVectorRaw));
+  if (pvr==NULL) { if (auxilMalloced) free(pv); return NULL; }
+  if ((pvr->v = gsl_vector_calloc(size))==NULL) { if (auxilMalloced) { free(pv); free(pvr); } return NULL; }
+  pvr->refCount  = 1;
+  pv ->refCount  = 1;
+  pv ->view      = NULL;
+  pv ->v         = pvr->v;
   in->auxilMalloced = auxilMalloced;
   in->auxilLen = sizeof(pplMatrix);
   in->objPrototype = &pplObjPrototypes[PPLOBJ_VEC];
@@ -219,12 +227,21 @@ pplObj *pplObjVector(pplObj *in, unsigned char amMalloced, unsigned char auxilMa
 pplObj *pplObjMatrix(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, int size1, int size2)
  {
   int i;
+  pplMatrix *pm;
+  pplMatrixRaw *pmr;
   in->objType = PPLOBJ_ZOM;
-  if (auxilMalloced) in->auxil = (void *)malloc      (sizeof(pplMatrix));
-  else               in->auxil = (void *)ppl_memAlloc(sizeof(pplMatrix));
-  if (in->auxil==NULL) return NULL;
-  ((pplMatrix *)in->auxil)->refCount = 1;
-  if ((((pplMatrix *)in->auxil)->m = gsl_matrix_calloc(size1 , size2))==NULL) { if (auxilMalloced) free(in->auxil); return NULL; }
+  if (auxilMalloced) pm = (pplMatrix *)(in->auxil = malloc      (sizeof(pplMatrix)));
+  else               pm = (pplMatrix *)(in->auxil = ppl_memAlloc(sizeof(pplMatrix)));
+  if (pm==NULL) return NULL;
+  if (auxilMalloced) pmr = pm->raw = (pplMatrixRaw *)malloc      (sizeof(pplMatrixRaw));
+  else               pmr = pm->raw = (pplMatrixRaw *)ppl_memAlloc(sizeof(pplMatrixRaw));
+  if (pmr==NULL) { if (auxilMalloced) free(pm); return NULL; }
+  if ((pmr->m = gsl_matrix_calloc(size1 , size2))==NULL) { if (auxilMalloced) { free(pm); free(pmr); } return NULL; }
+  pmr->refCount  = 1;
+  pm ->refCount  = 1;
+  pm ->sliceNext = 0;
+  pm ->view      = NULL;                     
+  pm ->m         = pmr->m;
   in->auxilMalloced = auxilMalloced;
   in->auxilLen = sizeof(pplMatrix);
   in->objPrototype = &pplObjPrototypes[PPLOBJ_MAT];
@@ -366,11 +383,19 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char outMalloced, unsigned c
       ((list *)(out->auxil))->refCount++;
       break;
     case PPLOBJ_VEC: // vector
-      ((pplVector *)(out->auxil))->refCount++;
+     {
+      pplVector *pv = (pplVector *)out->auxil;
+      pv->refCount++;
+      pv->raw->refCount++;
       break;
+     }
     case PPLOBJ_MAT: // matrix
-      ((pplMatrix *)(out->auxil))->refCount++;
+     {
+      pplMatrix *pm = (pplMatrix *)out->auxil;
+      pm->refCount++;
+      pm->raw->refCount++;
       break;
+     }
     case PPLOBJ_FILE: // file handle
       ((pplFile *)(out->auxil))->refCount++; 
       break;

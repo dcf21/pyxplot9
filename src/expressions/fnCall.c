@@ -54,7 +54,8 @@ void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int IterDepth, int
   int      t = out->objType;
   if (context->stackPtr<nArgs+1) { *status=1; *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Attempt to call function with few items on the stack."); return; }
   memcpy(&called, out, sizeof(pplObj));
-  pplObjNum(&context->stack[context->stackPtr-1-nArgs] , 0 , 0.0 , 0.0); // Overwrite function object on stack, but don't garbage collect it yet
+  pplObjNum(out, 0, 0, 0); // Overwrite function object on stack, but don't garbage collect it yet
+  out->self_this = called.self_this;
 
   // Attempt to call a module to general a class instance?
   if ((t == PPLOBJ_MOD) || (t == PPLOBJ_USER))
@@ -158,6 +159,7 @@ void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int IterDepth, int
      }
    }
 cleanup:
+  out->self_this = NULL;
   ppl_garbageObject(&called);
   for (i=0; i<nArgs; i++) { context->stackPtr--; ppl_garbageObject(&context->stack[context->stackPtr]); }
   return;

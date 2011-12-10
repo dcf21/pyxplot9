@@ -41,6 +41,7 @@
 #include "userspace/pplObj_fns.h"
 #include "userspace/pplObjCmp.h"
 #include "userspace/pplObjFunc.h"
+#include "userspace/pplObjMethods.h"
 #include "userspace/pplObjPrint.h"
 #include "userspace/unitsArithmetic.h"
 #include "userspace/unitsDisp.h"
@@ -304,24 +305,39 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
        }
       case 5: // Dereference value
        {
-        char *key = (char *)(in+j);
-        int   t   = (stk-1)->objType;
-        int   imm = (stk-1)->immutable;
-        dict *d   = (dict *)((stk-1)->auxil);
-        *lastOpAssign=0;
-        if ((t==PPLOBJ_MOD)||(t==PPLOBJ_USER))
+        char   *key     = (char *)(in+j);
+        pplObj *in      = stk-1;
+        pplObj *in_cpy  = NULL;
+        pplObj *iter    = in;
+        int     t       = iter->objType;
+        int     imm     = iter->immutable;
+        int   found     = 0;
+        *lastOpAssign   = 0;
+        // Make copy of object that will be self_this (in, which we therefore don't garbage below)
+        in_cpy = (pplObj *)malloc(sizeof(pplObj));
+        if (in_cpy == NULL) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Out of memory."); goto cleanup_on_error; }
+        memcpy(in_cpy, in, sizeof(pplObj));
+        // Loop through module / class instance and its prototypes looking for named method
+        for ( ; (t==PPLOBJ_MOD)||(t==PPLOBJ_USER) ; iter=iter->objPrototype , t=iter->objType )
          {
+          dict   *d   = (dict *)(iter->auxil);
           pplObj *obj = (pplObj *)ppl_dictLookup(d , key);
-          if ((obj==NULL) || (obj->objType==PPLOBJ_ZOM) || (obj->objType==PPLOBJ_GLOB)) { *errPos=charpos; *errType=ERR_NAMESPACE; sprintf(errText,"No such method '%s'.",key); goto cleanup_on_error; }
-          ppl_garbageObject(stk-1);
-          pplObjCpy(stk-1 , obj , 0 , 1);
-          (stk-1)->immutable = (stk-1)->immutable || imm;
+          imm = imm || iter->immutable;
+          if ((obj==NULL) || (obj->objType==PPLOBJ_ZOM) || (obj->objType==PPLOBJ_GLOB)) { imm=1; continue; } // Named methods of prototypes are immutable
+          pplObjCpy(in , obj , 0 , 1);
+          in->immutable = in->immutable || imm;
+          found = 1;
           break;
          }
-        else
+        if (!found) // If module or class instance doesn't have named method, see if type has named method
          {
-          *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Cannot dereference methods of this object."); goto cleanup_on_error;
+          dict   *d   = pplObjMethods[in->objType];
+          pplObj *obj = (pplObj *)ppl_dictLookup(d , key);
+          if (obj==NULL) { *errPos=charpos; *errType=ERR_NAMESPACE; sprintf(errText,"No such method '%s'.",key); goto cleanup_on_error; }
+          pplObjCpy(in , obj , 0 , 1);
+          in->immutable = 1;
          }
+        in->self_this = in_cpy;
         break;
        }
       case 6: // Dereference value (pointer)
@@ -347,7 +363,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
          }
         else
          {
-          *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Cannot dereference methods of this object."); goto cleanup_on_error;
+          *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Cannot assign methods or variables to this object."); goto cleanup_on_error;
          }
         break;
        }
@@ -562,138 +578,109 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
        }
       case 12: // assignment operator
        {
-        int t  = (int)*(unsigned char *)(in+j);
+        int     t  = (int)*(unsigned char *)(in+j);
         pplObj *o  = stk-2;
         pplObj *in = stk-1;
         pplObj *tmp= stk;
-        int t2 = in->objType;
+        int     t2 = in->objType;
+        int status = 0;
         *lastOpAssign=1;
         if (context->stackPtr < 2) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Too few items on stack for assignment operator."); goto cleanup_on_error; }
         if (o->self_lval == NULL)  { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Assignment operators can only be applied to variables."); goto cleanup_on_error; }
         if (o->immutable) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Cannot assign to an immutable object."); goto cleanup_on_error; }
+
+#define ASSIGN \
+         { \
+          if (o->self_dval==NULL) \
+           { \
+            int om = o->self_lval->amMalloced; \
+            o->self_lval->amMalloced = 0; \
+            ppl_garbageObject(o->self_lval); \
+            pplObjCpy(o->self_lval, tmp, om, 1); \
+           } \
+          else /* Assign vector or matrix element */ \
+           { \
+            if ((t2!=PPLOBJ_NUM) || (tmp->flagComplex)) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Vectors and matrices can only contain real numbers."); goto cleanup_on_error; } \
+            if (!ppl_unitsDimEqual(o,tmp)) { *errPos=charpos; *errType=ERR_UNIT; sprintf(errText,"Cannot insert element with dimensions <%s> into vector with dimensions <%s>.", ppl_printUnit(context,tmp,NULL,NULL,0,1,0), ppl_printUnit(context,o,NULL,NULL,1,1,0)); goto cleanup_on_error; } \
+            *o->self_dval = tmp->real; \
+           } \
+          ppl_garbageObject(o); \
+          memcpy(o , tmp , sizeof(pplObj)); /* swap-pop */ \
+          context->stackPtr--; \
+        }
+
         if (t==0x40) // =
          {
-          if (o->self_dval==NULL)
-           {
-            int om = o->self_lval->amMalloced;
-            o->self_lval->amMalloced = 0;
-            ppl_garbageObject(o->self_lval);
-            pplObjCpy(o->self_lval, in, om, 1);
-            ppl_garbageObject(o);
-           }
-          else // Assign vector or matrix element
-           {
-            if ((t2!=PPLOBJ_NUM) || (in->flagComplex) || (in->dimensionless))
-              { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Object elements can only represent real dimensionless numbers."); goto cleanup_on_error; }
-            *o->self_dval = in->real;
-            ppl_garbageObject(o);
-           }
-          memcpy(o , in , sizeof(pplObj)); // swap-pop
-          context->stackPtr--;
+          pplObj *tmp = in;
+          ASSIGN;
          }
         else if (t==0x41) // +=
          {
-          int status=0;
           ppl_opAdd(context, o, in, tmp, 0, &status, errType, errText);
           if (status) { *errPos=charpos; goto cleanup_on_error; }
-          pplObjCpy(o->self_lval, tmp, 0, 1);
-          ppl_garbageObject(o);
           ppl_garbageObject(in);
-          memcpy(o, tmp, sizeof(pplObj));
-          context->stackPtr--;
-          break;
+          ASSIGN;
          }
         else if (t==0x42) // -=
          {
-          int status=0;
           ppl_opSub(context, o, in, tmp, 0, &status, errType, errText);
           if (status) { *errPos=charpos; goto cleanup_on_error; }
-          pplObjCpy(o->self_lval, tmp, 0, 1);
-          ppl_garbageObject(o);
           ppl_garbageObject(in);
-          memcpy(o, tmp, sizeof(pplObj));
-          context->stackPtr--;
-          break;
+          ASSIGN;
          }
         else if (t==0x43) // *=
          {
-          int status=0;
           ppl_opMul(context, o, in, tmp, 0, &status, errType, errText);
           if (status) { *errPos=charpos; goto cleanup_on_error; }
-          pplObjCpy(o->self_lval, tmp, 0, 1);
-          ppl_garbageObject(o);
           ppl_garbageObject(in);
-          memcpy(o, tmp, sizeof(pplObj));
-          context->stackPtr--;
-          break;
+          ASSIGN;
          }
         else if (t==0x44) // /=
          {
-          int status=0;
           ppl_opDiv(context, o, in, tmp, 0, &status, errType, errText);
           if (status) { *errPos=charpos; goto cleanup_on_error; }
-          pplObjCpy(o->self_lval, tmp, 0, 1);
-          ppl_garbageObject(o);
           ppl_garbageObject(in);
-          memcpy(o, tmp, sizeof(pplObj));
-          context->stackPtr--;
-          break;
+          ASSIGN;
          }
         else
          {
-          int status=0;
           if (o->objType != PPLOBJ_NUM) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The fused operator-assignment operators can only be applied to numeric variables."); goto cleanup_on_error; }
-          CAST_TO_NUM(stk-1);
-          pplObjNum(stk, 0, 0, 0);
+          CAST_TO_NUM(in);
+          pplObjNum(tmp, 0, 0, 0);
           switch (t)
            {
             case 0x45: // %=
-              ppl_uaMod(context, stk-2, stk-1, stk, &status, errType, errText);
+              ppl_uaMod(context, o, in, tmp, &status, errType, errText);
               break;
             case 0x46: // &=
-              CAST_TO_INT(stk-1,"&="); CAST_TO_INT(stk-2,"&=");
-              stk->real = ((int)(stk-2)->real) & ((int)(stk-1)->real);
+              CAST_TO_INT(in,"&="); CAST_TO_INT(o,"&=");
+              tmp->real = ((int)o->real) & ((int)in->real);
               break;
             case 0x47: // ^=
-              CAST_TO_INT(stk-1,"^="); CAST_TO_INT(stk-2,"^=");
-              stk->real = ((int)(stk-2)->real) ^ ((int)(stk-1)->real);
+              CAST_TO_INT(in,"^="); CAST_TO_INT(o,"^=");
+              tmp->real = ((int)o->real) ^ ((int)in->real);
               break;
             case 0x48: // |=
-              CAST_TO_INT(stk-1,"|="); CAST_TO_INT(stk-2,"|=");
-              stk->real = ((int)(stk-2)->real) | ((int)(stk-1)->real);
+              CAST_TO_INT(in,"|="); CAST_TO_INT(o,"|=");
+              tmp->real = ((int)o->real) | ((int)in->real);
               break;
             case 0x49: // <<=
-              CAST_TO_INT(stk-1,"<<="); CAST_TO_INT(stk-2,"<<=");
-              stk->real = ((int)(stk-2)->real) << ((int)(stk-1)->real);
+              CAST_TO_INT(in,"<<="); CAST_TO_INT(o,"<<=");
+              tmp->real = ((int)o->real) << ((int)in->real);
               break;
             case 0x4A: // >>=
-              CAST_TO_INT(stk-1,">>="); CAST_TO_INT(stk-2,">>=");
-              stk->real = ((int)(stk-2)->real) >> ((int)(stk-1)->real);
+              CAST_TO_INT(in,">>="); CAST_TO_INT(o,">>=");
+              tmp->real = ((int)o->real) >> ((int)in->real);
               break;
             case 0x4B: // **=
-              ppl_uaPow(context, stk-2, stk-1, stk, &status, errType, errText);
+              ppl_uaPow(context, o, in, tmp, &status, errType, errText);
               break;
             default:
              *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Unknown fused operator-assignment operator with id=%d.",t); goto cleanup_on_error;
            }
           if (status) { *errPos=charpos; goto cleanup_on_error; }
-          if ((stk-2)->self_dval==NULL)
-           {
-            int om = (stk-2)->self_lval->amMalloced;
-            (stk-2)->self_lval->amMalloced = 0;
-            ppl_garbageObject((stk-2)->self_lval);
-            pplObjCpy((stk-2)->self_lval, stk, om, 1);
-            ppl_garbageObject(stk-2);
-           }
-          else // Assign vector or matrix element
-           {
-            if ((t2!=PPLOBJ_NUM) || (stk->flagComplex) || (stk->dimensionless))
-              { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Object elements can only represent real dimensionless numbers."); goto cleanup_on_error; }
-            *(stk-2)->self_dval = stk->real;
-            ppl_garbageObject(stk-2);
-           }
-          memcpy(stk-2, stk, sizeof(pplObj)); // swap-pop
-          context->stackPtr--;
+          ppl_garbageObject(in);
+          ASSIGN;
           break;
          }
         break;

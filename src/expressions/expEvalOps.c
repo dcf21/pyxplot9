@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include <gsl/gsl_math.h>
+#define GSL_RANGE_CHECK_OFF 1
 
 #include "expressions/expEval.h"
 #include "expressions/expEvalOps.h"
@@ -66,13 +67,25 @@ void ppl_opAdd(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
     r1+=r2; g1+=g2; b1+=b2;
     pplObjColor(o,0,SW_COLSPACE_RGB,r1,g1,b1,0);
    }
+  else if ( ((t1==PPLOBJ_DATE)&&(t2==PPLOBJ_NUM)) || ((t1==PPLOBJ_NUM)&&(t2==PPLOBJ_DATE)) ) // adding time interval to date
+   {
+    int i;
+    pplObj *num = (t1==PPLOBJ_NUM) ? a : b;
+    for (i=0; i<UNITS_MAX_BASEUNITS; i++) if (num->exponent[i] != (i==UNIT_TIME))
+     {
+      *status=1; *errType=ERR_UNIT;
+      sprintf(errText, "Can only add quantities with units of time to dates. Attempt to add a quantity with units of <%s>.", ppl_printUnit(context,num,NULL,NULL,1,1,0));
+      return;
+     }
+    pplObjDate(o,0,a->real+b->real);
+   }
   else if ((t1==PPLOBJ_VEC)&&(t2==PPLOBJ_VEC)) // adding vectors
    {
-    int i,j;
+    int i;
     gsl_vector *v1 = ((pplVector *)(a->auxil))->v;
     gsl_vector *v2 = ((pplVector *)(b->auxil))->v;
     gsl_vector *vo;
-    if (ppl_unitsDimEqual(a, b) == 0)
+    if (!ppl_unitsDimEqual(a, b))
      {
       if (a->dimensionless)
        { sprintf(errText, "Attempt to add quantities with conflicting dimensions: left operand is dimensionless, while right operand has units of <%s>.", ppl_printUnit(context, b, NULL, NULL, 1, 1, 0) ); }
@@ -82,10 +95,95 @@ void ppl_opAdd(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
        { sprintf(errText, "Attempt to add quantities with conflicting dimensions: left operand has units of <%s>, while right operand has units of <%s>.", ppl_printUnit(context, a, NULL, NULL, 0, 1, 0), ppl_printUnit(context, b, NULL, NULL, 1, 1, 0) ); }
       *errType=ERR_UNIT; *status = 1; return;
      }
-    if (pplObjVector(o,0,1,v1->size+v2->size)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    if (v1->size != v2->size)
+     {
+      sprintf(errText, "Can only add vectors of a common size. Left operand has length of %ld, while right operand has length of %ld.", (long)v1->size, (long)v2->size);
+      *errType=ERR_RANGE; *status = 1; return;
+     }
+    if (pplObjVector(o,0,1,v1->size)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
     vo = ((pplVector *)(o->auxil))->v;
-    for (j=i=0; i<v1->size; i++,j++) vo->data[j] = v1->data[i];
-    for (  i=0; i<v2->size; i++,j++) vo->data[j] = v2->data[i];
+    for (i=0; i<v1->size; i++) gsl_vector_set(vo , i , gsl_vector_get(v1,i) + gsl_vector_get(v2,i));
+    ppl_unitsDimCpy(o,a);
+   }
+  else if ((t1==PPLOBJ_LIST)&&(t2==PPLOBJ_LIST)) // adding lists
+   {
+    listIterator *li;
+    pplObj       *item, buff;
+    list         *l;
+    if (pplObjList(o,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    l  = (list *)o->auxil;
+    li = ppl_listIterateInit((list *)a->auxil);
+    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL) { pplObjCpy(&buff, item, 1, 1); ppl_listAppendCpy(l, (void *)&buff, sizeof(pplObj) ); }
+    li = ppl_listIterateInit((list *)b->auxil);
+    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL) { pplObjCpy(&buff, item, 1, 1); ppl_listAppendCpy(l, (void *)&buff, sizeof(pplObj) ); }
+   }
+  else if ((t1==PPLOBJ_LIST)&&(t2==PPLOBJ_VEC)) // adding vector to list
+   {
+    int i;
+    listIterator *li;
+    pplObj       *item, buff;
+    gsl_vector   *bv = ((pplVector *)(b->auxil))->v;
+    list         *l;
+    if (pplObjList(o,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    l  = (list *)o->auxil;
+    li = ppl_listIterateInit((list *)a->auxil);
+    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL) { pplObjCpy(&buff, item, 1, 1); ppl_listAppendCpy(l, (void *)&buff, sizeof(pplObj) ); }
+    pplObjNum(&buff,1,0,0); ppl_unitsDimCpy(&buff,b);
+    for (i=0; i<bv->size; i++) { buff.real=gsl_vector_get(bv,i); ppl_listAppendCpy(l, (void *)&buff, sizeof(pplObj) ); }
+   }
+  else if ((t1==PPLOBJ_VEC)&&(t2==PPLOBJ_LIST)) // adding list to vector
+   {
+    int i;
+    listIterator *li;
+    pplObj       *item, buff;
+    gsl_vector   *av = ((pplVector *)(a->auxil))->v;
+    list         *l;
+    if (pplObjList(o,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    l  = (list *)o->auxil;
+    pplObjNum(&buff,1,0,0); ppl_unitsDimCpy(&buff,a);
+    for (i=0; i<av->size; i++) { buff.real=gsl_vector_get(av,i); ppl_listAppendCpy(l, (void *)&buff, sizeof(pplObj) ); }
+    li = ppl_listIterateInit((list *)b->auxil);
+    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL) { pplObjCpy(&buff, item, 1, 1); ppl_listAppendCpy(l, (void *)&buff, sizeof(pplObj) ); }
+   }
+  else if ( ((t1==PPLOBJ_DICT)&&(t2==PPLOBJ_DICT)) || // adding dictionaries
+            ((t1==PPLOBJ_MOD )&&(t2==PPLOBJ_MOD )) )  // adding modules
+   {
+    dictIterator *di;
+    pplObj       *item, buff;
+    dict         *d;
+    char         *key;
+    if ( ((t1==PPLOBJ_DICT)?pplObjDict(o,0,1,NULL):pplObjModule(o,0,1,0)) == NULL )
+       { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    d  = (dict *)o->auxil;
+    di = ppl_dictIterateInit((dict *)a->auxil);
+    while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL) { pplObjCpy(&buff, item, 1, 1); ppl_dictAppendCpy(d, key, (void *)&buff, sizeof(pplObj) ); }
+    di = ppl_dictIterateInit((dict *)b->auxil);
+    while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL) { pplObjCpy(&buff, item, 1, 1); ppl_dictAppendCpy(d, key, (void *)&buff, sizeof(pplObj) ); }
+   }
+  else if ((t1==PPLOBJ_MAT)&&(t2==PPLOBJ_MAT)) // adding matrices
+   {
+    int i,j;
+    gsl_matrix *m1 = ((pplMatrix *)(a->auxil))->m;
+    gsl_matrix *m2 = ((pplMatrix *)(b->auxil))->m;
+    gsl_matrix *mo;
+    if (!ppl_unitsDimEqual(a, b))
+     {
+      if (a->dimensionless)
+       { sprintf(errText, "Attempt to add quantities with conflicting dimensions: left operand is dimensionless, while right operand has units of <%s>.", ppl_printUnit(context, b, NULL, NULL, 1, 1, 0) ); }
+      else if (b->dimensionless)
+       { sprintf(errText, "Attempt to add quantities with conflicting dimensions: left operand has units of <%s>, while right operand is dimensionless.", ppl_printUnit(context, a, NULL, NULL, 0, 1, 0) ); }
+      else
+       { sprintf(errText, "Attempt to add quantities with conflicting dimensions: left operand has units of <%s>, while right operand has units of <%s>.", ppl_printUnit(context, a, NULL, NULL, 0, 1, 0), ppl_printUnit(context, b, NULL, NULL, 1, 1, 0) ); }
+      *errType=ERR_UNIT; *status = 1; return;
+     }
+    if ( (m1->size1 != m2->size1) || (m1->size2 != m2->size2) )
+     {
+      sprintf(errText, "Can only add matrices of a common size. Left operand has size of %ldx%ld, while right operand has size of %ldx%ld.", (long)m1->size1, (long)m1->size2, (long)m2->size1, (long)m2->size2);
+      *errType=ERR_RANGE; *status = 1; return;
+     }
+    if (pplObjMatrix(o,0,1,m1->size1,m2->size2)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    mo = ((pplMatrix *)(o->auxil))->m;
+    for (i=0; i<m1->size1; i++) for (j=0; j<m1->size2; j++) gsl_matrix_set(mo , i , j , gsl_matrix_get(m1,i,j) + gsl_matrix_get(m2,i,j));
     ppl_unitsDimCpy(o,a);
    }
   else // adding numbers
@@ -108,6 +206,17 @@ void ppl_opSub(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
     o->dimensionless=0;
     o->exponent[UNIT_TIME]=1;
    }
+  else if ((t1==PPLOBJ_DATE)&&(t2==PPLOBJ_NUM)) // subtracting time interval from date
+   {
+    int i;
+    for (i=0; i<UNITS_MAX_BASEUNITS; i++) if (b->exponent[i] != (i==UNIT_TIME)) 
+     { 
+      *status=1; *errType=ERR_UNIT;
+      sprintf(errText, "Can only subtract quantities with units of time from dates. Attempt to subtract a quantity with units of <%s>.", ppl_printUnit(context,b,NULL,NULL,1,1,0));
+      return;
+     }
+    pplObjDate(o,0,a->real-b->real);
+   }
   else if ((t1==PPLOBJ_COL)&&(t2==PPLOBJ_COL)) // subtracting colors
    {
     double r1,g1,b1,r2,g2,b2;
@@ -120,6 +229,58 @@ void ppl_opSub(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
     r1-=r2; g1-=g2; b1-=b2;
     pplObjColor(o,0,SW_COLSPACE_RGB,r1,g1,b1,0);
    }
+  else if ((t1==PPLOBJ_VEC)&&(t2==PPLOBJ_VEC)) // subtracting vectors
+   {
+    int i;
+    gsl_vector *v1 = ((pplVector *)(a->auxil))->v;
+    gsl_vector *v2 = ((pplVector *)(b->auxil))->v;
+    gsl_vector *vo;
+    if (ppl_unitsDimEqual(a, b) == 0)
+     {
+      if (a->dimensionless)
+       { sprintf(errText, "Attempt to subtract quantities with conflicting dimensions: left operand is dimensionless, while right operand has units of <%s>.", ppl_printUnit(context, b, NULL, NULL, 1, 1, 0) ); }
+      else if (b->dimensionless)
+       { sprintf(errText, "Attempt to subtract quantities with conflicting dimensions: left operand has units of <%s>, while right operand is dimensionless.", ppl_printUnit(context, a, NULL, NULL, 0, 1, 0) ); }
+      else
+       { sprintf(errText, "Attempt to subtract quantities with conflicting dimensions: left operand has units of <%s>, while right operand has units of <%s>.", ppl_printUnit(context, a, NULL, NULL, 0, 1, 0), ppl_printUnit(context, b, NULL, NULL, 1, 1, 0) ); }
+      *errType=ERR_UNIT; *status = 1; return;
+     }
+    if (v1->size != v2->size)
+     {
+      sprintf(errText, "Can only subtract vectors of a common size. Left operand has length of %ld, while right operand has length of %ld.", (long)v1->size, (long)v2->size);
+      *errType=ERR_RANGE; *status = 1; return;
+     }
+    if (pplObjVector(o,0,1,v1->size)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    vo = ((pplVector *)(o->auxil))->v;
+    for (i=0; i<v1->size; i++) gsl_vector_set(vo , i , gsl_vector_get(v1,i) - gsl_vector_get(v2,i));
+    ppl_unitsDimCpy(o,a);
+   }
+  else if ((t1==PPLOBJ_MAT)&&(t2==PPLOBJ_MAT)) // subtracting matrices
+   {
+    int i,j;
+    gsl_matrix *m1 = ((pplMatrix *)(a->auxil))->m;
+    gsl_matrix *m2 = ((pplMatrix *)(b->auxil))->m;
+    gsl_matrix *mo;
+    if (ppl_unitsDimEqual(a, b) == 0)
+     {
+      if (a->dimensionless)
+       { sprintf(errText, "Attempt to subtract quantities with conflicting dimensions: left operand is dimensionless, while right operand has units of <%s>.", ppl_printUnit(context, b, NULL, NULL, 1, 1, 0) ); }
+      else if (b->dimensionless)
+       { sprintf(errText, "Attempt to subtract quantities with conflicting dimensions: left operand has units of <%s>, while right operand is dimensionless.", ppl_printUnit(context, a, NULL, NULL, 0, 1, 0) ); }
+      else
+       { sprintf(errText, "Attempt to subtract quantities with conflicting dimensions: left operand has units of <%s>, while right operand has units of <%s>.", ppl_printUnit(context, a, NULL, NULL, 0, 1, 0), ppl_printUnit(context, b, NULL, NULL, 1, 1, 0) ); }
+      *errType=ERR_UNIT; *status = 1; return;
+     }
+    if ( (m1->size1 != m2->size1) || (m1->size2 != m2->size2) )
+     {
+      sprintf(errText, "Can only subtract matrices of a common size. Left operand has size of %ldx%ld, while right operand has size of %ldx%ld.", (long)m1->size1, (long)m1->size2, (long)m2->size1, (long)m2->size2);
+      *errType=ERR_RANGE; *status = 1; return;
+     }
+    if (pplObjMatrix(o,0,1,m1->size1,m2->size2)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    mo = ((pplMatrix *)(o->auxil))->m;
+    for (i=0; i<m1->size1; i++) for (j=0; j<m1->size2; j++) gsl_matrix_set(mo , i , j , gsl_matrix_get(m1,i,j) - gsl_matrix_get(m2,i,j));
+    ppl_unitsDimCpy(o,a);
+   }
   else // subtracting numbers
    {
     CAST_TO_NUM(a); CAST_TO_NUM(b);
@@ -131,16 +292,101 @@ void ppl_opSub(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
 
 void ppl_opMul(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invertible, int *status, int *errType, char *errText)
  {
-  CAST_TO_NUM(a); CAST_TO_NUM(b);
-  ppl_uaMul(context, a, b, o, status, errType, errText);
+  int t1 = a->objType;
+  int t2 = b->objType;
+
+  if ((t1==PPLOBJ_VEC)&&(t2==PPLOBJ_VEC)) // multiplying vectors (scalar dot product)
+   {
+    gsl_vector *v1 = ((pplVector *)(a->auxil))->v;
+    gsl_vector *v2 = ((pplVector *)(b->auxil))->v;
+    int i;
+    double acc=0;
+    if (v1->size != v2->size)
+     {
+      sprintf(errText, "Can only form dot-product of vectors of a common size. Left operand has length of %ld, while right operand has length of %ld.", (long)v1->size, (long)v2->size);
+      *errType=ERR_RANGE; *status=1; return;
+     }
+    a->real=a->imag=b->real=b->imag=0 ; a->flagComplex=b->flagComplex=0;
+    ppl_uaMul(context, a, b, o, status, errType, errText);
+    for (i=0; i<v1->size; i++) acc += gsl_vector_get(v1,i) * gsl_vector_get(v2,i);
+    o->real=acc; o->imag=0; o->flagComplex=0;
+   }
+  else if ( ((t1==PPLOBJ_VEC)&&(t2==PPLOBJ_NUM)) || // multiplying vector by number
+            ((t1==PPLOBJ_NUM)&&(t2==PPLOBJ_VEC)) )  // multiplying number by vector
+   {
+    int         i;
+    pplObj     *num = (t1==PPLOBJ_NUM) ? a : b;
+    pplObj     *vec = (t1==PPLOBJ_VEC) ? a : b;
+    gsl_vector *v   = ((pplVector *)(vec->auxil))->v;
+    gsl_vector *vo  = NULL;
+    if (num->flagComplex) { sprintf(errText, "Vectors can only contain real numbers, and cannot be multiplied by complex numbers."); *errType=ERR_NUMERIC; *status = 1; return; }
+    vec->real=1; vec->imag=0; vec->flagComplex=0;
+    if (pplObjVector(o,0,1,v->size)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    ppl_uaMul(context, a, b, o, status, errType, errText);
+    vo = ((pplVector *)(o->auxil))->v;
+    for (i=0; i<v->size; i++) gsl_vector_set(vo, i, gsl_vector_get(v,i) * o->real);
+    o->real=0;
+   }
+  else if ( ((t1==PPLOBJ_MAT)&&(t2==PPLOBJ_NUM)) || // multiplying matrix by number
+            ((t1==PPLOBJ_NUM)&&(t2==PPLOBJ_MAT)) )  // multiplying number by matrix
+   {
+    int         i,j;
+    pplObj     *num = (t1==PPLOBJ_NUM) ? a : b;
+    pplObj     *mat = (t1==PPLOBJ_MAT) ? a : b;
+    gsl_matrix *m   = ((pplMatrix *)(mat->auxil))->m;
+    gsl_matrix *mo  = NULL;
+    if (num->flagComplex) { sprintf(errText, "Matrices can only contain real numbers, and cannot be multiplied by complex numbers."); *errType=ERR_NUMERIC; *status = 1; return; }
+    mat->real=1; mat->imag=0; mat->flagComplex=0;
+    if (pplObjMatrix(o,0,1,m->size1,m->size2)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    ppl_uaMul(context, a, b, o, status, errType, errText);
+    mo = ((pplMatrix *)(o->auxil))->m;
+    for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) gsl_matrix_set(mo, i, j, gsl_matrix_get(m,i,j) * o->real);
+    o->real=0;
+   }
+  else // multiplying numbers
+   {
+    CAST_TO_NUM(a); CAST_TO_NUM(b);
+    ppl_uaMul(context, a, b, o, status, errType, errText);
+   }
   return;
   cast_fail: *status=1;
  }
 
 void ppl_opDiv(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invertible, int *status, int *errType, char *errText)
  {
-  CAST_TO_NUM(a); CAST_TO_NUM(b);
-  ppl_uaDiv(context, a, b, o, status, errType, errText);
+  int t1 = a->objType;
+  int t2 = b->objType;
+  if ((t1==PPLOBJ_VEC)&&(t2==PPLOBJ_NUM)) // dividing vector by number
+   {
+    int         i;
+    gsl_vector *v   = ((pplVector *)(a->auxil))->v;
+    gsl_vector *vo  = NULL;
+    if (b->flagComplex) { sprintf(errText, "Vectors can only contain real numbers, and cannot be divided by complex numbers."); *errType=ERR_NUMERIC; *status = 1; return; }
+    a->real=1; a->imag=0; a->flagComplex=0;
+    if (pplObjVector(o,0,1,v->size)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    ppl_uaDiv(context, a, b, o, status, errType, errText);
+    vo = ((pplVector *)(o->auxil))->v;
+    for (i=0; i<v->size; i++) gsl_vector_set(vo, i, gsl_vector_get(v,i) * o->real);
+    o->real=0;
+   }
+  else if ((t1==PPLOBJ_MAT)&&(t2==PPLOBJ_NUM)) // dividing matrix by number
+   {
+    int         i,j;
+    gsl_matrix *m   = ((pplMatrix *)(a->auxil))->m;
+    gsl_matrix *mo  = NULL;
+    if (b->flagComplex) { sprintf(errText, "Matrices can only contain real numbers, and cannot be divided by complex numbers."); *errType=ERR_NUMERIC; *status = 1; return; }
+    a->real=1; a->imag=0; a->flagComplex=0;
+    if (pplObjMatrix(o,0,1,m->size1,m->size2)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    ppl_uaDiv(context, a, b, o, status, errType, errText);
+    mo = ((pplMatrix *)(o->auxil))->m;
+    for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) gsl_matrix_set(mo, i, j, gsl_matrix_get(m,i,j) * o->real);
+    o->real=0;
+   }
+  else // dividing numbers
+   {
+    CAST_TO_NUM(a); CAST_TO_NUM(b);
+    ppl_uaDiv(context, a, b, o, status, errType, errText);
+   }
   return;
   cast_fail: *status=1;
  }

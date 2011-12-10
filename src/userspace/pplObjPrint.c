@@ -23,6 +23,10 @@
 #include <math.h>
 #include <string.h>
 
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
+#define GSL_RANGE_CHECK_OFF 1
+
 #include "coreUtils/errorReport.h"
 #include "coreUtils/list.h"
 #include "coreUtils/dict.h"
@@ -167,26 +171,40 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
      }
     case PPLOBJ_VEC:
      {
-      int         i=0, j;
+      int         i=0, j=0;
+      double      real,imag;
+      char       *unit;
+      o->real=1; o->imag=0; o->flagComplex=0;
+      unit = ppl_printUnit(c,o,&real,&imag,1,1,SW_DISPLAY_T);
+      if (o->dimensionless) real=1;
       gsl_vector *v = ((pplVector *)(o->auxil))->v;
-      out[i++]='[';
+      strcpy(out+i,"vector(");
+      i+=strlen(out+i);
       for(j=0; j<v->size; j++)
        {
         if (j>0) { out[i++]=','; out[i++]=' '; }
-        strcpy(out+i,ppl_numericDisplay(v->data[j], c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L)));
+        strcpy(out+i,ppl_numericDisplay(gsl_vector_get(v,j)*real, c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L)));
         i+=strlen(out+i);
         if (i>outlen-100) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
        }
-      strcpy(out+i,"]");
+      strcpy(out+i,")");
+      i+=strlen(out+i);
+      if (!o->dimensionless) sprintf(out+i, "%s", unit);
       break;
      }
     case PPLOBJ_MAT:
      {
-      int         i=0, j, k;
+      int         i=0, j=0, k=0;
+      double      real,imag;
+      char       *unit;
+      o->real=1; o->imag=0; o->flagComplex=0;
+      unit = ppl_printUnit(c,o,&real,&imag,1,1,SW_DISPLAY_T);
+      if (o->dimensionless) real=1;
       gsl_matrix *m = ((pplMatrix *)(o->auxil))->m;
       if (typeable==SW_DISPLAY_T)
        {
-        out[i++]='[';
+        strcpy(out+i,"matrix(");
+        i+=strlen(out+i);
         for(j=0; j<m->size1; j++)
          {
           if (j>0) { out[i++]=','; out[i++]=' '; }
@@ -194,17 +212,20 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
           for(k=0; k<m->size2; k++)
            {
             if (k>0) { out[i++]=','; out[i++]=' '; }
-            strcpy(out+i,ppl_numericDisplay(m->data[j*m->tda+k], c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L)));
+            strcpy(out+i,ppl_numericDisplay(gsl_matrix_get(m,j,k)*real, c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L)));
             i+=strlen(out+i);
             if (i>outlen-100) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
            }
           strcpy(out+i,"]"); i+=strlen(out+i);
           if (i>outlen-100) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
          }
-        strcpy(out+i,"]"); i+=strlen(out+i);
+        strcpy(out+i,")");
+        i+=strlen(out+i);
+        if (!o->dimensionless) sprintf(out+i, "*%s", unit);
        }
       else
        {
+        const int unitLine = m->size1/2;
         for(j=0; j<m->size1; j++)
          {
           if (j>0) { out[i++]=','; out[i++]=' '; }
@@ -212,11 +233,13 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
           for(k=0; k<m->size2; k++)
            {
             if (k>0) { out[i++]=','; out[i++]=' '; }
-            strcpy(out+i,ppl_numericDisplay(m->data[j*m->tda+k], c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L)));
+            strcpy(out+i,ppl_numericDisplay(gsl_matrix_get(m,j,k)*real, c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L)));
             i+=strlen(out+i);
             if (i>outlen-100) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
            }
-          strcpy(out+i,")\n"); i+=strlen(out+i);
+          if ((j!=unitLine)||(o->dimensionless)) strcpy (out+i,")\n");
+          else                                   sprintf(out+i,") * %s\n",unit);
+          i+=strlen(out+i);
           if (i>outlen-100) { strcpy(out+i,"...\n"); i+=strlen(out+i); break; }
          }
        }
