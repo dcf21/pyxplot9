@@ -38,8 +38,8 @@ void pplcol_RGBtoHSB(double ri, double gi, double bi, double *ho, double *so, do
   double m = ppl_min3(ri,gi,bi);
   double C = M-m;
   if      (C== 0) *ho = 0;
-  else if (C==ri) *ho = fmod((gi-bi)/C , 6);
-  else if (C==gi) *ho = (bi-ri)/C + 2;
+  else if (M==ri) *ho = fmod((gi-bi)/C , 6);
+  else if (M==gi) *ho = (bi-ri)/C + 2;
   else            *ho = (ri-gi)/C + 4;
   *ho /= 6.0;
   *so = C/M;
@@ -90,6 +90,25 @@ void pplcol_CMYKtoHSB(double ci, double mi, double yi, double ki, double *ho, do
   double r,g,b;
   pplcol_CMYKtoRGB(ci,mi,yi,ki,&r,&g,&b);
   pplcol_RGBtoHSB(r,g,b,ho,so,bo);
+ }
+
+void pplcol_RGBtoCMYK(double ri, double gi, double bi, double *co, double *mo, double *yo, double *ko)
+ {
+  *ko = 1.0 - ppl_max3(ri,gi,bi);
+  *co = 1.0 - ri - *ko;
+  *mo = 1.0 - gi - *ko;
+  *yo = 1.0 - bi - *ko;
+  if (*co<0) *co=0; if (*co>1) *co=1;
+  if (*mo<0) *mo=0; if (*mo>1) *mo=1;
+  if (*yo<0) *yo=0; if (*yo>1) *yo=1;
+  if (*ko<0) *ko=0; if (*ko>1) *ko=1;
+ }
+
+void pplcol_HSBtoCMYK(double hi, double si, double bi, double *co, double *mo, double *yo, double *ko)
+ {
+  double r,g,b;
+  pplcol_HSBtoRGB(hi,si,bi,&r,&g,&b);
+  pplcol_RGBtoCMYK(r,g,b,co,mo,yo,ko);
  }
 
 int pplObjCmp(ppl_context *c, pplObj *a, pplObj *b, int *status, int *errType, char *errText)

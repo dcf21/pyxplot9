@@ -61,7 +61,7 @@ double ppl_max3(double x, double y, double z)
 double ppl_min3(double x, double y, double z)
  {
   double o = x<y?x:y;
-  if (o<z) return z;
+  if (o<z) return o;
   return z;
  }
 

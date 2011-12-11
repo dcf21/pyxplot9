@@ -436,10 +436,10 @@ void ppl_dateString(ppl_context *ct, char *out, double UT, const char *format, i
     switch (format[j+1])
      {
       case '%': sprintf(out+k, "%%"); break;
-      case 'a': sprintf(out+k, "%s", ppl_getWeekDayName(ct, floor( fmod(UT/3600/24+4 , 7) ))); out[k+3]='\0'; break;
-      case 'A': sprintf(out+k, "%s" , ppl_getWeekDayName(ct, floor( fmod(UT/3600/24+4 , 7) ))); break;
+      case 'a': sprintf(out+k, "%s", ppl_getWeekDayName(ct, floor( fmod(UT/3600/24+3 , 7) ))); out[k+3]='\0'; break;
+      case 'A': sprintf(out+k, "%s", ppl_getWeekDayName(ct, floor( fmod(UT/3600/24+3 , 7) ))); break;
       case 'b': sprintf(out+k, "%s", ppl_getMonthName(ct, month)); out[k+3]='\0'; break;
-      case 'B': sprintf(out+k, "%s" , ppl_getMonthName(ct, month)); break;
+      case 'B': sprintf(out+k, "%s", ppl_getMonthName(ct, month)); break;
       case 'C': sprintf(out+k, "%d", (year/100)+1); break;
       case 'd': sprintf(out+k, "%d", day); break;
       case 'H': sprintf(out+k, "%02d", hour); break;
