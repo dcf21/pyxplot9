@@ -29,6 +29,7 @@
 #include "settings/settingTypes.h"
 #include "userspace/context.h"
 #include "userspace/pplObj.h"
+#include "userspace/pplObjCmp.h"
 #include "userspace/unitsArithmetic.h"
 #include "userspace/unitsDisp.h"
 
@@ -111,7 +112,14 @@ void pplcol_HSBtoCMYK(double hi, double si, double bi, double *co, double *mo, d
   pplcol_RGBtoCMYK(r,g,b,co,mo,yo,ko);
  }
 
-int pplObjCmp(ppl_context *c, pplObj *a, pplObj *b, int *status, int *errType, char *errText)
+int pplObjCmpQuiet(const void *a, const void *b)
+ {
+  const pplObj *pa = *(pplObj **)a;
+  const pplObj *pb = *(pplObj **)b;
+  return pplObjCmp(NULL, pa, pb, NULL, NULL, NULL);
+ }
+
+int pplObjCmp(ppl_context *c, const pplObj *a, const pplObj *b, int *status, int *errType, char *errText)
  {
   int t1  = a->objType;
   int t2  = b->objType;
@@ -125,16 +133,28 @@ int pplObjCmp(ppl_context *c, pplObj *a, pplObj *b, int *status, int *errType, c
     double av,bv;
     if (ppl_unitsDimEqual(a,b)==0)
      {
-      *status=1; *errType=ERR_UNIT;
-      if (a->dimensionless)
-       sprintf(errText, "Attempt to compare a quantity which is dimensionless with one with dimensions of <%s>.", ppl_printUnit(c,b,NULL,NULL,1,1,0));
-      else if (b->dimensionless)
-       sprintf(errText, "Attempt to compare a quantity with dimensions of <%s> with one which is dimensionless.", ppl_printUnit(c,a,NULL,NULL,0,1,0));
+      if (c==NULL)
+       {
+        int i;
+        for (i=0; i<UNITS_MAX_BASEUNITS; i++)
+         {
+          if (a->exponent[i]<b->exponent[i]) return -1;
+          if (a->exponent[i]>b->exponent[i]) return  1;
+         }
+       }
       else
-       sprintf(errText, "Attempt to compare a quantity with dimensions of <%s> with one with dimensions of <%s>.", ppl_printUnit(c,a,NULL,NULL,0,1,0), ppl_printUnit(c,b,NULL,NULL,1,1,0));
-      return -2;
+       {
+        *status=1; *errType=ERR_UNIT;
+        if (a->dimensionless)
+         sprintf(errText, "Attempt to compare a quantity which is dimensionless with one with dimensions of <%s>.", ppl_printUnit(c,b,NULL,NULL,1,1,0));
+        else if (b->dimensionless)
+         sprintf(errText, "Attempt to compare a quantity with dimensions of <%s> with one which is dimensionless.", ppl_printUnit(c,a,NULL,NULL,0,1,0));
+        else
+         sprintf(errText, "Attempt to compare a quantity with dimensions of <%s> with one with dimensions of <%s>.", ppl_printUnit(c,a,NULL,NULL,0,1,0), ppl_printUnit(c,b,NULL,NULL,1,1,0));
+        return -2;
+       }
      }
-    if ((c->set->term_current.ComplexNumbers==SW_ONOFF_OFF)&&((a->flagComplex)||(b->flagComplex))) return -2;
+    if ((c!=NULL)&&(c->set->term_current.ComplexNumbers==SW_ONOFF_OFF)&&((a->flagComplex)||(b->flagComplex))) return -2;
     if ((!gsl_finite(a->real))||(!gsl_finite(a->imag))||(!gsl_finite(b->real))||(!gsl_finite(b->imag))) return -2;
     av = hypot(a->real,a->imag);
     bv = hypot(b->real,b->imag);
@@ -151,7 +171,7 @@ int pplObjCmp(ppl_context *c, pplObj *a, pplObj *b, int *status, int *errType, c
     return -2;
    }
   else if ((t1o==4)||(t1o==14)||(t1o==15)) // 4 - strings; 14 - data type; 15 - exception
-    return strcmp((char*)a->auxil,(char*)b->auxil);
+    return strcmp((const char*)a->auxil,(const char*)b->auxil);
   else if (t1o==5) // 5 - colors
    {
     double h1,s1,b1,h2,s2,b2;

@@ -26,12 +26,21 @@
 #include <ctype.h>
 #include <math.h>
 
+#include "gsl/gsl_blas.h"
+#include "gsl/gsl_eigen.h"
+#include "gsl/gsl_linalg.h"
+#include "gsl/gsl_matrix.h"
+#include "gsl/gsl_permutation.h"
+#include "gsl/gsl_vector.h"
+
 #include "coreUtils/errorReport.h"
 #include "coreUtils/list.h"
 #include "coreUtils/dict.h"
 
 #include "defaultObjs/defaultFuncs.h"
 #include "defaultObjs/defaultFuncsMacros.h"
+
+#include "mathsTools/dcfmath.h"
 
 #include "userspace/calendars.h"
 #include "userspace/context.h"
@@ -41,6 +50,7 @@
 #include "userspace/pplObjMethods.h"
 #include "userspace/pplObjPrint.h"
 #include "userspace/pplObjUnits.h"
+#include "userspace/unitsArithmetic.h"
 #include "userspace/unitsDisp.h"
 
 dict **pplObjMethods;
@@ -394,6 +404,278 @@ void pplmethod_colToHSB(ppl_context *c, pplObj *in, int nArgs, int *status, int 
   gsl_vector_set(v,2,b);
  }
 
+// Vector methods
+
+void pplmethod_vectorLen(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  gsl_vector *v = ((pplVector *)in[-1].self_this->auxil)->v;
+  pplObjNum(&OUTPUT,0,v->size,0);
+ }
+
+void pplmethod_vectorNorm(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *st = in[-1].self_this;
+  gsl_vector *v = ((pplVector *)st->auxil)->v;
+  pplObjNum(&OUTPUT,0,gsl_blas_dnrm2(v),0);
+  ppl_unitsDimCpy(&OUTPUT, st);
+ }
+
+void pplmethod_vectorReverse(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  gsl_vector *v = ((pplVector *)in[-1].self_this->auxil)->v;
+  long i,j;
+  long n = v->size;
+  if (v->size<2) return;
+  for ( i=0 , j=n-1 ; i<j ; i++ , j-- ) { double tmp = gsl_vector_get(v,i); gsl_vector_set(v,i,gsl_vector_get(v,j)); gsl_vector_set(v,j,tmp); }
+ }
+
+void pplmethod_vectorSort(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  gsl_vector *v = ((pplVector *)in[-1].self_this->auxil)->v;
+  if (v->size<2) return;
+  qsort((void *)v->data , v->size , sizeof(double)*v->stride , ppl_dblSort);
+ }
+
+// List methods
+
+void pplmethod_listLen(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  list *l = (list *)in[-1].self_this->auxil;
+  pplObjNum(&OUTPUT,0,l->length,0);
+ }
+
+void pplmethod_listReverse(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  long      i;
+  list     *l     = (list *)in[-1].self_this->auxil;
+  listItem *l1    = l->first;
+  listItem *l2    = l->last;
+  long      n     = l->length;
+  if (n<2) return;
+
+  for (i=0; i<n/2; i++)
+   {
+    void *tmp = l1->data; l1->data=l2->data; l2->data=tmp;
+    l1=l1->next; l2=l2->prev;
+   }
+ }
+
+void pplmethod_listSort(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  long     i;
+  list    *l     = (list *)in[-1].self_this->auxil;
+  long     n     = l->length;
+  pplObj **items;
+  listIterator *li = ppl_listIterateInit(l);
+  if (n<2) return;
+  items = (pplObj **)malloc(n * sizeof(pplObj *));
+  if (items==NULL) { *status=1; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); return; }
+  i=0; while (li!=NULL) { items[i++]=(pplObj*)li->data; ppl_listIterate(&li); }
+  qsort(items, n, sizeof(pplObj*), pplObjCmpQuiet);
+  li = ppl_listIterateInit(l);
+  i=0; while (li!=NULL) { li->data=(void*)items[i++]; ppl_listIterate(&li); }
+  free(items);
+ }
+
+// Dictionary methods
+
+void pplmethod_dictHasKey(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char         *key;
+  pplObj       *item;
+  dictIterator *di = ppl_dictIterateInit((dict *)in[-1].self_this->auxil);
+  char         *instr;
+  if ((nArgs!=1)&&(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The function hasKey() requires a string as its argument; supplied argument had type <%s>.", pplObjTypeNames[in[0].objType]); return; }
+  instr = (char *)in[0].auxil;
+  while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
+   { if (strcmp(instr,key)==0) { pplObjBool(&OUTPUT,0,1); return; } }
+  pplObjBool(&OUTPUT,0,0);
+  return;
+ }
+
+void pplmethod_dictItems(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char         *key, *tmp;
+  pplObj        v, va, vb, *item;
+  list         *l, *l2;
+  dictIterator *di = ppl_dictIterateInit((dict *)in[-1].self_this->auxil);
+  if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  l  = (list *)OUTPUT.auxil;
+  while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
+   {
+    COPYSTR(tmp,key);
+    if (pplObjStr(&va,1,1,tmp )==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    pplObjCpy(&vb,item,1,1);
+    if (pplObjList(&v,1,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    l2 = (list *)v.auxil;
+    ppl_listAppendCpy(l2, (void *)&va, sizeof(pplObj));
+    ppl_listAppendCpy(l2, (void *)&vb, sizeof(pplObj));
+    ppl_listAppendCpy(l , (void *)&v , sizeof(pplObj));
+   }
+ }
+
+void pplmethod_dictKeys(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char         *key, *tmp;
+  pplObj        v, *item;
+  list         *l;
+  dictIterator *di = ppl_dictIterateInit((dict *)in[-1].self_this->auxil);
+  if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  l  = (list *)OUTPUT.auxil;
+  while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
+   { COPYSTR(tmp,key); pplObjStr(&v,1,1,tmp); ppl_listAppendCpy(l, (void *)&v, sizeof(pplObj)); }
+ }
+
+void pplmethod_dictLen(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  dict *d = (dict *)in[-1].self_this->auxil;
+  pplObjNum(&OUTPUT,0,d->length,0);
+ }
+
+void pplmethod_dictValues(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char         *key, *tmp;
+  pplObj        v, *item;
+  list         *l;
+  dictIterator *di = ppl_dictIterateInit((dict *)in[-1].self_this->auxil);
+  if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  l  = (list *)OUTPUT.auxil;
+  while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
+   { COPYSTR(tmp,key); pplObjCpy(&v,item,1,1); ppl_listAppendCpy(l, (void *)&v, sizeof(pplObj)); }
+ }
+
+// Matrix methods
+
+void pplmethod_matrixDet(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj          *st  = in[-1].self_this;
+  gsl_matrix      *m   = ((pplMatrix *)in[-1].self_this->auxil)->m;
+  double           d   = 0;
+  int              n   = m->size1, i;
+  int              s;
+  gsl_matrix      *tmp = NULL;
+  gsl_permutation *p   = NULL;
+  if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "The determinant is only defined for square matrices."); return; }
+  if ((tmp=gsl_matrix_alloc(n,n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  gsl_matrix_memcpy(tmp,m);
+  if ((p = gsl_permutation_alloc(n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  if (gsl_linalg_LU_decomp(tmp,p,&s)!=0) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "LU decomposition failed whilst computing matrix determinant."); return; }
+  d = gsl_linalg_LU_det(tmp,s);
+  gsl_permutation_free(p);
+  gsl_matrix_free(tmp);
+  pplObjNum(&OUTPUT,0,d,0);
+  ppl_unitsDimCpy(&OUTPUT, st);
+  for (i=0; i<UNITS_MAX_BASEUNITS; i++) OUTPUT.exponent[i] *= n;
+ }
+
+void pplmethod_matrixEigenvalues(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  int         i,j;
+  pplObj     *st  = in[-1].self_this;
+  gsl_matrix *m   = ((pplMatrix *)st->auxil)->m;
+  gsl_matrix *tmp = NULL;
+  gsl_vector *vo;
+  int         n   = m->size1;
+  gsl_eigen_symm_workspace *w;
+  if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Eigenvalues are only defined for square matrices."); return; }
+  for (i=0; i<m->size1; i++) for (j=0; j<i; j++) if (gsl_matrix_get(m,i,j) != gsl_matrix_get(m,j,i)) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Eigenvalues can only be computed for symmetric matrices; supplied matrix is not symmetric."); return; }
+  if ((w=gsl_eigen_symm_alloc(n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  if ((tmp=gsl_matrix_alloc(n,n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  gsl_matrix_memcpy(tmp,m);
+  if (pplObjVector(&OUTPUT,0,1,n)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  vo = ((pplVector *)OUTPUT.auxil)->v;
+  if (gsl_eigen_symm(tmp, vo, w)!=0) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Numerical failure whilst trying to compute eigenvalues."); return; }
+  gsl_matrix_free(tmp);
+  gsl_eigen_symm_free(w);
+  ppl_unitsDimCpy(&OUTPUT, st);
+ }
+
+void pplmethod_matrixEigenvectors(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  int         i,j;
+  gsl_matrix *m    = ((pplMatrix *)in[-1].self_this->auxil)->m;
+  gsl_matrix *tmp1 = NULL;
+  gsl_matrix *tmp2 = NULL;
+  gsl_vector *vtmp = NULL;
+  list       *lo;
+  pplObj      v;
+  gsl_vector *vo;
+  int         n    = m->size1;
+  gsl_eigen_symmv_workspace *w;
+  if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Eigenvectors are only defined for square matrices."); return; }
+  for (i=0; i<m->size1; i++) for (j=0; j<i; j++) if (gsl_matrix_get(m,i,j) != gsl_matrix_get(m,j,i)) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Eigenvectors can only be computed for symmetric matrices; supplied matrix is not symmetric."); return; }
+  if ((w=gsl_eigen_symmv_alloc(n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  if ((tmp1=gsl_matrix_alloc(n,n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  if ((tmp2=gsl_matrix_alloc(n,n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  if ((vtmp=gsl_vector_alloc(n)  )==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  gsl_matrix_memcpy(tmp1,m);
+  if (gsl_eigen_symmv(tmp1, vtmp, tmp2, w)!=0) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Numerical failure whilst trying to compute eigenvectors."); return; }
+  gsl_matrix_free(tmp1);
+  gsl_eigen_symmv_free(w);
+  if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  lo = (list*)OUTPUT.auxil;
+  for (i=0; i<n; i++)
+   {
+    if (pplObjVector(&v,1,1,n)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    vo = ((pplVector *)v.auxil)->v;
+    for (j=0; j<n; j++) gsl_vector_set(vo,j,gsl_matrix_get(tmp2,i,j));
+    ppl_listAppendCpy(lo, (void*)&v, sizeof(pplObj));
+   }
+  gsl_matrix_free(tmp2);
+ }
+
+void pplmethod_matrixInv(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj          *st  = in[-1].self_this;
+  gsl_matrix      *m   = ((pplMatrix *)st->auxil)->m;
+  int              n   = m->size1;
+  int              s;
+  gsl_matrix      *tmp = NULL;
+  gsl_matrix      *vo  = NULL;
+  gsl_permutation *p   = NULL;
+  if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "The inverse is only defined for square matrices."); return; }
+  if ((tmp=gsl_matrix_alloc(n,n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  gsl_matrix_memcpy(tmp,m);
+  if ((p = gsl_permutation_alloc(n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  if (gsl_linalg_LU_decomp(tmp,p,&s)!=0) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "LU decomposition failed whilst computing matrix determinant."); return; }
+  if (pplObjMatrix(&OUTPUT,0,1,n,n)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  vo = ((pplMatrix *)OUTPUT.self_this->auxil)->m;
+  if (gsl_linalg_LU_invert(tmp,p,vo)) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Numerical failure while computing matrix inverse."); return; }
+  gsl_permutation_free(p);
+  gsl_matrix_free(tmp);
+  ppl_unitsDimInverse(&OUTPUT,st);
+ }
+
+void pplmethod_matrixSize(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  gsl_matrix *m = ((pplMatrix *)in[-1].self_this->auxil)->m;
+  gsl_vector *vo;
+  if (pplObjVector(&OUTPUT,0,1,2)==NULL) { *status=1; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); return; }
+  vo = ((pplVector *)OUTPUT.auxil)->v;
+  gsl_vector_set(vo,0,m->size1);
+  gsl_vector_set(vo,1,m->size2);
+ }
+
+void pplmethod_matrixSymmetric(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  int i,j;
+  gsl_matrix *m = ((pplMatrix *)in[-1].self_this->auxil)->m;
+  if (m->size1 != m->size2) { pplObjBool(&OUTPUT,0,0); return; }
+  for (i=0; i<m->size1; i++) for (j=0; j<i; j++) if (gsl_matrix_get(m,i,j) != gsl_matrix_get(m,j,i)) { pplObjBool(&OUTPUT,0,0); return; }
+  pplObjBool(&OUTPUT,0,1);
+ }
+
+void pplmethod_matrixTrans(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  gsl_matrix      *m = ((pplMatrix *)in[-1].self_this->auxil)->m;
+  int              n = m->size1, i, j;
+  gsl_matrix      *vo = NULL;
+  if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "The transpose is only defined for square matrices."); return; }
+  if (pplObjMatrix(&OUTPUT,0,1,n,n)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  vo = ((pplMatrix *)OUTPUT.self_this->auxil)->m;
+  for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) gsl_matrix_set(vo,i,j,gsl_matrix_get(m,j,i));
+ }
+
 // Build dictionaries of the above methods
 
 void pplObjMethodsInit(ppl_context *c)
@@ -440,6 +722,33 @@ void pplObjMethodsInit(ppl_context *c)
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"toCMYK",0,0,1,1,1,1,(void *)pplmethod_colToCMYK, "toCMYK()", "\\mathrm{toCMYK}@<@>", "toCMYK() returns a vector CMYK representation of a color");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"toHSB",0,0,1,1,1,1,(void *)pplmethod_colToHSB, "toHSB()", "\\mathrm{toHSB}@<@>", "toHSB() returns a vector HSB representation of a color");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"toRGB",0,0,1,1,1,1,(void *)pplmethod_colToRGB, "toRGB()", "\\mathrm{toRGB}@<@>", "toRGB() returns a vector RGB representation of a color");
+
+  // Vector methods
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"len",0,0,1,1,1,1,(void *)pplmethod_vectorLen, "len()", "\\mathrm{len}@<@>", "len() returns the number of dimensions of a vector");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"norm",0,0,1,1,1,1,(void *)pplmethod_vectorNorm, "norm()", "\\mathrm{norm}@<@>", "norm() returns the norm (quadrature sum) of a vector's elements");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"reverse",0,0,1,1,1,1,(void *)pplmethod_vectorReverse, "reverse()", "\\mathrm{reverse}@<@>", "reverse() reverses the order of the elements of a vector");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"sort",0,0,1,1,1,1,(void *)pplmethod_vectorSort, "sort()", "\\mathrm{sort}@<@>", "sort() sorts the members of a vector");
+
+  // List methods
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"len",0,0,1,1,1,1,(void *)pplmethod_listLen, "len()", "\\mathrm{len}@<@>", "len() returns the length of a list");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"reverse",0,0,1,1,1,1,(void *)pplmethod_listReverse, "reverse()", "\\mathrm{reverse}@<@>", "reverse() reverses the order of the members of a list");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"sort",0,0,1,1,1,1,(void *)pplmethod_listSort, "sort()", "\\mathrm{sort}@<@>", "sort() sorts the members of a list");
+
+  // Dictionary methods
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DICT],"hasKey",1,1,0,0,0,0,(void *)pplmethod_dictHasKey, "hasKey()", "\\mathrm{hasKey}@<@1@>", "hasKey(x) returns a boolean indicating whether the key x exists in the dictionary");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DICT],"items" ,0,0,1,1,1,1,(void *)pplmethod_dictItems , "items()", "\\mathrm{items}@<@>", "items() returns a list of the [key,value] pairs in a dictionary");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DICT],"keys"  ,0,0,1,1,1,1,(void *)pplmethod_dictKeys  , "keys()", "\\mathrm{keys}@<@>", "keys() returns a list of the keys defined in a dictionary");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DICT],"len"   ,0,0,1,1,1,1,(void *)pplmethod_dictLen   , "len()", "\\mathrm{len}@<@>", "len() returns the number of entries in a dictionary");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DICT],"values",0,0,1,1,1,1,(void *)pplmethod_dictValues, "values()", "\\mathrm{values}@<@>", "values() returns a list of the values in a dictionary");
+
+  // Matrix methods
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"det" ,0,0,1,1,1,1,(void *)pplmethod_matrixDet,"det()", "\\mathrm{det}@<@>", "det() returns the determinant of a square matrix");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"eigenvalues",0,0,1,1,1,1,(void *)pplmethod_matrixEigenvalues,"eigenvalues()", "\\mathrm{eigenvalues}@<@>", "eigenvalues() returns a vector containing the eigenvalues of a square symmetric matrix");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"eigenvectors",0,0,1,1,1,1,(void *)pplmethod_matrixEigenvectors,"eigenvectors()", "\\mathrm{eigenvectors}@<@>", "eigenvectors() returns a list of the eigenvectors of a square symmetric matrix");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"inv" ,0,0,1,1,1,1,(void *)pplmethod_matrixInv,"inv()", "\\mathrm{inv}@<@>", "inv() returns the inverse of a square matrix");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"size",0,0,1,1,1,1,(void *)pplmethod_matrixSize, "size()", "\\mathrm{size}@<@>", "size() returns the dimensions of a matrix");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"symmetric",0,0,1,1,1,1,(void *)pplmethod_matrixSymmetric, "symmetric()", "\\mathrm{symmetric}@<@>", "symmetric() returns a boolean indicating whether a matrix is symmetric");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"transpose",0,0,1,1,1,1,(void *)pplmethod_matrixTrans, "transpose()", "\\mathrm{transpose}@<@>", "transpose() returns the transpose of a matrix");
 
   return;
  }

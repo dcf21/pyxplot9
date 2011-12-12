@@ -632,7 +632,7 @@ void pplfunc_hypot       (ppl_context *c, pplObj *in, int nArgs, int *status, in
   buffer = (double *)malloc(nArgs * sizeof(double));
   if (buffer==NULL) { *status = 1; *errType=ERR_MEMORY; sprintf(errText, "Out of memory."); return; }
   for (i=0; i<nArgs; i++) buffer[i] = hypot(in[i].real, in[i].imag);
-  qsort((void *)buffer, sizeof(double), nArgs, ppl_dblSort);
+  qsort((void *)buffer, nArgs, sizeof(double), ppl_dblSort);
   for (i=0; i<nArgs; i++) acc += gsl_pow_2(buffer[i]);
   free(buffer);
   OUTPUT.real = sqrt(acc);
@@ -791,7 +791,7 @@ void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     listIterator *li = ppl_listIterateInit((list *)in[0].auxil);
     while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
      {
-      if ((best==NULL)||(pplObjCmp(c, item, best, status, errType, errText)==1)) best=item;
+      if ((best==NULL)||(pplObjCmpQuiet((void*)&item, (void*)&best)==1)) best=item;
       if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
@@ -804,7 +804,7 @@ void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     dictIterator *di = ppl_dictIterateInit((dict *)in[0].auxil);
     while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
      {
-      if ((best==NULL)||(pplObjCmp(c, item, best, status, errType, errText)==1)) best=item;
+      if ((best==NULL)||(pplObjCmpQuiet((void*)&item, (void*)&best)==1)) best=item;
       if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
@@ -818,6 +818,7 @@ void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     for (i=0; i<v->size; i++) if ((best==NULL)||(gsl_vector_get(v,i)>*best)) best=gsl_vector_ptr(v,i);
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjNum (&OUTPUT,0,*best,0);
+    ppl_unitsDimCpy(&OUTPUT, &in[0]);
    }
   else if ((nArgs==1)&&(in[0].objType==PPLOBJ_MAT))
    {
@@ -827,6 +828,7 @@ void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) if ((best==NULL)||(gsl_matrix_get(m,i,j)>*best)) best=gsl_matrix_ptr(m,i,j);
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjNum (&OUTPUT,0,*best,0);
+    ppl_unitsDimCpy(&OUTPUT, &in[0]);
    }
   else
    {
@@ -834,7 +836,8 @@ void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     pplObj *best = in;
     for (i=1; i<nArgs; i++)
      {
-      if (pplObjCmp(c, &in[i], best, status, errType, errText)==1) best=&in[i];
+      pplObj *x=&in[i];
+      if (pplObjCmpQuiet((void*)&x, (void*)&best)==1) best=&in[i];
       if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
@@ -851,7 +854,7 @@ void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     listIterator *li = ppl_listIterateInit((list *)in[0].auxil);
     while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
      {
-      if ((best==NULL)||(pplObjCmp(c, item, best, status, errType, errText)==-1)) best=item;
+      if ((best==NULL)||(pplObjCmpQuiet((void*)&item, (void*)&best)==-1)) best=item;
       if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
@@ -864,7 +867,7 @@ void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     dictIterator *di = ppl_dictIterateInit((dict *)in[0].auxil);
     while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
      {
-      if ((best==NULL)||(pplObjCmp(c, item, best, status, errType, errText)==-1)) best=item;
+      if ((best==NULL)||(pplObjCmpQuiet((void*)&item, (void*)&best)==-1)) best=item;
       if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
@@ -878,6 +881,7 @@ void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     for (i=0; i<v->size; i++) if ((best==NULL)||(gsl_vector_get(v,i)<*best)) best=gsl_vector_ptr(v,i);
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjNum (&OUTPUT,0,*best,0);
+    ppl_unitsDimCpy(&OUTPUT, &in[0]);
    }
   else if ((nArgs==1)&&(in[0].objType==PPLOBJ_MAT))
    {
@@ -887,6 +891,7 @@ void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) if ((best==NULL)||(gsl_matrix_get(m,i,j)<*best)) best=gsl_matrix_ptr(m,i,j);
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjNum (&OUTPUT,0,*best,0);
+    ppl_unitsDimCpy(&OUTPUT, &in[0]);
    }
   else
    {
@@ -894,7 +899,8 @@ void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     pplObj *best = in;
     for (i=1; i<nArgs; i++)
      {
-      if (pplObjCmp(c, &in[i], best, status, errType, errText)==-1) best=&in[i];
+      pplObj *x=&in[i];
+      if (pplObjCmpQuiet((void*)&x, (void*)&best)==-1) best=&in[i];
       if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);

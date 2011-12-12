@@ -32,7 +32,8 @@ void pplcol_CMYKtoHSB(double ci, double mi, double yi, double ki, double *ho, do
 void pplcol_RGBtoCMYK(double ri, double gi, double bi, double *co, double *mo, double *yo, double *ko);
 void pplcol_HSBtoCMYK(double hi, double si, double bi, double *co, double *mo, double *yo, double *ko);
 
-int pplObjCmp(ppl_context *c, pplObj *a, pplObj *b, int *status, int *errType, char *errText);
+int pplObjCmpQuiet(const void *a, const void *b);
+int pplObjCmp(ppl_context *c, const pplObj *a, const pplObj *b, int *status, int *errType, char *errText);
 
 #endif
 
