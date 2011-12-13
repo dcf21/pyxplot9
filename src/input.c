@@ -273,7 +273,7 @@ int ppl_ProcessStatement(ppl_context *context, char *line)
   ppl_report(&context->errcontext, NULL);
 
   // Execute bytecode
-  out = ppl_expEval(context, (void *)buff, &lastOpAssign, 0, &errPos, &errType, errText);
+  out = ppl_expEval(context, (void *)buff, &lastOpAssign, 1, 0, &errPos, &errType, errText);
   if (errPos>=0)
    {
     sprintf(context->errcontext.tempErrStr, "%d:%s\n",errPos,errText);

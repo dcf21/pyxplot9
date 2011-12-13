@@ -70,7 +70,7 @@ extern pplObj     *pplObjPrototypes;
 #endif
 
 // Structures for describing files and types
-typedef struct pplFile      { int refCount; FILE *file;    int open; } pplFile;
+typedef struct pplFile      { int refCount; FILE *file;    int open; int pipe; } pplFile;
 typedef struct pplType      { int refCount; dict *methods; int id;   } pplType;
 typedef struct pplVectorRaw { int refCount; gsl_vector *v; } pplVectorRaw;
 typedef struct pplVector    { int refCount; gsl_vector *v; gsl_vector_view *view; pplVectorRaw *raw; } pplVector;

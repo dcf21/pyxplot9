@@ -32,6 +32,7 @@
 #include "coreUtils/errorReport.h"
 #include "coreUtils/list.h"
 #include "expressions/expEval.h"
+#include "expressions/expEvalCalculus.h"
 #include "settings/settingTypes.h"
 #include "stringTools/asciidouble.h"
 #include "userspace/context.h"
@@ -44,7 +45,7 @@
 
 #include "pplConstants.h"
 
-void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int IterDepth, int *status, int *errPos, int *errType, char *errText)
+void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int dollarAllowed, int iterDepth, int *status, int *errPos, int *errType, char *errText)
  {
   pplObj  *out  = &context->stack[context->stackPtr-1-nArgs];
   pplObj  *args = context->stack+context->stackPtr-nArgs;
@@ -79,17 +80,36 @@ void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int IterDepth, int
      {
       int     end;
       char   *u = (char*)context->stack[context->stackPtr-1].auxil;
-      pplObj *o = &context->stack[context->stackPtr-1-nArgs];
       if (nArgs != 1) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The unit() function takes exactly one argument; %d supplied.",nArgs); goto cleanup; }
-      ppl_unitsStringEvaluate(context, u, o, &end, errPos, errText);
+      ppl_unitsStringEvaluate(context, u, out, &end, errPos, errText);
       if (*errPos>=0) { *errType=ERR_UNIT; goto cleanup; }
       if (end!=strlen(u)) { *errType=ERR_UNIT; *errPos=charpos; sprintf(errText,"Unexpected trailing matter after unit string."); goto cleanup; }
      }
     else if (fn->minArgs==2) // diff_d()
      {
+      pplObj v, *step, *xpos;
+      if      (nArgs == 3) step = &v;
+      else if (nArgs == 4) step = &args[3];
+      else    { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The diff_d() function takes two or thee arguments; %d supplied.",nArgs-1); goto cleanup; }
+      if (args[0].objType!=PPLOBJ_STR) { *status=1; *errPos=charpos; *errType=ERR_INTERNAL; strcpy(errText,"Dummy variable not passed to diff_d() as a string"); goto cleanup; }
+      if (args[1].objType!=PPLOBJ_STR) { *status=1; *errPos=charpos; *errType=ERR_INTERNAL; strcpy(errText,"Differentiation expression not passed to diff_d() as a string"); goto cleanup; }
+      if (args[2].objType!=PPLOBJ_NUM) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The diff_d() function requires a number as its second argument; supplied argument has type <%s>.",pplObjTypeNames[args[2].objType]); goto cleanup; }
+      if ((nArgs==4)&&(args[3].objType!=PPLOBJ_NUM)) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The diff_d() function requires a number as its third argument; supplied argument has type <%s>.",pplObjTypeNames[args[3].objType]); goto cleanup; }
+      xpos = &args[2];
+      memcpy(&v,xpos,sizeof(pplObj)); v.imag=0; v.real = hypot(xpos->real,xpos->imag)*1e-6; v.flagComplex=0;
+      if (v.real<DBL_MIN*1e6) v.real=1e-6;
+      ppl_expDifferentiate(context,(char*)args[1].auxil,(char*)args[0].auxil,xpos,step,out,dollarAllowed,errPos,errType,errText,iterDepth);
+      if (*errPos>=0) goto cleanup;
      }
     else if (fn->minArgs==3) // int_d()
      {
+      if (nArgs != 4) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The int_d() function takes two or thee arguments; %d supplied.",nArgs-1); goto cleanup; }
+      if (args[0].objType!=PPLOBJ_STR) { *status=1; *errPos=charpos; *errType=ERR_INTERNAL; strcpy(errText,"Dummy variable not passed to int_d() as a string"); goto cleanup; }
+      if (args[1].objType!=PPLOBJ_STR) { *status=1; *errPos=charpos; *errType=ERR_INTERNAL; strcpy(errText,"Integration expression not passed to diff_d() as a string"); goto cleanup; }
+      if (args[2].objType!=PPLOBJ_NUM) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The int_d() function requires a number as its second argument; supplied argument has type <%s>.",pplObjTypeNames[args[2].objType]); goto cleanup; }
+      if (args[3].objType!=PPLOBJ_NUM) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The int_d() function requires a number as its third argument; supplied argument has type <%s>.",pplObjTypeNames[args[3].objType]); goto cleanup; }
+      ppl_expIntegrate(context,(char*)args[1].auxil,(char*)args[0].auxil,&args[2],&args[3],out,dollarAllowed,errPos,errType,errText,iterDepth);
+      if (*errPos>=0) goto cleanup;
      }
     else if (fn->minArgs==4) // texify()
      {

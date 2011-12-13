@@ -39,7 +39,7 @@ pplObj *pplObjModule   (pplObj *in, unsigned char amMalloced, unsigned char auxi
 pplObj *pplObjList     (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, list *l);
 pplObj *pplObjVector   (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, int size);
 pplObj *pplObjMatrix   (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, int size1, int size2);
-pplObj *pplObjFile     (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, FILE *f);
+pplObj *pplObjFile     (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, FILE *f, int pipe);
 pplObj *pplObjFunc     (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, pplFunc *f);
 pplObj *pplObjType     (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, pplType *t);
 pplObj *pplObjNull     (pplObj *in, unsigned char amMalloced);

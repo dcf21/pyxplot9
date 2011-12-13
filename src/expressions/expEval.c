@@ -32,6 +32,7 @@
 #include "coreUtils/errorReport.h"
 #include "coreUtils/list.h"
 #include "expressions/expEval.h"
+#include "expressions/expEvalCalculus.h"
 #include "expressions/expEvalOps.h"
 #include "expressions/fnCall.h"
 #include "settings/settingTypes.h"
@@ -222,7 +223,7 @@ static void expEval_stringSubs(ppl_context *context, int Nsubs, int *status, int
     return;
  }
 
-pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterDepth, int *errPos, int *errType, char *errText)
+pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dollarAllowed, int IterDepth, int *errPos, int *errType, char *errText)
  {
   int j=0;
   int initialStackPtr;
@@ -409,7 +410,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterD
        {
         int nArgs = *(int *)(in+j) , stat=0;
         *lastOpAssign=0;
-        ppl_fnCall(context, nArgs, charpos, IterDepth, &stat, errPos, errType, errText);
+        ppl_fnCall(context, nArgs, charpos, dollarAllowed, IterDepth, &stat, errPos, errType, errText);
         if (stat) goto cleanup_on_error;
         break;
        }

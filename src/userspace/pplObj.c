@@ -255,7 +255,7 @@ pplObj *pplObjMatrix(pplObj *in, unsigned char amMalloced, unsigned char auxilMa
   return in;
  }
 
-pplObj *pplObjFile(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, FILE *f)
+pplObj *pplObjFile(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, FILE *f, int pipe)
  {
   in->objType = PPLOBJ_ZOM;
   if (auxilMalloced) in->auxil = (void *)malloc      (sizeof(pplFile));
@@ -264,6 +264,7 @@ pplObj *pplObjFile(pplObj *in, unsigned char amMalloced, unsigned char auxilMall
   ((pplFile *)in->auxil)->refCount = 1;
   ((pplFile *)in->auxil)->file     = f;
   ((pplFile *)in->auxil)->open     = 1;
+  ((pplFile *)in->auxil)->pipe     = pipe;
   in->auxilMalloced = auxilMalloced;
   in->auxilLen = sizeof(pplFile);
   in->objPrototype = &pplObjPrototypes[PPLOBJ_FILE];

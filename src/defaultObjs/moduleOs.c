@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 #include <glob.h>
 #include <limits.h>
 #include <math.h>
@@ -174,6 +175,19 @@ void pplfunc_osGlob(ppl_context *c, pplObj *in, int nArgs, int *status, int *err
   return;
  }
 
+void pplfunc_osPopen(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  FILE *f;
+  char *mode;
+  if ((nArgs<1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The open() function requires string arguments."); return; }
+  if ((nArgs>1)&&(in[1].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The open() function requires string arguments."); return; }
+  if (nArgs>1) mode=(char*)in[1].auxil;
+  else         mode="r";
+  f = popen((char*)in[0].auxil,mode);
+  if (f==NULL) { *status=1; *errType=ERR_FILE; strcpy(errText, strerror(errno)); return; }
+  pplObjFile(&OUTPUT,0,1,f,1);
+ }
+
 void pplfunc_osStat(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *tmp, permissions[]="---------";
@@ -224,7 +238,7 @@ void pplfunc_osSystem(ppl_context *c, pplObj *in, int nArgs, int *status, int *e
 
 void pplfunc_osTmpfile(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  pplObjFile(&OUTPUT,0,1,tmpfile());
+  pplObjFile(&OUTPUT,0,1,tmpfile(),0);
  }
 
 void pplfunc_osUname(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)

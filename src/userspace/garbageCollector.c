@@ -83,7 +83,7 @@ void ppl_garbageObject(pplObj *o)
       o->auxil = NULL;
       if ((f!=NULL)&&(--f->refCount <= 0))
        {
-        if ((f->open) && (f->file!=NULL)) { FILE *old=f->file; f->file=NULL; fclose(old); }
+        if ((f->open) && (f->file!=NULL)) { FILE *old=f->file; f->file=NULL; if (f->pipe) pclose(old); else fclose(old); }
         free(f);
        }
       break;

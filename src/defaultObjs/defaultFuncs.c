@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 #include <limits.h>
 #include <math.h>
 #include <string.h>
@@ -930,8 +931,8 @@ void pplfunc_open        (ppl_context *c, pplObj *in, int nArgs, int *status, in
   if (nArgs>1) mode=(char*)in[1].auxil;
   else         mode="r";
   f = fopen((char*)in[0].auxil,mode);
-  if (f==NULL) { *status=1; *errType=ERR_FILE; sprintf(errText,"File open error."); return; }
-  pplObjFile(&OUTPUT,0,1,f);
+  if (f==NULL) { *status=1; *errType=ERR_FILE; strcpy(errText, strerror(errno)); return; }
+  pplObjFile(&OUTPUT,0,1,f,0);
  }
 
 void pplfunc_ordinal     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)

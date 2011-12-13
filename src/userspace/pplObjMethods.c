@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
 #include <math.h>
 
 #include "gsl/gsl_blas.h"
@@ -44,6 +45,7 @@
 
 #include "userspace/calendars.h"
 #include "userspace/context.h"
+#include "userspace/garbageCollector.h"
 #include "userspace/pplObj_fns.h"
 #include "userspace/pplObjCmp.h"
 #include "userspace/pplObjFunc.h"
@@ -676,6 +678,147 @@ void pplmethod_matrixTrans(ppl_context *c, pplObj *in, int nArgs, int *status, i
   for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) gsl_matrix_set(vo,i,j,gsl_matrix_get(m,j,i));
  }
 
+// File methods
+
+void pplmethod_fileClose(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplFile *f = (pplFile *)in[-1].self_this->auxil;
+  if (f->open)
+   {
+    f->open=0;
+    if (!f->pipe) fclose(f->file);
+    else          pplObjNum(&OUTPUT,0,pclose(f->file),0);
+    f->file=NULL;
+   }
+ }
+
+void pplmethod_fileEof(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplFile *f = (pplFile *)in[-1].self_this->auxil;
+  if (!f->open) { pplObjNull(&OUTPUT,0); return; }
+  pplObjBool(&OUTPUT,0,feof(f->file)!=0);
+ }
+
+void pplmethod_fileFlush(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplFile *f = (pplFile *)in[-1].self_this->auxil;
+  if (!f->open) { pplObjNull(&OUTPUT,0); return; }
+  if (fflush(f->file)<0) { *status=1; *errType=ERR_FILE; strcpy(errText, strerror(errno)); return; }
+ }
+
+void pplmethod_fileGetpos(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  long int fp;
+  pplFile *f = (pplFile *)in[-1].self_this->auxil;
+  if (!f->open) { pplObjNull(&OUTPUT,0); return; }
+  if ((fp = ftell(f->file))<0) { *status=1; *errType=ERR_FILE; strcpy(errText, strerror(errno)); return; }
+  pplObjNum(&OUTPUT,0,fp*8,0);
+  CLEANUP_APPLYUNIT(UNIT_BIT);
+ }
+
+void pplmethod_fileIsOpen(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplFile *f = (pplFile *)in[-1].self_this->auxil;
+  pplObjBool(&OUTPUT,0,f->open!=0);
+ }
+
+void pplmethod_fileRead(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *out=NULL, *new;
+  int  chunk = 8192;
+  long pos   = 0;
+  long size  = chunk;
+  pplFile *f = (pplFile *)in[-1].self_this->auxil;
+  if (!f->open) { pplObjNull(&OUTPUT,0); return; }
+  new = (char *)malloc(chunk+4);
+  while (!feof(f->file))
+   {
+    int n;
+    if (new==NULL) { if (out!=NULL) free(out); *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    out = new;
+    n = fread(out+pos,1,chunk,f->file);
+    pos += n;
+    if (n<chunk) break;
+    size += chunk;
+    new = (char *)realloc(out,size+4);
+   }
+  out[pos]='\0';
+  pplObjStr(&OUTPUT,0,1,out);
+ }
+
+void pplmethod_fileReadline(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *out=NULL;
+  int  chunk = 8192;
+  long pos   = 0;
+  long size  = chunk;
+  pplFile *f = (pplFile *)in[-1].self_this->auxil;
+  if (!f->open) { pplObjNull(&OUTPUT,0); return; }
+  out = (char *)malloc(chunk);
+  if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  while (!feof(f->file))
+   {
+    int n;
+    n = fread(out+pos,1,1,f->file);
+    if ((n==0)||(out[pos]=='\n')) break;
+    pos++;
+    if (pos>size-4)
+     {
+      char *new;
+      size += chunk; new = (char *)realloc(out,size);
+      if (new==NULL) { if (out!=NULL) free(out); *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+      out = new;
+     }
+   }
+  out[pos]='\0';
+  pplObjStr(&OUTPUT,0,1,out);
+ }
+
+void pplmethod_fileReadlines(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *st = in[-1].self_this;
+  pplObj  v;
+  pplFile *f = (pplFile *)st->auxil;
+  list    *l;
+  if (!f->open) { pplObjNull(&OUTPUT,0); return; }
+  if (pplObjList(&v,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  l = (list *)v.auxil;
+  while (!feof(f->file))
+   {
+    in[-1].self_this = st;
+    pplmethod_fileReadline(c,in,0,status,errType,errText);
+    if (*status) { ppl_garbageObject(&v); return; }
+    OUTPUT.amMalloced=1;
+    ppl_listAppendCpy(l,&OUTPUT,sizeof(pplObj));
+    pplObjZom(&OUTPUT,0);
+   }
+  memcpy(&OUTPUT,&v,sizeof(pplObj));
+ }
+
+void pplmethod_fileSetpos(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char FunctionDescription[] = "setpos(x)";
+  int i;
+  long int fp = (long int)in[0].real;
+  pplFile *f = (pplFile *)in[-1].self_this->auxil;
+  CHECK_DIMLESS_OR_HAS_UNIT(in[0] , "first", "a number of bytes", UNIT_BIT, 1);
+  if (!f->open) { pplObjNull(&OUTPUT,0); return; }
+  if (!in[0].dimensionless) fp/=8;
+  if (fseek(f->file,fp,SEEK_SET)!=0) { *status=1; *errType=ERR_FILE; strcpy(errText, strerror(errno)); return; }
+ }
+
+void pplmethod_fileWrite(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplFile *f = (pplFile *)in[-1].self_this->auxil;
+  char    *s = (char *)in[0].auxil;
+  long int l , o;
+  if ((nArgs!=1)&&(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The function write() requires a string as its argument; supplied argument had type <%s>.", pplObjTypeNames[in[0].objType]); return; }
+  if (!f->open) { pplObjNull(&OUTPUT,0); return; }
+  l = strlen(s);
+  o = fwrite(s,1,l,f->file);
+  if (o!=l) { *status=1; *errType=ERR_FILE; strcpy(errText, strerror(errno)); return; }
+ }
+
 // Build dictionaries of the above methods
 
 void pplObjMethodsInit(ppl_context *c)
@@ -690,7 +833,7 @@ void pplObjMethodsInit(ppl_context *c)
     if (d==NULL) ppl_fatal(&c->errcontext,__FILE__,__LINE__,"Out of memory.");
     ppl_addSystemFunc(d,"class"   ,0,0,1,1,1,1,(void *)&pplmethod_class   , "class()", "\\mathrm{class}@<@>", "class() returns the class prototype of an object");
     ppl_addSystemFunc(d,"contents",0,0,1,1,1,1,(void *)&pplmethod_contents, "contents()", "\\mathrm{contents}@<@>", "contents() returns a list of all the methods and internal variables of an object");
-    ppl_addSystemFunc(d,"data"    ,0,0,1,1,1,1,(void *)&pplmethod_data    , "data()"    , "\\mathrm{data}@<@>", "data() returns a list of all the internal variables (not methods) of an object");
+    ppl_addSystemFunc(d,"data"    ,0,0,1,1,1,1,(void *)&pplmethod_data    , "data()", "\\mathrm{data}@<@>", "data() returns a list of all the internal variables (not methods) of an object");
     ppl_addSystemFunc(d,"methods" ,0,0,1,1,1,1,(void *)&pplmethod_methods , "methods()", "\\mathrm{methods}@<@>", "methods() returns a list of the methods of an object");
     ppl_addSystemFunc(d,"str"     ,0,0,1,1,1,1,(void *)&pplmethod_str     , "str()", "\\mathrm{str}@<@>", "str() returns a string representation of an object");
     ppl_addSystemFunc(d,"type"    ,0,0,1,1,1,1,(void *)&pplmethod_type    , "type()", "\\mathrm{type}@<@>", "type() returns the type of an object");
@@ -749,6 +892,18 @@ void pplObjMethodsInit(ppl_context *c)
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"size",0,0,1,1,1,1,(void *)pplmethod_matrixSize, "size()", "\\mathrm{size}@<@>", "size() returns the dimensions of a matrix");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"symmetric",0,0,1,1,1,1,(void *)pplmethod_matrixSymmetric, "symmetric()", "\\mathrm{symmetric}@<@>", "symmetric() returns a boolean indicating whether a matrix is symmetric");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"transpose",0,0,1,1,1,1,(void *)pplmethod_matrixTrans, "transpose()", "\\mathrm{transpose}@<@>", "transpose() returns the transpose of a matrix");
+
+  // File methods
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"close",0,0,1,1,1,1,(void *)pplmethod_fileClose,"close()", "\\mathrm{close}@<@>", "close() closes a file handle");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"eof",0,0,1,1,1,1,(void *)pplmethod_fileEof,"eof()", "\\mathrm{eof}@<@>", "eof() returns a boolean flag to indicate whether the end of a file has been reached");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"flush",0,0,1,1,1,1,(void *)pplmethod_fileFlush,"flush()", "\\mathrm{flush}@<@>", "flush() flushes any buffered data which has not yet physically been written to a file");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"getpos",0,0,1,1,1,1,(void *)pplmethod_fileGetpos,"getpos()", "\\mathrm{getpos}@<@>", "getpos() returns a file handle's current position in a file");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"isOpen",0,0,1,1,1,1,(void *)pplmethod_fileIsOpen,"isOpen()", "\\mathrm{isOpen}@<@>", "isOpen() returns a boolean flag indicating whether a file is open");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"read",0,0,1,1,1,1,(void *)pplmethod_fileRead,"read()", "\\mathrm{read}@<@>", "read() returns the contents of a file as a string");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"readline",0,0,1,1,1,1,(void *)pplmethod_fileReadline,"readline()", "\\mathrm{readline}@<@>", "readline() returns a single line of a file as a string");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"readlines",0,0,1,1,1,1,(void *)pplmethod_fileReadlines,"readlines()", "\\mathrm{readlines}@<@>", "readlines() returns the lines of a file as a list of strings");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"setpos",1,1,1,1,1,1,(void *)pplmethod_fileSetpos,"setpos(x)", "\\mathrm{setpos}@<@>", "setpos(x) sets a file handle's current position in a file");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"write",1,1,0,0,0,0,(void *)pplmethod_fileWrite,"write(x)", "\\mathrm{write}@<@0@>", "write(x) writes the string x to a file");
 
   return;
  }

@@ -209,6 +209,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d2,"getlogin"      ,0,0,1,1,1,1,(void *)&pplfunc_osGetLogin, "getlogin()", "\\mathrm{getlogin}@<@>", "getlogin() returns the system login of the user");
     ppl_addSystemFunc(d2,"getrealname"   ,0,0,1,1,1,1,(void *)&pplfunc_osGetRealName, "getrealname()", "\\mathrm{getrealname}@<@>", "getrealname() returns the user's real name");
     ppl_addSystemFunc(d2,"glob"          ,1,1,0,0,0,0,(void *)&pplfunc_osGlob    , "glob(x)", "\\mathrm{glob}@<@1@>", "glob(x) returns a list of files which match the supplied wildcard");
+    ppl_addSystemFunc(d2,"popen"         ,1,2,0,0,0,0,(void *)&pplfunc_osPopen   , "popen(x[,y])", "\\mathrm{popen}@<@0@>", "popen(x[,y]) opens a pipe to the command x with access mode y, and returns a file object");
     ppl_addSystemFunc(d2,"stat"          ,1,1,0,0,0,0,(void *)&pplfunc_osStat    , "stat(x)", "\\mathrm{stat}@<@1@>", "stat(x) returns a dictionary of information about the file x");
     ppl_addSystemFunc(d2,"system"        ,1,1,0,0,0,0,(void *)&pplfunc_osSystem  , "system()", "\\mathrm{system}@<@1@>", "system() executes a command in a subshell");
     ppl_addSystemFunc(d2,"tmpfile"       ,0,0,1,1,1,1,(void *)&pplfunc_osTmpfile , "tmpfile()", "\\mathrm{tmpfile}@<@>", "tmpfile() returns a file handle for a temporary file");
@@ -230,7 +231,9 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"acot"          ,1,1,1,1,0,1,(void *)&pplfunc_acot        , "acot(z)", "\\mathrm{acot}@<@1@>", "acot(z) returns the arccotangent of z");
     ppl_addSystemFunc(d,"acoth"         ,1,1,1,1,0,1,(void *)&pplfunc_acoth       , "acoth(z)", "\\mathrm{acoth}@<@1@>", "acoth(z) returns the hyperbolic arccotangent of z");
     ppl_addSystemFunc(d,"acsc"          ,1,1,1,1,0,1,(void *)&pplfunc_acsc        , "acsc(z)", "\\mathrm{acsc}@<@1@>", "acsc(z) returns the arccosecant of z");
+    ppl_addSystemFunc(d,"acosec"        ,1,1,1,1,0,1,(void *)&pplfunc_acsc        , "acosec(z)", "\\mathrm{acosec}@<@1@>", "acosec(z) returns the arccosecant of z");
     ppl_addSystemFunc(d,"acsch"         ,1,1,1,1,0,1,(void *)&pplfunc_acsch       , "acsch(z)", "\\mathrm{acsch}@<@1@>", "acsch(z) returns the hyperbolic arccosecant of z");
+    ppl_addSystemFunc(d,"acosech"       ,1,1,1,1,0,1,(void *)&pplfunc_acsch       , "acosech(z)", "\\mathrm{acosech}@<@1@>", "acosech(z) returns the hyperbolic arccosecant of z");
     ppl_addSystemFunc(d,"airy_ai"       ,1,1,1,1,0,1,(void *)&pplfunc_airy_ai     , "airy_ai(z)", "\\mathrm{airy\\_ai}@<@1@>", "airy_ai(z) returns the Airy function Ai evaluated at z");
     ppl_addSystemFunc(d,"airy_ai_diff"  ,1,1,1,1,0,1,(void *)&pplfunc_airy_ai_diff, "airy_ai_diff(z)", "\\mathrm{airy\\_ai\\_diff}@<@1@>", "airy_ai_diff(z) returns the first derivative of the Airy function Ai evaluated at z");
     ppl_addSystemFunc(d,"airy_bi"       ,1,1,1,1,0,1,(void *)&pplfunc_airy_bi     , "airy_bi(z)", "\\mathrm{airy\\_bi}@<@1@>", "airy_bi(z) returns the Airy function Bi evaluated at z");
@@ -261,7 +264,9 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"cot"           ,1,1,1,1,0,1,(void *)&pplfunc_cot         , "cot(z)", "\\mathrm{cot}@<@1@>", "cot(x) returns the cotangent of x. If x is dimensionless, it is assumed to be measured in radians");
     ppl_addSystemFunc(d,"coth"          ,1,1,1,1,0,1,(void *)&pplfunc_coth        , "coth(z)", "\\mathrm{coth}@<@1@>", "coth(x) returns the hyperbolic cotangent of x. x may either be a dimensionless number or may have units of angle");
     ppl_addSystemFunc(d,"csc"           ,1,1,1,1,0,1,(void *)&pplfunc_csc         , "csc(z)", "\\mathrm{csc}@<@1@>", "csc(x) returns the cosecant of x. If x is dimensionless, it is assumed to be measured in radians");
+    ppl_addSystemFunc(d,"cosec"         ,1,1,1,1,0,1,(void *)&pplfunc_csc         , "cosec(z)", "\\mathrm{cosec}@<@1@>", "cosec(x) returns the cosecant of x. If x is dimensionless, it is assumed to be measured in radians");
     ppl_addSystemFunc(d,"csch"          ,1,1,1,1,0,1,(void *)&pplfunc_csch        , "csch(z)", "\\mathrm{csch}@<@1@>", "csch(x) returns the hyperbolic cosecant of x. x may either be a dimensionless number or may have units of angle");
+    ppl_addSystemFunc(d,"cosech"        ,1,1,1,1,0,1,(void *)&pplfunc_csch        , "cosech(z)", "\\mathrm{cosech}@<@1@>", "cosech(x) returns the hyperbolic cosecant of x. x may either be a dimensionless number or may have units of angle");
     ppl_addSystemFunc(d,"degrees"       ,1,1,1,1,1,0,(void *)&pplfunc_degrees     , "degrees(x)", "\\mathrm{degrees}@<@1@>", "degrees(x) converts angles measured in radians into degrees");
     ppl_addMagicFunction(d, "diff_d", 2, "diff_d...(e,min,max)", "\\left.\\frac{\\mathrm{d}}{\\mathrm{d}@?}\\right|_{@?=@2}@<@1@>", "diff_d<v>(e,x,step) numerically differentiates an expression e wrt <v> at x, using a step size of step. <v> can be any variable name.");
     ppl_addSystemFunc(d,"ellK"          ,1,1,1,1,1,1,(void *)&pplfunc_ellK        , "ellipticintK(k)", "\\mathrm{ellipticintK}@<@1@>", "ellipticintK(k) evaluates the complete elliptic integral K(k)");

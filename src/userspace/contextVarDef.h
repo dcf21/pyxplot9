@@ -1,4 +1,4 @@
-// fnCall.h
+// contextVarDef.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,13 +19,14 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _FNCALL_H
-#define _FNCALL_H 1
+#ifndef _CONTEXTVARDEF_H
+#define _CONTEXTVARDEF_H 1
 
 #include "userspace/context.h"
 #include "userspace/pplObj.h"
 
-void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int dollarAllowed, int iterDepth, int *status, int *errPos, int *errType, char *errText);
+void ppl_contextGetVarPointer    (ppl_context *c, char *name, pplObj **output, pplObj *temp);
+void ppl_contextRestoreVarPointer(ppl_context *c, char *name, pplObj *temp);
 
 #endif
 

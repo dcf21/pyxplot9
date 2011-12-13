@@ -87,7 +87,7 @@
    } \
  }
 
-pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int IterDepth, int *errPos, int *errType, char *errText);
+pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dollarAllowed, int IterDepth, int *errPos, int *errType, char *errText);
 
 #endif
 
