@@ -348,6 +348,24 @@ pplObj *pplObjZom(pplObj *in, unsigned char amMalloced)
   return in;
  }
 
+pplObj *pplObjUser(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, pplObj *prototype)
+ {
+  in->objType = PPLOBJ_ZOM;
+  in->auxil = (void *)ppl_dictInit(HASHSIZE_LARGE,auxilMalloced);
+  if (in->auxil==NULL) return NULL;
+  in->auxilMalloced = auxilMalloced;
+  in->auxilLen = 0;
+  in->objPrototype = (pplObj *)malloc(sizeof(pplObj));
+  if (in->objPrototype==NULL) return NULL;
+  pplObjCpy(in->objPrototype, prototype, 1, 1);
+  in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
+  in->amMalloced = amMalloced;
+  in->immutable = 0;
+  in->objType = PPLOBJ_USER;
+  return in;
+ }
+
 pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char outMalloced, unsigned char useMalloc)
  {
   if (in==NULL) return NULL;
@@ -371,13 +389,19 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char outMalloced, unsigned c
     case PPLOBJ_EXC: // copy string value
       if (useMalloc) out->auxil = (void *)malloc      (in->auxilLen);
       else           out->auxil = (void *)ppl_memAlloc(in->auxilLen);
-      if (out->auxil==NULL) return NULL;
+      if (out->auxil==NULL) { out->objType=PPLOBJ_ZOM; return NULL; }
       memcpy(out->auxil, in->auxil, in->auxilLen);
       out->auxilMalloced = useMalloc;
       break;
-    case PPLOBJ_DICT:
+    case PPLOBJ_USER:
+     {
+      pplObj *p = (pplObj *)malloc(sizeof(pplObj)); // Copy prototype pointer object
+      if (p==NULL) { out->objType=PPLOBJ_ZOM; return NULL; }
+      pplObjCpy(p,out->objPrototype,1,1);
+      out->objPrototype=p;
+     }
+    case PPLOBJ_DICT: // dictionary -- pass by pointer
     case PPLOBJ_MOD:
-    case PPLOBJ_USER: // dictionary -- pass by pointer
       ((dict *)(out->auxil))->refCount++;
       break;
     case PPLOBJ_LIST: // list
@@ -408,5 +432,72 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char outMalloced, unsigned c
       break;
    }
   return out;
+ }
+
+pplObj *pplObjDeepCpy(pplObj *out, pplObj *in, int deep, unsigned char outMalloced, unsigned char useMalloc)
+ {
+  int t=in->objType;
+
+  if (in==NULL) return NULL;
+
+  if (out==NULL)
+   {
+    if (outMalloced) out = (pplObj *)malloc      (sizeof(pplObj));
+    else             out = (pplObj *)ppl_memAlloc(sizeof(pplObj));
+    if (out==NULL) return out;
+   }
+
+  switch (t)
+   {
+    case PPLOBJ_DICT:
+    case PPLOBJ_MOD:
+    case PPLOBJ_USER:
+     {
+      pplObj       *item, v;
+      char         *key;
+      dict         *d;
+      dictIterator *di = ppl_dictIterateInit((dict *)in->auxil);
+      memcpy(out, in, sizeof(pplObj));
+      out->objType    = PPLOBJ_ZOM;
+      out->self_lval  = NULL;
+      out->self_dval  = NULL;
+      out->self_this  = NULL;
+      out->amMalloced = outMalloced;
+      out->auxil      = (void *)(d = ppl_dictInit(HASHSIZE_LARGE,useMalloc));
+      if (out->auxil==NULL) return NULL;
+      while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
+       {
+        if (!deep) pplObjCpy(&v,item,useMalloc,useMalloc);
+        else       pplObjDeepCpy(&v,item,1,useMalloc,useMalloc);
+        ppl_dictAppendCpy(d,key,&v,sizeof(pplObj));
+       }
+      out->objType = t;
+      return out;
+     }
+    case PPLOBJ_LIST:
+     {
+      pplObj       *item, v;
+      list         *l;
+      listIterator *li = ppl_listIterateInit((list *)in->auxil);
+      memcpy(out, in, sizeof(pplObj));
+      out->objType    = PPLOBJ_ZOM;
+      out->self_lval  = NULL;
+      out->self_dval  = NULL;
+      out->self_this  = NULL;
+      out->amMalloced = outMalloced;
+      out->auxil      = (void *)(l = ppl_listInit(useMalloc));
+      if (out->auxil==NULL) return NULL; 
+      while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
+       {
+        if (!deep) pplObjCpy(&v,item,useMalloc,useMalloc);
+        else       pplObjDeepCpy(&v,item,1,useMalloc,useMalloc);
+        ppl_listAppendCpy(l,&v,sizeof(pplObj));
+       }
+      out->objType = t;
+      return out;
+     }
+    default:
+     return pplObjCpy(out,in,outMalloced,useMalloc);
+   }
  }
 

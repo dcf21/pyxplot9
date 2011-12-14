@@ -48,6 +48,7 @@ int           ppl_listFree       (list *in);
 int           ppl_listLen        (list *in);
 int           ppl_listAppend     (list *in, void *item);
 int           ppl_listAppendCpy  (list *in, void *item, int size);
+int           ppl_listInsertCpy  (list *in, int N, void *item, int size);
 int           ppl_listRemove     (list *in, void *item);
 int           ppl_listRemoveAll  (list *in, void *item);
 void         *ppl_listGetItem    (list *in, int   N);

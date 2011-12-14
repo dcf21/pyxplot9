@@ -22,9 +22,11 @@
 #define _FNCALL_C 1
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <limits.h>
+#include <time.h>
 
 #include <gsl/gsl_math.h>
 
@@ -61,13 +63,86 @@ void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int dollarAllowed,
   // Attempt to call a module to general a class instance?
   if ((t == PPLOBJ_MOD) || (t == PPLOBJ_USER))
    {
-
+    if (nArgs!=0) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Instantiation takes zero arguments; %d supplied.",nArgs); goto cleanup; }
+    pplObjUser(out,0,1,&called);
+    goto cleanup;
    }
 
   // Attempt to call a type object as a constructor?
   else if (t == PPLOBJ_TYPE)
    {
-
+    int id = ((pplType *)(out->auxil))->id;
+    switch (id)
+     {
+      case PPLOBJ_NUM:
+        if      (nArgs==0) { pplObjNum(out,0,0,0); }
+        else if (nArgs==1) { CAST_TO_NUM(&args[0]); pplObjCpy(out,&args[0],0,1); }
+        else               { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The numeric object constructor takes either zero or one arguments; %d supplied.",nArgs); }
+        goto cleanup;
+      case PPLOBJ_STR:
+        if      (nArgs==0) { pplObjStr(out,0,0,""); }
+        else if (nArgs==1) { if (args[0].objType==PPLOBJ_STR) pplObjCpy(out,&args[0],0,1);
+                             else { char *outstr=(char*)malloc(65536); pplObjPrint(context,&args[0],NULL,outstr,65536,0,0); pplObjStr(out,0,1,outstr); }
+                           }
+        else               { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The string object constructor takes either zero or one arguments; %d supplied.",nArgs); }
+        goto cleanup;
+      case PPLOBJ_BOOL:
+        if      (nArgs==0) { pplObjBool(out,0,1); }
+        else if (nArgs==1) { CAST_TO_BOOL(&args[0]); pplObjCpy(out,&args[0],0,1); }
+        else               { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The boolean object constructor takes either zero or one arguments; %d supplied.",nArgs); }
+        goto cleanup;
+      case PPLOBJ_DATE:
+        if      (nArgs==0) { pplObjDate(out,0,(double)time(NULL)); }
+        else if (nArgs==1) { if (args[0].objType==PPLOBJ_DATE) pplObjDate(out,0,args[0].real);
+                             else { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The first argument to the date object constructor should be a date; an object of type <%s> was supplied.",pplObjTypeNames[args[0].objType]); }
+                           }
+        else               { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The date object constructor takes zero or one arguments; %d supplied.",nArgs); }
+        goto cleanup;
+      case PPLOBJ_COL:
+        if      (nArgs==0) { pplObjColor(out,0,SW_COLSPACE_RGB,0,0,0,0); }
+        else if (nArgs==1) { if (args[0].objType==PPLOBJ_COL) pplObjColor(out,0,round(args[0].exponent[0]),args[0].exponent[8],args[0].exponent[9],args[0].exponent[10],args[0].exponent[11]);
+                             else { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The first argument to the color object constructor should be a color; an object of type <%s> was supplied.",pplObjTypeNames[args[0].objType]); }
+                           }
+        else               { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The color object constructor takes zero or one arguments; %d supplied.",nArgs); }
+        goto cleanup;
+      case PPLOBJ_DICT:
+        if      (nArgs==0) { pplObjDict(out,0,1,NULL); }
+        else if (nArgs==1) { if (args[0].objType==PPLOBJ_DICT) pplObjDeepCpy(out,&args[0],0,0,1);
+                             else { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The first argument to the dictionary object constructor should be a dictionary; an object of type <%s> was supplied.",pplObjTypeNames[args[0].objType]); }
+                           }
+        else               { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The dictionary object constructor takes zero or one arguments; %d supplied.",nArgs); }
+        goto cleanup;
+      case PPLOBJ_MOD:
+      case PPLOBJ_USER:
+        if      (nArgs==0) { pplObjModule(out,0,1,0); }
+        else if (nArgs==1) { if ((args[0].objType==PPLOBJ_MOD)||(args[0].objType==PPLOBJ_USER)) pplObjDeepCpy(out,&args[0],0,0,1);
+                             else { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The first argument to the module/instance object constructor should be a module or instance; an object of type <%s> was supplied.",pplObjTypeNames[args[0].objType]); }
+                           }
+        else               { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The module/instance object constructor takes zero or one arguments; %d supplied.",nArgs); }
+        goto cleanup;
+      case PPLOBJ_FILE:
+        if      (nArgs==0) { pplObjFile(out,0,1,tmpfile(),0); }
+        else if (nArgs==1) { if (args[0].objType==PPLOBJ_FILE) pplObjCpy(out,&args[0],0,1);
+                             else { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The first argument to the file object constructor should be a file object; an object of type <%s> was supplied.",pplObjTypeNames[args[0].objType]); }
+                           }
+        else               { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The file object constructor takes zero or one arguments; %d supplied.",nArgs); }
+        goto cleanup;
+      case PPLOBJ_TYPE:
+        *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Creation of new data type objects is not permitted."); goto cleanup;
+      case PPLOBJ_FUNC:
+        *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"New function objects must be created with the syntax f(x)=... or subroutine f(x) { ... }."); goto cleanup;
+      case PPLOBJ_EXC:
+        if (nArgs==1) { if      (args[0].objType==PPLOBJ_STR) pplObjException(out,0,1,(char*)args[0].auxil);
+                        else if (args[0].objType==PPLOBJ_EXC) pplObjCpy(out,&args[0],0,1);
+                        else { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The first argument to the exception object constructor should be a string; an object of type <%s> was supplied.",pplObjTypeNames[args[0].objType]); }
+                      }
+        else          { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The exception object constructor takes one argument; %d supplied.",nArgs); }
+        goto cleanup;
+      case PPLOBJ_NULL:
+        if      (nArgs==0) { pplObjNull(out,0); }
+        else               { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The null object constructor takes zero arguments; %d supplied.",nArgs); }
+        goto cleanup;
+     }
    }
 
   // Otherwise object being called must be a function object
@@ -99,7 +174,7 @@ void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int dollarAllowed,
       memcpy(&v,xpos,sizeof(pplObj)); v.imag=0; v.real = hypot(xpos->real,xpos->imag)*1e-6; v.flagComplex=0;
       if (v.real<DBL_MIN*1e6) v.real=1e-6;
       ppl_expDifferentiate(context,(char*)args[1].auxil,(char*)args[0].auxil,xpos,step,out,dollarAllowed,errPos,errType,errText,iterDepth);
-      if (*errPos>=0) goto cleanup;
+      if (*errPos>=0) { *status=1; *errPos=charpos; goto cleanup; }
      }
     else if (fn->minArgs==3) // int_d()
      {
@@ -109,7 +184,7 @@ void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int dollarAllowed,
       if (args[2].objType!=PPLOBJ_NUM) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The int_d() function requires a number as its second argument; supplied argument has type <%s>.",pplObjTypeNames[args[2].objType]); goto cleanup; }
       if (args[3].objType!=PPLOBJ_NUM) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The int_d() function requires a number as its third argument; supplied argument has type <%s>.",pplObjTypeNames[args[3].objType]); goto cleanup; }
       ppl_expIntegrate(context,(char*)args[1].auxil,(char*)args[0].auxil,&args[2],&args[3],out,dollarAllowed,errPos,errType,errText,iterDepth);
-      if (*errPos>=0) goto cleanup;
+      if (*errPos>=0) { *status=1; *errPos=charpos; goto cleanup; }
      }
     else if (fn->minArgs==4) // texify()
      {
@@ -183,5 +258,8 @@ cleanup:
   ppl_garbageObject(&called);
   for (i=0; i<nArgs; i++) { context->stackPtr--; ppl_garbageObject(&context->stack[context->stackPtr]); }
   return;
+cast_fail:
+  *status=1; *errPos=charpos;
+  goto cleanup;
  }
 

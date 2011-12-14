@@ -70,6 +70,7 @@ int ppl_listLen(list *in)
 int ppl_listAppend(list *in, void *item)
  {
   listItem *ptrnew;
+  if (in==NULL) return 1;
   ptrnew           = (listItem *)alloc(sizeof(listItem));
   if (ptrnew==NULL) return 1;
   ptrnew->prev     = in->last;
@@ -85,6 +86,7 @@ int ppl_listAppend(list *in, void *item)
 int ppl_listAppendCpy(list *in, void *item, int size)
  {
   listItem *ptrnew;
+  if (in==NULL) return 1;
   ptrnew         = (listItem *)alloc(sizeof(listItem));
   if (ptrnew==NULL) return 1;
   ptrnew->prev   = in->last;
@@ -95,6 +97,26 @@ int ppl_listAppendCpy(list *in, void *item, int size)
   if (in->first == NULL) in->first = ptrnew;
   if (in->last  != NULL) in->last->next = ptrnew;
   in->last = ptrnew;
+  in->length++;
+  return 0;
+ }
+
+int ppl_listInsertCpy(list *in, int N, void *item, int size)
+ {
+  int i;
+  listItem **ptr, *ptrnew;
+  if (in==NULL) return 1;
+  ptrnew = (listItem *)alloc(sizeof(listItem));
+  if (ptrnew==NULL) return 1;
+  ptrnew->data   = alloc(size);
+  if (ptrnew->data==NULL) { if (in->useMalloc) free(ptrnew); return 1; }
+  memcpy(ptrnew->data, item, size);
+  ptr = &in->first;
+  for (i=0; ((i<N) && (*ptr!=NULL)); i++, ptr=&(*ptr)->next);
+  ptrnew->prev = (*ptr==NULL) ? in->last : (*ptr)->prev;
+  ptrnew->next = *ptr;
+  if (*ptr!=NULL) (*ptr)->prev = ptrnew;
+  *ptr         = ptrnew;
   in->length++;
   return 0;
  }

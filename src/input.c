@@ -266,11 +266,11 @@ int ppl_ProcessStatement(ppl_context *context, char *line)
    }
 
   // Print tokens
-  ppl_tokenPrint(context, line, end);
+  // ppl_tokenPrint(context, line, end);
 
   // Print bytecode
-  ppl_reversePolishPrint(context, (void *)buff, context->errcontext.tempErrStr);
-  ppl_report(&context->errcontext, NULL);
+  // ppl_reversePolishPrint(context, (void *)buff, context->errcontext.tempErrStr);
+  // ppl_report(&context->errcontext, NULL);
 
   // Execute bytecode
   out = ppl_expEval(context, (void *)buff, &lastOpAssign, 1, 0, &errPos, &errType, errText);

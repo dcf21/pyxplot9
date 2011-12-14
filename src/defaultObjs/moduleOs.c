@@ -166,7 +166,7 @@ void pplfunc_osGlob(ppl_context *c, pplObj *in, int nArgs, int *status, int *err
     for (j=0; j<g.gl_pathc; j++)
      {
       COPYSTR(tmp,g.gl_pathv[j]);
-      pplObjStr(&v,0,1,tmp);
+      pplObjStr(&v,1,1,tmp);
       ppl_listAppendCpy(l, &v, sizeof(v));
      }
     globfree(&g);
@@ -199,15 +199,15 @@ void pplfunc_osStat(ppl_context *c, pplObj *in, int nArgs, int *status, int *err
   tmp = (char *)malloc(LSTR_LENGTH);
   if (pplObjDict(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   d = (dict *)OUTPUT.auxil;
-  pplObjDate(&v,0,s.st_atime   ); ppl_dictAppendCpy(d, "atime", &v, sizeof(v));
-  pplObjNum (&v,0,s.st_gid   ,0); ppl_dictAppendCpy(d, "gid"  , &v, sizeof(v));
-  pplObjDate(&v,0,s.st_ctime   ); ppl_dictAppendCpy(d, "ctime", &v, sizeof(v));
-  pplObjNum (&v,0,s.st_ino   ,0); ppl_dictAppendCpy(d, "ino"  , &v, sizeof(v));
-  pplObjNum (&v,0,s.st_mode  ,0); ppl_dictAppendCpy(d, "mode" , &v, sizeof(v));
-  pplObjDate(&v,0,s.st_mtime   ); ppl_dictAppendCpy(d, "mtime", &v, sizeof(v));
-  pplObjNum (&v,0,s.st_nlink ,0); ppl_dictAppendCpy(d, "nlink", &v, sizeof(v));
-  pplObjNum (&v,0,s.st_size*8,0); v.exponent[UNIT_BIT]=1; v.dimensionless=0; ppl_dictAppendCpy(d, "size", &v, sizeof(v));
-  pplObjNum (&v,0,s.st_uid   ,0); ppl_dictAppendCpy(d, "uid"  , &v, sizeof(v));
+  pplObjDate(&v,1,s.st_atime   ); ppl_dictAppendCpy(d, "atime", &v, sizeof(v));
+  pplObjNum (&v,1,s.st_gid   ,0); ppl_dictAppendCpy(d, "gid"  , &v, sizeof(v));
+  pplObjDate(&v,1,s.st_ctime   ); ppl_dictAppendCpy(d, "ctime", &v, sizeof(v));
+  pplObjNum (&v,1,s.st_ino   ,0); ppl_dictAppendCpy(d, "ino"  , &v, sizeof(v));
+  pplObjNum (&v,1,s.st_mode  ,0); ppl_dictAppendCpy(d, "mode" , &v, sizeof(v));
+  pplObjDate(&v,1,s.st_mtime   ); ppl_dictAppendCpy(d, "mtime", &v, sizeof(v));
+  pplObjNum (&v,1,s.st_nlink ,0); ppl_dictAppendCpy(d, "nlink", &v, sizeof(v));
+  pplObjNum (&v,1,s.st_size*8,0); v.exponent[UNIT_BIT]=1; v.dimensionless=0; ppl_dictAppendCpy(d, "size", &v, sizeof(v));
+  pplObjNum (&v,1,s.st_uid   ,0); ppl_dictAppendCpy(d, "uid"  , &v, sizeof(v));
   if      (S_ISREG (s.st_mode)) { COPYSTR(tmp,"regular file"); }
   else if (S_ISDIR (s.st_mode)) { COPYSTR(tmp,"directory"); }
   else if (S_ISCHR (s.st_mode)) { COPYSTR(tmp,"character special"); }
@@ -216,7 +216,7 @@ void pplfunc_osStat(ppl_context *c, pplObj *in, int nArgs, int *status, int *err
   else if (S_ISLNK (s.st_mode)) { COPYSTR(tmp,"symbolic link"); }
   else if (S_ISSOCK(s.st_mode)) { COPYSTR(tmp,"socket"); }
   else                          { COPYSTR(tmp,"other"); }
-  pplObjStr(&v,0,1,tmp); ppl_dictAppendCpy(d, "type", &v, sizeof(v));
+  pplObjStr(&v,1,1,tmp); ppl_dictAppendCpy(d, "type", &v, sizeof(v));
   if (s.st_mode & S_IRUSR) permissions[0] = 'r';
   if (s.st_mode & S_IWUSR) permissions[1] = 'w';
   if (s.st_mode & S_IXUSR) permissions[2] = 'x';
@@ -226,7 +226,7 @@ void pplfunc_osStat(ppl_context *c, pplObj *in, int nArgs, int *status, int *err
   if (s.st_mode & S_IROTH) permissions[6] = 'r';
   if (s.st_mode & S_IWOTH) permissions[7] = 'w';
   if (s.st_mode & S_IXOTH) permissions[8] = 'x';
-  COPYSTR(tmp,permissions); pplObjStr(&v,0,1,tmp); ppl_dictAppendCpy(d, "permissions", &v, sizeof(v));
+  COPYSTR(tmp,permissions); pplObjStr(&v,1,1,tmp); ppl_dictAppendCpy(d, "permissions", &v, sizeof(v));
   return;
  }
 
@@ -251,11 +251,11 @@ void pplfunc_osUname(ppl_context *c, pplObj *in, int nArgs, int *status, int *er
   tmp = (char *)malloc(LSTR_LENGTH);
   if (pplObjDict(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   d = (dict *)OUTPUT.auxil;
-  COPYSTR(tmp,u.sysname ); pplObjStr(&v,0,1,tmp); ppl_dictAppendCpy(d, "sysname" , &v, sizeof(v));
-  COPYSTR(tmp,u.nodename); pplObjStr(&v,0,1,tmp); ppl_dictAppendCpy(d, "nodename", &v, sizeof(v));
-  COPYSTR(tmp,u.release ); pplObjStr(&v,0,1,tmp); ppl_dictAppendCpy(d, "release" , &v, sizeof(v));
-  COPYSTR(tmp,u.version ); pplObjStr(&v,0,1,tmp); ppl_dictAppendCpy(d, "version" , &v, sizeof(v));
-  COPYSTR(tmp,u.machine ); pplObjStr(&v,0,1,tmp); ppl_dictAppendCpy(d, "machine" , &v, sizeof(v));
+  COPYSTR(tmp,u.sysname ); pplObjStr(&v,1,1,tmp); ppl_dictAppendCpy(d, "sysname" , &v, sizeof(v));
+  COPYSTR(tmp,u.nodename); pplObjStr(&v,1,1,tmp); ppl_dictAppendCpy(d, "nodename", &v, sizeof(v));
+  COPYSTR(tmp,u.release ); pplObjStr(&v,1,1,tmp); ppl_dictAppendCpy(d, "release" , &v, sizeof(v));
+  COPYSTR(tmp,u.version ); pplObjStr(&v,1,1,tmp); ppl_dictAppendCpy(d, "version" , &v, sizeof(v));
+  COPYSTR(tmp,u.machine ); pplObjStr(&v,1,1,tmp); ppl_dictAppendCpy(d, "machine" , &v, sizeof(v));
   return;
  }
 

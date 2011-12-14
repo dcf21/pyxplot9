@@ -61,6 +61,7 @@ void pplfunc_ceil        (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_classOf     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_cmyk        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_conjugate   (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_copy        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_cos         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_cosh        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_cot         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
@@ -68,6 +69,7 @@ void pplfunc_coth        (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_csc         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_csch        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_degrees     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_deepcopy    (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_ellK        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_ellE        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_ellP        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);

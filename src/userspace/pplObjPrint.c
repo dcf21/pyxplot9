@@ -124,7 +124,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
       dictIterator *iter = ppl_dictIterateInit((dict *)o->auxil);
       char         *key;
       pplObj       *item;
-      sprintf(out+i, (t==PPLOBJ_MOD)?"module {":"user-defined type {");
+      sprintf(out+i, (t==PPLOBJ_MOD)?"module {":"module instance {");
       i+=strlen(out+i);
       if (!expand) strcpy(out+i," ... }");
       else

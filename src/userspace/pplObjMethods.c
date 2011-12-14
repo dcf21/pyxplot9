@@ -408,6 +408,149 @@ void pplmethod_colToHSB(ppl_context *c, pplObj *in, int nArgs, int *status, int 
 
 // Vector methods
 
+void pplmethod_vectorAppend(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  int         i;
+  pplObj     *st = in[-1].self_this;
+  gsl_vector *v  = ((pplVector *)st->auxil)->v;
+  gsl_vector *vo;
+  if (!ppl_unitsDimEqual(st, &in[0]))
+   {
+    if (st->dimensionless)
+     { sprintf(errText, "Attempt to append a number to a vector with conflicting dimensions: vector is dimensionless, but number has units of <%s>.", ppl_printUnit(c, &in[0], NULL, NULL, 1, 1, 0) ); }
+    else if (in[0].dimensionless)
+     { sprintf(errText, "Attempt to append a number to a vector with conflicting dimensions: vector has units of <%s>, while number is dimensionless.", ppl_printUnit(c, st, NULL, NULL, 0, 1, 0) ); }
+    else
+     { sprintf(errText, "Attempt to append a number to a vector with conflicting dimensions: vector has units of <%s>, while number has units of <%s>.", ppl_printUnit(c, st, NULL, NULL, 0, 1, 0), ppl_printUnit(c, &in[0], NULL, NULL, 1, 1, 0) ); }
+    *errType=ERR_UNIT; *status = 1; return;
+   }
+  if (pplObjVector(&OUTPUT,0,1,v->size+1)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  vo = ((pplVector *)(OUTPUT.auxil))->v;
+  for (i=0; i<v->size; i++) gsl_vector_set(vo , i , gsl_vector_get(v,i));
+  gsl_vector_set(vo, i, in[0].real);
+  ppl_unitsDimCpy(&OUTPUT,st);
+  if (st->self_lval!=NULL)
+   {
+    pplObj *o = st->self_lval;
+    int     om=o->amMalloced;
+    o->amMalloced=0;
+    ppl_garbageObject(o);
+    pplObjCpy(o,&OUTPUT,om,1);
+   }
+ }
+
+void pplmethod_vectorExtend(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  int         i,l=0;
+  pplObj     *st = in[-1].self_this;
+  gsl_vector *va = ((pplVector *)st->auxil)->v;
+  gsl_vector *vo;
+  int         t  = in[0].objType;
+
+  if      (t==PPLOBJ_VEC)
+   {
+    if (!ppl_unitsDimEqual(st, &in[0]))
+     {
+      if (st->dimensionless)
+       { sprintf(errText, "Attempt to append a number to a vector with conflicting dimensions: vector is dimensionless, but number has units of <%s>.", ppl_printUnit(c, &in[0], NULL, NULL, 1, 1, 0) ); }
+      else if (in[0].dimensionless)
+       { sprintf(errText, "Attempt to append a number to a vector with conflicting dimensions: vector has units of <%s>, while number is dimensionless.", ppl_printUnit(c, st, NULL, NULL, 0, 1, 0) ); }
+      else
+       { sprintf(errText, "Attempt to append a number to a vector with conflicting dimensions: vector has units of <%s>, while number has units of <%s>.", ppl_printUnit(c, st, NULL, NULL, 0, 1, 0), ppl_printUnit(c, &in[0], NULL, NULL, 1, 1, 0) ); }
+      *errType=ERR_UNIT; *status = 1; return;
+     }
+    l = ((pplVector *)in[0].auxil)->v->size;
+   }
+  else if (t==PPLOBJ_LIST)
+   {
+    l = ((list *)in[0].auxil)->length;
+   }
+  else
+   {
+    *status=1; *errType=ERR_TYPE; sprintf(errText, "Argument to the extend(x) method must be either a list or a vector. Supplied argument had type <%s>.", pplObjTypeNames[t]); return;
+   }
+
+  if (pplObjVector(&OUTPUT,0,1,va->size+l)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  vo = ((pplVector *)(OUTPUT.auxil))->v;
+  for (i=0; i<va->size; i++) gsl_vector_set(vo , i , gsl_vector_get(va,i));
+  ppl_unitsDimCpy(&OUTPUT,st);
+
+  if (t==PPLOBJ_VEC)
+   {
+    int j;
+    gsl_vector *vi = ((pplVector *)in[0].auxil)->v;
+    for (j=0; j<vi->size; j++,i++) gsl_vector_set(vo, i, gsl_vector_get(vi,j));
+   }
+  else if (t==PPLOBJ_LIST)
+   {
+    list *listin = (list *)in[0].auxil;
+    listIterator *li = ppl_listIterateInit(listin);
+    pplObj *item;
+    while ((item = (pplObj*)ppl_listIterate(&li))!=NULL)
+     {
+      if (item->objType!=PPLOBJ_NUM)
+       { *status=1; *errType=ERR_TYPE; sprintf(errText, "Can only append numbers to vectors; supplied object has type <%s>.",pplObjTypeNames[item->objType]); return; } 
+      if (!ppl_unitsDimEqual(st, item))
+       {
+        if (st->dimensionless)
+         { sprintf(errText, "Attempt to append a number to a vector with conflicting dimensions: vector is dimensionless, but number has units of <%s>.", ppl_printUnit(c, item, NULL, NULL, 1, 1, 0) ); }
+        else if (item->dimensionless)
+         { sprintf(errText, "Attempt to append a number to a vector with conflicting dimensions: vector has units of <%s>, while number is dimensionless.", ppl_printUnit(c, st, NULL, NULL, 0, 1, 0) ); }
+        else
+         { sprintf(errText, "Attempt to append a number to a vector with conflicting dimensions: vector has units of <%s>, while number has units of <%s>.", ppl_printUnit(c, st, NULL, NULL, 0, 1, 0), ppl_printUnit(c, item, NULL, NULL, 1, 1, 0) ); }
+        *errType=ERR_UNIT; *status = 1; return;
+       }
+      if (item->flagComplex) { *status=1; *errType=ERR_TYPE; sprintf(errText, "Can only append real numbers to vectors; supplied value is complex."); return; }
+      gsl_vector_set(vo, i++, item->real);
+     }
+   }
+  if (st->self_lval!=NULL)
+   {
+    pplObj *o = st->self_lval;
+    int     om=o->amMalloced;
+    o->amMalloced=0;
+    ppl_garbageObject(o);
+    pplObjCpy(o,&OUTPUT,om,1);
+   }
+ }
+
+void pplmethod_vectorInsert(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  long    p,i;
+  pplObj *st = in[-1].self_this;
+  gsl_vector *v  = ((pplVector *)st->auxil)->v;
+  gsl_vector *vo;
+  if (in[0].objType!=PPLOBJ_NUM) { *status=1; *errType=ERR_TYPE; sprintf(errText, "First argument to the insert(n,x) method must be a number. Supplied argument had type <%s>.", pplObjTypeNames[in[0].objType]); return; }
+  if (in[0].flagComplex) { *status=1; *errType=ERR_TYPE; sprintf(errText, "First argument to the insert(n,x) method must be a real number. Supplied argument is complex."); return; }
+  if (in[0].real < 0) in[0].real += v->size+1;
+  p = (long)round(in[0].real);
+  if (p<0) { *status=1; *errType=ERR_RANGE; sprintf(errText, "Attempt to insert a vector item before the beginning of a vector."); return; }
+  if (p>v->size) { *status=1; *errType=ERR_RANGE; sprintf(errText, "Vector index out of range."); return; }
+  if (!ppl_unitsDimEqual(st, &in[1]))
+   {
+    if (st->dimensionless)
+     { sprintf(errText, "Attempt to append a number to a vector with conflicting dimensions: vector is dimensionless, but number has units of <%s>.", ppl_printUnit(c, &in[1], NULL, NULL, 1, 1, 0) ); }
+    else if (in[1].dimensionless)
+     { sprintf(errText, "Attempt to append a number to a vector with conflicting dimensions: vector has units of <%s>, while number is dimensionless.", ppl_printUnit(c, st, NULL, NULL, 0, 1, 0) ); }
+    else
+     { sprintf(errText, "Attempt to append a number to a vector with conflicting dimensions: vector has units of <%s>, while number has units of <%s>.", ppl_printUnit(c, st, NULL, NULL, 0, 1, 0), ppl_printUnit(c, &in[1], NULL, NULL, 1, 1, 0) ); }
+    *errType=ERR_UNIT; *status = 1; return;
+   }
+  if (pplObjVector(&OUTPUT,0,1,v->size+1)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  vo = ((pplVector *)(OUTPUT.auxil))->v;
+  gsl_vector_set(vo, p, in[1].real);
+  for (i=0; i<v->size; i++) gsl_vector_set(vo , i+(i>=p) , gsl_vector_get(v,i));
+  ppl_unitsDimCpy(&OUTPUT,st);
+  if (st->self_lval!=NULL)
+   {
+    pplObj *o = st->self_lval;
+    int     om=o->amMalloced;
+    o->amMalloced=0;
+    ppl_garbageObject(o);
+    pplObjCpy(o,&OUTPUT,om,1);
+   }
+ }
+
 void pplmethod_vectorLen(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   gsl_vector *v = ((pplVector *)in[-1].self_this->auxil)->v;
@@ -439,6 +582,70 @@ void pplmethod_vectorSort(ppl_context *c, pplObj *in, int nArgs, int *status, in
  }
 
 // List methods
+
+void pplmethod_listAppend(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj  v;
+  pplObj *st = in[-1].self_this;
+  list   *l  = (list *)st->auxil;
+  pplObjCpy(&v,&in[0],1,1);
+  ppl_listAppendCpy(l, &v, sizeof(pplObj));
+  pplObjCpy(&OUTPUT,st,0,1);
+ }
+
+void pplmethod_listExtend(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj  v;
+  pplObj *st = in[-1].self_this;
+  list   *l  = (list *)st->auxil;
+  int     t  = in[0].objType;
+
+  if (t==PPLOBJ_VEC)
+   {
+    int i;
+    gsl_vector *vi = ((pplVector *)in[0].auxil)->v;
+    pplObjNum(&v,1,0,0);
+    ppl_unitsDimCpy(&v, &in[0]);
+    for (i=0; i<vi->size; i++)
+     {
+      v.real = gsl_vector_get(vi,i);
+      ppl_listAppendCpy(l, &v, sizeof(pplObj));
+     }
+   }
+  else if (t==PPLOBJ_LIST)
+   {
+    list *listin = (list *)in[0].auxil;
+    listIterator *li = ppl_listIterateInit(listin);
+    pplObj *item;
+    while ((item = (pplObj*)ppl_listIterate(&li))!=NULL)
+     {
+      pplObjCpy(&v,item,1,1);
+      ppl_listAppendCpy(l, &v, sizeof(pplObj));
+     }
+   }
+  else
+   {
+    *status=1; *errType=ERR_TYPE; sprintf(errText, "Argument to the extend(x) method must be either a list or a vector. Supplied argument had type <%s>.", pplObjTypeNames[t]); return;
+   }
+  pplObjCpy(&OUTPUT,st,0,1);
+ }
+
+void pplmethod_listInsert(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  long    p;
+  pplObj  v;
+  pplObj *st = in[-1].self_this;
+  list   *l  = (list *)st->auxil;
+  if (in[0].objType!=PPLOBJ_NUM) { *status=1; *errType=ERR_TYPE; sprintf(errText, "First argument to the insert(n,x) method must be a number. Supplied argument had type <%s>.", pplObjTypeNames[in[0].objType]); return; }
+  if (in[0].flagComplex) { *status=1; *errType=ERR_TYPE; sprintf(errText, "First argument to the insert(n,x) method must be a real number. Supplied argument is complex."); return; }
+  if (in[0].real < 0) in[0].real += l->length+1;
+  p = (long)round(in[0].real);
+  if (p<0) { *status=1; *errType=ERR_RANGE; sprintf(errText, "Attempt to insert a list item before the beginning of a list."); return; }
+  if (p>l->length) { *status=1; *errType=ERR_RANGE; sprintf(errText, "List index out of range."); return; }
+  pplObjCpy(&v,&in[1],1,1);
+  ppl_listInsertCpy(l, p, &v, sizeof(pplObj));
+  pplObjCpy(&OUTPUT,st,0,1);
+ }
 
 void pplmethod_listLen(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
@@ -867,12 +1074,18 @@ void pplObjMethodsInit(ppl_context *c)
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"toRGB",0,0,1,1,1,1,(void *)pplmethod_colToRGB, "toRGB()", "\\mathrm{toRGB}@<@>", "toRGB() returns a vector RGB representation of a color");
 
   // Vector methods
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"append",1,1,1,1,1,0,(void *)pplmethod_vectorAppend, "append(x)", "\\mathrm{append}@<@0@>", "append(x) appends the object x to a vector");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"extend",1,1,0,0,0,0,(void *)pplmethod_vectorExtend, "extend(x)", "\\mathrm{extend}@<@0@>", "extend(x) appends the members of the list x to the end of a vector");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"insert",2,2,0,0,0,0,(void *)pplmethod_vectorInsert, "insert(n,x)", "\\mathrm{insert}@<@0@>", "insert(n,x) inserts the object x into a vector at position n");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"len",0,0,1,1,1,1,(void *)pplmethod_vectorLen, "len()", "\\mathrm{len}@<@>", "len() returns the number of dimensions of a vector");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"norm",0,0,1,1,1,1,(void *)pplmethod_vectorNorm, "norm()", "\\mathrm{norm}@<@>", "norm() returns the norm (quadrature sum) of a vector's elements");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"reverse",0,0,1,1,1,1,(void *)pplmethod_vectorReverse, "reverse()", "\\mathrm{reverse}@<@>", "reverse() reverses the order of the elements of a vector");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"sort",0,0,1,1,1,1,(void *)pplmethod_vectorSort, "sort()", "\\mathrm{sort}@<@>", "sort() sorts the members of a vector");
 
   // List methods
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"append",1,1,0,0,0,0,(void *)pplmethod_listAppend, "append(x)", "\\mathrm{append}@<@0}@>", "append(x) appends the object x to a list");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"extend",1,1,0,0,0,0,(void *)pplmethod_listExtend, "extend(x)", "\\mathrm{extend}@<@0}@>", "extend(x) appends the members of the list x to the end of a list");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"insert",2,2,0,0,0,0,(void *)pplmethod_listInsert, "insert(n,x)", "\\mathrm{insert}@<@0@>", "insert(n,x) inserts the object x into a list at position n");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"len",0,0,1,1,1,1,(void *)pplmethod_listLen, "len()", "\\mathrm{len}@<@>", "len() returns the length of a list");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"reverse",0,0,1,1,1,1,(void *)pplmethod_listReverse, "reverse()", "\\mathrm{reverse}@<@>", "reverse() reverses the order of the members of a list");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"sort",0,0,1,1,1,1,(void *)pplmethod_listSort, "sort()", "\\mathrm{sort}@<@>", "sort() sorts the members of a list");

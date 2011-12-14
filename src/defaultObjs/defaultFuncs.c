@@ -411,6 +411,11 @@ void pplfunc_conjugate   (ppl_context *c, pplObj *in, int nArgs, int *status, in
   CHECK_OUTPUT_OKAY;
  }
 
+void pplfunc_copy        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObjDeepCpy(&OUTPUT,&in[0],0,0,1);
+ }
+
 void pplfunc_cos         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "cos(x)";
@@ -473,6 +478,11 @@ void pplfunc_csch        (ppl_context *c, pplObj *in, int nArgs, int *status, in
   CHECK_DIMLESS_OR_HAS_UNIT(in[0] , "first", "an angle", UNIT_ANGLE, 1);
   GSL_SET_COMPLEX(&z,in[0].real,in[0].imag); z=gsl_complex_csch(z); CLEANUP_GSLCOMPLEX;
   CHECK_OUTPUT_OKAY;
+ }
+
+void pplfunc_deepcopy    (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObjDeepCpy(&OUTPUT,&in[0],1,0,1);
  }
 
 void pplfunc_degrees     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
