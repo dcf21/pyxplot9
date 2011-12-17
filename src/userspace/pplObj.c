@@ -209,7 +209,7 @@ pplObj *pplObjVector(pplObj *in, unsigned char amMalloced, unsigned char auxilMa
   if ((pvr->v = gsl_vector_calloc(size))==NULL) { if (auxilMalloced) { free(pv); free(pvr); } return NULL; }
   pvr->refCount  = 1;
   pv ->refCount  = 1;
-  pv ->view      = NULL;
+  pv ->rawm      = NULL;
   pv ->v         = pvr->v;
   in->auxilMalloced = auxilMalloced;
   in->auxilLen = sizeof(pplMatrix);
@@ -240,7 +240,6 @@ pplObj *pplObjMatrix(pplObj *in, unsigned char amMalloced, unsigned char auxilMa
   pmr->refCount  = 1;
   pm ->refCount  = 1;
   pm ->sliceNext = 0;
-  pm ->view      = NULL;                     
   pm ->m         = pmr->m;
   in->auxilMalloced = auxilMalloced;
   in->auxilLen = sizeof(pplMatrix);
@@ -411,7 +410,8 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char outMalloced, unsigned c
      {
       pplVector *pv = (pplVector *)out->auxil;
       pv->refCount++;
-      pv->raw->refCount++;
+      if (pv->raw !=NULL) pv->raw ->refCount++;
+      if (pv->rawm!=NULL) pv->rawm->refCount++;
       break;
      }
     case PPLOBJ_MAT: // matrix

@@ -142,6 +142,260 @@ void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int dollarAllowed,
         if      (nArgs==0) { pplObjNull(out,0); }
         else               { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The null object constructor takes zero arguments; %d supplied.",nArgs); }
         goto cleanup;
+      case PPLOBJ_LIST:
+        if ((nArgs==1)&&(args[0].objType==PPLOBJ_LIST)) { pplObjDeepCpy(out, &args[0], 0, 0, 1); goto cleanup; }
+        if (pplObjList(out,0,1,NULL)==NULL) { *status=1; *errPos=charpos; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); goto cleanup; }
+        if (nArgs<1) goto cleanup;
+        if ((nArgs==1)&&(args[0].objType==PPLOBJ_VEC))
+         {
+          int i;
+          gsl_vector *vec = ((pplVector *)args[0].auxil)->v;
+          const int l = vec->size;
+          pplObj v;
+          list *lo = (list *)out->auxil;
+          pplObjNum(&v,1,0,0);
+          ppl_unitsDimCpy(&v, &args[0]);
+          for (i=0; i<l; i++) { v.real = gsl_vector_get(vec,i); ppl_listAppendCpy(lo, &v, sizeof(pplObj)); }
+         }
+        else
+         {
+          int i;
+          for (i=0; i<nArgs; i++)
+           {
+            pplObj v;
+            list *lo = (list *)out->auxil;
+            pplObjCpy(&v,&args[i],1,1);
+            ppl_listAppendCpy(lo, &v, sizeof(pplObj));
+           }
+         }
+        goto cleanup;
+      case PPLOBJ_VEC:
+        if (nArgs<1) { pplObjVector(out,0,1,1); gsl_vector_set( ((pplVector*)out->auxil)->v,0,0); goto cleanup; }
+        if (nArgs==1)
+         {
+          if (args[0].objType==PPLOBJ_VEC) { pplObjDeepCpy(out, &args[0], 0, 0, 1); goto cleanup; }
+          else if (args[0].objType==PPLOBJ_NUM)
+           {
+            gsl_vector *v;
+            long i,len;
+            if (!args[0].dimensionless) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Specified length of vector should be dimensionless; supplied length has units of <%s>.", ppl_printUnit(context, &args[0], NULL, NULL, 0, 1, 0)); goto cleanup; }
+            if (args[0].flagComplex) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Specified length of vector should be real; supplied length is complex number."); goto cleanup; }
+            if ((args[0].real<1)||(args[0].real>INT_MAX)) { *status=1; *errPos=charpos; *errType=ERR_RANGE; sprintf(errText,"Specified length of vector should be in the range 1<len<%d.",INT_MAX); goto cleanup; }
+            len = floor(args[0].real);
+            if (pplObjVector(out,0,1,len)==NULL) { *status=1; *errPos=charpos; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); goto cleanup; }
+            v = ((pplVector *)out->auxil)->v;
+            for (i=0; i<len; i++) { gsl_vector_set(v,i,0); }
+            goto cleanup;
+           }
+          else if (args[0].objType==PPLOBJ_LIST)
+           {
+            long i=0;
+            list *listin = (list *)args[0].auxil;
+            listIterator *li = ppl_listIterateInit(listin);
+            const long len = listin->length;
+            gsl_vector *v;
+            if (len==0) { *status=1; *errPos=charpos; *errType=ERR_MEMORY; sprintf(errText,"Cannot create a vector of length zero."); goto cleanup; }
+            if (pplObjVector(out,0,1,len)==NULL) { *status=1; *errPos=charpos; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); goto cleanup; }
+            v = ((pplVector *)out->auxil)->v;
+            if (len>0)
+             {
+              pplObj *item = (pplObj*)ppl_listIterate(&li);
+              if (item->objType!=PPLOBJ_NUM) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Vectors can only hold numeric values. Attempt to add object of type <%s> to vector.", pplObjTypeNames[item->objType]); goto cleanup; }
+              if (item->flagComplex) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Vectors can only hold real numeric values. Attempt to add a complex number."); goto cleanup; }
+              ppl_unitsDimCpy(out,item);
+              gsl_vector_set(v,i,item->real);
+             }
+            for (i=1; i<len; i++)
+             {
+              pplObj *item = (pplObj*)ppl_listIterate(&li);
+              if (item->objType!=PPLOBJ_NUM) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Vectors can only hold numeric values. Attempt to add object of type <%s> to vector.", pplObjTypeNames[item->objType]); goto cleanup; }
+              if (item->flagComplex) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Vectors can only hold real numeric values. Attempt to add a complex number."); goto cleanup; }
+              if (!ppl_unitsDimEqual(item, out))
+               {
+                if (out->dimensionless)
+                 { sprintf(errText, "Attempt to append a number (argument %ld) to a vector with conflicting dimensions: vector is dimensionless, but number has units of <%s>.", i+1, ppl_printUnit(context, item, NULL, NULL, 1, 1, 0) ); }
+                else if (item->dimensionless)
+                 { sprintf(errText, "Attempt to append a number (argument %ld) to a vector with conflicting dimensions: vector has units of <%s>, while number is dimensionless.", i+1, ppl_printUnit(context, out, NULL, NULL, 0, 1, 0) ); }
+                else
+                 { sprintf(errText, "Attempt to append a number (argument %ld) to a vector with conflicting dimensions: vector has units of <%s>, while number has units of <%s>.", i+1, ppl_printUnit(context, out, NULL, NULL, 0, 1, 0), ppl_printUnit(context, item, NULL, NULL, 1, 1, 0) ); }
+                *errType=ERR_UNIT; *status=1; *errPos=charpos; goto cleanup;
+               }
+              gsl_vector_set(v,i,item->real);
+             }
+            goto cleanup;
+           }
+         }
+        // List is to made up from arguments supplied to constructor
+         {
+          long i=0;
+          gsl_vector *v;
+          if (pplObjVector(out,0,1,nArgs)==NULL) { *status=1; *errPos=charpos; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); goto cleanup; }
+          v = ((pplVector *)out->auxil)->v;
+          if (nArgs>0)
+           {
+            pplObj *item = &args[0];
+            if (item->objType!=PPLOBJ_NUM) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Vectors can only hold numeric values. Attempt to add object of type <%s> to vector.", pplObjTypeNames[item->objType]); goto cleanup; }
+            if (item->flagComplex) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Vectors can only hold real numeric values. Attempt to add a complex number."); goto cleanup; }
+            ppl_unitsDimCpy(out,item);
+            gsl_vector_set(v,i,item->real);
+           }
+          for (i=1; i<nArgs; i++)
+           {
+            pplObj *item = &args[i];
+            if (item->objType!=PPLOBJ_NUM) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Vectors can only hold numeric values. Attempt to add object of type <%s> to vector.", pplObjTypeNames[item->objType]); goto cleanup; }
+            if (item->flagComplex) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Vectors can only hold real numeric values. Attempt to add a complex number."); goto cleanup; }
+            if (!ppl_unitsDimEqual(item, out))
+             {
+              if (out->dimensionless)
+               { sprintf(errText, "Attempt to append a number (argument %ld) to a vector with conflicting dimensions: vector is dimensionless, but number has units of <%s>.", i+1, ppl_printUnit(context, item, NULL, NULL, 1, 1, 0) ); }
+              else if (item->dimensionless)
+               { sprintf(errText, "Attempt to append a number (argument %ld) to a vector with conflicting dimensions: vector has units of <%s>, while number is dimensionless.", i+1, ppl_printUnit(context, out, NULL, NULL, 0, 1, 0) ); }
+              else
+               { sprintf(errText, "Attempt to append a number (argument %ld) to a vector with conflicting dimensions: vector has units of <%s>, while number has units of <%s>.", i+1, ppl_printUnit(context, out, NULL, NULL, 0, 1, 0), ppl_printUnit(context, item, NULL, NULL, 1, 1, 0) ); }
+              *errType=ERR_UNIT; *status=1; *errPos=charpos; goto cleanup;
+             }
+            gsl_vector_set(v,i,item->real);
+           }
+          goto cleanup;
+         }
+      case PPLOBJ_MAT:
+        if (nArgs<1) { pplObjMatrix(out,0,1,1,1); gsl_matrix_set( ((pplMatrix*)out->auxil)->m,0,0,0); goto cleanup; }
+        else if (args[0].objType==PPLOBJ_MAT)
+         {
+          if (nArgs!=1) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"When initialising a matrix from another matrix, only one argument should be supplied (the source matrix). %d have been provided.",nArgs); goto cleanup; }
+          pplObjDeepCpy(out, &args[0], 0, 0, 1);
+          goto cleanup;
+         }
+        else if (args[0].objType==PPLOBJ_NUM)
+         {
+          int s1,s2,i,j;
+          gsl_matrix *m;
+          if (nArgs!=2) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"When specifying the size of a matrix, two numerical arguments must be supplied. %d have been provided.",nArgs); goto cleanup; }
+          if (args[1].objType!=PPLOBJ_NUM) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"When specifying the size of a matrix, two numerical arguments must be supplied. Second argument has type <%s>.", pplObjTypeNames[args[1].objType]); goto cleanup; }
+          if (!args[0].dimensionless) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"When specifying the size of a matrix, both numerical arguments must be dimensionless. First has units of <%s>.", ppl_printUnit(context, &args[0], NULL, NULL, 1, 1, 0) ); goto cleanup; }
+          if (!args[1].dimensionless) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"When specifying the size of a matrix, both numerical arguments must be dimensionless. Second has units of <%s>.", ppl_printUnit(context, &args[1], NULL, NULL, 1, 1, 0) ); goto cleanup; }
+          if ((args[0].flagComplex) || (args[1].flagComplex)) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"When specifying the size of a matrix, both arguments must be real numbers. Supplied arguments are complex."); goto cleanup; }
+          s1 = args[0].real ; s2 = args[1].real;
+          if ((s1<1)||(s1>INT_MAX)) { *status=1; *errPos=charpos; *errType=ERR_RANGE; sprintf(errText,"Specified dimension of vector should be in the range 1<len<%d.",INT_MAX); goto cleanup; }
+          if ((s2<1)||(s2>INT_MAX)) { *status=1; *errPos=charpos; *errType=ERR_RANGE; sprintf(errText,"Specified dimension of vector should be in the range 1<len<%d.",INT_MAX); goto cleanup; }
+          if (pplObjMatrix(out,0,1,s1,s2)==NULL) { *status=1; *errPos=charpos; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); goto cleanup; }
+          m = ((pplMatrix *)out->auxil)->m;
+          for (i=0; i<s1; i++) for (j=0; j<s2; j++) { gsl_matrix_set(m,i,j,0); }
+          goto cleanup;
+         }
+        else if (args[0].objType==PPLOBJ_VEC)
+         {
+          long i;
+          const long s1 = ((pplVector*)args[0].auxil)->v->size;
+          const long s2 = nArgs;
+          gsl_matrix *m;
+          if (pplObjMatrix(out,0,1,s1,s2)==NULL) { *status=1; *errPos=charpos; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); goto cleanup; }
+          m = ((pplMatrix *)out->auxil)->m;
+          ppl_unitsDimCpy(out,&args[0]);
+          for (i=0; i<s2; i++)
+           {
+            long j;
+            gsl_vector *v;
+            if (args[i].objType!=PPLOBJ_VEC) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"When initialising a matrix from a list of vectors, all arguments must be vectors. Supplied argument has type <%s>.", pplObjTypeNames[args[i].objType]); goto cleanup; }
+            v = ((pplVector*)args[i].auxil)->v;
+            if (v->size != s1) { *status=1; *errPos=charpos; *errType=ERR_RANGE; sprintf(errText,"When initialising a matrix from a list of vectors, the vectors must have consistent lengths. Supplied vector has length %ld whereas previous arguments have had a length %ld.",(long)v->size,s1); goto cleanup; }
+            if (!ppl_unitsDimEqual(out, &args[i])) { *status=1; *errPos=charpos; *errType=ERR_UNIT; sprintf(errText,"When initialising a matrix from a list of vectors, the vectors must all have the same dimensions. Supplied vectors have units of <%s> and <%s>.", ppl_printUnit(context, out, NULL, NULL, 0, 1, 0), ppl_printUnit(context, &args[i], NULL, NULL, 1, 1, 0) ); }
+            for (j=0; j<s1; j++) { gsl_matrix_set(m, j, i, gsl_vector_get(v,j) ); }
+           }
+          goto cleanup;
+         }
+        else if (args[0].objType==PPLOBJ_LIST)
+         {
+          list *listin = (list *)args[0].auxil;
+          listIterator *li = ppl_listIterateInit(listin);
+          const long len = listin->length;
+          pplObj *item;
+          if (len==0) { *status=1; *errPos=charpos; *errType=ERR_MEMORY; sprintf(errText,"Cannot create a matrix of dimension zero."); goto cleanup; }
+          item = (pplObj*)listin->first->data;
+          if (item->objType==PPLOBJ_NUM)
+           {
+            long i;
+            const long s1 = len;
+            const long s2 = nArgs;
+            gsl_matrix *m;
+            for (i=0; i<s2; i++) if (args[i].objType!=PPLOBJ_LIST) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"When initialising a matrix from a list of lists, all arguments must be lists. Supplied argument has type <%s>.", pplObjTypeNames[args[i].objType]); goto cleanup; }
+            if (pplObjMatrix(out,0,1,s1,s2)==NULL) { *status=1; *errPos=charpos; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); goto cleanup; }
+            m = ((pplMatrix *)out->auxil)->m;
+            ppl_unitsDimCpy(out,item);
+            for (i=0; i<s2; i++)
+             {
+              long j;
+              list *listin = (list *)args[i].auxil;
+              listIterator *li = ppl_listIterateInit(listin);
+              if (listin->length != s1) { *status=1; *errPos=charpos; *errType=ERR_RANGE; sprintf(errText,"When initialising a matrix from a list of lists, the lists must have consistent lengths. Supplied list has length %ld whereas previous lists have had a length %ld.",(long)listin->length,s1); goto cleanup; }
+              for (j=0; j<s1; j++)
+               {
+                pplObj *item = (pplObj *)ppl_listIterate(&li);
+                if (item->objType!=PPLOBJ_NUM) { *status=1; *errPos=charpos; *errType=ERR_RANGE; sprintf(errText,"When initialising a matrix from a list of lists, the elements must all be numerical values; supplied element has type <%s>.", pplObjTypeNames[item->objType]); goto cleanup; }
+                if (!ppl_unitsDimEqual(out, item)) { *status=1; *errPos=charpos; *errType=ERR_UNIT; sprintf(errText,"When initialising a matrix from a list of lists, all of the elements must have the same dimensions. Supplied elements have units of <%s> and <%s>.", ppl_printUnit(context, out, NULL, NULL, 0, 1, 0), ppl_printUnit(context, item, NULL, NULL, 1, 1, 0) ); goto cleanup; }
+                if (item->flagComplex) { *status=1; *errPos=charpos; *errType=ERR_NUMERIC; sprintf(errText,"Matrices can only hold real numbers; supplied elements are complex."); goto cleanup; }
+                gsl_matrix_set(m, j, i, item->real );
+               }
+             }
+            goto cleanup;
+           }
+          else if (item->objType==PPLOBJ_VEC)
+           {
+            long i;
+            const long s1 = ((pplVector*)item->auxil)->v->size;
+            const long s2 = len;
+            gsl_matrix *m;
+            if (nArgs!=1) { *status=1; *errPos=charpos; *errType=ERR_RANGE; sprintf(errText,"When initialising a matrix from a list of vectors, only one argument should be supplied. %d arguments were supplied.",nArgs); goto cleanup; }
+            if (pplObjMatrix(out,0,1,s1,s2)==NULL) { *status=1; *errPos=charpos; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); goto cleanup; }
+            m = ((pplMatrix *)out->auxil)->m;
+            ppl_unitsDimCpy(out,item);
+            for (i=0; i<s2; i++)
+             {
+              long j;
+              pplObj *item = (pplObj *)ppl_listIterate(&li);
+              gsl_vector *v;
+              if (item->objType!=PPLOBJ_VEC) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"When initialising a matrix from a list of vectors, all arguments must be vectors. Supplied argument has type <%s>.", pplObjTypeNames[item->objType]); goto cleanup; }
+              v = ((pplVector*)item->auxil)->v;
+              if (v->size != s1) { *status=1; *errPos=charpos; *errType=ERR_RANGE; sprintf(errText,"When initialising a matrix from a list of vectors, the vectors must have consistent lengths. Supplied vector has length %ld whereas previous arguments have had a length %ld.",(long)v->size,s1); goto cleanup; }
+              if (!ppl_unitsDimEqual(out, item)) { *status=1; *errPos=charpos; *errType=ERR_UNIT; sprintf(errText,"When initialising a matrix from a list of vectors, the vectors must all have the same dimensions. Supplied vectors have units of <%s> and <%s>.", ppl_printUnit(context, out, NULL, NULL, 0, 1, 0), ppl_printUnit(context, item, NULL, NULL, 1, 1, 0) ); goto cleanup; }
+              for (j=0; j<s1; j++) { gsl_matrix_set(m, j, i, gsl_vector_get(v,j) ); }
+             }
+            goto cleanup;
+           }
+          else if (item->objType==PPLOBJ_LIST)
+           {
+            long i;
+            const long s1 = ((list*)item->auxil)->length;
+            const long s2 = len;
+            gsl_matrix *m;
+            if (nArgs!=1) { *status=1; *errPos=charpos; *errType=ERR_RANGE; sprintf(errText,"When initialising a matrix from a list of lists, only one argument should be supplied. %d arguments were supplied.",nArgs); goto cleanup; }
+            if (s1==0) { *status=1; *errPos=charpos; *errType=ERR_MEMORY; sprintf(errText,"Cannot create a matrix of dimension zero."); goto cleanup; }
+            if (pplObjMatrix(out,0,1,s1,s2)==NULL) { *status=1; *errPos=charpos; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); goto cleanup; }
+            m = ((pplMatrix *)out->auxil)->m;
+            ppl_unitsDimCpy(out,((pplObj*)((list*)item->auxil)->first->data));
+            for (i=0; i<s2; i++)
+             {
+              long j;
+              pplObj *item = (pplObj *)ppl_listIterate(&li);
+              if (item->objType!=PPLOBJ_LIST) { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"When initialising a matrix from a list of lists, all arguments must be lists. Supplied argument has type <%s>.", pplObjTypeNames[item->objType]); goto cleanup; }
+              list *listin2 = (list *)item->auxil;
+              listIterator *li2 = ppl_listIterateInit(listin2);
+              if (listin2->length != s1) { *status=1; *errPos=charpos; *errType=ERR_RANGE; sprintf(errText,"When initialising a matrix from a list of lists, the lists must have consistent lengths. Supplied list has length %ld whereas previous lists have had a length %ld.",(long)listin2->length,s1); goto cleanup; }
+              for (j=0; j<s1; j++)
+               {
+                pplObj *item2 = (pplObj *)ppl_listIterate(&li2);
+                if (item2->objType!=PPLOBJ_NUM) { *status=1; *errPos=charpos; *errType=ERR_RANGE; sprintf(errText,"When initialising a matrix from a list of lists, the elements must all be numerical values; supplied element has type <%s>.", pplObjTypeNames[item2->objType]); goto cleanup; }
+                if (!ppl_unitsDimEqual(out, item2)) { *status=1; *errPos=charpos; *errType=ERR_UNIT; sprintf(errText,"When initialising a matrix from a list of lists, all of the elements must have the same dimensions. Supplied elements have units of <%s> and <%s>.", ppl_printUnit(context, out, NULL, NULL, 0, 1, 0), ppl_printUnit(context, item2, NULL, NULL, 1, 1, 0) ); goto cleanup; }
+                if (item->flagComplex) { *status=1; *errPos=charpos; *errType=ERR_NUMERIC; sprintf(errText,"Matrices can only hold real numbers; supplied elements are complex."); goto cleanup; }
+                gsl_matrix_set(m, j, i, item2->real );
+               }
+             }
+            goto cleanup;
+           }
+          else { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Cannot initialise a matrix from an object of type <%s>.", pplObjTypeNames[item->objType]); goto cleanup; }
+         }
+        else { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Cannot initialise a matrix from an object of type <%s>.", pplObjTypeNames[args[0].objType]); goto cleanup; }
+        goto cleanup;
      }
    }
 

@@ -113,11 +113,17 @@ void ppl_garbageObject(pplObj *o)
      {
       pplVector    *v  = (pplVector *)(o->auxil);
       pplVectorRaw *vr = v->raw;
+      pplMatrixRaw *vrm= v->rawm;
       o->auxil = NULL;
       if ((vr!=NULL)&&(--vr->refCount <= 0))
        {
         gsl_vector_free(vr->v);
         if (o->auxilMalloced) free(vr);
+       }
+      if ((vrm!=NULL)&&(--vrm->refCount <= 0))
+       {
+        gsl_matrix_free(vrm->m);
+        if (o->auxilMalloced) free(vrm);
        }
       if ((v!=NULL)&&(--v->refCount <= 0)&&(o->auxilMalloced)) free(v);
       break;

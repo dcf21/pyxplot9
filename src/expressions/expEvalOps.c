@@ -22,7 +22,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
 #define GSL_RANGE_CHECK_OFF 1
 
 #include "expressions/expEval.h"
@@ -342,6 +346,32 @@ void ppl_opMul(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
     mo = ((pplMatrix *)(o->auxil))->m;
     for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) gsl_matrix_set(mo, i, j, gsl_matrix_get(m,i,j) * o->real);
     o->real=0;
+   }
+  else if ((t1==PPLOBJ_MAT)&&(t2==PPLOBJ_VEC)) // matrix-vector multiplication
+   {
+    int gslerr=0;
+    gsl_matrix *m   = ((pplMatrix *)(a->auxil))->m;
+    gsl_vector *v   = ((pplVector *)(b->auxil))->v;
+    gsl_vector *vo  = NULL;
+    if (m->size2 != v->size) { sprintf(errText, "Matrices can only be multiplied by vectors when the number of matrix columns (%ld) equals the number of vector rows (%ld).", (long)m->size2, (long)v->size); *errType=ERR_NUMERIC; *status = 1; return; }
+    if (pplObjVector(o,0,1,m->size1)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    a->real=b->real=1; a->imag=b->imag=0; a->flagComplex=b->flagComplex=0;
+    ppl_uaMul(context, a, b, o, status, errType, errText);
+    vo = ((pplVector *)(o->auxil))->v;
+    if ((gslerr = gsl_blas_dgemv(CblasNoTrans, 1, m, v, 0, vo))!=0) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, gsl_strerror(gslerr)); return; }
+   }
+  else if ((t1==PPLOBJ_MAT)&&(t2==PPLOBJ_MAT)) // matrix-matrix multiplication
+   {
+    int gslerr=0;
+    gsl_matrix *m1  = ((pplMatrix *)(a->auxil))->m;
+    gsl_matrix *m2  = ((pplMatrix *)(b->auxil))->m;
+    gsl_matrix *mo  = NULL;
+    if (m1->size2 != m2->size1) { sprintf(errText, "Matrices can only be multiplied when the number of matrix columns (%ld) in the left matrix equals the number of rows (%ld) in the right matrix.", (long)m1->size2, (long)m2->size1); *errType=ERR_NUMERIC; *status = 1; return; }
+    if (pplObjMatrix(o,0,1,m1->size1,m2->size2)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    a->real=b->real=1; a->imag=b->imag=0; a->flagComplex=b->flagComplex=0;
+    ppl_uaMul(context, a, b, o, status, errType, errText);
+    mo = ((pplMatrix *)(o->auxil))->m;
+    if ((gslerr = gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1, m1, m2, 0, mo))!=0) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, gsl_strerror(gslerr)); return; }
    }
   else // multiplying numbers
    {

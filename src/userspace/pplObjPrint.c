@@ -228,8 +228,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
         const int unitLine = m->size1/2;
         for(j=0; j<m->size1; j++)
          {
-          if (j>0) { out[i++]=','; out[i++]=' '; }
-          strcpy(out+i,"( "); i+=strlen(out+i);
+          strcpy(out+i,"("); i+=strlen(out+i);
           for(k=0; k<m->size2; k++)
            {
             if (k>0) { out[i++]=','; out[i++]=' '; }
@@ -238,7 +237,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
             if (i>outlen-100) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
            }
           if ((j!=unitLine)||(o->dimensionless)) strcpy (out+i,")\n");
-          else                                   sprintf(out+i,") * %s\n",unit);
+          else                                   sprintf(out+i,") %s\n",unit);
           i+=strlen(out+i);
           if (i>outlen-100) { strcpy(out+i,"...\n"); i+=strlen(out+i); break; }
          }

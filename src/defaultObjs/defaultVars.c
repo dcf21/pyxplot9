@@ -337,6 +337,11 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"zernikeR"      ,3,3,1,1,1,1,(void *)&pplfunc_zernikeR    , "zernikeR(n,m,r)", "\\mathrm{zernikeR}@<@1,@2,@3@>", "zernikeR(n,m,r) evaluates the (n,m)th radial Zernike polynomial at radius r");
     ppl_addSystemFunc(d,"zeta"          ,1,1,1,1,1,1,(void *)&pplfunc_zeta        , "zeta(z)", "\\zeta@<@1@>", "zeta(x) evaluates the Riemann zeta function at x");
 
+    // Shortcuts to module, vector and matrix
+    pplObjCpy(&v, &pplObjPrototypes[PPLOBJ_MAT], 1, 1); ppl_dictAppendCpy(d, pplObjTypeNames[PPLOBJ_MAT], (void *)&v, sizeof(v));
+    pplObjCpy(&v, &pplObjPrototypes[PPLOBJ_MOD], 1, 1); ppl_dictAppendCpy(d, pplObjTypeNames[PPLOBJ_MOD], (void *)&v, sizeof(v));
+    pplObjCpy(&v, &pplObjPrototypes[PPLOBJ_VEC], 1, 1); ppl_dictAppendCpy(d, pplObjTypeNames[PPLOBJ_VEC], (void *)&v, sizeof(v));
+
     // Ast module
     ppl_dictAppendCpy(d, "ast", pplObjModule(&m,1,1,1) , sizeof(v));
     d2 = (dict *)m.auxil;

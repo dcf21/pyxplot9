@@ -777,6 +777,15 @@ void pplmethod_matrixDet(ppl_context *c, pplObj *in, int nArgs, int *status, int
   for (i=0; i<UNITS_MAX_BASEUNITS; i++) OUTPUT.exponent[i] *= n;
  }
 
+void pplmethod_matrixDiagonal(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  int i,j;
+  gsl_matrix *m = ((pplMatrix *)in[-1].self_this->auxil)->m;
+  if (m->size1 != m->size2) { pplObjBool(&OUTPUT,0,0); return; }
+  for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) if ((i!=j) && (gsl_matrix_get(m,i,j)!=0)) { pplObjBool(&OUTPUT,0,0); return; }
+  pplObjBool(&OUTPUT,0,1);
+ }
+
 void pplmethod_matrixEigenvalues(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   int         i,j;
@@ -840,7 +849,7 @@ void pplmethod_matrixInv(ppl_context *c, pplObj *in, int nArgs, int *status, int
   int              n   = m->size1;
   int              s;
   gsl_matrix      *tmp = NULL;
-  gsl_matrix      *vo  = NULL;
+  gsl_matrix      *mo  = NULL;
   gsl_permutation *p   = NULL;
   if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "The inverse is only defined for square matrices."); return; }
   if ((tmp=gsl_matrix_alloc(n,n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
@@ -848,8 +857,8 @@ void pplmethod_matrixInv(ppl_context *c, pplObj *in, int nArgs, int *status, int
   if ((p = gsl_permutation_alloc(n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   if (gsl_linalg_LU_decomp(tmp,p,&s)!=0) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "LU decomposition failed whilst computing matrix determinant."); return; }
   if (pplObjMatrix(&OUTPUT,0,1,n,n)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
-  vo = ((pplMatrix *)OUTPUT.self_this->auxil)->m;
-  if (gsl_linalg_LU_invert(tmp,p,vo)) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Numerical failure while computing matrix inverse."); return; }
+  mo = ((pplMatrix *)OUTPUT.auxil)->m;
+  if (gsl_linalg_LU_invert(tmp,p,mo)) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Numerical failure while computing matrix inverse."); return; }
   gsl_permutation_free(p);
   gsl_matrix_free(tmp);
   ppl_unitsDimInverse(&OUTPUT,st);
@@ -876,13 +885,15 @@ void pplmethod_matrixSymmetric(ppl_context *c, pplObj *in, int nArgs, int *statu
 
 void pplmethod_matrixTrans(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  gsl_matrix      *m = ((pplMatrix *)in[-1].self_this->auxil)->m;
+  pplObj          *st  = in[-1].self_this;
+  gsl_matrix      *m = ((pplMatrix *)st->auxil)->m;
   int              n = m->size1, i, j;
   gsl_matrix      *vo = NULL;
   if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "The transpose is only defined for square matrices."); return; }
   if (pplObjMatrix(&OUTPUT,0,1,n,n)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
-  vo = ((pplMatrix *)OUTPUT.self_this->auxil)->m;
+  vo = ((pplMatrix *)OUTPUT.auxil)->m;
   for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) gsl_matrix_set(vo,i,j,gsl_matrix_get(m,j,i));
+  ppl_unitsDimCpy(&OUTPUT,st);
  }
 
 // File methods
@@ -1099,6 +1110,7 @@ void pplObjMethodsInit(ppl_context *c)
 
   // Matrix methods
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"det" ,0,0,1,1,1,1,(void *)pplmethod_matrixDet,"det()", "\\mathrm{det}@<@>", "det() returns the determinant of a square matrix");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"diagonal",0,0,1,1,1,1,(void *)pplmethod_matrixDiagonal,"diagonal()", "\\mathrm{diagonal}@<@>", "diagonal() returns a boolean indicating whether a matrix is diagonal");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"eigenvalues",0,0,1,1,1,1,(void *)pplmethod_matrixEigenvalues,"eigenvalues()", "\\mathrm{eigenvalues}@<@>", "eigenvalues() returns a vector containing the eigenvalues of a square symmetric matrix");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"eigenvectors",0,0,1,1,1,1,(void *)pplmethod_matrixEigenvectors,"eigenvectors()", "\\mathrm{eigenvectors}@<@>", "eigenvectors() returns a list of the eigenvectors of a square symmetric matrix");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"inv" ,0,0,1,1,1,1,(void *)pplmethod_matrixInv,"inv()", "\\mathrm{inv}@<@>", "inv() returns the inverse of a square matrix");

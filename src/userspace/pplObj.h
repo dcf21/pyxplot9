@@ -73,9 +73,9 @@ extern pplObj     *pplObjPrototypes;
 typedef struct pplFile      { int refCount; FILE *file;    int open; int pipe; } pplFile;
 typedef struct pplType      { int refCount; dict *methods; int id;   } pplType;
 typedef struct pplVectorRaw { int refCount; gsl_vector *v; } pplVectorRaw;
-typedef struct pplVector    { int refCount; gsl_vector *v; gsl_vector_view *view; pplVectorRaw *raw; } pplVector;
 typedef struct pplMatrixRaw { int refCount; gsl_matrix *m; } pplMatrixRaw;
-typedef struct pplMatrix    { int refCount; gsl_matrix *m; gsl_matrix_view *view; int sliceNext; pplMatrixRaw *raw; } pplMatrix;
+typedef struct pplVector    { int refCount; gsl_vector *v; gsl_vector_view view; pplVectorRaw *raw; gsl_matrix_view view_m; pplMatrixRaw *rawm; } pplVector;
+typedef struct pplMatrix    { int refCount; gsl_matrix *m; gsl_matrix_view view; int sliceNext; pplMatrixRaw *raw; } pplMatrix;
 
 #endif
 
