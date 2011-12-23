@@ -98,6 +98,11 @@ src/settings/epsColors.h: buildScripts/colorlistGenerate.py
 
 src/settings/epsColors.c: src/settings/epsColors.h
 
+src/parser/cmdList.h: buildScripts/parser_data.py
+	python buildScripts/parser_data.py
+
+src/parser/cmdList.c: src/parser/cmdList.h
+
 #
 # General macros for the compile steps
 #
@@ -206,7 +211,7 @@ install: all
 #
 
 clean:
-	rm -f src/settings/epsColors.c src/settings/epsColors.h
+	rm -f src/parser/cmdList.c src/parser/cmdList.h src/settings/epsColors.c src/settings/epsColors.h
 	rm -vfR $(LOCAL_OBJDIR) $(LOCAL_BINDIR)
 
 afresh: clean all

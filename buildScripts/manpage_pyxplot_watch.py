@@ -1,10 +1,10 @@
-# MANPAGE_PYXPLOT_WATCH.PY
+# manpage_pyxplot_watch.py
 #
 # The code in this file is part of PyXPlot
 # <http://www.pyxplot.org.uk>
 #
-# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
-#               2008-2011 Ross Church
+# Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2012 Ross Church
 #
 # $Id$
 #

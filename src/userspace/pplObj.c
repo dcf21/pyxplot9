@@ -401,34 +401,34 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char outMalloced, unsigned c
      }
     case PPLOBJ_DICT: // dictionary -- pass by pointer
     case PPLOBJ_MOD:
-      ((dict *)(out->auxil))->refCount++;
+      __sync_add_and_fetch(&((dict *)(out->auxil))->refCount,1);
       break;
     case PPLOBJ_LIST: // list
-      ((list *)(out->auxil))->refCount++;
+      __sync_add_and_fetch(&((list *)(out->auxil))->refCount,1);
       break;
     case PPLOBJ_VEC: // vector
      {
       pplVector *pv = (pplVector *)out->auxil;
-      pv->refCount++;
-      if (pv->raw !=NULL) pv->raw ->refCount++;
-      if (pv->rawm!=NULL) pv->rawm->refCount++;
+      __sync_add_and_fetch(&pv->refCount,1);
+      if (pv->raw !=NULL) __sync_add_and_fetch(&pv->raw ->refCount,1);
+      if (pv->rawm!=NULL) __sync_add_and_fetch(&pv->rawm->refCount,1);
       break;
      }
     case PPLOBJ_MAT: // matrix
      {
       pplMatrix *pm = (pplMatrix *)out->auxil;
-      pm->refCount++;
-      pm->raw->refCount++;
+      __sync_add_and_fetch(&pm->refCount,1);
+      __sync_add_and_fetch(&pm->raw->refCount,1);
       break;
      }
     case PPLOBJ_FILE: // file handle
-      ((pplFile *)(out->auxil))->refCount++; 
+      __sync_add_and_fetch(&((pplFile *)(out->auxil))->refCount,1); 
       break;
     case PPLOBJ_FUNC: // function pointer
-      ((pplFunc *)(out->auxil))->refCount++;
+      __sync_add_and_fetch(&((pplFunc *)(out->auxil))->refCount,1);
       break;
     case PPLOBJ_TYPE: // data type
-      ((pplType *)(out->auxil))->refCount++;
+      __sync_add_and_fetch(&((pplType *)(out->auxil))->refCount,1);
       break;
    }
   return out;

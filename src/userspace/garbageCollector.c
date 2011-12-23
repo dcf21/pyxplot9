@@ -81,7 +81,7 @@ void ppl_garbageObject(pplObj *o)
      {
       pplFile *f = (pplFile *)(o->auxil);
       o->auxil = NULL;
-      if ((f!=NULL)&&(--f->refCount <= 0))
+      if ((f!=NULL)&&( __sync_sub_and_fetch(&f->refCount,1) <= 0))
        {
         if ((f->open) && (f->file!=NULL)) { FILE *old=f->file; f->file=NULL; if (f->pipe) pclose(old); else fclose(old); }
         free(f);
@@ -92,21 +92,21 @@ void ppl_garbageObject(pplObj *o)
      {
       pplFunc *f = (pplFunc *)(o->auxil);
       o->auxil = NULL;
-      if ((f!=NULL)&&(--f->refCount <= 0)) pplObjFuncDestroy(f);
+      if ((f!=NULL)&&( __sync_sub_and_fetch(&f->refCount,1) <= 0)) pplObjFuncDestroy(f);
       break;
      }
     case PPLOBJ_TYPE:
      {
       pplType *t = (pplType *)(o->auxil);
       o->auxil = NULL;
-      if (t!=NULL) t->refCount--;
+      if (t!=NULL) { __sync_sub_and_fetch(&t->refCount,1); }
       break; // Types don't ever get garbage collected
      }
     case PPLOBJ_LIST:
      {
       list *l = (list *)(o->auxil);
       o->auxil = NULL;
-      if ((l!=NULL)&&(--l->refCount <= 0)) ppl_garbageList(l);
+      if ((l!=NULL)&&( __sync_sub_and_fetch(&l->refCount,1) <= 0)) ppl_garbageList(l);
       break;
      }
     case PPLOBJ_VEC:
@@ -115,17 +115,17 @@ void ppl_garbageObject(pplObj *o)
       pplVectorRaw *vr = v->raw;
       pplMatrixRaw *vrm= v->rawm;
       o->auxil = NULL;
-      if ((vr!=NULL)&&(--vr->refCount <= 0))
+      if ((vr!=NULL)&&( __sync_sub_and_fetch(&vr->refCount,1) <= 0))
        {
         gsl_vector_free(vr->v);
         if (o->auxilMalloced) free(vr);
        }
-      if ((vrm!=NULL)&&(--vrm->refCount <= 0))
+      if ((vrm!=NULL)&&( __sync_sub_and_fetch(&vrm->refCount,1) <= 0))
        {
         gsl_matrix_free(vrm->m);
         if (o->auxilMalloced) free(vrm);
        }
-      if ((v!=NULL)&&(--v->refCount <= 0)&&(o->auxilMalloced)) free(v);
+      if ((v!=NULL)&&( __sync_sub_and_fetch(&v->refCount,1) <= 0)&&(o->auxilMalloced)) free(v);
       break;
      }
     case PPLOBJ_MAT:
@@ -133,12 +133,12 @@ void ppl_garbageObject(pplObj *o)
       pplMatrix    *m  = (pplMatrix *)(o->auxil);
       pplMatrixRaw *mr = m->raw;
       o->auxil = NULL;
-      if ((mr!=NULL)&&(--mr->refCount <= 0))
+      if ((mr!=NULL)&&( __sync_sub_and_fetch(&mr->refCount,1) <= 0))
        {
         gsl_matrix_free(mr->m);
         if (o->auxilMalloced) free(mr);
        }
-      if ((m!=NULL)&&(--m->refCount <= 0)&&(o->auxilMalloced)) free(m);
+      if ((m!=NULL)&&( __sync_sub_and_fetch(&m->refCount,1) <= 0)&&(o->auxilMalloced)) free(m);
       break;
      }
     case PPLOBJ_USER:
@@ -149,7 +149,7 @@ void ppl_garbageObject(pplObj *o)
     case PPLOBJ_MOD:
      {
       dict *d = (dict *)(o->auxil);
-      if ((d!=NULL)&&(--d->refCount <= 0)) ppl_garbageNamespace(d);
+      if ((d!=NULL)&&( __sync_sub_and_fetch(&d->refCount,1) <= 0)) ppl_garbageNamespace(d);
       break;
      }
    }

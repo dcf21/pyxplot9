@@ -654,7 +654,7 @@ void pplfunc_hypot       (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_globals     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   pplObjDict(&OUTPUT, 0, 1, c->namespaces[1]);
-  c->namespaces[1]->refCount++;
+  __sync_add_and_fetch(&c->namespaces[1]->refCount,1);
  }
 
 void pplfunc_imag        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -744,7 +744,7 @@ void pplfunc_len         (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_locals      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   pplObjDict(&OUTPUT, 0, 1, c->namespaces[c->ns_ptr]);
-  c->namespaces[c->ns_ptr]->refCount++;
+  __sync_add_and_fetch(&c->namespaces[c->ns_ptr]->refCount,1);
  }
 
 void pplfunc_log         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
