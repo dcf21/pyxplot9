@@ -4,7 +4,7 @@
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2011 Ross Church
+//               2008-2012 Ross Church
 //
 // $Id$
 //
@@ -72,7 +72,7 @@ sprintf(ppltxt_welcome, "\n\
 | |_) | | | |\\  /| |_) | |/ _ \\| __|   %s\n\
 |  __/| |_| |/  \\|  __/| | (_) | |_ \n\
 |_|    \\__, /_/\\_\\_|   |_|\\___/ \\__|   Copyright (C) 2006-2012 Dominic Ford\n\
-       |___/                                         2008-2011 Ross Church\n\
+       |___/                                         2008-2012 Ross Church\n\
                                                      2010-2011 Zoltan Voros\n\
 \n\
 THIS DEVELOPMENT VERSION OF PYXPLOT IS FEATURE INCOMPLETE, HIGHLY UNSTABLE, AND\n\

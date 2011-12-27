@@ -1,4 +1,4 @@
-// papersizes.h
+// expEvalSlice.c
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,12 +19,21 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _PAPERSIZES_H
-#define _PAPERSIZES_H 1
+#include <stdlib.h>
+#include <string.h>
 
-void ppl_PaperSizeInit  ();
-void ppl_PaperSizeByName(char *name, double *height, double *width);
-void ppl_GetPaperName   (char *name, double *height, double *width);
+#include "expressions/expEvalSlice.h"
+#include "userspace/context.h"
+#include "userspace/pplObj_fns.h"
 
-#endif
+#include "pplConstants.h"
 
+void ppl_sliceItem (ppl_context *context, int getPtr, int *status, int *errType, char *errText)
+ {
+  return;
+ }
+
+void ppl_sliceRange(ppl_context *context, int minset, int min, int maxset, int max, int *status, int *errType, char *errText)
+ {
+  return;
+ }

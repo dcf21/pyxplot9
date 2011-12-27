@@ -4,7 +4,7 @@
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2011 Ross Church
+//               2008-2012 Ross Church
 //
 // $Id$
 //
@@ -34,6 +34,7 @@
 #include "expressions/expEval.h"
 #include "expressions/expEvalCalculus.h"
 #include "expressions/expEvalOps.h"
+#include "expressions/expEvalSlice.h"
 #include "expressions/fnCall.h"
 #include "settings/settingTypes.h"
 #include "stringTools/asciidouble.h"
@@ -242,6 +243,9 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
     int     o       = (int)(*(unsigned char *)(in+j+2*sizeof(int)  )); // Opcode number
     charpos = *(int *)(in+j+sizeof(int)); // character position of token (for error reporting)
     j+=2*sizeof(int)+1; // Leave j pointing to first data item after opcode
+
+    if (cancellationFlag) { *errPos=0; *errType=ERR_INTERRUPT; strcpy(errText,"Operation cancelled."); goto cleanup_on_error; }
+
     switch (o)
      {
       case 0: // Return
@@ -367,6 +371,34 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
           *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Cannot assign methods or variables to this object."); goto cleanup_on_error;
          }
         break;
+       }
+      case 7: // slice
+      case 16: // slice pointer
+       {
+        int       status = 0;
+        const int getPtr = (o==16);
+        const int mode   = (int)*(unsigned char *)(in+j);
+        const int range  = (mode & 1) == 0;
+        const int maxset = (mode & 2) != 0;
+        const int minset = (mode & 4) != 0;
+        int       Nrange = 1 , i , min=0 , max=0;
+        *lastOpAssign=0;
+        if (range)
+         {
+          Nrange = minset + maxset;
+          for (i=0; i<Nrange; i++)
+           {
+            int *out = ((i==0)&&maxset) ? &max : &min;
+            if ((stk-i)->objType!=PPLOBJ_NUM) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Range limits when slicing must be numerical values; supplied limit has type <%s>.",pplObjTypeNames[(stk-1)->objType]); goto cleanup_on_error; }
+            if (!(stk-i)->dimensionless) { *errPos=charpos; *errType=ERR_NUMERIC; sprintf(errText,"Range limits when slicing must be dimensionless numbers; supplied limit has units of <%s>.", ppl_printUnit(context, stk-i, NULL, NULL, 0, 1, 0) ); goto cleanup_on_error; }
+            if ((stk-i)->flagComplex) { *errPos=charpos; *errType=ERR_NUMERIC; sprintf(errText,"Range limits when slicing must be real numbers; supplied limit is complex."); goto cleanup_on_error; }
+            if ( (!gsl_finite((stk-i)->real)) || ((stk-i)->real<INT_MIN) || ((stk-i)->real>INT_MAX) ) { *errPos=charpos; *errType=ERR_NUMERIC; sprintf(errText,"Range limits when slicing must be in the range %d to %d.", INT_MIN, INT_MAX); goto cleanup_on_error; }
+            *out = (int)(stk-i)->real;
+           }
+         }
+        if (!range) ppl_sliceItem (context, getPtr, &status, errType, errText);
+        else        ppl_sliceRange(context, minset, min, maxset, max, &status, errType, errText);
+        if (status) { *errPos = charpos; goto cleanup_on_error; }
        }
       case 8: // Make dict
        {

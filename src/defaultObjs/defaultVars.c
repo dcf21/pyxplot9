@@ -4,7 +4,7 @@
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2011 Ross Church
+//               2008-2012 Ross Church
 //
 // $Id$
 //
@@ -90,7 +90,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_dictAppendCpy(d  , "types"     , pplObjModule(&m,1,1,1) , sizeof(v));
     d2 = (dict *)m.auxil;
     for (i=0; i<=PPLOBJ_USER; i++)
-     if ((i!=PPLOBJ_GLOB)&&(i!=PPLOBJ_ZOM))
+     if ((i!=PPLOBJ_GLOB)&&(i!=PPLOBJ_ZOM)&&(i!=PPLOBJ_EXP)&&(i!=PPLOBJ_BYT))
       {
        pplObjCpy(&v, &pplObjPrototypes[i], 1, 1);
        ppl_dictAppendCpy(d2, pplObjTypeNames[i], (void *)&v, sizeof(v));

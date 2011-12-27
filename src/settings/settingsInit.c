@@ -4,7 +4,7 @@
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2011 Ross Church
+//               2008-2012 Ross Church
 //
 // $Id$
 //
@@ -20,6 +20,8 @@
 // ----------------------------------------------------------------------------
 
 #define _SETTINGSINIT_C 1
+
+int cancellationFlag = 0;
 
 #include <stdlib.h>
 #include <stdio.h>

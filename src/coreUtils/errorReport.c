@@ -4,7 +4,7 @@
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2011 Ross Church
+//               2008-2012 Ross Church
 //
 // $Id$
 //
@@ -74,6 +74,7 @@ void ppl_error(pplerr_context *context, int ErrType, int HighlightPos1, int High
       case ERR_OVERFLOW : sprintf(temp_stringB+i, "Overflow Error: ");  break;
       case ERR_NAMESPACE: sprintf(temp_stringB+i, "Namespace Error: ");  break;
       case ERR_TYPE     : sprintf(temp_stringB+i, "Type Error: ");       break;
+      case ERR_INTERRUPT: sprintf(temp_stringB+i, "Interrupt Error: ");  break;
      }
     i += strlen(temp_stringB+i);
    }
@@ -145,6 +146,7 @@ void ppl_warning(pplerr_context *context, int ErrType, char *msg)
       case ERR_OVERFLOW : sprintf(temp_stringB+i, "Overflow Warning: ");  break;
       case ERR_NAMESPACE: sprintf(temp_stringB+i, "Namespace Warning: ");  break;
       case ERR_TYPE     : sprintf(temp_stringB+i, "Type Warning: ");       break;
+      case ERR_INTERRUPT: sprintf(temp_stringB+i, "Interrupt Warning: ");  break;
      }
     i += strlen(temp_stringB+i);
    }

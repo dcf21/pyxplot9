@@ -4,7 +4,7 @@
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2011 Ross Church
+//               2008-2012 Ross Church
 //
 // $Id$
 //
@@ -75,6 +75,8 @@ void ppl_garbageObject(pplObj *o)
    {
     case PPLOBJ_STR:
     case PPLOBJ_EXC:
+    case PPLOBJ_EXP:
+    case PPLOBJ_BYT:
       if (o->auxilMalloced) { void *old=o->auxil; o->auxil=NULL; if (old!=NULL) free(old); }
       break;
     case PPLOBJ_FILE:

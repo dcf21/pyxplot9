@@ -4,7 +4,7 @@
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2011 Ross Church
+//               2008-2012 Ross Church
 //
 // $Id$
 //
@@ -198,8 +198,8 @@ void pplmethod_strUpper(ppl_context *c, pplObj *in, int nArgs, int *status, int 
   int     i=0;
   pplObj *t = in[-1].self_this;
   char   *tmp, *work=(char *)t->auxil;
-  while (work[i]!='\0') { work[i] = toupper(work[i]); i++; }
   COPYSTR(tmp, work);
+  while (tmp[i]!='\0') { tmp[i] = toupper(tmp[i]); i++; }
   pplObjStr(&OUTPUT,0,1,tmp);
  }
 
@@ -208,9 +208,48 @@ void pplmethod_strLower(ppl_context *c, pplObj *in, int nArgs, int *status, int 
   int     i=0;
   pplObj *t = in[-1].self_this;
   char   *tmp, *work=(char *)t->auxil;
-  while (work[i]!='\0') { work[i] = tolower(work[i]); i++; }
   COPYSTR(tmp, work);
+  while (tmp[i]!='\0') { tmp[i] = tolower(tmp[i]); i++; }
   pplObjStr(&OUTPUT,0,1,tmp);
+ }
+
+void pplmethod_strStrip(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  int     i,j;
+  pplObj *t = in[-1].self_this;
+  char   *tmp, *work=(char *)t->auxil;
+  COPYSTR(tmp, work);
+  for (i=0; ((tmp[i]>'\0')&&(tmp[i]<=' ')); i++);
+  for (j=0; tmp[i]!='\0'; i++,j++) tmp[j]=tmp[i];
+  for (   ; ((i>=0)&&(tmp[i]>'\0')&&(tmp[i]<=' ')); i--) tmp[j]='\0';
+  pplObjStr(&OUTPUT,0,1,tmp);
+ }
+
+void pplmethod_strisalpha(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *t = in[-1].self_this;
+  char   *s = (char *)t->auxil;
+  int i, l=strlen(s), out=1;
+  for (i=0; i<l; i++) if (!isalpha(s[i])) { out=0; break; }
+  pplObjBool(&OUTPUT,0,out);
+ }
+
+void pplmethod_strisdigit(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *t = in[-1].self_this;
+  char   *s = (char *)t->auxil;
+  int i, l=strlen(s), out=1;
+  for (i=0; i<l; i++) if (!isdigit(s[i])) { out=0; break; }
+  pplObjBool(&OUTPUT,0,out);
+ }
+
+void pplmethod_strisalnum(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *t = in[-1].self_this;
+  char   *s = (char *)t->auxil;
+  int i, l=strlen(s), out=1;
+  for (i=0; i<l; i++) if (!isalnum(s[i])) { out=0; break; }
+  pplObjBool(&OUTPUT,0,out);
  }
 
 void pplmethod_strBeginsWith(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -233,7 +272,21 @@ void pplmethod_strEndsWith(ppl_context *c, pplObj *in, int nArgs, int *status, i
   cl     = strlen(cmpstr);
   instr += il-cl;
   if (il<cl) { pplObjBool(&OUTPUT,0,0); }
-  else       { pplObjBool(&OUTPUT,0,strncmp(instr,cmpstr,strlen(cmpstr))==0); }
+  else       { pplObjBool(&OUTPUT,0,strncmp(instr,cmpstr,cl)==0); }
+ }
+
+void pplmethod_strFind(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *t = in[-1].self_this;
+  char   *instr = (char *)t->auxil, *cmpstr;
+  int     il, cl, pmax, p;
+  if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The find() method requires a single string argument."); return; }
+  cmpstr = (char *)in[0].auxil;
+  il     = strlen(instr);
+  cl     = strlen(cmpstr);
+  pmax   = il-cl;
+  for (p=0; p<=pmax; p++) if (strncmp(instr+p,cmpstr,cl)==0) { pplObjNum(&OUTPUT,0,p,0); return; }
+  pplObjNum(&OUTPUT,0,-1,0);
  }
 
 void pplmethod_strLen(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -1060,8 +1113,13 @@ void pplObjMethodsInit(ppl_context *c)
   // String methods
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"beginswith",1,1,0,0,0,0,(void *)&pplmethod_strBeginsWith, "beginswith(x)", "\\mathrm{beginswith}@<@1@>", "beginswith(x) returns a boolean indicating whether a string begins with the substring x");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"endswith"  ,1,1,0,0,0,0,(void *)&pplmethod_strEndsWith  , "endswith(x)", "\\mathrm{endswith}@<@1@>", "endswith(x) returns a boolean indicating whether a string ends with the substring x");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"find"      ,1,1,0,0,0,0,(void *)&pplmethod_strFind      , "find(x)", "\\mathrm{find}@<@1@>", "find(x) returns the position of the first occurance of x in a string");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"isalnum"   ,0,0,1,1,1,1,(void *)&pplmethod_strisalnum   , "isalnum()", "\\mathrm{isalnum}@<@>", "isalnum() returns a boolean indicating whether all of the characters of a string are alphanumeric");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"isalpha"   ,0,0,1,1,1,1,(void *)&pplmethod_strisalpha   , "isalpha()", "\\mathrm{isalpha}@<@>", "isalpha() returns a boolean indicating whether all of the characters of a string are alphabetic");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"isdigit"   ,0,0,1,1,1,1,(void *)&pplmethod_strisdigit   , "isdigit()", "\\mathrm{isdigit}@<@>", "isdigit() returns a boolean indicating whether all of the characters of a string are numeric");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"len"       ,0,0,1,1,1,1,(void *)&pplmethod_strLen       , "len()", "\\mathrm{len}@<@>", "len() returns the length of a string");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"lower"     ,0,0,1,1,1,1,(void *)&pplmethod_strLower     , "lower()", "\\mathrm{lower}@<@>", "lower() converts a string to lowercase");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"strip"     ,0,0,1,1,1,1,(void *)&pplmethod_strStrip     , "strip()", "\\mathrm{strip}@<@>", "strip() strips whitespace off the beginning and end of a string");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"upper"     ,0,0,1,1,1,1,(void *)&pplmethod_strUpper     , "upper()", "\\mathrm{upper}@<@>", "upper() converts a string to uppercase");
 
   // Date methods

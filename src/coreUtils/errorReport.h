@@ -4,7 +4,7 @@
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2011 Ross Church
+//               2008-2012 Ross Church
 //
 // $Id$
 //
@@ -37,6 +37,7 @@
 #define ERR_OVERFLOW  110
 #define ERR_NAMESPACE 111
 #define ERR_TYPE      112
+#define ERR_INTERRUPT 113
 
 #include "stringTools/strConstants.h"
 

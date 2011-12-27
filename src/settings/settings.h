@@ -4,7 +4,7 @@
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2011 Ross Church
+//               2008-2012 Ross Church
 //
 // $Id$
 //
@@ -29,6 +29,10 @@
 #include "pplConstants.h"
 #include "userspace/pplObj.h"
 #include "settings/withWords.h"
+
+#ifndef _SETTINGSINIT_C
+extern int cancellationFlag;
+#endif
 
 // Setting structures
 typedef struct pplset_terminal {

@@ -4,7 +4,7 @@
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2011 Ross Church
+//               2008-2012 Ross Church
 //
 // $Id$
 //
@@ -895,7 +895,7 @@ void ppl_reversePolishPrint(ppl_context *context, void *in, char *out)
       case 16:
         strcpy (op,     "slice");
         strcpy (optype, "pointer");
-        sprintf(arg,    "[%d]"   , *(int *)(in+j+1));
+        strcpy (arg,    "[--]"   );
         break;
       case 8:
         strcpy (op,     "make");

@@ -4,8 +4,7 @@
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2011 Ross Church
-//               2010-2011 Zoltan Voros
+//               2008-2012 Ross Church
 //
 // $Id$
 //
@@ -74,6 +73,7 @@ void ppl_interactiveSession(ppl_context *context)
       ppl_sigjmpFromSigInt = &ppl_sigjmpToInteractive;
 
       pplcsp_checkForGvOutput(context);
+      cancellationFlag = 0;
       if (isatty(STDIN_FILENO) == 1)
        {
         ppl_error_setstreaminfo(&context->errcontext,-1, "");
@@ -145,7 +145,7 @@ void ppl_processScript(ppl_context *context, char *input, int iterLevel)
    }
 
   context->shellExiting = 0;
-  while (!context->shellExiting)
+  while ((!context->shellExiting)&&(!cancellationFlag))
    {
     ppl_error_setstreaminfo(&context->errcontext, linenumber, filename_description);
     if ((feof(infile)) || (ferror(infile))) break;
@@ -269,8 +269,8 @@ int ppl_ProcessStatement(ppl_context *context, char *line)
   // ppl_tokenPrint(context, line, end);
 
   // Print bytecode
-  // ppl_reversePolishPrint(context, (void *)buff, context->errcontext.tempErrStr);
-  // ppl_report(&context->errcontext, NULL);
+  ppl_reversePolishPrint(context, (void *)buff, context->errcontext.tempErrStr);
+  ppl_report(&context->errcontext, NULL);
 
   // Execute bytecode
   out = ppl_expEval(context, (void *)buff, &lastOpAssign, 1, 0, &errPos, &errType, errText);

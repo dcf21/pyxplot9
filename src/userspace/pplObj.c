@@ -4,7 +4,7 @@
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2011 Ross Church
+//               2008-2012 Ross Church
 //
 // $Id$
 //
@@ -36,8 +36,8 @@
 #include "userspace/pplObjUnits.h"
 
 // Items with ! should never be displayed because they are internal markers
-const char *pplObjTypeNames[] = {"number","string","boolean","date","color","dictionary","module","list","vector","matrix","file handle","function","type","null","exception","!global","!zombie","instance",NULL};
-const int   pplObjTypeOrder[] = { 2      , 4      , 1       , 3    , 5     ,  9          , 11    , 7    , 6      , 8      , 13          , 12       , 14    , 0   , 15        , 0       , 0       , 10       };
+const char *pplObjTypeNames[] = {"number","string","boolean","date","color","dictionary","module","list","vector","matrix","file handle","function","type","null","exception","!global","!zombie","!expression","!bytecode","instance",NULL};
+const int   pplObjTypeOrder[] = { 2      , 4      , 1       , 3    , 5     ,  9          , 11    , 7    , 6      , 8      , 13          , 12       , 14    , 0   , 15        , 0       , 0       , 0           , 0         , 10       };
 pplObj     *pplObjPrototypes;
 
 void pplObjInit(ppl_context *c)
@@ -386,6 +386,8 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char outMalloced, unsigned c
    {
     case PPLOBJ_STR:
     case PPLOBJ_EXC: // copy string value
+    case PPLOBJ_EXP:
+    case PPLOBJ_BYT:
       if (useMalloc) out->auxil = (void *)malloc      (in->auxilLen);
       else           out->auxil = (void *)ppl_memAlloc(in->auxilLen);
       if (out->auxil==NULL) { out->objType=PPLOBJ_ZOM; return NULL; }

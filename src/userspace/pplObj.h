@@ -4,7 +4,7 @@
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2011 Ross Church
+//               2008-2012 Ross Church
 //
 // $Id$
 //
@@ -47,7 +47,9 @@
 #define PPLOBJ_EXC  14 /* exception type */
 #define PPLOBJ_GLOB 15 /* global variable marker */
 #define PPLOBJ_ZOM  16 /* zombie */
-#define PPLOBJ_USER 17 /* user-defined datatype */
+#define PPLOBJ_EXP  17 /* expression bytecode */
+#define PPLOBJ_BYT  18 /* command bytecode */
+#define PPLOBJ_USER 19 /* user-defined datatype */
 
 typedef struct pplObj
  {

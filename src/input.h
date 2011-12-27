@@ -4,8 +4,7 @@
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2011 Ross Church
-//               2010-2011 Zoltan Voros
+//               2008-2012 Ross Church
 //
 // $Id$
 //
