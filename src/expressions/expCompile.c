@@ -773,6 +773,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       tpos+=3; ipos++;
       if (tpos>=tlen) break;
       if ((o=='D') && ((in[ipos]=='(')||(in[ipos]==')'))) break; // Empty list ( ) of function arguments
+      if ((o=='E') && ((in[ipos]=='(')||(in[ipos]==')'))) break; // Empty list ( ) of function arguments
       if ((o=='P') && ((in[ipos]=='(')||(in[ipos]==')'))) break; // Empty list ( ) of function arguments
       if ((o=='M') && ((in[ipos]=='[')||(in[ipos]==']'))) break; // Empty list [ ] is two tokens
       if ((o=='Q') && ((in[ipos]=='[')||(in[ipos]==']'))) break; // Empty list [ ] is two tokens

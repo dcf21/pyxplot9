@@ -386,9 +386,9 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
         if (range)
          {
           Nrange = minset + maxset;
-          for (i=0; i<Nrange; i++)
+          for (i=1; i<=Nrange; i++)
            {
-            int *out = ((i==0)&&maxset) ? &max : &min;
+            int *out = ((i==1)&&maxset) ? &max : &min;
             if ((stk-i)->objType!=PPLOBJ_NUM) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Range limits when slicing must be numerical values; supplied limit has type <%s>.",pplObjTypeNames[(stk-1)->objType]); goto cleanup_on_error; }
             if (!(stk-i)->dimensionless) { *errPos=charpos; *errType=ERR_NUMERIC; sprintf(errText,"Range limits when slicing must be dimensionless numbers; supplied limit has units of <%s>.", ppl_printUnit(context, stk-i, NULL, NULL, 0, 1, 0) ); goto cleanup_on_error; }
             if ((stk-i)->flagComplex) { *errPos=charpos; *errType=ERR_NUMERIC; sprintf(errText,"Range limits when slicing must be real numbers; supplied limit is complex."); goto cleanup_on_error; }
@@ -399,6 +399,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
         if (!range) ppl_sliceItem (context, getPtr, &status, errType, errText);
         else        ppl_sliceRange(context, minset, min, maxset, max, &status, errType, errText);
         if (status) { *errPos = charpos; goto cleanup_on_error; }
+        break;
        }
       case 8: // Make dict
        {

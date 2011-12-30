@@ -130,7 +130,6 @@ int pplObjCmp(ppl_context *c, const pplObj *a, const pplObj *b, int *status, int
   if  (t1o==0) return -2; // 0 - nulls are never equal
   if  (t1o==2) // 2 - numbers
    {
-    double av,bv;
     if (ppl_unitsDimEqual(a,b)==0)
      {
       if (c==NULL)
@@ -156,12 +155,11 @@ int pplObjCmp(ppl_context *c, const pplObj *a, const pplObj *b, int *status, int
      }
     if ((c!=NULL)&&(c->set->term_current.ComplexNumbers==SW_ONOFF_OFF)&&((a->flagComplex)||(b->flagComplex))) return -2;
     if ((!gsl_finite(a->real))||(!gsl_finite(a->imag))||(!gsl_finite(b->real))||(!gsl_finite(b->imag))) return -2;
-    av = hypot(a->real,a->imag);
-    bv = hypot(b->real,b->imag);
-    if (av <bv) return -1;
-    if (av >bv) return  1;
-    if (av==bv) return  0;
-    return -2;
+    if (a->real < b->real) return -1;
+    if (a->real > b->real) return  1;
+    if (a->imag < b->imag) return -1;
+    if (a->imag > b->imag) return  1;
+    return 0;
    }
   else if ((t1o==2) || (t1o==3)) // 2 - booleans; 3 - dates
    {
