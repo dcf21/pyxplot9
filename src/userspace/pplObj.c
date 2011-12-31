@@ -37,7 +37,7 @@
 
 // Items with ! should never be displayed because they are internal markers
 const char *pplObjTypeNames[] = {"number","string","boolean","date","color","dictionary","module","list","vector","matrix","file handle","function","type","null","exception","!global","!zombie","!expression","!bytecode","instance",NULL};
-const int   pplObjTypeOrder[] = { 2      , 4      , 1       , 3    , 5     ,  9          , 11    , 7    , 6      , 8      , 13          , 12       , 14    , 0   , 15        , 0       , 0       , 0           , 0         , 10       };
+const int   pplObjTypeOrder[] = { 2      , 4      , 2       , 3    , 5     ,  9          , 11    , 7    , 6      , 8      , 13          , 12       , 14    , 0   , 15        , 0       , 0       , 0           , 0         , 10       };
 pplObj     *pplObjPrototypes;
 
 void pplObjInit(ppl_context *c)
@@ -95,6 +95,7 @@ pplObj *pplObjStr(pplObj *in, unsigned char amMalloced, unsigned char auxilMallo
 
 pplObj *pplObjBool(pplObj *in, unsigned char amMalloced, int stat)
  {
+  int i;
   in->objType = PPLOBJ_BOOL;
   in->real = stat;
   in->auxil = NULL;
@@ -104,6 +105,11 @@ pplObj *pplObjBool(pplObj *in, unsigned char amMalloced, int stat)
   in->auxilMalloced = 0;
   in->auxilLen = 0;
   in->amMalloced = amMalloced;
+  in->immutable = 0;
+  in->imag      = 0; // Need to set these as booleans use same object comparison logic as numeric values
+  in->dimensionless = 1;
+  in->flagComplex = in->tempType = 0;
+  for (i=0; i<UNITS_MAX_BASEUNITS; i++) in->exponent[i]=0;
   return in;
  }
 
@@ -118,6 +124,7 @@ pplObj *pplObjDate(pplObj *in, unsigned char amMalloced, double unixTime)
   in->auxilMalloced = 0;
   in->auxilLen = 0;
   in->amMalloced = amMalloced;
+  in->immutable = 0;
   return in;
  }
 
@@ -135,6 +142,7 @@ pplObj *pplObjColor(pplObj *in, unsigned char amMalloced, int scheme, double c1,
   in->auxilMalloced = 0;
   in->auxilLen = 0; 
   in->amMalloced = amMalloced;
+  in->immutable = 0;
   in->exponent[ 0] = scheme;
   in->exponent[ 8] = c1;
   in->exponent[ 9] = c2;

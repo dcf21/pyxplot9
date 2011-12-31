@@ -128,7 +128,7 @@ int pplObjCmp(ppl_context *c, const pplObj *a, const pplObj *b, int *status, int
   if (t1o < t2o) return -1;
   if (t1o > t2o) return  1;
   if  (t1o==0) return -2; // 0 - nulls are never equal
-  if  (t1o==2) // 2 - numbers
+  if  (t1o==2) // 2 - numbers or booleans
    {
     if (ppl_unitsDimEqual(a,b)==0)
      {
@@ -161,7 +161,7 @@ int pplObjCmp(ppl_context *c, const pplObj *a, const pplObj *b, int *status, int
     if (a->imag > b->imag) return  1;
     return 0;
    }
-  else if ((t1o==2) || (t1o==3)) // 2 - booleans; 3 - dates
+  else if (t1o==3) // 3 - dates
    {
     if (a->real <b->real) return -1;
     if (a->real >b->real) return  1;
