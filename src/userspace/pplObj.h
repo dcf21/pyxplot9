@@ -63,6 +63,7 @@ typedef struct pplObj
   struct pplObj *self_lval;
   double        *self_dval;
   struct pplObj *self_this;
+  int            refCount;
  } pplObj;
 
 #ifndef _PPLOBJ_C

@@ -38,6 +38,7 @@ list *ppl_listInit(int useMalloc)
   out->last      = NULL;
   out->length    = 0;
   out->refCount  = 1;
+  out->immutable = 0;
   out->useMalloc = useMalloc;
   out->memory_context = ppl_memAlloc_GetMemContext();
   return out;

@@ -290,20 +290,20 @@ void pplset_makedefault(ppl_context *context)
   s->filters = ppl_dictInit(HASHSIZE_SMALL,0);
   #ifdef HAVE_FITSIO
   pplObjStr(&tempval,0,0,FITSHELPER);
-  ppl_dictAppend(s->filters, "*.fits", pplObjCpy(NULL,&tempval,1,1));
+  ppl_dictAppend(s->filters, "*.fits", pplObjCpy(NULL,&tempval,0,1,1));
   #endif
   #ifdef TIMEHELPER
   pplObjStr(&tempval,0,0,TIMEHELPER);
-  ppl_dictAppend(s->filters, "*.log", pplObjCpy(NULL,&tempval,1,1));
+  ppl_dictAppend(s->filters, "*.log", pplObjCpy(NULL,&tempval,0,1,1));
   #endif
   #ifdef GUNZIP_COMMAND
   pplObjStr(&tempval,0,0,GUNZIP_COMMAND);
-  ppl_dictAppend(s->filters, "*.gz", pplObjCpy(NULL,&tempval,1,1));
+  ppl_dictAppend(s->filters, "*.gz", pplObjCpy(NULL,&tempval,0,1,1));
   #endif
   #ifdef WGET_COMMAND
   pplObjStr(&tempval,0,0,WGET_COMMAND);
-  ppl_dictAppend(s->filters, "http://*", pplObjCpy(NULL,&tempval,1,1));
-  ppl_dictAppend(s->filters, "ftp://*", pplObjCpy(NULL,&tempval,1,1));
+  ppl_dictAppend(s->filters, "http://*", pplObjCpy(NULL,&tempval,0,1,1));
+  ppl_dictAppend(s->filters, "ftp://*", pplObjCpy(NULL,&tempval,0,1,1));
   #endif
 
   // Set up empty lists of arrows and labels

@@ -53,6 +53,7 @@ void ppl_contextGetVarPointer(ppl_context *c, char *name, pplObj **output, pplOb
    }
   else // If variable is not defined, create it now
    {
+    temp->refCount=1;
     pplObjNum(temp,1,1,0);
     ppl_dictAppendCpy(d, name, temp, sizeof(pplObj));
     *output = (pplObj *)ppl_dictLookup(d, name);
@@ -68,16 +69,19 @@ void ppl_contextRestoreVarPointer(ppl_context *c, char *name, pplObj *temp)
    {
     int om = obj->amMalloced;
     int tm = temp->amMalloced;
+    int rc = obj->refCount;
     obj->amMalloced = 0;
     ppl_garbageObject(obj);
     memcpy(obj,temp,sizeof(pplObj));
     obj->amMalloced = om;
+    obj->refCount = rc;
     pplObjZom(temp,tm);
    }
   else
    {
     int tm = temp->amMalloced;
     temp->amMalloced = 1;
+    temp->refCount = 1;
     ppl_dictAppendCpy(d, name, temp, sizeof(pplObj));
     pplObjZom(temp,tm);
    }

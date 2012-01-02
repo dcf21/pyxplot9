@@ -55,6 +55,7 @@ void pplObjInit(ppl_context *c)
     typeObjs[i].refCount = 1;
     typeObjs[i].id       = i;
     typeObjs[i].methods  = pplObjMethods[i];
+    pplObjPrototypes[i].refCount = 1;
     pplObjType(&pplObjPrototypes[i],1,1,&typeObjs[i]);
    }
   initialised=1;
@@ -317,6 +318,8 @@ pplObj *pplObjNull(pplObj *in, unsigned char amMalloced)
  {
   in->objType      = PPLOBJ_NULL;
   in->objPrototype = &pplObjPrototypes[PPLOBJ_NULL];
+  in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
   in->amMalloced   = amMalloced;
   in->immutable    = 0;
   return in;
@@ -341,6 +344,8 @@ pplObj *pplObjGlobal(pplObj *in, unsigned char amMalloced)
  {
   in->objType      = PPLOBJ_GLOB;
   in->objPrototype = &pplObjPrototypes[PPLOBJ_GLOB];
+  in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
   in->amMalloced   = amMalloced;
   in->immutable    = 0;
   return in;
@@ -364,7 +369,7 @@ pplObj *pplObjUser(pplObj *in, unsigned char amMalloced, unsigned char auxilMall
   in->auxilLen = 0;
   in->objPrototype = (pplObj *)malloc(sizeof(pplObj));
   if (in->objPrototype==NULL) return NULL;
-  pplObjCpy(in->objPrototype, prototype, 1, 1);
+  pplObjCpy(in->objPrototype, prototype, 0, 1, 1);
   in->self_lval = NULL; in->self_dval = NULL;
   in->self_this = NULL;
   in->amMalloced = amMalloced;
@@ -373,7 +378,7 @@ pplObj *pplObjUser(pplObj *in, unsigned char amMalloced, unsigned char auxilMall
   return in;
  }
 
-pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char outMalloced, unsigned char useMalloc)
+pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char lval, unsigned char outMalloced, unsigned char useMalloc)
  {
   if (in==NULL) return NULL;
 
@@ -385,7 +390,8 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char outMalloced, unsigned c
    }
 
   memcpy(out, in, sizeof(pplObj));
-  out->self_lval  = in;
+  if (lval) { out->self_lval = in; __sync_add_and_fetch(&out->self_lval->refCount,1); }
+  else      { out->self_lval = NULL; }
   out->self_dval  = NULL;
   out->self_this  = NULL;
   out->amMalloced = outMalloced;
@@ -406,7 +412,7 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char outMalloced, unsigned c
      {
       pplObj *p = (pplObj *)malloc(sizeof(pplObj)); // Copy prototype pointer object
       if (p==NULL) { out->objType=PPLOBJ_ZOM; return NULL; }
-      pplObjCpy(p,out->objPrototype,1,1);
+      pplObjCpy(p,out->objPrototype,0,1,1);
       out->objPrototype=p;
      }
     case PPLOBJ_DICT: // dictionary -- pass by pointer
@@ -477,7 +483,7 @@ pplObj *pplObjDeepCpy(pplObj *out, pplObj *in, int deep, unsigned char outMalloc
       if (out->auxil==NULL) return NULL;
       while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
        {
-        if (!deep) pplObjCpy(&v,item,useMalloc,useMalloc);
+        if (!deep) pplObjCpy(&v,item,0,useMalloc,useMalloc);
         else       pplObjDeepCpy(&v,item,1,useMalloc,useMalloc);
         ppl_dictAppendCpy(d,key,&v,sizeof(pplObj));
        }
@@ -499,7 +505,7 @@ pplObj *pplObjDeepCpy(pplObj *out, pplObj *in, int deep, unsigned char outMalloc
       if (out->auxil==NULL) return NULL; 
       while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
        {
-        if (!deep) pplObjCpy(&v,item,useMalloc,useMalloc);
+        if (!deep) pplObjCpy(&v,item,0,useMalloc,useMalloc);
         else       pplObjDeepCpy(&v,item,1,useMalloc,useMalloc);
         ppl_listAppendCpy(l,&v,sizeof(pplObj));
        }
@@ -507,7 +513,7 @@ pplObj *pplObjDeepCpy(pplObj *out, pplObj *in, int deep, unsigned char outMalloc
       return out;
      }
     default:
-     return pplObjCpy(out,in,outMalloced,useMalloc);
+     return pplObjCpy(out,in,0,outMalloced,useMalloc);
    }
  }
 

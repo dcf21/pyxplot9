@@ -158,6 +158,7 @@ void pplfunc_osGlob(ppl_context *c, pplObj *in, int nArgs, int *status, int *err
   int        i,j;
   if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The os.glob() function requires a single string argument."); return; }
   if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  v.refCount=1;
   l = (list *)OUTPUT.auxil;
   if (wordexp((char*)in[0].auxil, &w, 0) != 0) return; // No matches; return empty list
   for (i=0; i<w.we_wordc; i++)
@@ -196,6 +197,7 @@ void pplfunc_osStat(ppl_context *c, pplObj *in, int nArgs, int *status, int *err
   struct stat s;
   if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The os.stat() function requires a single string argument."); return; }
   if (stat((char*)in[0].auxil,&s)!=0) { pplObjNull(&OUTPUT,0); return; }
+  v.refCount=1;
   tmp = (char *)malloc(LSTR_LENGTH);
   if (pplObjDict(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   d = (dict *)OUTPUT.auxil;
@@ -248,6 +250,7 @@ void pplfunc_osUname(ppl_context *c, pplObj *in, int nArgs, int *status, int *er
   pplObj v;
   struct utsname u;
   if (uname(&u)) { *status=1; *errType=ERR_INTERNAL; sprintf(errText,"The uname() function failed."); return; }
+  v.refCount=1;
   tmp = (char *)malloc(LSTR_LENGTH);
   if (pplObjDict(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   d = (dict *)OUTPUT.auxil;

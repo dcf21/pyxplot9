@@ -224,14 +224,21 @@ static void expEval_stringSubs(ppl_context *context, int Nsubs, int *status, int
     return;
  }
 
+#define STACK_POP \
+   { \
+    context->stackPtr--; \
+    ppl_garbageObject(&context->stack[context->stackPtr]); \
+    if (context->stack[context->stackPtr].refCount != 0) { *errPos=0; *errType=ERR_INTERNAL; strcpy(errText,"Stack forward reference detected."); goto cleanup_on_error; } \
+   } \
+
 pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dollarAllowed, int IterDepth, int *errPos, int *errType, char *errText)
  {
   int j=0;
-  int initialStackPtr;
+  int initialStackPtr=0;
   int charpos=0;
 
   // If at bottom iteration depth, clean up stack now if there is any left-over junk
-  if (IterDepth==0) for ( ; context->stackPtr>0 ; ) { context->stackPtr--; ppl_garbageObject(&context->stack[context->stackPtr]); }
+  if (IterDepth==0) for ( ; context->stackPtr>0 ; ) { STACK_POP; }
   initialStackPtr = context->stackPtr;
   *lastOpAssign=0;
 
@@ -245,6 +252,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
     j+=2*sizeof(int)+1; // Leave j pointing to first data item after opcode
 
     if (cancellationFlag) { *errPos=0; *errType=ERR_INTERRUPT; strcpy(errText,"Operation cancelled."); goto cleanup_on_error; }
+    if (context->stackPtr > ALGEBRA_STACK-4) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText,"Stack overflow."); goto cleanup_on_error; }
 
     switch (o)
      {
@@ -253,6 +261,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
       case 1: // Numeric literal
         *lastOpAssign=0;
         pplObjNum(stk , 0 , *(double *)(in+j) , 0);
+        stk->refCount=1;
         context->stackPtr++;
         break;
       case 2: // String literal
@@ -263,6 +272,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
         if ((out = (char *)malloc(l+1))==NULL) { *errPos=charpos; *errType=ERR_MEMORY; strcpy(errText,"Out of memory."); goto cleanup_on_error; }
         strcpy(out , (char *)(in+j));
         pplObjStr(stk , 0 , 1 , out);
+        stk->refCount=1;
         context->stackPtr++;
         break;
        }
@@ -276,8 +286,9 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
           pplObj *obj = (pplObj *)ppl_dictLookup(context->namespaces[i] , key);
           if (obj==NULL) continue;
           if ((obj->objType==PPLOBJ_GLOB)||(obj->objType==PPLOBJ_ZOM)) continue;
-          pplObjCpy(stk , obj , 0 , 1);
+          pplObjCpy(stk , obj , 1 , 0 , 1);
           stk->immutable = stk->immutable || context->namespaces[i]->immutable;
+          stk->refCount=1;
           context->stackPtr++;
           got=1;
           break;
@@ -296,13 +307,15 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
           if ((obj==NULL)&&(!context->namespaces[i]->immutable))
            {
             pplObjZom(stk , 0); // Create a temporary zombie for now
+            stk->refCount=1;
             ppl_dictAppendCpy(context->namespaces[i] , key , stk , sizeof(pplObj));
             obj = (pplObj *)ppl_dictLookup(context->namespaces[i] , key);
             if (obj==NULL) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Out of memory."); goto cleanup_on_error; }
            }
           if ((obj==NULL)||((context->namespaces[i]->immutable)&&(obj->objType!=PPLOBJ_GLOB))) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Cannot modify variable in immutable namespace."); goto cleanup_on_error; }
           if (obj->objType==PPLOBJ_GLOB) { if (i<2) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Variable declared global in global namespace."); goto cleanup_on_error; } continue; }
-          pplObjCpy(stk , obj , 0 , 1);
+          pplObjCpy(stk , obj , 1 , 0 , 1);
+          stk->refCount=1;
           context->stackPtr++;
           break;
          }
@@ -329,8 +342,9 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
           pplObj *obj = (pplObj *)ppl_dictLookup(d , key);
           imm = imm || iter->immutable;
           if ((obj==NULL) || (obj->objType==PPLOBJ_ZOM) || (obj->objType==PPLOBJ_GLOB)) { imm=1; continue; } // Named methods of prototypes are immutable
-          pplObjCpy(in , obj , 0 , 1);
-          in->immutable = in->immutable || imm;
+          pplObjCpy(stk-1 , obj , 1 , 0 , 1);
+          (stk-1)->immutable = (stk-1)->immutable || imm;
+          (stk-1)->refCount=1;
           found = 1;
           break;
          }
@@ -339,8 +353,9 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
           dict   *d   = pplObjMethods[in->objType];
           pplObj *obj = (pplObj *)ppl_dictLookup(d , key);
           if (obj==NULL) { *errPos=charpos; *errType=ERR_NAMESPACE; sprintf(errText,"No such method '%s'.",key); goto cleanup_on_error; }
-          pplObjCpy(in , obj , 0 , 1);
-          in->immutable = 1;
+          pplObjCpy(stk-1 , obj , 1 , 0 , 1);
+          (stk-1)->immutable = 1;
+          (stk-1)->refCount=1;
          }
         in->self_this = in_cpy;
         break;
@@ -358,12 +373,15 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
           if (obj==NULL)
            {
             pplObjZom(stk , 0); // Create a temporary zombie for now
+            stk->refCount=1;
             ppl_dictAppendCpy(d , key , stk , sizeof(pplObj));
             obj = (pplObj *)ppl_dictLookup(d , key);
             if (obj==NULL) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Out of memory."); goto cleanup_on_error; }
            }
-          ppl_garbageObject(stk-1);
-          pplObjCpy(stk-1 , obj , 0 , 1);
+          STACK_POP;
+          pplObjCpy(stk , obj , 1 , 0 , 1);
+          stk->refCount=1;
+          context->stackPtr++;
           break;
          }
         else
@@ -412,12 +430,14 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
         for (k=0; k<len; k++) if ((stk-2*(len-k))->objType!=PPLOBJ_STR) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Dictionary keys must be strings; supplied key has type <%s>.",pplObjTypeNames[(stk-2*(len-k))->objType]); goto cleanup_on_error; }
         for (k=0; k<len; k++)
          {
-          (stk-2*(len-k)+1)->amMalloced = 1;
-          ppl_dictAppendCpy( d , (char *)((stk-2*(len-k))->auxil) , (void *)(stk-2*(len-k)+1) , sizeof(pplObj) );
+          pplObj v;
+          pplObjCpy(&v, stk-2*(len-k)+1, 0, 1, 1);
+          v.refCount = 1;
+          ppl_dictAppendCpy( d , (char *)((stk-2*(len-k))->auxil) , (void *)&v , sizeof(pplObj) );
          }
-        for (k=0; k<len; k++) free((stk-2*(len-k))->auxil); // Free key strings
-        context->stackPtr -= 2*len; // Don't garbage collect, as objects have gone into dictionary
+        for (k=0; k<2*len; k++) { STACK_POP; }
         pplObjDict(&context->stack[context->stackPtr] , 0 , 1 , d);
+        context->stack[context->stackPtr].refCount=1;
         context->stackPtr++;
         break;
        }
@@ -431,11 +451,14 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
         if (context->stackPtr<len) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Attempt to make list with too few items on the stack."); goto cleanup_on_error; }
         for (k=0; k<len; k++)
          {
-          (stk-len+k)->amMalloced = 1;
-          ppl_listAppendCpy( l , (void *)(stk-len+k) , sizeof(pplObj) );
+          pplObj v;
+          pplObjCpy(&v, stk-len+k, 0, 1, 1);
+          v.refCount = 1;
+          ppl_listAppendCpy( l , (void *)&v , sizeof(pplObj) );
          }
-        context->stackPtr -= len; // Don't garbage collect, as objects have gone into list
+        for (k=0; k<len; k++) { STACK_POP; }
         pplObjList(&context->stack[context->stackPtr] , 0 , 1 , l);
+        context->stack[context->stackPtr].refCount=1;
         context->stackPtr++;
         break;
        }
@@ -452,6 +475,7 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
         int t = (int)*(unsigned char *)(in+j);
         *lastOpAssign=0;
         pplObjNum(stk, 0, 0, 0);
+        stk->refCount=1;
         switch (t)
          {
           case 0x25: // -
@@ -484,8 +508,9 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
             CAST_TO_NUM(stk-1); CAST_TO_NUM(stk-2);
             ppl_uaPow(context, stk-2, stk-1, stk, &status, errType, errText);
             if (status) { *errPos=charpos; goto cleanup_on_error; }
+            STACK_POP; STACK_POP;
             memcpy(stk-2, stk, sizeof(pplObj));
-            context->stackPtr--;
+            context->stackPtr++;
             break;
            }
           case 0x4A: // *
@@ -493,10 +518,9 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
             int status=0;
             ppl_opMul(context, stk-2, stk-1, stk, 1, &status, errType, errText);
             if (status) { *errPos=charpos; goto cleanup_on_error; }
-            ppl_garbageObject(stk-2);
-            ppl_garbageObject(stk-1);
+            STACK_POP; STACK_POP;
             memcpy(stk-2, stk, sizeof(pplObj));
-            context->stackPtr--;
+            context->stackPtr++;
             break;
            }
           case 0x4B: // div
@@ -504,10 +528,9 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
             int status=0;
             ppl_opDiv(context, stk-2, stk-1, stk, 1, &status, errType, errText);
             if (status) { *errPos=charpos; goto cleanup_on_error; }
-            ppl_garbageObject(stk-2);
-            ppl_garbageObject(stk-1);
+            STACK_POP; STACK_POP;
             memcpy(stk-2, stk, sizeof(pplObj));
-            context->stackPtr--;
+            context->stackPtr++;
             break;
            }
           case 0x4C: // mod
@@ -516,8 +539,9 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
             CAST_TO_NUM(stk-1); CAST_TO_NUM(stk-2);
             ppl_uaMod(context, stk-2, stk-1, stk, &status, errType, errText);
             if (status) { *errPos=charpos; goto cleanup_on_error; }
+            STACK_POP; STACK_POP;
             memcpy(stk-2, stk, sizeof(pplObj));
-            context->stackPtr--;
+            context->stackPtr++;
             break;
            }
           case 0x4D: // add
@@ -525,10 +549,9 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
             int status=0;
             ppl_opAdd(context, stk-2, stk-1, stk, 1, &status, errType, errText);
             if (status) { *errPos=charpos; goto cleanup_on_error; }
-            ppl_garbageObject(stk-2);
-            ppl_garbageObject(stk-1);
+            STACK_POP; STACK_POP;
             memcpy(stk-2, stk, sizeof(pplObj));
-            context->stackPtr--;
+            context->stackPtr++;
             break;
            }
           case 0x4E: // sub
@@ -536,45 +559,44 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
             int status=0;
             ppl_opSub(context, stk-2, stk-1, stk, 1, &status, errType, errText);
             if (status) { *errPos=charpos; goto cleanup_on_error; }
-            ppl_garbageObject(stk-2);
-            ppl_garbageObject(stk-1);
+            STACK_POP; STACK_POP;
             memcpy(stk-2, stk, sizeof(pplObj));
-            context->stackPtr--;
+            context->stackPtr++;
             break;
            }
           case 0x4F: // <<
            {
             CAST_TO_INT(stk-1,"<<"); CAST_TO_INT(stk-2,"<<");
             (stk-2)->real = ((int)(stk-2)->real) << ((int)(stk-1)->real);
-            context->stackPtr--;
+            STACK_POP;
             break;
            }
           case 0x50: // >>
            {
             CAST_TO_INT(stk-1,">>"); CAST_TO_INT(stk-2,">>");
             (stk-2)->real = ((int)(stk-2)->real) >> ((int)(stk-1)->real);
-            context->stackPtr--;
+            STACK_POP;
             break;
            }
           case 0x57: // &
            {
             CAST_TO_INT(stk-1,"&"); CAST_TO_INT(stk-2,"&");
             (stk-2)->real = ((int)(stk-2)->real) & ((int)(stk-1)->real);
-            context->stackPtr--;
+            STACK_POP;
             break;
            }
           case 0x58: // ^
            {
             CAST_TO_INT(stk-1,"^"); CAST_TO_INT(stk-2,"^");
             (stk-2)->real = ((int)(stk-2)->real) ^ ((int)(stk-1)->real);
-            context->stackPtr--;
+            STACK_POP;
             break;
            }
           case 0x59: // |
            {
             CAST_TO_INT(stk-1,"|"); CAST_TO_INT(stk-2,"|");
             (stk-2)->real = ((int)(stk-2)->real) | ((int)(stk-1)->real);
-            context->stackPtr--;
+            STACK_POP;
             break;
            }
           case 0x5C: // swap-pop
@@ -599,10 +621,10 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
             else if (t==0x54) stat = (cmp ==  1);
             else if (t==0x55) stat = (cmp ==  0);
             else              stat = (cmp !=  0);
-            ppl_garbageObject(stk-2);
-            ppl_garbageObject(stk-1);
+            STACK_POP; STACK_POP;
             pplObjBool(stk-2,0,stat);
-            context->stackPtr--;
+            (stk-2)->refCount=1;
+            context->stackPtr++;
             break;
            }
           default:
@@ -625,12 +647,16 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
 
 #define ASSIGN \
          { \
+          tmp->refCount=1; \
           if (o->self_dval==NULL) \
            { \
             int om = o->self_lval->amMalloced; \
+            int rc = o->self_lval->refCount; \
             o->self_lval->amMalloced = 0; \
+            o->self_lval->refCount = 1; \
             ppl_garbageObject(o->self_lval); \
-            pplObjCpy(o->self_lval, tmp, om, 1); \
+            pplObjCpy(o->self_lval, tmp, 0, om, 1); \
+            o->self_lval->refCount = rc; \
            } \
           else /* Assign vector or matrix element */ \
            { \
@@ -640,40 +666,36 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
            } \
           ppl_garbageObject(o); \
           memcpy(o , tmp , sizeof(pplObj)); /* swap-pop */ \
-          context->stackPtr--; \
-        }
+          STACK_POP; \
+         }
 
         if (t==0x40) // =
          {
-          pplObj *tmp = in;
+          pplObjCpy(tmp, in, 0, 0, 1);
           ASSIGN;
          }
         else if (t==0x41) // +=
          {
           ppl_opAdd(context, o, in, tmp, 0, &status, errType, errText);
           if (status) { *errPos=charpos; goto cleanup_on_error; }
-          ppl_garbageObject(in);
           ASSIGN;
          }
         else if (t==0x42) // -=
          {
           ppl_opSub(context, o, in, tmp, 0, &status, errType, errText);
           if (status) { *errPos=charpos; goto cleanup_on_error; }
-          ppl_garbageObject(in);
           ASSIGN;
          }
         else if (t==0x43) // *=
          {
           ppl_opMul(context, o, in, tmp, 0, &status, errType, errText);
           if (status) { *errPos=charpos; goto cleanup_on_error; }
-          ppl_garbageObject(in);
           ASSIGN;
          }
         else if (t==0x44) // /=
          {
           ppl_opDiv(context, o, in, tmp, 0, &status, errType, errText);
           if (status) { *errPos=charpos; goto cleanup_on_error; }
-          ppl_garbageObject(in);
           ASSIGN;
          }
         else
@@ -713,7 +735,6 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
              *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Unknown fused operator-assignment operator with id=%d.",t); goto cleanup_on_error;
            }
           if (status) { *errPos=charpos; goto cleanup_on_error; }
-          ppl_garbageObject(in);
           ASSIGN;
           break;
          }
@@ -756,8 +777,9 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
         if ((stk-Nsubs-1)->objType != PPLOBJ_STR) { *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"Attempt to apply string substitution operator to a non-string."); goto cleanup_on_error; }
         expEval_stringSubs(context, Nsubs, &status, errType, errText);
         if (status) {  *errPos=charpos; goto cleanup_on_error; }
+        stk->refCount = 1;
         context->stackPtr--;
-        for (i=0; i<Nsubs+1; i++) { context->stackPtr--; ppl_garbageObject(&context->stack[context->stackPtr]); }
+        for (i=0; i<Nsubs+1; i++) { STACK_POP; }
         memcpy(&context->stack[context->stackPtr] , stk , sizeof(pplObj));
         context->stackPtr++;
         break;
@@ -768,8 +790,8 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
         *lastOpAssign=0;
         CAST_TO_BOOL(stk-1);
         branch = (stk-1)->real == 0;
-        if (branch) { len = *(int *)(in+j+1)-pos; if (*(unsigned char *)(in+j)) context->stackPtr--; }
-        else        { context->stackPtr--; }
+        if (branch) { len = *(int *)(in+j+1)-pos; if (*(unsigned char *)(in+j)) { STACK_POP; } }
+        else        { STACK_POP; }
         break;
        }
       case 18: // branch if true
@@ -778,8 +800,8 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
         *lastOpAssign=0;
         CAST_TO_BOOL(stk-1);
         branch = (stk-1)->real != 0;
-        if (branch) { len = *(int *)(in+j+1)-pos; if (*(unsigned char *)(in+j)) context->stackPtr--; }
-        else        { context->stackPtr--; }
+        if (branch) { len = *(int *)(in+j+1)-pos; if (*(unsigned char *)(in+j)) { STACK_POP; } }
+        else        { STACK_POP; }
         break;
        }
       case 19: // goto
@@ -804,9 +826,10 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
   if (context->stackPtr != initialStackPtr+1) ppl_warning(&context->errcontext, ERR_INTERNAL, "Unexpected junk on stack in expEval.");
   return &context->stack[context->stackPtr-1];
 
-  cast_fail:         *errPos = charpos;
+  cast_fail:
+    *errPos = charpos;
   cleanup_on_error:
-    for ( ; context->stackPtr>initialStackPtr ; ) { context->stackPtr--; ppl_garbageObject(&context->stack[context->stackPtr]); }
+    for ( ; context->stackPtr>initialStackPtr ; ) { STACK_POP; }
     return NULL;
  }
 

@@ -36,7 +36,7 @@ typedef struct listS
  {
   struct listItemS *first;
   struct listItemS *last;
-  int               length, refCount;
+  int               length, refCount, immutable;
   int               useMalloc;
   int               memory_context;
  } list;

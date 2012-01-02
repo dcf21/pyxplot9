@@ -29,9 +29,17 @@
 #include "userspace/context.h"
 #include "userspace/garbageCollector.h"
 #include "userspace/pplObj_fns.h"
+#include "userspace/unitsArithmetic.h"
 #include "userspace/unitsDisp.h"
 
 #include "pplConstants.h"
+
+#define STACK_POP \
+   { \
+    context->stackPtr--; \
+    ppl_garbageObject(&context->stack[context->stackPtr]); \
+    if (context->stack[context->stackPtr].refCount != 0) { *status=1; *errType=ERR_INTERNAL; strcpy(errText,"Stack forward reference detected."); goto fail; } \
+   } \
 
 void ppl_sliceItem (ppl_context *context, int getPtr, int *status, int *errType, char *errText)
  {
@@ -43,11 +51,39 @@ void ppl_sliceItem (ppl_context *context, int getPtr, int *status, int *errType,
   int      t = out->objType;
   if (context->stackPtr<nArgs+1) { *status=1; *errType=ERR_INTERNAL; sprintf(errText,"Attempt to slice object with few items on the stack."); return; }
   memcpy(&called, out, sizeof(pplObj));
-  pplObjNum(out, 0, 0, 0); // Overwrite function object on stack, but don't garbage collect it yet
+  pplObjNum(out, 0, 0, 0); // Overwrite sliced object on stack, but don't garbage collect it yet
+  out->refCount = 1;
 
-  if (args->objType!=PPLOBJ_NUM) { *errType=ERR_TYPE; sprintf(errText,"Item numbers when slicing must be numerical values; supplied limit has type <%s>.",pplObjTypeNames[args->objType]); goto fail; }
-  if (!args->dimensionless) { *errType=ERR_NUMERIC; sprintf(errText,"Item numbers when slicing must be dimensionless numbers; supplied limit has units of <%s>.", ppl_printUnit(context, args, NULL, NULL, 0, 1, 0) ); goto fail; }
-  if (args->flagComplex) { *errType=ERR_NUMERIC; sprintf(errText,"Item numbers when slicing must be real numbers; supplied limit is complex."); goto fail; }
+  if ((t==PPLOBJ_DICT) || (t==PPLOBJ_MOD) || (t==PPLOBJ_USER))
+   {
+    dict   *din = (dict *)called.auxil;
+    char   *key;
+    pplObj *obj;
+    if (args->objType!=PPLOBJ_STR) { *errType=ERR_TYPE; sprintf(errText,"Dictionary keys must be strings; supplied key has type <%s>.",pplObjTypeNames[args->objType]); goto fail; }
+    key = (char *)args[0].auxil;
+    if (!ppl_dictContains(din,key))
+     {
+      if (getPtr && (!din->immutable))
+       {
+        pplObj v;
+        v.refCount=1;
+        pplObjNull(&v,1);
+        ppl_dictAppendCpy(din, key, &v, sizeof(pplObj));
+       }
+      else
+       {
+        *status=1; *errType=ERR_DICTKEY; sprintf(errText,"Undefined dictionary key '%s'.", key); goto fail;
+       }
+     }
+    obj = (pplObj *)ppl_dictLookup(din,key);
+    pplObjCpy(out, obj, 1, 0, 1);
+    out->immutable = out->immutable || din->immutable;
+    goto cleanup;
+   }
+
+  if (args->objType!=PPLOBJ_NUM) { *errType=ERR_TYPE; sprintf(errText,"Item numbers when slicing must be numerical values; supplied index has type <%s>.",pplObjTypeNames[args->objType]); goto fail; }
+  if (!args->dimensionless) { *errType=ERR_NUMERIC; sprintf(errText,"Item numbers when slicing must be dimensionless numbers; supplied index has units of <%s>.", ppl_printUnit(context, args, NULL, NULL, 0, 1, 0) ); goto fail; }
+  if (args->flagComplex) { *errType=ERR_NUMERIC; sprintf(errText,"Item numbers when slicing must be real numbers; supplied index is complex."); goto fail; }
   if ( (!gsl_finite(args->real)) || (args->real<INT_MIN) || (args->real>INT_MAX) ) { *errType=ERR_NUMERIC; sprintf(errText,"Item numbers when slicing must be in the range %d to %d.", INT_MIN, INT_MAX); goto fail; }
 
   switch (t)
@@ -59,11 +95,83 @@ void ppl_sliceItem (ppl_context *context, int getPtr, int *status, int *errType,
       char *outstr;
       int p = args[0].real;
       if (p<0) p+=inl;
-      if ((p<0)||(p>inl)) { *status=1; *errType=ERR_RANGE; sprintf(errText,"String index out of range."); goto fail; }
+      if ((p<0)||(p>=inl)) { *status=1; *errType=ERR_RANGE; sprintf(errText,"String index out of range."); goto fail; }
+      if (getPtr) { *status=1; *errType=ERR_TYPE; sprintf(errText,"Cannot assign to a character in a string."); goto fail; }
       if ((outstr = (char *)malloc(2))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); goto fail; }
       outstr[0] = in[p];
       outstr[1] = '\0';
       pplObjStr(out, 0, 1, outstr);
+      break;
+     }
+    case PPLOBJ_LIST:
+     {
+      list *lin = (list *)called.auxil;
+      const int   linl = lin->length;
+      int         p    = args[0].real;
+      pplObj     *obj;
+      if (p<0) p+=linl;
+      if (getPtr && (p==linl) && (!lin->immutable))
+       {
+        pplObj v;
+        v.refCount=1;
+        pplObjNull(&v,1);
+        ppl_listAppendCpy(lin, &v, sizeof(pplObj));
+       }
+      else
+       {
+        if ((p<0)||(p>=linl)) { *status=1; *errType=ERR_RANGE; sprintf(errText,"List index out of range."); goto fail; }
+       }
+      obj = (pplObj *)ppl_listGetItem(lin,p);
+      pplObjCpy(out, obj, 1, 0, 1);
+      out->immutable = out->immutable || lin->immutable;
+      break;
+     }
+    case PPLOBJ_VEC:
+     {
+      gsl_vector *vin = ((pplVector *)called.auxil)->v;
+      const int   vinl = vin->size;
+      int         p    = args[0].real;
+      double     *obj;
+      if (p<0) p+=vinl;
+      if ((p<0)||(p>=vinl)) { *status=1; *errType=ERR_RANGE; sprintf(errText,"Vector index out of range."); goto fail; }
+      obj = gsl_vector_ptr(vin, p);
+      pplObjNum(out, 0, *obj, 0);
+      ppl_unitsDimCpy(out,&called);
+      if ((out->self_lval = called.self_lval)!=NULL) { __sync_add_and_fetch(&out->self_lval->refCount,1); }
+      out->self_dval = obj;
+      out->immutable = out->immutable || called.immutable;
+      break;
+     }
+    case PPLOBJ_MAT:
+     {
+      pplMatrix  *mob  = (pplMatrix *)called.auxil;
+      gsl_matrix *min  = mob->m;
+      const int   minl = mob->sliceNext ? min->size2 : min->size1;
+      int         p    = args[0].real;
+      pplVector  *vo;
+      if (p<0) p+=minl;
+      if ((p<0)||(p>=minl)) { *status=1; *errType=ERR_RANGE; sprintf(errText,"Matrix index out of range."); goto fail; }
+      vo = (pplVector *)malloc(sizeof(pplVector));
+      if (vo==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); goto fail; }
+      vo->refCount = 1;
+      vo->raw  = NULL;
+      vo->rawm = mob->raw; __sync_add_and_fetch(&mob->raw->refCount,1);
+      if (!mob->sliceNext) vo->view = gsl_matrix_column(min, p);
+      else                 vo->view = gsl_matrix_row   (min, p);
+      vo->v = &vo->view.vector;
+      out->objType = PPLOBJ_ZOM;
+      out->refCount=1;
+      out->auxil = (void*)vo;
+      out->auxilMalloced = 1;
+      out->auxilLen = sizeof(pplMatrix);
+      out->objPrototype = &pplObjPrototypes[PPLOBJ_VEC];
+      if ((out->self_lval = called.self_lval)!=NULL) { __sync_add_and_fetch(&out->self_lval->refCount,1); }
+      out->self_dval = NULL;
+      out->self_this = NULL;
+      out->immutable = 0;
+      ppl_unitsDimCpy(out,&called);
+      out->objType   = PPLOBJ_VEC;
+      out->immutable = called.immutable;
       break;
      }
     default:
@@ -73,8 +181,8 @@ void ppl_sliceItem (ppl_context *context, int getPtr, int *status, int *errType,
    }
 
 cleanup:
+  for (i=0; i<nArgs; i++) { STACK_POP; }
   ppl_garbageObject(&called);
-  for (i=0; i<nArgs; i++) { context->stackPtr--; ppl_garbageObject(&context->stack[context->stackPtr]); }
   return;
 fail:
   *status=1;
@@ -91,6 +199,7 @@ void ppl_sliceRange(ppl_context *context, int minset, int min, int maxset, int m
   if (context->stackPtr<nArgs+1) { *status=1; *errType=ERR_INTERNAL; sprintf(errText,"Attempt to slice object with few items on the stack."); return; }
   memcpy(&called, out, sizeof(pplObj));
   pplObjNum(out, 0, 0, 0); // Overwrite function object on stack, but don't garbage collect it yet
+  out->refCount = 1;
 
   switch (t)
    {
@@ -120,8 +229,8 @@ void ppl_sliceRange(ppl_context *context, int minset, int min, int maxset, int m
    }
 
 cleanup:
+  for (i=0; i<nArgs; i++) { STACK_POP; }
   ppl_garbageObject(&called);
-  for (i=0; i<nArgs; i++) { context->stackPtr--; ppl_garbageObject(&context->stack[context->stackPtr]); }
   return;
 fail:
   *status=1;

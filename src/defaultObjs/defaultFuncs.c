@@ -394,8 +394,7 @@ void pplfunc_ceil        (ppl_context *c, pplObj *in, int nArgs, int *status, in
 
 void pplfunc_classOf     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  pplObjCpy(&OUTPUT,in[0].objPrototype,0,1);
-  OUTPUT.self_lval = NULL;
+  pplObjCpy(&OUTPUT,in[0].objPrototype,0,0,1);
  }
 
 void pplfunc_cmyk        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -806,7 +805,7 @@ void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, in
       if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
-    else            pplObjCpy (&OUTPUT,best,0,1);
+    else            pplObjCpy (&OUTPUT,best,0,0,1);
    }
   else if ((nArgs==1)&&((in[0].objType==PPLOBJ_DICT)||(in[0].objType==PPLOBJ_MOD)||(in[0].objType==PPLOBJ_USER)))
    {
@@ -819,7 +818,7 @@ void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, in
       if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
-    else            pplObjCpy (&OUTPUT,best,0,1);
+    else            pplObjCpy (&OUTPUT,best,0,0,1);
    }
   else if ((nArgs==1)&&(in[0].objType==PPLOBJ_VEC))
    {
@@ -852,7 +851,7 @@ void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, in
       if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
-    else            pplObjCpy (&OUTPUT,best,0,1);
+    else            pplObjCpy (&OUTPUT,best,0,0,1);
    }
  }
 
@@ -869,7 +868,7 @@ void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, in
       if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
-    else            pplObjCpy (&OUTPUT,best,0,1);
+    else            pplObjCpy (&OUTPUT,best,0,0,1);
    }
   else if ((nArgs==1)&&((in[0].objType==PPLOBJ_DICT)||(in[0].objType==PPLOBJ_MOD)||(in[0].objType==PPLOBJ_USER)))
    {
@@ -882,7 +881,7 @@ void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, in
       if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
-    else            pplObjCpy (&OUTPUT,best,0,1);
+    else            pplObjCpy (&OUTPUT,best,0,0,1);
    }
   else if ((nArgs==1)&&(in[0].objType==PPLOBJ_VEC))
    {
@@ -915,7 +914,7 @@ void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, in
       if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
-    else            pplObjCpy (&OUTPUT,best,0,1);
+    else            pplObjCpy (&OUTPUT,best,0,0,1);
    }
  }
 
@@ -1160,7 +1159,7 @@ void pplfunc_sum         (ppl_context *c, pplObj *in, int nArgs, int *status, in
      {
       if (first)
        {
-        pplObjCpy(&acc2, item, 0, 1);
+        pplObjCpy(&acc2, item, 0, 0, 1);
         memcpy(&acc, &acc2, sizeof(pplObj));
         first=0;
        }
@@ -1184,7 +1183,7 @@ void pplfunc_sum         (ppl_context *c, pplObj *in, int nArgs, int *status, in
      {
       if (first)
        {
-        pplObjCpy(&acc2, item, 0, 1);
+        pplObjCpy(&acc2, item, 0, 0, 1);
         memcpy(&acc, &acc2, sizeof(pplObj));
         first=0;
        }
@@ -1218,7 +1217,7 @@ void pplfunc_sum         (ppl_context *c, pplObj *in, int nArgs, int *status, in
    {
     int i;
     pplObj acc, acc2;
-    pplObjCpy(&acc2, &in[0], 0, 1);
+    pplObjCpy(&acc2, &in[0], 0, 0, 1);
     memcpy(&acc, &acc2, sizeof(pplObj));
     for (i=1; i<nArgs; i++)
      {
@@ -1263,7 +1262,7 @@ void pplfunc_tophat      (ppl_context *c, pplObj *in, int nArgs, int *status, in
 
 void pplfunc_typeOf      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  pplObjCpy(&OUTPUT,&pplObjPrototypes[in[0].objType],0,1);
+  pplObjCpy(&OUTPUT,&pplObjPrototypes[in[0].objType],0,0,1);
   OUTPUT.self_lval = NULL;
  }
 

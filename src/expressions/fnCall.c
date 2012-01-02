@@ -47,6 +47,13 @@
 
 #include "pplConstants.h"
 
+#define STACK_POP \
+   { \
+    context->stackPtr--; \
+    ppl_garbageObject(&context->stack[context->stackPtr]); \
+    if (context->stack[context->stackPtr].refCount != 0) { *status=1; *errPos=charpos; *errType=ERR_INTERNAL; strcpy(errText,"Stack forward reference detected."); goto cleanup; } \
+   }
+
 void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int dollarAllowed, int iterDepth, int *status, int *errPos, int *errType, char *errText)
  {
   pplObj  *out  = &context->stack[context->stackPtr-1-nArgs];
@@ -58,6 +65,7 @@ void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int dollarAllowed,
   if (context->stackPtr<nArgs+1) { *status=1; *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Attempt to call function with few items on the stack."); return; }
   memcpy(&called, out, sizeof(pplObj));
   pplObjNum(out, 0, 0, 0); // Overwrite function object on stack, but don't garbage collect it yet
+  out->refCount = 1;
   out->self_this = called.self_this;
 
   // Attempt to call a module to general a class instance?
@@ -76,19 +84,19 @@ void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int dollarAllowed,
      {
       case PPLOBJ_NUM:
         if      (nArgs==0) { pplObjNum(out,0,0,0); }
-        else if (nArgs==1) { CAST_TO_NUM(&args[0]); pplObjCpy(out,&args[0],0,1); }
+        else if (nArgs==1) { CAST_TO_NUM(&args[0]); pplObjCpy(out,&args[0],0,0,1); }
         else               { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The numeric object constructor takes either zero or one arguments; %d supplied.",nArgs); }
         goto cleanup;
       case PPLOBJ_STR:
         if      (nArgs==0) { pplObjStr(out,0,0,""); }
-        else if (nArgs==1) { if (args[0].objType==PPLOBJ_STR) pplObjCpy(out,&args[0],0,1);
+        else if (nArgs==1) { if (args[0].objType==PPLOBJ_STR) pplObjCpy(out,&args[0],0,0,1);
                              else { char *outstr=(char*)malloc(65536); pplObjPrint(context,&args[0],NULL,outstr,65536,0,0); pplObjStr(out,0,1,outstr); }
                            }
         else               { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The string object constructor takes either zero or one arguments; %d supplied.",nArgs); }
         goto cleanup;
       case PPLOBJ_BOOL:
         if      (nArgs==0) { pplObjBool(out,0,1); }
-        else if (nArgs==1) { CAST_TO_BOOL(&args[0]); pplObjCpy(out,&args[0],0,1); }
+        else if (nArgs==1) { CAST_TO_BOOL(&args[0]); pplObjCpy(out,&args[0],0,0,1); }
         else               { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The boolean object constructor takes either zero or one arguments; %d supplied.",nArgs); }
         goto cleanup;
       case PPLOBJ_DATE:
@@ -122,7 +130,7 @@ void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int dollarAllowed,
         goto cleanup;
       case PPLOBJ_FILE:
         if      (nArgs==0) { pplObjFile(out,0,1,tmpfile(),0); }
-        else if (nArgs==1) { if (args[0].objType==PPLOBJ_FILE) pplObjCpy(out,&args[0],0,1);
+        else if (nArgs==1) { if (args[0].objType==PPLOBJ_FILE) pplObjCpy(out,&args[0],0,0,1);
                              else { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The first argument to the file object constructor should be a file object; an object of type <%s> was supplied.",pplObjTypeNames[args[0].objType]); }
                            }
         else               { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The file object constructor takes zero or one arguments; %d supplied.",nArgs); }
@@ -133,7 +141,7 @@ void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int dollarAllowed,
         *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"New function objects must be created with the syntax f(x)=... or subroutine f(x) { ... }."); goto cleanup;
       case PPLOBJ_EXC:
         if (nArgs==1) { if      (args[0].objType==PPLOBJ_STR) pplObjException(out,0,1,(char*)args[0].auxil);
-                        else if (args[0].objType==PPLOBJ_EXC) pplObjCpy(out,&args[0],0,1);
+                        else if (args[0].objType==PPLOBJ_EXC) pplObjCpy(out,&args[0],0,0,1);
                         else { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The first argument to the exception object constructor should be a string; an object of type <%s> was supplied.",pplObjTypeNames[args[0].objType]); }
                       }
         else          { *status=1; *errPos=charpos; *errType=ERR_TYPE; sprintf(errText,"The exception object constructor takes one argument; %d supplied.",nArgs); }
@@ -153,6 +161,7 @@ void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int dollarAllowed,
           const int l = vec->size;
           pplObj v;
           list *lo = (list *)out->auxil;
+          v.refCount = 1;
           pplObjNum(&v,1,0,0);
           ppl_unitsDimCpy(&v, &args[0]);
           for (i=0; i<l; i++) { v.real = gsl_vector_get(vec,i); ppl_listAppendCpy(lo, &v, sizeof(pplObj)); }
@@ -164,7 +173,8 @@ void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int dollarAllowed,
            {
             pplObj v;
             list *lo = (list *)out->auxil;
-            pplObjCpy(&v,&args[i],1,1);
+            v.refCount = 1;
+            pplObjCpy(&v,&args[i],0,1,1);
             ppl_listAppendCpy(lo, &v, sizeof(pplObj));
            }
          }
@@ -509,8 +519,9 @@ void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int dollarAllowed,
    }
 cleanup:
   out->self_this = NULL;
+  out->refCount = 1;
+  for (i=0; i<nArgs; i++) { STACK_POP; }
   ppl_garbageObject(&called);
-  for (i=0; i<nArgs; i++) { context->stackPtr--; ppl_garbageObject(&context->stack[context->stackPtr]); }
   return;
 cast_fail:
   *status=1; *errPos=charpos;

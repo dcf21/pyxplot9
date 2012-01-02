@@ -117,9 +117,9 @@ void ppl_opAdd(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
     if (pplObjList(o,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
     l  = (list *)o->auxil;
     li = ppl_listIterateInit((list *)a->auxil);
-    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL) { pplObjCpy(&buff, item, 1, 1); ppl_listAppendCpy(l, (void *)&buff, sizeof(pplObj) ); }
+    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL) { pplObjCpy(&buff, item, 0, 1, 1); ppl_listAppendCpy(l, (void *)&buff, sizeof(pplObj) ); }
     li = ppl_listIterateInit((list *)b->auxil);
-    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL) { pplObjCpy(&buff, item, 1, 1); ppl_listAppendCpy(l, (void *)&buff, sizeof(pplObj) ); }
+    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL) { pplObjCpy(&buff, item, 0, 1, 1); ppl_listAppendCpy(l, (void *)&buff, sizeof(pplObj) ); }
    }
   else if ((t1==PPLOBJ_LIST)&&(t2==PPLOBJ_VEC)) // adding vector to list
    {
@@ -131,7 +131,7 @@ void ppl_opAdd(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
     if (pplObjList(o,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
     l  = (list *)o->auxil;
     li = ppl_listIterateInit((list *)a->auxil);
-    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL) { pplObjCpy(&buff, item, 1, 1); ppl_listAppendCpy(l, (void *)&buff, sizeof(pplObj) ); }
+    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL) { pplObjCpy(&buff, item, 0, 1, 1); ppl_listAppendCpy(l, (void *)&buff, sizeof(pplObj) ); }
     pplObjNum(&buff,1,0,0); ppl_unitsDimCpy(&buff,b);
     for (i=0; i<bv->size; i++) { buff.real=gsl_vector_get(bv,i); ppl_listAppendCpy(l, (void *)&buff, sizeof(pplObj) ); }
    }
@@ -147,7 +147,7 @@ void ppl_opAdd(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
     pplObjNum(&buff,1,0,0); ppl_unitsDimCpy(&buff,a);
     for (i=0; i<av->size; i++) { buff.real=gsl_vector_get(av,i); ppl_listAppendCpy(l, (void *)&buff, sizeof(pplObj) ); }
     li = ppl_listIterateInit((list *)b->auxil);
-    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL) { pplObjCpy(&buff, item, 1, 1); ppl_listAppendCpy(l, (void *)&buff, sizeof(pplObj) ); }
+    while ((item = (pplObj *)ppl_listIterate(&li))!=NULL) { pplObjCpy(&buff, item, 0, 1, 1); ppl_listAppendCpy(l, (void *)&buff, sizeof(pplObj) ); }
    }
   else if ( ((t1==PPLOBJ_DICT)&&(t2==PPLOBJ_DICT)) || // adding dictionaries
             ((t1==PPLOBJ_MOD )&&(t2==PPLOBJ_MOD )) )  // adding modules
@@ -160,9 +160,9 @@ void ppl_opAdd(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
        { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
     d  = (dict *)o->auxil;
     di = ppl_dictIterateInit((dict *)a->auxil);
-    while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL) { pplObjCpy(&buff, item, 1, 1); ppl_dictAppendCpy(d, key, (void *)&buff, sizeof(pplObj) ); }
+    while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL) { pplObjCpy(&buff, item, 0, 1, 1); ppl_dictAppendCpy(d, key, (void *)&buff, sizeof(pplObj) ); }
     di = ppl_dictIterateInit((dict *)b->auxil);
-    while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL) { pplObjCpy(&buff, item, 1, 1); ppl_dictAppendCpy(d, key, (void *)&buff, sizeof(pplObj) ); }
+    while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL) { pplObjCpy(&buff, item, 0, 1, 1); ppl_dictAppendCpy(d, key, (void *)&buff, sizeof(pplObj) ); }
    }
   else if ((t1==PPLOBJ_MAT)&&(t2==PPLOBJ_MAT)) // adding matrices
    {

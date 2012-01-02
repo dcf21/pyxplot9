@@ -118,8 +118,8 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
  {
   const char    *allowed[] = {"BEHILMNOG","CJKQRU","BDHILMNOG","JKQU","FJKQRU","JKU","SFJKPQRU","EG","BEHLMNOG","BEHILMNOG","BEHILMNOG","JKU","JKQRU","JKQRU","ELV","JKPQRU","SFJKPQU","T","BEHILMNOG","SFJKPQRU","","JKU"};
   int            nCommaItems=1, nDictItems=0, tertiaryDepth=0;
-  char           state='A', oldstate, trialstate;
-  int            scanpos=0, outpos=0, trialpos;
+  char           state='A', trialstate;
+  int            scanpos=0, outpos=0, oldpos, trialpos;
   unsigned char  opcode=0, precedence=0;
   unsigned char *out = context->tokenBuff + outOffset;
   const int      buffSize = ALGEBRA_MAXLEN;
@@ -128,8 +128,8 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
 
   while (state!='U')
    {
-    oldstate = state;
     while ((in[scanpos]!='\0') && (in[scanpos]<=' ')) { SAMESTATE; } // Sop up whitespace
+    oldpos = scanpos;
 
     for (trialpos=0; ((trialstate=allowed[(int)(state-'A')][trialpos])!='\0'); trialpos++)
      {
@@ -404,9 +404,9 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
        }
       else if (trialstate=='U') // end of expression
        { NEWSTATE(0,0,0); }
-      if (state != oldstate) break;
+      if (scanpos != oldpos) break;
      }
-    if (state == oldstate) break; // We've got stuck
+    if (scanpos == oldpos) break; // We've got stuck
    }
 
   if (state=='U') // We reached state U... end of expression

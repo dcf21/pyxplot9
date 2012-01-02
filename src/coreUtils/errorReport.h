@@ -38,6 +38,7 @@
 #define ERR_NAMESPACE 111
 #define ERR_TYPE      112
 #define ERR_INTERRUPT 113
+#define ERR_DICTKEY   114
 
 #include "stringTools/strConstants.h"
 

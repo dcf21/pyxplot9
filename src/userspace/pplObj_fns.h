@@ -47,7 +47,7 @@ pplObj *pplObjException(pplObj *in, unsigned char amMalloced, unsigned char auxi
 pplObj *pplObjGlobal   (pplObj *in, unsigned char amMalloced);
 pplObj *pplObjZom      (pplObj *in, unsigned char amMalloced);
 pplObj *pplObjUser     (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, pplObj *prototype);
-pplObj *pplObjCpy      (pplObj *out, pplObj *in, unsigned char outMalloced, unsigned char useMalloc);
+pplObj *pplObjCpy      (pplObj *out, pplObj *in, unsigned char lval, unsigned char outMalloced, unsigned char useMalloc);
 
 pplObj *pplObjDeepCpy(pplObj *out, pplObj *in, int deep, unsigned char outMalloced, unsigned char useMalloc);
 

@@ -70,7 +70,7 @@ void pplmethod_class(ppl_context *c, pplObj *in, int nArgs, int *status, int *er
  {
   pplObj *t = in[-1].self_this;
   if (t==NULL) pplObjNull(&OUTPUT,0);
-  else         pplObjCpy (&OUTPUT,t->objPrototype,0,1);
+  else         pplObjCpy (&OUTPUT,t->objPrototype,0,0,1);
   OUTPUT.self_lval = NULL;
  }
 
@@ -86,6 +86,7 @@ void pplmethod_data(ppl_context *c, pplObj *in, int nArgs, int *status, int *err
   list         *l;
   dictIterator *di;
   if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  v.refCount=1;
   l = (list *)OUTPUT.auxil;
   for ( ; (t==PPLOBJ_MOD)||(t==PPLOBJ_USER) ; iter=iter->objPrototype , t=iter->objType )
    {
@@ -120,6 +121,7 @@ void pplmethod_contents(ppl_context *c, pplObj *in, int nArgs, int *status, int 
   list         *l;
   dictIterator *di;
   if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  v.refCount=1;
   l = (list *)OUTPUT.auxil;
   for ( ; (t==PPLOBJ_MOD)||(t==PPLOBJ_USER) ; iter=iter->objPrototype , t=iter->objType )
    {
@@ -152,6 +154,7 @@ void pplmethod_methods(ppl_context *c, pplObj *in, int nArgs, int *status, int *
   list         *l;
   dictIterator *di;
   if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  v.refCount=1;
   l = (list *)OUTPUT.auxil;
   for ( ; (t==PPLOBJ_MOD)||(t==PPLOBJ_USER) ; iter=iter->objPrototype , t=iter->objType )
    {
@@ -187,7 +190,7 @@ void pplmethod_type(ppl_context *c, pplObj *in, int nArgs, int *status, int *err
  {
   pplObj *t = in[-1].self_this;
   if (t==NULL) pplObjNull(&OUTPUT,0);
-  else         pplObjCpy (&OUTPUT,&pplObjPrototypes[t->objType],0,1);
+  else         pplObjCpy (&OUTPUT,&pplObjPrototypes[t->objType],0,0,1);
   OUTPUT.self_lval = NULL;
  }
 
@@ -486,9 +489,12 @@ void pplmethod_vectorAppend(ppl_context *c, pplObj *in, int nArgs, int *status, 
    {
     pplObj *o = st->self_lval;
     int     om=o->amMalloced;
+    int     rc=o->refCount;
     o->amMalloced=0;
+    o->refCount=1;
     ppl_garbageObject(o);
-    pplObjCpy(o,&OUTPUT,om,1);
+    o->refCount=rc;
+    pplObjCpy(o,&OUTPUT,0,om,1);
    }
  }
 
@@ -561,9 +567,12 @@ void pplmethod_vectorExtend(ppl_context *c, pplObj *in, int nArgs, int *status, 
    {
     pplObj *o = st->self_lval;
     int     om=o->amMalloced;
+    int     rc=o->refCount;
     o->amMalloced=0;
+    o->refCount=1;
     ppl_garbageObject(o);
-    pplObjCpy(o,&OUTPUT,om,1);
+    o->refCount=rc;
+    pplObjCpy(o,&OUTPUT,0,om,1);
    }
  }
 
@@ -598,9 +607,12 @@ void pplmethod_vectorInsert(ppl_context *c, pplObj *in, int nArgs, int *status, 
    {
     pplObj *o = st->self_lval;
     int     om=o->amMalloced;
+    int     rc=o->refCount;
     o->amMalloced=0;
+    o->refCount=1;
     ppl_garbageObject(o);
-    pplObjCpy(o,&OUTPUT,om,1);
+    o->refCount=rc;
+    pplObjCpy(o,&OUTPUT,0,om,1);
    }
  }
 
@@ -641,9 +653,10 @@ void pplmethod_listAppend(ppl_context *c, pplObj *in, int nArgs, int *status, in
   pplObj  v;
   pplObj *st = in[-1].self_this;
   list   *l  = (list *)st->auxil;
-  pplObjCpy(&v,&in[0],1,1);
+  v.refCount=1;
+  pplObjCpy(&v,&in[0],0,1,1);
   ppl_listAppendCpy(l, &v, sizeof(pplObj));
-  pplObjCpy(&OUTPUT,st,0,1);
+  pplObjCpy(&OUTPUT,st,0,0,1);
  }
 
 void pplmethod_listExtend(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -672,7 +685,8 @@ void pplmethod_listExtend(ppl_context *c, pplObj *in, int nArgs, int *status, in
     pplObj *item;
     while ((item = (pplObj*)ppl_listIterate(&li))!=NULL)
      {
-      pplObjCpy(&v,item,1,1);
+      v.refCount=1;
+      pplObjCpy(&v,item,0,1,1);
       ppl_listAppendCpy(l, &v, sizeof(pplObj));
      }
    }
@@ -680,7 +694,7 @@ void pplmethod_listExtend(ppl_context *c, pplObj *in, int nArgs, int *status, in
    {
     *status=1; *errType=ERR_TYPE; sprintf(errText, "Argument to the extend(x) method must be either a list or a vector. Supplied argument had type <%s>.", pplObjTypeNames[t]); return;
    }
-  pplObjCpy(&OUTPUT,st,0,1);
+  pplObjCpy(&OUTPUT,st,0,0,1);
  }
 
 void pplmethod_listInsert(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -695,9 +709,10 @@ void pplmethod_listInsert(ppl_context *c, pplObj *in, int nArgs, int *status, in
   p = (long)round(in[0].real);
   if (p<0) { *status=1; *errType=ERR_RANGE; sprintf(errText, "Attempt to insert a list item before the beginning of a list."); return; }
   if (p>l->length) { *status=1; *errType=ERR_RANGE; sprintf(errText, "List index out of range."); return; }
-  pplObjCpy(&v,&in[1],1,1);
+  v.refCount=1;
+  pplObjCpy(&v,&in[1],0,1,1);
   ppl_listInsertCpy(l, p, &v, sizeof(pplObj));
-  pplObjCpy(&OUTPUT,st,0,1);
+  pplObjCpy(&OUTPUT,st,0,0,1);
  }
 
 void pplmethod_listLen(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -765,9 +780,12 @@ void pplmethod_dictItems(ppl_context *c, pplObj *in, int nArgs, int *status, int
   l  = (list *)OUTPUT.auxil;
   while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
    {
+    v .refCount=1;
+    va.refCount=1;
+    vb.refCount=1;
     COPYSTR(tmp,key);
     if (pplObjStr(&va,1,1,tmp )==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
-    pplObjCpy(&vb,item,1,1);
+    pplObjCpy(&vb,item,0,1,1);
     if (pplObjList(&v,1,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
     l2 = (list *)v.auxil;
     ppl_listAppendCpy(l2, (void *)&va, sizeof(pplObj));
@@ -783,6 +801,7 @@ void pplmethod_dictKeys(ppl_context *c, pplObj *in, int nArgs, int *status, int 
   list         *l;
   dictIterator *di = ppl_dictIterateInit((dict *)in[-1].self_this->auxil);
   if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  v.refCount=1;
   l  = (list *)OUTPUT.auxil;
   while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
    { COPYSTR(tmp,key); pplObjStr(&v,1,1,tmp); ppl_listAppendCpy(l, (void *)&v, sizeof(pplObj)); }
@@ -801,9 +820,10 @@ void pplmethod_dictValues(ppl_context *c, pplObj *in, int nArgs, int *status, in
   list         *l;
   dictIterator *di = ppl_dictIterateInit((dict *)in[-1].self_this->auxil);
   if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  v.refCount=1;
   l  = (list *)OUTPUT.auxil;
   while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
-   { COPYSTR(tmp,key); pplObjCpy(&v,item,1,1); ppl_listAppendCpy(l, (void *)&v, sizeof(pplObj)); }
+   { COPYSTR(tmp,key); pplObjCpy(&v,item,0,1,1); ppl_listAppendCpy(l, (void *)&v, sizeof(pplObj)); }
  }
 
 // Matrix methods
@@ -873,6 +893,7 @@ void pplmethod_matrixEigenvectors(ppl_context *c, pplObj *in, int nArgs, int *st
   gsl_vector *vo;
   int         n    = m->size1;
   gsl_eigen_symmv_workspace *w;
+  v.refCount=1;
   if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Eigenvectors are only defined for square matrices."); return; }
   for (i=0; i<m->size1; i++) for (j=0; j<i; j++) if (gsl_matrix_get(m,i,j) != gsl_matrix_get(m,j,i)) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Eigenvectors can only be computed for symmetric matrices; supplied matrix is not symmetric."); return; }
   if ((w=gsl_eigen_symmv_alloc(n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
@@ -1051,6 +1072,7 @@ void pplmethod_fileReadlines(ppl_context *c, pplObj *in, int nArgs, int *status,
   pplObj  v;
   pplFile *f = (pplFile *)st->auxil;
   list    *l;
+  v.refCount=1;
   if (!f->open) { pplObjNull(&OUTPUT,0); return; }
   if (pplObjList(&v,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   l = (list *)v.auxil;

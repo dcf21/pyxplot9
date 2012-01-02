@@ -72,9 +72,10 @@ void ppl_error(pplerr_context *context, int ErrType, int HighlightPos1, int High
       case ERR_RANGE    : sprintf(temp_stringB+i, "Range Error: ");     break;
       case ERR_UNIT     : sprintf(temp_stringB+i, "Unit Error: ");      break;
       case ERR_OVERFLOW : sprintf(temp_stringB+i, "Overflow Error: ");  break;
-      case ERR_NAMESPACE: sprintf(temp_stringB+i, "Namespace Error: ");  break;
-      case ERR_TYPE     : sprintf(temp_stringB+i, "Type Error: ");       break;
-      case ERR_INTERRUPT: sprintf(temp_stringB+i, "Interrupt Error: ");  break;
+      case ERR_NAMESPACE: sprintf(temp_stringB+i, "Namespace Error: "); break;
+      case ERR_TYPE     : sprintf(temp_stringB+i, "Type Error: ");      break;
+      case ERR_INTERRUPT: sprintf(temp_stringB+i, "Interrupt Error: "); break;
+      case ERR_DICTKEY  : sprintf(temp_stringB+i, "Key Error: ");       break;
      }
     i += strlen(temp_stringB+i);
    }
@@ -144,9 +145,10 @@ void ppl_warning(pplerr_context *context, int ErrType, char *msg)
       case ERR_RANGE    : sprintf(temp_stringB+i, "Range Warning: ");     break;
       case ERR_UNIT     : sprintf(temp_stringB+i, "Unit Warning: ");      break;
       case ERR_OVERFLOW : sprintf(temp_stringB+i, "Overflow Warning: ");  break;
-      case ERR_NAMESPACE: sprintf(temp_stringB+i, "Namespace Warning: ");  break;
-      case ERR_TYPE     : sprintf(temp_stringB+i, "Type Warning: ");       break;
-      case ERR_INTERRUPT: sprintf(temp_stringB+i, "Interrupt Warning: ");  break;
+      case ERR_NAMESPACE: sprintf(temp_stringB+i, "Namespace Warning: "); break;
+      case ERR_TYPE     : sprintf(temp_stringB+i, "Type Warning: ");      break;
+      case ERR_INTERRUPT: sprintf(temp_stringB+i, "Interrupt Warning: "); break;
+      case ERR_DICTKEY  : sprintf(temp_stringB+i, "Key Warning: ");       break;
      }
     i += strlen(temp_stringB+i);
    }

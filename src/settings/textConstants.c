@@ -73,7 +73,6 @@ sprintf(ppltxt_welcome, "\n\
 |  __/| |_| |/  \\|  __/| | (_) | |_ \n\
 |_|    \\__, /_/\\_\\_|   |_|\\___/ \\__|   Copyright (C) 2006-2012 Dominic Ford\n\
        |___/                                         2008-2012 Ross Church\n\
-                                                     2010-2011 Zoltan Voros\n\
 \n\
 THIS DEVELOPMENT VERSION OF PYXPLOT IS FEATURE INCOMPLETE, HIGHLY UNSTABLE, AND\n\
 LARGELY UNDOCUMENTED. IF DIDN'T ALREADY KNOW THAT, YOU SHOULD PROBABLY BE USING\n\

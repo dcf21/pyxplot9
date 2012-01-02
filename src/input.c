@@ -130,7 +130,6 @@ void ppl_processScript(ppl_context *context, char *input, int iterLevel)
  {
   int  linenumber = 1;
   int  status;
-  int  ProcessedALine = 0;
   char full_filename[FNAME_LENGTH];
   char filename_description[FNAME_LENGTH];
   FILE *infile;
@@ -151,16 +150,15 @@ void ppl_processScript(ppl_context *context, char *input, int iterLevel)
     if ((feof(infile)) || (ferror(infile))) break;
     ppl_file_readline(infile, context->inputLineBuffer, LSTR_LENGTH);
     linenumber++;
-    status = ppl_processLine(context, context->inputLineBuffer, 0, iterLevel, !ProcessedALine);
+    status = ppl_processLine(context, context->inputLineBuffer, 0, iterLevel, 1);
     ppl_error_setstreaminfo(&context->errcontext, -1, "");
     pplcsp_killAllHelpers(context);
     if (status>0) // If an error occurs on the first line of a script, aborted processing it
      {
-      ppl_error(&context->errcontext, ERR_FILE, -1, -1, "Error on first line of command file.  Is this a valid script?  Aborting.");
+      ppl_error(&context->errcontext, ERR_FILE, -1, -1, "Aborting.");
       if (context->inputLineAddBuffer != NULL) { free(context->inputLineAddBuffer); context->inputLineAddBuffer=NULL; }
       break;
      }
-    if (status>=0) ProcessedALine = 1;
    }
   context->shellExiting = 0;
   if (context->inputLineAddBuffer != NULL) { free(context->inputLineAddBuffer); context->inputLineAddBuffer=NULL; }
@@ -266,11 +264,11 @@ int ppl_ProcessStatement(ppl_context *context, char *line)
    }
 
   // Print tokens
-  // ppl_tokenPrint(context, line, end);
+  //ppl_tokenPrint(context, line, end);
 
   // Print bytecode
-  // ppl_reversePolishPrint(context, (void *)buff, context->errcontext.tempErrStr);
-  // ppl_report(&context->errcontext, NULL);
+  //ppl_reversePolishPrint(context, (void *)buff, context->errcontext.tempErrStr);
+  //ppl_report(&context->errcontext, NULL);
 
   // Execute bytecode
   out = ppl_expEval(context, (void *)buff, &lastOpAssign, 1, 0, &errPos, &errType, errText);

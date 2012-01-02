@@ -60,6 +60,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     pplObj  v, m;
     dict   *d, *d2, *d3;
     int     i;
+    m.refCount = v.refCount = 1;  
     ppl_dictAppendCpy(out->namespaces[1] , "defaults" , pplObjModule(&m,1,1,1) , sizeof(v));
     d = (dict *)m.auxil;
     out->namespaces[0] = d;
@@ -92,7 +93,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     for (i=0; i<=PPLOBJ_USER; i++)
      if ((i!=PPLOBJ_GLOB)&&(i!=PPLOBJ_ZOM)&&(i!=PPLOBJ_EXP)&&(i!=PPLOBJ_BYT))
       {
-       pplObjCpy(&v, &pplObjPrototypes[i], 1, 1);
+       pplObjCpy(&v, &pplObjPrototypes[i], 0, 1, 1);
        ppl_dictAppendCpy(d2, pplObjTypeNames[i], (void *)&v, sizeof(v));
       }
 
@@ -338,9 +339,9 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"zeta"          ,1,1,1,1,1,1,(void *)&pplfunc_zeta        , "zeta(z)", "\\zeta@<@1@>", "zeta(x) evaluates the Riemann zeta function at x");
 
     // Shortcuts to module, vector and matrix
-    pplObjCpy(&v, &pplObjPrototypes[PPLOBJ_MAT], 1, 1); ppl_dictAppendCpy(d, pplObjTypeNames[PPLOBJ_MAT], (void *)&v, sizeof(v));
-    pplObjCpy(&v, &pplObjPrototypes[PPLOBJ_MOD], 1, 1); ppl_dictAppendCpy(d, pplObjTypeNames[PPLOBJ_MOD], (void *)&v, sizeof(v));
-    pplObjCpy(&v, &pplObjPrototypes[PPLOBJ_VEC], 1, 1); ppl_dictAppendCpy(d, pplObjTypeNames[PPLOBJ_VEC], (void *)&v, sizeof(v));
+    pplObjCpy(&v, &pplObjPrototypes[PPLOBJ_MAT], 0, 1, 1); ppl_dictAppendCpy(d, pplObjTypeNames[PPLOBJ_MAT], (void *)&v, sizeof(v));
+    pplObjCpy(&v, &pplObjPrototypes[PPLOBJ_MOD], 0, 1, 1); ppl_dictAppendCpy(d, pplObjTypeNames[PPLOBJ_MOD], (void *)&v, sizeof(v));
+    pplObjCpy(&v, &pplObjPrototypes[PPLOBJ_VEC], 0, 1, 1); ppl_dictAppendCpy(d, pplObjTypeNames[PPLOBJ_VEC], (void *)&v, sizeof(v));
 
     // Ast module
     ppl_dictAppendCpy(d, "ast", pplObjModule(&m,1,1,1) , sizeof(v));
