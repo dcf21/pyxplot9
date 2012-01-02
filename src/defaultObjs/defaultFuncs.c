@@ -557,6 +557,25 @@ void pplfunc_expint      (ppl_context *c, pplObj *in, int nArgs, int *status, in
   CHECK_OUTPUT_OKAY;
  }
 
+void pplfunc_factors(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj  v;
+  list   *l;
+  int     i,n=(int)in[0].real;
+  char   *FunctionDescription = "factors(x)";
+  CHECK_NEEDINT(in[0], "x", "function's argument must be");
+  if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  v.refCount=1;
+  l = (list *)OUTPUT.auxil;
+  for (i=1; i<=n/2; i++)
+   {
+    if ((n%i)!=0) continue;
+    pplObjNum(&v,0,i,0); ppl_listAppendCpy(l, &v, sizeof(v));
+   }
+  pplObjNum(&v,0,n,0); ppl_listAppendCpy(l, &v, sizeof(v));
+  return;
+ }
+
 void pplfunc_finite      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   if ((c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && (in[0].flagComplex)) return;
@@ -973,6 +992,7 @@ void pplfunc_prime       (ppl_context *c, pplObj *in, int nArgs, int *status, in
  {
   char *FunctionDescription = "prime(x)";
   CHECK_NEEDINT(in[0], "x", "function's argument must be an integer in the range");
+  pplObjBool(&OUTPUT,0,0);
    {
     long x = floor(in[0].real), m, n;
     if (x<53) // Hardcode primes less than 53
@@ -990,6 +1010,42 @@ void pplfunc_prime       (ppl_context *c, pplObj *in, int nArgs, int *status, in
     OUTPUT.real = 1;
    }
   CHECK_OUTPUT_OKAY;
+ }
+
+void pplfunc_primefactors(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj  v;
+  list   *l;
+  int     i,n=(int)in[0].real;
+  char   *FunctionDescription = "primeFactors(x)";
+  CHECK_NEEDINT(in[0], "x", "function's argument must be");
+  if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  v.refCount=1;
+  l = (list *)OUTPUT.auxil;
+  for (i=2; i<=sqrt(n); i++)
+   {
+    int prime=1;
+    if (i<53) prime=(i==2)||(i==3)||(i==5)||(i==7)||(i==11)||(i==13)||(i==17)||(i==19)||(i==23)||(i==29)||(i==31)||(i==37)||(i==41)||(i==43)||(i==47);
+    else if (((i%2)==0)||((i%3)==0)||((i%5)==0)||((i%7)==0)) prime=0;
+    else
+     {
+      int t, tm = sqrt(i);
+      for (t=11; ((t<=tm)&&prime); t+=6)
+       {
+        if ((i% t   )==0) prime=0;
+        if ((i%(t+2))==0) prime=0;
+       }
+      prime=1;
+     }
+    if (!prime) continue;
+    while (n%i==0)
+     {
+      pplObjNum(&v,0,i,0); ppl_listAppendCpy(l, &v, sizeof(v));
+      if ((n/=i)==1) break;
+     }
+   }
+  if (n!=1) { pplObjNum(&v,0,n,0); ppl_listAppendCpy(l, &v, sizeof(v)); }
+  return;
  }
 
 void pplfunc_radians     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)

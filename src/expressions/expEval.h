@@ -29,6 +29,7 @@
  { \
   double d=0; \
   int t=(X)->objType; \
+  int rc=(X)->refCount; \
   if (t!=PPLOBJ_NUM) \
    { \
     switch (t) \
@@ -47,6 +48,7 @@
      } \
     ppl_garbageObject(X); \
     pplObjNum(X,0,d,0); \
+    (X)->refCount=rc; \
    } \
  }
 
@@ -66,6 +68,7 @@
 #define CAST_TO_BOOL(X) \
  { \
   int t=(X)->objType, s; \
+  int rc=(X)->refCount; \
   if (t!=PPLOBJ_BOOL) \
    { \
     switch (t) \
@@ -84,6 +87,7 @@
      } \
     ppl_garbageObject(X); \
     pplObjBool(X,0,s); \
+    (X)->refCount=rc; \
    } \
  }
 

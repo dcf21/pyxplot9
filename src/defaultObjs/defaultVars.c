@@ -280,6 +280,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"exp"           ,1,1,1,1,0,0,(void *)&pplfunc_exp         , "exp(z)", "\\mathrm{exp}@<@1@>", "exp(x) returns e to the power of x. x may either be a dimensionless number or may have units of angle");
     ppl_addSystemFunc(d,"expm1"         ,1,1,1,1,0,0,(void *)&pplfunc_expm1       , "expm1(x)", "\\mathrm{expm1}@<@1@>", "expm1(x) accurately evaluates exp(x)-1");
     ppl_addSystemFunc(d,"expint"        ,2,2,1,1,1,1,(void *)&pplfunc_expint      , "expint(n,x)", "\\mathrm{expint}@<@1,@2@>", "expint(n,x) evaluates the integral of exp(-xt)/t**n between one and infinity");
+    ppl_addSystemFunc(d,"factors"       ,1,1,1,1,1,1,(void *)&pplfunc_factors     , "factors(x)", "\\mathrm{factors}@<@1@>", "factors(x) returns a list of the factors of the integer x");
     ppl_addSystemFunc(d,"finite"        ,1,1,1,0,0,0,(void *)&pplfunc_finite      , "finite(z)", "\\mathrm{finite}@<@1@>", "finite(x) returns 1 if x is a finite number, and 0 otherwise");
     ppl_addSystemFunc(d,"floor"         ,1,1,1,1,1,1,(void *)&pplfunc_floor       , "floor(x)", "\\mathrm{floor}@<@1@>", "floor(x) returns the largest integer value smaller than or equal to x");
     ppl_addSystemFunc(d,"gamma"         ,1,1,1,1,1,1,(void *)&pplfunc_gamma       , "gamma(x)", "\\mathrm{\\Gamma}@<@1@>", "gamma(x) evaluates the gamma function at x");
@@ -316,6 +317,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"ordinal"       ,1,1,1,1,1,1,(void *)&pplfunc_ordinal     , "ordinal(n)", "\\mathrm{ordinal}@<@1@>", "ordinal(n) returns the ordinal string, e.g. '1st', '2nd', '3rd' for the positive integer n");
     ppl_addSystemFunc(d,"pow"           ,2,2,1,1,0,0,(void *)&pplfunc_pow         , "pow(x,y)", "\\mathrm{pow}@<@1,@2@>", "pow(x,y) returns x to the power of y");
     ppl_addSystemFunc(d,"prime"         ,1,1,1,1,1,1,(void *)&pplfunc_prime       , "prime(x)", "\\mathrm{prime}@<@1@>", "prime(x) returns one if floor(x) is a prime number; zero otherwise");
+    ppl_addSystemFunc(d,"primeFactors"  ,1,1,1,1,1,1,(void *)&pplfunc_primefactors, "primeFactors(x)", "\\mathrm{primeFactors}@<@1@>", "primeFactors(x) returns a list of the prime factors of the integer x");
     ppl_addSystemFunc(d,"radians"       ,1,1,1,1,1,0,(void *)&pplfunc_radians     , "radians(x)", "\\mathrm{radians}@<@1@>", "radians(x) converts angles measured in degrees into radians");
     ppl_addSystemFunc(d,"range"         ,1,3,1,1,1,0,(void *)&pplfunc_range       , "range([f],l,[s])", "\\mathrm{range@<@0@>", "range([f],l,[s]) returns a vector of uniformly-spaced numbers between f and l, with stepsize s");
     ppl_addSystemFunc(d,"Re"            ,1,1,1,1,0,0,(void *)&pplfunc_real        , "Re(z)", "\\mathrm{Re}@<@1@>", "Re(z) returns the magnitude of the real part of z");

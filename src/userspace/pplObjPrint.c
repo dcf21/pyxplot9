@@ -201,7 +201,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
       unit = ppl_printUnit(c,o,&real,&imag,1,1,SW_DISPLAY_T);
       if (o->dimensionless) real=1;
       gsl_matrix *m = ((pplMatrix *)(o->auxil))->m;
-      if (typeable==SW_DISPLAY_T)
+      if (internal || (typeable==SW_DISPLAY_T))
        {
         strcpy(out+i,"matrix(");
         i+=strlen(out+i);

@@ -292,6 +292,26 @@ void pplmethod_strFind(ppl_context *c, pplObj *in, int nArgs, int *status, int *
   pplObjNum(&OUTPUT,0,-1,0);
  }
 
+void pplmethod_strFindAll(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *t = in[-1].self_this;
+  char   *instr = (char *)t->auxil, *cmpstr;
+  int     il, cl, pmax, p;
+  pplObj  v;
+  list   *l;
+  if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The findAll() method requires a single string argument."); return; }
+  if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  v.refCount=1;
+  l = (list *)OUTPUT.auxil;
+  cmpstr = (char *)in[0].auxil;
+  il     = strlen(instr);
+  cl     = strlen(cmpstr);
+  pmax   = il-cl;
+  for (p=0; p<=pmax; p++)
+   if (strncmp(instr+p,cmpstr,cl)==0)
+    { pplObjNum(&v,0,p,0); ppl_listAppendCpy(l, &v, sizeof(v)); }
+ }
+
 void pplmethod_strLen(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   pplObj *t = in[-1].self_this;
@@ -1136,6 +1156,7 @@ void pplObjMethodsInit(ppl_context *c)
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"beginswith",1,1,0,0,0,0,(void *)&pplmethod_strBeginsWith, "beginswith(x)", "\\mathrm{beginswith}@<@1@>", "beginswith(x) returns a boolean indicating whether a string begins with the substring x");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"endswith"  ,1,1,0,0,0,0,(void *)&pplmethod_strEndsWith  , "endswith(x)", "\\mathrm{endswith}@<@1@>", "endswith(x) returns a boolean indicating whether a string ends with the substring x");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"find"      ,1,1,0,0,0,0,(void *)&pplmethod_strFind      , "find(x)", "\\mathrm{find}@<@1@>", "find(x) returns the position of the first occurance of x in a string");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"findAll"   ,1,1,0,0,0,0,(void *)&pplmethod_strFindAll   , "findAll(x)", "\\mathrm{findAll}@<@1@>", "findAll(x) returns a list of the positions where the substring x occurs in a string");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"isalnum"   ,0,0,1,1,1,1,(void *)&pplmethod_strisalnum   , "isalnum()", "\\mathrm{isalnum}@<@>", "isalnum() returns a boolean indicating whether all of the characters of a string are alphanumeric");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"isalpha"   ,0,0,1,1,1,1,(void *)&pplmethod_strisalpha   , "isalpha()", "\\mathrm{isalpha}@<@>", "isalpha() returns a boolean indicating whether all of the characters of a string are alphabetic");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"isdigit"   ,0,0,1,1,1,1,(void *)&pplmethod_strisdigit   , "isdigit()", "\\mathrm{isdigit}@<@>", "isdigit() returns a boolean indicating whether all of the characters of a string are numeric");

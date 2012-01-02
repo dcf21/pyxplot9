@@ -78,6 +78,7 @@ void pplfunc_erfc        (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_exp         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_expm1       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_expint      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_factors     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_finite      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_floor       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_gamma       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
@@ -112,6 +113,7 @@ void pplfunc_open        (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_ordinal     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_pow         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_prime       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_primefactors(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_radians     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_range       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_rgb         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);

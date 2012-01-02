@@ -379,8 +379,8 @@ pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dolla
             if (obj==NULL) { *errPos=charpos; *errType=ERR_INTERNAL; sprintf(errText,"Out of memory."); goto cleanup_on_error; }
            }
           STACK_POP;
-          pplObjCpy(stk , obj , 1 , 0 , 1);
-          stk->refCount=1;
+          pplObjCpy(stk-1 , obj , 1 , 0 , 1);
+          (stk-1)->refCount=1;
           context->stackPtr++;
           break;
          }
