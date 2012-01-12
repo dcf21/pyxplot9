@@ -67,26 +67,26 @@ for line in f_in:
   varcount       = len(varnames)
   words = line.split()
   for word in words:
-    if word in ["=","(","~",")","{","}","<","|",">","["]:
+    if word in ["=","(","~",")","{","}","<","|",">","["]: # Grammar characters are passed straight through
       outline += "%s "%word
-      if word=="[":
+      if word=="[": # Lists are placed on the stack, and the number of variables in each list counted
         stack.append(varcount)
         stack_varnames.append(varnames)
-        varcount=0
+        varcount=1 # Start counting from variable 1 inside a list, as first value is pointer to next list item
         varnames={}
       continue
     parts = word[1:].split(":")
-    parts[0] = word[0]+parts[0]
-    subparts = parts[0].split("@")
+    parts[0] = word[0]+parts[0] # If first character is a colon, it should match a literal :, not act as a separator
+    subparts = parts[0].split("@") # Match string has form plot@1, meaning 'p' is short for 'plot'
     if len(parts)<2:
-      parts.append("X")
+      parts.append("X") # If output variable name is not specified, stick it in 'X'.
     if len(subparts)>1:
-      if subparts[1]=="n": subparts[1]=-1
+      if subparts[1]=="n": subparts[1]=-1 # An auto-complete length of 'n' is stored as -1
       parts.append("%s"%subparts[1])
       parts[0] = subparts[0]
     else:
-      parts.append("%s"%len(parts[0]))
-    if len(parts)==3: parts.insert(2,"")
+      parts.append("%s"%len(parts[0])) # If no auto-complete length is specified, whole string must be matched
+    if len(parts)==3: parts.insert(2,"") # At this point, parts is [ match string , output variable , string to store (blank if equals match string) , auto-complete len ]
     assert len(parts)==4, "Syntax error in word '%s'."%word
     varname = parts[1]
     if word.startswith("]:"):
@@ -94,36 +94,35 @@ for line in f_in:
       listsizes.append(varcount)
       varcount=stack.pop()
       varnames=stack_varnames.pop()
-    if varname=='directive':
+    if varname=='directive': # Directive names are stored for use in #defines to convert variable names into output slot numbers
       if parts[2]=="": directive = parts[0]
       else           : directive = parts[2]
-    if varname=='set_option':
+    if varname=='set_option': # Set options are also used in #defines
       if parts[2]=="": setoption = parts[0]+"_"
       else           : setoption = parts[2]+"_"
     if varname not in varnames:
       varnames[varname] = varcount
-      if   (parts[0]=="%p"): varcount += 2
+      if   (parts[0]=="%p"): varcount += 2 # Position vectors require 2 or 3 slots
       elif (parts[0]=="%P"): varcount += 3
-      else                 : varcount += 1
+      else                 : varcount += 1 # Varcount keeps track of the slot number to place the next variable in
     elif (parts[0] in ["%p","%P"]): print "Danger in command %s: sharing position variable name with other variables of different lengths"%directive
     outnum = varnames[varname]
-    parts.append("%s"%outnum)
+    parts.append("%s"%outnum) # parts[4] = slot number
     if word.startswith("]:"):
       initial = ""
-      parts.append("%s"%listsizes[-1])
+      parts.append("%s"%listsizes[-1]) # parts[5] = list length for ] (number of slots needed for this list's variables)
     else:
       initial = "@"
-      parts.append("0")
+      parts.append("0") # ... or zero otherwise
     outline += initial + "@".join(parts) + " "
-  f_c.write("%d %d "%(varcount,len(listsizes)))
-  for i in listsizes: f_c.write("%d "%i)
+  f_c.write("%d "%(varcount)) # First word on each statement definition line is the number of variables in the root slotspace
   f_c.write("%s\\n\\\n"%outline)
   for i,j in varnames.iteritems():
    if i!="X":
     key = "PARSE_%s_%s%s"%(directive,setoption,sanitize(i))
     if (key in includeKeys) and (includeKeys[key]!=j): print "Repetition of key %s"%key
     includeKeys[key] = j
-    f_h.write("#define %s %d\n"%(key,j))
+    f_h.write("#define %s %d\n"%(key,j)) # Write #defines to convert variable names into slot numbers
 
 # Finish up
 
