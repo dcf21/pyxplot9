@@ -122,37 +122,44 @@ int ppl_listInsertCpy(list *in, int N, void *item, int size)
   return 0;
  }
 
+static void ppl_listRemoveEngine(list *in, listItem *ptr)
+ {
+  listItem *ptrnext;
+  if (ptr->next != NULL) // We are not the last item in the list
+   {
+    ptrnext       = ptr->next;
+    ptr->data     = ptrnext->data;
+    ptr->next     = ptrnext->next;
+    if (in->last == ptrnext) in->last = ptr;
+    else ptr->next->prev = ptr;
+   }
+  else if (ptr->prev != NULL) // We are the last item in the list, but not the first item
+   {
+    ptrnext       = ptr->prev;
+    ptr->data     = ptrnext->data;
+    ptr->prev     = ptrnext->prev;
+    if (in->first == ptrnext) in->first = ptr;
+    else ptr->prev->next = ptr;
+   }
+  else // We are the only item in the list
+   {
+    in->first = NULL;
+    in->last  = NULL;
+   }
+  in->length--;
+  return;
+ }
+
 int ppl_listRemove(list *in, void *item)
  {
-  listItem *ptr, *ptrnext;
+  listItem *ptr;
   if (in==NULL) return 1;
   ptr = in->first;
   while (ptr != NULL)
    {
     if (ptr->data == item)
      {
-      if (ptr->next != NULL) // We are not the last item in the list
-       {
-        ptrnext       = ptr->next;
-        ptr->data     = ptrnext->data;
-        ptr->next     = ptrnext->next;
-        if (in->last == ptrnext) in->last = ptr;
-        else ptr->next->prev = ptr;
-       }
-      else if (ptr->prev != NULL) // We are the last item in the list, but not the first item
-       {
-        ptrnext       = ptr->prev;
-        ptr->data     = ptrnext->data;
-        ptr->prev     = ptrnext->prev;
-        if (in->first == ptrnext) in->first = ptr;
-        else ptr->prev->next = ptr;
-       }
-      else // We are the only item in the list
-       {
-        in->first = NULL;
-        in->last  = NULL;
-       }
-      in->length--;
+      ppl_listRemoveEngine(in, ptr);
       return 0;
      }
     ptr = ptr->next;
@@ -174,6 +181,7 @@ void *ppl_listGetItem(list *in, int N)
   ptr = in->first;
   for (i=0; ((i<N) && (ptr!=NULL)); i++, ptr=ptr->next);
   if (ptr==NULL) return NULL;
+  else           ppl_listRemoveEngine(in, ptr);
   return ptr->data;
  }
 
@@ -191,6 +199,17 @@ void *ppl_listPop(list *in)
    }
   in->length--;
   return out;
+ }
+
+void *ppl_listPopItem(list *in, int N)
+ {
+  listItem *ptr;
+  int   i;
+  if (in==NULL) return NULL;
+  ptr = in->first;
+  for (i=0; ((i<N) && (ptr!=NULL)); i++, ptr=ptr->next);
+  if (ptr==NULL) return NULL;
+  return ptr->data;
  }
 
 void *ppl_listLast(list *in)

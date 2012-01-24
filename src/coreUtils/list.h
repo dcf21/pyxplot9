@@ -53,6 +53,7 @@ int           ppl_listRemove     (list *in, void *item);
 int           ppl_listRemoveAll  (list *in, void *item);
 void         *ppl_listGetItem    (list *in, int   N);
 void         *ppl_listPop        (list *in);
+void         *ppl_listPopItem    (list *in, int   N);
 void         *ppl_listLast       (list *in);
 listIterator *ppl_listIterateInit(list *in);
 void         *ppl_listIterate    (listIterator **in);

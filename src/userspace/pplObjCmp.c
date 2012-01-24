@@ -1,4 +1,4 @@
-// expEvalOps.c
+// pplObjCmp.c
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -190,43 +190,75 @@ int pplObjCmp(ppl_context *c, const pplObj *a, const pplObj *b, int *status, int
    }
   else if (t1o==6) // 6 - vector
    {
+    int i;
     gsl_vector *av = ((pplVector *)a->auxil)->v;
     gsl_vector *bv = ((pplVector *)b->auxil)->v;
     if (av->size < bv->size) return -1;
     if (av->size > bv->size) return  1;
-    if (av < bv) return -1;
-    if (av > bv) return  1;
+    for (i=0; i<UNITS_MAX_BASEUNITS; i++)
+     {
+      if (a->exponent[i] < b->exponent[i]) return -1;
+      if (a->exponent[i] > b->exponent[i]) return  1;
+     }
+    for (i=0; i<av->size; i++)
+     {
+      if (gsl_vector_get(av,i) < gsl_vector_get(bv,i)) return -1;
+      if (gsl_vector_get(av,i) > gsl_vector_get(bv,i)) return  1;
+     }
     return 0;
    }
   else if (t1o==7) // 7 - list
    {
+    int           out;
+    listIterator *lia, *lib;
+    pplObj       *oba, *obb;
     list *la = (list *)a->auxil;
     list *lb = (list *)b->auxil;
     if (la->length < lb->length) return -1;
     if (la->length > lb->length) return  1;
-    if (la < lb) return -1;
-    if (la > lb) return  1;
-    return 0;
+    lia = ppl_listIterateInit(la);
+    lib = ppl_listIterateInit(lb);
+    out = 0;
+    while ( ((oba=ppl_listIterate(&lia))!=NULL) && ((obb=ppl_listIterate(&lib))!=NULL) && ((out=pplObjCmpQuiet((void*)&oba,(void*)&obb))==0) )
+    return out;
    }
   else if (t1o==8) // 8 - matrix
    {
+    int i,j;
     gsl_matrix *am = ((pplMatrix *)a->auxil)->m;
     gsl_matrix *bm = ((pplMatrix *)b->auxil)->m;
     if (am->size1*am->size2 < bm->size1*bm->size2) return -1;
     if (am->size1*am->size2 > bm->size1*bm->size2) return  1;
-    if (am < bm) return -1;
-    if (am > bm) return  1;
+    for (i=0; i<UNITS_MAX_BASEUNITS; i++)
+     {
+      if (a->exponent[i] < b->exponent[i]) return -1;
+      if (a->exponent[i] > b->exponent[i]) return  1;
+     }
+    for (i=0; i<am->size1; i++) for (j=0; j<am->size2; j++)
+     {
+      if (gsl_matrix_get(am,i,j) < gsl_matrix_get(bm,i,j)) return -1;
+      if (gsl_matrix_get(am,i,j) > gsl_matrix_get(bm,i,j)) return  1;
+     }
     return 0;
    }
   else if ((t1o==9)||(t1o==10)||(t1o==11)) // 9 - dictionary; 10 - instance; 11 - module
    {
+    int           out;
+    dictIterator *dia, *dib;
+    pplObj       *oba, *obb;
+    char         *keya, *keyb;
     dict *da = (dict *)a->auxil;
     dict *db = (dict *)b->auxil;
     if (da->length < db->length) return -1;
     if (da->length > db->length) return  1;
-    if (da < db) return -1;
-    if (da > db) return  1;
-    return 0;
+    dia = ppl_dictIterateInit(da);
+    dib = ppl_dictIterateInit(db);
+    out = 0;
+    while ( ((oba=ppl_dictIterate(&dia,&keya))!=NULL) &&
+            ((obb=ppl_dictIterate(&dib,&keyb))!=NULL) &&
+            ((out=strcmp(keya,keyb))==0) &&
+            ((out=pplObjCmpQuiet((void*)&oba,(void*)&obb))==0) )
+    return out;
    }
   else if ((t1o==12)||(t1o==13)) // 12 - function; 13 - file handle
    {

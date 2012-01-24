@@ -741,6 +741,30 @@ void pplmethod_listLen(ppl_context *c, pplObj *in, int nArgs, int *status, int *
   pplObjNum(&OUTPUT,0,l->length,0);
  }
 
+void pplmethod_listPop(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *obj;
+  pplObj *st = in[-1].self_this;
+  list   *l  = (list *)st->auxil;
+  if (nArgs==0)
+   {
+    obj = ppl_listPop(l);
+   }
+  else
+   {
+    long p;
+    if (in[0].objType!=PPLOBJ_NUM) { *status=1; *errType=ERR_TYPE; sprintf(errText, "Optional argument to the pop(n) method must be a number. Supplied argument had type <%s>.", pplObjTypeNames[in[0].objType]); return; }
+    if (in[0].flagComplex) { *status=1; *errType=ERR_TYPE; sprintf(errText, "Optional argument to the pop(n) method must be a real number. Supplied argument is complex."); return; }
+    if (in[0].real < 0) in[0].real += l->length+1;
+    p = (long)round(in[0].real);
+    if (p<0) { *status=1; *errType=ERR_RANGE; sprintf(errText, "Attempt to pop a list item before the beginning of a list."); return; }
+    if (p>=l->length) { *status=1; *errType=ERR_RANGE; sprintf(errText, "List index out of range."); return; }
+    obj = ppl_listPopItem(l,p);
+   }
+  pplObjCpy(&OUTPUT,obj,0,0,1);
+  ppl_garbageObject(obj);
+ }
+
 void pplmethod_listReverse(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   long      i;
