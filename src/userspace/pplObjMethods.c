@@ -755,7 +755,7 @@ void pplmethod_listPop(ppl_context *c, pplObj *in, int nArgs, int *status, int *
     long p;
     if (in[0].objType!=PPLOBJ_NUM) { *status=1; *errType=ERR_TYPE; sprintf(errText, "Optional argument to the pop(n) method must be a number. Supplied argument had type <%s>.", pplObjTypeNames[in[0].objType]); return; }
     if (in[0].flagComplex) { *status=1; *errType=ERR_TYPE; sprintf(errText, "Optional argument to the pop(n) method must be a real number. Supplied argument is complex."); return; }
-    if (in[0].real < 0) in[0].real += l->length+1;
+    if (in[0].real < 0) in[0].real += l->length;
     p = (long)round(in[0].real);
     if (p<0) { *status=1; *errType=ERR_RANGE; sprintf(errText, "Attempt to pop a list item before the beginning of a list."); return; }
     if (p>=l->length) { *status=1; *errType=ERR_RANGE; sprintf(errText, "List index out of range."); return; }
@@ -1223,6 +1223,7 @@ void pplObjMethodsInit(ppl_context *c)
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"extend",1,1,0,0,0,0,(void *)pplmethod_listExtend, "extend(x)", "\\mathrm{extend}@<@0}@>", "extend(x) appends the members of the list x to the end of a list");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"insert",2,2,0,0,0,0,(void *)pplmethod_listInsert, "insert(n,x)", "\\mathrm{insert}@<@0@>", "insert(n,x) inserts the object x into a list at position n");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"len",0,0,1,1,1,1,(void *)pplmethod_listLen, "len()", "\\mathrm{len}@<@>", "len() returns the length of a list");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"pop",0,1,1,1,1,1,(void *)pplmethod_listPop, "pop()", "\\mathrm{pop}@<@0@>", "pop(n) removes the nth item from a list and returns it. If n is not specified, the last list item is popped.");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"reverse",0,0,1,1,1,1,(void *)pplmethod_listReverse, "reverse()", "\\mathrm{reverse}@<@>", "reverse() reverses the order of the members of a list");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"sort",0,0,1,1,1,1,(void *)pplmethod_listSort, "sort()", "\\mathrm{sort}@<@>", "sort() sorts the members of a list");
 

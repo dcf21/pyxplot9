@@ -132,6 +132,7 @@ static void ppl_listRemoveEngine(list *in, listItem *ptr)
     ptr->next     = ptrnext->next;
     if (in->last == ptrnext) in->last = ptr;
     else ptr->next->prev = ptr;
+    if (in->useMalloc) free(ptrnext);
    }
   else if (ptr->prev != NULL) // We are the last item in the list, but not the first item
    {
@@ -140,11 +141,13 @@ static void ppl_listRemoveEngine(list *in, listItem *ptr)
     ptr->prev     = ptrnext->prev;
     if (in->first == ptrnext) in->first = ptr;
     else ptr->prev->next = ptr;
+    if (in->useMalloc) free(ptrnext);
    }
   else // We are the only item in the list
    {
     in->first = NULL;
     in->last  = NULL;
+    if (in->useMalloc) free(ptr);
    }
   in->length--;
   return;
@@ -181,7 +184,6 @@ void *ppl_listGetItem(list *in, int N)
   ptr = in->first;
   for (i=0; ((i<N) && (ptr!=NULL)); i++, ptr=ptr->next);
   if (ptr==NULL) return NULL;
-  else           ppl_listRemoveEngine(in, ptr);
   return ptr->data;
  }
 
@@ -204,12 +206,14 @@ void *ppl_listPop(list *in)
 void *ppl_listPopItem(list *in, int N)
  {
   listItem *ptr;
+  void     *out=NULL;
   int   i;
   if (in==NULL) return NULL;
   ptr = in->first;
   for (i=0; ((i<N) && (ptr!=NULL)); i++, ptr=ptr->next);
   if (ptr==NULL) return NULL;
-  return ptr->data;
+  else           { out=ptr->data; ppl_listRemoveEngine(in, ptr); }
+  return out;
  }
 
 void *ppl_listLast(list *in)

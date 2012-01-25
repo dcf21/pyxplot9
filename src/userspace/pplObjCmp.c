@@ -112,6 +112,13 @@ void pplcol_HSBtoCMYK(double hi, double si, double bi, double *co, double *mo, d
   pplcol_RGBtoCMYK(r,g,b,co,mo,yo,ko);
  }
 
+static int SGN(int x)
+ {
+  if (x==0) return  0;
+  if (x< 0) return -1;
+  return 1;
+ }
+
 int pplObjCmpQuiet(const void *a, const void *b)
  {
   const pplObj *pa = *(pplObj **)a;
@@ -169,7 +176,7 @@ int pplObjCmp(ppl_context *c, const pplObj *a, const pplObj *b, int *status, int
     return -2;
    }
   else if ((t1o==4)||(t1o==14)||(t1o==15)) // 4 - strings; 14 - data type; 15 - exception
-    return strcmp((const char*)a->auxil,(const char*)b->auxil);
+    return SGN(strcmp((const char*)a->auxil,(const char*)b->auxil));
   else if (t1o==5) // 5 - colors
    {
     double h1,s1,b1,h2,s2,b2;
@@ -219,7 +226,7 @@ int pplObjCmp(ppl_context *c, const pplObj *a, const pplObj *b, int *status, int
     lia = ppl_listIterateInit(la);
     lib = ppl_listIterateInit(lb);
     out = 0;
-    while ( ((oba=ppl_listIterate(&lia))!=NULL) && ((obb=ppl_listIterate(&lib))!=NULL) && ((out=pplObjCmpQuiet((void*)&oba,(void*)&obb))==0) )
+    while ( ((oba=ppl_listIterate(&lia))!=NULL) && ((obb=ppl_listIterate(&lib))!=NULL) && ((out=pplObjCmpQuiet((void*)&oba,(void*)&obb))==0) );
     return out;
    }
   else if (t1o==8) // 8 - matrix
@@ -256,8 +263,8 @@ int pplObjCmp(ppl_context *c, const pplObj *a, const pplObj *b, int *status, int
     out = 0;
     while ( ((oba=ppl_dictIterate(&dia,&keya))!=NULL) &&
             ((obb=ppl_dictIterate(&dib,&keyb))!=NULL) &&
-            ((out=strcmp(keya,keyb))==0) &&
-            ((out=pplObjCmpQuiet((void*)&oba,(void*)&obb))==0) )
+            ((out=SGN(strcmp(keya,keyb)))==0) &&
+            ((out=pplObjCmpQuiet((void*)&oba,(void*)&obb))==0) );
     return out;
    }
   else if ((t1o==12)||(t1o==13)) // 12 - function; 13 - file handle
