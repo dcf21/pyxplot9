@@ -459,6 +459,27 @@ void pplfunc_coth        (ppl_context *c, pplObj *in, int nArgs, int *status, in
   CHECK_OUTPUT_OKAY;
  }
 
+void pplfunc_cross       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *FunctionDescription = "cross(a,b)";
+  int   t1 = in[0].objType;
+  int   t2 = in[1].objType;
+  gsl_vector *va, *vb, *vo;
+  if (t1!=PPLOBJ_VEC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "First argument to %s must be a vector. Supplied argument had type <%s>.", FunctionDescription, pplObjTypeNames[t1]); return; }
+  if (t2!=PPLOBJ_VEC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "Second argument to %s must be a vector. Supplied argument had type <%s>.", FunctionDescription, pplObjTypeNames[t2]); return; }
+  va = ((pplVector *)in[0].auxil)->v;
+  vb = ((pplVector *)in[1].auxil)->v;
+  if (va->size != 3) { *status=1; *errType=ERR_TYPE; sprintf(errText, "%s can only act on three-component vectors. Supplied vector has %ld components.", FunctionDescription, (long)va->size); return; }
+  if (vb->size != 3) { *status=1; *errType=ERR_TYPE; sprintf(errText, "%s can only act on three-component vectors. Supplied vector has %ld components.", FunctionDescription, (long)vb->size); return; }
+  if (pplObjVector(&OUTPUT,0,1,3)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  vo = ((pplVector *)(OUTPUT.auxil))->v;
+  gsl_vector_set(vo, 0, gsl_vector_get(va,1)*gsl_vector_get(vb,2) - gsl_vector_get(vb,1)*gsl_vector_get(va,2) );
+  gsl_vector_set(vo, 1, gsl_vector_get(va,2)*gsl_vector_get(vb,0) - gsl_vector_get(vb,2)*gsl_vector_get(va,0) );
+  gsl_vector_set(vo, 2, gsl_vector_get(va,0)*gsl_vector_get(vb,1) - gsl_vector_get(vb,0)*gsl_vector_get(va,1) );
+  in[0].real=in[1].real=1; in[0].imag=in[1].imag=0; in[0].flagComplex=in[1].flagComplex=0;
+  ppl_uaMul(c, &in[0], &in[1], &OUTPUT, status, errType, errText);
+ }
+
 void pplfunc_csc         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "csc(x)";
@@ -1146,6 +1167,11 @@ void pplfunc_sech        (ppl_context *c, pplObj *in, int nArgs, int *status, in
   CHECK_DIMLESS_OR_HAS_UNIT(in[0] , "first", "an angle", UNIT_ANGLE, 1);
   GSL_SET_COMPLEX(&z,in[0].real,in[0].imag); z=gsl_complex_sech(z); CLEANUP_GSLCOMPLEX;
   CHECK_OUTPUT_OKAY;
+ }
+
+void pplfunc_sgn         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  OUTPUT.real = ppl_sgn(in[0].real);
  }
 
 void pplfunc_sin         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)

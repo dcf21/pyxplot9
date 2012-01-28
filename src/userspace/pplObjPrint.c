@@ -263,7 +263,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
          {
           case PPL_FUNC_SYSTEM:
           case PPL_FUNC_MAGIC:
-            strcpy(out+i, f->description);
+            sprintf(out+i, "%s.", f->description);
             i+=strlen(out+i);
             break;
           case PPL_FUNC_USERDEF:
