@@ -317,7 +317,7 @@ void pplfunc_atan2       (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_besseli     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "besseli(l,x)";
-  CHECK_NEEDINT(in[0], "l", "function can only evaluate Bessel functions");
+  CHECK_NEEDINT(in[0], "l", "function can only evaluate integer-order Bessel functions");
   OUTPUT.real = gsl_sf_bessel_il_scaled((int)in[0].real, in[1].real);
   CHECK_OUTPUT_OKAY;
  }
@@ -325,7 +325,7 @@ void pplfunc_besseli     (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_besselI     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "besselI(l,x)";
-  CHECK_NEEDINT(in[0], "l", "function can only evaluate Bessel functions");
+  CHECK_NEEDINT(in[0], "l", "function can only evaluate integer-order Bessel functions");
   OUTPUT.real = gsl_sf_bessel_In((int)in[0].real, in[1].real);
   CHECK_OUTPUT_OKAY;
  }
@@ -333,7 +333,7 @@ void pplfunc_besselI     (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_besselj     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "besselj(l,x)";
-  CHECK_NEEDINT(in[0], "l", "function can only evaluate Bessel functions");
+  CHECK_NEEDINT(in[0], "l", "function can only evaluate integer-order Bessel functions");
   OUTPUT.real = gsl_sf_bessel_jl((int)in[0].real, in[1].real);
   CHECK_OUTPUT_OKAY;
  }
@@ -341,7 +341,7 @@ void pplfunc_besselj     (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_besselJ     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "besselJ(l,x)";
-  CHECK_NEEDINT(in[0], "l", "function can only evaluate Bessel functions");
+  CHECK_NEEDINT(in[0], "l", "function can only evaluate integer-order Bessel functions");
   OUTPUT.real = gsl_sf_bessel_Jn((int)in[0].real, in[1].real);
   CHECK_OUTPUT_OKAY;
  }
@@ -349,7 +349,7 @@ void pplfunc_besselJ     (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_besselk     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "besselk(l,x)";
-  CHECK_NEEDINT(in[0], "l", "function can only evaluate Bessel functions");
+  CHECK_NEEDINT(in[0], "l", "function can only evaluate integer-order Bessel functions");
   OUTPUT.real = gsl_sf_bessel_kl_scaled((int)in[0].real, in[1].real);
   CHECK_OUTPUT_OKAY;
  }
@@ -357,7 +357,7 @@ void pplfunc_besselk     (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_besselK     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "besselK(l,x)";
-  CHECK_NEEDINT(in[0], "l", "function can only evaluate Bessel functions");
+  CHECK_NEEDINT(in[0], "l", "function can only evaluate integer-order Bessel functions");
   OUTPUT.real = gsl_sf_bessel_Kn((int)in[0].real, in[1].real);
   CHECK_OUTPUT_OKAY;
  }
@@ -365,7 +365,7 @@ void pplfunc_besselK     (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_bessely     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "bessely(l,x)";
-  CHECK_NEEDINT(in[0], "l", "function can only evaluate Bessel functions");
+  CHECK_NEEDINT(in[0], "l", "function can only evaluate integer-order Bessel functions");
   OUTPUT.real = gsl_sf_bessel_yl((int)in[0].real, in[1].real);
   CHECK_OUTPUT_OKAY;
  }
@@ -373,7 +373,7 @@ void pplfunc_bessely     (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_besselY     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "besselY(l,x)";
-  CHECK_NEEDINT(in[0], "l", "function can only evaluate Bessel functions");
+  CHECK_NEEDINT(in[0], "l", "function can only evaluate integer-order Bessel functions");
   OUTPUT.real = gsl_sf_bessel_Yn((int)in[0].real, in[1].real);
   CHECK_OUTPUT_OKAY;
  }
@@ -390,6 +390,18 @@ void pplfunc_ceil        (ppl_context *c, pplObj *in, int nArgs, int *status, in
   char *FunctionDescription = "ceil(x)";
   OUTPUT.real = ceil(in[0].real);
   CHECK_OUTPUT_OKAY;
+ }
+
+void pplfunc_chr         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *FunctionDescription = "chr(x)";
+  char *out;
+  CHECK_NEEDINT(in[0], "s", "function can only evaluate integer ASCII codes");
+  out = (char *)malloc(2);
+  if (out==NULL) { *status=1; sprintf(errText,"Out of memory."); return; }
+  out[0] = ((int)in[0].real) & 255;
+  out[1] = '\0';
+  pplObjStr(&OUTPUT,0,1,out);
  }
 
 void pplfunc_classOf     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -982,6 +994,14 @@ void pplfunc_open        (ppl_context *c, pplObj *in, int nArgs, int *status, in
   f = fopen((char*)in[0].auxil,mode);
   if (f==NULL) { *status=1; *errType=ERR_FILE; strcpy(errText, strerror(errno)); return; }
   pplObjFile(&OUTPUT,0,1,f,0);
+ }
+
+void pplfunc_ord         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *FunctionDescription = "ord(s)";
+  int t=in[0].objType;
+  if (t!=PPLOBJ_STR) { *status=1; *errType=ERR_TYPE; sprintf(errText, "Argument to %s must be a string. Supplied argument had type <%s>.", FunctionDescription, pplObjTypeNames[t]); return; }
+  OUTPUT.real = (double)((char*)in[0].auxil)[0];
  }
 
 void pplfunc_ordinal     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)

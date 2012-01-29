@@ -54,6 +54,8 @@
 #include "settings/textConstants.h"
 #include "settings/withWords_fns.h"
 
+#include "parser/parser.h"
+
 #include "userspace/context.h"
 #include "userspace/pplObj_fns.h"
 
@@ -97,6 +99,10 @@ int main(int argc, char **argv)
   rl_readline_name = "PyXPlot";                          /* Allow conditional parsing of the ~/.inputrc file. */
   //rl_attempted_completion_function = ppl_rl_completion;  /* Tell the completer that we want a crack first. */
 #endif
+
+  // Set up commandline parser; do this BEFORE reading config files, which may contain a [script] section which needs parsing
+  if (DEBUG) ppl_log(&context->errcontext,"Setting up commandline parser from RE++ definitions.");
+  ppl_parserInit(context);
 
   // Set default terminal
   EnvDisplay = getenv("DISPLAY"); // Check whether the environment variable DISPLAY is set

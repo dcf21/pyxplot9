@@ -100,6 +100,7 @@ for line in f_in:
     if varname=='set_option': # Set options are also used in #defines
       if parts[2]=="": setoption = parts[0]+"_"
       else           : setoption = parts[2]+"_"
+      if (setoption[0]=="%"): setoption=""
     if varname not in varnames:
       varnames[varname] = varcount
       if   (parts[0]=="%p"): varcount += 2 # Position vectors require 2 or 3 slots

@@ -257,6 +257,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"besselY"       ,2,2,1,1,1,1,(void *)&pplfunc_besselY     , "besselY(l,x)", "\\mathrm{besselY}@<@1,@2@>", "besselY(l,x) evaluates the lth irregular cylindrical Bessel function at x");
     ppl_addSystemFunc(d,"beta"          ,2,2,1,1,1,1,(void *)&pplfunc_beta        , "beta(a,b)", "\\mathrm{B}@<@1,@2@>", "beta(a,b) evaluates the beta function B(a,b)");
     ppl_addSystemFunc(d,"ceil"          ,1,1,1,1,1,1,(void *)&pplfunc_ceil        , "ceil(x)", "\\mathrm{ceil}@<@1@>", "ceil(x) returns the smallest integer value greater than or equal to x");
+    ppl_addSystemFunc(d,"chr"           ,1,1,1,1,1,1,(void *)&pplfunc_chr         , "chr(x)", "\\mathrm{chr}@<@1@>", "chr(x) returns the character with ASCII code x");
     ppl_addSystemFunc(d,"classOf"       ,1,1,0,0,0,0,(void *)&pplfunc_classOf     , "classOf(x)", "\\mathrm{classOf}@<@1@>", "classOf(x) returns the class prototype of the object x");
     ppl_addSystemFunc(d,"cmyk"          ,4,4,1,1,1,1,(void *)&pplfunc_cmyk        , "cmyk(c,m,y,k)", "\\mathrm{cmyk}@<@1,@2,@3,@4@>", "cmyk(c,m,y,k) returns a colour with specified CMYK components in the range 0-1");
     ppl_addSystemFunc(d,"conjugate"     ,1,1,1,1,0,0,(void *)&pplfunc_conjugate   , "conjugate(z)", "\\mathrm{conjugate}@<@1@>", "conjugate(z) returns the complex conjugate of z");
@@ -315,6 +316,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"min"           ,0,1e9,0,0,0,0,(void *)&pplfunc_min       , "min(x,...)", "\\mathrm{min}@<@0@>", "min(x,...) returns the least of its arguments");
     ppl_addSystemFunc(d,"mod"           ,2,2,1,1,1,0,(void *)&pplfunc_mod         , "mod(x,y)", "\\mathrm{mod}@<@1,@2@>", "mod(x,y) returns the remainder of x/y");
     ppl_addSystemFunc(d,"open"          ,1,2,0,0,0,0,(void *)&pplfunc_open        , "open(x[,y])", "\\mathrm{open}@<@0@>", "open(x[,y]) opens the file x with access mode y, and returns a file object");
+    ppl_addSystemFunc(d,"ord"           ,1,1,0,0,0,0,(void *)&pplfunc_ord         , "ord(s)", "\\mathrm{ord}@<@1@>", "ord(s) returns the ASCII code of the first character of the string s");
     ppl_addSystemFunc(d,"ordinal"       ,1,1,1,1,1,1,(void *)&pplfunc_ordinal     , "ordinal(n)", "\\mathrm{ordinal}@<@1@>", "ordinal(n) returns the ordinal string, e.g. '1st', '2nd', '3rd' for the positive integer n");
     ppl_addSystemFunc(d,"pow"           ,2,2,1,1,0,0,(void *)&pplfunc_pow         , "pow(x,y)", "\\mathrm{pow}@<@1,@2@>", "pow(x,y) returns x to the power of y");
     ppl_addSystemFunc(d,"prime"         ,1,1,1,1,1,1,(void *)&pplfunc_prime       , "prime(x)", "\\mathrm{prime}@<@1@>", "prime(x) returns one if floor(x) is a prime number; zero otherwise");
