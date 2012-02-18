@@ -122,7 +122,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
   int            scanpos=0, outpos=0, oldpos, trialpos;
   unsigned char  opcode=0, precedence=0;
   unsigned char *out = context->tokenBuff + outOffset;
-  const int      buffSize = ALGEBRA_MAXLEN;
+  const int      buffSize = ALGEBRA_MAXLEN - outOffset;
   int            expOp = 0; // Was last named function one which acts on an expression -- e.g. unit() or int_dx()?
   int            extraArg = 0; // Was last named function one which has a variable name encoded in it -- i.e. int_dx() or diff_dx()?
 
@@ -545,7 +545,7 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
   *(int *)(out+lastoutpos) = outpos - lastoutpos; /* Write the length of the bytecode instruction we've just written */ \
  }
 
-void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed, int allowCommaOperator, void *out, int *outlen, int *errPos, int *errType, char *errText)
+void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed, int allowCommaOperator, pplExpr **outExpr, int *errPos, int *errType, char *errText)
  {
   unsigned char *stack = context->tokenBuff + ALGEBRA_MAXLEN - 1;
   unsigned char *tdata = context->tokenBuff;
@@ -554,16 +554,32 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
   int            tpos, ipos;
   int            tlen;
   int            outpos = 0, lastoutpos = -1;
+  void          *out;
+  int            outlen=8192;
+
+  // malloc output structure
+  *outExpr = (pplExpr *)calloc(1,sizeof(outExpr));
+  if (*outExpr==NULL) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); *end=-1; return; }
+  out = (*outExpr)->bytecode = malloc(outlen);
+  if ((*outExpr)->bytecode==NULL) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); *end=-1; return; }
 
   // First tokenise expression
   ppl_expTokenise(context, in, end, dollarAllowed, allowCommaOperator, 0, 0, 0, &tlen, errPos, errType, errText);
   if (*errPos >= 0) return;
   stacklen = ALGEBRA_MAXLEN - tlen;
+  (*outExpr)->ascii = (char *)malloc(*end+1);
+  if ((*outExpr)->ascii==NULL) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); *end=-1; return; }
+  strncpy((*outExpr)->ascii, in, *end);
+  (*outExpr)->ascii[*end]='\0';
 
   // The stacking-yard algorithm
   for ( tpos=ipos=0; tpos<tlen; )
    {
     char o = tdata[tpos]+'@'; // Get tokenised markup state code
+
+    // Expand space for bytecode as necessary
+    if (outlen - outpos < 1024) { outlen+=8192; out=(*outExpr)->bytecode=realloc(out,outlen); if (out==NULL) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); *end=-1; return; } }
+
     if (o=='B') // Process a string literal
      {
       int  i;
@@ -615,6 +631,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       else if ((o=='K')&&(opCode==0xFD)) { BYTECODE_OP(17); *(char *)(out+outpos++) = 1; *(int *)(stack-stackpos-sizeof(int)+1)=outpos; stackpos+=sizeof(int); outpos+=sizeof(int); BYTECODE_ENDOP; } // ? operator -- if false goto
       else if ((o=='K')&&(opCode==0xFE)) { BYTECODE_OP(19);                              *(int *)(stack-stackpos-sizeof(int)+1)=outpos; stackpos+=sizeof(int); outpos+=sizeof(int); BYTECODE_ENDOP; } // : operator -- goto
 
+      if (stackpos>stacklen-32) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; } 
       *(int*)(stack-stackpos-sizeof(int)+1) = ipos;
       stackpos+=sizeof(int);
 
@@ -630,6 +647,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       char bracketType=in[ipos];
       if (bracketType=='(') // open (
        {
+        if (stackpos>stacklen-64) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
         *(stack-stackpos-0) = '('; // push bracket onto stack
         *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
         stackpos+=3;
@@ -695,6 +713,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       char bracketType=in[ipos];
       if (bracketType=='[') // open [
        {
+        if (stackpos>stacklen-4) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
         *(stack-stackpos-0) = '['; // push bracket onto stack
         *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
         stackpos+=3;
@@ -717,6 +736,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       char bracketType=in[ipos];
       if (bracketType=='{') // open {
        {
+        if (stackpos>stacklen-4) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
         *(stack-stackpos-0) = '{'; // push bracket onto stack
         *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
         stackpos+=3;
@@ -736,6 +756,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
      }
     else if (o=='O') // a dollar operator
      {
+      if (stackpos>stacklen-32) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
       *(int*)(stack-stackpos-sizeof(int)+1) = ipos;
       stackpos+=sizeof(int);
       *(stack-stackpos-0) = '$'; // push dollar onto stack
@@ -751,6 +772,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       char bracketType=in[ipos];
       if (bracketType=='[') // open dereference brackets
        {
+        if (stackpos>stacklen-4) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
         *(stack-stackpos-0) = '<'; // push bracket onto stack
         *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
         stackpos+=3;
@@ -796,7 +818,7 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
 
   // Store final return
   BYTECODE_OP(0);
-  *outlen = outpos;
+  (*outExpr)->bcLen = outpos;
   BYTECODE_ENDOP;
 
   // Optimise gotos that point directly at other gotos
@@ -831,10 +853,11 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
 
 // Debugging routine to produce a textual representation of reverse Polish bytecode
 
-void ppl_reversePolishPrint(ppl_context *context, void *in, char *out)
+void ppl_reversePolishPrint(ppl_context *context, pplExpr *expIn, char *out)
  {
-  int i=0, j=0;
-  char op[32],optype[32],arg[1024];
+  int   i=0, j=0;
+  char  op[32],optype[32],arg[1024];
+  void *in = expIn->bytecode;
 
   while (1)
    {
@@ -1016,6 +1039,15 @@ void ppl_reversePolishPrint(ppl_context *context, void *in, char *out)
     j = pos+len;
    }
   out[i]='\0'; // null terminate string
+  return;
+ }
+
+void pplExpr_free(pplExpr *inexpr)
+ {
+  if (inexpr==NULL) return;
+  if (inexpr->ascii!=NULL) free(inexpr->ascii);
+  if (inexpr->bytecode!=NULL) free(inexpr->bytecode);
+  free(inexpr);
   return;
  }
 

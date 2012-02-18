@@ -35,6 +35,8 @@
 #include "coreUtils/errorReport.h"
 #include "coreUtils/getPasswd.h"
 
+#include "expressions/traceback_fns.h"
+
 #include "stringTools/asciidouble.h"
 #include "stringTools/strConstants.h"
 
@@ -250,16 +252,19 @@ LOOP_END
 
 int ppl_ProcessStatement(ppl_context *context, char *line)
  {
-  int end, errPos, errType, lastOpAssign, bufflen=65536;
-  char errText[LSTR_LENGTH];
-  unsigned char buff[65536];
+  int end, errPos, errType, lastOpAssign;
+  pplExpr *bytecode=NULL;
   pplObj *out;
 
-  ppl_expCompile(context,line,&end,1,1,(void *)buff,&bufflen,&errPos,&errType,errText);
+  ppl_tbClear(context);
+  ppl_expCompile(context, line, &end, 1, 1, &bytecode, &errPos, &errType, context->errStat.errBuff);
   if (errPos>=0)
    {
-    sprintf(context->errcontext.tempErrStr, "%d:%s\n",errPos,errText);
-    ppl_error(&context->errcontext, errType, -1, -1, NULL);
+    int h1=-1, h2=-1;
+    ppl_tbAdd(context,1,errType,errPos,line);
+    ppl_tbWrite(context, context->errcontext.tempErrStr, LSTR_LENGTH, &h1, &h2);
+    ppl_error(&context->errcontext, ERR_PREFORMED, h1, h2, NULL);
+    pplExpr_free(bytecode);
     return 1;
    }
 
@@ -267,21 +272,25 @@ int ppl_ProcessStatement(ppl_context *context, char *line)
   //ppl_tokenPrint(context, line, end);
 
   // Print bytecode
-  //ppl_reversePolishPrint(context, (void *)buff, context->errcontext.tempErrStr);
+  //ppl_reversePolishPrint(context, bytecode, context->errcontext.tempErrStr);
   //ppl_report(&context->errcontext, NULL);
 
   // Execute bytecode
-  out = ppl_expEval(context, (void *)buff, &lastOpAssign, 1, 0, &errPos, &errType, errText);
+  out = ppl_expEval(context, bytecode->bytecode, &lastOpAssign, 1, 0, &errPos, &errType, context->errStat.errBuff);
   if (errPos>=0)
    {
-    sprintf(context->errcontext.tempErrStr, "%d:%s\n",errPos,errText);
-    ppl_error(&context->errcontext, errType, -1, -1, NULL);
+    int h1=-1, h2=-1;
+    ppl_tbAdd(context,0,errType,errPos,line);
+    ppl_tbWrite(context, context->errcontext.tempErrStr, LSTR_LENGTH, &h1, &h2);
+    ppl_error(&context->errcontext, ERR_PREFORMED, h1, h2, NULL);
+    pplExpr_free(bytecode);
     return 1;
    }
   else if (!lastOpAssign)
    {
     pplObjPrint(context, out, NULL, context->errcontext.tempErrStr, LSTR_LENGTH, 0, 0);
     ppl_report(&context->errcontext, NULL);
+    pplExpr_free(bytecode);
    }
 
   return 0;

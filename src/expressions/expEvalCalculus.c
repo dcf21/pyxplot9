@@ -41,7 +41,7 @@
 #include "userspace/unitsArithmetic.h"
 
 typedef struct calculusComm {
- void         *expr;
+ pplExpr      *expr;
  ppl_context  *context;
  pplObj       *dummy;
  pplObj        first;
@@ -66,7 +66,7 @@ double ppl_expEvalCalculusSlave(double x, void *params)
   if (data->varyingReal) { data->dummy->real = x; data->dummy->imag = data->dummyImag; data->dummy->flagComplex = !ppl_dblEqual(data->dummy->imag,0); }
   else                   { data->dummy->imag = x; data->dummy->real = data->dummyReal; data->dummy->flagComplex = !ppl_dblEqual(data->dummy->imag,0); }
 
-  output = ppl_expEval(data->context, data->expr, &lastOpAssign, data->dollarAllowed, data->iterDepth+1, data->errPos, data->errType, data->errText);
+  output = ppl_expEval(data->context, data->expr->bytecode, &lastOpAssign, data->dollarAllowed, data->iterDepth+1, data->errPos, data->errType, data->errText);
   if (*(data->errPos)>=0) return GSL_NAN;
 
   // Check that integrand is a number
@@ -109,8 +109,7 @@ void ppl_expIntegrate(ppl_context *c, char *expr, char *dummy, pplObj *min, pplO
   pplObj           dummyTemp;
   gsl_integration_workspace *ws;
   gsl_function     fn;
-  void            *expr2, *tmp;
-  int              elen = 4*strlen(expr)+1024;
+  pplExpr         *expr2;
   int              explen;
   double           resultReal=0, resultImag=0, error;
 
@@ -128,13 +127,9 @@ void ppl_expIntegrate(ppl_context *c, char *expr, char *dummy, pplObj *min, pplO
     return;
    }
 
-  expr2 = malloc(elen);
-  ppl_expCompile(c,expr,&explen,dollarAllowed,1,expr2,&elen,errPos,errType,errText);
-  if (*errPos>=0) { free(expr2); return; }
-  if (explen<strlen(expr)) { *errPos=explen; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at the end of integrand."); free(expr2); return; }
-  tmp = realloc(expr2,elen+16);
-  if (tmp==NULL) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); free(expr2); return; }
-  expr2 = tmp;
+  ppl_expCompile(c,expr,&explen,dollarAllowed,1,&expr2,errPos,errType,errText);
+  if (*errPos>=0) { pplExpr_free(expr2); return; }
+  if (explen<strlen(expr)) { *errPos=explen; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at the end of integrand."); pplExpr_free(expr2); return; }
 
   commlink.context = c;
   commlink.expr    = expr2;
@@ -167,7 +162,7 @@ void ppl_expIntegrate(ppl_context *c, char *expr, char *dummy, pplObj *min, pplO
    }
 
   gsl_integration_workspace_free(ws);
-  free(expr2);
+  pplExpr_free(expr2);
 
   ppl_contextRestoreVarPointer(c, dummy, &dummyTemp); // Restore old value of the dummy variable we've been using
 
@@ -196,8 +191,7 @@ void ppl_expDifferentiate(ppl_context *c, char *expr, char *dummy, pplObj *point
   pplObj          *dummyVar;
   pplObj           dummyTemp;
   gsl_function     fn;
-  void            *expr2, *tmp;
-  int              elen = 4*strlen(expr)+1024;
+  pplExpr         *expr2;
   int              explen;
   double           resultReal=0, resultImag=0, dIdI, dRdI;
   double           resultReal_error, resultImag_error, dIdI_error, dRdI_error;
@@ -216,13 +210,9 @@ void ppl_expDifferentiate(ppl_context *c, char *expr, char *dummy, pplObj *point
     return;
    }
 
-  expr2 = malloc(elen);
-  ppl_expCompile(c,expr,&explen,dollarAllowed,1,expr2,&elen,errPos,errType,errText);
-  if (*errPos>=0) { free(expr2); return; }
-  if (explen<strlen(expr)) { *errPos=explen; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at the end of integrand."); free(expr2); return; }
-  tmp = realloc(expr2,elen+16);
-  if (tmp==NULL) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); free(expr2); return; }
-  expr2 = tmp;
+  ppl_expCompile(c,expr,&explen,dollarAllowed,1,&expr2,errPos,errType,errText);
+  if (*errPos>=0) { pplExpr_free(expr2); return; }
+  if (explen<strlen(expr)) { *errPos=explen; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at the end of differentiated expression."); pplExpr_free(expr2); return; }
 
   commlink.context = c;
   commlink.expr    = expr2;
@@ -246,6 +236,7 @@ void ppl_expDifferentiate(ppl_context *c, char *expr, char *dummy, pplObj *point
   fn.params   = &commlink;
 
   gsl_deriv_central(&fn, point->real, step->real, &resultReal, &resultReal_error);
+  pplExpr_free(expr2);
 
   if ((*errPos < 0) && (c->set->term_current.ComplexNumbers == SW_ONOFF_ON))
    {
@@ -276,7 +267,7 @@ void ppl_expDifferentiate(ppl_context *c, char *expr, char *dummy, pplObj *point
 
   if ((!gsl_finite(out->real)) || (!gsl_finite(out->imag)) || ((out->flagComplex) && (c->set->term_current.ComplexNumbers == SW_ONOFF_OFF)))
    {
-    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *errPos=0; *errType=ERR_NUMERIC; sprintf(errText, "Differential does not evaluate to a finite value."); return; }
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *errPos=0; *errType=ERR_NUMERIC; sprintf(errText, "Differentiated expression does not evaluate to a finite value."); return; }
     else { out->real = GSL_NAN; out->imag = 0; out->flagComplex=0; }
    }
   return;

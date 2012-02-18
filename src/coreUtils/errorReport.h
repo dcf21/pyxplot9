@@ -52,6 +52,7 @@ typedef struct pplset_session {
 typedef struct pplerr_context_s
  {
   int       error_input_linenumber;
+  long      error_input_sourceId;
   char      error_input_filename[FNAME_LENGTH];
   char      error_source[16]; // Identifier of the process producing log messages
   char      tempErrStr[LSTR_LENGTH];

@@ -1,4 +1,4 @@
-// expCompile.h
+// traceback_fns.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,20 +19,17 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _EXPCOMPILE_H
-#define _EXPCOMPILE_H 1
+#ifndef _TRACEBACK_FNS_H
+#define _TRACEBACK_FNS_H 1
 
+#include "expressions/traceback.h"
 #include "userspace/context.h"
 
-typedef struct pplExpr {
-  char *ascii; void *bytecode; int bcLen;
- } pplExpr;
-
-void ppl_expTokenise       (ppl_context *context, char *in, int *end, int dollarAllowed, int allowCommaOperator, int collectCommas, int isDict, int outOffset, int *outlen, int *errPos, int *errType, char *errText);
-void ppl_tokenPrint        (ppl_context *context, char *in, int len);
-void ppl_expCompile        (ppl_context *context, char *in, int *end, int dollarAllowed, int allowCommaOperator, pplExpr **outexpr, int *errPos, int *errType, char *errText);
-void ppl_reversePolishPrint(ppl_context *context, pplExpr *inexpr, char *out);
-void pplExpr_free          (pplExpr *inexpr);
+void ppl_tbClear         (ppl_context *c);
+void ppl_tbAdd           (ppl_context *c, int cmdOrExpr, int errType, int errPos, char *linetext);
+void ppl_tbWasInSubstring(ppl_context *c, int errPosAdd);
+void ppl_tbAddContext    (ppl_context *c, char *context);
+void ppl_tbWrite         (ppl_context *c, char *out, int outLen, int *HighlightPos1, int *HighlightPos2);
 
 #endif
 

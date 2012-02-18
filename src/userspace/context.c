@@ -28,6 +28,8 @@
 #include "coreUtils/dict.h"
 #include "coreUtils/memAlloc.h"
 
+#include "expressions/traceback_fns.h"
+
 #include "settings/settings_fns.h"
 
 #include "stringTools/strConstants.h"
@@ -53,6 +55,8 @@ ppl_context *ppl_contextInit()
   strcpy(out->errcontext.error_source,"main     ");
   ppl_memAlloc_MemoryInit(&out->errcontext, &ppl_error, &ppl_log);
   pplset_makedefault(out);
+
+  out->errStat.status = out->errStat.tracebackDepth = 0; ppl_tbClear(out);
 
   out->stackPtr = 0;
   out->willBeInteractive = 1;

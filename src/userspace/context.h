@@ -30,6 +30,8 @@
 #include "coreUtils/list.h"
 #include "coreUtils/errorReport.h"
 
+#include "expressions/traceback.h"
+
 #include "pplConstants.h"
 
 typedef struct ppl_context_struc
@@ -48,6 +50,9 @@ typedef struct ppl_context_struc
 
   // Code position to report when ppl_error() is called
   pplerr_context errcontext;
+
+  // traceback
+  errStatus errStat;
 
   // Buffers for parsing and evaluating expressions
   unsigned char tokenBuff[ALGEBRA_MAXLEN];

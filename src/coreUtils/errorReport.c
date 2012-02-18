@@ -34,8 +34,14 @@ static char temp_stringA[LSTR_LENGTH], temp_stringB[LSTR_LENGTH], temp_stringC[L
 
 void ppl_error_setstreaminfo(pplerr_context *context, int linenumber,char *filename)
  {
+  static long sourceId=0;
+  context->error_input_sourceId   = sourceId++;
   context->error_input_linenumber = linenumber;
-  if (filename != NULL) strcpy(context->error_input_filename, filename);
+  if (filename != NULL)
+   {
+    strncpy(context->error_input_filename, filename, FNAME_LENGTH);
+    context->error_input_filename[FNAME_LENGTH-1]='\0';
+   }
   return;
  }
 
