@@ -530,14 +530,19 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
    } \
  }
 
-#define BYTECODE_OP(X) \
+#define BYTECODE_OP_POS(X,P) \
  { \
   lastoutpos = outpos; \
   *(int *)(out+outpos) = 0; /* Set length of instruction equals zero for the moment */ \
   outpos += sizeof(int); /* Save a place for the length of this instruction */ \
-  *(int *)(out+outpos) = ipos; /* Store character position of token for error reporting */ \
+  *(int *)(out+outpos) = P; /* Store character position of token for error reporting */ \
   outpos += sizeof(int); \
   *(unsigned char *)(out+outpos++) = (X); \
+ }
+
+#define BYTECODE_OP(X) \
+ { \
+  BYTECODE_OP_POS(X,ipos); \
  }
 
 #define BYTECODE_ENDOP \
@@ -648,6 +653,8 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       if (bracketType=='(') // open (
        {
         if (stackpos>stacklen-64) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
+        *(int*)(stack-stackpos-sizeof(int)+1) = ipos;
+        stackpos+=sizeof(int);
         *(stack-stackpos-0) = '('; // push bracket onto stack
         *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
         stackpos+=3;
@@ -656,21 +663,23 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
        {
         unsigned char rightAssoc = 0;
         unsigned char precedence = 255;
+        int startpos;
         POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
         if ( (stackpos<3) || (*(stack-stackpos+3)!='(') ) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match ) to an (."); *end=-1; return; }
-        stackpos-=3; // pop bracket
+        startpos = *(int *)(stack-stackpos+4);
+        stackpos-=3+sizeof(int); // pop bracket
         if (o=='D') // apply string substitution operator straight away
          {
           if ( (stackpos<3) || (*(stack-stackpos+2)!=0x40)) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match string substituion () to a %."); *end=-1; return; }
           stackpos-=3+sizeof(int); // pop stack
-          BYTECODE_OP(14); // bytecode 14 -- string substitution operator
+          BYTECODE_OP_POS(14,startpos); // bytecode 14 -- string substitution operator
           *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of string substitutions; stored with closing bracket in bytecode is number of collected ,-separated items
           outpos += sizeof(int);
           BYTECODE_ENDOP;
          }
         else if (o=='P') // make function call
          {
-          BYTECODE_OP(10); // bytecode 10 -- function call
+          BYTECODE_OP_POS(10,startpos); // bytecode 10 -- function call
           *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of function arguments; stored with closing bracket in bytecode is number of collected ,-separated items
           outpos += sizeof(int);
           BYTECODE_ENDOP;
@@ -713,7 +722,9 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       char bracketType=in[ipos];
       if (bracketType=='[') // open [
        {
-        if (stackpos>stacklen-4) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
+        if (stackpos>stacklen-64) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
+        *(int*)(stack-stackpos-sizeof(int)+1) = ipos;
+        stackpos+=sizeof(int);
         *(stack-stackpos-0) = '['; // push bracket onto stack
         *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
         stackpos+=3;
@@ -722,10 +733,12 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
        {
         unsigned char rightAssoc = 0;
         unsigned char precedence = 255;
+        int startpos;
         POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
         if ( (stackpos<3) || (*(stack-stackpos+3)!='[') ) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match ] to an [."); *end=-1; return; }
-        stackpos-=3; // pop bracket
-        BYTECODE_OP(9); // bytecode 9 -- make list
+        startpos = *(int *)(stack-stackpos+4);
+        stackpos-=3+sizeof(int); // pop bracket
+        BYTECODE_OP_POS(9,startpos); // bytecode 9 -- make list
         *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of list items; stored with closing bracket in bytecode is number of collected ,-separated items
         outpos += sizeof(int);
         BYTECODE_ENDOP;
@@ -736,7 +749,9 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       char bracketType=in[ipos];
       if (bracketType=='{') // open {
        {
-        if (stackpos>stacklen-4) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
+        if (stackpos>stacklen-64) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
+        *(int*)(stack-stackpos-sizeof(int)+1) = ipos;
+        stackpos+=sizeof(int);
         *(stack-stackpos-0) = '{'; // push bracket onto stack
         *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
         stackpos+=3;
@@ -745,10 +760,12 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
        {
         unsigned char rightAssoc = 0;
         unsigned char precedence = 255;
+        int startpos;
         POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
         if ( (stackpos<3) || (*(stack-stackpos+3)!='{') ) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match } to an {."); *end=-1; return; }
-        stackpos-=3; // pop bracket
-        BYTECODE_OP(8); // bytecode 8 -- make dict
+        startpos = *(int *)(stack-stackpos+4);
+        stackpos-=3+sizeof(int); // pop bracket
+        BYTECODE_OP_POS(8,startpos); // bytecode 8 -- make dict
         *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of list items; stored with closing bracket in bytecode is number of collected ,-separated items
         outpos += sizeof(int);
         BYTECODE_ENDOP;
@@ -772,7 +789,9 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
       char bracketType=in[ipos];
       if (bracketType=='[') // open dereference brackets
        {
-        if (stackpos>stacklen-4) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
+        if (stackpos>stacklen-64) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
+        *(int*)(stack-stackpos-sizeof(int)+1) = ipos;
+        stackpos+=sizeof(int);
         *(stack-stackpos-0) = '<'; // push bracket onto stack
         *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
         stackpos+=3;
@@ -781,10 +800,12 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
        {
         unsigned char rightAssoc = 0;
         unsigned char precedence = 255;
+        int startpos;
         POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
         if ( (stackpos<3) || (*(stack-stackpos+3)!='<') ) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match ] to an [."); *end=-1; return; }
-        stackpos-=3; // pop bracket
-        BYTECODE_OP(7); // bytecode 7 -- slice object
+        startpos = *(int *)(stack-stackpos+4);
+        stackpos-=3+sizeof(int); // pop bracket
+        BYTECODE_OP_POS(7,startpos); // bytecode 7 -- slice object
         *(unsigned char *)(out+outpos) = tdata[tpos+1]; // flags to distinguish [x], [x:], [:x], [x:y] and [:]
         outpos += 1;
         BYTECODE_ENDOP;

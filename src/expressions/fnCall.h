@@ -25,7 +25,7 @@
 #include "userspace/context.h"
 #include "userspace/pplObj.h"
 
-void ppl_fnCall(ppl_context *context, int nArgs, int charpos, int dollarAllowed, int iterDepth, int *status, int *errPos, int *errType, char *errText);
+void ppl_fnCall(ppl_context *context, int nArgs, int dollarAllowed, int iterDepth);
 
 #endif
 

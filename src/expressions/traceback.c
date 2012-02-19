@@ -54,6 +54,7 @@ void ppl_tbAdd(ppl_context *c, int cmdOrExpr, int errType, int errPos, char *lin
     t->errLine   = c->errcontext.error_input_linenumber;
     t->sourceId  = c->errcontext.error_input_sourceId;
     strncpy(t->source, c->errcontext.error_input_filename, FNAME_LENGTH);
+    t->amErrMsgExpr = t->amErrMsgCmd = 0;
     t->source[FNAME_LENGTH-1]='\0';
     t->context[0] = '\0';
     if (linetext==NULL) { t->linetext=NULL; }
@@ -63,10 +64,12 @@ void ppl_tbAdd(ppl_context *c, int cmdOrExpr, int errType, int errPos, char *lin
     if (c->errStat.errType < 0) c->errStat.errType = errType;
     if ((!cmdOrExpr)&&(c->errStat.sourceIdExpr<0))
      {
+      t->amErrMsgExpr = 1;
       c->errStat.sourceIdExpr = c->errcontext.error_input_sourceId;
       c->errStat.errPosExpr = errPos;
       strcpy(c->errStat.errMsgExpr, c->errStat.errBuff);
      }
+    if ((cmdOrExpr)&&(c->errStat.sourceIdCmd<0)) t->amErrMsgCmd = 1;
    }
   if ((cmdOrExpr)&&(c->errStat.sourceIdCmd<0))
    {
@@ -77,11 +80,20 @@ void ppl_tbAdd(ppl_context *c, int cmdOrExpr, int errType, int errPos, char *lin
   return;
  }
 
-void ppl_tbWasInSubstring(ppl_context *c, int errPosAdd)
+void ppl_tbWasInSubstring(ppl_context *c, int errPosAdd, char *linetext)
  {
   int i = c->errStat.tracebackDepth-1;
+  traceback *t = &c->errStat.tbLevel[i];
   if ((i<0)||(i>=TB_MAXLEVEL)) return;
-  c->errStat.tbLevel[i].errPos += errPosAdd;
+  t->errPos += errPosAdd;
+  if (t->amErrMsgExpr) c->errStat.errPosExpr += errPosAdd;
+  if (t->amErrMsgCmd ) c->errStat.errPosCmd  += errPosAdd;
+  if (linetext!=NULL)
+   {
+    if (t->linetext!=NULL) free(t->linetext);
+    t->linetext = malloc(strlen(linetext)+1);
+    if (t->linetext!=NULL) strcpy(t->linetext,linetext);
+   }
   return;
  }
 

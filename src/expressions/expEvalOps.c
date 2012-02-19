@@ -42,6 +42,33 @@
 
 #include "pplConstants.h"
 
+#define CAST_TO_NUM2(X) \
+ { \
+  double d=0; \
+  int t=(X)->objType; \
+  int rc=(X)->refCount; \
+  if (t!=PPLOBJ_NUM) \
+   { \
+    switch (t) \
+     { \
+      case PPLOBJ_BOOL: d = ((X)->real!=0); break; \
+      case PPLOBJ_STR : \
+       { \
+        int len; char *c=(char *)(X)->auxil; \
+        d = ppl_getFloat(c, &len); \
+        if (len>0) { while ((c[len]>'\0')&&(c[len]<=' ')) len++; } \
+        if ((len<0)||(c[len]!='\0')) { *status=1; *errType=ERR_TYPE; sprintf(errText,"Attempt to implicitly cast string to number failed: string is not a valid number."); goto cast_fail; } \
+        break; \
+       } \
+      default: \
+        { *status=1; *errType=ERR_TYPE; sprintf(errText,"Cannot implicitly cast an object of type <%s> to a number.",pplObjTypeNames[t]); goto cast_fail; } \
+     } \
+    ppl_garbageObject(X); \
+    pplObjNum(X,0,d,0); \
+    (X)->refCount=rc; \
+   } \
+ }
+
 void ppl_opAdd(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invertible, int *status, int *errType, char *errText)
  {
   int t1 = a->objType;
@@ -192,11 +219,11 @@ void ppl_opAdd(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
    }
   else // adding numbers
    {
-    CAST_TO_NUM(a); CAST_TO_NUM(b);
+    CAST_TO_NUM2(a); CAST_TO_NUM2(b);
     ppl_uaAdd(context, a, b, o, status, errType, errText);
    }
+cast_fail:
   return;
-  cast_fail: *status=1;
  }
 
 void ppl_opSub(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invertible, int *status, int *errType, char *errText)
@@ -287,11 +314,11 @@ void ppl_opSub(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
    }
   else // subtracting numbers
    {
-    CAST_TO_NUM(a); CAST_TO_NUM(b);
+    CAST_TO_NUM2(a); CAST_TO_NUM2(b);
     ppl_uaSub(context, a, b, o, status, errType, errText);
    }
+cast_fail:
   return;
-  cast_fail: *status=1;
  }
 
 void ppl_opMul(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invertible, int *status, int *errType, char *errText)
@@ -375,11 +402,11 @@ void ppl_opMul(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
    }
   else // multiplying numbers
    {
-    CAST_TO_NUM(a); CAST_TO_NUM(b);
+    CAST_TO_NUM2(a); CAST_TO_NUM2(b);
     ppl_uaMul(context, a, b, o, status, errType, errText);
    }
+cast_fail:
   return;
-  cast_fail: *status=1;
  }
 
 void ppl_opDiv(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invertible, int *status, int *errType, char *errText)
@@ -414,10 +441,10 @@ void ppl_opDiv(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
    }
   else // dividing numbers
    {
-    CAST_TO_NUM(a); CAST_TO_NUM(b);
+    CAST_TO_NUM2(a); CAST_TO_NUM2(b);
     ppl_uaDiv(context, a, b, o, status, errType, errText);
    }
+cast_fail:
   return;
-  cast_fail: *status=1;
  }
 

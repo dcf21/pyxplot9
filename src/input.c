@@ -276,11 +276,10 @@ int ppl_ProcessStatement(ppl_context *context, char *line)
   //ppl_report(&context->errcontext, NULL);
 
   // Execute bytecode
-  out = ppl_expEval(context, bytecode->bytecode, &lastOpAssign, 1, 0, &errPos, &errType, context->errStat.errBuff);
-  if (errPos>=0)
+  out = ppl_expEval(context, bytecode, &lastOpAssign, 1, 0);
+  if (context->errStat.status)
    {
     int h1=-1, h2=-1;
-    ppl_tbAdd(context,0,errType,errPos,line);
     ppl_tbWrite(context, context->errcontext.tempErrStr, LSTR_LENGTH, &h1, &h2);
     ppl_error(&context->errcontext, ERR_PREFORMED, h1, h2, NULL);
     pplExpr_free(bytecode);

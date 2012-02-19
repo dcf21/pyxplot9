@@ -27,7 +27,7 @@
 
 void ppl_tbClear         (ppl_context *c);
 void ppl_tbAdd           (ppl_context *c, int cmdOrExpr, int errType, int errPos, char *linetext);
-void ppl_tbWasInSubstring(ppl_context *c, int errPosAdd);
+void ppl_tbWasInSubstring(ppl_context *c, int errPosAdd, char *linetext);
 void ppl_tbAddContext    (ppl_context *c, char *context);
 void ppl_tbWrite         (ppl_context *c, char *out, int outLen, int *HighlightPos1, int *HighlightPos2);
 

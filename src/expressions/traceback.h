@@ -27,7 +27,7 @@
 #include "stringTools/strConstants.h"
 
 typedef struct traceback {
-  int errPos, errLine;
+  int errPos, errLine, amErrMsgExpr, amErrMsgCmd;
   long sourceId;
   char source[FNAME_LENGTH];
   char context[FNAME_LENGTH];

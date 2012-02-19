@@ -32,6 +32,7 @@
 
 #include "expressions/expCompile.h"
 #include "expressions/expEval.h"
+#include "expressions/traceback_fns.h"
 #include "settings/settingTypes.h"
 #include "stringTools/asciidouble.h"
 #include "userspace/context.h"
@@ -49,9 +50,6 @@ typedef struct calculusComm {
  unsigned char isFirst;
  unsigned char testingReal, varyingReal;
  int           dollarAllowed;
- int          *errPos;
- int          *errType;
- char         *errText;
  int           iterDepth;
  } calculusComm;
 
@@ -61,19 +59,19 @@ double ppl_expEvalCalculusSlave(double x, void *params)
   pplObj       *output;
   calculusComm *data = (calculusComm *)params;
 
-  if (*(data->errPos)>=0) return GSL_NAN; // We've previously had an error... so don't do any more work
+  if (data->context->errStat.status) return GSL_NAN; // We've previously had an error... so don't do any more work
 
   if (data->varyingReal) { data->dummy->real = x; data->dummy->imag = data->dummyImag; data->dummy->flagComplex = !ppl_dblEqual(data->dummy->imag,0); }
   else                   { data->dummy->imag = x; data->dummy->real = data->dummyReal; data->dummy->flagComplex = !ppl_dblEqual(data->dummy->imag,0); }
 
-  output = ppl_expEval(data->context, data->expr->bytecode, &lastOpAssign, data->dollarAllowed, data->iterDepth+1, data->errPos, data->errType, data->errText);
-  if (*(data->errPos)>=0) return GSL_NAN;
+  output = ppl_expEval(data->context, data->expr, &lastOpAssign, data->dollarAllowed, data->iterDepth+1);
+  if (data->context->errStat.status) return GSL_NAN;
 
   // Check that integrand is a number
   if (output->objType!=PPLOBJ_NUM)
    {
-    *(data->errPos)=0; *(data->errType)=ERR_TYPE;
-    strcpy(data->errText, "This operand is not a number across the range where calculus is being attempted.");
+    strcpy(data->context->errStat.errBuff, "This operand is not a number across the range where calculus is being attempted.");
+    ppl_tbAdd(data->context,0,ERR_TYPE,0,NULL);
     ppl_garbageObject(&data->context->stack[--data->context->stackPtr]); // trash and pop output from stack
     return GSL_NAN;
    }
@@ -89,8 +87,8 @@ double ppl_expEvalCalculusSlave(double x, void *params)
    {
     if (!ppl_unitsDimEqual(&data->first,output))
      {
-      *(data->errPos)=0; *(data->errType)=ERR_UNIT;
-      strcpy(data->errText, "This operand does not have consistent units across the range where calculus is being attempted.");
+      strcpy(data->context->errStat.errBuff, "This operand does not have consistent units across the range where calculus is being attempted.");
+      ppl_tbAdd(data->context,0,ERR_UNIT,0,NULL);
       return GSL_NAN;
      }
    }
@@ -102,7 +100,7 @@ double ppl_expEvalCalculusSlave(double x, void *params)
   else                   return output->imag;
  }
 
-void ppl_expIntegrate(ppl_context *c, char *expr, char *dummy, pplObj *min, pplObj *max, pplObj *out, int dollarAllowed, int *errPos, int *errType, char *errText, int iterDepth)
+void ppl_expIntegrate(ppl_context *c, char *expr, char *dummy, pplObj *min, pplObj *max, pplObj *out, int dollarAllowed, int iterDepth)
  {
   calculusComm     commlink;
   pplObj          *dummyVar;
@@ -115,21 +113,24 @@ void ppl_expIntegrate(ppl_context *c, char *expr, char *dummy, pplObj *min, pplO
 
   if (!ppl_unitsDimEqual(min,max))
    {
-    *errPos=0; *errType=ERR_UNIT;
-    strcpy(errText, "The minimum and maximum limits of this integration operation are not dimensionally compatible.");
+    strcpy(c->errStat.errBuff, "The minimum and maximum limits of this integration operation are not dimensionally compatible.");
+    ppl_tbAdd(c,0,ERR_UNIT,0,NULL);
     return;
    }
 
   if (min->flagComplex || max->flagComplex)
    {
-    *errPos=0; *errType=ERR_NUMERIC;
-    strcpy(errText, "The minimum and maximum limits of this integration operation must be real numbers; supplied values are complex.");
+    strcpy(c->errStat.errBuff, "The minimum and maximum limits of this integration operation must be real numbers; supplied values are complex.");
+    ppl_tbAdd(c,0,ERR_NUMERIC,0,NULL);
     return;
    }
 
-  ppl_expCompile(c,expr,&explen,dollarAllowed,1,&expr2,errPos,errType,errText);
-  if (*errPos>=0) { pplExpr_free(expr2); return; }
-  if (explen<strlen(expr)) { *errPos=explen; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at the end of integrand."); pplExpr_free(expr2); return; }
+  {
+   int errPos=-1, errType=-1;
+   ppl_expCompile(c,expr,&explen,dollarAllowed,1,&expr2,&errPos,&errType,c->errStat.errBuff);
+   if (errPos>=0) { pplExpr_free(expr2); ppl_tbAdd(c,1,errType,errPos,NULL); return; }
+   if (explen<strlen(expr)) { strcpy(c->errStat.errBuff, "Unexpected trailing matter at the end of integrand."); ppl_tbAdd(c,0,ERR_SYNTAX,explen,NULL); pplExpr_free(expr2); return; }
+  }
 
   commlink.context = c;
   commlink.expr    = expr2;
@@ -137,9 +138,6 @@ void ppl_expIntegrate(ppl_context *c, char *expr, char *dummy, pplObj *min, pplO
   commlink.testingReal = 1;
   commlink.varyingReal = 1;
   commlink.dollarAllowed = dollarAllowed;
-  commlink.errPos  = errPos;
-  commlink.errType = errType;
-  commlink.errText = errText;
   commlink.iterDepth = iterDepth;
   pplObjNum(&commlink.first,0,0,0);
 
@@ -155,7 +153,7 @@ void ppl_expIntegrate(ppl_context *c, char *expr, char *dummy, pplObj *min, pplO
 
   gsl_integration_qags (&fn, min->real, max->real, 0, 1e-7, 1000, ws, &resultReal, &error);
 
-  if ((*errPos < 0) && (c->set->term_current.ComplexNumbers == SW_ONOFF_ON))
+  if ((!c->errStat.status) && (c->set->term_current.ComplexNumbers == SW_ONOFF_ON))
    {
     commlink.testingReal = 0;
     gsl_integration_qags (&fn, min->real, max->real, 0, 1e-7, 1000, ws, &resultImag, &error);
@@ -166,11 +164,11 @@ void ppl_expIntegrate(ppl_context *c, char *expr, char *dummy, pplObj *min, pplO
 
   ppl_contextRestoreVarPointer(c, dummy, &dummyTemp); // Restore old value of the dummy variable we've been using
 
-  if (*errPos < 0)
+  if (!c->errStat.status)
    {
-    int status=0;
-    ppl_uaMul( c, &commlink.first , min , out , &status, errType, errText ); // Get units of output right
-    if (status) { *errPos=0; return; }
+    int status=0, errType=-1;
+    ppl_uaMul( c, &commlink.first , min , out , &status, &errType, c->errStat.errBuff ); // Get units of output right
+    if (status) { ppl_tbAdd(c,0,errType,0,NULL); return; }
     out->real = resultReal;
     out->imag = resultImag;
     out->flagComplex = !ppl_dblEqual(resultImag, 0);
@@ -178,14 +176,14 @@ void ppl_expIntegrate(ppl_context *c, char *expr, char *dummy, pplObj *min, pplO
 
     if ((!gsl_finite(out->real)) || (!gsl_finite(out->imag)) || ((out->flagComplex) && (c->set->term_current.ComplexNumbers == SW_ONOFF_OFF)))
      {
-      if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *errPos=0; *errType=ERR_NUMERIC; sprintf(errText, "Integral does not evaluate to a finite value."); return; }
+      if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(c->errStat.errBuff, "Integral does not evaluate to a finite value."); ppl_tbAdd(c,0,ERR_NUMERIC,0,NULL); return; }
       else { out->real = GSL_NAN; out->imag = 0; out->flagComplex=0; }
      }
    }
   return;
  }
 
-void ppl_expDifferentiate(ppl_context *c, char *expr, char *dummy, pplObj *point, pplObj *step, pplObj *out, int dollarAllowed, int *errPos, int *errType, char *errText, int iterDepth)
+void ppl_expDifferentiate(ppl_context *c, char *expr, char *dummy, pplObj *point, pplObj *step, pplObj *out, int dollarAllowed, int iterDepth)
  {
   calculusComm     commlink;
   pplObj          *dummyVar;
@@ -198,21 +196,24 @@ void ppl_expDifferentiate(ppl_context *c, char *expr, char *dummy, pplObj *point
 
   if (!ppl_unitsDimEqual(point, step))
    {
-    *errPos=0; *errType=ERR_NUMERIC;
-    strcpy(errText, "The arguments x and step to this differentiation operation are not dimensionally compatible.");
+    strcpy(c->errStat.errBuff, "The arguments x and step to this differentiation operation are not dimensionally compatible.");
+    ppl_tbAdd(c,0,ERR_NUMERIC,0,NULL);
     return;
    }
 
   if (step->flagComplex)
    {
-    *errPos=0; *errType=ERR_NUMERIC;
-    strcpy(errText, "The argument 'step' to this differentiation operation must be a real number; supplied value is complex.");
+    strcpy(c->errStat.errBuff, "The argument 'step' to this differentiation operation must be a real number; supplied value is complex.");
+    ppl_tbAdd(c,0,ERR_NUMERIC,0,NULL);
     return;
    }
 
-  ppl_expCompile(c,expr,&explen,dollarAllowed,1,&expr2,errPos,errType,errText);
-  if (*errPos>=0) { pplExpr_free(expr2); return; }
-  if (explen<strlen(expr)) { *errPos=explen; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at the end of differentiated expression."); pplExpr_free(expr2); return; }
+  {
+   int errPos=-1, errType=-1;
+   ppl_expCompile(c,expr,&explen,dollarAllowed,1,&expr2,&errPos,&errType,c->errStat.errBuff);
+   if (errPos>=0) { pplExpr_free(expr2); ppl_tbAdd(c,1,errType,errPos,NULL); return; }
+   if (explen<strlen(expr)) { strcpy(c->errStat.errBuff, "Unexpected trailing matter at the end of differentiated expression."); ppl_tbAdd(c,0,ERR_SYNTAX,explen,NULL); pplExpr_free(expr2); return; }
+  }
 
   commlink.context = c;
   commlink.expr    = expr2;
@@ -220,9 +221,6 @@ void ppl_expDifferentiate(ppl_context *c, char *expr, char *dummy, pplObj *point
   commlink.testingReal = 1;
   commlink.varyingReal = 1;
   commlink.dollarAllowed = dollarAllowed;
-  commlink.errPos  = errPos;
-  commlink.errType = errType;
-  commlink.errText = errText;
   commlink.iterDepth = iterDepth;
   pplObjNum(&commlink.first,0,0,0);
 
@@ -238,7 +236,7 @@ void ppl_expDifferentiate(ppl_context *c, char *expr, char *dummy, pplObj *point
   gsl_deriv_central(&fn, point->real, step->real, &resultReal, &resultReal_error);
   pplExpr_free(expr2);
 
-  if ((*errPos < 0) && (c->set->term_current.ComplexNumbers == SW_ONOFF_ON))
+  if ((!c->errStat.status) && (c->set->term_current.ComplexNumbers == SW_ONOFF_ON))
    {
     commlink.testingReal = 0;
     gsl_deriv_central(&fn, point->real, step->real, &resultImag, &resultImag_error);
@@ -248,17 +246,17 @@ void ppl_expDifferentiate(ppl_context *c, char *expr, char *dummy, pplObj *point
     gsl_deriv_central(&fn, point->imag, step->real, &dRdI      , &dRdI_error);
 
     if ((!ppl_dblApprox(resultReal, dIdI, 2*(resultReal_error+dIdI_error))) || (!ppl_dblApprox(resultImag, -dRdI, 2*(resultImag_error+dRdI_error))))
-     { *errPos = 0; *errType=ERR_NUMERIC; sprintf(errText, "The Cauchy-Riemann equations are not satisfied at this point in the complex plane. It does not therefore appear possible to perform complex differentiation. In the notation f(x+iy)=u+iv, the offending derivatives were: du/dx=%e, dv/dy=%e, du/dy=%e and dv/dx=%e.", resultReal, dIdI, dRdI, resultImag); return; }
+     { sprintf(c->errStat.errBuff, "The Cauchy-Riemann equations are not satisfied at this point in the complex plane. It does not therefore appear possible to perform complex differentiation. In the notation f(x+iy)=u+iv, the offending derivatives were: du/dx=%e, dv/dy=%e, du/dy=%e and dv/dx=%e.", resultReal, dIdI, dRdI, resultImag); ppl_tbAdd(c,0,ERR_NUMERIC,0,NULL); return; }
    }
 
   ppl_contextRestoreVarPointer(c, dummy, &dummyTemp); // Restore old value of the dummy variable we've been using
 
-  if (*errPos < 0)
+  if (!c->errStat.status)
    {
-    int status=0;
+    int status=0, errType=-1;
     point->real = 1.0; point->imag = 0.0; point->flagComplex = 0;
-    ppl_uaDiv( c , &commlink.first , point , out , &status, errType, errText ); // Get units of output right
-    if (status) { *errPos=0; return; }
+    ppl_uaDiv( c , &commlink.first , point , out , &status, &errType, c->errStat.errBuff ); // Get units of output right
+    if (status) { ppl_tbAdd(c,0,errType,0,NULL); return; }
     out->real = resultReal;
     out->imag = resultImag;
     out->flagComplex = !ppl_dblEqual(resultImag, 0);
@@ -267,7 +265,7 @@ void ppl_expDifferentiate(ppl_context *c, char *expr, char *dummy, pplObj *point
 
   if ((!gsl_finite(out->real)) || (!gsl_finite(out->imag)) || ((out->flagComplex) && (c->set->term_current.ComplexNumbers == SW_ONOFF_OFF)))
    {
-    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *errPos=0; *errType=ERR_NUMERIC; sprintf(errText, "Differentiated expression does not evaluate to a finite value."); return; }
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(c->errStat.errBuff, "Differentiated expression does not evaluate to a finite value."); ppl_tbAdd(c,0,ERR_NUMERIC,0,NULL); return; }
     else { out->real = GSL_NAN; out->imag = 0; out->flagComplex=0; }
    }
   return;

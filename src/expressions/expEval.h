@@ -22,6 +22,7 @@
 #ifndef _EXPEVAL_H
 #define _EXPEVAL_H 1
 
+#include "expressions/expCompile.h"
 #include "userspace/context.h"
 #include "userspace/pplObj.h"
 
@@ -40,11 +41,11 @@
         int len; char *c=(char *)(X)->auxil; \
         d = ppl_getFloat(c, &len); \
         if (len>0) { while ((c[len]>'\0')&&(c[len]<=' ')) len++; } \
-        if ((len<0)||(c[len]!='\0')) { *errType=ERR_TYPE; sprintf(errText,"Attempt to implicitly cast string to number failed: string is not a valid number."); goto cast_fail; } \
+        if ((len<0)||(c[len]!='\0')) { sprintf(context->errStat.errBuff,"Attempt to implicitly cast string to number failed: string is not a valid number."); ppl_tbAdd(context,0,ERR_TYPE,0,NULL); goto cast_fail; } \
         break; \
        } \
       default: \
-        { *errType=ERR_TYPE; sprintf(errText,"Cannot implicitly cast an object of type <%s> to a number.",pplObjTypeNames[t]); goto cast_fail; } \
+        { sprintf(context->errStat.errBuff,"Cannot implicitly cast an object of type <%s> to a number.",pplObjTypeNames[t]); ppl_tbAdd(context,0,ERR_TYPE,0,NULL); goto cast_fail; } \
      } \
     ppl_garbageObject(X); \
     pplObjNum(X,0,d,0); \
@@ -55,14 +56,14 @@
 #define CAST_TO_REAL(X,OP) \
  { \
   CAST_TO_NUM(X); \
-  if ((X)->flagComplex) { *errType=ERR_RANGE; sprintf(errText,"The %s operator can only act on real numbers.",OP); goto cast_fail; } \
+  if ((X)->flagComplex) { sprintf(context->errStat.errBuff,"The %s operator can only act on real numbers.",OP); ppl_tbAdd(context,0,ERR_RANGE,0,NULL); goto cast_fail; } \
  }
 
 #define CAST_TO_INT(X,OP) \
  { \
   CAST_TO_REAL(X,OP); \
-  if (!(X)->dimensionless) { *errType=ERR_UNIT; sprintf(errText,"The %s operator is an integer operator which can only act on dimensionless numbers: supplied operand has units of <%s>.",OP,ppl_printUnit(context,X,NULL,NULL,0,1,0)); goto cast_fail; } \
-  if (((X)->real < INT_MIN) || ((X)->real > INT_MAX)) { *errType=ERR_RANGE; sprintf(errText,"The %s operator can only act on integers in the range %d to %d.",OP,INT_MIN,INT_MAX); goto cast_fail; } \
+  if (!(X)->dimensionless) { sprintf(context->errStat.errBuff,"The %s operator is an integer operator which can only act on dimensionless numbers: supplied operand has units of <%s>.",OP,ppl_printUnit(context,X,NULL,NULL,0,1,0)); ppl_tbAdd(context,0,ERR_UNIT,0,NULL); goto cast_fail; } \
+  if (((X)->real < INT_MIN) || ((X)->real > INT_MAX)) { sprintf(context->errStat.errBuff,"The %s operator can only act on integers in the range %d to %d.",OP,INT_MIN,INT_MAX); ppl_tbAdd(context,0,ERR_RANGE,0,NULL); goto cast_fail; } \
  }
 
 #define CAST_TO_BOOL(X) \
@@ -91,7 +92,7 @@
    } \
  }
 
-pplObj *ppl_expEval(ppl_context *context, void *in, int *lastOpAssign, int dollarAllowed, int IterDepth, int *errPos, int *errType, char *errText);
+pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, int dollarAllowed, int IterDepth);
 
 #endif
 
