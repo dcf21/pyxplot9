@@ -36,6 +36,7 @@
 #include "userspace/context.h"
 
 #include "defaultObjs/defaultUnits.h"
+#include "defaultObjs/defaultVars.h"
 
 void ppl_makeDefaultUnits(ppl_context *context)
  {
@@ -520,7 +521,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "years";
   unit_database[unit_pos].quantity   = "time";
   unit_database[unit_pos].maxPrefix  = 9;
-  unit_database[unit_pos].multiplier = 31557600;
+  unit_database[unit_pos].multiplier = 365.2421896698 * 24 * 3600;
   unit_database[unit_pos].ancient    = 1;
   unit_database[unit_pos].exponent[UNIT_TIME]=1;
   unit_pos++;
@@ -774,7 +775,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "solar_masses";
   unit_database[unit_pos].alt1       = "Msolar";
   unit_database[unit_pos].quantity   = "mass";
-  unit_database[unit_pos].multiplier = GSL_CONST_MKSA_SOLAR_MASS;
+  unit_database[unit_pos].multiplier = NASA_MG_SUN / NASA_G;
   unit_database[unit_pos].exponent[UNIT_MASS]=1;
   unit_pos++;
 

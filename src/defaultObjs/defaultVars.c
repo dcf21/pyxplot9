@@ -40,6 +40,7 @@
 #include "userspace/pplObjUnits.h"
 
 #include "defaultObjs/defaultFuncs.h"
+#include "defaultObjs/defaultVars.h"
 #include "defaultObjs/moduleAst.h"
 #include "defaultObjs/moduleFractals.h"
 #include "defaultObjs/moduleOs.h"
@@ -151,7 +152,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_dictAppendCpy(d2 , "m_n"       , (void *)&v , sizeof(v)); // The neutron mass
     v.real = GSL_CONST_MKSA_MASS_MUON;
     ppl_dictAppendCpy(d2 , "m_muon"    , (void *)&v , sizeof(v)); // The muon mass
-    v.real = GSL_CONST_MKSA_SOLAR_MASS;
+    v.real = NASA_MG_SUN / NASA_G;
     ppl_dictAppendCpy(d2 , "Msun"      , (void *)&v , sizeof(v)); // The solar mass
     pplObjNum(&v, 1, GSL_CONST_MKSA_RYDBERG / GSL_CONST_MKSA_SPEED_OF_LIGHT / GSL_CONST_MKSA_PLANCKS_CONSTANT_H, 0);
     v.dimensionless = 0;
@@ -182,7 +183,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     v.dimensionless = 0;
     v.exponent[UNIT_MASS] = 1; v.exponent[UNIT_TIME] =-3; v.exponent[UNIT_TEMPERATURE] =-4;
     ppl_dictAppendCpy(d2 , "sigma"     , (void *)&v , sizeof(v)); // The Stefan-Boltzmann constant
-    pplObjNum(&v, 1, GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT, 0);
+    pplObjNum(&v, 1, NASA_G, 0);
     v.dimensionless = 0;
     v.exponent[UNIT_LENGTH] = 3; v.exponent[UNIT_TIME] =-2; v.exponent[UNIT_MASS] =-1;
     ppl_dictAppendCpy(d2 , "G"         , (void *)&v , sizeof(v)); // The gravitational constant

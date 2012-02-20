@@ -22,6 +22,9 @@
 #ifndef _DEFAULTVARS_H
 #define _DEFAULTVARS_H 1
 
+#define NASA_MG_SUN 1.32712440018e20
+#define NASA_G      6.67259e-11
+
 #include "userspace/context.h"
 
 void ppl_makeDefaultVars(ppl_context *out);
