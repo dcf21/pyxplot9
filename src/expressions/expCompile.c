@@ -550,7 +550,7 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
   *(int *)(out+lastoutpos) = outpos - lastoutpos; /* Write the length of the bytecode instruction we've just written */ \
  }
 
-void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed, int allowCommaOperator, pplExpr **outExpr, int *errPos, int *errType, char *errText)
+void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFname, char *in, int *end, int dollarAllowed, int allowCommaOperator, pplExpr **outExpr, int *errPos, int *errType, char *errText)
  {
   unsigned char *stack = context->tokenBuff + ALGEBRA_MAXLEN - 1;
   unsigned char *tdata = context->tokenBuff;
@@ -563,10 +563,14 @@ void ppl_expCompile(ppl_context *context, char *in, int *end, int dollarAllowed,
   int            outlen=8192;
 
   // malloc output structure
-  *outExpr = (pplExpr *)calloc(1,sizeof(outExpr));
+  *outExpr = (pplExpr *)calloc(1,sizeof(pplExpr));
   if (*outExpr==NULL) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); *end=-1; return; }
+  (*outExpr)->srcId    = context->errcontext.error_input_sourceId;
+  (*outExpr)->srcLineN = context->errcontext.error_input_linenumber;
+  (*outExpr)->srcFname = (char *)malloc(strlen(context->errcontext.error_input_filename)+1);
   out = (*outExpr)->bytecode = malloc(outlen);
-  if ((*outExpr)->bytecode==NULL) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); *end=-1; return; }
+  if (((*outExpr)->bytecode==NULL)||((*outExpr)->srcFname==NULL)) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); *end=-1; return; }
+  strcpy((*outExpr)->srcFname , context->errcontext.error_input_filename);
 
   // First tokenise expression
   ppl_expTokenise(context, in, end, dollarAllowed, allowCommaOperator, 0, 0, 0, &tlen, errPos, errType, errText);
@@ -1063,12 +1067,13 @@ void ppl_reversePolishPrint(ppl_context *context, pplExpr *expIn, char *out)
   return;
  }
 
-void pplExpr_free(pplExpr *inexpr)
+void pplExpr_free(pplExpr *inExpr)
  {
-  if (inexpr==NULL) return;
-  if (inexpr->ascii!=NULL) free(inexpr->ascii);
-  if (inexpr->bytecode!=NULL) free(inexpr->bytecode);
-  free(inexpr);
+  if (inExpr==NULL) return;
+  if (inExpr->ascii!=NULL) free(inExpr->ascii);
+  if (inExpr->srcFname!=NULL) free(inExpr->srcFname);
+  if (inExpr->bytecode!=NULL) free(inExpr->bytecode);
+  free(inExpr);
   return;
  }
 

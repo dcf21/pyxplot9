@@ -257,11 +257,11 @@ int ppl_ProcessStatement(ppl_context *context, char *line)
   pplObj *out;
 
   ppl_tbClear(context);
-  ppl_expCompile(context, line, &end, 1, 1, &bytecode, &errPos, &errType, context->errStat.errBuff);
+  ppl_expCompile(context, context->errcontext.error_input_linenumber, context->errcontext.error_input_sourceId, context->errcontext.error_input_filename, line, &end, 1, 1, &bytecode, &errPos, &errType, context->errStat.errBuff);
   if (errPos>=0)
    {
     int h1=-1, h2=-1;
-    ppl_tbAdd(context,1,errType,errPos,line);
+    ppl_tbAdd(context,context->errcontext.error_input_linenumber,context->errcontext.error_input_sourceId,context->errcontext.error_input_filename,1,errType,errPos,line);
     ppl_tbWrite(context, context->errcontext.tempErrStr, LSTR_LENGTH, &h1, &h2);
     ppl_error(&context->errcontext, ERR_PREFORMED, h1, h2, NULL);
     pplExpr_free(bytecode);

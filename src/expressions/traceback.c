@@ -42,7 +42,7 @@ void ppl_tbClear(ppl_context *c)
   return;
  }
 
-void ppl_tbAdd(ppl_context *c, int cmdOrExpr, int errType, int errPos, char *linetext)
+void ppl_tbAdd(ppl_context *c, int srcLineN, long srcId, char *srcFname, int cmdOrExpr, int errType, int errPos, char *linetext)
  {
   int i = c->errStat.tracebackDepth;
   if ((!cmdOrExpr) || (i==0))
@@ -51,9 +51,9 @@ void ppl_tbAdd(ppl_context *c, int cmdOrExpr, int errType, int errPos, char *lin
     if ((i<0)||(i>=TB_MAXLEVEL)) return;
     c->errStat.tracebackDepth++;
     t->errPos    = errPos;
-    t->errLine   = c->errcontext.error_input_linenumber;
-    t->sourceId  = c->errcontext.error_input_sourceId;
-    strncpy(t->source, c->errcontext.error_input_filename, FNAME_LENGTH);
+    t->errLine   = srcLineN;
+    t->sourceId  = srcId;
+    strncpy(t->source, srcFname, FNAME_LENGTH);
     t->amErrMsgExpr = t->amErrMsgCmd = 0;
     t->source[FNAME_LENGTH-1]='\0';
     t->context[0] = '\0';
@@ -65,7 +65,7 @@ void ppl_tbAdd(ppl_context *c, int cmdOrExpr, int errType, int errPos, char *lin
     if ((!cmdOrExpr)&&(c->errStat.sourceIdExpr<0))
      {
       t->amErrMsgExpr = 1;
-      c->errStat.sourceIdExpr = c->errcontext.error_input_sourceId;
+      c->errStat.sourceIdExpr = srcId;
       c->errStat.errPosExpr = errPos;
       strcpy(c->errStat.errMsgExpr, c->errStat.errBuff);
      }
@@ -73,7 +73,7 @@ void ppl_tbAdd(ppl_context *c, int cmdOrExpr, int errType, int errPos, char *lin
    }
   if ((cmdOrExpr)&&(c->errStat.sourceIdCmd<0))
    {
-    c->errStat.sourceIdCmd = c->errcontext.error_input_sourceId;
+    c->errStat.sourceIdCmd = srcId;
     c->errStat.errPosCmd   = errPos;
     strcpy(c->errStat.errMsgCmd, c->errStat.errBuff);
    }

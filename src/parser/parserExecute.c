@@ -33,9 +33,34 @@
 #include "parser/parser.h"
 
 #include "userspace/context.h"
+#include "userspace/garbageCollector.h"
+#include "userspace/pplObj_fns.h"
 
-int ppl_parserExecute(ppl_context *c)
+void ppl_parserOutFree(parserOutput *in)
  {
-  return 0;
+  int i;
+  if (in==NULL) return;
+  for (i=0; i<in->stackLen; i++) ppl_garbageObject(&in->stk[i]);
+  free(in->stk);
+  free(in);
+  return;
+ }
+
+parserOutput *ppl_parserExecute(ppl_context *c, parserLine *in)
+ {
+  int           i;
+  parserOutput *out=NULL;
+  pplObj       *stk=NULL;
+
+  // Initialise output stack
+  out = (parserOutput *)malloc(sizeof(parserOutput));
+  if (out==NULL) return NULL;
+  stk = (pplObj *)malloc(in->stackLen*sizeof(pplObj));
+  if (stk==NULL) { free(out); return NULL; }
+  for (i=0; i<in->stackLen; i++) pplObjZom(&stk[i],0);
+  out->stk = stk;
+  out->stackLen = in->stackLen;
+
+  return out;
  }
 

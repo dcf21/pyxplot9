@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "coreUtils/errorReport.h"
+#include "coreUtils/list.h"
 
 #include "stringTools/asciidouble.h"
 #include "stringTools/strConstants.h"

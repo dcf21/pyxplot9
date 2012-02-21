@@ -23,7 +23,9 @@
 #define _PARSER_H 1
 
 #include "coreUtils/list.h"
+#include "expressions/expCompile.h"
 #include "userspace/context.h"
+#include "userspace/pplObj.h"
 
 #define PN_TYPE_SEQ     21000
 #define PN_TYPE_OPT     21001
@@ -49,15 +51,18 @@ typedef struct parserNode {
 typedef struct parserAtom {
   int stackOutPos;
   int linePos; // Position of this atom in the string copy of the line, used for error reporting
-  int atomLen; // Length of this atom; number of bytes to advance in bytecode to find next parserAtom record
-  unsigned char amLiteral;
   unsigned char options[8]; // characters, e.g. 'd' if %d is an allowed kind of value for this variable
+  pplExpr *expr; pplObj *literal;
+  struct parserAtom *next;
  } parserAtom;
 
 typedef struct parserLine {
-  char *linetxt;
-  void *bytecode;
-  int   bytecodelen;
+  char       *linetxt;
+  int         srcLineN;
+  long        srcId;
+  char       *srcFname;
+  int         stackLen;
+  parserAtom *firstAtom, *lastAtom;
  } parserLine;
 
 typedef struct parserStatus {
@@ -65,13 +70,21 @@ typedef struct parserStatus {
   int readingData, readingCode;
  } parserStatus;
 
+typedef struct parserOutput {
+  pplObj *stk;
+  int stackLen;
+ } parserOutput;
+
 #ifndef _PARSERINIT_C
 extern list *pplParserCmdList[];
 #endif
 
-int ppl_parserInit   (ppl_context *c);
-int ppl_parserCompile(ppl_context *c, int ExpandMacros);
-int ppl_parserExecute(ppl_context *c);
+int           ppl_parserInit     (ppl_context *c);
+void          ppl_parserAtomFree (parserAtom **in);
+void          ppl_parserLineFree (parserLine *in);
+parserLine   *ppl_parserCompile  (ppl_context *c, char *line, int ExpandMacros);
+void          ppl_parserOutFree  (parserOutput *in);
+parserOutput *ppl_parserExecute  (ppl_context *c, parserLine *in);
 
 #endif
 
