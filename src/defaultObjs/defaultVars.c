@@ -98,6 +98,32 @@ void ppl_makeDefaultVars(ppl_context *out)
        ppl_dictAppendCpy(d2, pplObjTypeNames[i], (void *)&v, sizeof(v));
       }
 
+    // exceptions module
+    ppl_dictAppendCpy(d  , "exceptions", pplObjModule(&m,1,1,1) , sizeof(v));
+    d2 = (dict *)m.auxil;
+    pplObjException(&v, 1, 0, "generic", ERR_GENERAL);
+    ppl_dictAppendCpy(d2 , "generic"   , (void *)&v , sizeof(v));
+    pplObjException(&v, 1, 0, "syntax", ERR_SYNTAX);
+    ppl_dictAppendCpy(d2 , "syntax"    , (void *)&v , sizeof(v));
+    pplObjException(&v, 1, 0, "numerical", ERR_NUMERIC);
+    ppl_dictAppendCpy(d2 , "numerical" , (void *)&v , sizeof(v));
+    pplObjException(&v, 1, 0, "file", ERR_FILE);
+    ppl_dictAppendCpy(d2 , "file"      , (void *)&v , sizeof(v));
+    pplObjException(&v, 1, 0, "range", ERR_RANGE);
+    ppl_dictAppendCpy(d2 , "range"     , (void *)&v , sizeof(v));
+    pplObjException(&v, 1, 0, "unit", ERR_UNIT);
+    ppl_dictAppendCpy(d2 , "unit"      , (void *)&v , sizeof(v));
+    pplObjException(&v, 1, 0, "overflow", ERR_OVERFLOW);
+    ppl_dictAppendCpy(d2 , "overflow"  , (void *)&v , sizeof(v));
+    pplObjException(&v, 1, 0, "namespace", ERR_NAMESPACE);
+    ppl_dictAppendCpy(d2 , "namespace" , (void *)&v , sizeof(v));
+    pplObjException(&v, 1, 0, "type", ERR_TYPE);
+    ppl_dictAppendCpy(d2 , "type"      , (void *)&v , sizeof(v));
+    pplObjException(&v, 1, 0, "interrupt", ERR_INTERRUPT);
+    ppl_dictAppendCpy(d2 , "interrupt" , (void *)&v , sizeof(v));
+    pplObjException(&v, 1, 0, "key", ERR_DICTKEY);
+    ppl_dictAppendCpy(d2 , "key"       , (void *)&v , sizeof(v));
+
     // colors module
     ppl_dictAppendCpy(d  , "colors"    , pplObjModule(&m,1,1,1) , sizeof(v));
     d2 = (dict *)m.auxil;
@@ -323,6 +349,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"prime"         ,1,1,1,1,1,1,(void *)&pplfunc_prime       , "prime(x)", "\\mathrm{prime}@<@1@>", "prime(x) returns one if floor(x) is a prime number; zero otherwise");
     ppl_addSystemFunc(d,"primeFactors"  ,1,1,1,1,1,1,(void *)&pplfunc_primefactors, "primeFactors(x)", "\\mathrm{primeFactors}@<@1@>", "primeFactors(x) returns a list of the prime factors of the integer x");
     ppl_addSystemFunc(d,"radians"       ,1,1,1,1,1,0,(void *)&pplfunc_radians     , "radians(x)", "\\mathrm{radians}@<@1@>", "radians(x) converts angles measured in degrees into radians");
+    ppl_addSystemFunc(d,"raise"         ,2,2,0,0,0,0,(void *)&pplfunc_raise       , "raise(e,s)", "\\mathrm{raise@<@1,@2@>", "radians(e,s) raises the exception e, with error string s");
     ppl_addSystemFunc(d,"range"         ,1,3,1,1,1,0,(void *)&pplfunc_range       , "range([f],l,[s])", "\\mathrm{range@<@0@>", "range([f],l,[s]) returns a vector of uniformly-spaced numbers between f and l, with stepsize s");
     ppl_addSystemFunc(d,"Re"            ,1,1,1,1,0,0,(void *)&pplfunc_real        , "Re(z)", "\\mathrm{Re}@<@1@>", "Re(z) returns the magnitude of the real part of z");
     ppl_addSystemFunc(d,"rgb"           ,3,3,1,1,1,1,(void *)&pplfunc_rgb         , "rgb(r,g,b)", "\\mathrm{rgb}@<@1,@2,@3@>", "rgb(r,g,b) returns a colour with specified RGB components in the range 0-1");

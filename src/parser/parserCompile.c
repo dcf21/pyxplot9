@@ -25,6 +25,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef HAVE_READLINE
+#include <readline/readline.h>
+#endif
+
 #include "coreUtils/errorReport.h"
 
 #include "expressions/expCompile.h"
@@ -133,4 +137,47 @@ parserLine *ppl_parserCompile(ppl_context *c, char *line, int ExpandMacros)
   ppl_parserLineFree(output);
   return NULL;
  }
+
+#ifdef HAVE_READLINE
+static ppl_context *rootContext = NULL;
+
+void ppl_parseAutocompleteSetContext(ppl_context *c)
+ {
+  rootContext = c;
+  return;
+ }
+
+char *ppl_parseAutocomplete(const char *line, int status)
+ {
+  return NULL;
+ }
+
+char **ppl_rl_completion(const char *text, int start, int end)
+ {
+  char **matches;
+  char  *firstItem;
+
+  if ((start>0)&&((rl_line_buffer[start-1]=='\"')||(rl_line_buffer[start-1]=='\''))) return NULL; // Do filename completion
+
+  firstItem = ppl_parseAutocomplete(text, -1-start); // Setup parse_autocomplete to know what string it's working on
+
+  if (firstItem!=NULL)
+   {
+    if (firstItem[0]=='\n') // We are trying to match a %s:filename field, so turn on filename completion
+     {
+      free(firstItem);
+      rl_attempted_completion_over = 1; // NULL means that readline's default filename completer is activated
+      return NULL;
+     }
+    else
+     {
+      free(firstItem);
+     }
+   }
+
+  matches = rl_completion_matches(text, ppl_parseAutocomplete);
+  rl_attempted_completion_over = 1; // Make sure that filenames are not completion options
+  return matches;
+ }
+#endif
 

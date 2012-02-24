@@ -118,6 +118,7 @@ void pplfunc_pow         (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_prime       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_primefactors(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_radians     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_raise       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_range       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_rgb         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_real        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);

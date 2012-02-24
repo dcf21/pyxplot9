@@ -349,9 +349,9 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
     case PPLOBJ_EXC:
      {
       int i=0;
-      strcpy (out  , "<exception: ");     i+=strlen(out+i);
-      strncpy(out+i, o->auxil, outlen-i); i+=strlen(out+i);
-      strncpy(out+i, ">", outlen-i);
+      strcpy (out  , "<exception: ");             i+=strlen(out+i);
+      strncpy(out+i, (char *)o->auxil, outlen-i); i+=strlen(out+i);
+      strncpy(out+i, ">", outlen-i);              i+=strlen(out+i);
       out[outlen-1]='\0';
       break;
      }

@@ -34,7 +34,9 @@
 #define PN_TYPE_PER     21004
 #define PN_TYPE_ORA     21005
 #define PN_TYPE_ITEM    21006
-#define PN_TYPE_CONFIRM 21007
+#define PN_TYPE_CONFIRM 21007 // The = token in RE++
+#define PN_TYPE_DATABLK 21008
+#define PN_TYPE_CODEBLK 21009
 
 typedef struct parserNode {
   int   type;
@@ -85,6 +87,11 @@ void          ppl_parserLineFree (parserLine *in);
 parserLine   *ppl_parserCompile  (ppl_context *c, char *line, int ExpandMacros);
 void          ppl_parserOutFree  (parserOutput *in);
 parserOutput *ppl_parserExecute  (ppl_context *c, parserLine *in);
+
+#ifdef HAVE_READLINE
+void          ppl_parseAutocompleteSetContext(ppl_context *c);
+char        **ppl_rl_completion              (const char *text, int start, int end);
+#endif
 
 #endif
 

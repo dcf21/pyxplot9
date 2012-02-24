@@ -43,7 +43,7 @@ pplObj *pplObjFile     (pplObj *in, unsigned char amMalloced, unsigned char auxi
 pplObj *pplObjFunc     (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, pplFunc *f);
 pplObj *pplObjType     (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, pplType *t);
 pplObj *pplObjNull     (pplObj *in, unsigned char amMalloced);
-pplObj *pplObjException(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, char *str);
+pplObj *pplObjException(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, char *str, int errCode);
 pplObj *pplObjGlobal   (pplObj *in, unsigned char amMalloced);
 pplObj *pplObjZom      (pplObj *in, unsigned char amMalloced);
 pplObj *pplObjUser     (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, pplObj *prototype);

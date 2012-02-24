@@ -197,6 +197,8 @@ int ppl_parserInit(ppl_context *c)
         if (newNode->matchString == NULL) { ppl_fatal(e,__FILE__,__LINE__,"Out of memory whilst setting up PyXPlot's command line parser."); exit(1); }
         strncpy( newNode->matchString , ppl_cmdList+strStart , inPos-strStart );
         newNode->matchString[inPos - strStart] = '\0';
+        if (strcmp(newNode->matchString, "DATABLOCK")==0) newNode->type = PN_TYPE_DATABLK;
+        if (strcmp(newNode->matchString, "CODEBLOCK")==0) newNode->type = PN_TYPE_CODEBLK;
         if (ppl_cmdList[inPos++]!='@') { sprintf(e->tempErrStr, "Syntax error: expecting @ after @matchstr..."); ppl_fatal(e,__FILE__,__LINE__, NULL); }
 
         strStart = inPos;

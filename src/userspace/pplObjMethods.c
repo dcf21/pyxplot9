@@ -1156,6 +1156,18 @@ void pplmethod_fileWrite(ppl_context *c, pplObj *in, int nArgs, int *status, int
   if (o!=l) { *status=1; *errType=ERR_FILE; strcpy(errText, strerror(errno)); return; }
  }
 
+// Exception methods
+
+void pplmethod_excRaise(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  if ((nArgs!=1)&&(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The function raise() requires a string as its argument; supplied argument had type <%s>.", pplObjTypeNames[in[0].objType]); return; }
+  *status  = 1;
+  *errType = (int)round(in[-1].self_this->real);
+  strncpy(errText, in[0].auxil, FNAME_LENGTH);
+  errText[FNAME_LENGTH-1]='\0';
+  return;
+ }
+
 // Build dictionaries of the above methods
 
 void pplObjMethodsInit(ppl_context *c)
@@ -1255,6 +1267,9 @@ void pplObjMethodsInit(ppl_context *c)
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"readlines",0,0,1,1,1,1,(void *)pplmethod_fileReadlines,"readlines()", "\\mathrm{readlines}@<@>", "readlines() returns the lines of a file as a list of strings");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"setpos",1,1,1,1,1,1,(void *)pplmethod_fileSetpos,"setpos(x)", "\\mathrm{setpos}@<@>", "setpos(x) sets a file handle's current position in a file");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"write",1,1,0,0,0,0,(void *)pplmethod_fileWrite,"write(x)", "\\mathrm{write}@<@0@>", "write(x) writes the string x to a file");
+
+  // Exception methods
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_EXC],"raise",1,1,0,0,0,0,(void *)pplmethod_excRaise,"raise(s)", "\\mathrm{raise}@<@0@>", "raise(s) raises an exception with error string s");
 
   return;
  }

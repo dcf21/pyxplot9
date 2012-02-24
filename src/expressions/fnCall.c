@@ -144,8 +144,8 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int nArgs, int dollarAllo
       case PPLOBJ_FUNC:
         sprintf(context->errStat.errBuff,"New function objects must be created with the syntax f(x)=... or subroutine f(x) { ... }."); TBADD(ERR_TYPE,0,NULL); goto cleanup;
       case PPLOBJ_EXC:
-        if (nArgs==1) { if      (args[0].objType==PPLOBJ_STR) pplObjException(out,0,1,(char*)args[0].auxil);
-                        else if (args[0].objType==PPLOBJ_EXC) pplObjCpy(out,&args[0],0,0,1);
+        if (nArgs==1) { if      (args[0].objType==PPLOBJ_STR) { pplObjCpy(out,&args[0],0,0,1); pplObjException(out,0,1,(char*)out->auxil,ERR_GENERAL); }
+                        else if (args[0].objType==PPLOBJ_EXC) { pplObjCpy(out,&args[0],0,0,1); }
                         else { sprintf(context->errStat.errBuff,"The first argument to the exception object constructor should be a string; an object of type <%s> was supplied.",pplObjTypeNames[args[0].objType]); TBADD(ERR_TYPE,0,NULL); }
                       }
         else          { sprintf(context->errStat.errBuff,"The exception object constructor takes one argument; %d supplied.",nArgs); TBADD(ERR_TYPE,0,NULL); }

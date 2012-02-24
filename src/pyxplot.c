@@ -88,7 +88,7 @@ int main(int argc, char **argv)
   if (DEBUG) ppl_log(&context->errcontext,"Initialising PyXPlot.");
   ppl_memAlloc_MemoryInit(&context->errcontext, &ppl_error, &ppl_log);
   ppl_PaperSizeInit();
-  ppl_inputInit(context);
+  if (!ppl_inputInit(context)) ppl_fatal(&context->errcontext, __FILE__, __LINE__, "Out of memory." );
   ppltxt_init();
 
   // Turn off GSL's automatic error handler
@@ -96,8 +96,9 @@ int main(int argc, char **argv)
 
   // Initialise GNU Readline
 #ifdef HAVE_READLINE
-  rl_readline_name = "PyXPlot";                          /* Allow conditional parsing of the ~/.inputrc file. */
-  //rl_attempted_completion_function = ppl_rl_completion;  /* Tell the completer that we want a crack first. */
+  ppl_parseAutocompleteSetContext(context);              // Tab completer needs to be able to access root-level context, even though rl doesn't pass it
+  rl_readline_name = "PyXPlot";                          // Allow conditional parsing of the ~/.inputrc file.
+  rl_attempted_completion_function = ppl_rl_completion;  // Tell the completer that we want a crack first.
 #endif
 
   // Set up commandline parser; do this BEFORE reading config files, which may contain a [script] section which needs parsing

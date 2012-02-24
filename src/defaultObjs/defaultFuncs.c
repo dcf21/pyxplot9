@@ -1098,6 +1098,19 @@ void pplfunc_radians     (ppl_context *c, pplObj *in, int nArgs, int *status, in
   CHECK_OUTPUT_OKAY;
  }
 
+void pplfunc_raise       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *FunctionDescription = "raise(e,s)";
+  if (nArgs!=2) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The %s function expects two input arguments.", FunctionDescription); return; }
+  if (in[0].objType!=PPLOBJ_EXC) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The first argument to the %s function should be an exception object; supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
+  if (in[1].objType!=PPLOBJ_STR) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The second argument to the %s function should be a string object; supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[1].objType]); return; }
+  *status=1;
+  *errType=(int)round(in[0].real);
+  strncpy(errText, in[1].auxil, FNAME_LENGTH);
+  errText[FNAME_LENGTH-1]='\0';
+  return;
+ }
+
 void pplfunc_range       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char  *FunctionDescription = "range([f],l,[s])";

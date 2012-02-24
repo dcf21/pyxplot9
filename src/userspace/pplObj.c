@@ -325,18 +325,19 @@ pplObj *pplObjNull(pplObj *in, unsigned char amMalloced)
   return in;
  }
 
-pplObj *pplObjException(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, char *str)
+pplObj *pplObjException(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, char *str, int errCode)
  {
-  in->objType      = PPLOBJ_ZOM;
-  in->auxil = (void *)str;
+  in->objType       = PPLOBJ_ZOM;
+  in->auxil         = (void *)str;
   in->auxilMalloced = auxilMalloced;
-  in->auxilLen = strlen(str+1);
-  in->objPrototype = &pplObjPrototypes[PPLOBJ_EXC];
+  in->auxilLen      = strlen(str)+1;
+  in->real          = errCode;
+  in->objPrototype  = &pplObjPrototypes[PPLOBJ_EXC];
   in->self_lval = NULL; in->self_dval = NULL;
   in->self_this = NULL;
   in->amMalloced = amMalloced;
-  in->immutable = 0;
-  in->objType = PPLOBJ_EXC;
+  in->immutable  = 0;
+  in->objType    = PPLOBJ_EXC;
   return in;
  }
 
