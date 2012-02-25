@@ -37,6 +37,8 @@
 
 #include "expressions/traceback_fns.h"
 
+#include "parser/parser.h"
+
 #include "stringTools/asciidouble.h"
 #include "stringTools/strConstants.h"
 
@@ -53,16 +55,22 @@
 
 int ppl_inputInit(ppl_context *context)
  {
-  context->inputLineBuffer = (char *)malloc(LSTR_LENGTH);
+  context->inputLineBufferLen = LSTR_LENGTH;
+  context->inputLineBuffer    = (char *)malloc( context->inputLineBufferLen );
   return (context->inputLineBuffer!=NULL);
  }
 
 void ppl_interactiveSession(ppl_context *context)
  {
-  int   linenumber = 1;
-  sigset_t sigs;
+  int           linenumber = 1;
+  sigset_t      sigs;
+  parserLine   *pl = NULL;
+  parserStatus *ps = NULL;
 
   if (DEBUG) ppl_log(&context->errcontext,"Starting an interactive session.");
+
+  ppl_parserStatInit(&ps,&pl);
+  if ( (ps==NULL) || (context->inputLineBuffer == NULL) ) { ppl_error(&context->errcontext,ERR_MEMORY,-1,-1,"Out of memory."); return; }
 
   if ((isatty(STDIN_FILENO) == 1) && (context->errcontext.session_default.splash == SW_ONOFF_ON)) ppl_report(&context->errcontext,ppltxt_welcome);
 
@@ -81,13 +89,18 @@ void ppl_interactiveSession(ppl_context *context)
         ppl_error_setstreaminfo(&context->errcontext,-1, "");
 #ifdef HAVE_READLINE
          {
-          char *line_ptr;
-          line_ptr = readline( (context->inputLineAddBuffer == NULL) ? "pyxplot> " : ".......> ");
+          int len;
+          char *line_ptr, prompt[32];
+          if (context->inputLineAddBuffer!=NULL) { strcpy(prompt,".......> "); }
+          else                                   { snprintf(prompt,16,"%s.......",ps->prompt); strcpy(prompt+7, "> "); }
+          line_ptr = readline(prompt);
           if (line_ptr==NULL) break;
           add_history(line_ptr);
           context->historyNLinesWritten++;
-          strncpy(context->inputLineBuffer, line_ptr, LSTR_LENGTH-1);
-          context->inputLineBuffer[LSTR_LENGTH-1]='\0';
+          len = strlen(line_ptr)+1;
+          if (len > context->inputLineBufferLen) { context->inputLineBuffer = (char *)realloc(context->inputLineBuffer, len); context->inputLineBufferLen=len; }
+          if (context->inputLineBuffer == NULL) break;
+          strcpy(context->inputLineBuffer, line_ptr);
           free(line_ptr);
          }
 #else
@@ -104,7 +117,7 @@ void ppl_interactiveSession(ppl_context *context)
         context->inputLineBuffer[LSTR_LENGTH-1]='\0';
         linenumber++;
        }
-      ppl_processLine(context, context->inputLineBuffer, isatty(STDIN_FILENO), 0, 0);
+      ppl_processLine(context, ps, context->inputLineBuffer, isatty(STDIN_FILENO), 0);
       ppl_error_setstreaminfo(&context->errcontext, -1, "");
       pplcsp_killAllHelpers(context);
      } else {
@@ -125,16 +138,19 @@ void ppl_interactiveSession(ppl_context *context)
     if (context->errcontext.session_default.splash == SW_ONOFF_ON) ppl_report(&context->errcontext,"\nGoodbye. Have a nice day.");
     else                                              ppl_report(&context->errcontext,""); // Make a new line
    }
+  ppl_parserStatFree(&ps);
   return;
  }
 
-void ppl_processScript(ppl_context *context, char *input, int iterLevel)
+void ppl_processScript(ppl_context *context, char *input, int iterDepth)
  {
-  int  linenumber = 1;
-  int  status;
-  char full_filename[FNAME_LENGTH];
-  char filename_description[FNAME_LENGTH];
-  FILE *infile;
+  int           linenumber = 1;
+  int           status;
+  char          full_filename[FNAME_LENGTH];
+  char          filename_description[FNAME_LENGTH];
+  FILE         *infile;
+  parserLine   *pl = NULL;
+  parserStatus *ps = NULL;
 
   if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Processing input from the script file '%s'.", input); ppl_log(&context->errcontext, NULL); }
   ppl_unixExpandUserHomeDir(&context->errcontext, input, context->errcontext.session_default.cwd, full_filename);
@@ -145,31 +161,43 @@ void ppl_processScript(ppl_context *context, char *input, int iterLevel)
     return;
    }
 
+  ppl_parserStatInit(&ps,&pl);
+  if ( (ps==NULL) || (context->inputLineBuffer == NULL) ) { ppl_error(&context->errcontext,ERR_MEMORY,-1,-1,"Out of memory."); return; }
+
   context->shellExiting = 0;
   while ((!context->shellExiting)&&(!cancellationFlag))
    {
     ppl_error_setstreaminfo(&context->errcontext, linenumber, filename_description);
     if ((feof(infile)) || (ferror(infile))) break;
-    ppl_file_readline(infile, context->inputLineBuffer, LSTR_LENGTH);
+    ppl_file_readline(infile, context->inputLineBuffer, context->inputLineBufferLen);
     linenumber++;
-    status = ppl_processLine(context, context->inputLineBuffer, 0, iterLevel, 1);
+    status = ppl_processLine(context, ps, context->inputLineBuffer, 0, iterDepth);
     ppl_error_setstreaminfo(&context->errcontext, -1, "");
     pplcsp_killAllHelpers(context);
-    if (status>0) // If an error occurs on the first line of a script, aborted processing it
+    if ( (status>0) || context->shellExiting || cancellationFlag )// If an error occurs in a script, aborted processing it
      {
-      ppl_error(&context->errcontext, ERR_FILE, -1, -1, "Aborting.");
+      if (!context->shellExiting) ppl_error(&context->errcontext, ERR_FILE, -1, -1, "Aborting.");
       if (context->inputLineAddBuffer != NULL) { free(context->inputLineAddBuffer); context->inputLineAddBuffer=NULL; }
       break;
      }
    }
   context->shellExiting = 0;
-  if (context->inputLineAddBuffer != NULL) { free(context->inputLineAddBuffer); context->inputLineAddBuffer=NULL; }
+  if (context->inputLineAddBuffer != NULL) // Process last line of file if there is still text buffered
+   {
+    ppl_error_setstreaminfo(&context->errcontext, linenumber, filename_description);
+    status = ppl_processLine(context, ps, "", 0, iterDepth);
+    ppl_error_setstreaminfo(&context->errcontext, -1, "");
+    if (status>0) ppl_error(&context->errcontext, ERR_FILE, -1, -1, "Aborting.");
+    if (context->inputLineAddBuffer != NULL) { free(context->inputLineAddBuffer); context->inputLineAddBuffer=NULL; }
+   }
+  context->inputLineAddBuffer=NULL;
   fclose(infile);
+  ppl_parserStatFree(&ps);
   pplcsp_checkForGvOutput(context);
   return;
  }
 
-int ppl_processLine(ppl_context *context, char *in, int interactive, int iterLevel, int exitOnError)
+int ppl_processLine(ppl_context *context, parserStatus *ps, char *in, int interactive, int iterDepth)
  {
   int   i, status=0;
   char *inputLineBuffer = NULL;
@@ -233,67 +261,42 @@ LOOP_OVER_LINE
   else if ((quoteChar=='\0') && (inputLineBuffer[i]==';' )                     )
    {
     inputLineBuffer[i]='\0';
-    status = ppl_ProcessStatement(context, inputLineBuffer);
-    if ((status) && (exitOnError)) break;
+    status = ppl_ProcessStatement(context, ps, inputLineBuffer, iterDepth);
+    if (status) break;
     inputLineBuffer = inputLineBuffer+i+1;
     i=0;
    }
 LOOP_END
 
-  if ((!status) || (!exitOnError)) status = ppl_ProcessStatement(context, inputLineBuffer);
+  if (!status) status = ppl_ProcessStatement(context, ps, inputLineBuffer, iterDepth);
   if (context->inputLineAddBuffer != NULL) free(context->inputLineAddBuffer);
   context->inputLineAddBuffer = NULL;
   return (status!=0);
  }
 
-#include "expressions/expCompile.h"
-#include "expressions/expEval.h"
-#include "userspace/pplObjPrint.h"
-
-int ppl_ProcessStatement(ppl_context *context, char *line)
+int ppl_ProcessStatement(ppl_context *context, parserStatus *ps, char *line, int iterDepth)
  {
-  int end, errPos, errType, lastOpAssign;
-  pplExpr *bytecode=NULL;
-  pplObj *out;
+  int stat=0;
 
   ppl_tbClear(context);
 
   // If line is blank, ignore it
   { int i=0,j=0; for (i=0; line[i]!='\0'; i++) if (line[i]>' ') { j=1; break; } if (j==0) return 0; }
 
-  ppl_expCompile(context, context->errcontext.error_input_linenumber, context->errcontext.error_input_sourceId, context->errcontext.error_input_filename, line, &end, 1, 1, &bytecode, &errPos, &errType, context->errStat.errBuff);
-  if (errPos>=0)
+  stat = ppl_parserCompile(context, ps, context->errcontext.error_input_linenumber, context->errcontext.error_input_sourceId, context->errcontext.error_input_filename, line, 0, iterDepth);
+
+  if ( (!stat) && (!context->errStat.status) && (ps->blockDepth==0) )
    {
-    int h1=-1, h2=-1;
-    ppl_tbAdd(context,context->errcontext.error_input_linenumber,context->errcontext.error_input_sourceId,context->errcontext.error_input_filename,1,errType,errPos,line);
-    ppl_tbWrite(context, context->errcontext.tempErrStr, LSTR_LENGTH, &h1, &h2);
-    ppl_error(&context->errcontext, ERR_PREFORMED, h1, h2, NULL);
-    pplExpr_free(bytecode);
-    return 1;
+    ppl_parserExecute(context, *ps->rootpl, iterDepth);
    }
 
-  // Print tokens
-  //ppl_tokenPrint(context, line, end);
-
-  // Print bytecode
-  //ppl_reversePolishPrint(context, bytecode, context->errcontext.tempErrStr);
-  //ppl_report(&context->errcontext, NULL);
-
-  // Execute bytecode
-  out = ppl_expEval(context, bytecode, &lastOpAssign, 1, 0);
-  if (context->errStat.status)
+  if (stat || context->errStat.status)
    {
     int h1=-1, h2=-1;
     ppl_tbWrite(context, context->errcontext.tempErrStr, LSTR_LENGTH, &h1, &h2);
     ppl_error(&context->errcontext, ERR_PREFORMED, h1, h2, NULL);
-    pplExpr_free(bytecode);
+    ppl_parserStatReInit(ps);
     return 1;
-   }
-  else if (!lastOpAssign)
-   {
-    pplObjPrint(context, out, NULL, context->errcontext.tempErrStr, LSTR_LENGTH, 0, 0);
-    ppl_report(&context->errcontext, NULL);
-    pplExpr_free(bytecode);
    }
 
   return 0;

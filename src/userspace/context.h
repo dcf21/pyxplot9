@@ -40,6 +40,7 @@ typedef struct ppl_context_struc
   // Shell status
   int       willBeInteractive;
   char     *inputLineBuffer;
+  int       inputLineBufferLen;
   char     *inputLineAddBuffer;
   int       shellExiting;
   long int  historyNLinesWritten;

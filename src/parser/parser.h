@@ -72,8 +72,10 @@ typedef struct parserLine {
  } parserLine;
 
 typedef struct parserStatus {
-  parserLine *inPrep;
-  int readingData, readingCode;
+  char         prompt[64];
+  parserLine **rootpl;
+  void        *stk[MAX_RECURSION_DEPTH][16];
+  int          blockDepth;
  } parserStatus;
 
 typedef struct parserOutput {
@@ -85,13 +87,17 @@ typedef struct parserOutput {
 extern list *pplParserCmdList[];
 #endif
 
-int           ppl_parserInit     (ppl_context *c);
-void          ppl_parserAtomFree (parserAtom **in);
-void          ppl_parserLineFree (parserLine *in);
-parserLine   *ppl_parserCompile  (ppl_context *c, int srcLineN, long srcId, char *srcFname, char *line, int expandMacros);
-void          ppl_parserOutFree  (parserOutput *in);
-void          ppl_parserExecute  (ppl_context *c, parserLine *in, int iterDepth);
-void          ppl_parserShell    (ppl_context *c, parserOutput *in, int iterDepth);
+int           ppl_parserInit      (ppl_context *c);
+void          ppl_parserAtomFree  (parserAtom **in);
+void          ppl_parserLineFree  (parserLine *in);
+void          ppl_parserStatInit  (parserStatus **in, parserLine **pl);
+void          ppl_parserStatReInit(parserStatus *in);
+void          ppl_parserStatAdd   (parserStatus *in, parserLine *pl);
+void          ppl_parserStatFree  (parserStatus **in);
+void          ppl_parserLineInit  (parserLine **in, int srcLineN, long srcId, char *srcFname, char *line);
+int           ppl_parserCompile   (ppl_context *c, parserStatus *s, int srcLineN, long srcId, char *srcFname, char *line, int expandMacros, int iterDepth);
+void          ppl_parserExecute   (ppl_context *c, parserLine *in, int iterDepth);
+void          ppl_parserShell     (ppl_context *c, parserOutput *in, int iterDepth);
 
 #ifdef HAVE_READLINE
 void          ppl_parseAutocompleteSetContext(ppl_context *c);

@@ -22,13 +22,14 @@
 #ifndef _INPUT_H
 #define _INPUT_H 1
 
+#include "parser/parser.h"
 #include "userspace/context.h"
 
 int  ppl_inputInit         (ppl_context *context);
 void ppl_interactiveSession(ppl_context *context);
-void ppl_processScript     (ppl_context *context, char *input, int iterLevel);
-int  ppl_processLine       (ppl_context *context, char *in, int interactive, int iterLevel, int exitOnError);
-int  ppl_ProcessStatement  (ppl_context *context,char *line);
+void ppl_processScript     (ppl_context *context, char *input, int iterDepth);
+int  ppl_processLine       (ppl_context *context, parserStatus *ps, char *in, int interactive, int iterDepth);
+int  ppl_ProcessStatement  (ppl_context *context, parserStatus *ps, char *line, int iterDepth);
 
 #endif
 
