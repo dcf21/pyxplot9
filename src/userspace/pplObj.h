@@ -47,8 +47,8 @@
 #define PPLOBJ_EXC  14 /* exception type */
 #define PPLOBJ_GLOB 15 /* global variable marker */
 #define PPLOBJ_ZOM  16 /* zombie */
-#define PPLOBJ_EXP  17 /* expression bytecode */
-#define PPLOBJ_BYT  18 /* command bytecode */
+#define PPLOBJ_EXP  17 /* expression bytecode (returned from parser in expressions like while (foo) { ... } */
+#define PPLOBJ_BYT  18 /* command bytecode (returned from parser for CODEBLOCKs */
 #define PPLOBJ_USER 19 /* user-defined datatype */
 
 typedef struct pplObj

@@ -352,6 +352,34 @@ pplObj *pplObjGlobal(pplObj *in, unsigned char amMalloced)
   return in;
  }
 
+pplObj *pplObjExpression(pplObj *in, unsigned char amMalloced, void *bytecode)
+ {
+  in->objType       = PPLOBJ_EXP;
+  in->auxil         = bytecode;
+  in->auxilMalloced = 1;
+  in->auxilLen      = 0;
+  in->objPrototype  = &pplObjPrototypes[PPLOBJ_EXP];
+  in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
+  in->amMalloced = amMalloced;
+  in->immutable  = 1;
+  return in;
+ }
+
+pplObj *pplObjBytecode(pplObj *in, unsigned char amMalloced, void *parserline)
+ {
+  in->objType       = PPLOBJ_BYT;
+  in->auxil         = parserline;
+  in->auxilMalloced = 1;
+  in->auxilLen      = 0;
+  in->objPrototype  = &pplObjPrototypes[PPLOBJ_BYT];
+  in->self_lval = NULL; in->self_dval = NULL;
+  in->self_this = NULL;
+  in->amMalloced = amMalloced;
+  in->immutable  = 1;
+  return in;
+ }
+
 pplObj *pplObjZom(pplObj *in, unsigned char amMalloced)
  {
   in->objType      = PPLOBJ_ZOM;
@@ -401,14 +429,18 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char lval, unsigned char out
    {
     case PPLOBJ_STR:
     case PPLOBJ_EXC: // copy string value
-    case PPLOBJ_EXP:
-    case PPLOBJ_BYT:
       if (useMalloc) out->auxil = (void *)malloc      (in->auxilLen);
       else           out->auxil = (void *)ppl_memAlloc(in->auxilLen);
       if (out->auxil==NULL) { out->objType=PPLOBJ_ZOM; return NULL; }
       memcpy(out->auxil, in->auxil, in->auxilLen);
       out->auxilMalloced = useMalloc;
       break;
+    case PPLOBJ_EXP:
+    case PPLOBJ_BYT:
+     {
+      // Copying a parser line suggests something has gone very wrong
+      out->objType=PPLOBJ_ZOM; return NULL;
+     }
     case PPLOBJ_USER:
      {
       pplObj *p = (pplObj *)malloc(sizeof(pplObj)); // Copy prototype pointer object

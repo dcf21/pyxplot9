@@ -565,12 +565,12 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
   // malloc output structure
   *outExpr = (pplExpr *)calloc(1,sizeof(pplExpr));
   if (*outExpr==NULL) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); *end=-1; return; }
-  (*outExpr)->srcId    = context->errcontext.error_input_sourceId;
-  (*outExpr)->srcLineN = context->errcontext.error_input_linenumber;
-  (*outExpr)->srcFname = (char *)malloc(strlen(context->errcontext.error_input_filename)+1);
+  (*outExpr)->srcId    = srcId;
+  (*outExpr)->srcLineN = srcLineN;
+  (*outExpr)->srcFname = (char *)malloc(strlen(srcFname)+1);
   out = (*outExpr)->bytecode = malloc(outlen);
   if (((*outExpr)->bytecode==NULL)||((*outExpr)->srcFname==NULL)) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); *end=-1; return; }
-  strcpy((*outExpr)->srcFname , context->errcontext.error_input_filename);
+  strcpy((*outExpr)->srcFname , srcFname);
 
   // First tokenise expression
   ppl_expTokenise(context, in, end, dollarAllowed, allowCommaOperator, 0, 0, 0, &tlen, errPos, errType, errText);

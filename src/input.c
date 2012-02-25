@@ -257,6 +257,10 @@ int ppl_ProcessStatement(ppl_context *context, char *line)
   pplObj *out;
 
   ppl_tbClear(context);
+
+  // If line is blank, ignore it
+  { int i=0,j=0; for (i=0; line[i]!='\0'; i++) if (line[i]>' ') { j=1; break; } if (j==0) return 0; }
+
   ppl_expCompile(context, context->errcontext.error_input_linenumber, context->errcontext.error_input_sourceId, context->errcontext.error_input_filename, line, &end, 1, 1, &bytecode, &errPos, &errType, context->errStat.errBuff);
   if (errPos>=0)
    {

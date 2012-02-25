@@ -50,10 +50,12 @@ typedef struct parserNode {
   struct parserNode *nextSibling;
  } parserNode;
 
+#define PARSER_TYPE_OPTIONS 8
+  
 typedef struct parserAtom {
   int stackOutPos;
   int linePos; // Position of this atom in the string copy of the line, used for error reporting
-  unsigned char options[8]; // characters, e.g. 'd' if %d is an allowed kind of value for this variable
+  unsigned char options[PARSER_TYPE_OPTIONS]; // characters, e.g. 'd' if %d is an allowed kind of value for this variable
   pplExpr *expr; pplObj *literal;
   struct parserAtom *next;
  } parserAtom;
@@ -64,7 +66,9 @@ typedef struct parserLine {
   long        srcId;
   char       *srcFname;
   int         stackLen;
+  int         containsMacros;
   parserAtom *firstAtom, *lastAtom;
+  struct parserLine *next;
  } parserLine;
 
 typedef struct parserStatus {
@@ -84,9 +88,10 @@ extern list *pplParserCmdList[];
 int           ppl_parserInit     (ppl_context *c);
 void          ppl_parserAtomFree (parserAtom **in);
 void          ppl_parserLineFree (parserLine *in);
-parserLine   *ppl_parserCompile  (ppl_context *c, char *line, int ExpandMacros);
+parserLine   *ppl_parserCompile  (ppl_context *c, int srcLineN, long srcId, char *srcFname, char *line, int expandMacros);
 void          ppl_parserOutFree  (parserOutput *in);
-parserOutput *ppl_parserExecute  (ppl_context *c, parserLine *in);
+void          ppl_parserExecute  (ppl_context *c, parserLine *in, int iterDepth);
+void          ppl_parserShell    (ppl_context *c, parserOutput *in, int iterDepth);
 
 #ifdef HAVE_READLINE
 void          ppl_parseAutocompleteSetContext(ppl_context *c);

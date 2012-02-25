@@ -233,7 +233,7 @@ static void expEval_stringSubs(ppl_context *context, pplExpr *inExpr, int Nsubs)
     if (context->stack[context->stackPtr].refCount != 0) { strcpy(context->errStat.errBuff,"Stack forward reference detected."); TBADD(ERR_INTERNAL,0,ascii); goto cleanup_on_error; } \
    } \
 
-pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, int dollarAllowed, int IterDepth)
+pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, int dollarAllowed, int iterDepth)
  {
   int   j=0;
   int   initialStackPtr=0;
@@ -241,8 +241,10 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
   void *in = inExpr->bytecode;
   char *ascii = inExpr->ascii;
 
+  if (iterDepth > MAX_RECURSION_DEPTH) { strcpy(context->errStat.errBuff,"Maximum recursion depth exceeded."); TBADD(ERR_OVERFLOW,0,inExpr->ascii); return NULL; }
+
   // If at bottom iteration depth, clean up stack now if there is any left-over junk
-  if (IterDepth==0) for ( ; context->stackPtr>0 ; ) { STACK_POP; }
+  if (iterDepth==0) for ( ; context->stackPtr>0 ; ) { STACK_POP; }
   initialStackPtr = context->stackPtr;
   *lastOpAssign=0;
 
@@ -470,7 +472,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
        {
         int nArgs = *(int *)(in+j);
         *lastOpAssign=0;
-        ppl_fnCall(context, inExpr, nArgs, dollarAllowed, IterDepth);
+        ppl_fnCall(context, inExpr, nArgs, dollarAllowed, iterDepth);
         if (context->errStat.status) { ppl_tbWasInSubstring(context, charpos, inExpr->ascii); goto cleanup_on_error; }
         break;
        }

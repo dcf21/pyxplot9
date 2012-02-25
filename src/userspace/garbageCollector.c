@@ -27,6 +27,11 @@
 
 #include "coreUtils/dict.h"
 #include "coreUtils/list.h"
+
+#include "expressions/expCompile.h"
+
+#include "parser/parser.h"
+
 #include "userspace/garbageCollector.h"
 #include "userspace/pplObj.h"
 #include "userspace/pplObjFunc_fns.h"
@@ -77,10 +82,20 @@ void ppl_garbageObject(pplObj *o)
    {
     case PPLOBJ_STR:
     case PPLOBJ_EXC:
-    case PPLOBJ_EXP:
-    case PPLOBJ_BYT:
       if (o->auxilMalloced) { void *old=o->auxil; o->auxil=NULL; if (old!=NULL) free(old); }
       break;
+    case PPLOBJ_EXP:
+     {
+      void *old=o->auxil; o->auxil=NULL;
+      if (old!=NULL) pplExpr_free((pplExpr *)old);
+      break;
+     }
+    case PPLOBJ_BYT:
+     {
+      void *old=o->auxil; o->auxil=NULL;
+      if (old!=NULL) ppl_parserLineFree((parserLine *)old);
+      break;
+     }
     case PPLOBJ_FILE:
      {
       pplFile *f = (pplFile *)(o->auxil);

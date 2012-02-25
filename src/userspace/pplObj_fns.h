@@ -45,11 +45,12 @@ pplObj *pplObjType     (pplObj *in, unsigned char amMalloced, unsigned char auxi
 pplObj *pplObjNull     (pplObj *in, unsigned char amMalloced);
 pplObj *pplObjException(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, char *str, int errCode);
 pplObj *pplObjGlobal   (pplObj *in, unsigned char amMalloced);
+pplObj *pplObjExpression(pplObj *in, unsigned char amMalloced, void *bytecode);
+pplObj *pplObjBytecode (pplObj *in, unsigned char amMalloced, void *parserline);
 pplObj *pplObjZom      (pplObj *in, unsigned char amMalloced);
 pplObj *pplObjUser     (pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, pplObj *prototype);
 pplObj *pplObjCpy      (pplObj *out, pplObj *in, unsigned char lval, unsigned char outMalloced, unsigned char useMalloc);
 
 pplObj *pplObjDeepCpy(pplObj *out, pplObj *in, int deep, unsigned char outMalloced, unsigned char useMalloc);
-
 #endif
 
