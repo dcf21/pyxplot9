@@ -92,7 +92,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int iterDepth)
     if (out==NULL) { strcpy(eB,"Out of memory."); TBADD(ERR_MEMORY,0,in->linetxt); return; }
     stk = (pplObj *)malloc(in->stackLen*sizeof(pplObj));
     if (stk==NULL) { free(out); strcpy(eB,"Out of memory."); TBADD(ERR_MEMORY,0,in->linetxt); return; }
-    for (i=0; i<in->stackLen; i++) pplObjZom(&stk[i],0);
+    for (i=0; i<in->stackLen; i++) { stk[i].refCount=1; pplObjZom(&stk[i],0); }
     out->stk = stk;
     out->stackLen = in->stackLen;
 
@@ -102,7 +102,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int iterDepth)
       if (item->literal!=NULL)
        {
         // Atom is a literal: simply copy it
-        pplObjCpy(&stk[i],item->literal,0,0,1);
+        pplObjCpy(&stk[item->stackOutPos],item->literal,0,0,1);
        }
       else
        {
@@ -235,7 +235,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int iterDepth)
          }
 
         // Copy value produced by atom
-        pplObjCpy(&stk[i], val, 0, 0, 1);
+        pplObjCpy(&stk[item->stackOutPos], val, 0, 0, 1);
        }
       item = item->next;
      }

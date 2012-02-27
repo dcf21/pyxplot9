@@ -55,7 +55,7 @@ typedef struct parserNode {
 typedef struct parserAtom {
   int stackOutPos;
   int linePos; // Position of this atom in the string copy of the line, used for error reporting
-  unsigned char options[PARSER_TYPE_OPTIONS]; // characters, e.g. 'd' if %d is an allowed kind of value for this variable
+  char options[PARSER_TYPE_OPTIONS]; // characters, e.g. 'd' if %d is an allowed kind of value for this variable
   pplExpr *expr; pplObj *literal;
   struct parserAtom *next;
  } parserAtom;
@@ -65,7 +65,7 @@ typedef struct parserLine {
   int         srcLineN;
   long        srcId;
   char       *srcFname;
-  int         stackLen;
+  int         stackLen, stackOffset;
   int         containsMacros;
   parserAtom *firstAtom, *lastAtom;
   struct parserLine *next;
@@ -74,8 +74,11 @@ typedef struct parserLine {
 typedef struct parserStatus {
   char         prompt[64];
   parserLine **rootpl;
-  void        *stk[MAX_RECURSION_DEPTH][16];
+  parserLine  *pl [MAX_RECURSION_DEPTH];
+  parserNode  *stk[MAX_RECURSION_DEPTH][16];
   int          blockDepth;
+  char         expectingList[LSTR_LENGTH];
+  int          eLPos, eLlinePos;
  } parserStatus;
 
 typedef struct parserOutput {
@@ -88,11 +91,12 @@ extern list *pplParserCmdList[];
 #endif
 
 int           ppl_parserInit      (ppl_context *c);
+void          ppl_parserAtomAdd   (parserLine *in, int stackOutPos, int linePos, char *options, pplExpr *expr, pplObj *literal);
 void          ppl_parserAtomFree  (parserAtom **in);
 void          ppl_parserLineFree  (parserLine *in);
 void          ppl_parserStatInit  (parserStatus **in, parserLine **pl);
 void          ppl_parserStatReInit(parserStatus *in);
-void          ppl_parserStatAdd   (parserStatus *in, parserLine *pl);
+void          ppl_parserStatAdd   (parserStatus *in, int level, parserLine *pl);
 void          ppl_parserStatFree  (parserStatus **in);
 void          ppl_parserLineInit  (parserLine **in, int srcLineN, long srcId, char *srcFname, char *line);
 int           ppl_parserCompile   (ppl_context *c, parserStatus *s, int srcLineN, long srcId, char *srcFname, char *line, int expandMacros, int iterDepth);

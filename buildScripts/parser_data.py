@@ -119,11 +119,10 @@ for line in f_in:
   f_c.write("%d "%(varcount)) # First word on each statement definition line is the number of variables in the root slotspace
   f_c.write("%s\\n\\\n"%outline)
   for i,j in varnames.iteritems():
-   if i!="X":
-    key = "PARSE_%s_%s%s"%(directive,setoption,sanitize(i))
-    if (key in includeKeys) and (includeKeys[key]!=j): print "Repetition of key %s"%key
-    includeKeys[key] = j
-    f_h.write("#define %s %d\n"%(key,j)) # Write #defines to convert variable names into slot numbers
+   key = "PARSE_%s_%s%s"%(directive,setoption,sanitize(i))
+   if (key in includeKeys) and (includeKeys[key]!=j): print "Repetition of key %s"%key
+   includeKeys[key] = j
+   f_h.write("#define %s %d\n"%(key,j)) # Write #defines to convert variable names into slot numbers
 
 # Finish up
 
