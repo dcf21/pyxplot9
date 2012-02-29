@@ -93,7 +93,11 @@ void ppl_error(pplerr_context *context, int ErrType, int HighlightPos1, int High
     if (ApplyHighlighting && ((j==HighlightPos1-1) || (j==HighlightPos2-1))) { if (reverse==0) { snprintf(temp_stringB+i, BLEN-i, "\x1b[7m"); i+=strlen(temp_stringB+i); } reverse=3; }
     else if (ApplyHighlighting && (reverse==1)) { snprintf(temp_stringB+i, BLEN-i, "\x1b[27m"); i+=strlen(temp_stringB+i); reverse=0; }
     else if (ApplyHighlighting && (reverse> 1)) reverse--;
-    if (i<BLEN) temp_stringB[i++] = msg[j];
+    if (i<BLEN)
+     {
+      if ((msg[j]=='\n') && (reverse>0)) { temp_stringB[i++] = ' '; j--; } // If newline is highlighted, add spaces to end of line so that we can highlight them
+      else                                 temp_stringB[i++] = msg[j];
+     }
    }
   if (ApplyHighlighting && (reverse!=0)) { snprintf(temp_stringB+i, BLEN-i, "\x1b[27m"); i+=strlen(temp_stringB+i); reverse=0; }
   if (i<BLEN) temp_stringB[i] = '\0';

@@ -44,6 +44,15 @@
 #include "userspace/garbageCollector.h"
 #include "userspace/pplObj_fns.h"
 
+static char *strDup(const char *in, int N)
+ {
+  char *out = (char *)malloc(N+1);
+  if (out==NULL) return NULL;
+  strncpy(out, in, N+1);
+  out[N]='\0';
+  return out;
+ }
+
 void ppl_parserAtomAdd(parserLine *in, int stackOutPos, int linePos, char *options, pplExpr *expr, pplObj *literal)
  {
   parserAtom *output = (parserAtom *)malloc(sizeof(parserAtom));
@@ -67,7 +76,7 @@ void ppl_parserAtomAdd(parserLine *in, int stackOutPos, int linePos, char *optio
   in->lastAtom = output;
  }
 
-static int parse_descend(ppl_context *c, parserStatus *s, int srcLineN, long srcId, char *srcFname, char *line, int *linepos, parserNode *node, int *tabCompNo, int tabCompStart, char *tabCompTxt, int level, int blockDepth, int *match)
+static int parse_descend(ppl_context *c, parserStatus *s, int writeOut, int srcLineN, long srcId, char *srcFname, char *line, int *linepos, parserNode *node, int *tabCompNo, int tabCompStart, char *tabCompTxt, int level, int blockDepth, int *match)
  {
   int status=0; // 0=fail; 1=pass; 2=tab completion returned; 3=want another line.
 
@@ -79,7 +88,7 @@ static int parse_descend(ppl_context *c, parserStatus *s, int srcLineN, long src
     if (nodeNext != NULL) // We need to descend still further...
      {
       parserNode *nodeIter = node->firstChild;
-      status = parse_descend(c,s,srcLineN,srcId,srcFname,line,linepos,NULL,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
+      status = parse_descend(c,s,writeOut,srcLineN,srcId,srcFname,line,linepos,NULL,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
       if (status!=1) goto cleanup;
 
       // We came out of child node with a success return code. This means we carry on chomping along the SEQ
@@ -87,7 +96,7 @@ static int parse_descend(ppl_context *c, parserStatus *s, int srcLineN, long src
       if (nodeIter==nodeNext) nodeIter = nodeIter->nextSibling;
       while (nodeIter != NULL)
        {
-        status = parse_descend(c,s,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
+        status = parse_descend(c,s,writeOut,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
         if (status!=1) goto cleanup;
         nodeIter = nodeIter->nextSibling;
        }
@@ -97,13 +106,17 @@ static int parse_descend(ppl_context *c, parserStatus *s, int srcLineN, long src
    }
 
   // If this is a top-level attempt to parse a statement, make a new parserLine structure to hold the output of our attempt
-  if ((s!=NULL) && (s->pl[blockDepth]==NULL))
+  if ((s!=NULL) && writeOut && (s->pl[blockDepth]==NULL))
    {
     parserLine *output=NULL;
     ppl_parserLineInit(&output,srcLineN,srcId,srcFname,line);
+    output->stackLen = node->listLen;
     if (output==NULL) { sprintf(c->errStat.errBuff,"Out of memory."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_MEMORY,0,line); return 0; }
     ppl_parserStatAdd(s, blockDepth, output);
    }
+
+  // FFW over spaces
+  while ((line[*linepos]!='\0') && (line[*linepos]<=' ')) (*linepos)++;
 
   // Deal with the node we've been given
   switch (node->type)
@@ -116,10 +129,12 @@ static int parse_descend(ppl_context *c, parserStatus *s, int srcLineN, long src
      }
     case PN_TYPE_DATABLK:
      {
+      status=1;
       goto cleanup;
      }
     case PN_TYPE_CODEBLK:
      {
+      status=1;
       goto cleanup;
      }
     case PN_TYPE_ITEM:
@@ -135,8 +150,8 @@ static int parse_descend(ppl_context *c, parserStatus *s, int srcLineN, long src
          {
           if ((node->varName != NULL) && ((strcmp(node->varName,"filename")==0)||(strcmp(node->varName,"directory")==0)))
            { // Expecting a filename
-            if ((*tabCompNo)!=0) { status=0; (*tabCompNo)--; goto cleanup; }
-            status=2; strcpy(tabCompTxt, "\n"); (*tabCompNo)--; goto cleanup;
+            if ((*tabCompNo)!=0) { status=0; (*tabCompNo)--; goto item_cleanup; }
+            status=2; strcpy(tabCompTxt, "\n"); (*tabCompNo)--; goto item_cleanup;
            }
           goto finished_looking_for_tabcomp; // Expecting a float or string, which we don't tab complete... move along and look for something else
          }
@@ -146,15 +161,15 @@ static int parse_descend(ppl_context *c, parserStatus *s, int srcLineN, long src
         for (i=0; ((line[*linepos+i]>' ') && (node->matchString[i]>' ')); i++)
          if (toupper(line[*linepos+i])!=toupper(node->matchString[i]))
           {
-           status=0; goto cleanup; // We don't match the beginning of this string
+           status=0; goto item_cleanup; // We don't match the beginning of this string
           }
         if ((node->acLevel == -1) && (node->matchString[i]<=' ')) goto finished_looking_for_tabcomp; // We've matched an @n string right to the end... move on
-        if ((*tabCompNo)!=0) { status=0; (*tabCompNo)--; goto cleanup; }
+        if ((*tabCompNo)!=0) { status=0; (*tabCompNo)--; goto item_cleanup; }
         status=2;
         for (i=0; i<((*linepos)-tabCompStart); i++) tabCompTxt[i] = line[tabCompStart+i];
         strcpy(tabCompTxt+i, node->matchString); // Matchstring should match itself
         (*tabCompNo)--;
-        goto cleanup;
+        goto item_cleanup;
        }
 finished_looking_for_tabcomp:
 
@@ -172,7 +187,7 @@ finished_looking_for_tabcomp:
          {
           *linepos += i; // We do match this string: advance by i spaces
           atNLastPos = *linepos;
-          if (s!=NULL)
+          if ((s!=NULL) && writeOut)
            {
             pplObj val;
             val.refCount=1;
@@ -183,7 +198,7 @@ finished_looking_for_tabcomp:
        }
 
       // Treat items which are not @n
-      else if (node->matchString[0]!='%')
+      else if (node->matchString[0]!='%') // Items which do not begin % match themselves
        {
         int i = ppl_strAutocomplete(line+*linepos , node->matchString , node->acLevel);
         if (i<0)
@@ -193,35 +208,124 @@ finished_looking_for_tabcomp:
           status=1;
           *linepos += i; // We match this string: advance by i spaces
           atNLastPos = *linepos;
-          if (s!=NULL)
+          if ((s!=NULL) && writeOut)
            {
             pplObj val;
             val.refCount=1;
-            pplObjStr(&val,0,0,node->matchString);
+            pplObjStr(&val,0,0,node->outString);
             ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
            }
          }
        }
-      else
+      else // Item begins with a %, so substitute a value for this variable
        {
+        pplExpr *expr;
+        int      explen=0, errPos=-1, errType;
+        int      dollarAllowed = (node->matchString[1]=='E');
+
+        switch (node->matchString[1])
+         {
+          case 's': case 'S': case 'r': case 'v':
+           {
+            if      (node->matchString[1]=='r')
+              explen = strlen(line+*linepos);
+            else if (node->matchString[1]=='s')
+             {
+              for (explen=0; ((isalpha(line[*linepos+explen]))||(line[*linepos+explen]=='_')); explen++);
+              if (explen==0) { status=0; goto item_cleanup; }
+             }
+            else if (node->matchString[1]=='S')
+             {
+              for (explen=0; ((line[*linepos+explen]>' ')&&(line[*linepos+explen]!='\'')&&(line[*linepos+explen]!='\"')); explen++);
+              if (explen==0) { status=0; goto item_cleanup; }
+             }
+            else if (node->matchString[1]=='v')
+             {
+              if (!isalpha(line[*linepos])) { status=0; goto item_cleanup; } // variable name must start with a letter
+              for (explen=1; ((isalnum(line[*linepos+explen]))||(line[*linepos+explen]=='_')); explen++); // afterwards, numbers and _ allowed
+             }
+            if ((s!=NULL) && writeOut)
+             {
+              char   *str = strDup(line+*linepos,explen);
+              pplObj  val;
+              if (str==NULL) { status=0; goto item_cleanup; }
+              val.refCount=1;
+              pplObjStr(&val,0,1,str);
+              ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
+             }
+            break;
+           }
+          default:
+           {
+            ppl_expCompile(c,srcLineN,srcId,srcFname,line+*linepos,&explen,dollarAllowed,0,&expr,&errPos,&errType,c->errStat.errBuff);
+            if (errPos>=0)
+             {
+              pplExpr_free(expr);
+              ppl_tbAdd(c,srcLineN,srcId,srcFname,0,errType,errPos+*linepos,line);
+              status=0;
+              goto item_cleanup;
+             }
+            if ((s==NULL)||(!writeOut)) pplExpr_free(expr);
+            else if ((node->matchString[1]!='e') && (node->matchString[1]!='E'))
+             {
+              ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, node->matchString+1, expr, NULL);
+             }
+            else
+             {
+              pplObj val;
+              val.refCount=1;
+              pplObjExpression(&val,0,(void *)expr);
+              ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
+             }
+           }
+         }
+        *linepos += explen;
+        status=1;
        }
 
-      // If we're not running in tab-completion mode, either set a parserLine variable, or return an "expecting" hint
-      if (s!=NULL)
+      // If we're not running in tab-completion mode and have failed, return an "expecting" hint
+item_cleanup:
+      if ((s!=NULL) && (status!=1) && (s->eLlinePos <= *linepos))
        {
-        if (status==1) // Success; return value
+        int i;
+        char varname[FNAME_LENGTH];
+        if (s->eLlinePos < *linepos) { s->eLlinePos = *linepos; s->eLPos = 0; s->expectingList[0]='\0'; }
+        if ((node->varName != NULL) && (node->varName[0] != '\0'))  sprintf(varname, " (%s)", node->varName);
+        else                                                        varname[0]='\0';
+        for (i=1; 1; i++)
          {
-         }
-        else if (s->eLlinePos <= *linepos)
-         {
-          char varname[FNAME_LENGTH];
-          if (s->eLlinePos < *linepos) { s->eLlinePos = *linepos; s->eLPos = 0; s->expectingList[0]='\0'; }
           if (s->eLPos != 0) { strcpy(s->expectingList+s->eLPos, ", or "); s->eLPos+=strlen(s->expectingList+s->eLPos); }
-          if ((node->varName != NULL) && (node->varName[0] != '\0'))  sprintf(varname, " (%s)", node->varName);
-          else                                                        varname[0]='\0';
+
+          if (node->matchString[0]!='%')
+           { sprintf(s->expectingList+s->eLPos, "\"%s\"", node->matchString); s->eLPos+=strlen(s->expectingList+s->eLPos); break; }
+          else
+           {
+            if (node->matchString[i]=='\0') { if (s->eLPos!=0) { s->eLPos-=5; s->expectingList[s->eLPos]='\0'; } break; }
+            switch(node->matchString[i])
+             {
+              case 'a': sprintf(s->expectingList+s->eLPos, "an axis name%s", varname); break;
+              case 'A': sprintf(s->expectingList+s->eLPos, "an angle%s", varname); break;
+              case 'b': sprintf(s->expectingList+s->eLPos, "a boolean%s", varname); break;
+              case 'c': sprintf(s->expectingList+s->eLPos, "a color%s", varname); break;
+              case 'C': sprintf(s->expectingList+s->eLPos, "a color%s", varname); break;
+              case 'd': sprintf(s->expectingList+s->eLPos, "an integer%s", varname); break;
+              case 'D': sprintf(s->expectingList+s->eLPos, "a distance%s", varname); break;
+              case 'e': sprintf(s->expectingList+s->eLPos, "an algebraic expression%s", varname); break;
+              case 'E': sprintf(s->expectingList+s->eLPos, "an algebraic expression%s", varname); break;
+              case 'f': sprintf(s->expectingList+s->eLPos, "a real, dimensionless number%s", varname); break;
+              case 'o': sprintf(s->expectingList+s->eLPos, "an expression%s", varname); break;
+              case 'p': sprintf(s->expectingList+s->eLPos, "a position vector%s", varname); break;
+              case 'P': sprintf(s->expectingList+s->eLPos, "a position vector%s", varname); break;
+              case 'q': sprintf(s->expectingList+s->eLPos, "a string%s", varname); break;
+              case 'r': sprintf(s->expectingList+s->eLPos, "a string of text%s", varname); break;
+              case 's': sprintf(s->expectingList+s->eLPos, "an alphabetical word%s", varname); break;
+              case 'S': sprintf(s->expectingList+s->eLPos, "a word%s", varname); break;
+              case 'u': sprintf(s->expectingList+s->eLPos, "a physical quantity%s", varname); break;
+             }
+            s->eLPos+=strlen(s->expectingList+s->eLPos);
+           }
          }
        }
-
       goto cleanup;
      }
     case PN_TYPE_SEQ:
@@ -229,7 +333,7 @@ finished_looking_for_tabcomp:
       parserNode *nodeIter = node->firstChild;
       while (nodeIter != NULL)
        {
-        status = parse_descend(c,s,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
+        status = parse_descend(c,s,writeOut,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
         if (status!=1) goto cleanup;
         nodeIter = nodeIter->nextSibling;
        }
@@ -259,50 +363,50 @@ finished_looking_for_tabcomp:
         int         lineposOld = *linepos;
         int         matchOld   = *match;
         int         lineposOld2;
-        int         matchOld2;
         parserNode *nodeIter   = node->firstChild;
 
         if (separator && !first)
          {
-          status = parse_descend(c,NULL,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
+          status = parse_descend(c,s,0,srcLineN,srcId,srcFname,line,linepos,&sepNode,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
           if (status==3) { status=0; }
-          if (status==0) { *linepos=lineposOld; *match=matchOld; status=1; break; }
-          if (status==2) goto cleanup;
+          if (status==0) { *linepos=lineposOld; *match=matchOld; status=1; goto repCleanup; }
+          if (status==2) goto repCleanup;
          }
-        lineposOld2 = lineposOld;
-        matchOld2   = matchOld;
+        lineposOld2 = *linepos;
         while (nodeIter != NULL)
          {
-          status = parse_descend(c,NULL,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
-          if (status==3) { status=0; goto cleanup; }
-          if (status==0) { if ((!separator)&&((!first)||(node->type==PN_TYPE_REP2))) { status=1; *linepos=lineposOld; *match=matchOld; } goto cleanup; }
-          if (status==2) goto cleanup;
+          status = parse_descend(c,s,0,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
+          if (status==3) { status=0; goto repCleanup; }
+          if (status==0) { if ((!separator)&&((!first)||(node->type==PN_TYPE_REP2))) { status=1; *linepos=lineposOld; *match=matchOld; } goto repCleanup; }
+          if (status==2) goto repCleanup;
           nodeIter = nodeIter->nextSibling;
          }
-        if (s!=NULL)
+        if ((s!=NULL) && writeOut)
          {
+          int    oldStackLen = s->pl[blockDepth]->stackLen;
+          pplObj val;
+          val.refCount=1;
+          pplObjNum(&val,1,oldStackLen,0);
+          ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + ((s->pl[blockDepth]->stackOffset == oldStackOffset) ? node->outStackPos : 0), *linepos, "", NULL, &val);
+          s->pl[blockDepth]->stackLen += node->listLen;
+          s->pl[blockDepth]->stackOffset = oldStackLen;
+          nodeIter=node->firstChild;
           *linepos=lineposOld2;
-          *match=matchOld2;
+          *match=matchOld;
           while (nodeIter != NULL)
            {
             // Add an atom to the parserLine to point to the beginning of structure
             // This is written to either stack location (offset + stackPos) if first iteration, or (offset + 0) subsequently
             // In any repeating structure, first stack position is pointer to next item
-            int    oldStackLen = s->pl[blockDepth]->stackLen;
-            pplObj val;
-            val.refCount=1;
-            pplObjNum(&val,1,oldStackLen,0);
-            ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + ((s->pl[blockDepth]->stackOffset == oldStackOffset) ? node->outStackPos : 0), *linepos, "", NULL, &val);
-            s->pl[blockDepth]->stackLen += node->listLen;
-            s->pl[blockDepth]->stackOffset = oldStackLen;
-            status = parse_descend(c,s,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
+            status = parse_descend(c,s,writeOut,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
             if (status==3) status=0;
-            if (status!=1) goto cleanup;
+            if (status!=1) goto repCleanup;
             nodeIter = nodeIter->nextSibling;
            }
          }
         first=0;
        }
+repCleanup:
       s->pl[blockDepth]->stackOffset = oldStackOffset;
       goto cleanup;
      }
@@ -311,23 +415,23 @@ finished_looking_for_tabcomp:
       int         lineposOld = *linepos;
       int         matchOld   = *match;
       parserNode *nodeIter   = node->firstChild;
-      parserStatus *stat     = NULL;
+      int         wo         = 0;
       while (1)
        {
         while (nodeIter != NULL)
          {
-          status = parse_descend(c,stat,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
-          if (status==3) { status=0; }
-          if (status==0) { *linepos=lineposOld; *match=matchOld; goto cleanup; }
+          status = parse_descend(c,s,wo,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
+          if (status==3) { status=0; goto cleanup; }
+          if (status==0) { *linepos=lineposOld; *match=matchOld; status=1; goto cleanup; }
           if (status==2) goto cleanup;
           nodeIter = nodeIter->nextSibling;
          }
 
         // The dry run succeeded, so do it again, for real
-        if (stat==s) goto cleanup;
+        if (wo==writeOut) goto cleanup;
         *linepos=lineposOld; *match=matchOld;
         nodeIter=node->firstChild;
-        stat=s;
+        wo=writeOut;
        }
      }
     case PN_TYPE_PER:
@@ -342,20 +446,22 @@ finished_looking_for_tabcomp:
         int         lineposOld = *linepos;
         int         matchOld   = *match;
         parserNode *nodeIter   = node->firstChild;
-        parserStatus *stat     = NULL;
+        int         wo         = 0, secondPass=0;
         repeating=0;
         while (nodeIter != NULL)
          {
           if (excluded[count]) { nodeIter=nodeIter->nextSibling; count++; continue; } 
 
-          status = parse_descend(c,stat,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
-          if (stat==s) { excluded[count]=1; repeating=1; break; }
+          status = parse_descend(c,s,wo,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
+          if (secondPass) { excluded[count]=1; repeating=1; break; }
           if (status==3) { status=0; }
           if (status==0) { *linepos=lineposOld; *match=matchOld; nodeIter=nodeIter->nextSibling; count++; continue; }
           if (status==2) goto cleanup;
-          stat=s;
+          *linepos=lineposOld; *match=matchOld;
+          wo=writeOut; secondPass=1;
          }
        }
+      status=1;
       goto cleanup;
      }
     case PN_TYPE_ORA:
@@ -363,15 +469,16 @@ finished_looking_for_tabcomp:
       int         lineposOld = *linepos;
       int         matchOld   = *match;
       parserNode *nodeIter   = node->firstChild;
-      parserStatus *stat     = NULL;
+      int         wo         = 0, secondPass=0;
       while (nodeIter != NULL)
        {
-        status = parse_descend(c,stat,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
-        if (stat==s) goto cleanup;
-        if (status==3) { status=0; }
+        status = parse_descend(c,s,wo,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
+        if (secondPass) goto cleanup;
+        if (status==3) { status=0; goto cleanup; }
         if (status==0) { *linepos=lineposOld; *match=matchOld; nodeIter=nodeIter->nextSibling; continue; }
         if (status==2) goto cleanup;
-        stat=s;
+        *linepos=lineposOld; *match=matchOld;
+        wo=writeOut; secondPass=1;
        }
       goto cleanup;
      }
@@ -394,7 +501,7 @@ cleanup:
   // If we have succeeded in parsing, we should by now have consumed a whole line; if there is trailig text, that's an error
   if ((level==0) && (blockDepth==0) && (status<2) && (s!=NULL))
    {
-    if (status==0)
+    if (status==1)
      {
       while ((line[*linepos]>'\0') && (line[*linepos]<=' ')) (*linepos)++;
       if (line[*linepos]!='\0')
@@ -402,10 +509,10 @@ cleanup:
         if (s->eLPos>0) { snprintf(s->expectingList+s->eLPos,LSTR_LENGTH-s->eLPos,", or "); s->eLPos+=strlen(s->expectingList+s->eLPos); }
         snprintf(s->expectingList+s->eLPos,LSTR_LENGTH-s->eLPos,"the end of the command");
         s->eLPos+=strlen(s->expectingList+s->eLPos);
-        status=1;
+        status=0;
        }
      }
-    if (status==1)
+    if (status==0)
      {
       snprintf(c->errStat.errBuff,LSTR_LENGTH,"At this point, was expecting %s.",s->expectingList);
       c->errStat.errBuff[LSTR_LENGTH-1] = '\0';
@@ -445,11 +552,12 @@ void ppl_parserStatInit(parserStatus **in, parserLine **pl)
 
 void ppl_parserStatReInit(parserStatus *in)
  {
-  int i;
+  int i,j;
   parserLine **pl = in->rootpl;
   if (*pl != NULL) ppl_parserLineFree(*pl);
   *pl = NULL;
   for (i=0; i<MAX_RECURSION_DEPTH; i++) in->pl[i]=NULL;
+  for (i=0; i<MAX_RECURSION_DEPTH; i++) for (j=0; j<16; j++) in->stk[i][j]=NULL;
   strcpy(in->prompt, "pyxplot");
   in->blockDepth = 0;
   in->eLPos      = 0;
@@ -549,14 +657,14 @@ void ppl_parserLineFree(parserLine *in)
   else if ((quoteChar=='\0') && (line[i]=='@')) { containsMacros=1; break; } \
   LOOP_END(0)
 
-int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId, char *srcFname, char *line, int expandMacros, int iterDepth)
+int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId, char *srcFname, char *line, int expandMacros, int blockDepth)
  {
   listIterator *cmdIter=NULL;
   int           i, cln, containsMacros=0, fail=0;
   int           obLen = LSTR_LENGTH, obPos;
   char         *outbuff = NULL;
 
-  if (iterDepth+s->blockDepth > MAX_RECURSION_DEPTH) { strcpy(c->errStat.errBuff,"Maximum recursion depth exceeded."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_OVERFLOW,0,line); ppl_parserStatReInit(s); return 1; }
+  if (blockDepth > MAX_RECURSION_DEPTH) { strcpy(c->errStat.errBuff,"Maximum recursion depth exceeded."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_OVERFLOW,0,line); ppl_parserStatReInit(s); return 1; }
 
   // Deal with macros and ` ` substitutions
   if (!expandMacros)
@@ -567,8 +675,9 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
       parserLine *output=NULL;
       ppl_parserLineInit(&output, srcLineN, srcId, srcFname, line);
       if (output==NULL) { sprintf(c->errStat.errBuff,"Out of memory."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_MEMORY,0,line); ppl_parserStatReInit(s); return 1; }
+      output->stackLen       = 0;
       output->containsMacros = 1;
-      ppl_parserStatAdd(s, s->blockDepth, output);
+      ppl_parserStatAdd(s, blockDepth, output);
       return 0;
      }
    }
@@ -670,7 +779,7 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
   else                                     cln=-1;
 
   // Cycle through possible command matches
-  cmdIter = ppl_listIterateInit(pplParserCmdList[26]);
+  cmdIter = ppl_listIterateInit(pplParserCmdList[cln]);
   while (1)
    {
     int match=0, linepos=0;
@@ -678,19 +787,27 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
 
     if (cmdIter == NULL) // Once we've finished cycling through commands that start with punctuation, cycle through ones that start with first letter
      {
-      if (cln==-1) break;
-      cmdIter = ppl_listIterateInit(pplParserCmdList[cln]);
-      cln=-1;
+      if (cln==26) break;
+      cmdIter = ppl_listIterateInit(pplParserCmdList[cln=26]);
       if (cmdIter==NULL) break;
      }
 
     // Fetch next item from list of possible commands and try to parse it
     item  = (parserNode *)ppl_listIterate(&cmdIter);
     match = linepos = 0;
-    parse_descend(c, s, srcLineN, srcId, srcFname, line, &linepos, item, NULL, -1, NULL, 0, 0, &match);
+    parse_descend(c, s, 1, srcLineN, srcId, srcFname, line, &linepos, item, NULL, -1, NULL, 0, blockDepth, &match);
 
     // If this command did not match as far as the '=' token, clear stack and traceback
-    if (match==0) { ppl_tbClear(c); continue; }
+    if (match==0)
+     {
+      ppl_tbClear(c);
+      ppl_parserLineFree(s->pl[blockDepth]);
+      s->pl[blockDepth]=NULL;
+      if (blockDepth==0) *(s->rootpl) = NULL;
+      s->eLPos = s->eLlinePos = 0;
+      s->expectingList[0] = '\0';
+      continue;
+     }
 
     // If we did match as far as '=', but got an error traceback, free the stack and return to the user
     if (c->errStat.status) { if (outbuff!=NULL) free(outbuff); ppl_parserStatReInit(s); return 1; }
@@ -746,7 +863,7 @@ char *ppl_parseAutocomplete(const char *dummy, int status)
   // Look for possible tab completions. Do this in a while loop, since if we get a %s filename completion, we search again
   while (1)
    {
-    int           cln=26;
+    int           cln=0;
     listIterator *cmdIter=NULL;
     int           number = matchNum++;
     char          tabCompTxt[FNAME_LENGTH] = "\0";
@@ -760,15 +877,15 @@ char *ppl_parseAutocomplete(const char *dummy, int status)
 
       if (cmdIter == NULL) // Once we've finished cycling through commands that start with punctuation, cycle through ones that start with first letter
        {
-        if (cln==-1) break;
-        cmdIter = ppl_listIterateInit(pplParserCmdList[cln--]);
+        if (cln==26) break;
+        cmdIter = ppl_listIterateInit(pplParserCmdList[cln++]);
         if (cmdIter==NULL) continue;
        }
 
       // Fetch next item from list of possible commands and try to parse it
       item  = (parserNode *)ppl_listIterate(&cmdIter);
       match = linepos = 0;
-      parse_descend(rootContext, NULL, -1, -1, "", line, &linepos, item, &number, start, tabCompTxt, 0, 0, &match);
+      parse_descend(rootContext, NULL, 0, -1, -1, "", line, &linepos, item, &number, start, tabCompTxt, 0, 0, &match);
 
       if (tabCompTxt[0] == '\n') // Special case: use Readline's filename tab completion
        {
@@ -796,8 +913,8 @@ char *ppl_parseAutocomplete(const char *dummy, int status)
 
 char **ppl_rl_completion(const char *text, int start, int end)
  {
-  char **matches;
-  char  *firstItem;
+  char        **matches;
+  char         *firstItem;
 
   if ((start>0)&&((rl_line_buffer[start-1]=='\"')||(rl_line_buffer[start-1]=='\''))) return NULL; // Do filename completion
 

@@ -43,10 +43,43 @@
 #include "userspace/context.h"
 #include "userspace/garbageCollector.h"
 #include "userspace/pplObj_fns.h"
+#include "userspace/pplObjPrint.h"
 
 #include "pplConstants.h"
 
 #define TBADD(et,pos,lt) ppl_tbAdd(c,in->srcLineN,in->srcId,in->srcFname,0,et,pos,lt)
+
+void ppl_parserLinePrint(ppl_context *c, parserLine *in)
+ {
+  char *t = c->errcontext.tempErrStr;
+  parserAtom *a = in->firstAtom;
+
+  sprintf(t,"Parser line -- stack length %d\nOriginal line was: %s",in->stackLen,in->linetxt);
+  ppl_report(&c->errcontext, NULL);
+  if (in->containsMacros) ppl_report(&c->errcontext, "Contains macros.");
+
+  for (a = in->firstAtom; a!=NULL; a=a->next)
+   {
+    if (a->literal!=NULL)
+     {
+      int i=0;
+      sprintf(t+i,"Set %4d to literal of type %2d -- ",a->stackOutPos,a->literal->objType);
+      i=strlen(t+i);
+      pplObjPrint(c,a->literal,NULL,t+i,LSTR_LENGTH-i,0,0);
+      i+=strlen(t+i);
+      sprintf(t+i,".");
+     }
+    else
+     {
+      int i=0;
+      sprintf(t+i,"Set %4d to expression -- %s.",a->stackOutPos,a->expr->ascii);
+     }
+    ppl_report(&c->errcontext, NULL);
+   }
+
+  ppl_report(&c->errcontext, "---------------");
+  return;
+ }
 
 void ppl_parserOutFree(parserOutput *in)
  {
@@ -71,6 +104,8 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int iterDepth)
 
   while (in != NULL)
    {
+    ppl_parserLinePrint(c,in);
+    
     // If line contains macros, need to recompile it now
     if (in->containsMacros)
      {

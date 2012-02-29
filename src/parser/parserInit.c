@@ -53,8 +53,9 @@ static void ppl_parserStartNode(pplerr_context *c, parserNode **stk, int *i, int
 
   if ((*i)>0) // If this new node is not the root context, check whether we need to insert an implicit sequence between *list* *seq* STUFF stuff stuff *endseq* *endlist*
    {
-    parserNode **target = &(stk[(*i)-1]->firstChild); // Pointer to where first child of parent is linked
+    parserNode **target = NULL;
     if ( (stk[(*i)-1]->type != PN_TYPE_SEQ) && (type != PN_TYPE_SEQ) ) ppl_parserStartNode(c, stk, i, PN_TYPE_SEQ);
+    target = &(stk[(*i)-1]->firstChild); // Pointer to where first child of parent is linked
     while (*target != NULL) target = &((*target)->nextSibling); // If not first child of parent, traverse linked list to end
     *target = newNode; // Add new node into hierarchy, either as first child of parent, or into linked list of siblings
    }
@@ -134,8 +135,8 @@ int ppl_parserInit(ppl_context *c)
     inPos+=nc;
     while ((ppl_cmdList[inPos] != '\0') && (ppl_cmdList[inPos] <= ' ')) inPos++; // Ignore whitespace
     if (ppl_cmdList[inPos] == '\0') break; // End of cmdList -- all instructions have now been read
-    if ((ppl_cmdList[inPos]>='a')&&(ppl_cmdList[inPos]<='z')) cmdLetter = (int)(ppl_cmdList[inPos]-'a');
-    else                                                      cmdLetter = 26; // Begins with punctuation
+    if ((ppl_cmdList[inPos]>='@')&&(ppl_cmdList[inPos+1]>='a')&&(ppl_cmdList[inPos+1]<='z')) cmdLetter = (int)(ppl_cmdList[inPos+1]-'a');
+    else                                                                                     cmdLetter = 26; // Begins with punctuation
     ppl_parserStartNode(e, defnStack, &stackPos, PN_TYPE_SEQ);
     defnStack[0]->listLen = rootStackLen;
 
@@ -211,10 +212,17 @@ int ppl_parserInit(ppl_context *c)
 
         strStart = inPos;
         while ((ppl_cmdList[inPos]>' ')&&(ppl_cmdList[inPos]!='@')) inPos++; // FFW over output string literal
-        newNode->outString = (char *)malloc((inPos-strStart+1)*sizeof(char));
-        if (newNode->outString == NULL) { ppl_fatal(e,__FILE__,__LINE__,"Out of memory whilst setting up PyXPlot's command line parser."); exit(1); }
-        strncpy( newNode->outString , ppl_cmdList+strStart , inPos-strStart );
-        newNode->outString[inPos - strStart] = '\0';
+        if (strStart==inPos)
+         {
+          newNode->outString = newNode->matchString; // No outString is specified, assume it is the same as matchString
+         }
+        else
+         {
+          newNode->outString = (char *)malloc((inPos-strStart+1)*sizeof(char));
+          if (newNode->outString == NULL) { ppl_fatal(e,__FILE__,__LINE__,"Out of memory whilst setting up PyXPlot's command line parser."); exit(1); }
+          strncpy( newNode->outString , ppl_cmdList+strStart , inPos-strStart );
+          newNode->outString[inPos - strStart] = '\0';
+         }
         if (ppl_cmdList[inPos++]!='@') { sprintf(e->tempErrStr, "Syntax error: expecting @ after @matchstr@varname@str..."); ppl_fatal(e,__FILE__,__LINE__, NULL); }
 
         k=(int)ppl_getFloat(ppl_cmdList+inPos,NULL); while ((ppl_cmdList[inPos]>' ')&&(ppl_cmdList[inPos]!='@')) inPos++;
