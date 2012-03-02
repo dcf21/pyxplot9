@@ -24,7 +24,7 @@
 def sanitize(instr):
   outstr = ""
   for i in range(len(instr)):
-    if instr[i].isalnum(): outstr+=instr[i]
+    if (instr[i].isalnum() or instr[i]=='_'): outstr+=instr[i]
   return outstr
 
 f_in = open("buildScripts/parser_data.dat","r")
@@ -63,7 +63,7 @@ for line in f_in:
   stack          = []
   stack_varnames = []
   listsizes      = []
-  varnames       = {"directive":0 , "editno":1, "set_option":2}
+  varnames       = {"directive":0 , "editno":1, "set_option":2, "X":3}
   varcount       = len(varnames)
   words = line.split()
   for word in words:
@@ -93,6 +93,7 @@ for line in f_in:
       parts = [ "]" , word[2:] , "" , "1" ]
       listsizes.append(varcount)
       varcount=stack.pop()
+      for key,item in varnames.iteritems(): stack_varnames[-1]["%s_%s"%(key,varname)] = item
       varnames=stack_varnames.pop()
     if varname=='directive': # Directive names are stored for use in #defines to convert variable names into output slot numbers
       if parts[2]=="": directive = parts[0]
@@ -119,10 +120,11 @@ for line in f_in:
   f_c.write("%d "%(varcount)) # First word on each statement definition line is the number of variables in the root slotspace
   f_c.write("%s\\n\\\n"%outline)
   for i,j in varnames.iteritems():
-   key = "PARSE_%s_%s%s"%(directive,setoption,sanitize(i))
-   if (key in includeKeys) and (includeKeys[key]!=j): print "Repetition of key %s"%key
-   includeKeys[key] = j
-   f_h.write("#define %s %d\n"%(key,j)) # Write #defines to convert variable names into slot numbers
+   if '%' not in directive:
+    key = "PARSE_%s_%s%s"%(directive,setoption,sanitize(i))
+    if (key in includeKeys) and (includeKeys[key]!=j): print "Repetition of key %s"%key
+    includeKeys[key] = j
+    f_h.write("#define %s %d\n"%(key,j)) # Write #defines to convert variable names into slot numbers
 
 # Finish up
 

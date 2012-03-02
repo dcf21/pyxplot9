@@ -1,4 +1,4 @@
-// input.h
+// core.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,17 +19,19 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _INPUT_H
-#define _INPUT_H 1
+#ifndef _CORE_H
+#define _CORE_H 1
 
 #include "parser/parser.h"
 #include "userspace/context.h"
+#include "userspace/pplObj.h"
 
-int  ppl_inputInit         (ppl_context *context);
-void ppl_interactiveSession(ppl_context *context);
-void ppl_processScript     (ppl_context *context, char *input, int iterDepth);
-int  ppl_processLine       (ppl_context *context, parserStatus *ps, char *in, int interactive, int iterDepth);
-int  ppl_ProcessStatement  (ppl_context *context, parserStatus *ps, char *line, int interactive, int iterDepth);
+void directive_assert (ppl_context *c, parserLine *pl, parserOutput *in);
+void directive_cd     (ppl_context *c, parserLine *pl, parserOutput *in);
+void directive_history(ppl_context *c, parserLine *pl, parserOutput *in);
+void directive_print  (ppl_context *c, parserLine *pl, parserOutput *in);
+void directive_save   (ppl_context *c, parserLine *pl, parserOutput *in);
+void directive_seterror(ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
+void directive_unseterror(ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
 
 #endif
-

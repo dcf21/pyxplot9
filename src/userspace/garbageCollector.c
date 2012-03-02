@@ -87,13 +87,13 @@ void ppl_garbageObject(pplObj *o)
     case PPLOBJ_EXP:
      {
       void *old=o->auxil; o->auxil=NULL;
-      if (old!=NULL) pplExpr_free((pplExpr *)old);
+      if ((old!=NULL)&&o->auxilMalloced) pplExpr_free((pplExpr *)old);
       break;
      }
     case PPLOBJ_BYT:
      {
       void *old=o->auxil; o->auxil=NULL;
-      if (old!=NULL) ppl_parserLineFree((parserLine *)old);
+      if ((old!=NULL)&&o->auxilMalloced) ppl_parserLineFree((parserLine *)old);
       break;
      }
     case PPLOBJ_FILE:

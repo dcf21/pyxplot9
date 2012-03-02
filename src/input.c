@@ -261,20 +261,20 @@ LOOP_OVER_LINE
   else if ((quoteChar=='\0') && (inputLineBuffer[i]==';' )                     )
    {
     inputLineBuffer[i]='\0';
-    status = ppl_ProcessStatement(context, ps, inputLineBuffer, iterDepth);
+    status = ppl_ProcessStatement(context, ps, inputLineBuffer, interactive, iterDepth);
     if (status) break;
     inputLineBuffer = inputLineBuffer+i+1;
     i=0;
    }
 LOOP_END
 
-  if (!status) status = ppl_ProcessStatement(context, ps, inputLineBuffer, iterDepth);
+  if (!status) status = ppl_ProcessStatement(context, ps, inputLineBuffer, interactive, iterDepth);
   if (context->inputLineAddBuffer != NULL) free(context->inputLineAddBuffer);
   context->inputLineAddBuffer = NULL;
   return (status!=0);
  }
 
-int ppl_ProcessStatement(ppl_context *context, parserStatus *ps, char *line, int iterDepth)
+int ppl_ProcessStatement(ppl_context *context, parserStatus *ps, char *line, int interactive, int iterDepth)
  {
   int stat=0;
 
@@ -287,7 +287,7 @@ int ppl_ProcessStatement(ppl_context *context, parserStatus *ps, char *line, int
 
   if ( (!stat) && (!context->errStat.status) && (ps->blockDepth==0) )
    {
-    ppl_parserExecute(context, *ps->rootpl, iterDepth);
+    ppl_parserExecute(context, *ps->rootpl, interactive, iterDepth);
    }
 
   if (stat || context->errStat.status)

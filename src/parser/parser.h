@@ -101,8 +101,8 @@ void    ppl_parserStatFree  (parserStatus **in);
 void    ppl_parserLineInit  (parserLine **in, int srcLineN, long srcId, char *srcFname, char *line);
 int     ppl_parserCompile   (ppl_context *c, parserStatus *s, int srcLineN, long srcId, char *srcFname, char *line, int expandMacros, int blockDepth);
 void    ppl_parserLinePrint (ppl_context *c, parserLine *in);
-void    ppl_parserExecute   (ppl_context *c, parserLine *in, int iterDepth);
-void    ppl_parserShell     (ppl_context *c, parserOutput *in, int iterDepth);
+void    ppl_parserExecute   (ppl_context *c, parserLine *in, int interactive, int iterDepth);
+void    ppl_parserShell     (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 
 #ifdef HAVE_READLINE
 void    ppl_parseAutocompleteSetContext(ppl_context *c);

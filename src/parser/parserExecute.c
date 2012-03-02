@@ -91,7 +91,7 @@ void ppl_parserOutFree(parserOutput *in)
   return;
  }
 
-void ppl_parserExecute(ppl_context *c, parserLine *in, int iterDepth)
+void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iterDepth)
  {
   int           i;
   parserOutput *out  = NULL;
@@ -104,7 +104,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int iterDepth)
 
   while (in != NULL)
    {
-    ppl_parserLinePrint(c,in);
+    //ppl_parserLinePrint(c,in);
     
     // If line contains macros, need to recompile it now
     if (in->containsMacros)
@@ -116,7 +116,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int iterDepth)
       if (ps==NULL) { strcpy(eB,"Out of memory."); TBADD(ERR_MEMORY,0,in->linetxt); return; }
       stat = ppl_parserCompile(c, ps, in->srcLineN, in->srcId, in->srcFname, in->linetxt, 1, iterDepth+1);
       if (stat || c->errStat.status) break;
-      ppl_parserExecute(c, pl, iterDepth+1);
+      ppl_parserExecute(c, pl, interactive, iterDepth+1);
       ppl_parserStatFree(&ps);
       in = in->next;
       continue;
@@ -154,6 +154,15 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int iterDepth)
           if (j!=0) { strcpy(eB+k,", or"); k+=strlen(eB+k); }
           switch(item->options[j])
            {
+            case 'a':
+              strcpy(eB+k," an axis number"); k+=strlen(eB+k);
+              if (val->objType != PPLOBJ_NUM) break;
+              if (val->flagComplex) break;
+              if (!val->dimensionless) break;
+              if ( (val->real <= 0) || (val->real >= MAX_AXES) ) break;
+              val->exponent[0] = (double)(item->options[++j]-'0');
+              passed=1;
+              break;
             case 'A':
               strcpy(eB+k," an angle"); k+=strlen(eB+k);
               if (val->objType != PPLOBJ_NUM) break;
@@ -278,7 +287,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int iterDepth)
     // If no error, pass command to shell
     if (!c->errStat.status)
      {
-      ppl_parserShell(c, out, iterDepth);
+      ppl_parserShell(c, in, out, interactive, iterDepth);
      }
 
     // Free output stack

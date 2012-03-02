@@ -1,4 +1,4 @@
-// input.h
+// axes_fns.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,17 +19,18 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _INPUT_H
-#define _INPUT_H 1
+#ifndef _PPLSET_AXES_FNS_H
+#define _PPLSET_AXES_FNS_H 1
 
-#include "parser/parser.h"
+#include "settings/settings.h"
 #include "userspace/context.h"
 
-int  ppl_inputInit         (ppl_context *context);
-void ppl_interactiveSession(ppl_context *context);
-void ppl_processScript     (ppl_context *context, char *input, int iterDepth);
-int  ppl_processLine       (ppl_context *context, parserStatus *ps, char *in, int interactive, int iterDepth);
-int  ppl_ProcessStatement  (ppl_context *context, parserStatus *ps, char *line, int interactive, int iterDepth);
+void          pplaxis_destroy  (ppl_context *context, pplset_axis *in);
+void          pplaxis_copy     (ppl_context *context, pplset_axis *out, const pplset_axis *in);
+void          pplaxis_copyTics (ppl_context *context, pplset_axis *out, const pplset_axis *in);
+void          pplaxis_copyMTics(ppl_context *context, pplset_axis *out, const pplset_axis *in);
+unsigned char pplaxis_cmpTics  (ppl_context *context, const pplset_axis *a, const pplset_axis *b);
+unsigned char pplaxis_cmpMTics (ppl_context *context, const pplset_axis *a, const pplset_axis *b);
 
 #endif
 

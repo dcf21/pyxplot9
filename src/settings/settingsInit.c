@@ -287,7 +287,7 @@ void pplset_makedefault(ppl_context *context)
   pplObjNum(&(s->axis_default.unit),0,0.0,0.0);
 
   // Set up list of input filters
-  s->filters = ppl_dictInit(HASHSIZE_SMALL,0);
+  s->filters = ppl_dictInit(HASHSIZE_SMALL,1);
   #ifdef HAVE_FITSIO
   pplObjStr(&tempval,0,0,FITSHELPER);
   ppl_dictAppend(s->filters, "*.fits", pplObjCpy(NULL,&tempval,0,1,1));

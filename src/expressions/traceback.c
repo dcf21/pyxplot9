@@ -131,6 +131,7 @@ void ppl_tbWrite(ppl_context *c, char *out, int outLen, int *HighlightPos1, int 
     case ERR_TYPE     : snprintf(out+i, outLen-i, "Type Error:");      break;
     case ERR_INTERRUPT: snprintf(out+i, outLen-i, "Interrupt Error:"); break;
     case ERR_DICTKEY  : snprintf(out+i, outLen-i, "Key Error:");       break;
+    case ERR_ASSERT   : snprintf(out+i, outLen-i, "Assertion Error:"); break;
     case ERR_MEMORY   :
     case ERR_GENERAL  :
     default           : snprintf(out+i, outLen-i, "Error:");           break;

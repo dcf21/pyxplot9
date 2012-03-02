@@ -438,8 +438,9 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char lval, unsigned char out
     case PPLOBJ_EXP:
     case PPLOBJ_BYT:
      {
-      // Copying a parser line suggests something has gone very wrong
-      out->objType=PPLOBJ_ZOM; return NULL;
+      // Copying a parser line or bytecode is difficult. Assume that original will outlive the copy
+      out->auxilMalloced = 0;
+      break;
      }
     case PPLOBJ_USER:
      {

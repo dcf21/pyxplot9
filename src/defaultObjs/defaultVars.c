@@ -123,6 +123,8 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_dictAppendCpy(d2 , "interrupt" , (void *)&v , sizeof(v));
     pplObjException(&v, 1, 0, "key", ERR_DICTKEY);
     ppl_dictAppendCpy(d2 , "key"       , (void *)&v , sizeof(v));
+    pplObjException(&v, 1, 0, "assertion", ERR_ASSERT);
+    ppl_dictAppendCpy(d2 , "assertion" , (void *)&v , sizeof(v));
 
     // colors module
     ppl_dictAppendCpy(d  , "colors"    , pplObjModule(&m,1,1,1) , sizeof(v));

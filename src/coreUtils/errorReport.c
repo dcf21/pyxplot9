@@ -84,6 +84,7 @@ void ppl_error(pplerr_context *context, int ErrType, int HighlightPos1, int High
       case ERR_TYPE     : snprintf(temp_stringB+i, BLEN-i, "Type Error: ");      break;
       case ERR_INTERRUPT: snprintf(temp_stringB+i, BLEN-i, "Interrupt Error: "); break;
       case ERR_DICTKEY  : snprintf(temp_stringB+i, BLEN-i, "Key Error: ");       break;
+      case ERR_ASSERT   : snprintf(temp_stringB+i, BLEN-i, "Assertion Error: "); break;
      }
     i += strlen(temp_stringB+i);
    }
@@ -163,6 +164,7 @@ void ppl_warning(pplerr_context *context, int ErrType, char *msg)
       case ERR_TYPE     : snprintf(temp_stringB+i, BLEN-i, "Type Warning: ");      break;
       case ERR_INTERRUPT: snprintf(temp_stringB+i, BLEN-i, "Interrupt Warning: "); break;
       case ERR_DICTKEY  : snprintf(temp_stringB+i, BLEN-i, "Key Warning: ");       break;
+      case ERR_ASSERT   : snprintf(temp_stringB+i, BLEN-i, "Assertion Warning: "); break;
      }
     i += strlen(temp_stringB+i);
    }

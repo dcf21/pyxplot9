@@ -55,9 +55,9 @@ LOCAL_OBJDIR = obj
 LOCAL_DOCDIR = doc
 LOCAL_BINDIR = bin
 
-PPL_FILES   = children.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/getPasswd.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c defaultObjs/airyFuncs.c defaultObjs/defaultFuncs.c defaultObjs/defaultUnits.c defaultObjs/defaultVars.c defaultObjs/moduleAst.c defaultObjs/moduleFractals.c defaultObjs/moduleOs.c defaultObjs/modulePhy.c defaultObjs/moduleRandom.c defaultObjs/moduleStats.c defaultObjs/moduleTime.c defaultObjs/zetaRiemann.c expressions/expCompile.c expressions/expEval.c expressions/expEvalCalculus.c expressions/expEvalOps.c expressions/expEvalSlice.c expressions/fnCall.c expressions/traceback.c input.c mathsTools/dcfmath.c parser/cmdList.c parser/parserCompile.c parser/parserExecute.c parser/parserInit.c parser/parserShell.c pyxplot.c settings/arrows.c settings/colors.c settings/epsColors.c settings/labels.c settings/papersizes.c settings/settingsInit.c settings/settingTypes.c settings/textConstants.c settings/withWords.c stringTools/asciidouble.c userspace/calendars.c userspace/context.c userspace/contextVarDef.c userspace/garbageCollector.c userspace/pplObj.c userspace/pplObjCmp.c userspace/pplObjFunc.c userspace/pplObjMethods.c userspace/pplObjPrint.c userspace/unitsArithmetic.c userspace/unitsDisp.c
+PPL_FILES   = canvasItems.c children.c commands/core.c commands/show.c commands/help.c coreUtils/backup.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/getPasswd.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c defaultObjs/airyFuncs.c defaultObjs/defaultFuncs.c defaultObjs/defaultUnits.c defaultObjs/defaultVars.c defaultObjs/moduleAst.c defaultObjs/moduleFractals.c defaultObjs/moduleOs.c defaultObjs/modulePhy.c defaultObjs/moduleRandom.c defaultObjs/moduleStats.c defaultObjs/moduleTime.c defaultObjs/zetaRiemann.c expressions/expCompile.c expressions/expEval.c expressions/expEvalCalculus.c expressions/expEvalOps.c expressions/expEvalSlice.c expressions/fnCall.c expressions/traceback.c input.c mathsTools/dcfmath.c parser/cmdList.c parser/parserCompile.c parser/parserExecute.c parser/parserInit.c parser/parserShell.c pyxplot.c settings/arrows.c settings/axes.c settings/colors.c settings/epsColors.c settings/labels.c settings/papersizes.c settings/settingsInit.c settings/settingTypes.c settings/textConstants.c settings/withWords.c stringTools/asciidouble.c userspace/calendars.c userspace/context.c userspace/contextVarDef.c userspace/garbageCollector.c userspace/pplObj.c userspace/pplObjCmp.c userspace/pplObjFunc.c userspace/pplObjMethods.c userspace/pplObjPrint.c userspace/unitsArithmetic.c userspace/unitsDisp.c
 
-PPL_HEADERS = children.h coreUtils/dict.h coreUtils/errorReport.h coreUtils/getPasswd.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h defaultObjs/airyFuncs.h defaultObjs/defaultFuncs.h defaultObjs/defaultFuncsMacros.h defaultObjs/moduleAst.h defaultObjs/moduleFractals.h defaultObjs/moduleOs.h defaultObjs/modulePhy.h defaultObjs/moduleRandom.h defaultObjs/moduleStats.h defaultObjs/moduleTime.h defaultObjs/zetaRiemann.h expressions/expCompile.h expressions/expEval.h expressions/expEvalCalculus.h expressions/expEvalOps.h expressions/expEvalSlice.h expressions/fnCall.h expressions/traceback.h expressions/traceback_fns.h input.h mathsTools/dcfmath.h parser/cmdList.h parser/parser.h pplConstants.h pyxplot.h settings/arrows.h settings/colors.h settings/arrows_fns.h settings/epsColors.h settings/labels.h settings/labels_fns.h settings/papersizes.h settings/settings.h settings/settingTypes.h settings/textConstants.h settings/withWords.h settings/withWords_fns.h stringTools/asciidouble.h stringTools/strConstants.h userspace/calendars.h userspace/context.h userspace/contextVarDef.h userspace/garbageCollector.h userspace/pplObj.h userspace/pplObj_fns.h userspace/pplObjCmp.h userspace/pplObjFunc.h userspace/pplObjFunc_fns.h userspace/pplObjMethods.h userspace/pplObjPrint.h userspace/pplObjUnits.h userspace/unitsArithmetic.h userspace/unitsDisp.h
+PPL_HEADERS = canvasItems.h children.h commands/core.h commands/show.h commands/help.h coreUtils/backup.h coreUtils/dict.h coreUtils/errorReport.h coreUtils/getPasswd.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h datafile.h defaultObjs/airyFuncs.h defaultObjs/defaultFuncs.h defaultObjs/defaultFuncsMacros.h defaultObjs/moduleAst.h defaultObjs/moduleFractals.h defaultObjs/moduleOs.h defaultObjs/modulePhy.h defaultObjs/moduleRandom.h defaultObjs/moduleStats.h defaultObjs/moduleTime.h defaultObjs/zetaRiemann.h expressions/expCompile.h expressions/expEval.h expressions/expEvalCalculus.h expressions/expEvalOps.h expressions/expEvalSlice.h expressions/fnCall.h expressions/traceback.h expressions/traceback_fns.h input.h mathsTools/dcfmath.h parser/cmdList.h parser/parser.h pplConstants.h pyxplot.h settings/arrows.h settings/axes_fns.h settings/colors.h settings/arrows_fns.h settings/epsColors.h settings/labels.h settings/labels_fns.h settings/papersizes.h settings/settings.h settings/settingTypes.h settings/textConstants.h settings/withWords.h settings/withWords_fns.h stringTools/asciidouble.h stringTools/strConstants.h userspace/calendars.h userspace/context.h userspace/contextVarDef.h userspace/garbageCollector.h userspace/pplObj.h userspace/pplObj_fns.h userspace/pplObjCmp.h userspace/pplObjFunc.h userspace/pplObjFunc_fns.h userspace/pplObjMethods.h userspace/pplObjPrint.h userspace/pplObjUnits.h userspace/unitsArithmetic.h userspace/unitsDisp.h
 
 PPLW_FILES   = helpers/pyxplot_watch.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c stringTools/asciidouble.c settings/settingTypes.c
 
@@ -98,7 +98,7 @@ src/settings/epsColors.h: buildScripts/colorlistGenerate.py
 
 src/settings/epsColors.c: src/settings/epsColors.h
 
-src/parser/cmdList.h: buildScripts/parser_data.py
+src/parser/cmdList.h: buildScripts/parser_data.py buildScripts/parser_data.dat
 	python buildScripts/parser_data.py
 
 src/parser/cmdList.c: src/parser/cmdList.h
@@ -108,15 +108,15 @@ src/parser/cmdList.c: src/parser/cmdList.h
 #
 
 $(LOCAL_OBJDIR)/%.o:         $(LOCAL_SRCDIR)/%.c $(ALL_HFILES)
-	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/defaultObjs $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
+	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/commands $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/defaultObjs $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
 	$(COMPILE) $(CFLAGS) $(OPTIMISATION) $(NODEBUG) $(NOINSTALL_SWITCHES) $< -o $@
 
 $(LOCAL_OBJDIR)/%.debug.o:   $(LOCAL_SRCDIR)/%.c $(ALL_HFILES)
-	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/defaultObjs $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
+	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/commands $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/defaultObjs $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
 	$(COMPILE) $(CFLAGS) $(OPTIMISATION) $(DEBUG)   $(DEBUG_SWITCHES)     $< -o $@
 
 $(LOCAL_OBJDIR)/%.install.o: $(LOCAL_SRCDIR)/%.c $(ALL_HFILES)
-	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/defaultObjs $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
+	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/commands $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/defaultObjs $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
 	$(COMPILE) $(CFLAGS) $(OPTIMISATION) $(NODEBUG) $(INSTALL_SWITCHES)   $< -o $@
 
 #
@@ -196,7 +196,7 @@ $(LOCAL_OBJDIR)/pyxplot_watch.1: buildScripts/manpage_pyxplot_watch.py
 
 install: all
 	install -d ${SRCDIR} ${BINDIR} ${BINDIR_PRIVATE} ${DOCDIR} ${MANDIR}
-	install -m644 ${LOCAL_SRCDIR}/ppl_help.xml               ${SRCDIR}
+	install -m644 ${LOCAL_SRCDIR}/help.xml                   ${SRCDIR}
 	install -m755 ${LOCAL_BINDIR}/install/pyxplot            ${BINDIR}/pyxplot
 	install -m755 ${LOCAL_BINDIR}/install/pyxplot_watch      ${BINDIR}/pyxplot_watch
 	install -m755 ${LOCAL_BINDIR}/install/pyxplot_fitshelper ${BINDIR_PRIVATE}/pyxplot_fitshelper

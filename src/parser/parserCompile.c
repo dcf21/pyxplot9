@@ -34,6 +34,9 @@
 #include "expressions/expCompile.h"
 #include "expressions/traceback_fns.h"
 
+#include "settings/epsColors.h"
+#include "settings/settingTypes.h"
+
 #include "stringTools/asciidouble.h"
 #include "stringTools/strConstants.h"
 
@@ -187,11 +190,11 @@ finished_looking_for_tabcomp:
          {
           *linepos += i; // We do match this string: advance by i spaces
           atNLastPos = *linepos;
-          if ((s!=NULL) && writeOut)
+          if ((s!=NULL) && writeOut && (strcmp(node->varName,"X")!=0))
            {
             pplObj val;
             val.refCount=1;
-            pplObjStr(&val,0,0,node->matchString);
+            pplObjStr(&val,0,0,node->outString);
             ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
            }
          }
@@ -208,7 +211,7 @@ finished_looking_for_tabcomp:
           status=1;
           *linepos += i; // We match this string: advance by i spaces
           atNLastPos = *linepos;
-          if ((s!=NULL) && writeOut)
+          if ((s!=NULL) && writeOut && (strcmp(node->varName,"X")!=0))
            {
             pplObj val;
             val.refCount=1;
@@ -255,6 +258,49 @@ finished_looking_for_tabcomp:
              }
             break;
            }
+          case 'a':
+           {
+            int xyz;
+            if      ((line[*linepos]=='x')||(line[*linepos]=='X')) xyz=0;
+            else if ((line[*linepos]=='y')||(line[*linepos]=='Y')) xyz=1;
+            else if ((line[*linepos]=='z')||(line[*linepos]=='Z')) xyz=2;
+            else                                                   { status=0; goto item_cleanup; }
+            ppl_expCompile(c,srcLineN,srcId,srcFname,line+*linepos+1,&explen,dollarAllowed,0,&expr,&errPos,&errType,c->errStat.errBuff);
+            if (errPos>=0)
+             {
+              pplExpr_free(expr);
+              ppl_tbAdd(c,srcLineN,srcId,srcFname,0,errType,errPos+*linepos+1,line);
+              status=0;
+              goto item_cleanup;
+             }
+            if ((s==NULL)||(!writeOut)) pplExpr_free(expr);
+            else
+             {
+              char opt[8];
+              sprintf(opt,"a%d",xyz);
+              ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos+1, opt, expr, NULL);
+             }
+            explen++;
+            break;
+           }
+          case 'c': case 'C':
+           {
+            char nambuff[64];
+            int id, i;
+            for (i=0; ((i<63)&&(line[*linepos+i]>' ')); i++) nambuff[i] = line[*linepos+i];
+            nambuff[i] = '\0';
+            id = ppl_fetchSettingByName(&c->errcontext, nambuff, SW_COLOR_INT, SW_COLOR_STR);
+            if (id > 0)
+             {
+              pplObj val;
+              val.refCount=1;
+              pplObjNum(&val,0,id,0);
+              ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
+              explen=i;
+              break;
+             }
+            // If supplied string did not match a named colour, treat it as an expression
+           }
           default:
            {
             ppl_expCompile(c,srcLineN,srcId,srcFname,line+*linepos,&explen,dollarAllowed,0,&expr,&errPos,&errType,c->errStat.errBuff);
@@ -266,7 +312,7 @@ finished_looking_for_tabcomp:
               goto item_cleanup;
              }
             if ((s==NULL)||(!writeOut)) pplExpr_free(expr);
-            else if ((node->matchString[1]!='e') && (node->matchString[1]!='E'))
+            else if ((node->matchString[1]!='C') && (node->matchString[1]!='e') && (node->matchString[1]!='E'))
              {
               ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, node->matchString+1, expr, NULL);
              }
@@ -287,7 +333,7 @@ finished_looking_for_tabcomp:
 item_cleanup:
       if ((s!=NULL) && (status!=1) && (s->eLlinePos <= *linepos))
        {
-        int i;
+        int i,j,k,l;
         char varname[FNAME_LENGTH];
         if (s->eLlinePos < *linepos) { s->eLlinePos = *linepos; s->eLPos = 0; s->expectingList[0]='\0'; }
         if ((node->varName != NULL) && (node->varName[0] != '\0'))  sprintf(varname, " (%s)", node->varName);
@@ -297,7 +343,7 @@ item_cleanup:
           if (s->eLPos != 0) { strcpy(s->expectingList+s->eLPos, ", or "); s->eLPos+=strlen(s->expectingList+s->eLPos); }
 
           if (node->matchString[0]!='%')
-           { sprintf(s->expectingList+s->eLPos, "\"%s\"", node->matchString); s->eLPos+=strlen(s->expectingList+s->eLPos); break; }
+           { sprintf(s->expectingList+s->eLPos, "\"%s\"", node->matchString); }
           else
            {
             if (node->matchString[i]=='\0') { if (s->eLPos!=0) { s->eLPos-=5; s->expectingList[s->eLPos]='\0'; } break; }
@@ -322,8 +368,12 @@ item_cleanup:
               case 'S': sprintf(s->expectingList+s->eLPos, "a word%s", varname); break;
               case 'u': sprintf(s->expectingList+s->eLPos, "a physical quantity%s", varname); break;
              }
-            s->eLPos+=strlen(s->expectingList+s->eLPos);
            }
+          l = strlen(s->expectingList+s->eLPos);
+          for (j=k=0; ((j<s->eLPos)&&!k); j++) k = (strncmp(s->expectingList+j,s->expectingList+s->eLPos,l)==0); // Don't repeat ourselves
+          if (!k) s->eLPos+=strlen(s->expectingList+s->eLPos);
+          else    { if (s->eLPos!=0) { s->eLPos-=5; } s->expectingList[s->eLPos]='\0'; }
+          if (node->matchString[0]!='%') break;
          }
        }
       goto cleanup;
@@ -520,6 +570,7 @@ cleanup:
      }
    }
 
+  if (status==1) ppl_tbClear(c);
   return status;
  }
 

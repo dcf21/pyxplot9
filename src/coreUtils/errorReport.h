@@ -39,6 +39,7 @@
 #define ERR_TYPE      112
 #define ERR_INTERRUPT 113
 #define ERR_DICTKEY   114
+#define ERR_ASSERT    115
 
 #include "stringTools/strConstants.h"
 

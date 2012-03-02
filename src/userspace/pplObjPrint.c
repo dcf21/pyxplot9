@@ -365,6 +365,16 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
       strcpy(out, "<internal: zombie>");
       break;
      }
+    case PPLOBJ_EXP:
+     {
+      strcpy(out, "<internal: expression bytecode>");
+      break;
+     }
+    case PPLOBJ_BYT:
+     {
+      strcpy(out, "<internal: commandline bytecode>");
+      break;
+     }
     default:
      strcpy(out, "<unknown object type>");
      break;
