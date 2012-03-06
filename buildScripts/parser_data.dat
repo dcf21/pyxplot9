@@ -39,6 +39,7 @@
 # %e:variable            Match an algebraic expression (dollars not allowed)
 # %E:variable            Match an algebraic expression (dollars allowed)
 # %f:variable            Match an expression that evaluates to a real, dimensionless number
+# %g:variable            Match an algebraic expression (no equals signs or dollars)
 # %o:variable            Match an expression that evaluates to any object
 # %p:variable            Match a position -- (x,y) or a vector/list
 # %P:variable            Match a position with a possible third component
@@ -175,7 +176,7 @@ set@2:directive { item@1 %d:editno } vrange@2:set_option = { [@n:range { %u:min 
 set@2:directive { item@1 %d:editno } width@1:set_option = %D:width
 set@2:directive:set_error = { item@1 %d:editno } { %s:set_option } %r:restofline
 show@2:directive = { item@1 %d:editno } [ %S:setting ]:0setting_list
-solve@2:directive = [ %e:left_expression =@n %e:right_expression ]:expressions, via@1 [ %v:fit_variable ]:fit_variables,
+solve@2:directive = [ %g:left_expression =@n %g:right_expression ]:expressions, via@1 [ %v:fit_variable ]:fit_variables,
 < spline@3:directive = | interpolate@4 = < akima@1:directive | linear@2:directive | loglinear@2:directive | polynomial@1:directive | spline@2:directive | stepwise@2:directive | 2d@2:directive:interpolate2d { < bmp_r:bmp | bmp_g:bmp | bmp_b:bmp > } > > [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n ]:0range_list %v:fit_function ()@2 < %S:filename | %q:filename > ( every@1 [ { %d:every_item } ]:every_list: ~ index@1 %d:index ~ select@1 %E:select_criterion ~ using@1 { < rows@1:use_rows | columns@1:use_columns > } [ { %E:using_item } ]:using_list: )
 subroutine@2:directive = %v:subroutine_name (@n [ %v:argument_name ]:0argument_list, )@n CODEBLOCK:code
 swap@2:directive = %d:item1 %d:item2

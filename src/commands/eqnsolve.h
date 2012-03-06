@@ -1,4 +1,4 @@
-// traceback_fns.h
+// eqnsolve.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,15 +19,19 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _TRACEBACK_FNS_H
-#define _TRACEBACK_FNS_H 1
+#ifndef _EQNSOLVE_H
+#define _EQNSOLVE_H 1
 
-#include "expressions/traceback.h"
+#include "parser/parser.h"
 #include "userspace/context.h"
+#include "userspace/pplObj.h"
 
-void ppl_tbClear         (ppl_context *c);
-void ppl_tbAdd           (ppl_context *c, int srcLineN, long srcId, char *srcFname, int cmdOrExpr, int errType, int errPos, char *linetext, char *context);
-void ppl_tbWrite         (ppl_context *c);
+double ppl_optimise_RealToLog(double in, int iter, double *norm);
+double ppl_optimise_LogToReal(double in, int iter, double *norm);
+
+void directive_solve   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+void directive_maximise(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+void directive_minimise(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 
 #endif
 

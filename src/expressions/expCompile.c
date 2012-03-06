@@ -114,7 +114,7 @@
   scanpos += (L); \
  }
 
-void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed, int allowCommaOperator, int collectCommas, int isDict, int outOffset, int *outlen, int *errPos, int *errType, char *errText)
+void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed, int equalsAllowed, int allowCommaOperator, int collectCommas, int isDict, int outOffset, int *outlen, int *errPos, int *errType, char *errText)
  {
   const char    *allowed[] = {"BEHILMNOG","CJKQRU","BDHILMNOG","JKQU","FJKQRU","JKU","SFJKPQRU","EG","BEHLMNOG","BEHILMNOG","BEHILMNOG","JKU","JKQRU","JKQRU","ELV","JKPQRU","SFJKPQU","T","BEHILMNOG","SFJKPQRU","","JKU"};
   int            nCommaItems=1, nDictItems=0, tertiaryDepth=0;
@@ -172,7 +172,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
           k=scanpos; l=outpos; j-=n;
           if ((in[k]!=')')||(trialstate=='E'))
            {
-            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,(trialstate!='E'),0,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
+            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,1,(trialstate!='E'),0,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
             if (*errPos>=0) { *errPos+=k; return; }
             if (m!=j) { *errPos = m+k; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at end of expression."); *end=-1; *outlen=0; return; }
            }
@@ -329,7 +329,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
           if ((in[k]!=']') || ((trialstate=='Q')&&(!slice))) // [] is allowed as a list literal, but not as an array dereference
            {
             if (slice) maxSet=1;
-            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,trialstate!='Q',0,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
+            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,1,trialstate!='Q',0,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
             if (*errPos>=0) { *errPos+=k; return; }
             if ((trialstate=='Q')&&(!slice)&&(in[k+m]==':'))
              {
@@ -342,7 +342,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
               if (j>0)
                {
                 maxSet=1;
-                ppl_expTokenise(context,in+k,&m,dollarAllowed,1,trialstate!='Q',0,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
+                ppl_expTokenise(context,in+k,&m,dollarAllowed,1,1,trialstate!='Q',0,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
                 if (*errPos>=0) { *errPos+=k; return; }
                }
              }
@@ -370,7 +370,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
           k=scanpos; l=outpos; j-=n;
           if (in[k]!='}')
            {
-            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,1,1,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
+            ppl_expTokenise(context,in+k,&m,dollarAllowed,1,1,1,1,l+outOffset,&n,errPos,errType,errText); // Hierarchically tokenise the inside of the brackets
             if (*errPos>=0) { *errPos+=k; return; }
             if (m!=j) { *errPos = m+k; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
            }
@@ -389,7 +389,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
        }
       else if (trialstate=='S') // assignment operator
        {
-        if     ((MARKUP_MATCH("="  )&&(in[scanpos+1]!='='))) { NEWSTATE(1,0x40,17); } // Match = but not ==
+        if     ((MARKUP_MATCH("="  )&&(in[scanpos+1]!='=')&&equalsAllowed)) { NEWSTATE(1,0x40,17); } // Match = but not ==
         else if (MARKUP_MATCH("+=" )) { NEWSTATE(2,0x41,17); }
         else if (MARKUP_MATCH("-=" )) { NEWSTATE(2,0x42,17); }
         else if (MARKUP_MATCH("*=" )) { NEWSTATE(2,0x43,17); }
@@ -550,7 +550,7 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
   *(int *)(out+lastoutpos) = outpos - lastoutpos; /* Write the length of the bytecode instruction we've just written */ \
  }
 
-void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFname, char *in, int *end, int dollarAllowed, int allowCommaOperator, pplExpr **outExpr, int *errPos, int *errType, char *errText)
+void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFname, char *in, int *end, int dollarAllowed, int equalsAllowed, int allowCommaOperator, pplExpr **outExpr, int *errPos, int *errType, char *errText)
  {
   unsigned char *stack = context->tokenBuff + ALGEBRA_MAXLEN - 1;
   unsigned char *tdata = context->tokenBuff;
@@ -573,7 +573,7 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
   strcpy((*outExpr)->srcFname , srcFname);
 
   // First tokenise expression
-  ppl_expTokenise(context, in, end, dollarAllowed, allowCommaOperator, 0, 0, 0, &tlen, errPos, errType, errText);
+  ppl_expTokenise(context, in, end, dollarAllowed, equalsAllowed, allowCommaOperator, 0, 0, 0, &tlen, errPos, errType, errText);
   if (*errPos >= 0) return;
   stacklen = ALGEBRA_MAXLEN - tlen;
   (*outExpr)->ascii = (char *)malloc(*end+1);

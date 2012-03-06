@@ -47,7 +47,7 @@
 
 #include "pplConstants.h"
 
-#define TBADD(et,pos,lt) ppl_tbAdd(c,in->srcLineN,in->srcId,in->srcFname,0,et,pos,lt)
+#define TBADD(et,pos) ppl_tbAdd(c,in->srcLineN,in->srcId,in->srcFname,0,et,pos,in->linetxt,NULL)
 
 void ppl_parserLinePrint(ppl_context *c, parserLine *in)
  {
@@ -98,9 +98,10 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
   parserAtom   *item = in->firstAtom;
   pplObj       *stk  = NULL;
   char         *eB   = c->errStat.errBuff;
+  int          *stkCharPos = NULL;
 
   // Check that recursion depth has not been exceeded
-  if (iterDepth > MAX_RECURSION_DEPTH) { strcpy(eB,"Maximum recursion depth exceeded."); TBADD(ERR_OVERFLOW,0,in->linetxt); return; }
+  if (iterDepth > MAX_RECURSION_DEPTH) { strcpy(eB,"Maximum recursion depth exceeded."); TBADD(ERR_OVERFLOW,0); return; }
 
   while (in != NULL)
    {
@@ -113,7 +114,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
       parserStatus *ps = NULL;
       parserLine   *pl = NULL;
       ppl_parserStatInit(&ps,&pl);
-      if (ps==NULL) { strcpy(eB,"Out of memory."); TBADD(ERR_MEMORY,0,in->linetxt); return; }
+      if (ps==NULL) { strcpy(eB,"Out of memory."); TBADD(ERR_MEMORY,0); return; }
       stat = ppl_parserCompile(c, ps, in->srcLineN, in->srcId, in->srcFname, in->linetxt, 1, iterDepth+1);
       if (stat || c->errStat.status) break;
       ppl_parserExecute(c, pl, interactive, iterDepth+1);
@@ -124,12 +125,16 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
 
     // Initialise output stack
     out = (parserOutput *)malloc(sizeof(parserOutput));
-    if (out==NULL) { strcpy(eB,"Out of memory."); TBADD(ERR_MEMORY,0,in->linetxt); return; }
+    if (out==NULL) { strcpy(eB,"Out of memory."); TBADD(ERR_MEMORY,0); return; }
     stk = (pplObj *)malloc(in->stackLen*sizeof(pplObj));
-    if (stk==NULL) { free(out); strcpy(eB,"Out of memory."); TBADD(ERR_MEMORY,0,in->linetxt); return; }
+    if (stk==NULL) { free(out); strcpy(eB,"Out of memory."); TBADD(ERR_MEMORY,0); return; }
     for (i=0; i<in->stackLen; i++) { stk[i].refCount=1; pplObjZom(&stk[i],0); }
-    out->stk = stk;
-    out->stackLen = in->stackLen;
+    stkCharPos = (int *)malloc(in->stackLen*sizeof(int));
+    if (stkCharPos==NULL) { free(out); free(stk); strcpy(eB,"Out of memory."); TBADD(ERR_MEMORY,0); return; }
+    for (i=0; i<in->stackLen; i++) { stkCharPos[i]=-1; }
+    out->stk        = stk;
+    out->stkCharPos = stkCharPos;
+    out->stackLen   = in->stackLen;
 
     // Loop over atoms
     while (item != NULL)
@@ -144,7 +149,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
         // Atom is an expression: evaluate it
         int lastOpAssign=0, passed=0, j=0, k=0, p=0;
         pplObj *val = ppl_expEval(c, item->expr, &lastOpAssign, 1, iterDepth+1);
-        if (c->errStat.status) { ppl_tbWasInSubstring(c, item->linePos, in->linetxt); break; } // On error, stop
+        if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,item->linePos); break; } // On error, stop
 
         // Check type of pplObj produced by expression, and complain if the wrong type
         strcpy(eB+k,"Expression evaluates to the wrong type: needed"); k+=strlen(eB+k);
@@ -274,13 +279,14 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
         if (!passed)
          {
           strcpy(eB+k,".");
-          TBADD(ERR_TYPE, item->linePos, in->linetxt);
+          TBADD(ERR_TYPE, item->linePos);
           break;
          }
 
         // Copy value produced by atom
         pplObjCpy(&stk[item->stackOutPos], val, 0, 0, 1);
        }
+      stkCharPos[item->stackOutPos] = item->linePos;
       item = item->next;
      }
 

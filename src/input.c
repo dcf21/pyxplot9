@@ -292,9 +292,7 @@ int ppl_ProcessStatement(ppl_context *context, parserStatus *ps, char *line, int
 
   if (stat || context->errStat.status)
    {
-    int h1=-1, h2=-1;
-    ppl_tbWrite(context, context->errcontext.tempErrStr, LSTR_LENGTH, &h1, &h2);
-    ppl_error(&context->errcontext, ERR_PREFORMED, h1, h2, NULL);
+    ppl_tbWrite(context);
     ppl_parserStatReInit(ps);
     return 1;
    }

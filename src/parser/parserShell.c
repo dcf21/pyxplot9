@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "commands/core.h"
+#include "commands/eqnsolve.h"
 #include "commands/show.h"
 #include "commands/help.h"
 
@@ -47,7 +48,7 @@
 
 #include "pplConstants.h"
 
-#define TBADD(et,pos) ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,pos,pl->linetxt)
+#define TBADD(et,pos) ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,pos,pl->linetxt,"")
 
 void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
@@ -107,6 +108,10 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     directive_help(c,pl,in,interactive);
   else if (strcmp(d, "history")==0)
     directive_history(c,pl,in);
+  else if (strcmp(d, "maximise")==0)
+    directive_maximise(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "minimise")==0)
+    directive_minimise(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "pling")==0)
    {
     if (system((char *)stk[PARSE_pling_cmd].auxil)) { if (DEBUG) ppl_log(&c->errcontext, "Pling command received non-zero return value."); }
@@ -118,10 +123,12 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     directive_save(c,pl,in);
   else if (strcmp(d, "show")==0)
     directive_show(c,pl,in,interactive);
+  else if (strcmp(d, "solve")==0)
+    directive_solve(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "set_error")==0)
-   directive_seterror(c,pl,in,interactive);
+    directive_seterror(c,pl,in,interactive);
   else if (strcmp(d, "unset_error")==0)
-   directive_unseterror(c,pl,in,interactive);
+    directive_unseterror(c,pl,in,interactive);
   else
    {
     snprintf(c->errStat.errBuff, LSTR_LENGTH, "Unimplemented command: %s", d);

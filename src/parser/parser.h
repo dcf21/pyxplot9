@@ -82,6 +82,7 @@ typedef struct parserStatus {
  } parserStatus;
 
 typedef struct parserOutput {
+  int    *stkCharPos;
   pplObj *stk;
   int stackLen;
  } parserOutput;

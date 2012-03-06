@@ -63,7 +63,7 @@
 
 #include "pplConstants.h"
 
-#define TBADD(et,pos) ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,pos,pl->linetxt)
+#define TBADD(et,pos) ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,pos,pl->linetxt,"")
 
 void directive_assert(ppl_context *c, parserLine *pl, parserOutput *in)
  {
@@ -86,7 +86,7 @@ void directive_assert(ppl_context *c, parserLine *pl, parserOutput *in)
     if (val->real<0.5)
      {
       snprintf(c->errStat.errBuff, LSTR_LENGTH, "%s", txt);
-      TBADD(ERR_ASSERT,0);
+      TBADD(ERR_ASSERT,in->stkCharPos[PARSE_assert_expr]);
       return;
      }
    }
@@ -96,8 +96,8 @@ void directive_assert(ppl_context *c, parserLine *pl, parserOutput *in)
     int i=0,j=0,sgn,pass=0;
     char txtauto[64];
     sprintf(txtauto, "This script requires a%s version of PyXPlot (%s %s)", (!lt)?" newer":"n older", (!lt)?">=":"<", version);
-#define VERSION_FAIL { snprintf(c->errStat.errBuff, LSTR_LENGTH, "%s", txt); TBADD(ERR_ASSERT,0); return; }
-#define VERSION_MALF { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Malformed version string."); TBADD(ERR_SYNTAX,0); return; }
+#define VERSION_FAIL { snprintf(c->errStat.errBuff, LSTR_LENGTH, "%s", txt); TBADD(ERR_ASSERT,in->stkCharPos[PARSE_assert_version]); return; }
+#define VERSION_MALF { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Malformed version string."); TBADD(ERR_SYNTAX,in->stkCharPos[PARSE_assert_version]); return; }
     if (txt==NULL) txt=txtauto;
     sgn = (!lt)?1:-1;
     while ((version[i]>'\0')&&(version[i]<=' ')) i++;
@@ -145,13 +145,13 @@ void directive_cd(ppl_context *c, parserLine *pl, parserOutput *in)
     if (pos<=0) break;
     dirName = (char *)stk[pos+PARSE_cd_directory_path].auxil;
 
-    if ((wordexp(dirName, &wordExp, 0) != 0) || (wordExp.we_wordc <= 0)) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Could not enter directory '%s'.", dirName); TBADD(ERR_FILE,0); return; }
-    if ((glob(wordExp.we_wordv[0], 0, NULL, &globData) != 0) || (globData.gl_pathc <= 0)) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Could not enter directory '%s'.", dirName); TBADD(ERR_FILE,0); wordfree(&wordExp); return; }
+    if ((wordexp(dirName, &wordExp, 0) != 0) || (wordExp.we_wordc <= 0)) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Could not enter directory '%s'.", dirName); TBADD(ERR_FILE,in->stkCharPos[pos+PARSE_cd_directory_path]); return; }
+    if ((glob(wordExp.we_wordv[0], 0, NULL, &globData) != 0) || (globData.gl_pathc <= 0)) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Could not enter directory '%s'.", dirName); TBADD(ERR_FILE,in->stkCharPos[pos+PARSE_cd_directory_path]); wordfree(&wordExp); return; }
     wordfree(&wordExp);
     if (chdir(globData.gl_pathv[0]) < 0)
      {
       snprintf(c->errStat.errBuff, LSTR_LENGTH, "Could not change into directory '%s'.", globData.gl_pathv[0]);
-      TBADD(ERR_FILE,0);
+      TBADD(ERR_FILE,in->stkCharPos[pos+PARSE_cd_directory_path]);
       globfree(&globData);
       break;
      }
@@ -222,7 +222,7 @@ void directive_save(ppl_context *c, parserLine *pl, parserOutput *in)
     ppl_createBackupIfRequired(c, outfname);
     outfile = fopen(outfname , "w");
    }
-  if (outfile == NULL) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "The save command could not open output file '%s' for writing.", outfname); TBADD(ERR_FILE,0); return; }
+  if (outfile == NULL) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "The save command could not open output file '%s' for writing.", outfname); TBADD(ERR_FILE,in->stkCharPos[pos]); return; }
   fprintf(outfile, "# Command script saved by PyXPlot %s\n# Timestamp: %s\n", VERSION, ppl_strStrip(ppl_friendlyTimestring(),c->errcontext.tempErrStr));
   fprintf(outfile, "# User: %s\n\n", ppl_unixGetIRLName(&c->errcontext));
 
@@ -249,8 +249,8 @@ void directive_seterror(ppl_context *c, parserLine *pl, parserOutput *in, int in
   char *tempstr = (o->objType==PPLOBJ_STR) ? (char *)in->stk[PARSE_set_error_set_option].auxil : NULL;
   if (tempstr != NULL)
    {
-    if (!interactive) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Unrecognised set option '%s'.", tempstr); TBADD(ERR_SYNTAX,0); }
-    else              { snprintf(c->errStat.errBuff, LSTR_LENGTH, ppltxt_set                     , tempstr); TBADD(ERR_SYNTAX,0); }
+    if (!interactive) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Unrecognised set option '%s'.", tempstr); TBADD(ERR_SYNTAX,in->stkCharPos[PARSE_set_error_set_option]); }
+    else              { snprintf(c->errStat.errBuff, LSTR_LENGTH, ppltxt_set                     , tempstr); TBADD(ERR_SYNTAX,in->stkCharPos[PARSE_set_error_set_option]); }
    }
   else
    {
@@ -266,8 +266,8 @@ void directive_unseterror(ppl_context *c, parserLine *pl, parserOutput *in, int 
   char *tempstr = (o->objType==PPLOBJ_STR) ? (char *)in->stk[PARSE_set_error_set_option].auxil : NULL;
   if (tempstr != NULL)
    { 
-    if (!interactive) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Unrecognised set option '%s'.", tempstr); TBADD(ERR_SYNTAX,0); }
-    else              { snprintf(c->errStat.errBuff, LSTR_LENGTH, ppltxt_unset                   , tempstr); TBADD(ERR_SYNTAX,0); }
+    if (!interactive) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Unrecognised set option '%s'.", tempstr); TBADD(ERR_SYNTAX,in->stkCharPos[PARSE_set_error_set_option]); }
+    else              { snprintf(c->errStat.errBuff, LSTR_LENGTH, ppltxt_unset                   , tempstr); TBADD(ERR_SYNTAX,in->stkCharPos[PARSE_set_error_set_option]); }
    }
   else
    {

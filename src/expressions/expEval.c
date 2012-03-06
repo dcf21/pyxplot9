@@ -51,9 +51,9 @@
 
 #include "pplConstants.h"
 
-#define TBADD(et,pos,lt) ppl_tbAdd(context,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,et,pos,lt)
+#define TBADD(et) ppl_tbAdd(context,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,et,charpos,inExpr->ascii,"")
 
-static void expEval_stringSubs(ppl_context *context, pplExpr *inExpr, int Nsubs)
+static void expEval_stringSubs(ppl_context *context, pplExpr *inExpr, int charpos, int Nsubs)
  {
   const char allowedFormats[] = "cdieEfgGosSxX%"; // These tokens are allowed after a % format specifier
   char       formatToken[512];
@@ -66,7 +66,7 @@ static void expEval_stringSubs(ppl_context *context, pplExpr *inExpr, int Nsubs)
   int        inP2, requiredArgs, l, arg1i, arg2i;
   char      *out    = (char *)malloc(outlen);
 
-  if (out==NULL) { strcpy(context->errStat.errBuff, "Out of memory."); TBADD(ERR_MEMORY,0,NULL); return; }
+  if (out==NULL) { strcpy(context->errStat.errBuff, "Out of memory."); TBADD(ERR_MEMORY); return; }
 
   // Loop over format string looking for tokens
   for ( ; format[inP]!='\0' ; inP++)
@@ -75,7 +75,7 @@ static void expEval_stringSubs(ppl_context *context, pplExpr *inExpr, int Nsubs)
     if (outP>outlen-16384)
      {
       char *outnew=(char *)realloc((void*)out , outlen+=65536);
-      if (outnew==NULL) { free(out); strcpy(context->errStat.errBuff, "Out of memory."); TBADD(ERR_MEMORY,0,NULL); return; }
+      if (outnew==NULL) { free(out); strcpy(context->errStat.errBuff, "Out of memory."); TBADD(ERR_MEMORY); return; }
       out = outnew;
      }
 
@@ -97,7 +97,7 @@ static void expEval_stringSubs(ppl_context *context, pplExpr *inExpr, int Nsubs)
     for (l=0; allowedFormats[l]!='\0'; l++) if (format[inP2]==allowedFormats[l]) break;
     if (allowedFormats[l]=='%') requiredArgs=0;
     if ((allowedFormats[l]=='\0') || ((allowedFormats[l]=='%')&&(format[inP2-1]!='%')) ) { out[outP++] = format[inP]; continue; } // Have not got correct syntax for a format specifier
-    if (requiredArgs > -argP) { free(out); strcpy(context->errStat.errBuff, "Too few arguments supplied to string substitution operator"); TBADD(ERR_RANGE,0,NULL); return; } // Have run out of substitution arguments
+    if (requiredArgs > -argP) { free(out); strcpy(context->errStat.errBuff, "Too few arguments supplied to string substitution operator"); TBADD(ERR_RANGE); return; } // Have run out of substitution arguments
 
     // %% token simply produces a literal %
     if (allowedFormats[l]=='%')
@@ -115,7 +115,7 @@ static void expEval_stringSubs(ppl_context *context, pplExpr *inExpr, int Nsubs)
        {
         const int tmpbufflen = 65536;
         char *tmpbuff = (char *)malloc(tmpbufflen);
-        if (tmpbuff==NULL) { free(out); strcpy(context->errStat.errBuff, "Out of memory."); TBADD(ERR_MEMORY,0,NULL); return; }
+        if (tmpbuff==NULL) { free(out); strcpy(context->errStat.errBuff, "Out of memory."); TBADD(ERR_MEMORY); return; }
         pplObjPrint(context, obj+argP, NULL, tmpbuff, tmpbufflen, 0, 0);
         formatToken[inP2-inP] = 's';
         if (requiredArgs==1) snprintf(out+outP, outlen-outP, formatToken, tmpbuff); // Print a string variable
@@ -230,7 +230,7 @@ static void expEval_stringSubs(ppl_context *context, pplExpr *inExpr, int Nsubs)
    { \
     context->stackPtr--; \
     ppl_garbageObject(&context->stack[context->stackPtr]); \
-    if (context->stack[context->stackPtr].refCount != 0) { strcpy(context->errStat.errBuff,"Stack forward reference detected."); TBADD(ERR_INTERNAL,0,ascii); goto cleanup_on_error; } \
+    if (context->stack[context->stackPtr].refCount != 0) { strcpy(context->errStat.errBuff,"Stack forward reference detected."); TBADD(ERR_INTERNAL); goto cleanup_on_error; } \
    } \
 
 pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, int dollarAllowed, int iterDepth)
@@ -239,9 +239,8 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
   int   initialStackPtr=0;
   int   charpos=0;
   void *in = inExpr->bytecode;
-  char *ascii = inExpr->ascii;
 
-  if (iterDepth > MAX_RECURSION_DEPTH) { strcpy(context->errStat.errBuff,"Maximum recursion depth exceeded."); TBADD(ERR_OVERFLOW,0,inExpr->ascii); return NULL; }
+  if (iterDepth > MAX_RECURSION_DEPTH) { strcpy(context->errStat.errBuff,"Maximum recursion depth exceeded."); TBADD(ERR_OVERFLOW); return NULL; }
 
   // If at bottom iteration depth, clean up stack now if there is any left-over junk
   if (iterDepth==0) for ( ; context->stackPtr>0 ; ) { STACK_POP; }
@@ -257,8 +256,8 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
     charpos = *(int *)(in+j+sizeof(int)); // character position of token (for error reporting)
     j+=2*sizeof(int)+1; // Leave j pointing to first data item after opcode
 
-    if (cancellationFlag) { strcpy(context->errStat.errBuff,"Operation cancelled."); TBADD(ERR_INTERRUPT,0,inExpr->ascii); goto cleanup_on_error; }
-    if (context->stackPtr > ALGEBRA_STACK-4) { strcpy(context->errStat.errBuff,"Stack overflow."); TBADD(ERR_MEMORY,0,inExpr->ascii); goto cleanup_on_error; }
+    if (cancellationFlag) { strcpy(context->errStat.errBuff,"Operation cancelled."); charpos=0; TBADD(ERR_INTERRUPT); goto cleanup_on_error; }
+    if (context->stackPtr > ALGEBRA_STACK-4) { strcpy(context->errStat.errBuff,"Stack overflow."); charpos=0; TBADD(ERR_MEMORY); goto cleanup_on_error; }
 
     switch (o)
      {
@@ -275,7 +274,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
         int l = strlen((char *)(in+j));
         char *out;
         *lastOpAssign=0;
-        if ((out = (char *)malloc(l+1))==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY,charpos,inExpr->ascii); goto cleanup_on_error; }
+        if ((out = (char *)malloc(l+1))==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY); goto cleanup_on_error; }
         strcpy(out , (char *)(in+j));
         pplObjStr(stk , 0 , 1 , out);
         stk->refCount=1;
@@ -299,7 +298,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
           got=1;
           break;
          }
-        if (!got) { sprintf(context->errStat.errBuff,"No such variable '%s'.",key); TBADD(ERR_NAMESPACE,charpos,inExpr->ascii); goto cleanup_on_error; }
+        if (!got) { sprintf(context->errStat.errBuff,"No such variable '%s'.",key); TBADD(ERR_NAMESPACE); goto cleanup_on_error; }
         break;
        }
       case 4: // Lookup value (pointer)
@@ -316,10 +315,10 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
             stk->refCount=1;
             ppl_dictAppendCpy(context->namespaces[i] , key , stk , sizeof(pplObj));
             obj = (pplObj *)ppl_dictLookup(context->namespaces[i] , key);
-            if (obj==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY,charpos,inExpr->ascii); goto cleanup_on_error; }
+            if (obj==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY); goto cleanup_on_error; }
            }
-          if ((obj==NULL)||((context->namespaces[i]->immutable)&&(obj->objType!=PPLOBJ_GLOB))) { sprintf(context->errStat.errBuff,"Cannot modify variable in immutable namespace."); TBADD(ERR_NAMESPACE,charpos,inExpr->ascii); goto cleanup_on_error; }
-          if (obj->objType==PPLOBJ_GLOB) { if (i<2) { sprintf(context->errStat.errBuff,"Variable declared global in global namespace."); TBADD(ERR_NAMESPACE,charpos,inExpr->ascii); goto cleanup_on_error; } continue; }
+          if ((obj==NULL)||((context->namespaces[i]->immutable)&&(obj->objType!=PPLOBJ_GLOB))) { sprintf(context->errStat.errBuff,"Cannot modify variable in immutable namespace."); TBADD(ERR_NAMESPACE); goto cleanup_on_error; }
+          if (obj->objType==PPLOBJ_GLOB) { if (i<2) { sprintf(context->errStat.errBuff,"Variable declared global in global namespace."); TBADD(ERR_NAMESPACE); goto cleanup_on_error; } continue; }
           pplObjCpy(stk , obj , 1 , 0 , 1);
           stk->refCount=1;
           context->stackPtr++;
@@ -339,7 +338,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
         *lastOpAssign   = 0;
         // Make copy of object that will be self_this (in, which we therefore don't garbage below)
         in_cpy = (pplObj *)malloc(sizeof(pplObj));
-        if (in_cpy == NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY,charpos,inExpr->ascii); goto cleanup_on_error; }
+        if (in_cpy == NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY); goto cleanup_on_error; }
         memcpy(in_cpy, in, sizeof(pplObj));
         // Loop through module / class instance and its prototypes looking for named method
         for ( ; (t==PPLOBJ_MOD)||(t==PPLOBJ_USER) ; iter=iter->objPrototype , t=iter->objType )
@@ -358,7 +357,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
          {
           dict   *d   = pplObjMethods[in->objType];
           pplObj *obj = (pplObj *)ppl_dictLookup(d , key);
-          if (obj==NULL) { sprintf(context->errStat.errBuff,"No such method '%s'.",key); TBADD(ERR_NAMESPACE,charpos,inExpr->ascii); goto cleanup_on_error; }
+          if (obj==NULL) { sprintf(context->errStat.errBuff,"No such method '%s'.",key); TBADD(ERR_NAMESPACE); goto cleanup_on_error; }
           pplObjCpy(stk-1 , obj , 1 , 0 , 1);
           (stk-1)->immutable = 1;
           (stk-1)->refCount=1;
@@ -372,7 +371,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
         int   t   = (stk-1)->objType;
         dict *d   = (dict *)((stk-1)->auxil);
         *lastOpAssign=0;
-        if ((stk-1)->immutable) { sprintf(context->errStat.errBuff,"Cannot modify variable in immutable namespace."); TBADD(ERR_INTERNAL,charpos,inExpr->ascii); goto cleanup_on_error; }
+        if ((stk-1)->immutable) { sprintf(context->errStat.errBuff,"Cannot modify variable in immutable namespace."); TBADD(ERR_INTERNAL); goto cleanup_on_error; }
         if ((t==PPLOBJ_MOD)||(t==PPLOBJ_USER))
          {
           pplObj *obj = (pplObj *)ppl_dictLookup(d , key);
@@ -382,7 +381,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
             stk->refCount=1;
             ppl_dictAppendCpy(d , key , stk , sizeof(pplObj));
             obj = (pplObj *)ppl_dictLookup(d , key);
-            if (obj==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY,charpos,inExpr->ascii); goto cleanup_on_error; }
+            if (obj==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY); goto cleanup_on_error; }
            }
           STACK_POP;
           pplObjCpy(stk-1 , obj , 1 , 0 , 1);
@@ -392,7 +391,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
          }
         else
          {
-          sprintf(context->errStat.errBuff,"Cannot assign methods or variables to this object."); TBADD(ERR_TYPE,charpos,inExpr->ascii); goto cleanup_on_error;
+          sprintf(context->errStat.errBuff,"Cannot assign methods or variables to this object."); TBADD(ERR_TYPE); goto cleanup_on_error;
          }
         break;
        }
@@ -413,16 +412,16 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
           for (i=1; i<=Nrange; i++)
            {
             int *out = ((i==1)&&maxset) ? &max : &min;
-            if ((stk-i)->objType!=PPLOBJ_NUM) { sprintf(context->errStat.errBuff,"Range limits when slicing must be numerical values; supplied limit has type <%s>.",pplObjTypeNames[(stk-1)->objType]); TBADD(ERR_TYPE,charpos,inExpr->ascii); goto cleanup_on_error; }
-            if (!(stk-i)->dimensionless) { sprintf(context->errStat.errBuff,"Range limits when slicing must be dimensionless numbers; supplied limit has units of <%s>.", ppl_printUnit(context, stk-i, NULL, NULL, 0, 1, 0) ); TBADD(ERR_NUMERIC,charpos,inExpr->ascii); goto cleanup_on_error; }
-            if ((stk-i)->flagComplex) { sprintf(context->errStat.errBuff,"Range limits when slicing must be real numbers; supplied limit is complex."); TBADD(ERR_NUMERIC,charpos,inExpr->ascii); goto cleanup_on_error; }
-            if ( (!gsl_finite((stk-i)->real)) || ((stk-i)->real<INT_MIN) || ((stk-i)->real>INT_MAX) ) { sprintf(context->errStat.errBuff,"Range limits when slicing must be in the range %d to %d.", INT_MIN, INT_MAX); TBADD(ERR_RANGE,charpos,inExpr->ascii); goto cleanup_on_error; }
+            if ((stk-i)->objType!=PPLOBJ_NUM) { sprintf(context->errStat.errBuff,"Range limits when slicing must be numerical values; supplied limit has type <%s>.",pplObjTypeNames[(stk-1)->objType]); TBADD(ERR_TYPE); goto cleanup_on_error; }
+            if (!(stk-i)->dimensionless) { sprintf(context->errStat.errBuff,"Range limits when slicing must be dimensionless numbers; supplied limit has units of <%s>.", ppl_printUnit(context, stk-i, NULL, NULL, 0, 1, 0) ); TBADD(ERR_NUMERIC); goto cleanup_on_error; }
+            if ((stk-i)->flagComplex) { sprintf(context->errStat.errBuff,"Range limits when slicing must be real numbers; supplied limit is complex."); TBADD(ERR_NUMERIC); goto cleanup_on_error; }
+            if ( (!gsl_finite((stk-i)->real)) || ((stk-i)->real<INT_MIN) || ((stk-i)->real>INT_MAX) ) { sprintf(context->errStat.errBuff,"Range limits when slicing must be in the range %d to %d.", INT_MIN, INT_MAX); TBADD(ERR_RANGE); goto cleanup_on_error; }
             *out = (int)(stk-i)->real;
            }
          }
         if (!range) ppl_sliceItem (context, getPtr, &status, &errType, context->errStat.errBuff);
         else        ppl_sliceRange(context, minset, min, maxset, max, &status, &errType, context->errStat.errBuff);
-        if (status) { TBADD(errType,charpos,inExpr->ascii); goto cleanup_on_error; }
+        if (status) { TBADD(errType); goto cleanup_on_error; }
         break;
        }
       case 8: // Make dict
@@ -431,9 +430,9 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
         int len = *(int *)(in+j);
         dict *d = ppl_dictInit(HASHSIZE_LARGE,1);
         *lastOpAssign=0;
-        if (d==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_INTERNAL,charpos,inExpr->ascii); goto cleanup_on_error; }
-        if (context->stackPtr<2*len) { sprintf(context->errStat.errBuff,"Attempt to make dictionary with too few items on the stack."); TBADD(ERR_INTERNAL,charpos,inExpr->ascii); goto cleanup_on_error; }
-        for (k=0; k<len; k++) if ((stk-2*(len-k))->objType!=PPLOBJ_STR) { sprintf(context->errStat.errBuff,"Dictionary keys must be strings; supplied key has type <%s>.",pplObjTypeNames[(stk-2*(len-k))->objType]); TBADD(ERR_TYPE,charpos,inExpr->ascii); goto cleanup_on_error; }
+        if (d==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_INTERNAL); goto cleanup_on_error; }
+        if (context->stackPtr<2*len) { sprintf(context->errStat.errBuff,"Attempt to make dictionary with too few items on the stack."); TBADD(ERR_INTERNAL); goto cleanup_on_error; }
+        for (k=0; k<len; k++) if ((stk-2*(len-k))->objType!=PPLOBJ_STR) { sprintf(context->errStat.errBuff,"Dictionary keys must be strings; supplied key has type <%s>.",pplObjTypeNames[(stk-2*(len-k))->objType]); TBADD(ERR_TYPE); goto cleanup_on_error; }
         for (k=0; k<len; k++)
          {
           pplObj v;
@@ -453,8 +452,8 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
         int len = *(int *)(in+j);
         list *l = ppl_listInit(1);
         *lastOpAssign=0;
-        if (l==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_INTERNAL,charpos,inExpr->ascii); goto cleanup_on_error; }
-        if (context->stackPtr<len) { sprintf(context->errStat.errBuff,"Attempt to make list with too few items on the stack."); TBADD(ERR_INTERNAL,charpos,inExpr->ascii); goto cleanup_on_error; }
+        if (l==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_INTERNAL); goto cleanup_on_error; }
+        if (context->stackPtr<len) { sprintf(context->errStat.errBuff,"Attempt to make list with too few items on the stack."); TBADD(ERR_INTERNAL); goto cleanup_on_error; }
         for (k=0; k<len; k++)
          {
           pplObj v;
@@ -472,8 +471,8 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
        {
         int nArgs = *(int *)(in+j);
         *lastOpAssign=0;
-        ppl_fnCall(context, inExpr, nArgs, dollarAllowed, iterDepth);
-        if (context->errStat.status) { ppl_tbWasInSubstring(context, charpos, inExpr->ascii); goto cleanup_on_error; }
+        ppl_fnCall(context, inExpr, charpos, nArgs, dollarAllowed, iterDepth);
+        if (context->errStat.status) goto cleanup_on_error;
         break;
        }
       case 11: // Operator
@@ -513,7 +512,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
             int status=0, errType=-1; 
             CAST_TO_NUM(stk-1); CAST_TO_NUM(stk-2);
             ppl_uaPow(context, stk-2, stk-1, stk, &status, &errType, context->errStat.errBuff);
-            if (status) { TBADD(errType,charpos,inExpr->ascii); goto cleanup_on_error; }
+            if (status) { TBADD(errType); goto cleanup_on_error; }
             STACK_POP; STACK_POP;
             memcpy(stk-2, stk, sizeof(pplObj));
             context->stackPtr++;
@@ -523,7 +522,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
            {
             int status=0, errType=-1; 
             ppl_opMul(context, stk-2, stk-1, stk, 1, &status, &errType, context->errStat.errBuff);
-            if (status) { TBADD(errType,charpos,inExpr->ascii); goto cleanup_on_error; }
+            if (status) { TBADD(errType); goto cleanup_on_error; }
             STACK_POP; STACK_POP;
             memcpy(stk-2, stk, sizeof(pplObj));
             context->stackPtr++;
@@ -533,7 +532,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
            {
             int status=0, errType=-1; 
             ppl_opDiv(context, stk-2, stk-1, stk, 1, &status, &errType, context->errStat.errBuff);
-            if (status) { TBADD(errType,charpos,inExpr->ascii); goto cleanup_on_error; }
+            if (status) { TBADD(errType); goto cleanup_on_error; }
             STACK_POP; STACK_POP;
             memcpy(stk-2, stk, sizeof(pplObj));
             context->stackPtr++;
@@ -544,7 +543,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
             int status=0, errType=-1; 
             CAST_TO_NUM(stk-1); CAST_TO_NUM(stk-2);
             ppl_uaMod(context, stk-2, stk-1, stk, &status, &errType, context->errStat.errBuff);
-            if (status) { TBADD(errType,charpos,inExpr->ascii); goto cleanup_on_error; }
+            if (status) { TBADD(errType); goto cleanup_on_error; }
             STACK_POP; STACK_POP;
             memcpy(stk-2, stk, sizeof(pplObj));
             context->stackPtr++;
@@ -554,7 +553,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
            {
             int status=0, errType=-1;
             ppl_opAdd(context, stk-2, stk-1, stk, 1, &status, &errType, context->errStat.errBuff);
-            if (status) { TBADD(errType,charpos,inExpr->ascii); goto cleanup_on_error; }
+            if (status) { TBADD(errType); goto cleanup_on_error; }
             STACK_POP; STACK_POP;
             memcpy(stk-2, stk, sizeof(pplObj));
             context->stackPtr++;
@@ -564,7 +563,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
            {
             int status=0, errType=-1;
             ppl_opSub(context, stk-2, stk-1, stk, 1, &status, &errType, context->errStat.errBuff);
-            if (status) { TBADD(errType,charpos,inExpr->ascii); goto cleanup_on_error; }
+            if (status) { TBADD(errType); goto cleanup_on_error; }
             STACK_POP; STACK_POP;
             memcpy(stk-2, stk, sizeof(pplObj));
             context->stackPtr++;
@@ -620,7 +619,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
           case 0x56: // !=
            {
             int stat=0 , errType=-1 , cmp = pplObjCmp(context, stk-2, stk-1, &stat, &errType, context->errStat.errBuff);
-            if (stat) { TBADD(errType,charpos,inExpr->ascii); goto cleanup_on_error; }
+            if (stat) { TBADD(errType); goto cleanup_on_error; }
             if      (t==0x51) stat = (cmp == -1);
             else if (t==0x52) stat = (cmp == -1) || (cmp==0);
             else if (t==0x53) stat = (cmp ==  1) || (cmp==0);
@@ -634,7 +633,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
             break;
            }
           default:
-           sprintf(context->errStat.errBuff,"Unknown operator with id=%d.",t); TBADD(ERR_INTERNAL,charpos,inExpr->ascii); goto cleanup_on_error;
+           sprintf(context->errStat.errBuff,"Unknown operator with id=%d.",t); TBADD(ERR_INTERNAL); goto cleanup_on_error;
          }
         break;
        }
@@ -647,9 +646,9 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
         int     t2 = in->objType;
         int status = 0, errType=-1;
         *lastOpAssign=1;
-        if (context->stackPtr < 2) { sprintf(context->errStat.errBuff,"Too few items on stack for assignment operator."); TBADD(ERR_INTERNAL,charpos,inExpr->ascii); goto cleanup_on_error; }
-        if (o->self_lval == NULL)  { sprintf(context->errStat.errBuff,"Assignment operators can only be applied to variables."); TBADD(ERR_TYPE,charpos,inExpr->ascii); goto cleanup_on_error; }
-        if (o->immutable) { sprintf(context->errStat.errBuff,"Cannot assign to an immutable object."); TBADD(ERR_TYPE,charpos,inExpr->ascii); goto cleanup_on_error; }
+        if (context->stackPtr < 2) { sprintf(context->errStat.errBuff,"Too few items on stack for assignment operator."); TBADD(ERR_INTERNAL); goto cleanup_on_error; }
+        if (o->self_lval == NULL)  { sprintf(context->errStat.errBuff,"Assignment operators can only be applied to variables."); TBADD(ERR_TYPE); goto cleanup_on_error; }
+        if (o->immutable) { sprintf(context->errStat.errBuff,"Cannot assign to an immutable object."); TBADD(ERR_TYPE); goto cleanup_on_error; }
 
 #define ASSIGN \
          { \
@@ -666,8 +665,8 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
            } \
           else /* Assign vector or matrix element */ \
            { \
-            if ((t2!=PPLOBJ_NUM) || (tmp->flagComplex)) { sprintf(context->errStat.errBuff,"Vectors and matrices can only contain real numbers."); TBADD(ERR_TYPE,charpos,inExpr->ascii); goto cleanup_on_error; } \
-            if (!ppl_unitsDimEqual(o,tmp)) { sprintf(context->errStat.errBuff,"Cannot insert element with dimensions <%s> into vector with dimensions <%s>.", ppl_printUnit(context,tmp,NULL,NULL,0,1,0), ppl_printUnit(context,o,NULL,NULL,1,1,0)); TBADD(ERR_UNIT,charpos,inExpr->ascii); goto cleanup_on_error; } \
+            if ((t2!=PPLOBJ_NUM) || (tmp->flagComplex)) { sprintf(context->errStat.errBuff,"Vectors and matrices can only contain real numbers."); TBADD(ERR_TYPE); goto cleanup_on_error; } \
+            if (!ppl_unitsDimEqual(o,tmp)) { sprintf(context->errStat.errBuff,"Cannot insert element with dimensions <%s> into vector with dimensions <%s>.", ppl_printUnit(context,tmp,NULL,NULL,0,1,0), ppl_printUnit(context,o,NULL,NULL,1,1,0)); TBADD(ERR_UNIT); goto cleanup_on_error; } \
             *o->self_dval = tmp->real; \
            } \
           ppl_garbageObject(o); \
@@ -683,30 +682,30 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
         else if (t==0x41) // +=
          {
           ppl_opAdd(context, o, in, tmp, 0, &status, &errType, context->errStat.errBuff);
-          if (status) { TBADD(errType,charpos,inExpr->ascii); goto cleanup_on_error; }
+          if (status) { TBADD(errType); goto cleanup_on_error; }
           ASSIGN;
          }
         else if (t==0x42) // -=
          {
           ppl_opSub(context, o, in, tmp, 0, &status, &errType, context->errStat.errBuff);
-          if (status) { TBADD(errType,charpos,inExpr->ascii); goto cleanup_on_error; }
+          if (status) { TBADD(errType); goto cleanup_on_error; }
           ASSIGN;
          }
         else if (t==0x43) // *=
          {
           ppl_opMul(context, o, in, tmp, 0, &status, &errType, context->errStat.errBuff);
-          if (status) { TBADD(errType,charpos,inExpr->ascii); goto cleanup_on_error; }
+          if (status) { TBADD(errType); goto cleanup_on_error; }
           ASSIGN;
          }
         else if (t==0x44) // /=
          {
           ppl_opDiv(context, o, in, tmp, 0, &status, &errType, context->errStat.errBuff);
-          if (status) { TBADD(errType,charpos,inExpr->ascii); goto cleanup_on_error; }
+          if (status) { TBADD(errType); goto cleanup_on_error; }
           ASSIGN;
          }
         else
          {
-          if (o->objType != PPLOBJ_NUM) { sprintf(context->errStat.errBuff,"The fused operator-assignment operators can only be applied to numeric variables."); TBADD(ERR_TYPE,charpos,inExpr->ascii); goto cleanup_on_error; }
+          if (o->objType != PPLOBJ_NUM) { sprintf(context->errStat.errBuff,"The fused operator-assignment operators can only be applied to numeric variables."); TBADD(ERR_TYPE); goto cleanup_on_error; }
           CAST_TO_NUM(in);
           pplObjNum(tmp, 0, 0, 0);
           switch (t)
@@ -738,9 +737,9 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
               ppl_uaPow(context, o, in, tmp, &status, &errType, context->errStat.errBuff);
               break;
             default:
-             sprintf(context->errStat.errBuff,"Unknown fused operator-assignment operator with id=%d.",t); TBADD(ERR_INTERNAL,charpos,inExpr->ascii); goto cleanup_on_error;
+             sprintf(context->errStat.errBuff,"Unknown fused operator-assignment operator with id=%d.",t); TBADD(ERR_INTERNAL); goto cleanup_on_error;
            }
-          if (status) { TBADD(errType,charpos,inExpr->ascii); goto cleanup_on_error; }
+          if (status) { TBADD(errType); goto cleanup_on_error; }
           ASSIGN;
           break;
          }
@@ -751,10 +750,10 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
         int     t = (int)*(unsigned char *)(in+j);
         pplObj *o = stk-1;
         *lastOpAssign=1;
-        if (context->stackPtr < 1)    { sprintf(context->errStat.errBuff,"Too few items on stack for -- or ++ operator."); TBADD(ERR_INTERNAL,charpos,inExpr->ascii); goto cleanup_on_error; }
-        if (o->self_lval == NULL)     { sprintf(context->errStat.errBuff,"The -- and ++ operators can only be applied to variables."); TBADD(ERR_TYPE,charpos,inExpr->ascii); goto cleanup_on_error; }
-        if (o->objType != PPLOBJ_NUM) { sprintf(context->errStat.errBuff,"The -- and ++ operators can only be applied to numeric variables."); TBADD(ERR_TYPE,charpos,inExpr->ascii); goto cleanup_on_error; }
-        if (o->immutable)             { sprintf(context->errStat.errBuff,"Cannot modify an immutable object."); TBADD(ERR_TYPE,charpos,inExpr->ascii); goto cleanup_on_error; }
+        if (context->stackPtr < 1)    { sprintf(context->errStat.errBuff,"Too few items on stack for -- or ++ operator."); TBADD(ERR_INTERNAL); goto cleanup_on_error; }
+        if (o->self_lval == NULL)     { sprintf(context->errStat.errBuff,"The -- and ++ operators can only be applied to variables."); TBADD(ERR_TYPE); goto cleanup_on_error; }
+        if (o->objType != PPLOBJ_NUM) { sprintf(context->errStat.errBuff,"The -- and ++ operators can only be applied to numeric variables."); TBADD(ERR_TYPE); goto cleanup_on_error; }
+        if (o->immutable)             { sprintf(context->errStat.errBuff,"Cannot modify an immutable object."); TBADD(ERR_TYPE); goto cleanup_on_error; }
         switch (t)
          {
           case 0x21: // -- (post-eval)
@@ -770,7 +769,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
             if (t==0x24) o->real = (o->self_dval != NULL) ? *o->self_dval : o->self_lval->real;
             break;
           default:
-           sprintf(context->errStat.errBuff,"Unknown increment/decrement operator with id=%d.",t); TBADD(ERR_INTERNAL,charpos,inExpr->ascii); goto cleanup_on_error;
+           sprintf(context->errStat.errBuff,"Unknown increment/decrement operator with id=%d.",t); TBADD(ERR_INTERNAL); goto cleanup_on_error;
          }            
         break;
        }
@@ -778,9 +777,9 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
        {
         int Nsubs  = *(int *)(in+j);
         int i;
-        if (context->stackPtr < Nsubs+1) { sprintf(context->errStat.errBuff,"Too few items on stack for string substitution operator."); TBADD(ERR_INTERNAL,charpos,inExpr->ascii); goto cleanup_on_error; }
-        if ((stk-Nsubs-1)->objType != PPLOBJ_STR) { sprintf(context->errStat.errBuff,"Attempt to apply string substitution operator to a non-string."); TBADD(ERR_TYPE,charpos,inExpr->ascii); goto cleanup_on_error; }
-        expEval_stringSubs(context, inExpr, Nsubs);
+        if (context->stackPtr < Nsubs+1) { sprintf(context->errStat.errBuff,"Too few items on stack for string substitution operator."); TBADD(ERR_INTERNAL); goto cleanup_on_error; }
+        if ((stk-Nsubs-1)->objType != PPLOBJ_STR) { sprintf(context->errStat.errBuff,"Attempt to apply string substitution operator to a non-string."); TBADD(ERR_TYPE); goto cleanup_on_error; }
+        expEval_stringSubs(context, inExpr, charpos, Nsubs);
         if (context->errStat.status) { goto cast_fail; }
         stk->refCount = 1;
         context->stackPtr--;
@@ -822,17 +821,16 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
         break;
        }
       default:
-       sprintf(context->errStat.errBuff,"Illegal bytecode opcode passed to expEval."); TBADD(ERR_INTERNAL,0,inExpr->ascii); goto cleanup_on_error;
+       sprintf(context->errStat.errBuff,"Illegal bytecode opcode passed to expEval."); charpos=0; TBADD(ERR_INTERNAL); goto cleanup_on_error;
      }
     if (o==0) break;
     j = pos+len;
    }
-  if (context->stackPtr <= 0) { sprintf(context->errStat.errBuff,"Unexpected empty stack at end of evaluation."); TBADD(ERR_INTERNAL,0,inExpr->ascii); goto cleanup_on_error; }
+  if (context->stackPtr <= 0) { sprintf(context->errStat.errBuff,"Unexpected empty stack at end of evaluation."); charpos=0; TBADD(ERR_INTERNAL); goto cleanup_on_error; }
   if (context->stackPtr != initialStackPtr+1) ppl_warning(&context->errcontext, ERR_INTERNAL, "Unexpected junk on stack in expEval.");
   return &context->stack[context->stackPtr-1];
 
   cast_fail:
-    ppl_tbWasInSubstring(context, charpos, inExpr->ascii);
   cleanup_on_error:
     for ( ; context->stackPtr>initialStackPtr ; ) { STACK_POP; }
     return NULL;

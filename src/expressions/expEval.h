@@ -41,11 +41,11 @@
         int len; char *c=(char *)(X)->auxil; \
         d = ppl_getFloat(c, &len); \
         if (len>0) { while ((c[len]>'\0')&&(c[len]<=' ')) len++; } \
-        if ((len<0)||(c[len]!='\0')) { sprintf(context->errStat.errBuff,"Attempt to implicitly cast string to number failed: string is not a valid number."); TBADD(ERR_TYPE,0,NULL); goto cast_fail; } \
+        if ((len<0)||(c[len]!='\0')) { sprintf(context->errStat.errBuff,"Attempt to implicitly cast string to number failed: string is not a valid number."); TBADD(ERR_TYPE); goto cast_fail; } \
         break; \
        } \
       default: \
-        { sprintf(context->errStat.errBuff,"Cannot implicitly cast an object of type <%s> to a number.",pplObjTypeNames[t]); TBADD(ERR_TYPE,0,NULL); goto cast_fail; } \
+        { sprintf(context->errStat.errBuff,"Cannot implicitly cast an object of type <%s> to a number.",pplObjTypeNames[t]); TBADD(ERR_TYPE); goto cast_fail; } \
      } \
     ppl_garbageObject(X); \
     pplObjNum(X,0,d,0); \
@@ -56,14 +56,14 @@
 #define CAST_TO_REAL(X,OP) \
  { \
   CAST_TO_NUM(X); \
-  if ((X)->flagComplex) { sprintf(context->errStat.errBuff,"The %s operator can only act on real numbers.",OP); TBADD(ERR_RANGE,0,NULL); goto cast_fail; } \
+  if ((X)->flagComplex) { sprintf(context->errStat.errBuff,"The %s operator can only act on real numbers.",OP); TBADD(ERR_RANGE); goto cast_fail; } \
  }
 
 #define CAST_TO_INT(X,OP) \
  { \
   CAST_TO_REAL(X,OP); \
-  if (!(X)->dimensionless) { sprintf(context->errStat.errBuff,"The %s operator is an integer operator which can only act on dimensionless numbers: supplied operand has units of <%s>.",OP,ppl_printUnit(context,X,NULL,NULL,0,1,0)); TBADD(ERR_UNIT,0,NULL); goto cast_fail; } \
-  if (((X)->real < INT_MIN) || ((X)->real > INT_MAX)) { sprintf(context->errStat.errBuff,"The %s operator can only act on integers in the range %d to %d.",OP,INT_MIN,INT_MAX); TBADD(ERR_RANGE,0,NULL); goto cast_fail; } \
+  if (!(X)->dimensionless) { sprintf(context->errStat.errBuff,"The %s operator is an integer operator which can only act on dimensionless numbers: supplied operand has units of <%s>.",OP,ppl_printUnit(context,X,NULL,NULL,0,1,0)); TBADD(ERR_UNIT); goto cast_fail; } \
+  if (((X)->real < INT_MIN) || ((X)->real > INT_MAX)) { sprintf(context->errStat.errBuff,"The %s operator can only act on integers in the range %d to %d.",OP,INT_MIN,INT_MAX); TBADD(ERR_RANGE); goto cast_fail; } \
  }
 
 #define CAST_TO_BOOL(X) \

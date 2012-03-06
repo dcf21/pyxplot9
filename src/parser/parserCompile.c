@@ -114,7 +114,7 @@ static int parse_descend(ppl_context *c, parserStatus *s, int writeOut, int srcL
     parserLine *output=NULL;
     ppl_parserLineInit(&output,srcLineN,srcId,srcFname,line);
     output->stackLen = node->listLen;
-    if (output==NULL) { sprintf(c->errStat.errBuff,"Out of memory."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_MEMORY,0,line); return 0; }
+    if (output==NULL) { sprintf(c->errStat.errBuff,"Out of memory."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_MEMORY,0,line,""); return 0; }
     ppl_parserStatAdd(s, blockDepth, output);
    }
 
@@ -225,6 +225,7 @@ finished_looking_for_tabcomp:
         pplExpr *expr;
         int      explen=0, errPos=-1, errType;
         int      dollarAllowed = (node->matchString[1]=='E');
+        int      equalsAllowed = (node->matchString[1]!='g');
 
         switch (node->matchString[1])
          {
@@ -265,11 +266,11 @@ finished_looking_for_tabcomp:
             else if ((line[*linepos]=='y')||(line[*linepos]=='Y')) xyz=1;
             else if ((line[*linepos]=='z')||(line[*linepos]=='Z')) xyz=2;
             else                                                   { status=0; goto item_cleanup; }
-            ppl_expCompile(c,srcLineN,srcId,srcFname,line+*linepos+1,&explen,dollarAllowed,0,&expr,&errPos,&errType,c->errStat.errBuff);
+            ppl_expCompile(c,srcLineN,srcId,srcFname,line+*linepos+1,&explen,dollarAllowed,equalsAllowed,0,&expr,&errPos,&errType,c->errStat.errBuff);
             if (errPos>=0)
              {
               pplExpr_free(expr);
-              ppl_tbAdd(c,srcLineN,srcId,srcFname,0,errType,errPos+*linepos+1,line);
+              ppl_tbAdd(c,srcLineN,srcId,srcFname,0,errType,errPos+*linepos+1,line,"");
               status=0;
               goto item_cleanup;
              }
@@ -303,16 +304,16 @@ finished_looking_for_tabcomp:
            }
           default:
            {
-            ppl_expCompile(c,srcLineN,srcId,srcFname,line+*linepos,&explen,dollarAllowed,0,&expr,&errPos,&errType,c->errStat.errBuff);
+            ppl_expCompile(c,srcLineN,srcId,srcFname,line+*linepos,&explen,dollarAllowed,equalsAllowed,0,&expr,&errPos,&errType,c->errStat.errBuff);
             if (errPos>=0)
              {
               pplExpr_free(expr);
-              ppl_tbAdd(c,srcLineN,srcId,srcFname,0,errType,errPos+*linepos,line);
+              ppl_tbAdd(c,srcLineN,srcId,srcFname,0,errType,errPos+*linepos,line,"");
               status=0;
               goto item_cleanup;
              }
             if ((s==NULL)||(!writeOut)) pplExpr_free(expr);
-            else if ((node->matchString[1]!='C') && (node->matchString[1]!='e') && (node->matchString[1]!='E'))
+            else if ((node->matchString[1]!='C') && (node->matchString[1]!='e') && (node->matchString[1]!='E') && (node->matchString[1]!='g'))
              {
               ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, node->matchString+1, expr, NULL);
              }
@@ -358,6 +359,7 @@ item_cleanup:
               case 'D': sprintf(s->expectingList+s->eLPos, "a distance%s", varname); break;
               case 'e': sprintf(s->expectingList+s->eLPos, "an algebraic expression%s", varname); break;
               case 'E': sprintf(s->expectingList+s->eLPos, "an algebraic expression%s", varname); break;
+              case 'g': sprintf(s->expectingList+s->eLPos, "an algebraic expression%s", varname); break;
               case 'f': sprintf(s->expectingList+s->eLPos, "a real, dimensionless number%s", varname); break;
               case 'o': sprintf(s->expectingList+s->eLPos, "an expression%s", varname); break;
               case 'p': sprintf(s->expectingList+s->eLPos, "a position vector%s", varname); break;
@@ -566,7 +568,7 @@ cleanup:
      {
       snprintf(c->errStat.errBuff,LSTR_LENGTH,"At this point, was expecting %s.",s->expectingList);
       c->errStat.errBuff[LSTR_LENGTH-1] = '\0';
-      ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,*linepos,line);
+      ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,*linepos,line,"");
      }
    }
 
@@ -715,7 +717,7 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
   int           obLen = LSTR_LENGTH, obPos;
   char         *outbuff = NULL;
 
-  if (blockDepth > MAX_RECURSION_DEPTH) { strcpy(c->errStat.errBuff,"Maximum recursion depth exceeded."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_OVERFLOW,0,line); ppl_parserStatReInit(s); return 1; }
+  if (blockDepth > MAX_RECURSION_DEPTH) { strcpy(c->errStat.errBuff,"Maximum recursion depth exceeded."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_OVERFLOW,0,line,""); ppl_parserStatReInit(s); return 1; }
 
   // Deal with macros and ` ` substitutions
   if (!expandMacros)
@@ -725,7 +727,7 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
      {
       parserLine *output=NULL;
       ppl_parserLineInit(&output, srcLineN, srcId, srcFname, line);
-      if (output==NULL) { sprintf(c->errStat.errBuff,"Out of memory."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_MEMORY,0,line); ppl_parserStatReInit(s); return 1; }
+      if (output==NULL) { sprintf(c->errStat.errBuff,"Out of memory."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_MEMORY,0,line,""); ppl_parserStatReInit(s); return 1; }
       output->stackLen       = 0;
       output->containsMacros = 1;
       ppl_parserStatAdd(s, blockDepth, output);
@@ -818,7 +820,7 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
         // Clean up after macro substitution
         if ((!fail)&&(outbuff!=NULL)) { if (line!=lineOriginal) free(line); line = outbuff; }
         else if (outbuff!=NULL) { free(outbuff); outbuff=NULL; }
-        if (fail) { ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,0,line); ppl_parserStatReInit(s); return 1; }
+        if (fail) { ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,0,line,""); ppl_parserStatReInit(s); return 1; }
        }
      }
    }
@@ -870,7 +872,7 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
 
   // We have not found a match to this command
   sprintf(c->errStat.errBuff, "Unrecognised command.");
-  ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,0,line);
+  ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,0,line,"");
   if (outbuff!=NULL) free(outbuff);
   ppl_parserStatReInit(s);
   return 1;

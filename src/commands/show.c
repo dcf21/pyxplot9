@@ -1276,12 +1276,13 @@ static int directive_show2(ppl_context *c, char *word, char *itemSet, int intera
   return p;
  }
 
-#define TBADD(et,pos) ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,pos,pl->linetxt)
+#define TBADD(et,pos) ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,pos,pl->linetxt,"")
 
 void directive_show(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
  {
-  pplObj            *stk = in->stk, *pos;
-  char               itemSet[32], *showWord=NULL;
+  pplObj            *stk = in->stk;
+  int                pos;
+  char               itemSet[32];
   pplset_graph      *sg;
   pplarrow_object  **al;
   ppllabel_object  **ll;
@@ -1316,12 +1317,12 @@ void directive_show(ppl_context *c, parserLine *pl, parserOutput *in, int intera
     sprintf(itemSet, "item %d ", editNo);
    }
 
-  pos = &stk[PARSE_show_0setting_list];
-  if ((pos->objType != PPLOBJ_NUM) || (pos->real <= 0))
+  pos = PARSE_show_0setting_list;
+  if ((stk[pos].objType != PPLOBJ_NUM) || (stk[pos].real <= 0))
    { ppl_error(&c->errcontext, ERR_PREFORMED, -1, -1, ppltxt_show); }
   else
    {
-    char textBuffer[SSTR_LENGTH];
+    char textBuffer[SSTR_LENGTH], *showWord=NULL;
     int  p=0,i=0;
     if (interactive!=0) // On interactive sessions, highlight those settings which have been manually set by the user
      {
@@ -1339,10 +1340,10 @@ void directive_show(ppl_context *c, parserLine *pl, parserOutput *in, int intera
       i += strlen(textBuffer+i);
       ppl_report(&c->errcontext,textBuffer);
      }
-    while ((pos->objType == PPLOBJ_NUM) && (pos->real > 0))
+    while ((stk[pos].objType == PPLOBJ_NUM) && (stk[pos].real > 0))
      {
-      pos = &stk[ (int)round(pos->real) ];
-      showWord = (char *)(pos + PARSE_show_setting_0setting_list)->auxil;
+      pos = (int)round(stk[pos].real);
+      showWord = (char *)stk[pos+PARSE_show_setting_0setting_list].auxil;
       if (ppl_strAutocomplete(showWord,"all",1)>=0)
        {
         directive_show2(c, "settings"       ,itemSet, interactive, sg, al, ll, xa, ya, za);
@@ -1360,10 +1361,10 @@ void directive_show(ppl_context *c, parserLine *pl, parserOutput *in, int intera
         p = (directive_show2(c, showWord, itemSet, interactive, sg, al, ll, xa, ya, za) || p);
        }
      }
-    if (p==0)
+    if ((p==0) && (showWord!=NULL))
      {
       snprintf(c->errStat.errBuff, LSTR_LENGTH, "Unrecognised show option '%s'.\n\n%s", showWord, ppltxt_show);
-      TBADD(ERR_SYNTAX,0);
+      TBADD(ERR_SYNTAX,in->stkCharPos[pos+PARSE_show_setting_0setting_list]);
      }
    }
   return;
