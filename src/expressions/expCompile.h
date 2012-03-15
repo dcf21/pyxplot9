@@ -34,6 +34,7 @@ void ppl_tokenPrint        (ppl_context *context, char *in, int len);
 void ppl_expCompile        (ppl_context *context, int srcLineN, long srcId, char *srcFname, char *in, int *end, int dollarAllowed, int equalsAllowed, int allowCommaOperator, pplExpr **outexpr, int *errPos, int *errType, char *errText);
 void ppl_reversePolishPrint(ppl_context *context, pplExpr *expIn, char *out);
 void pplExpr_free          (pplExpr *inExpr);
+pplExpr *pplExpr_cpy       (pplExpr *i);
 
 #endif
 

@@ -77,6 +77,7 @@ typedef struct parserStatus {
   parserLine  *pl [MAX_RECURSION_DEPTH];
   parserNode  *stk[MAX_RECURSION_DEPTH][16];
   int          blockDepth;
+  int          NinlineDatafiles;
   char         expectingList[LSTR_LENGTH];
   int          eLPos, eLlinePos;
  } parserStatus;

@@ -137,7 +137,7 @@ int pplObjCmp(ppl_context *c, const pplObj *a, const pplObj *b, int *status, int
   if  (t1o==0) return -2; // 0 - nulls are never equal
   if  (t1o==2) // 2 - numbers or booleans
    {
-    if (ppl_unitsDimEqual(a,b)==0)
+    if (!ppl_unitsDimEqual(a,b))
      {
       if (c==NULL)
        {

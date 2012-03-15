@@ -1077,3 +1077,15 @@ void pplExpr_free(pplExpr *inExpr)
   return;
  }
 
+pplExpr *pplExpr_cpy(pplExpr *i)
+ {
+  pplExpr *o;
+  if (i==NULL) return NULL;
+  o = (pplExpr *)malloc(sizeof(pplExpr));
+  memcpy(o, i, sizeof(pplExpr));
+  if (i->ascii   !=NULL) { if ((o->ascii   =malloc(strlen(i->ascii   )+1))==NULL) return NULL; strcpy(o->ascii   , i->ascii   ); }
+  if (i->srcFname!=NULL) { if ((o->srcFname=malloc(strlen(i->srcFname)+1))==NULL) return NULL; strcpy(o->srcFname, i->srcFname); }
+  if (i->bytecode!=NULL) { if ((o->bytecode=malloc(i->bcLen             ))==NULL) return NULL; memcpy(o->bytecode, i->bytecode, i->bcLen); }
+  return o;
+ }
+

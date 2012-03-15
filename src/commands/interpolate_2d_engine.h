@@ -1,4 +1,4 @@
-// axes_fns.h
+// interpolate_2d_engine.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,21 +19,15 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _PPLSET_AXES_FNS_H
-#define _PPLSET_AXES_FNS_H 1
+#ifndef _INTERPOLATE2D_H
+#define _INTERPOLATE2D_H 1
 
+#include "datafile.h"
 #include "settings/settings.h"
 #include "userspace/context.h"
 
-void          pplaxis_destroy  (ppl_context *context, pplset_axis *in);
-void          pplaxis_copy     (ppl_context *context, pplset_axis *out, const pplset_axis *in);
-void          pplaxis_copyTics (ppl_context *context, pplset_axis *out, const pplset_axis *in);
-void          pplaxis_copyMTics(ppl_context *context, pplset_axis *out, const pplset_axis *in);
-unsigned char pplaxis_cmpTics  (ppl_context *context, const pplset_axis *a, const pplset_axis *b);
-unsigned char pplaxis_cmpMTics (ppl_context *context, const pplset_axis *a, const pplset_axis *b);
-
-double        pplaxis_GetPosition   (double xin, pplset_axis *xa, int xrn, unsigned char AllowOffBounds);
-double        pplaxis_InvGetPosition(double xin, pplset_axis *xa);
+void ppl_interp2d_eval(ppl_context *c, double *output, const pplset_graph *sg, const double *in, const long InSize, const int ColNum, const int NCols, const double x, const double y);
+void ppl_interp2d_grid(ppl_context *c, dataTable **output, const pplset_graph *sg, dataTable *in, pplset_axis *axis_x, pplset_axis *axis_y, unsigned char SampleToEdge, int *XSizeOut, int *YSizeOut);
 
 #endif
 

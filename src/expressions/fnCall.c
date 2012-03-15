@@ -30,6 +30,9 @@
 
 #include <gsl/gsl_math.h>
 
+#include "commands/fft.h"
+#include "commands/histogram.h"
+#include "commands/interpolate.h"
 #include "coreUtils/dict.h"
 #include "coreUtils/errorReport.h"
 #include "coreUtils/list.h"
@@ -40,6 +43,7 @@
 #include "settings/settingTypes.h"
 #include "stringTools/asciidouble.h"
 #include "userspace/context.h"
+#include "userspace/contextVarDef.h"
 #include "userspace/garbageCollector.h"
 #include "userspace/pplObj_fns.h"
 #include "userspace/pplObjFunc.h"
@@ -50,6 +54,8 @@
 #include "pplConstants.h"
 
 #define TBADD(et) ppl_tbAdd(context,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,et,inExprCharPos,inExpr->ascii,"")
+
+#define TBADD2(et,place) ppl_tbAdd(context,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,et,inExprCharPos,inExpr->ascii,place)
 
 #define STACK_POP \
    { \
@@ -523,6 +529,207 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
         int stat=0, errType=-1;
         ((void(*)(ppl_context *, pplObj *, int, int *, int *, char *))fn->functionPtr)(context, args, nArgs, &stat, &errType, context->errStat.errBuff);
         if (stat) { TBADD(errType); goto cleanup; }
+        break;
+       }
+      case PPL_FUNC_USERDEF:
+       {
+        int      checked[FUNC_MAXARGS], j;
+        pplFunc *f = fn;
+        for (j=0; j<nArgs; j++) checked[j]=0;
+
+        while (f != NULL) // Check whether supplied arguments are within the range of this definition
+         {
+          int k,l=1;
+          for (k=0; ((k<nArgs)&&l); k++)
+           {
+            if (f->minActive[k]!=0)
+             {
+              if (!checked[k])
+               {
+                if (args[k].objType != PPLOBJ_NUM)
+                 {
+                  sprintf(context->errStat.errBuff,"Argument %d supplied to this function is not numeric, but a numeric range is specified for this argument in the function's definition.",k+1);
+                  TBADD(ERR_NUMERIC);
+                  return;
+                 }
+                else if (!ppl_unitsDimEqual(f->min+k , args+k))
+                 {
+                  sprintf(context->errStat.errBuff,"Argument %d supplied to this function is dimensionally incompatible with the argument's specified min/max range: argument has dimensions of <%s>, meanwhile range has dimensions of <%s>.",k+1,ppl_printUnit(context,args+k,NULL,NULL,0,1,0),ppl_printUnit(context,f->min+k,NULL,NULL,1,1,0));
+                  TBADD(ERR_UNIT);
+                  return;
+                 }
+                else if (args[k].flagComplex)
+                 {
+                  sprintf(context->errStat.errBuff,"Argument %d supplied to this function must be a real number: any arguments which have min/max ranges specified must be real.",k+1);
+                  TBADD(ERR_NUMERIC);
+                  return;
+                 } else { checked[k]=1; }
+               }
+              if (args[k].real < f->min[k].real) { f=f->next; l=0; continue; }
+             }
+            if (f->maxActive[k]!=0)
+             {
+              if (!checked[k])
+               {
+                if (args[k].objType != PPLOBJ_NUM)
+                 {
+                  sprintf(context->errStat.errBuff,"Argument %d supplied to this function is not numeric, but a numeric range is specified for this argument in the function's definition.",k+1);
+                  TBADD(ERR_NUMERIC);
+                  return;
+                 } 
+                else if (!ppl_unitsDimEqual(f->max+k , args+k))
+                 {
+                  sprintf(context->errStat.errBuff,"Argument %d supplied to this function is dimensionally incompatible with the argument's specified min/max range: argument has dimensions of <%s>, meanwhile range has dimensions of <%s>.",k+1,ppl_printUnit(context,args+k,NULL,NULL,0,1,0),ppl_printUnit(context,f->max+k,NULL,NULL,1,1,0));
+                  TBADD(ERR_UNIT);
+                  return;
+                 }
+                else if (args[k].flagComplex)
+                 {
+                  sprintf(context->errStat.errBuff,"Argument %d supplied to this function must be a real number: any arguments which have min/max ranges specified must be real.",k+1);
+                  TBADD(ERR_UNIT);
+                  return;
+                 } else { checked[k]=1; }
+               }
+              if (args[k].real > f->max[k].real) { f=f->next; l=0; continue; }
+             }
+           }
+          if (l) break;
+         }
+ 
+        if (f==NULL)
+         {
+          if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(context->errStat.errBuff,"This function is not defined in the requested region of parameter space."); TBADD(ERR_RANGE); goto cleanup; }
+          else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; goto cleanup; }
+         }
+        else
+         {
+          int k, lastOpAssign=0, stkp=context->stackPtr, ns_ptr=context->ns_ptr;
+          pplObj *output;
+
+          // If function definition is null, result is NAN
+          if (f->functionPtr==NULL)
+           {
+            if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(context->errStat.errBuff,"This function is not defined in the requested region of parameter space."); TBADD(ERR_RANGE); goto cleanup; }
+            else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; goto cleanup; }
+           }
+
+          // Check that there's enough space on the stack
+          if (stkp+nArgs+1 > ALGEBRA_STACK-4) { strcpy(context->errStat.errBuff,"Stack overflow."); TBADD(ERR_MEMORY); goto cleanup; }
+          if (context->ns_ptr > CONTEXT_DEPTH-2) { strcpy(context->errStat.errBuff,"Stack overflow."); TBADD(ERR_MEMORY); goto cleanup; }
+
+          // Consider entering a new local namespace if function is within a module
+          if ((called.self_this!=NULL) && ( (called.self_this->objType==PPLOBJ_USER)||(called.self_this->objType==PPLOBJ_MOD)) )
+           {
+            dict *d = (dict *)called.self_this->auxil;
+            context->namespaces[++context->ns_ptr] = d;
+           }
+
+          // Insert arguments into namespace dictionary
+          for (k=j=0; j<nArgs; j++)
+           {
+            pplObj *varObj;
+            ppl_contextGetVarPointer(context, fn->argList+k, &varObj, &context->stack[stkp+j]);
+            pplObjCpy(varObj, args+j, 0, varObj->amMalloced, 1);
+            k += strlen(fn->argList+k)+1;
+           }
+          context->stackPtr+=nArgs;
+
+          // Evaluate function
+          output = ppl_expEval(context, (pplExpr *)f->functionPtr, &lastOpAssign, dollarAllowed, iterDepth+1);
+
+          // Take arguments out of namespace dictionary
+          for (k=j=0; j<nArgs; j++)
+           {
+            ppl_contextRestoreVarPointer(context, fn->argList+k, &context->stack[stkp+j]);
+            k += strlen(fn->argList+k)+1;
+           }
+
+          // Add traceback information if error happened
+          if (context->errStat.status) { strcpy(context->errStat.errBuff,""); TBADD2(ERR_GENERAL,"called function"); goto cleanup; }
+
+          // Tidy up
+          memcpy(args-1, output, sizeof(pplObj));
+          context->stackPtr--;
+          context->stackPtr-=nArgs;
+          context->ns_ptr = ns_ptr;
+         }
+        break;
+       }
+      case PPL_FUNC_SUBROUTINE:
+       {
+        dict *d;
+        int   j, k, ns_ptr=context->ns_ptr;
+
+        // Check that there's enough space on the stack
+        if (context->ns_ptr > CONTEXT_DEPTH-2) { strcpy(context->errStat.errBuff,"Stack overflow."); TBADD(ERR_MEMORY); goto cleanup; }
+
+        // Enter a new namespace
+        d = ppl_dictInit(HASHSIZE_LARGE , 1);
+        if (d==NULL) { strcpy(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY); goto cleanup; }
+        context->namespaces[++context->ns_ptr] = d;
+
+        // Insert arguments into namespace dictionary
+        for (k=j=0; j<nArgs; j++)
+         {
+          pplObj *varObj, tmp;
+          ppl_contextGetVarPointer(context, fn->argList+k, &varObj, &tmp);
+          pplObjCpy(varObj, args+j, 0, varObj->amMalloced, 1);
+          ppl_garbageObject(&tmp);
+          k += strlen(fn->argList+k)+1;
+         }
+
+        // Insert variable 'self' into namespace, if this is a method
+        if ((called.self_this!=NULL) && ( (called.self_this->objType==PPLOBJ_USER)||(called.self_this->objType==PPLOBJ_MOD)) )
+         {
+          pplObj *varObj, tmp;
+          ppl_contextGetVarPointer(context, "self", &varObj, &tmp);
+          pplObjCpy(varObj, called.self_this, 0, varObj->amMalloced, 1);
+          ppl_garbageObject(&tmp);
+         }
+
+        // Execute subroutine
+        ppl_parserExecute(context, (parserLine *)fn->functionPtr, 0, iterDepth+1);
+
+        // Garbage subroutine's namespace
+        ppl_garbageNamespace(d);
+        context->ns_ptr = ns_ptr;
+
+        // Add traceback information if error happened
+        if (context->errStat.status) { strcpy(context->errStat.errBuff,""); TBADD2(ERR_GENERAL,"called subroutine"); goto cleanup; }
+
+        // Output return value
+        break;
+       }
+      case PPL_FUNC_FFT:
+       {
+        int stat=0;
+        FFTDescriptor *f = (FFTDescriptor *)fn->functionPtr;
+        ppl_fft_evaluate(context, "fft", f, args, out, &stat, context->errStat.errBuff);
+        if (stat) { TBADD(ERR_NUMERIC); goto cleanup; }
+        break;
+       }
+      case PPL_FUNC_HISTOGRAM:
+       {
+        int stat=0;
+        histogramDescriptor *h = (histogramDescriptor *)fn->functionPtr;
+        ppl_histogram_evaluate(context, "histogram", h, args, out, &stat, context->errStat.errBuff);
+        if (stat) { TBADD(ERR_NUMERIC); goto cleanup; }
+        break;
+       }
+      case PPL_FUNC_SPLINE:
+       {
+        int stat=0;
+        splineDescriptor *s = (splineDescriptor *)fn->functionPtr;
+        ppl_spline_evaluate(context, "interpolation", s, args, out, &stat, context->errStat.errBuff);
+        if (stat) { TBADD(ERR_NUMERIC); goto cleanup; }
+        break;
+       }
+      case PPL_FUNC_INTERP2D: case PPL_FUNC_BMPDATA:
+       {
+        int stat=0;
+        splineDescriptor *s = (splineDescriptor *)fn->functionPtr;
+        ppl_interp2d_evaluate(context, "interpolation", s, args, args+1, fn->functionType==PPL_FUNC_BMPDATA, out, &stat, context->errStat.errBuff);
+        if (stat) { TBADD(ERR_NUMERIC); goto cleanup; }
         break;
        }
       default:

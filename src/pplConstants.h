@@ -39,6 +39,12 @@
 #define MAX_PLOTSTYLES       128 // The maximum number of plot styles (e.g. plot sin(x) with style 23) which are be defined. Similar to 'with linestyle 23' in gnuplot
 #define MAX_AXES             128
 #define MAX_CONTOURS         128 // Maximum number of contours in 'set contour'
+#define USING_ITEMS_MAX       32
+#define FUNC_MAXARGS        1024
+
+// Axis linear interpolations
+
+#define AXISLINEARINTERPOLATION_NPOINTS 2045
 
 // Command-specific options
 

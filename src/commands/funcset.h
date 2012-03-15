@@ -1,4 +1,4 @@
-// pplObjFunc_fn.h
+// funcset.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,16 +19,14 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _PPLOBJFUNC_FN_H
-#define _PPLOBJFUNC_FN_H 1
+#ifndef _FUNCSET_H
+#define _FUNCSET_H 1
 
-#include "pplObjFunc.h"
+#include "parser/parser.h"
+#include "userspace/context.h"
+#include "userspace/pplObj.h"
 
-// Routines for manipulating function descriptors
-
-void pplObjFuncDestroyChain(pplFunc *f);
-void pplObjFuncDestroy(pplFunc *f);
-pplFunc *pplObjFuncCpy(pplFunc *f);
+void directive_funcset(ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
 
 #endif
 

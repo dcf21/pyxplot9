@@ -72,6 +72,7 @@ void ppl_parserAtomAdd(parserLine *in, int stackOutPos, int linePos, char *optio
     output->literal = (pplObj *)malloc(sizeof(pplObj));
     if (output->literal==NULL) { free(output); return; }
     memcpy(output->literal, literal, sizeof(pplObj));
+    output->literal->refCount   = 1;
     output->literal->amMalloced = 1;
    }
   if (in->lastAtom==NULL) { in->firstAtom = output; }
@@ -132,6 +133,7 @@ static int parse_descend(ppl_context *c, parserStatus *s, int writeOut, int srcL
      }
     case PN_TYPE_DATABLK:
      {
+printf("*** %d\n",s->NinlineDatafiles);
       status=1;
       goto cleanup;
      }
@@ -315,7 +317,23 @@ finished_looking_for_tabcomp:
             if ((s==NULL)||(!writeOut)) pplExpr_free(expr);
             else if ((node->matchString[1]!='C') && (node->matchString[1]!='e') && (node->matchString[1]!='E') && (node->matchString[1]!='g'))
              {
-              ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, node->matchString+1, expr, NULL);
+              int j, isInline=1;
+              if ( (!(strcmp(node->varName,"filename")==0))&&(!(strcmp(node->varName,"directory")==0)) ) isInline=0;
+              if (isInline && (strncmp(line+*linepos,"\"--\"",4)!=0) && (strncmp(line+*linepos,"'--'",4)!=0) ) isInline=0;
+              for (j=4; j<explen; j++) if ((line[*linepos+j]>='\0')&&(line[*linepos+j]<=' ')) isInline=0;
+              if (isInline)
+               {
+                pplObj val;
+                val.refCount=1;
+                pplObjStr(&val,0,0,"--");
+                pplExpr_free(expr);
+                ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
+                s->NinlineDatafiles++;
+               }
+              else
+               {
+                ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, node->matchString+1, expr, NULL);
+               }
              }
             else
              {
@@ -573,6 +591,7 @@ cleanup:
    }
 
   if (status==1) ppl_tbClear(c);
+  if (level==0) s->NinlineDatafiles=0;
   return status;
  }
 
@@ -612,9 +631,10 @@ void ppl_parserStatReInit(parserStatus *in)
   for (i=0; i<MAX_RECURSION_DEPTH; i++) in->pl[i]=NULL;
   for (i=0; i<MAX_RECURSION_DEPTH; i++) for (j=0; j<16; j++) in->stk[i][j]=NULL;
   strcpy(in->prompt, "pyxplot");
-  in->blockDepth = 0;
-  in->eLPos      = 0;
-  in->eLlinePos  = 0;
+  in->blockDepth       = 0;
+  in->NinlineDatafiles = 0;
+  in->eLPos            = 0;
+  in->eLlinePos        = 0;
   in->expectingList[0] = '\0';
   return;
  }

@@ -82,6 +82,7 @@ void ppl_addMagicFunction(dict *n, char *name, int id, char *shortdesc, char *la
   f->LaTeX        = latex;
   f->descriptionShort = shortdesc;
   f->description  = desc;
+  v.refCount      = 1;
   if (pplObjFunc(&v,1,1,f)!=NULL) ppl_dictAppendCpy(n , name , (void *)&v , sizeof(v));
   return;
  }
@@ -107,6 +108,7 @@ void ppl_addSystemFunc(dict *n, char *name, int minArgs, int maxArgs, int numOnl
   f->LaTeX        = latex;
   f->descriptionShort = shortdesc;
   f->description  = desc;
+  v.refCount      = 1;
   if (pplObjFunc(&v,1,1,f)!=NULL) ppl_dictAppendCpy(n , name , (void *)&v , sizeof(v));
   return;
  }

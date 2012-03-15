@@ -409,6 +409,8 @@ pplObj *pplObjUser(pplObj *in, unsigned char amMalloced, unsigned char auxilMall
 
 pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char lval, unsigned char outMalloced, unsigned char useMalloc)
  {
+  int rc = (out==NULL) ? 1 : out->refCount;
+
   if (in==NULL) return NULL;
 
   if (out==NULL)
@@ -423,6 +425,7 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char lval, unsigned char out
   else      { out->self_lval = NULL; }
   out->self_dval  = NULL;
   out->self_this  = NULL;
+  out->refCount   = rc;
   out->amMalloced = outMalloced;
 
   switch(in->objType)

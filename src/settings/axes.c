@@ -157,3 +157,49 @@ unsigned char pplaxis_cmpMTics(ppl_context *context, const pplset_axis *a, const
   return 1;
  }
 
+// Where along this axis, in the range 0 (left) to 1 (right) should the value
+// xin go? xrn = Region Number for interpolated axes which do not have
+// monotonically increasing ordinate values.
+double pplaxis_GetPosition(double xin, pplset_axis *xa, int xrn, unsigned char AllowOffBounds)
+ {
+  int imin, imax, i;
+  if (xa==NULL) return xin;
+  if (xa->AxisLinearInterpolation != NULL) // Axis is linearly interpolated
+   {
+    imin = xa->AxisTurnings[xrn  ];
+    imax = xa->AxisTurnings[xrn+1];
+    for (i=imin; i<imax; i++)
+     {
+      if (   ((xa->AxisLinearInterpolation[i] < xin) && (xa->AxisLinearInterpolation[i+1] >= xin))
+          || ((xa->AxisLinearInterpolation[i] > xin) && (xa->AxisLinearInterpolation[i+1] <= xin)) )
+       return (i + (xin-xa->AxisLinearInterpolation[i])/(xa->AxisLinearInterpolation[i+1]-xa->AxisLinearInterpolation[i])) / (AXISLINEARINTERPOLATION_NPOINTS-1);
+     }
+    return GSL_NAN;
+   }
+  if (!AllowOffBounds)
+   {
+    if (xa->MaxFinal > xa->MinFinal)
+     { if ((xin<xa->MinFinal) || (xin>xa->MaxFinal)) return GSL_NAN; }
+    else
+     { if ((xin>xa->MinFinal) || (xin<xa->MaxFinal)) return GSL_NAN; }
+   }
+  if ((xa->LogFinal==SW_BOOL_TRUE) && (xin <= 0)) return GSL_NAN;
+  if (xa->LogFinal!=SW_BOOL_TRUE) return (xin - xa->MinFinal) / (xa->MaxFinal - xa->MinFinal); // Either linear...
+  else                            return (log(xin)-log(xa->MinFinal)) / (log(xa->MaxFinal)-log(xa->MinFinal)); // ... or logarithmic
+ }
+
+// What is the value of this axis at point xin, in the range 0 (left) to 1 (right)?
+double pplaxis_InvGetPosition(double xin, pplset_axis *xa)
+ {
+  if (xa->AxisLinearInterpolation != NULL) // Axis is linearly interpolated
+   {
+    int    i = floor(xin * (AXISLINEARINTERPOLATION_NPOINTS-1));
+    double x = xin * (AXISLINEARINTERPOLATION_NPOINTS-1) - i;
+    if (i>=AXISLINEARINTERPOLATION_NPOINTS-1) return xa->AxisLinearInterpolation[AXISLINEARINTERPOLATION_NPOINTS-1];
+    if (i<                                 0) return xa->AxisLinearInterpolation[0];
+    return xa->AxisLinearInterpolation[i]*(1-x) + xa->AxisLinearInterpolation[i+1]*x;
+   }
+  if (xa->LogFinal!=SW_BOOL_TRUE) return xa->MinFinal + xin * (xa->MaxFinal - xa->MinFinal); // Either linear...
+  else                            return xa->MinFinal * pow(xa->MaxFinal / xa->MinFinal , xin); // ... or logarithmic
+ }
+

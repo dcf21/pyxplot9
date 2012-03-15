@@ -111,7 +111,7 @@ void ppl_garbageObject(pplObj *o)
      {
       pplFunc *f = (pplFunc *)(o->auxil);
       o->auxil = NULL;
-      if ((f!=NULL)&&( __sync_sub_and_fetch(&f->refCount,1) <= 0)) pplObjFuncDestroy(f);
+      if ((f!=NULL)&&( __sync_sub_and_fetch(&f->refCount,1) <= 0)) pplObjFuncDestroyChain(f);
       break;
      }
     case PPLOBJ_TYPE:

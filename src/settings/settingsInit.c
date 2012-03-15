@@ -71,8 +71,10 @@ void pplset_makedefault(ppl_context *context)
 
   // Default Terminal Settings, used when these values are not changed by any configuration files
   s->term_default.backup              = SW_ONOFF_OFF;
+  s->term_default.BinOrigin.refCount=1;
   pplObjNum(&(s->term_default.BinOrigin),0,0.0,0.0);
   s->term_default.BinOriginAuto       = 1;
+  s->term_default.BinWidth.refCount=1;
   pplObjNum(&(s->term_default.BinWidth),0,0.0,0.0);
   s->term_default.BinWidth.real       = 1.0;
   s->term_default.BinWidthAuto        = 1;
@@ -88,10 +90,12 @@ void pplset_makedefault(ppl_context *context)
   s->term_default.multiplot           = SW_ONOFF_OFF;
   s->term_default.NumDisplay          = SW_DISPLAY_N;
   strcpy(s->term_default.output, "");
+  s->term_default.PaperHeight.refCount=1;
   pplObjNum(&(s->term_default.PaperHeight),0,0.0,0.0);
   s->term_default.PaperHeight.real    = 297.30178 / 1000;
   s->term_default.PaperHeight.dimensionless = 0; s->term_default.PaperHeight.exponent[UNIT_LENGTH] = 1;
   strcpy(s->term_default.PaperName, "a4");
+  s->term_default.PaperWidth.refCount=1;
   pplObjNum(&(s->term_default.PaperWidth),0,0.0,0.0);
   s->term_default.PaperWidth.real     = 210.2241 / 1000;
   s->term_default.PaperWidth.dimensionless = 0; s->term_default.PaperWidth.exponent[UNIT_LENGTH] = 1;
@@ -121,8 +125,10 @@ void pplset_makedefault(ppl_context *context)
   s->graph_default.AxesColour4           = 0.0;
   s->graph_default.AxisUnitStyle         = SW_AXISUNITSTY_RATIO;
   s->graph_default.bar                   = 1.0;
+  s->graph_default.BoxFrom.refCount=1;
   pplObjNum(&(s->graph_default.BoxFrom),0,0.0,0.0);
   s->graph_default.BoxFromAuto           = 1;
+  s->graph_default.BoxWidth.refCount=1;
   pplObjNum(&(s->graph_default.BoxWidth),0,0.0,0.0);
   s->graph_default.BoxWidthAuto          = 1;
   strcpy(s->graph_default.c1format, "");
@@ -135,8 +141,10 @@ void pplset_makedefault(ppl_context *context)
   for (i=0; i<4; i++)
    {
     s->graph_default.Clog[i]             = SW_BOOL_FALSE;
+    s->graph_default.Cmax[i].refCount=1;
     pplObjNum(&s->graph_default.Cmax[i],0,0.0,0.0);
     s->graph_default.Cmaxauto[i]         = SW_BOOL_TRUE;
+    s->graph_default.Cmin[i].refCount=1;
     pplObjNum(&s->graph_default.Cmin[i],0,0.0,0.0);
     s->graph_default.Cminauto[i]         = SW_BOOL_TRUE;
     s->graph_default.Crenorm[i]          = SW_BOOL_TRUE;
@@ -154,6 +162,7 @@ void pplset_makedefault(ppl_context *context)
   s->graph_default.ContoursListLen       = -1;
   for (i=0; i<MAX_CONTOURS; i++) s->graph_default.ContoursList[i] = 0.0;
   s->graph_default.ContoursN             = 12;
+  s->graph_default.ContoursUnit.refCount=1;
   pplObjNum(&s->graph_default.ContoursUnit,0,0.0,0.0);
   ppl_withWordsZero(context,&(s->graph_default.DataStyle),1);
   s->graph_default.DataStyle.linespoints = SW_STYLE_POINTS;
@@ -180,16 +189,20 @@ void pplset_makedefault(ppl_context *context)
   s->graph_default.key           = SW_ONOFF_ON;
   s->graph_default.KeyColumns    = 0;
   s->graph_default.KeyPos        = SW_KEYPOS_TR;
+  s->graph_default.KeyXOff.refCount=1;
   pplObjNum(&(s->graph_default.KeyXOff),0,0.0,0.0);
   s->graph_default.KeyXOff.real  = 0.0;
   s->graph_default.KeyXOff.dimensionless = 0; s->graph_default.KeyXOff.exponent[UNIT_LENGTH] = 1;
+  s->graph_default.KeyYOff.refCount=1;
   pplObjNum(&(s->graph_default.KeyYOff),0,0.0,0.0);
   s->graph_default.KeyYOff.real  = 0.0;
   s->graph_default.KeyYOff.dimensionless = 0; s->graph_default.KeyYOff.exponent[UNIT_LENGTH] = 1;
   s->graph_default.LineWidth     = 1.0;
+  s->graph_default.OriginX.refCount=1;
   pplObjNum(&(s->graph_default.OriginX),0,0.0,0.0);
   s->graph_default.OriginX.real  = 0.0;
   s->graph_default.OriginX.dimensionless = 0; s->graph_default.OriginX.exponent[UNIT_LENGTH] = 1;
+  s->graph_default.OriginY.refCount=1;
   pplObjNum(&(s->graph_default.OriginY),0,0.0,0.0);
   s->graph_default.OriginY.real  = 0.0;
   s->graph_default.OriginY.dimensionless = 0; s->graph_default.OriginY.exponent[UNIT_LENGTH] = 1;
@@ -210,34 +223,45 @@ void pplset_makedefault(ppl_context *context)
   s->graph_default.TextHAlign    = SW_HALIGN_LEFT;
   s->graph_default.TextVAlign = SW_VALIGN_BOT;
   strcpy(s->graph_default.title, "");
+  s->graph_default.TitleXOff.refCount=1;
   pplObjNum(&(s->graph_default.TitleXOff),0,0.0,0.0);
   s->graph_default.TitleXOff.real= 0.0;
   s->graph_default.TitleXOff.dimensionless = 0; s->graph_default.TitleXOff.exponent[UNIT_LENGTH] = 1;
+  s->graph_default.TitleYOff.refCount=1;
   pplObjNum(&(s->graph_default.TitleYOff),0,0.0,0.0);
   s->graph_default.TitleYOff.real= 0.0;
   s->graph_default.TitleYOff.dimensionless = 0; s->graph_default.TitleYOff.exponent[UNIT_LENGTH] = 1;
   s->graph_default.Tlog          = SW_BOOL_FALSE;
+  s->graph_default.Tmin.refCount=1;
   pplObjNum(&(s->graph_default.Tmin),0,0.0,0.0);
+  s->graph_default.Tmax.refCount=1;
   pplObjNum(&(s->graph_default.Tmax),0,0.0,0.0);
   s->graph_default.Tmin.real     = 0.0;
   s->graph_default.Tmax.real     = 1.0;
   s->graph_default.USE_T_or_uv   = 1;
   s->graph_default.Ulog          = SW_BOOL_FALSE;
+  s->graph_default.Umin.refCount=1;
   pplObjNum(&(s->graph_default.Umin),0,0.0,0.0);
+  s->graph_default.Umax.refCount=1;
   pplObjNum(&(s->graph_default.Umax),0,0.0,0.0);
   s->graph_default.Umin.real     = 0.0;
   s->graph_default.Umax.real     = 1.0;
   s->graph_default.Vlog          = SW_BOOL_FALSE;
+  s->graph_default.Vmin.refCount=1;
   pplObjNum(&(s->graph_default.Vmin),0,0.0,0.0);
+  s->graph_default.Vmax.refCount=1;
   pplObjNum(&(s->graph_default.Vmax),0,0.0,0.0);
   s->graph_default.Vmin.real     = 0.0;
   s->graph_default.Vmax.real     = 1.0;
+  s->graph_default.width.refCount=1;
   pplObjNum(&(s->graph_default.width),0,0.0,0.0);
   s->graph_default.width.real    = 0.08; // 8cm
   s->graph_default.width.dimensionless = 0; s->graph_default.width.exponent[UNIT_LENGTH] = 1;
+  s->graph_default.XYview.refCount=1;
   pplObjNum(&(s->graph_default.XYview),0,0.0,0.0);
   s->graph_default.XYview.real   = 60.0 * M_PI / 180; // 60 degrees
   s->graph_default.XYview.dimensionless = 0; s->graph_default.XYview.exponent[UNIT_ANGLE] = 1;
+  s->graph_default.YZview.refCount=1;
   pplObjNum(&(s->graph_default.YZview),0,0.0,0.0);
   s->graph_default.YZview.real   = 30.0 * M_PI / 180; // 30 degrees
   s->graph_default.YZview.dimensionless = 0; s->graph_default.YZview.exponent[UNIT_ANGLE] = 1;
@@ -284,9 +308,11 @@ void pplset_makedefault(ppl_context *context)
   s->axis_default.TickList    = NULL;
   s->axis_default.MTickStrs   = NULL;
   s->axis_default.TickStrs    = NULL;
+  s->axis_default.unit.refCount=1;
   pplObjNum(&(s->axis_default.unit),0,0.0,0.0);
 
   // Set up list of input filters
+  tempval.refCount=1;
   s->filters = ppl_dictInit(HASHSIZE_SMALL,1);
   #ifdef HAVE_FITSIO
   pplObjStr(&tempval,0,0,FITSHELPER);

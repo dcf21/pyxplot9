@@ -1,4 +1,4 @@
-// pplObjFunc_fn.h
+// interpolate.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,16 +19,17 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _PPLOBJFUNC_FN_H
-#define _PPLOBJFUNC_FN_H 1
+#ifndef _INTERPOLATE_H
+#define _INTERPOLATE_H 1
 
-#include "pplObjFunc.h"
+#include "parser/parser.h"
+#include "userspace/context.h"
+#include "userspace/pplObj.h"
+#include "userspace/pplObjFunc.h"
 
-// Routines for manipulating function descriptors
-
-void pplObjFuncDestroyChain(pplFunc *f);
-void pplObjFuncDestroy(pplFunc *f);
-pplFunc *pplObjFuncCpy(pplFunc *f);
+void directive_interpolate (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
+void ppl_spline_evaluate   (ppl_context *c, char *FuncName, splineDescriptor *desc, pplObj *in, pplObj *out, int *status, char *errout);
+void ppl_interp2d_evaluate (ppl_context *c, const char *FuncName, splineDescriptor *desc, const pplObj *in1, const pplObj *in2, const unsigned char bmp, pplObj *out, int *status, char *errout);
 
 #endif
 

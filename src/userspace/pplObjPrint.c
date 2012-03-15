@@ -286,18 +286,26 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
               if (f->maxActive[k]) { sprintf(out+i,"%s", ppl_unitsNumericDisplay(c, f->max+k, 0, 0, 0)); i+=strlen(out+i); }
               out[i++] = ']';
              }
-            sprintf(out+i,"=%s",(char *)f->description); i+=strlen(out+i);
+            if (f->functionPtr==NULL) sprintf(out+i,"=");
+            else                      sprintf(out+i,"=%s",((pplExpr *)f->functionPtr)->ascii);
+            i+=strlen(out+i);
             break;
            }
           case PPL_FUNC_SPLINE:
           case PPL_FUNC_INTERP2D:
           case PPL_FUNC_BMPDATA:
            {
+            splineDescriptor *s = (splineDescriptor *)f->functionPtr;
+            sprintf(out+i,"%s(x)= [%s interpolation of data from the %sfile '%s']\n", fnname,
+                                                                                s->splineType,
+                                                                                (f->functionType == PPL_FUNC_BMPDATA)?"bitmap ":"",
+                                                                                s->filename );
+            i+=strlen(out+i); 
             break;
            }
           case PPL_FUNC_HISTOGRAM:
            {
-            sprintf(out+i,"%s(x)= [histogram of data from the file '%s']\n", fnname, ((HistogramDescriptor *)f->functionPtr)->filename );
+            sprintf(out+i,"%s(x)= [histogram of data from the file '%s']\n", fnname, ((histogramDescriptor *)f->functionPtr)->filename );
             i+=strlen(out+i);
             break;
            }
@@ -310,7 +318,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
           case PPL_FUNC_SUBROUTINE:
            {
             int l,m;
-            SubroutineDescriptor *SDiter = (SubroutineDescriptor *)f->functionPtr;
+            subroutineDescriptor *SDiter = (subroutineDescriptor *)f->functionPtr;
             sprintf(out+i,"%s(", fnname); i+=strlen(out+i);
             for (l=0, m=0; l<SDiter->nArgs; l++, m++)
              {

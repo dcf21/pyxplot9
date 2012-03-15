@@ -27,6 +27,10 @@
 
 #include "commands/core.h"
 #include "commands/eqnsolve.h"
+#include "commands/fft.h"
+#include "commands/funcset.h"
+#include "commands/histogram.h"
+#include "commands/interpolate.h"
 #include "commands/show.h"
 #include "commands/help.h"
 
@@ -100,6 +104,8 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
       break;
      }
    }
+  else if (strcmp(d, "func_set")==0)
+    directive_funcset(c,pl,in,interactive);
   else if (strcmp(d, "assert")==0)
     directive_assert(c,pl,in);
   else if (strcmp(d, "cd")==0)

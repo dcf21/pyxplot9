@@ -1,4 +1,4 @@
-// pplObjFunc_fn.h
+// histogram.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,16 +19,16 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _PPLOBJFUNC_FN_H
-#define _PPLOBJFUNC_FN_H 1
+#ifndef _HISTOGRAM_H
+#define _HISTOGRAM_H 1
 
-#include "pplObjFunc.h"
+#include "parser/parser.h"
+#include "userspace/context.h"
+#include "userspace/pplObj.h"
+#include "userspace/pplObjFunc.h"
 
-// Routines for manipulating function descriptors
-
-void pplObjFuncDestroyChain(pplFunc *f);
-void pplObjFuncDestroy(pplFunc *f);
-pplFunc *pplObjFuncCpy(pplFunc *f);
+void directive_histogram    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
+void ppl_histogram_evaluate (ppl_context *c, char *FuncName, histogramDescriptor *desc, pplObj *in, pplObj *out, int *status, char *errout);
 
 #endif
 

@@ -62,6 +62,7 @@ void ppl_unitsDimInverse(pplObj *o, const pplObj *i)
 int ppl_unitsDimEqual(const pplObj *a, const pplObj *b)
  {
   int j;
+  if (a->dimensionless && b->dimensionless) return 1;
   for (j=0; j<UNITS_MAX_BASEUNITS; j++) if (ppl_dblEqual(a->exponent[j] , b->exponent[j]) == 0) return 0;
   return 1;
  }

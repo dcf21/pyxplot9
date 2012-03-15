@@ -26,13 +26,16 @@
 
 #include <gsl/gsl_spline.h>
 
+#include "parser/parser.h"
+
 #ifdef HAVE_FFTW3
 #include <fftw3.h>
 #else
 #include <fftw.h>
 #endif
 
-#include "pplObj.h"
+#include "userspace/pplObj.h"
+#include "pplConstants.h"
 
 #define PPL_FUNC_USERDEF    32050
 #define PPL_FUNC_SYSTEM     32051
@@ -44,37 +47,38 @@
 #define PPL_FUNC_FFT        32057
 #define PPL_FUNC_SUBROUTINE 32058
 
-typedef struct FunctionDescriptor
+typedef struct functionDescriptor
  {
   int     functionType, refCount;
   int     minArgs , maxArgs;
-  void   *functionPtr;
+  void   *functionPtr; // Can be any of the structures below
   char   *argList;
   pplObj *min, *max; // Range of values over which this function definition can be used; used in function splicing
   unsigned char *minActive, *maxActive, numOnly, notNan, realOnly, dimlessOnly;
-  struct FunctionDescriptor *next; // A linked list of spliced alternative function definitions
+  struct functionDescriptor *next; // A linked list of spliced alternative function definitions
   char   *LaTeX;
   char   *description, *descriptionShort;
  } pplFunc;
 
-typedef struct SubroutineDescriptor
+typedef struct subroutineDescriptor
  {
-  int        nArgs;
-  char      *argList;
- } SubroutineDescriptor;
+  int         nArgs;
+  char       *argList;
+  parserLine *code;
+ } subroutineDescriptor;
 
 
-typedef struct SplineDescriptor
+typedef struct splineDescriptor
  {
-  gsl_spline       *SplineObj;
+  gsl_spline       *splineObj;
   gsl_interp_accel *accelerator;
-  pplObj            UnitX, UnitY, UnitZ;
-  long              SizeX, SizeY;
-  unsigned char     LogInterp;
-  char             *filename, *SplineType;
- } SplineDescriptor;
+  pplObj            unitX, unitY, unitZ;
+  long              sizeX, sizeY;
+  unsigned char     logInterp;
+  char             *filename, *splineType;
+ } splineDescriptor;
 
-typedef struct HistogramDescriptor
+typedef struct histogramDescriptor
  {
   long int      Nbins;
   double       *bins;
@@ -82,14 +86,14 @@ typedef struct HistogramDescriptor
   unsigned char log;
   pplObj        unit;
   char         *filename;
- } HistogramDescriptor;
+ } histogramDescriptor;
 
 typedef struct FFTDescriptor
  {
   int           Ndims;
-  int          *XSize;
+  int           XSize[USING_ITEMS_MAX];
   fftw_complex *datagrid;
-  pplObj       *range, *invrange, OutputUnit;
+  pplObj        range[USING_ITEMS_MAX], invRange[USING_ITEMS_MAX], outputUnit;
   double        normalisation;
  } FFTDescriptor;
 

@@ -20,6 +20,7 @@
 // ----------------------------------------------------------------------------
 
 #include "stdlib.h"
+#include "string.h"
 
 #ifdef HAVE_FFTW3
 #include <fftw3.h>
@@ -27,8 +28,24 @@
 #include <fftw.h>
 #endif
 
+#include "expressions/expCompile.h"
+
+#include "parser/parser.h"
+
 #include "userspace/pplObj.h"
 #include "userspace/pplObjFunc_fns.h"
+
+void pplObjFuncDestroyChain(pplFunc *f)
+ {
+  pplFunc *next;
+  while (f!=NULL)
+   {
+    next=f->next;
+    pplObjFuncDestroy(f);
+    f=next;
+   }
+  return;
+ }
 
 void pplObjFuncDestroy(pplFunc *f)
  {
@@ -39,41 +56,52 @@ void pplObjFuncDestroy(pplFunc *f)
    {
     case PPL_FUNC_USERDEF:
      {
+      pplExpr *e = (pplExpr *)f->functionPtr;
+      f->functionPtr=NULL;
+      if (e!=NULL) pplExpr_free(e);
       break;
      }
     case PPL_FUNC_SPLINE:
      {
-      SplineDescriptor *d = (SplineDescriptor *)f->functionPtr;
+      splineDescriptor *d = (splineDescriptor *)f->functionPtr;
       f->functionPtr=NULL;
       if (d!=NULL)
        {
-        if (d->SplineType[1]!='t') // Not stepwise interpolation
+        if (d->splineType[1]!='t') // Not stepwise interpolation
          {
-          if (d->SplineObj   != NULL) gsl_spline_free      (d->SplineObj  );
+          if (d->splineObj   != NULL) gsl_spline_free      (d->splineObj  );
           if (d->accelerator != NULL) gsl_interp_accel_free(d->accelerator);
          }
         else
          {
-          if (d->SplineObj   != NULL) free(d->SplineObj);
+          if (d->splineObj   != NULL) free(d->splineObj);
          }
+        free(d);
        }
       break;
      }
     case PPL_FUNC_INTERP2D:
     case PPL_FUNC_BMPDATA:
      {
+      splineDescriptor *d = (splineDescriptor *)f->functionPtr;
+      f->functionPtr=NULL;
+      if (d!=NULL)
+       {
+        if (d->splineObj != NULL) free(d->splineObj);
+        free(d);
+       }
       break;
      }
     case PPL_FUNC_HISTOGRAM:
      {
-      HistogramDescriptor *h = (HistogramDescriptor *)f->functionPtr;
+      histogramDescriptor *h = (histogramDescriptor *)f->functionPtr;
       f->functionPtr=NULL;
       if (h!=NULL)
        {
         if (h->bins   != NULL ) free(h->bins   );
         if (h->binvals!= NULL ) free(h->binvals);
+        free(h);
        }
-      free(h);
       break;
      }
     case PPL_FUNC_FFT:
@@ -82,17 +110,58 @@ void pplObjFuncDestroy(pplFunc *f)
       f->functionPtr=NULL;
       if (d!=NULL)
        {
-        if (d->XSize    != NULL )      free(d->XSize   );
-        if (d->range    != NULL )      free(d->range   );
-        if (d->datagrid != NULL ) fftw_free(d->datagrid);
+        if (d->datagrid != NULL) fftw_free(d->datagrid);
+        free(d);
        }
       break;
      }
     case PPL_FUNC_SUBROUTINE:
      {
+      subroutineDescriptor *s = (subroutineDescriptor *)f->functionPtr;
+      f->functionPtr=NULL;
+      if (s!=NULL)
+       {
+        if (s->code!=NULL) ppl_parserLineFree(s->code);
+        free(s);
+       }
       break;
      }
    }
+
+  if (f->argList    !=NULL) free(f->argList);
+  if (f->min        !=NULL) free(f->min);
+  if (f->max        !=NULL) free(f->max);
+  if (f->minActive  !=NULL) free(f->minActive);
+  if (f->maxActive  !=NULL) free(f->maxActive);
+  if (f->LaTeX      !=NULL) free(f->LaTeX);
+  free(f);
   return;
+ }
+
+pplFunc *pplObjFuncCpy(pplFunc *f)
+ {
+  pplFunc *o;
+  int i,j;
+  int Nargs;
+  if (f->functionType != PPL_FUNC_USERDEF) return NULL;
+
+  Nargs=f->maxArgs;
+  for (j=0,i=0;i<Nargs;i++) while (f->argList[j++]!='\0');
+
+  if ((o = (pplFunc *)malloc(sizeof(pplFunc)))==NULL) return NULL;
+       o->functionType = PPL_FUNC_USERDEF;
+       o->minArgs      = f->minArgs;
+       o->maxArgs      = f->maxArgs;
+  if ((o->functionPtr  = (void   *)pplExpr_cpy((pplExpr *)f->functionPtr))==NULL) return NULL;
+  if ((o->argList      = (char   *)malloc(j                    ))==NULL) return NULL; memcpy( o->argList    , f->argList   , j );
+  if ((o->min          = (pplObj *)malloc(Nargs*sizeof(pplObj) ))==NULL) return NULL; memcpy( o->min        , f->min       , Nargs*sizeof(pplObj));
+  if ((o->max          = (pplObj *)malloc(Nargs*sizeof(pplObj) ))==NULL) return NULL; memcpy( o->max        , f->max       , Nargs*sizeof(pplObj));
+  if ((o->minActive    = (unsigned char *)malloc(Nargs         ))==NULL) return NULL; memcpy( o->minActive  , f->minActive , Nargs);
+  if ((o->maxActive    = (unsigned char *)malloc(Nargs         ))==NULL) return NULL; memcpy( o->maxActive  , f->maxActive , Nargs);
+       o->next         = NULL;
+       o->description  = NULL;
+       o->descriptionShort = NULL;
+       o->LaTeX        = NULL;
+  return o;
  }
 

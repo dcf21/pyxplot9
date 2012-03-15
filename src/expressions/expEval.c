@@ -229,8 +229,11 @@ static void expEval_stringSubs(ppl_context *context, pplExpr *inExpr, int charpo
 #define STACK_POP \
    { \
     context->stackPtr--; \
-    ppl_garbageObject(&context->stack[context->stackPtr]); \
-    if (context->stack[context->stackPtr].refCount != 0) { strcpy(context->errStat.errBuff,"Stack forward reference detected."); TBADD(ERR_INTERNAL); goto cleanup_on_error; } \
+    if (context->stack[context->stackPtr].objType!=PPLOBJ_NUM) /* optimisation: Don't waste time garbage collecting numbers */ \
+     { \
+      ppl_garbageObject(&context->stack[context->stackPtr]); \
+      if (context->stack[context->stackPtr].refCount != 0) { strcpy(context->errStat.errBuff,"Stack forward reference detected."); TBADD(ERR_INTERNAL); goto cleanup_on_error; } \
+    } \
    } \
 
 pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, int dollarAllowed, int iterDepth)
@@ -251,7 +254,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
    {
     pplObj *stk     = &context->stack[context->stackPtr];
     int     pos     = j; // Position of start of instruction
-    int     len     = *(int *)(in+j            ); // length of bytecode instruction with data
+    int     len     = *(int *)(in+j); // length of bytecode instruction with data
     int     o       = (int)(*(unsigned char *)(in+j+2*sizeof(int)  )); // Opcode number
     charpos = *(int *)(in+j+sizeof(int)); // character position of token (for error reporting)
     j+=2*sizeof(int)+1; // Leave j pointing to first data item after opcode
