@@ -439,10 +439,15 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char lval, unsigned char out
       out->auxilMalloced = useMalloc;
       break;
     case PPLOBJ_EXP:
+     {
+      // Copying bytecode is difficult. Assume that original will outlive the copy
+      out->auxilMalloced = 0;
+      break;
+     }
     case PPLOBJ_BYT:
      {
-      // Copying a parser line or bytecode is difficult. Assume that original will outlive the copy
-      out->auxilMalloced = 0;
+      parserLine *item = (parserLine *)out->auxil;
+      __sync_add_and_fetch(&item->refCount,1);
       break;
      }
     case PPLOBJ_USER:

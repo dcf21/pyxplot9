@@ -645,11 +645,14 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
            }
 
           // Add traceback information if error happened
-          if (context->errStat.status) { strcpy(context->errStat.errBuff,""); TBADD2(ERR_GENERAL,"called function"); goto cleanup; }
+          if (context->errStat.status) { strcpy(context->errStat.errBuff,""); TBADD2(ERR_GENERAL,"called function"); }
 
           // Tidy up
-          memcpy(args-1, output, sizeof(pplObj));
-          context->stackPtr--;
+          if (output!=NULL)
+           {
+            memcpy(args-1, output, sizeof(pplObj));
+            context->stackPtr--;
+           }
           context->stackPtr-=nArgs;
           context->ns_ptr = ns_ptr;
          }
@@ -657,8 +660,10 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
        }
       case PPL_FUNC_SUBROUTINE:
        {
-        dict *d;
-        int   j, k, ns_ptr=context->ns_ptr;
+        dict     *d;
+        int       j, k, ns_ptr=context->ns_ptr;
+        int       shellReturnableOld = context->shellReturnable;
+        const int stkLevelOld = context->stackPtr;
 
         // Check that there's enough space on the stack
         if (context->ns_ptr > CONTEXT_DEPTH-2) { strcpy(context->errStat.errBuff,"Stack overflow."); TBADD(ERR_MEMORY); goto cleanup; }
@@ -668,12 +673,16 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
         if (d==NULL) { strcpy(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY); goto cleanup; }
         context->namespaces[++context->ns_ptr] = d;
 
+        // Set returnable flag
+        context->shellReturnable = 1;
+
         // Insert arguments into namespace dictionary
         for (k=j=0; j<nArgs; j++)
          {
           pplObj *varObj, tmp;
           ppl_contextGetVarPointer(context, fn->argList+k, &varObj, &tmp);
           pplObjCpy(varObj, args+j, 0, varObj->amMalloced, 1);
+          tmp.amMalloced=0;
           ppl_garbageObject(&tmp);
           k += strlen(fn->argList+k)+1;
          }
@@ -684,6 +693,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
           pplObj *varObj, tmp;
           ppl_contextGetVarPointer(context, "self", &varObj, &tmp);
           pplObjCpy(varObj, called.self_this, 0, varObj->amMalloced, 1);
+          tmp.amMalloced=0;
           ppl_garbageObject(&tmp);
          }
 
@@ -693,11 +703,17 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
         // Garbage subroutine's namespace
         ppl_garbageNamespace(d);
         context->ns_ptr = ns_ptr;
+        while (context->stackPtr>stkLevelOld) { STACK_POP; }
 
         // Add traceback information if error happened
         if (context->errStat.status) { strcpy(context->errStat.errBuff,""); TBADD2(ERR_GENERAL,"called subroutine"); goto cleanup; }
 
         // Output return value
+        if (context->shellReturned) pplObjCpy(out, &context->shellReturnVal, 0, 0, 1);
+        else                        pplObjNum(out, 0, 0, 0);
+        ppl_garbageObject(&context->shellReturnVal);
+        context->shellReturnable = shellReturnableOld;
+        context->shellReturned   = 0;
         break;
        }
       case PPL_FUNC_FFT:

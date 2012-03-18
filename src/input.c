@@ -75,7 +75,7 @@ void ppl_interactiveSession(ppl_context *context)
   if ((isatty(STDIN_FILENO) == 1) && (context->errcontext.session_default.splash == SW_ONOFF_ON)) ppl_report(&context->errcontext,ppltxt_welcome);
 
   context->shellExiting = 0;
-  while (!context->shellExiting)
+  while ((!context->shellExiting)&&(!context->shellBroken)&&(!context->shellContinued)&&(!context->shellReturned))
    {
     // Set up SIGINT handler
     if (sigsetjmp(ppl_sigjmpToInteractive, 1) == 0)
@@ -151,6 +151,8 @@ void ppl_processScript(ppl_context *context, char *input, int iterDepth)
   FILE         *infile;
   parserLine   *pl = NULL;
   parserStatus *ps = NULL;
+  int           shellBreakableOld  = context->shellBreakable;
+  int           shellReturnableOld = context->shellReturnable;
 
   if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Processing input from the script file '%s'.", input); ppl_log(&context->errcontext, NULL); }
   ppl_unixExpandUserHomeDir(&context->errcontext, input, context->errcontext.session_default.cwd, full_filename);
@@ -164,8 +166,10 @@ void ppl_processScript(ppl_context *context, char *input, int iterDepth)
   ppl_parserStatInit(&ps,&pl);
   if ( (ps==NULL) || (context->inputLineBuffer == NULL) ) { ppl_error(&context->errcontext,ERR_MEMORY,-1,-1,"Out of memory."); return; }
 
-  context->shellExiting = 0;
-  while ((!context->shellExiting)&&(!cancellationFlag))
+  context->shellExiting    = 0;
+  context->shellBreakable  = 0;
+  context->shellReturnable = 0;
+  while ((!context->shellExiting)&&(!context->shellBroken)&&(!context->shellContinued)&&(!context->shellReturned)&&(!cancellationFlag))
    {
     ppl_error_setstreaminfo(&context->errcontext, linenumber, filename_description);
     if ((feof(infile)) || (ferror(infile))) break;
@@ -181,16 +185,19 @@ void ppl_processScript(ppl_context *context, char *input, int iterDepth)
       break;
      }
    }
-  context->shellExiting = 0;
-  if (context->inputLineAddBuffer != NULL) // Process last line of file if there is still text buffered
-   {
-    ppl_error_setstreaminfo(&context->errcontext, linenumber, filename_description);
-    status = ppl_processLine(context, ps, "", 0, iterDepth);
-    ppl_error_setstreaminfo(&context->errcontext, -1, "");
-    if (status>0) ppl_error(&context->errcontext, ERR_FILE, -1, -1, "Aborting.");
-    if (context->inputLineAddBuffer != NULL) { free(context->inputLineAddBuffer); context->inputLineAddBuffer=NULL; }
-   }
-  context->inputLineAddBuffer=NULL;
+  if ((!context->shellExiting)&&(!context->shellBroken)&&(!context->shellContinued)&&(!context->shellReturned)&&(!cancellationFlag))
+   if (context->inputLineAddBuffer != NULL) // Process last line of file if there is still text buffered
+    {
+     ppl_error_setstreaminfo(&context->errcontext, linenumber, filename_description);
+     status = ppl_processLine(context, ps, "", 0, iterDepth);
+     ppl_error_setstreaminfo(&context->errcontext, -1, "");
+     if (status>0) ppl_error(&context->errcontext, ERR_FILE, -1, -1, "Aborting.");
+     if (context->inputLineAddBuffer != NULL) { free(context->inputLineAddBuffer); context->inputLineAddBuffer=NULL; }
+    }
+  context->shellExiting       = 0;
+  context->shellBreakable     = shellBreakableOld;
+  context->shellReturnable    = shellReturnableOld;
+  context->inputLineAddBuffer = NULL;
   fclose(infile);
   ppl_parserStatFree(&ps);
   pplcsp_checkForGvOutput(context);
@@ -201,7 +208,6 @@ int ppl_processLine(ppl_context *context, parserStatus *ps, char *in, int intera
  {
   int   i, status=0;
   char *inputLineBuffer = NULL;
-  char  quoteChar;
 
   // Find last character of presently entered line. If it's a \, buffer line and collect another
   for (i=0; in[i]!='\0'; i++); for (; ((i>0)&&(in[i]<=' ')); i--);
@@ -239,26 +245,31 @@ int ppl_processLine(ppl_context *context, parserStatus *ps, char *in, int intera
    }
 
 #define LOOP_OVER_LINE \
-  for (i=0 , quoteChar='\0'; inputLineBuffer[i]!='\0'; i++) \
+ { \
+  int   bracketLevel=0; \
+  char  quoteChar='\0'; \
+  for (i=0; inputLineBuffer[i]!='\0'; i++) \
    { \
-    if      ((quoteChar=='\0') && (inputLineBuffer[i]=='\'')                                ) quoteChar = '\''; \
+    if      ((quoteChar=='\0') && (inputLineBuffer[i]=='(')                                 ) bracketLevel++; \
+    else if ((quoteChar=='\0') && (inputLineBuffer[i]==')')                                 ) bracketLevel--; \
+    else if ((quoteChar=='\0') && (inputLineBuffer[i]=='\'')                                ) quoteChar = '\''; \
     else if ((quoteChar=='\0') && (inputLineBuffer[i]=='\"')                                ) quoteChar = '\"'; \
     else if ((quoteChar=='\'') && (inputLineBuffer[i]=='\'') && (inputLineBuffer[i-1]!='\\')) quoteChar = '\0'; \
     else if ((quoteChar=='\"') && (inputLineBuffer[i]=='\"') && (inputLineBuffer[i-1]!='\\')) quoteChar = '\0'; \
     else if ((quoteChar=='\0') && (inputLineBuffer[i]=='`' )                                ) quoteChar = '`';  \
     else if ((quoteChar=='`' ) && (inputLineBuffer[i]=='`' ) && (inputLineBuffer[i-1]!='\\')) quoteChar = '\0';
 
-#define LOOP_END }
+#define LOOP_END } }
 
   // Cut comments off the ends of lines
 LOOP_OVER_LINE
-  else if ((quoteChar=='\0') && (inputLineBuffer[i]=='#' )) break;
+  else if ((quoteChar=='\0') && (inputLineBuffer[i]=='#')) break;
 LOOP_END
   inputLineBuffer[i] = '\0';
 
   // Loop over semicolon-separated line segments
 LOOP_OVER_LINE
-  else if ((quoteChar=='\0') && (inputLineBuffer[i]==';' )                     )
+  else if ((quoteChar=='\0') && (bracketLevel==0) && (inputLineBuffer[i]==';'))
    {
     inputLineBuffer[i]='\0';
     status = ppl_ProcessStatement(context, ps, inputLineBuffer, interactive, iterDepth);
@@ -292,8 +303,11 @@ int ppl_ProcessStatement(ppl_context *context, parserStatus *ps, char *line, int
 
   if (stat || context->errStat.status)
    {
-    ppl_tbWrite(context);
-    ppl_parserStatReInit(ps);
+    if (iterDepth==0)
+     {
+      ppl_tbWrite(context);
+      ppl_parserStatReInit(ps);
+     }
     return 1;
    }
 

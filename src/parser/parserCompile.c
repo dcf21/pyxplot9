@@ -96,13 +96,26 @@ static int parse_descend(ppl_context *c, parserStatus *s, int writeOut, int srcL
       if (status!=1) goto cleanup;
 
       // We came out of child node with a success return code. This means we carry on chomping along the SEQ
-      while ((nodeIter!=nodeNext) && (nodeIter!=NULL)) nodeIter = nodeIter->nextSibling; // Work out where we were...
-      if (nodeIter==nodeNext) nodeIter = nodeIter->nextSibling;
-      while (nodeIter != NULL)
+      // If we've come out of an OPT, treat it as a SEQ now...
+      if ((node->type==PN_TYPE_SEQ)||(node->type==PN_TYPE_OPT))
        {
-        status = parse_descend(c,s,writeOut,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
-        if (status!=1) goto cleanup;
-        nodeIter = nodeIter->nextSibling;
+        while ((nodeIter!=nodeNext) && (nodeIter!=NULL)) nodeIter = nodeIter->nextSibling; // Work out where we were...
+        if (nodeIter==nodeNext) nodeIter = nodeIter->nextSibling;
+        while (nodeIter != NULL)
+         {
+          status = parse_descend(c,s,writeOut,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
+          if (status!=1) goto cleanup;
+          nodeIter = nodeIter->nextSibling;
+         }
+       }
+      else if ((node->type==PN_TYPE_REP)||(node->type==PN_TYPE_REP2))
+       {
+       }
+      else
+       {
+        status=0;
+        sprintf(c->errStat.errBuff,"Bad node type coming out of code block.");
+        ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_INTERNAL,0,line,"");
        }
       goto cleanup;
      }
@@ -110,7 +123,7 @@ static int parse_descend(ppl_context *c, parserStatus *s, int writeOut, int srcL
    }
 
   // If this is a top-level attempt to parse a statement, make a new parserLine structure to hold the output of our attempt
-  if ((s!=NULL) && writeOut && (s->pl[blockDepth]==NULL))
+  if ((s!=NULL) && writeOut && (level==0))
    {
     parserLine *output=NULL;
     ppl_parserLineInit(&output,srcLineN,srcId,srcFname,line);
@@ -133,13 +146,167 @@ static int parse_descend(ppl_context *c, parserStatus *s, int writeOut, int srcL
      }
     case PN_TYPE_DATABLK:
      {
-printf("*** %d\n",s->NinlineDatafiles);
-      status=1;
+      if ((s==NULL)||(!writeOut))
+       {
+        status=1;
+       }
+      else
+       {
+        int first = (s->blockDepth != blockDepth+1);
+
+        // Make parserLine structure to hold this line of text
+        parserLine *output=NULL;
+        ppl_parserLineInit(&output, srcLineN, srcId, srcFname, line);
+        if (output==NULL) { sprintf(c->errStat.errBuff,"Out of memory."); ppl_tbAdd(c,srcLineN,srcId,srcFname,0,ERR_MEMORY,0,line,"inline data"); status=0; goto cleanup; }
+        output->stackLen       = 0;
+        output->containsMacros = 1;
+
+        // If s->blockDepth is not already set, this is the first line of data
+        if (first)
+         {
+          pplObj val;
+          val.refCount=1;
+          pplObjBytecode(&val,0,(void *)output);
+          ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
+          s->blockDepth = blockDepth+1;
+          s->pl[s->blockDepth] = output;
+         }
+        else // Add this line of data to linked list of parserLines.
+         {
+          ppl_parserStatAdd(s, s->blockDepth, output);
+         }
+
+        // See whether this line is the end of a datablock
+        if (strncmp(line+*linepos,"END",3)==0)
+         {
+          int i, endBlock=1;
+          for (i=3; line[*linepos+i]!='\0'; i++) if (line[*linepos+i]>' ') { endBlock=0; break; }
+          if (endBlock) { s->NinlineDatafiles--; first=1; }
+         }
+
+        // Return status 1 or 3 depending whether we're still looking for more data
+        if (s->NinlineDatafiles<1) { status=1; strcpy(s->prompt, "pyxplot"); }
+        else if (first)            { status=3; strcpy(s->prompt, "data>>>"); }
+        else                       { status=3; strcpy(s->prompt, "data..."); }
+        *linepos += strlen(line+*linepos);
+       }
       goto cleanup;
      }
     case PN_TYPE_CODEBLK:
      {
-      status=1;
+      if ((s==NULL)||(!writeOut))
+       {
+        if (line[*linepos]=='{')
+         { status=(s!=NULL); (*linepos)++; } // Return fail when tab-completing, even if we've actually correctly matched a {; it won't make any useful suggestions hereafter
+        else if ((s!=NULL)&&(s->eLlinePos <= *linepos)) // Not tab completing, and we haven't matched a {: suggest { as an 'expecting' hint
+         {
+          int j,k,l;
+          if (s->eLlinePos < *linepos) { s->eLlinePos = *linepos; s->eLPos = 0; s->expectingList[0]='\0'; }
+          if (s->eLPos != 0) { strcpy(s->expectingList+s->eLPos, ", or "); s->eLPos+=strlen(s->expectingList+s->eLPos); }
+          sprintf(s->expectingList+s->eLPos, "\"{\"");
+          l = strlen(s->expectingList+s->eLPos);
+          for (j=k=0; ((j<s->eLPos)&&!k); j++) k = (strncmp(s->expectingList+j,s->expectingList+s->eLPos,l)==0); // Don't repeat ourselves
+          if (!k) { s->eLPos+=l; }
+          else    { if (s->eLPos!=0) { s->eLPos-=5; } s->expectingList[s->eLPos]='\0'; }
+          status=0;
+         }
+        else // We failed to match a {
+         {
+          status=0;
+         }
+       }
+      else
+       {
+        char *cmd   = (char *)s->pl[blockDepth]->firstAtom->literal->auxil; // THIS ASSUMES DIRECTIVE IS FIRST ATOM
+        int   first = (s->blockDepth<blockDepth+1);
+        int   i;
+
+        // Test for opening brace
+        if (first)
+         {
+          s->waitingForBrace   = 1;
+          s->outputPos         = s->pl[blockDepth]->stackOffset + node->outStackPos;
+          s->blockDepth        = blockDepth+1;
+          s->pl[s->blockDepth] = NULL;
+         }
+        if (s->waitingForBrace)
+         {
+          if (line[*linepos]=='{')
+           {
+            s->waitingForBrace = 0;
+            (*linepos)++;
+            while ((line[*linepos]!='\0') && (line[*linepos]<=' ')) (*linepos)++; // FFW over spaces
+            if (line[*linepos]=='\0') goto codeblock_write_prompt;
+           }
+          else if (line[*linepos]=='\0')
+           {
+            goto codeblock_write_prompt;
+           }
+          else
+           {
+            status=0;
+            if ((s!=NULL)&&(s->eLlinePos <= *linepos))
+             {
+              int j,k,l;
+              if (s->eLlinePos < *linepos) { s->eLlinePos = *linepos; s->eLPos = 0; s->expectingList[0]='\0'; }
+              if (s->eLPos != 0) { strcpy(s->expectingList+s->eLPos, ", or "); s->eLPos+=strlen(s->expectingList+s->eLPos); }
+              sprintf(s->expectingList+s->eLPos, "\"{\"");
+              l = strlen(s->expectingList+s->eLPos);
+              for (j=k=0; ((j<s->eLPos)&&!k); j++) k = (strncmp(s->expectingList+j,s->expectingList+s->eLPos,l)==0); // Don't repeat ourselves
+              if (!k) { s->eLPos+=l; }
+              else    { if (s->eLPos!=0) { s->eLPos-=5; } s->expectingList[s->eLPos]='\0'; }
+             }
+            goto cleanup;
+           }
+         }
+
+        // Test for closing brace
+        if (line[*linepos]=='}')
+         {
+          status=1;
+          (*linepos)++;
+          if (s->outputPos>=0) // check we've had at least one command
+           {
+            pplObj val;
+            val.refCount=1;
+            pplObjBytecode(&val,0,NULL);
+            ppl_parserAtomAdd(s->pl[blockDepth], s->outputPos, *linepos, "", NULL, &val);
+            s->outputPos=-1;
+           }
+          strcpy(s->prompt, "pyxplot");
+          break;
+         }
+
+        // Compile line of text to bytecode
+        ppl_parserCompile(c, s, srcLineN, srcId, srcFname, line+*linepos, 0, blockDepth+1);
+        if (c->errStat.status) { status=0; goto cleanup; } // On error, stop
+        if (s->blockDepth<blockDepth+1) s->blockDepth=blockDepth+1;
+
+        // If s->outputPos is set, this is the first line of data
+        if (s->outputPos>=0)
+         {
+          pplObj val;
+          val.refCount=1;
+          pplObjBytecode(&val,0,(void *)s->pl[s->blockDepth]);
+          ppl_parserAtomAdd(s->pl[blockDepth], s->outputPos, *linepos, "", NULL, &val);
+          s->outputPos=-1;
+         }
+
+        // Write prompt
+codeblock_write_prompt:
+        if      (strcmp(cmd,"do"          )==0) strcpy(s->prompt, "do");
+        else if (strcmp(cmd,"for"         )==0) strcpy(s->prompt, "for");
+        else if (strcmp(cmd,"foreach"     )==0) strcpy(s->prompt, "foreac");
+        else if (strcmp(cmd,"foreachdatum")==0) strcpy(s->prompt, "foreac");
+        else if (strcmp(cmd,"if"          )==0) strcpy(s->prompt, "if");
+        else if (strcmp(cmd,"subroutine"  )==0) strcpy(s->prompt, "subrou");
+        else if (strcmp(cmd,"while"       )==0) strcpy(s->prompt, "while");
+        else                                    strcpy(s->prompt, "unknow");
+        i = strlen(s->prompt);
+        for ( ; i<7; i++) s->prompt[i]=first?'>':'.';
+        s->prompt[i]='\0';
+        status=3;
+       }
       goto cleanup;
      }
     case PN_TYPE_ITEM:
@@ -317,10 +484,14 @@ finished_looking_for_tabcomp:
             if ((s==NULL)||(!writeOut)) pplExpr_free(expr);
             else if ((node->matchString[1]!='C') && (node->matchString[1]!='e') && (node->matchString[1]!='E') && (node->matchString[1]!='g'))
              {
+              ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, node->matchString+1, expr, NULL);
+             }
+            else
+             {
               int j, isInline=1;
-              if ( (!(strcmp(node->varName,"filename")==0))&&(!(strcmp(node->varName,"directory")==0)) ) isInline=0;
+              if (!(strcmp(node->varName,"expression")==0)) isInline=0;
               if (isInline && (strncmp(line+*linepos,"\"--\"",4)!=0) && (strncmp(line+*linepos,"'--'",4)!=0) ) isInline=0;
-              for (j=4; j<explen; j++) if ((line[*linepos+j]>='\0')&&(line[*linepos+j]<=' ')) isInline=0;
+              for (j=4; j<explen; j++) if (line[*linepos+j]>' ') isInline=0;
               if (isInline)
                {
                 pplObj val;
@@ -332,15 +503,11 @@ finished_looking_for_tabcomp:
                }
               else
                {
-                ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, node->matchString+1, expr, NULL);
+                pplObj val;
+                val.refCount=1;
+                pplObjExpression(&val,0,(void *)expr);
+                ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
                }
-             }
-            else
-             {
-              pplObj val;
-              val.refCount=1;
-              pplObjExpression(&val,0,(void *)expr);
-              ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
              }
            }
          }
@@ -391,7 +558,7 @@ item_cleanup:
            }
           l = strlen(s->expectingList+s->eLPos);
           for (j=k=0; ((j<s->eLPos)&&!k); j++) k = (strncmp(s->expectingList+j,s->expectingList+s->eLPos,l)==0); // Don't repeat ourselves
-          if (!k) s->eLPos+=strlen(s->expectingList+s->eLPos);
+          if (!k) { s->eLPos+=l; }
           else    { if (s->eLPos!=0) { s->eLPos-=5; } s->expectingList[s->eLPos]='\0'; }
           if (node->matchString[0]!='%') break;
          }
@@ -569,16 +736,20 @@ cleanup:
 
   // If we are at the top level of the hierarchy and we have failed to parse, throw a traceback now.
   // If we have succeeded in parsing, we should by now have consumed a whole line; if there is trailig text, that's an error
-  if ((level==0) && (blockDepth==0) && (status<2) && (s!=NULL))
+  if ((level==0) && (status<2) && (s!=NULL))
    {
     if (status==1)
      {
       while ((line[*linepos]>'\0') && (line[*linepos]<=' ')) (*linepos)++;
       if (line[*linepos]!='\0')
        {
-        if (s->eLPos>0) { snprintf(s->expectingList+s->eLPos,LSTR_LENGTH-s->eLPos,", or "); s->eLPos+=strlen(s->expectingList+s->eLPos); }
-        snprintf(s->expectingList+s->eLPos,LSTR_LENGTH-s->eLPos,"the end of the command");
-        s->eLPos+=strlen(s->expectingList+s->eLPos);
+        if (s->eLlinePos <= *linepos)
+         {
+          if (s->eLlinePos < *linepos) { s->eLlinePos = *linepos; s->eLPos = 0; s->expectingList[0]='\0'; }
+          if (s->eLPos>0) { snprintf(s->expectingList+s->eLPos,LSTR_LENGTH-s->eLPos,", or "); s->eLPos+=strlen(s->expectingList+s->eLPos); }
+          snprintf(s->expectingList+s->eLPos,LSTR_LENGTH-s->eLPos,"the end of the command");
+          s->eLPos+=strlen(s->expectingList+s->eLPos);
+         }
         status=0;
        }
      }
@@ -586,12 +757,14 @@ cleanup:
      {
       snprintf(c->errStat.errBuff,LSTR_LENGTH,"At this point, was expecting %s.",s->expectingList);
       c->errStat.errBuff[LSTR_LENGTH-1] = '\0';
-      ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,*linepos,line,"");
+      ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,s->eLlinePos,line,"");
      }
    }
 
-  if (status==1) ppl_tbClear(c);
-  if (level==0) s->NinlineDatafiles=0;
+  if  (status==1)              ppl_tbClear(c);
+  if  (status!=3)              s->blockDepth=0;
+  if ((status!=3)&&(level==0)) s->NinlineDatafiles=0;
+//printf("%d %d %d %d\n",blockDepth,level,status,s->blockDepth);
   return status;
  }
 
@@ -633,6 +806,8 @@ void ppl_parserStatReInit(parserStatus *in)
   strcpy(in->prompt, "pyxplot");
   in->blockDepth       = 0;
   in->NinlineDatafiles = 0;
+  in->waitingForBrace  = 0;
+  in->outputPos        = -1;
   in->eLPos            = 0;
   in->eLlinePos        = 0;
   in->expectingList[0] = '\0';
@@ -643,11 +818,14 @@ void ppl_parserStatAdd(parserStatus *in, int bd, parserLine *pl)
  {
   if (in->pl[bd] != NULL)
    {
-    in->pl[bd] = in->pl[bd]->next = pl;
+    pl->prev         = in->pl[bd];
+    in->pl[bd]->next = pl;
+    in->pl[bd]       = pl;
    }
   else
    {
     if (bd==0) *(in->rootpl) = pl;
+    pl->prev   = NULL;
     in->pl[bd] = pl;
    }
   return;
@@ -679,7 +857,9 @@ void ppl_parserLineInit(parserLine **in, int srcLineN, long srcId, char *srcFnam
   output->firstAtom      = NULL;
   output->lastAtom       = NULL;
   output->next           = NULL;
+  output->prev           = NULL;
   output->containsMacros = 0;
+  output->refCount       = 1;
   output->srcLineN       = srcLineN;
   output->srcId          = srcId;
   output->stackLen       = 16;
@@ -692,6 +872,7 @@ void ppl_parserLineInit(parserLine **in, int srcLineN, long srcId, char *srcFnam
 void ppl_parserLineFree(parserLine *in)
  {
   parserLine *item = in;
+  if ( __sync_sub_and_fetch(&in->refCount,1) > 0) return;
   while (item != NULL)
    {
     parserLine *next = item->next;
@@ -743,14 +924,23 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
   if (!expandMacros)
    {
     TEST_FOR_MACROS;
-    if (containsMacros) // If we're not expanding macros at this stage, flag this parserLine as containing macros, and exit
+    if ((containsMacros)&&(s!=NULL)) // If we're not expanding macros at this stage, flag this parserLine as containing macros, and exit
      {
+      if (s->waitingForBrace) { sprintf(c->errStat.errBuff,"Cannot process a macro on the same line as the opening brace of a loop."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,0,line,""); ppl_parserStatReInit(s); return 1; }
       parserLine *output=NULL;
       ppl_parserLineInit(&output, srcLineN, srcId, srcFname, line);
       if (output==NULL) { sprintf(c->errStat.errBuff,"Out of memory."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_MEMORY,0,line,""); ppl_parserStatReInit(s); return 1; }
       output->stackLen       = 0;
       output->containsMacros = 1;
-      ppl_parserStatAdd(s, blockDepth, output);
+      ppl_parserStatAdd(s, s->blockDepth, output);
+      if (s->outputPos>=0)
+       {
+        pplObj val;
+        val.refCount=1;
+        pplObjBytecode(&val,0,(void *)s->pl[s->blockDepth]);
+        ppl_parserAtomAdd(s->pl[blockDepth], s->outputPos, 0, "", NULL, &val);
+        s->outputPos=-1;
+       }
       return 0;
      }
    }
@@ -845,6 +1035,18 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
      }
    }
 
+  // If we are returning to add more code into a codeblock, do that now
+  if (s->stk[blockDepth][0] != NULL)
+   {
+    int match=0, linepos=0;
+    parse_descend(c, s, 1, srcLineN, srcId, srcFname, line, &linepos, NULL, NULL, -1, NULL, 0, blockDepth, &match);
+    if (c->errStat.status) { if (outbuff!=NULL) free(outbuff); ppl_parserStatReInit(s); return 1; }
+    return 0;
+   }
+
+  // If we're not adding more code to a codeBlock, and this is a top-level call, clean the stack
+  if (blockDepth==0) ppl_parserStatReInit(s);
+
   // Fetch first non-whitespace character of command string
   for (i=0; ((line[i]>='\0')&&(line[i]<=' ')); i++);
   if      ((line[i]>='a')&&(line[i]<='z')) cln=(int)(line[i]-'a');
@@ -873,10 +1075,13 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
     // If this command did not match as far as the '=' token, clear stack and traceback
     if (match==0)
      {
+      parserLine *new = s->pl[blockDepth];
+      parserLine *old = new->prev;
       ppl_tbClear(c);
-      ppl_parserLineFree(s->pl[blockDepth]);
-      s->pl[blockDepth]=NULL;
-      if (blockDepth==0) *(s->rootpl) = NULL;
+      ppl_parserLineFree(new);
+      s->pl[blockDepth]=old;
+      if (old!=NULL) old->next=NULL;
+      if ((blockDepth==0)&&(old==NULL)) *(s->rootpl)=NULL;
       s->eLPos = s->eLlinePos = 0;
       s->expectingList[0] = '\0';
       continue;

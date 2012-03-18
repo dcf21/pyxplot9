@@ -42,8 +42,8 @@ typedef struct dictS
   struct dictItemS  *last;
   int                length, refCount;
   unsigned char      immutable;
-  int                HashSize;
-  struct dictItemS **HashTable;
+  int                hashSize;
+  struct dictItemS **hashTable;
   int                useMalloc;
   int                memory_context;
  } dict;

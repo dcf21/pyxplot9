@@ -33,7 +33,7 @@
 
 void _ppl_dictRemoveEngine(dict *in, dictItem *ptr);
 
-dict *ppl_dictInit(int HashSize, int useMalloc)
+dict *ppl_dictInit(int hashSize, int useMalloc)
  {
   dict *out;
   if (useMalloc) out = (dict *)malloc(sizeof(dict));
@@ -44,11 +44,11 @@ dict *ppl_dictInit(int HashSize, int useMalloc)
   out->length    = 0;
   out->refCount  = 1;
   out->immutable = 0;
-  out->HashSize  = HashSize;
-  if (useMalloc) out->HashTable = (dictItem **)malloc(HashSize * sizeof(dictItem *));
-  else           out->HashTable = (dictItem **)ppl_memAlloc(HashSize * sizeof(dictItem *));
-  if (out->HashTable==NULL) { if (useMalloc) free(out); return NULL; }
-  memset(out->HashTable, 0, HashSize * sizeof(dictItem *));
+  out->hashSize  = hashSize;
+  if (useMalloc) out->hashTable = (dictItem **)malloc(hashSize * sizeof(dictItem *));
+  else           out->hashTable = (dictItem **)ppl_memAlloc(hashSize * sizeof(dictItem *));
+  if (out->hashTable==NULL) { if (useMalloc) free(out); return NULL; }
+  memset(out->hashTable, 0, hashSize * sizeof(dictItem *));
   out->useMalloc = useMalloc;
   out->memory_context = ppl_memAlloc_GetMemContext();
   return out;
@@ -67,16 +67,17 @@ int ppl_dictFree(dict *in)
     free(ptr);
     ptr = ptrnext;
    }
+  free(in->hashTable);
   free(in);
   return 0;
  }
 
-int ppl_dictHash(const char *str, int HashSize)
+int ppl_dictHash(const char *str, int hashSize)
  {
   unsigned int hash = 5381;
   int c;
   while ((c = *str++)) hash = ((hash << 5) + hash) + c;
-  return hash % HashSize;
+  return hash % hashSize;
  }
 
 int ppl_dictLen(dict *in)
@@ -118,8 +119,8 @@ int ppl_dictAppend(dict *in, const char *key, void *item)
     if (ptr  == NULL) in->last  = ptrnew; else ptr ->prev = ptrnew;
     in->length++;
 
-    hash = ppl_dictHash(key, in->HashSize);
-    in->HashTable[hash] = ptrnew;
+    hash = ppl_dictHash(key, in->hashSize);
+    in->hashTable[hash] = ptrnew;
    }
   return 0;
  }
@@ -162,15 +163,15 @@ int ppl_dictAppendCpy(dict *in, const char *key, void *item, int size)
     if (ptr  == NULL) in->last  = ptrnew; else ptr ->prev = ptrnew;
     in->length++;
 
-    hash = ppl_dictHash(key, in->HashSize);
-    in->HashTable[hash] = ptrnew;
+    hash = ppl_dictHash(key, in->hashSize);
+    in->hashTable[hash] = ptrnew;
    }
   return 0;
  }
 
 void *ppl_dictLookup(dict *in, const char *key)
  {
-  int hash = ppl_dictHash(key, in->HashSize);
+  int hash = ppl_dictHash(key, in->hashSize);
   return ppl_dictLookupHash(in, key, hash);
  }
 
@@ -184,7 +185,7 @@ void *ppl_dictLookupHash(dict *in, const char *key, int hash)
    if (strcmp(ptr->key, key) == 0) return ptr->data; \
 
   // Check hash table
-  ptr  = in->HashTable[hash];
+  ptr  = in->hashTable[hash];
   if (ptr==NULL) { return NULL; }
   DICTLOOKUP_TEST;
 
@@ -212,9 +213,9 @@ void ppl_dictLookupWithWildcard(dict *in, dict *in_w, char *key, char *SubsStrin
   for (k=0; (isalnum(key[k]) || (key[k]=='_')); k++);
   tmp=key[k];
   key[k]='\0';
-  hash = ppl_dictHash(key, in->HashSize);
+  hash = ppl_dictHash(key, in->hashSize);
   key[k]=tmp;
-  ptr  = in->HashTable[hash];
+  ptr  = in->hashTable[hash];
   if (ptr!=NULL)
    {
     for (k=0; ((ptr->key[k]>' ')&&(ptr->key[k]!='?')&&(ptr->key[k]==key[k])); k++);
@@ -261,8 +262,8 @@ int ppl_dictContains(dict *in, const char *key)
   if (in==NULL) return 0;
 
   // Check hash table
-  hash = ppl_dictHash(key, in->HashSize);
-  ptr  = in->HashTable[hash];
+  hash = ppl_dictHash(key, in->hashSize);
+  ptr  = in->hashTable[hash];
   if (ptr==NULL) return 0;
   if (strcmp(ptr->key, key)==0) return 1;
 
@@ -284,8 +285,8 @@ int ppl_dictRemoveKey(dict *in, const char *key)
   if (in==NULL) return 1;
 
   // Check hash table
-  hash = ppl_dictHash(key, in->HashSize);
-  ptr  = in->HashTable[hash];
+  hash = ppl_dictHash(key, in->hashSize);
+  ptr  = in->hashTable[hash];
   if (ptr==NULL) return 1;
   if (strcmp(ptr->key, key)==0) { _ppl_dictRemoveEngine(in, ptr); return 0; }
 
@@ -322,8 +323,8 @@ void _ppl_dictRemoveEngine(dict *in, dictItem *ptr)
   if (ptr==NULL) return;
 
   // Remove hash table entry
-  hash = ppl_dictHash(ptr->key,in->HashSize);
-  if (in->HashTable[hash]==ptr) in->HashTable[hash]=NULL;
+  hash = ppl_dictHash(ptr->key,in->hashSize);
+  if (in->hashTable[hash]==ptr) in->hashTable[hash]=NULL;
 
   if (in->useMalloc) { free(ptr->data); free(ptr->key); }
 

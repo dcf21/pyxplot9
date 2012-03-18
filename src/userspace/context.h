@@ -42,7 +42,10 @@ typedef struct ppl_context_struc
   char     *inputLineBuffer;
   int       inputLineBufferLen;
   char     *inputLineAddBuffer;
-  int       shellExiting;
+  int       shellBreakable, shellReturnable, shellBreakLevel;
+  int       shellExiting, shellBroken, shellContinued, shellReturned;
+  char     *shellLoopName[MAX_RECURSION_DEPTH+8];
+  pplObj    shellReturnVal;
   long int  historyNLinesWritten;
   int       termtypeSetInConfigfile;
 

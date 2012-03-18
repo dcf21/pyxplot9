@@ -80,6 +80,7 @@ void directive_funcset(ppl_context *c, parserLine *pl, parserOutput *in, int int
 
   // Allocate function descriptor
   f = (pplFunc *)malloc(sizeof(pplFunc));
+  if (f==NULL) { sprintf(c->errStat.errBuff, "Out of memory."); TBADD(ERR_MEMORY,0); return; }
   f->functionType = PPL_FUNC_USERDEF;
   f->refCount     = 1;
   f->minArgs      = nArgs;
@@ -98,7 +99,7 @@ void directive_funcset(ppl_context *c, parserLine *pl, parserOutput *in, int int
   f->LaTeX        = NULL;
   f->description  = NULL;
   f->descriptionShort = NULL;
-  if ((f->argList==NULL)||(f->functionPtr==NULL)||(f->min==NULL)||(f->max==NULL)||(f->minActive==NULL)||(f->maxActive==NULL)) { sprintf(c->errStat.errBuff, "Out of memory."); TBADD(ERR_MEMORY,0); goto fail; }
+  if ((f->argList==NULL)||((!nullDefn)&&(f->functionPtr==NULL))||(f->min==NULL)||(f->max==NULL)||(f->minActive==NULL)||(f->maxActive==NULL)) { sprintf(c->errStat.errBuff, "Out of memory."); TBADD(ERR_MEMORY,0); goto fail; }
 
   // Put ranges and argument names into structures
   pos  = PARSE_func_set_0argument_list;
@@ -258,7 +259,7 @@ supersede:
   tmpObj.amMalloced=0;
   ppl_garbageObject(&tmpObj);
   pplObjFunc(fnObj,fnObj->amMalloced,1,f);
-  pplObjZom(&stk[PARSE_func_set_definition],0); // Don't free the expression we've stored as a variable
+  //pplObjZom(&stk[PARSE_func_set_definition],0); // Don't free the expression we've stored as a variable
   return;
 
 fail:

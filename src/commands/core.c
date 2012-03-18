@@ -62,6 +62,7 @@
 #include "userspace/pplObjPrint.h"
 
 #include "pplConstants.h"
+#include "input.h"
 
 #define TBADD(et,pos) ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,pos,pl->linetxt,"")
 
@@ -161,6 +162,28 @@ void directive_cd(ppl_context *c, parserLine *pl, parserOutput *in)
   return;
  }
 
+void directive_exec(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+ {
+  pplObj       *stk = in->stk;
+  char         *cmd = (char *)stk[PARSE_exec_command].auxil;
+  parserLine   *pl2 = NULL;
+  parserStatus *ps2 = NULL;
+
+  ppl_parserStatInit(&ps2,&pl2);
+  if ( (ps2==NULL) || (c->inputLineBuffer == NULL) ) { ppl_error(&c->errcontext,ERR_MEMORY,-1,-1,"Out of memory."); return; }
+  ppl_error_setstreaminfo(&c->errcontext, -1, "executed statement");
+
+  ppl_ProcessStatement(c, ps2, cmd, 0, iterDepth+1);
+
+  if (c->errStat.status)
+   {
+    strcpy(c->errStat.errBuff, "");
+    ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,ERR_GENERAL,0,pl->linetxt,"executed statement");
+   }
+  ppl_parserStatFree(&ps2);
+  return;
+ }
+
 void directive_history(ppl_context *c, parserLine *pl, parserOutput *in)
  {
 #ifdef HAVE_READLINE
@@ -184,6 +207,26 @@ void directive_history(ppl_context *c, parserLine *pl, parserOutput *in)
   TBADD(ERR_GENERAL,0);
   return;
 #endif
+ }
+
+void directive_load(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+ {
+  pplObj *stk = in->stk;
+  char   *fn  = (char *)stk[PARSE_load_filename].auxil;
+  wordexp_t     wordExp;
+  glob_t        globData;
+
+  if ((wordexp(fn, &wordExp, 0) != 0) || (wordExp.we_wordc <= 0)) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Could not access file '%s'.", fn); TBADD(ERR_FILE,in->stkCharPos[PARSE_load_filename]); return; }
+  if ((glob(wordExp.we_wordv[0], 0, NULL, &globData) != 0) || (globData.gl_pathc <= 0)) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Could not access file '%s'.", fn); TBADD(ERR_FILE,in->stkCharPos[PARSE_load_filename]); wordfree(&wordExp); return; }
+  wordfree(&wordExp);
+  ppl_processScript(c, globData.gl_pathv[0], iterDepth+1);
+  if (c->errStat.status)
+   {
+    strcpy(c->errStat.errBuff, "");
+    ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,ERR_GENERAL,0,pl->linetxt,"executed script");
+   }
+  globfree(&globData);
+  return;
  }
 
 void directive_print(ppl_context *c, parserLine *pl, parserOutput *in)

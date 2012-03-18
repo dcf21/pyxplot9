@@ -28,6 +28,7 @@
 #include "commands/core.h"
 #include "commands/eqnsolve.h"
 #include "commands/fft.h"
+#include "commands/flowctrl.h"
 #include "commands/funcset.h"
 #include "commands/histogram.h"
 #include "commands/interpolate.h"
@@ -54,6 +55,16 @@
 
 #define TBADD(et,pos) ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,pos,pl->linetxt,"")
 
+#define STACK_POP \
+   { \
+    c->stackPtr--; \
+    if (c->stack[c->stackPtr].objType!=PPLOBJ_NUM) /* optimisation: Don't waste time garbage collecting numbers */ \
+     { \
+      ppl_garbageObject(&c->stack[c->stackPtr]); \
+      if (c->stack[c->stackPtr].refCount != 0) { strcpy(c->errStat.errBuff,"Stack forward reference detected."); TBADD(ERR_INTERNAL,0); return; } \
+    } \
+   } \
+
 void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj *stk = in->stk;
@@ -62,12 +73,13 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
   // If directive is an expression, evaluate it and print result, unless it's an assignment
   if (stk[PARSE_arc_directive].objType == PPLOBJ_EXP)
    {
-    int lastOpAssign=0;
+    int       lastOpAssign=0;
+    const int stkLevelOld = c->stackPtr;
     pplExpr *expr = (pplExpr *)stk[PARSE_arc_directive].auxil;
-    pplObj *val = ppl_expEval(c, expr, &lastOpAssign, 1, iterDepth+1);
+    pplObj  *val  = ppl_expEval(c, expr, &lastOpAssign, 1, iterDepth+1);
     if (c->errStat.status) return; // On error, stop
     if (!lastOpAssign) { pplObjPrint(c,val,NULL,c->errcontext.tempErrStr,LSTR_LENGTH,0,0); ppl_report(&c->errcontext, NULL); }
-    ppl_garbageObject(val);
+    while (c->stackPtr>stkLevelOld) { STACK_POP; }
     return;
    }
 
@@ -108,12 +120,30 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     directive_funcset(c,pl,in,interactive);
   else if (strcmp(d, "assert")==0)
     directive_assert(c,pl,in);
+  else if (strcmp(d, "break")==0)
+    directive_break(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "cd")==0)
     directive_cd(c,pl,in);
+  else if (strcmp(d, "continue")==0)
+    directive_continue(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "do")==0)
+    directive_do(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "exec")==0)
+    directive_load(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "for")==0)
+    directive_for(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "foreach")==0)
+    directive_foreach(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "foreachdatum")==0)
+    directive_fordata(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "help")==0)
     directive_help(c,pl,in,interactive);
   else if (strcmp(d, "history")==0)
     directive_history(c,pl,in);
+  else if (strcmp(d, "if")==0)
+    directive_if(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "load")==0)
+    directive_load(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "maximise")==0)
     directive_maximise(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "minimise")==0)
@@ -125,6 +155,12 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
    }
   else if (strcmp(d, "print")==0)
     directive_print(c,pl,in);
+  else if (strcmp(d, "pwd")==0)
+    ppl_report(&c->errcontext, c->errcontext.session_default.cwd);
+  else if (strcmp(d, "quit")==0)
+    c->shellExiting = 1;
+  else if (strcmp(d, "return")==0)
+    directive_return(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "save")==0)
     directive_save(c,pl,in);
   else if (strcmp(d, "show")==0)
@@ -133,8 +169,12 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     directive_solve(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "set_error")==0)
     directive_seterror(c,pl,in,interactive);
+  else if (strcmp(d, "subroutine")==0)
+    directive_subrt(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "unset_error")==0)
     directive_unseterror(c,pl,in,interactive);
+  else if (strcmp(d, "while")==0)
+    directive_while(c,pl,in,interactive,iterDepth);
   else
    {
     snprintf(c->errStat.errBuff, LSTR_LENGTH, "Unimplemented command: %s", d);

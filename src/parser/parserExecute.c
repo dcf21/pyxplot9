@@ -91,11 +91,20 @@ void ppl_parserOutFree(parserOutput *in)
   return;
  }
 
+#define STACK_POP \
+   { \
+    c->stackPtr--; \
+    if (c->stack[c->stackPtr].objType!=PPLOBJ_NUM) /* optimisation: Don't waste time garbage collecting numbers */ \
+     { \
+      ppl_garbageObject(&c->stack[c->stackPtr]); \
+      if (c->stack[c->stackPtr].refCount != 0) { strcpy(c->errStat.errBuff,"Stack forward reference detected."); TBADD(ERR_INTERNAL,0); return; } \
+    } \
+   } \
+
 void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iterDepth)
  {
   int           i;
   parserOutput *out  = NULL;
-  parserAtom   *item = in->firstAtom;
   pplObj       *stk  = NULL;
   char         *eB   = c->errStat.errBuff;
   int          *stkCharPos = NULL;
@@ -103,8 +112,13 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
   // Check that recursion depth has not been exceeded
   if (iterDepth > MAX_RECURSION_DEPTH) { strcpy(eB,"Maximum recursion depth exceeded."); TBADD(ERR_OVERFLOW,0); return; }
 
-  while (in != NULL)
+  // If at bottom iteration depth, clean up stack now if there is any left-over junk
+  if (iterDepth==0) while (c->stackPtr>0) { STACK_POP; }
+
+  while ((in!=NULL)&&(!c->shellExiting)&&(!c->shellBroken)&&(!c->shellContinued)&&(!c->shellReturned))
    {
+    parserAtom *item = in->firstAtom;
+
     //ppl_parserLinePrint(c,in);
     
     // If line contains macros, need to recompile it now

@@ -50,6 +50,7 @@ void ppl_garbageNamespace(dict *n)
     free(ptr);
     ptr = ptrnext;
    }
+  free(n->hashTable);
   free(n);
   return;
  }
@@ -93,7 +94,7 @@ void ppl_garbageObject(pplObj *o)
     case PPLOBJ_BYT:
      {
       void *old=o->auxil; o->auxil=NULL;
-      if ((old!=NULL)&&o->auxilMalloced) ppl_parserLineFree((parserLine *)old);
+      if ((old!=NULL)&&(o->auxilMalloced)) ppl_parserLineFree((parserLine *)old);
       break;
      }
     case PPLOBJ_FILE:

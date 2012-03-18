@@ -246,7 +246,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
   if (iterDepth > MAX_RECURSION_DEPTH) { strcpy(context->errStat.errBuff,"Maximum recursion depth exceeded."); TBADD(ERR_OVERFLOW); return NULL; }
 
   // If at bottom iteration depth, clean up stack now if there is any left-over junk
-  if (iterDepth==0) for ( ; context->stackPtr>0 ; ) { STACK_POP; }
+  if (iterDepth==0) while (context->stackPtr>0) { STACK_POP; }
   initialStackPtr = context->stackPtr;
   *lastOpAssign=0;
 

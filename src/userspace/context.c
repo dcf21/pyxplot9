@@ -44,6 +44,7 @@
 
 ppl_context *ppl_contextInit()
  {
+  int i;
   ppl_context *out = malloc(sizeof(ppl_context));
   if (out==NULL) return NULL;
 
@@ -63,6 +64,14 @@ ppl_context *ppl_contextInit()
   out->inputLineBuffer = NULL;
   out->inputLineAddBuffer = NULL;
   out->shellExiting = 0;
+  out->shellBreakable = 0;
+  out->shellReturnable = 0;
+  out->shellBroken = 0;
+  out->shellContinued = 0;
+  out->shellReturned = 0;
+  for (i=0; i<MAX_RECURSION_DEPTH+8; i++) out->shellLoopName[i]=NULL;
+  out->shellReturnVal.refCount = 1;
+  pplObjNum(&out->shellReturnVal,0,0,0);
   out->historyNLinesWritten = 0;
   out->termtypeSetInConfigfile = 0;
   out->errcontext.error_input_linenumber = -1;

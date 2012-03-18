@@ -74,7 +74,11 @@ void ppl_opAdd(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
   int t1 = a->objType;
   int t2 = b->objType;
 
-  if ((t1==PPLOBJ_STR)&&(t2==PPLOBJ_STR)) // adding strings: concatenate
+  if ((t1==PPLOBJ_NUM)&&(t2==PPLOBJ_NUM))
+   {
+    goto am_numeric;
+   }
+  else if ((t1==PPLOBJ_STR)&&(t2==PPLOBJ_STR)) // adding strings: concatenate
    {
     char *tmp;
     int   l1 = strlen((char *)a->auxil);
@@ -220,6 +224,13 @@ void ppl_opAdd(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
   else // adding numbers
    {
     CAST_TO_NUM2(a); CAST_TO_NUM2(b);
+am_numeric:
+    o->objType = PPLOBJ_NUM; // Do this by hand rather than calling pplObjNum to save time (some field will be set by function call below)
+    o->objPrototype = &pplObjPrototypes[PPLOBJ_NUM];
+    o->self_lval = NULL; o->self_dval = NULL;
+    o->self_this = NULL;
+    o->amMalloced = 0;
+    o->immutable = 0;
     ppl_uaAdd(context, a, b, o, status, errType, errText);
    }
 cast_fail:
@@ -231,7 +242,11 @@ void ppl_opSub(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
   int t1 = a->objType;
   int t2 = b->objType;
 
-  if ((t1==PPLOBJ_DATE)&&(t2==PPLOBJ_DATE)) // subtracting dates: return time interval
+  if ((t1==PPLOBJ_NUM)&&(t2==PPLOBJ_NUM))
+   {
+    goto am_numeric;
+   }
+  else if ((t1==PPLOBJ_DATE)&&(t2==PPLOBJ_DATE)) // subtracting dates: return time interval
    {
     pplObjNum(o,0,a->real-b->real,0);
     o->dimensionless=0;
@@ -315,6 +330,13 @@ void ppl_opSub(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
   else // subtracting numbers
    {
     CAST_TO_NUM2(a); CAST_TO_NUM2(b);
+am_numeric:
+    o->objType = PPLOBJ_NUM; // Do this by hand rather than calling pplObjNum to save time (some field will be set by function call below)
+    o->objPrototype = &pplObjPrototypes[PPLOBJ_NUM];
+    o->self_lval = NULL; o->self_dval = NULL;
+    o->self_this = NULL;
+    o->amMalloced = 0;
+    o->immutable = 0;
     ppl_uaSub(context, a, b, o, status, errType, errText);
    }
 cast_fail:
@@ -326,7 +348,11 @@ void ppl_opMul(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
   int t1 = a->objType;
   int t2 = b->objType;
 
-  if ((t1==PPLOBJ_VEC)&&(t2==PPLOBJ_VEC)) // multiplying vectors (scalar dot product)
+  if ((t1==PPLOBJ_NUM)&&(t2==PPLOBJ_NUM))
+   {
+    goto am_numeric;
+   }
+  else if ((t1==PPLOBJ_VEC)&&(t2==PPLOBJ_VEC)) // multiplying vectors (scalar dot product)
    {
     gsl_vector *v1 = ((pplVector *)(a->auxil))->v;
     gsl_vector *v2 = ((pplVector *)(b->auxil))->v;
@@ -403,6 +429,13 @@ void ppl_opMul(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
   else // multiplying numbers
    {
     CAST_TO_NUM2(a); CAST_TO_NUM2(b);
+am_numeric:
+    o->objType = PPLOBJ_NUM; // Do this by hand rather than calling pplObjNum to save time (some field will be set by function call below)
+    o->objPrototype = &pplObjPrototypes[PPLOBJ_NUM];
+    o->self_lval = NULL; o->self_dval = NULL;
+    o->self_this = NULL;
+    o->amMalloced = 0;
+    o->immutable = 0;
     ppl_uaMul(context, a, b, o, status, errType, errText);
    }
 cast_fail:
@@ -413,7 +446,12 @@ void ppl_opDiv(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
  {
   int t1 = a->objType;
   int t2 = b->objType;
-  if ((t1==PPLOBJ_VEC)&&(t2==PPLOBJ_NUM)) // dividing vector by number
+
+  if ((t1==PPLOBJ_NUM)&&(t2==PPLOBJ_NUM))
+   {
+    goto am_numeric;
+   }
+  else if ((t1==PPLOBJ_VEC)&&(t2==PPLOBJ_NUM)) // dividing vector by number
    {
     int         i;
     gsl_vector *v   = ((pplVector *)(a->auxil))->v;
@@ -442,6 +480,13 @@ void ppl_opDiv(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
   else // dividing numbers
    {
     CAST_TO_NUM2(a); CAST_TO_NUM2(b);
+am_numeric:
+    o->objType = PPLOBJ_NUM; // Do this by hand rather than calling pplObjNum to save time (some field will be set by function call below)
+    o->objPrototype = &pplObjPrototypes[PPLOBJ_NUM];
+    o->self_lval = NULL; o->self_dval = NULL;
+    o->self_this = NULL;
+    o->amMalloced = 0;
+    o->immutable = 0;
     ppl_uaDiv(context, a, b, o, status, errType, errText);
    }
 cast_fail:

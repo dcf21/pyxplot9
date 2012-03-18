@@ -66,9 +66,9 @@ typedef struct parserLine {
   long        srcId;
   char       *srcFname;
   int         stackLen, stackOffset;
-  int         containsMacros;
+  int         containsMacros, refCount;
   parserAtom *firstAtom, *lastAtom;
-  struct parserLine *next;
+  struct parserLine *next, *prev;
  } parserLine;
 
 typedef struct parserStatus {
@@ -78,6 +78,7 @@ typedef struct parserStatus {
   parserNode  *stk[MAX_RECURSION_DEPTH][16];
   int          blockDepth;
   int          NinlineDatafiles;
+  int          waitingForBrace, outputPos;
   char         expectingList[LSTR_LENGTH];
   int          eLPos, eLlinePos;
  } parserStatus;

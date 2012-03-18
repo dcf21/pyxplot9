@@ -248,7 +248,7 @@ int main(int argc, char **argv)
 
   // Terminate
   if (signal(SIGCHLD, SIG_DFL) == SIG_ERR) ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Main process could not unconfigure signal handler for SIGCHLD.");
-  ppl_contextInit(context);
+  ppl_contextFree(context);
   ppl_memAlloc_FreeAll(0);
   ppl_memAlloc_MemoryStop();
   if (DEBUG) ppl_log(&context->errcontext,"Terminating normally.");
