@@ -447,10 +447,9 @@ void directive_subrt(ppl_context *c, parserLine *pl, parserOutput *in, int inter
  {
   pplObj     *stk   = in->stk;
   parserLine *plsub = (parserLine *)stk[PARSE_subroutine_code     ].auxil;
-  char       *name  = (char *)stk[PARSE_subroutine_subroutine_name].auxil;
-  int         pos, nArgs=0, argListLen=0, i;
+  int         pos, nArgs=0, argListLen=0, i, om, rc;
   pplFunc    *f     = NULL;
-  pplObj     *fnObj, tmpObj;
+  pplObj     *tmpObj;
 
   // Count number of arguments
   pos = PARSE_subroutine_0argument_list;
@@ -505,10 +504,17 @@ void directive_subrt(ppl_context *c, parserLine *pl, parserOutput *in, int inter
    }
 
   // Look up function or variable we are superseding
-  ppl_contextGetVarPointer(c, name, &fnObj, &tmpObj);
-  tmpObj.amMalloced=0;
-  ppl_garbageObject(&tmpObj);
-  pplObjFunc(fnObj,fnObj->amMalloced,1,f);
+  ppl_contextVarHierLookup(c, pl->srcLineN, pl->srcId, pl->srcFname, pl->linetxt, stk, in->stkCharPos, &tmpObj, PARSE_subroutine_subroutine_names, PARSE_subroutine_subroutine_name_subroutine_names);
+  if ((c->errStat.status) || (tmpObj==NULL)) goto fail;
+  if (tmpObj->objType==PPLOBJ_GLOB) { sprintf(c->errStat.errBuff,"Variable declared global in global namespace."); TBADD(ERR_NAMESPACE,0); goto fail; }
+
+  om = tmpObj->amMalloced;
+  rc = tmpObj->refCount;
+  tmpObj->amMalloced=0;
+  tmpObj->refCount  =1;
+  ppl_garbageObject(tmpObj);
+  pplObjFunc(tmpObj,om,1,f);
+  tmpObj->refCount  =rc;
   __sync_add_and_fetch(&plsub->refCount,1);
   return;
 
@@ -558,6 +564,36 @@ cleanup:
   if ((c->shellBroken)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellBroken=0; c->shellBreakLevel=0; }
   c->shellLoopName[iterDepth] = NULL;
   c->shellBreakable = shellBreakableOld;
+  return;
+ }
+
+void directive_with(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+ {
+  pplObj     *stk         = in->stk;
+  parserLine *pl2         = (parserLine *)stk[PARSE_with_code].auxil;
+  pplObj     *obj         = &stk[PARSE_with_namespace];
+  dict       *d;
+  const int   stkLevelOld = c->stackPtr;
+
+  // Check that there's enough space on the stack
+  if (c->ns_ptr > CONTEXT_DEPTH-2) { strcpy(c->errStat.errBuff,"Stack overflow."); TBADD(ERR_MEMORY,""); return; }
+
+  // Check requested namespace
+  if ((obj->objType!=PPLOBJ_MOD)&&(obj->objType!=PPLOBJ_USER)) { sprintf(c->errStat.errBuff,"Requested namespace is not a module; it has type <%s>.",pplObjTypeNames[obj->objType]); TBADD(ERR_TYPE,""); return; }
+  d = (dict *)obj->auxil;
+
+  // Enter a new namespace
+  d->refCount++;
+  c->namespaces[++c->ns_ptr] = d;
+
+  ppl_parserExecute(c, pl2, interactive, iterDepth+1);
+
+  // Leave namespace
+  if ((--d->refCount)<1) ppl_dictFree(d);
+  c->ns_ptr--;
+
+  if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"with block"); return; }
+  while (c->stackPtr>stkLevelOld) { STACK_POP; }
   return;
  }
 

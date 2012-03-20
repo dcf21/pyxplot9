@@ -55,8 +55,7 @@ void directive_funcset(ppl_context *c, parserLine *pl, parserOutput *in, int int
   pplFunc *f   = NULL;
   int      i, j, nArgs=0, pos, posR, argListLen=0;
   int      needToStoreNan=0, nullDefn=0;
-  char    *fnName = (char *)stk[PARSE_func_set_function_name].auxil;
-  pplObj  *fnObj, tmpObj;
+  pplObj  *tmpObj;
 
   // Count number of arguments
   pos = PARSE_func_set_0argument_list;
@@ -163,17 +162,19 @@ void directive_funcset(ppl_context *c, parserLine *pl, parserOutput *in, int int
    }
 
   // Look up function or variable we are superseding
-  ppl_contextGetVarPointer(c, fnName, &fnObj, &tmpObj);
+  ppl_contextVarHierLookup(c, pl->srcLineN, pl->srcId, pl->srcFname, pl->linetxt, stk, in->stkCharPos, &tmpObj, PARSE_func_set_function_names, PARSE_func_set_function_name_function_names);
+  if ((c->errStat.status) || (tmpObj==NULL)) goto fail;
+  if (tmpObj->objType==PPLOBJ_GLOB) { sprintf(c->errStat.errBuff,"Variable declared global in global namespace."); TBADD(ERR_NAMESPACE,0); goto fail; }
 
   // If not a function, we delete it and supersede it
-  if ( (tmpObj.objType!=PPLOBJ_FUNC) || (((pplFunc*)tmpObj.auxil)->functionType!=PPL_FUNC_USERDEF) || (((pplFunc*)tmpObj.auxil)->minArgs!=nArgs) )
+  if ( (tmpObj->objType!=PPLOBJ_FUNC) || (((pplFunc*)tmpObj->auxil)->functionType!=PPL_FUNC_USERDEF) || (((pplFunc*)tmpObj->auxil)->minArgs!=nArgs) )
    goto supersede;
 
   // If old function has dimensionally incompatible limits with us, we cannot splice with it; supersede it
   {
    int k;
    pplFunc *fIter;
-   for (fIter = (pplFunc*)tmpObj.auxil ; fIter!=NULL ; fIter=fIter->next)
+   for (fIter = (pplFunc*)tmpObj->auxil ; fIter!=NULL ; fIter=fIter->next)
     for (k=0; k<nArgs; k++)
      if ( ((f->minActive[k])&&(fIter->minActive[k])&&(!ppl_unitsDimEqual(f->min+k , fIter->min+k))) ||
           ((f->minActive[k])&&(fIter->maxActive[k])&&(!ppl_unitsDimEqual(f->min+k , fIter->max+k))) ||
@@ -184,7 +185,7 @@ void directive_funcset(ppl_context *c, parserLine *pl, parserOutput *in, int int
 
   // If old function has ranges which extend outside our range, we should not supersede it
   {
-   pplFunc **fIterPtr = (pplFunc **)&tmpObj.auxil;
+   pplFunc **fIterPtr = (pplFunc **)&tmpObj->auxil;
    pplFunc  *fIter    = *fIterPtr;
    for ( ; fIter!=NULL ; )
     {
@@ -244,22 +245,25 @@ void directive_funcset(ppl_context *c, parserLine *pl, parserOutput *in, int int
   // If definition is null, only insert it if it has complicated overlap
   if (nullDefn && !needToStoreNan)
    {
-    if (tmpObj.auxil==NULL) pplObjZom(&tmpObj,1);
-    ppl_contextRestoreVarPointer(c, fnName, &tmpObj);
+    if (tmpObj->auxil==NULL) pplObjZom(tmpObj,1);
     return;
    }
 
   // Add new function definition to chain of other definitions
-  f->next      = (pplFunc *)tmpObj.auxil;
-  tmpObj.auxil = (void *)f;
-  ppl_contextRestoreVarPointer(c, fnName, &tmpObj);
+  f->next       = (pplFunc *)tmpObj->auxil;
+  tmpObj->auxil = (void *)f;
   return;
 
 supersede:
-  tmpObj.amMalloced=0;
-  ppl_garbageObject(&tmpObj);
-  pplObjFunc(fnObj,fnObj->amMalloced,1,f);
-  //pplObjZom(&stk[PARSE_func_set_definition],0); // Don't free the expression we've stored as a variable
+  {
+   int rc = tmpObj->refCount;
+   int om = tmpObj->amMalloced;
+   tmpObj->refCount  =1;
+   tmpObj->amMalloced=0;
+   ppl_garbageObject(tmpObj);
+   tmpObj->refCount  = rc;
+   pplObjFunc(tmpObj,om,1,f);
+  }
   return;
 
 fail:

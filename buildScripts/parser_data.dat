@@ -53,14 +53,14 @@
 
 # List of commands recognised by PyXPlot
 
-{ < let@3 > = } %v:varname < =~@n:directive:var_set = s@n %r:regex | =@n:directive:var_set = { %o:value } >
-%v:function_name (@n [ %v:argument_name ]:0argument_list, )@n [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n ]:0range_list =@n:directive:func_set = { %e:definition }
+{ < let@3 > = } [ %v:varname ]:varnames. < =~@n:directive:var_set = s@n %r:regex | =@n:directive:var_set = { %o:value } >
+[ %v:function_name ]:function_names. (@n [ %v:argument_name ]:0argument_list, )@n [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n ]:0range_list =@n:directive:func_set = { %e:definition }
 arc@3:directive = { item@1 %d:editno } { at@1 } %p:centre radius@1 %u:r from@1 %u:angle1 to@1 %u:angle2 { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < fillcolour@1 | fillcolor@1 | fc@2 > %c:fillcolor ) }
 < line@2:directive | arrow@2:directive > = { item@1 %d:editno } { from@1 } %p:p1 to@1 %p:p2 { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < nohead@2:arrow_style | head@2:arrow_style | twohead@2:arrow_style:twoway | twoway@2:arrow_style > ) }
 assert@2:directive = < version@4 < >=@n:gtreq | <@n:lt > < %S:version | %q:version > | %b:expr > { %q:message }
 < box@2:directive | rectangle@2:directive:box > = { item@1 %d:editno } < from@1 %p:p1 to@1 %p:p2 { rotate@1 %A:rotation } | at@1 %p:p3 ( width@1 %D:width ~ height@1 %D:height ~ rotate@1 %A:rotation ) > { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < fillcolour@1 | fillcolor@1 | fc@2 > %c:fillcolor ) }
 break@2:directive = { %v:loopname }
-call@2:directive = %v:subroutine_name (@n [ < %o:argument > ]:0argument_list, )@n
+call@2:directive = %o:object
 cd@2:directive = [ < %S:directory | %q:directory > ]:path
 circle@2:directive = { item@1 %d:editno } { at@1 } %p:p radius@1 %D:r { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < fillcolour@1 | fillcolor@1 | fc@2 > %c:fillcolor ) }
 clear@3:directive =
@@ -76,6 +76,7 @@ fit@3:directive = [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max
 for@2:directive = < %v:var_name =@n %u:start_value to@n %u:final_value ( step@2:step %u:step_size ) | (@n { %E:begin } ;@n { %E:criterion } ;@n { %E:iterate } )@n > { loopname@1 %v:loopname } CODEBLOCK:code
 foreach@4:directive:foreachdatum datum@5:df = [ %v:variable ]:variables, in@n:in [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n ]:0range_list [ %q:filename ]:filename_list ( every@1 [ { %d:every_item } ]:every_list: ~ index@1 %d:index ~ select@1 %E:select_criterion ~ using@1 { < rows@1:use_rows | columns@1:use_columns > } [ { %E:using_item } ]:using_list: ) { loopname@1 %v:loopname } CODEBLOCK:code
 foreach@4:directive = %v:var_name in@n:in %o:item_list { loopname@1 %s:loopname } CODEBLOCK:code
+global@6:directive = [ %v:var_name ]:var_names,
 help@2:directive = %r:topic
 history@2:directive = { %d:number_lines }
 histogram@5:directive = { [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n } %v:hist_function ()@2 < %S:filename | %q:filename > ( every@1 [ { %d:every_item } ]:every_list: ~ index@1 %d:index ~ select@1 %E:select_criterion ~ using@1 { < rows@1:use_rows | columns@1:use_columns > } [ { %E:using_item } ]:using_list: ~ binwidth@4 %u:binwidth ~ binorigin@4 %u:binorigin ~ bins@n (@n [ %u:x ]:bin_list, )@n )
@@ -83,6 +84,7 @@ histogram@5:directive = { [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < 
 if@2:directive = %b:criterion CODEBLOCK:code [ else@4 if@1 %b:criterion CODEBLOCK:code_elif ]:0elifs { else CODEBLOCK:code_else }
 < list@2:directive | ls@2:directive:list > =
 load@2:directive = < %S:filename | %q:filename >
+local@5:directive = [ %v:var_name ]:var_names,
 maximise@2:directive = %e:expression via@1 [ %v:fit_variable ]:fit_variables,
 minimise@2:directive = %e:expression via@1 [ %v:fit_variable ]:fit_variables,
 move@2:directive = { item@1 } %d:moveno to@1 %p:p { rotate@1 %A:rotation }
@@ -178,7 +180,7 @@ set@2:directive:set_error = { item@1 %d:editno } { %s:set_option } %r:restofline
 show@2:directive = { item@1 %d:editno } [ %S:setting ]:0setting_list
 solve@2:directive = [ %g:left_expression =@n %g:right_expression ]:expressions, via@1 [ %v:fit_variable ]:fit_variables,
 < spline@3:directive = | interpolate@4 = < akima@1:directive | linear@2:directive | loglinear@2:directive | polynomial@1:directive | spline@2:directive | stepwise@2:directive | 2d@2:directive:interpolate2d { < bmp_r:bmp | bmp_g:bmp | bmp_b:bmp > } > > [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n ]:0range_list %v:fit_function ()@2 < %S:filename | %q:filename > ( every@1 [ { %d:every_item } ]:every_list: ~ index@1 %d:index ~ select@1 %E:select_criterion ~ using@1 { < rows@1:use_rows | columns@1:use_columns > } [ { %E:using_item } ]:using_list: )
-subroutine@2:directive = %v:subroutine_name (@n [ %v:argument_name ]:0argument_list, )@n CODEBLOCK:code
+subroutine@2:directive = [ %v:subroutine_name ]:subroutine_names. (@n [ %v:argument_name ]:0argument_list, )@n CODEBLOCK:code
 swap@2:directive = %d:item1 %d:item2
 tabulate@2:directive = [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n ]:0range_list [ { parametric@1:parametric { [@n %u:tmin < :@n | to@n > %u:tmax ]@n { [@n %u:vmin < :@n | to@n > %u:vmax ]@n } } } [ %e:expression ]:expression_list: ( every@1 [ { %d:every_item } ]:every_list: ~ index@1 %d:index ~ select@1 %E:select_criterion ~ sortby %E:sort_expression ~ using@1 { < rows@1:use_rows | columns@1:use_columns > } [ { %E:using_item } ]:using_list: ) { with@1 ( format@1 %q:format ~ spacing@1 %u:spacing ) } ]:0tabulate_list, DATABLOCK:data
 text@3:directive = { item@1 %d:editno } < %q:string > ( at@1 %p:p ~ rotate@1 %A:rotation ~ gap@1 %D:gap ~ halign@2 < left@1:halign | centre@1:halign | center@1:halign:centre | right@1:halign > ~ valign@2 < top@1:valign | centre@1:valign | center@1:valign:centre | bottom@1:valign > ~ with@1 < colour@1 | color@1 > %c:color )
@@ -261,5 +263,6 @@ unset@2:directive { item@1 %d:editno } vrange@2:set_option =
 unset@3:directive { item@1 %d:editno } width@1:set_option =
 unset@3:directive:unset_error = { item@1 %d:editno } { %s:set_option } %r:restofline
 while@5:directive = %e:criterion { loopname@1 %v:loopname } CODEBLOCK:code
+with@4:directive = %o:namespace CODEBLOCK:code
 %e:directive =
 

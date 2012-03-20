@@ -60,14 +60,6 @@ typedef struct functionDescriptor
   char   *description, *descriptionShort;
  } pplFunc;
 
-typedef struct subroutineDescriptor
- {
-  int         nArgs;
-  char       *argList;
-  parserLine *code;
- } subroutineDescriptor;
-
-
 typedef struct splineDescriptor
  {
   gsl_spline       *splineObj;

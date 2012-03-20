@@ -115,7 +115,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
   // If at bottom iteration depth, clean up stack now if there is any left-over junk
   if (iterDepth==0) while (c->stackPtr>0) { STACK_POP; }
 
-  while ((in!=NULL)&&(!c->shellExiting)&&(!c->shellBroken)&&(!c->shellContinued)&&(!c->shellReturned))
+  while ((in!=NULL)&&(!c->errStat.status)&&(!c->shellExiting)&&(!c->shellBroken)&&(!c->shellContinued)&&(!c->shellReturned))
    {
     parserAtom *item = in->firstAtom;
 

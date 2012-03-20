@@ -37,6 +37,7 @@ void directive_fordata (ppl_context *c, parserLine *pl, parserOutput *in, int in
 void directive_if      (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 void directive_subrt   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 void directive_while   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+void directive_with    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 
 #endif
 

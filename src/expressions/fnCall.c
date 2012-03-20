@@ -604,6 +604,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
         else
          {
           int k, lastOpAssign=0, stkp=context->stackPtr, ns_ptr=context->ns_ptr;
+          int setSelf = (called.self_this!=NULL) && ( (called.self_this->objType==PPLOBJ_USER)||(called.self_this->objType==PPLOBJ_MOD));
           pplObj *output;
 
           // If function definition is null, result is NAN
@@ -634,6 +635,15 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
            }
           context->stackPtr+=nArgs;
 
+          // Insert variable 'self' into namespace, if this is a method
+          if (setSelf)
+           {
+            pplObj *varObj;
+            ppl_contextGetVarPointer(context, "self", &varObj, &context->stack[stkp+j]);
+            pplObjCpy(varObj, called.self_this, 0, varObj->amMalloced, 1);
+            context->stackPtr++;
+           }
+
           // Evaluate function
           output = ppl_expEval(context, (pplExpr *)f->functionPtr, &lastOpAssign, dollarAllowed, iterDepth+1);
 
@@ -642,6 +652,12 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
            {
             ppl_contextRestoreVarPointer(context, fn->argList+k, &context->stack[stkp+j]);
             k += strlen(fn->argList+k)+1;
+           }
+
+          // Take self out of namespace dictionary
+          if (setSelf)
+           {
+            ppl_contextRestoreVarPointer(context, "self", &context->stack[stkp+j]);
            }
 
           // Add traceback information if error happened
@@ -653,7 +669,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
             memcpy(args-1, output, sizeof(pplObj));
             context->stackPtr--;
            }
-          context->stackPtr-=nArgs;
+          context->stackPtr-=nArgs+setSelf;
           context->ns_ptr = ns_ptr;
          }
         break;

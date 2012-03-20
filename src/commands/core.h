@@ -29,11 +29,14 @@
 void directive_assert (ppl_context *c, parserLine *pl, parserOutput *in);
 void directive_cd     (ppl_context *c, parserLine *pl, parserOutput *in);
 void directive_exec   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+void directive_global (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 void directive_history(ppl_context *c, parserLine *pl, parserOutput *in);
 void directive_load   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+void directive_local  (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 void directive_print  (ppl_context *c, parserLine *pl, parserOutput *in);
 void directive_save   (ppl_context *c, parserLine *pl, parserOutput *in);
 void directive_seterror(ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
 void directive_unseterror(ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
+void directive_varset (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 
 #endif

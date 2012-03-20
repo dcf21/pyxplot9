@@ -117,13 +117,9 @@ void pplObjFuncDestroy(pplFunc *f)
      }
     case PPL_FUNC_SUBROUTINE:
      {
-      subroutineDescriptor *s = (subroutineDescriptor *)f->functionPtr;
+      parserLine *s = (parserLine *)f->functionPtr;
       f->functionPtr=NULL;
-      if (s!=NULL)
-       {
-        if (s->code!=NULL) ppl_parserLineFree(s->code);
-        free(s);
-       }
+      if (s!=NULL) ppl_parserLineFree(s);
       break;
      }
    }

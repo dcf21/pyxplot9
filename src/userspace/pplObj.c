@@ -410,6 +410,7 @@ pplObj *pplObjUser(pplObj *in, unsigned char amMalloced, unsigned char auxilMall
 pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char lval, unsigned char outMalloced, unsigned char useMalloc)
  {
   int rc = (out==NULL) ? 1 : out->refCount;
+  int t;
 
   if (in==NULL) return NULL;
 
@@ -420,6 +421,7 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char lval, unsigned char out
     if (out==NULL) return out;
    }
 
+  t = in->objType;
   memcpy(out, in, sizeof(pplObj));
   if (lval) { out->self_lval = in; __sync_add_and_fetch(&out->self_lval->refCount,1); }
   else      { out->self_lval = NULL; }
@@ -427,6 +429,7 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char lval, unsigned char out
   out->self_this  = NULL;
   out->refCount   = rc;
   out->amMalloced = outMalloced;
+  out->immutable  = in->immutable && ((t==PPLOBJ_EXP)||(t==PPLOBJ_BYT)||(t==PPLOBJ_LIST)||(t==PPLOBJ_VEC)||(t==PPLOBJ_MAT)||(t==PPLOBJ_DICT)||(t==PPLOBJ_MOD)||(t==PPLOBJ_USER)||(t==PPLOBJ_FILE)||(t==PPLOBJ_FUNC)||(t==PPLOBJ_TYPE));
 
   switch(in->objType)
    {

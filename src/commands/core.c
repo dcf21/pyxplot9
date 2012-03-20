@@ -57,6 +57,7 @@
 #include "expressions/traceback.h"
 
 #include "userspace/context.h"
+#include "userspace/contextVarDef.h"
 #include "userspace/garbageCollector.h"
 #include "userspace/pplObj_fns.h"
 #include "userspace/pplObjPrint.h"
@@ -184,6 +185,44 @@ void directive_exec(ppl_context *c, parserLine *pl, parserOutput *in, int intera
   return;
  }
 
+void directive_global(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+ {
+  pplObj *stk = in->stk;
+  int     pos;
+
+  if (c->ns_ptr<2) { sprintf(c->errStat.errBuff,"Cannot declare global variables when not in a subroutine or module namespace."); TBADD(ERR_NAMESPACE,0); return; }
+
+  pos = PARSE_global_var_names;
+  while ((stk[pos].objType == PPLOBJ_NUM) && (stk[pos].real > 0))
+   {
+    int     om, rc;
+    char   *varname;
+    pplObj *obj;
+
+    pos     = (int)round(stk[pos].real);
+    varname = (char *)stk[pos+PARSE_global_var_name_var_names].auxil;
+    obj = (pplObj *)ppl_dictLookup(c->namespaces[c->ns_ptr] , varname);
+    if ((obj==NULL)&&(!c->namespaces[c->ns_ptr]->immutable))
+     {
+      pplObj  out;
+      pplObjZom(&out,1); out.refCount=1; // Create a temporary zombie for now
+      ppl_dictAppendCpy(c->namespaces[c->ns_ptr] , varname , (void *)&out , sizeof(pplObj));
+      obj = (pplObj *)ppl_dictLookup(c->namespaces[c->ns_ptr] , varname);
+      if (obj==NULL) { sprintf(c->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY,0); return; }
+     }
+    if ((obj==NULL)||(c->namespaces[c->ns_ptr]->immutable)) { sprintf(c->errStat.errBuff,"Cannot modify variable in immutable namespace."); TBADD(ERR_NAMESPACE,in->stkCharPos[pos+PARSE_global_var_name_var_names]); return; }
+    if (obj->objType==PPLOBJ_GLOB) return;
+    om = obj->amMalloced;
+    rc = obj->refCount;
+    obj->amMalloced = 0;
+    obj->refCount = 1;
+    ppl_garbageObject(obj);
+    pplObjGlobal(obj, om);
+    obj->refCount = rc;
+   }
+  return;
+ }
+
 void directive_history(ppl_context *c, parserLine *pl, parserOutput *in)
  {
 #ifdef HAVE_READLINE
@@ -226,6 +265,31 @@ void directive_load(ppl_context *c, parserLine *pl, parserOutput *in, int intera
     ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,ERR_GENERAL,0,pl->linetxt,"executed script");
    }
   globfree(&globData);
+  return;
+ }
+
+void directive_local(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+ {
+  pplObj *stk = in->stk;
+  int     pos;
+
+  if (c->ns_ptr<2) { sprintf(c->errStat.errBuff,"Cannot declare global variables when not in a subroutine or module namespace."); TBADD(ERR_NAMESPACE,0); return; }
+
+  pos = PARSE_local_var_names;
+  while ((stk[pos].objType == PPLOBJ_NUM) && (stk[pos].real > 0))
+   {
+    char   *varname;
+    pplObj *obj;
+
+    pos = (int)round(stk[pos].real);
+    varname = (char *)stk[pos+PARSE_local_var_name_var_names].auxil;
+
+    // Look up requested variable
+    ppl_contextVarLookup(c, varname, &obj, 1);
+    if ((obj==NULL)||(obj->objType!=PPLOBJ_GLOB)) { sprintf(c->errStat.errBuff,"Variable '%s' has not previously been declared global in this namespace. It is already a local variable.",varname); TBADD(ERR_NAMESPACE,in->stkCharPos[pos+PARSE_local_var_name_var_names]); return; }
+
+    pplObjZom(obj,obj->amMalloced);
+   }
   return;
  }
 
@@ -308,7 +372,7 @@ void directive_unseterror(ppl_context *c, parserLine *pl, parserOutput *in, int 
   pplObj *o = &in->stk[PARSE_set_error_set_option];
   char *tempstr = (o->objType==PPLOBJ_STR) ? (char *)in->stk[PARSE_set_error_set_option].auxil : NULL;
   if (tempstr != NULL)
-   { 
+   {
     if (!interactive) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Unrecognised set option '%s'.", tempstr); TBADD(ERR_SYNTAX,in->stkCharPos[PARSE_set_error_set_option]); }
     else              { snprintf(c->errStat.errBuff, LSTR_LENGTH, ppltxt_unset                   , tempstr); TBADD(ERR_SYNTAX,in->stkCharPos[PARSE_set_error_set_option]); }
    }
@@ -317,6 +381,27 @@ void directive_unseterror(ppl_context *c, parserLine *pl, parserOutput *in, int 
     if (!interactive) { snprintf(c->errStat.errBuff, LSTR_LENGTH,  "unset command detected with no set option following it."); TBADD(ERR_SYNTAX,0); }
     else              { snprintf(c->errStat.errBuff, LSTR_LENGTH, "%s", ppltxt_unset_noword); TBADD(ERR_SYNTAX,0); }
    }
+  return;
+ }
+
+void directive_varset(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+ {
+  pplObj *stk = in->stk;
+  int     om, rc;
+  pplObj *val = &stk[PARSE_var_set_value];
+  pplObj *obj=NULL;
+
+  ppl_contextVarHierLookup(c, pl->srcLineN, pl->srcId, pl->srcFname, pl->linetxt, stk, in->stkCharPos, &obj, PARSE_var_set_varnames, PARSE_var_set_varname_varnames);
+  if ((c->errStat.status) || (obj==NULL)) return;
+  if (obj->objType==PPLOBJ_GLOB) { sprintf(c->errStat.errBuff,"Variable declared global in global namespace."); TBADD(ERR_NAMESPACE,0); return; }
+
+  om = obj->amMalloced;
+  rc = obj->refCount;
+  obj->amMalloced = 0;
+  obj->refCount = 1;
+  ppl_garbageObject(obj);
+  pplObjCpy(obj, val, 0, om, 1);
+  obj->refCount = rc;
   return;
  }
 

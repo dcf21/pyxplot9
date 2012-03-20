@@ -254,7 +254,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
       const char    *fnname = (oname==NULL)?"function":oname;
       const pplFunc *f      = (pplFunc *)o->auxil;
       int            first  = 1, i=0;
-      int            indent = 18*(modIterDepth>0) + 2*modIterDepth;
+      int            indent = 16*(modIterDepth>0) + 2*modIterDepth;
       for ( ; f!=NULL ; f=f->next , first=0)
        {
         const int t = f->functionType;
@@ -296,7 +296,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
           case PPL_FUNC_BMPDATA:
            {
             splineDescriptor *s = (splineDescriptor *)f->functionPtr;
-            sprintf(out+i,"%s(x)= [%s interpolation of data from the %sfile '%s']\n", fnname,
+            sprintf(out+i,"%s(x)= [%s interpolation of data from the %sfile '%s']", fnname,
                                                                                 s->splineType,
                                                                                 (f->functionType == PPL_FUNC_BMPDATA)?"bitmap ":"",
                                                                                 s->filename );
@@ -305,28 +305,27 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
            }
           case PPL_FUNC_HISTOGRAM:
            {
-            sprintf(out+i,"%s(x)= [histogram of data from the file '%s']\n", fnname, ((histogramDescriptor *)f->functionPtr)->filename );
+            sprintf(out+i,"%s(x)= [histogram of data from the file '%s']", fnname, ((histogramDescriptor *)f->functionPtr)->filename );
             i+=strlen(out+i);
             break;
            }
           case PPL_FUNC_FFT:
            {
-            sprintf(out+i,"%s(x)= [%d-dimensional fft]\n", fnname, ((FFTDescriptor *)f->functionPtr)->Ndims );
+            sprintf(out+i,"%s(x)= [%d-dimensional fft]", fnname, ((FFTDescriptor *)f->functionPtr)->Ndims );
             i+=strlen(out+i);
             break;
            }
           case PPL_FUNC_SUBROUTINE:
            {
             int l,m;
-            subroutineDescriptor *SDiter = (subroutineDescriptor *)f->functionPtr;
             sprintf(out+i,"%s(", fnname); i+=strlen(out+i);
-            for (l=0, m=0; l<SDiter->nArgs; l++, m++)
+            for (l=0, m=0; l<f->maxArgs; l++, m++)
              {
-              for ( ; SDiter->argList[m]!='\0'; m++) out[i++] = SDiter->argList[m];
+              for ( ; f->argList[m]!='\0'; m++) out[i++] = f->argList[m];
               out[i++] = ',';
              }
-            if (SDiter->nArgs>0) i--; // Remove final comma from list of arguments
-            sprintf(out+i,") = [subroutine]\n");
+            if (f->maxArgs>0) i--; // Remove final comma from list of arguments
+            sprintf(out+i,") = [subroutine]");
             i+=strlen(out+i);
             break;
            }

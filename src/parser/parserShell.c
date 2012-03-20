@@ -88,40 +88,15 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
 
   // Directive is a string
   if      (strcmp(d, "var_set")==0)
-   {
-    int i;
-    char *varname = (char *)stk[PARSE_var_set_varname].auxil;
-    pplObj *val = &stk[PARSE_var_set_value];
-    pplObj  out; pplObjZom(&out,1); out.refCount=1; // Create a temporary zombie for now
-
-    for (i=c->ns_ptr ; ; i=1)
-     {
-      int om, rc;
-      pplObj *obj = (pplObj *)ppl_dictLookup(c->namespaces[i] , varname);
-      if ((obj==NULL)&&(!c->namespaces[i]->immutable))
-       {
-        ppl_dictAppendCpy(c->namespaces[i] , varname , (void *)&out , sizeof(pplObj));
-        obj = (pplObj *)ppl_dictLookup(c->namespaces[i] , varname);
-        if (obj==NULL) { sprintf(c->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY,0); break; }
-       }
-      if ((obj==NULL)||((c->namespaces[i]->immutable)&&(obj->objType!=PPLOBJ_GLOB))) { sprintf(c->errStat.errBuff,"Cannot modify variable in immutable namespace."); TBADD(ERR_NAMESPACE,0); break; }
-      if (obj->objType==PPLOBJ_GLOB) { if (i<2) { sprintf(c->errStat.errBuff,"Variable declared global in global namespace."); TBADD(ERR_NAMESPACE,0); break; } continue; }
-      om = obj->amMalloced;
-      rc = obj->refCount;
-      obj->amMalloced = 0;
-      obj->refCount = 1;
-      ppl_garbageObject(obj);
-      pplObjCpy(obj, val, 0, om, 1);
-      obj->refCount = rc;
-      break;
-     }
-   }
+    directive_varset(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "func_set")==0)
     directive_funcset(c,pl,in,interactive);
   else if (strcmp(d, "assert")==0)
     directive_assert(c,pl,in);
   else if (strcmp(d, "break")==0)
     directive_break(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "call")==0)
+    { } // Work already done in evaluating the called object!
   else if (strcmp(d, "cd")==0)
     directive_cd(c,pl,in);
   else if (strcmp(d, "continue")==0)
@@ -136,6 +111,8 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     directive_foreach(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "foreachdatum")==0)
     directive_fordata(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "global")==0)
+    directive_global(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "help")==0)
     directive_help(c,pl,in,interactive);
   else if (strcmp(d, "history")==0)
@@ -144,6 +121,8 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     directive_if(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "load")==0)
     directive_load(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "local")==0)
+    directive_local(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "maximise")==0)
     directive_maximise(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "minimise")==0)
@@ -175,6 +154,8 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     directive_unseterror(c,pl,in,interactive);
   else if (strcmp(d, "while")==0)
     directive_while(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "with")==0)
+    directive_with(c,pl,in,interactive,iterDepth);
   else
    {
     snprintf(c->errStat.errBuff, LSTR_LENGTH, "Unimplemented command: %s", d);
