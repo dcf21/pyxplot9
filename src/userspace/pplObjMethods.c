@@ -1240,11 +1240,19 @@ void pplObjMethodsInit(ppl_context *c)
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"sort",0,0,1,1,1,1,(void *)pplmethod_listSort, "sort()", "\\mathrm{sort}@<@>", "sort() sorts the members of a list");
 
   // Dictionary methods
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DICT],"hasKey",1,1,0,0,0,0,(void *)pplmethod_dictHasKey, "hasKey()", "\\mathrm{hasKey}@<@1@>", "hasKey(x) returns a boolean indicating whether the key x exists in the dictionary");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DICT],"items" ,0,0,1,1,1,1,(void *)pplmethod_dictItems , "items()", "\\mathrm{items}@<@>", "items() returns a list of the [key,value] pairs in a dictionary");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DICT],"keys"  ,0,0,1,1,1,1,(void *)pplmethod_dictKeys  , "keys()", "\\mathrm{keys}@<@>", "keys() returns a list of the keys defined in a dictionary");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DICT],"len"   ,0,0,1,1,1,1,(void *)pplmethod_dictLen   , "len()", "\\mathrm{len}@<@>", "len() returns the number of entries in a dictionary");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DICT],"values",0,0,1,1,1,1,(void *)pplmethod_dictValues, "values()", "\\mathrm{values}@<@>", "values() returns a list of the values in a dictionary");
+  for (i=0 ;i<3; i++)
+   {
+    int pplobj;
+    if      (i==0) pplobj = PPLOBJ_DICT;
+    else if (i==1) pplobj = PPLOBJ_MOD;
+    else           pplobj = PPLOBJ_USER;
+
+    ppl_addSystemFunc(pplObjMethods[pplobj],"hasKey",1,1,0,0,0,0,(void *)pplmethod_dictHasKey, "hasKey()", "\\mathrm{hasKey}@<@1@>", "hasKey(x) returns a boolean indicating whether the key x exists in the dictionary");
+    ppl_addSystemFunc(pplObjMethods[pplobj],"items" ,0,0,1,1,1,1,(void *)pplmethod_dictItems , "items()", "\\mathrm{items}@<@>", "items() returns a list of the [key,value] pairs in a dictionary");
+    ppl_addSystemFunc(pplObjMethods[pplobj],"keys"  ,0,0,1,1,1,1,(void *)pplmethod_dictKeys  , "keys()", "\\mathrm{keys}@<@>", "keys() returns a list of the keys defined in a dictionary");
+    ppl_addSystemFunc(pplObjMethods[pplobj],"len"   ,0,0,1,1,1,1,(void *)pplmethod_dictLen   , "len()", "\\mathrm{len}@<@>", "len() returns the number of entries in a dictionary");
+    ppl_addSystemFunc(pplObjMethods[pplobj],"values",0,0,1,1,1,1,(void *)pplmethod_dictValues, "values()", "\\mathrm{values}@<@>", "values() returns a list of the values in a dictionary");
+   }
 
   // Matrix methods
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"det" ,0,0,1,1,1,1,(void *)pplmethod_matrixDet,"det()", "\\mathrm{det}@<@>", "det() returns the determinant of a square matrix");

@@ -209,7 +209,7 @@ void directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int interac
   if (BASICstyle)
    {
     double iter;
-    int backwards = endVal->real > beginVal->real;
+    int forwards = endVal->real > beginVal->real;
 
     if (!stepGot) // If no step is specified, make it equal to one SI unit
      {
@@ -221,9 +221,9 @@ void directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int interac
      }
     if (!ppl_unitsDimEqual(beginVal , endVal )) { sprintf(c->errStat.errBuff,"The start and end values of this for loop are dimensionally incompatible: the start value has dimensions of <%s> but the end value has dimensions of <%s>.",ppl_printUnit(c,beginVal,NULL,NULL,0,1,0),ppl_printUnit(c,endVal,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERIC,in->stkCharPos[PARSE_for_final_value]); goto cleanup; }
     if (!ppl_unitsDimEqual(beginVal , stepVal)) { sprintf(c->errStat.errBuff,"The start value and step size of this for loop are dimensionally incompatible: the start value has dimensions of <%s> but the step size has dimensions of <%s>.",ppl_printUnit(c,beginVal,NULL,NULL,0,1,0),ppl_printUnit(c,stepVal,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERIC,in->stkCharPos[PARSE_for_start_value]); goto cleanup; }
-    if ( (stepVal->real==0) || ((stepVal->real > 0) != backwards) ) { strcpy(c->errStat.errBuff,"The number of iterations in this for loop is infinite."); TBADD2(ERR_NUMERIC,in->stkCharPos[PARSE_for_start_value]); goto cleanup; }
+    if ( (stepVal->real==0) || ((stepVal->real > 0) != forwards) ) { strcpy(c->errStat.errBuff,"The number of iterations in this for loop is infinite."); TBADD2(ERR_NUMERIC,in->stkCharPos[PARSE_for_start_value]); goto cleanup; }
 
-    for (iter=beginVal->real; iter<=endVal->real; iter+=stepVal->real)
+    for (iter=beginVal->real; (forwards ? (iter<=endVal->real) : (iter>=endVal->real)); iter+=stepVal->real)
      {
       pplObj *varObj, vartmp;
       ppl_contextGetVarPointer(c, varname, &varObj, &vartmp);

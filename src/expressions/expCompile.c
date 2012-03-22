@@ -140,7 +140,8 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
         if ( (in[scanpos]==(quoteType='\'')) || (in[scanpos]==(quoteType='"')) )
          {
           int j;
-          for (j=1; ((in[scanpos+j]!='\0')&&((in[scanpos+j]!=quoteType)||(in[scanpos+j-1]=='\\'))); j++);
+          for (j=1; ((in[scanpos+j]!=quoteType)&&(in[scanpos+j]!='\0')); j++)
+            if ((in[scanpos+j]=='\\')&&(in[scanpos+j+1]!='\0')) j++;
           if (in[scanpos+j]==quoteType) { j++; NEWSTATE(j,0,0); }
           else                          { *errPos = scanpos; *errType=ERR_SYNTAX; strcpy(errText, "Mismatched quote."); *end=-1; *outlen=0; return; }
          }
@@ -593,27 +594,43 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
      {
       int  i;
       char quoteType=in[ipos];
+      char *oc = (char *)out;
       BYTECODE_OP(2); // bytecode op 2
       if ((quoteType!='\'')&&(quoteType!='"')) // Unquoted string
        {
         while ((tpos<tlen) && (tdata[tpos]+'@' == o))
          {
-          *(char *)(out+outpos++) = in[ipos];
+          oc[outpos++] = in[ipos];
           tpos+=3; ipos++;
           if (tpos>=tlen) break;
          }
-        if ((outpos>0)&&(*(unsigned char *)(out+outpos-1)==',')) outpos--;
+        if ((outpos>0)&&(oc[outpos-1]==',')) outpos--;
        }
       else
        {
-        for ( i=ipos+1 ; ((in[i]!=quoteType) || ((quoteType!='\0')&&(in[i-1]=='\\'))) ; i++ )
+        for ( i=ipos+1 ; (in[i]!=quoteType) ; i++ )
          {
           if (in[i]=='\0') { *errPos=i; *errType=ERR_INTERNAL; strcpy(errText, "Unexpected end of string."); *end=-1; return; }
-          if ((in[i]=='\\') && (in[i-1]!='\\')) continue; // We have a double backslash
-          *(char *)(out+outpos++) = in[i];
+          if (in[i]=='\\')
+           switch (in[i+1])
+            {
+             case '?' : oc[outpos++]='\?'; i++; break;
+             case '\'': oc[outpos++]='\''; i++; break;
+             case '\"': oc[outpos++]='\"'; i++; break;
+             case '\\': oc[outpos++]='\\'; i++; break;
+             case 'a' : oc[outpos++]='\a'; i++; break;
+             case 'b' : oc[outpos++]='\b'; i++; break;
+             case 'f' : oc[outpos++]='\f'; i++; break;
+             case 'n' : oc[outpos++]='\n'; i++; break;
+             case 'r' : oc[outpos++]='\r'; i++; break;
+             case 't' : oc[outpos++]='\t'; i++; break;
+             case 'v' : oc[outpos++]='\v'; i++; break;
+             default  : oc[outpos++] = in[i]; break;
+            }
+          else { oc[outpos++] = in[i]; }
          }
        }
-      *(unsigned char *)(out+outpos++) = '\0';
+      oc[outpos++] = '\0';
       BYTECODE_ENDOP;
      }
     else if ( (o=='C') || (o=='H') || (o=='I') || (o=='J') || (o=='K') || (o=='S') ) // Process an operator

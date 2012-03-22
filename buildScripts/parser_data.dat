@@ -81,7 +81,7 @@ help@2:directive = %r:topic
 history@2:directive = { %d:number_lines }
 histogram@5:directive = { [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n } %v:hist_function ()@2 < %S:filename | %q:filename > ( every@1 [ { %d:every_item } ]:every_list: ~ index@1 %d:index ~ select@1 %E:select_criterion ~ using@1 { < rows@1:use_rows | columns@1:use_columns > } [ { %E:using_item } ]:using_list: ~ binwidth@4 %u:binwidth ~ binorigin@4 %u:binorigin ~ bins@n (@n [ %u:x ]:bin_list, )@n )
 < image@2:directive | jpeg@2:directive:image > = { item@1 %d:editno } = < %S:filename | %q:filename > ( at@2 %p:p ~ smooth@1:smooth ~ < notransparency@3:notrans | transparent@1 rgb@n %f:colourR :@n %f:colourG :@n %f:colourB > ~ rotate@1 %A:rotation ~ < width@1 %D:width | height@1 %D:height > )
-if@2:directive = %b:criterion CODEBLOCK:code [ else@4 if@1 %b:criterion CODEBLOCK:code_elif ]:0elifs { else CODEBLOCK:code_else }
+if@2:directive = %E:criterion CODEBLOCK:code [ else@4 if@1 %E:criterion CODEBLOCK:code_elif ]:0elifs { else CODEBLOCK:code_else }
 < list@2:directive | ls@2:directive:list > =
 load@2:directive = < %S:filename | %q:filename >
 local@5:directive = [ %v:var_name ]:var_names,

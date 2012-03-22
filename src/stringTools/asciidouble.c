@@ -516,6 +516,14 @@ char *ppl_strEscapify(const char *in, char *out)
   *scanout++ = '\"';
   while (*scanin != '\0')
    {
+    if (*scanin=='\?') { strcpy(scanout,"\\?"); scanout+=2; scanin++; continue; }
+    if (*scanin=='\a') { strcpy(scanout,"\\a"); scanout+=2; scanin++; continue; }
+    if (*scanin=='\b') { strcpy(scanout,"\\b"); scanout+=2; scanin++; continue; }
+    if (*scanin=='\f') { strcpy(scanout,"\\f"); scanout+=2; scanin++; continue; }
+    if (*scanin=='\n') { strcpy(scanout,"\\n"); scanout+=2; scanin++; continue; }
+    if (*scanin=='\r') { strcpy(scanout,"\\r"); scanout+=2; scanin++; continue; }
+    if (*scanin=='\t') { strcpy(scanout,"\\t"); scanout+=2; scanin++; continue; }
+    if (*scanin=='\v') { strcpy(scanout,"\\v"); scanout+=2; scanin++; continue; }
     if ((*scanin=='\'')||(*scanin=='\"')||(*scanin=='\\')) *(scanout++) = '\\';
     *(scanout++) = *(scanin++);
    }

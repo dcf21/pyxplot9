@@ -110,6 +110,84 @@ static int parse_descend(ppl_context *c, parserStatus *s, int writeOut, int srcL
        }
       else if ((node->type==PN_TYPE_REP)||(node->type==PN_TYPE_REP2))
        {
+        int        separator=1;
+        char       sepStr[4];
+        parserNode sepNode;
+        int        oldStackOffset = s->oldStackOffset[blockDepth][level];
+        sepStr[0] = node->varName[strlen(node->varName)-1];
+        sepStr[1] = '\0';
+        if (isalnum(sepStr[0])) separator=0;
+        sepNode.type        = PN_TYPE_ITEM;
+        sepNode.listLen     = 0;
+        sepNode.acLevel     = -1;
+        sepNode.matchString = sepStr;
+        sepNode.outString   = sepStr;
+        sepNode.varName     = "X";
+        sepNode.outStackPos = PARSE_arc_X;
+        sepNode.firstChild  = NULL;
+        sepNode.nextSibling = NULL;
+
+        // Treat the run through the REP that we're in the middle of as a SEQ
+        while ((nodeIter!=nodeNext) && (nodeIter!=NULL)) nodeIter = nodeIter->nextSibling; // Work out where we were...
+        if (nodeIter==nodeNext) nodeIter = nodeIter->nextSibling;
+        while (nodeIter != NULL)
+         {
+          status = parse_descend(c,s,writeOut,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
+          if (status!=1) goto cleanup;
+          nodeIter = nodeIter->nextSibling;
+         }
+
+        // See whether REP repeats again
+        while (1)
+         {
+          int         lineposOld = *linepos;
+          int         matchOld   = *match;
+          int         lineposOld2;
+          parserNode *nodeIter   = node->firstChild;
+
+          if (separator)
+           {
+            status = parse_descend(c,s,0,srcLineN,srcId,srcFname,line,linepos,&sepNode,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
+            if (status==3) { status=0; } // Separator shouldn't ask for more lines!
+            if (status==0) { *linepos=lineposOld; *match=matchOld; status=1; goto repLoopCleanup; }
+            if (status==2) goto repLoopCleanup;
+           }
+          lineposOld2 = *linepos;
+          while (nodeIter != NULL)
+           {
+            status = parse_descend(c,s,0,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
+            if (status==3) { status=0; goto repLoopCleanup; } // Trial run with writeOut=0 shouldn't ask for more lines!
+            if (status==0) { if (!separator) { status=1; *linepos=lineposOld; *match=matchOld; } goto repLoopCleanup; }
+            if (status==2) goto repLoopCleanup;
+            nodeIter = nodeIter->nextSibling;
+           }
+          if ((s!=NULL) && writeOut)
+           {
+            int    oldStackLen = s->pl[blockDepth]->stackLen;
+            pplObj val;
+            val.refCount=1;
+            pplObjNum(&val,1,oldStackLen,0);
+            ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + ((s->pl[blockDepth]->stackOffset == oldStackOffset) ? node->outStackPos : 0), *linepos, "", NULL, &val);
+            s->pl[blockDepth]->stackLen += node->listLen;
+            s->pl[blockDepth]->stackOffset = oldStackLen;
+            nodeIter=node->firstChild;
+            *linepos=lineposOld2;
+            *match=matchOld;
+            while (nodeIter != NULL)
+             {
+              // Add an atom to the parserLine to point to the beginning of structure
+              // This is written to either stack location (offset + stackPos) if first iteration, or (offset + 0) subsequently
+              // In any repeating structure, first stack position is pointer to next item
+              status = parse_descend(c,s,writeOut,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
+              if (status==3) goto cleanup;
+              if (status!=1) goto repLoopCleanup;
+              nodeIter = nodeIter->nextSibling;
+             }
+           }
+         }
+repLoopCleanup:
+        s->pl[blockDepth]->stackOffset = oldStackOffset;
+        goto cleanup;
        }
       else
        {
@@ -224,12 +302,12 @@ static int parse_descend(ppl_context *c, parserStatus *s, int writeOut, int srcL
         // Test for opening brace
         if (first)
          {
-          s->waitingForBrace   = 1;
-          s->outputPos         = s->pl[blockDepth]->stackOffset + node->outStackPos;
-          s->blockDepth        = blockDepth+1;
-          s->pl[s->blockDepth] = NULL;
+          s->waitingForBrace       = 1;
+          s->outputPos[blockDepth] = s->pl[blockDepth]->stackOffset + node->outStackPos;
+          s->blockDepth            = blockDepth+1;
+          s->pl[s->blockDepth]     = NULL;
          }
-        if (s->waitingForBrace)
+        if ((s->waitingForBrace)&&(s->blockDepth==blockDepth+1))
          {
           if (line[*linepos]=='{')
            {
@@ -261,17 +339,17 @@ static int parse_descend(ppl_context *c, parserStatus *s, int writeOut, int srcL
          }
 
         // Test for closing brace
-        if (line[*linepos]=='}')
+        if ((line[*linepos]=='}')&&(s->blockDepth==blockDepth+1))
          {
           status=1;
           (*linepos)++;
-          if (s->outputPos>=0) // check we've had at least one command
+          if (s->outputPos[blockDepth]>=0) // check we've had at least one command
            {
             pplObj val;
             val.refCount=1;
             pplObjBytecode(&val,0,NULL);
-            ppl_parserAtomAdd(s->pl[blockDepth], s->outputPos, *linepos, "", NULL, &val);
-            s->outputPos=-1;
+            ppl_parserAtomAdd(s->pl[blockDepth], s->outputPos[blockDepth], *linepos, "", NULL, &val);
+            s->outputPos[blockDepth]=-1;
            }
           strcpy(s->prompt, "pyxplot");
           break;
@@ -283,17 +361,18 @@ static int parse_descend(ppl_context *c, parserStatus *s, int writeOut, int srcL
         if (s->blockDepth<blockDepth+1) s->blockDepth=blockDepth+1;
 
         // If s->outputPos is set, this is the first line of data
-        if (s->outputPos>=0)
+        if (s->outputPos[blockDepth]>=0)
          {
           pplObj val;
           val.refCount=1;
-          pplObjBytecode(&val,0,(void *)s->pl[s->blockDepth]);
-          ppl_parserAtomAdd(s->pl[blockDepth], s->outputPos, *linepos, "", NULL, &val);
-          s->outputPos=-1;
+          pplObjBytecode(&val,0,(void *)s->pl[blockDepth+1]);
+          ppl_parserAtomAdd(s->pl[blockDepth], s->outputPos[blockDepth], *linepos, "", NULL, &val);
+          s->outputPos[blockDepth]=-1;
          }
 
         // Write prompt
 codeblock_write_prompt:
+        if (s->stk[blockDepth+1][0]!=NULL) { status=3; goto cleanup; }
         if      (strcmp(cmd,"do"          )==0) strcpy(s->prompt, "do");
         else if (strcmp(cmd,"for"         )==0) strcpy(s->prompt, "for");
         else if (strcmp(cmd,"foreach"     )==0) strcpy(s->prompt, "foreac");
@@ -582,6 +661,7 @@ item_cleanup:
       char       sepStr[4];
       parserNode sepNode;
       int        oldStackOffset = s->pl[blockDepth]->stackOffset;
+      s->oldStackOffset[blockDepth][level] = oldStackOffset;
       sepStr[0] = node->varName[strlen(node->varName)-1];
       sepStr[1] = '\0';
       if (isalnum(sepStr[0])) separator=0;
@@ -605,7 +685,7 @@ item_cleanup:
         if (separator && !first)
          {
           status = parse_descend(c,s,0,srcLineN,srcId,srcFname,line,linepos,&sepNode,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
-          if (status==3) { status=0; }
+          if (status==3) { status=0; } // Separator shouldn't ask for more lines!
           if (status==0) { *linepos=lineposOld; *match=matchOld; status=1; goto repCleanup; }
           if (status==2) goto repCleanup;
          }
@@ -613,8 +693,8 @@ item_cleanup:
         while (nodeIter != NULL)
          {
           status = parse_descend(c,s,0,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
-          if (status==3) { status=0; goto repCleanup; }
-          if (status==0) { if ((!separator)&&((!first)||(node->type==PN_TYPE_REP2))) { status=1; *linepos=lineposOld; *match=matchOld; } goto repCleanup; }
+          if (status==3) { status=0; goto repCleanup; } // Trial run with writeOut=0 shouldn't ask for more lines!
+          if (status==0) { if (first ? (node->type==PN_TYPE_REP2) : !separator) { status=1; *linepos=lineposOld; *match=matchOld; } goto repCleanup; }
           if (status==2) goto repCleanup;
           nodeIter = nodeIter->nextSibling;
          }
@@ -636,7 +716,7 @@ item_cleanup:
             // This is written to either stack location (offset + stackPos) if first iteration, or (offset + 0) subsequently
             // In any repeating structure, first stack position is pointer to next item
             status = parse_descend(c,s,writeOut,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
-            if (status==3) status=0;
+            if (status==3) goto cleanup;
             if (status!=1) goto repCleanup;
             nodeIter = nodeIter->nextSibling;
            }
@@ -658,9 +738,8 @@ repCleanup:
         while (nodeIter != NULL)
          {
           status = parse_descend(c,s,wo,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
-          if (status==3) { status=0; goto cleanup; }
           if (status==0) { *linepos=lineposOld; *match=matchOld; status=1; goto cleanup; }
-          if (status==2) goto cleanup;
+          if (status>=2) goto cleanup;
           nodeIter = nodeIter->nextSibling;
          }
 
@@ -803,11 +882,11 @@ void ppl_parserStatReInit(parserStatus *in)
   *pl = NULL;
   for (i=0; i<MAX_RECURSION_DEPTH; i++) in->pl[i]=NULL;
   for (i=0; i<MAX_RECURSION_DEPTH; i++) for (j=0; j<16; j++) in->stk[i][j]=NULL;
+  for (i=0; i<MAX_RECURSION_DEPTH; i++) in->outputPos[i] = -1;
   strcpy(in->prompt, "pyxplot");
   in->blockDepth       = 0;
   in->NinlineDatafiles = 0;
   in->waitingForBrace  = 0;
-  in->outputPos        = -1;
   in->eLPos            = 0;
   in->eLlinePos        = 0;
   in->expectingList[0] = '\0';
@@ -933,13 +1012,13 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
       output->stackLen       = 0;
       output->containsMacros = 1;
       ppl_parserStatAdd(s, s->blockDepth, output);
-      if (s->outputPos>=0)
+      if ((s->blockDepth>0)&&(s->outputPos[s->blockDepth-1]>=0))
        {
         pplObj val;
         val.refCount=1;
         pplObjBytecode(&val,0,(void *)s->pl[s->blockDepth]);
-        ppl_parserAtomAdd(s->pl[blockDepth], s->outputPos, 0, "", NULL, &val);
-        s->outputPos=-1;
+        ppl_parserAtomAdd(s->pl[s->blockDepth-1], s->outputPos[s->blockDepth-1], 0, "", NULL, &val);
+        s->outputPos[s->blockDepth-1]=-1;
        }
       return 0;
      }
