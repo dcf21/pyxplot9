@@ -103,7 +103,7 @@ void ppl_garbageObject(pplObj *o)
       o->auxil = NULL;
       if ((f!=NULL)&&( __sync_sub_and_fetch(&f->refCount,1) <= 0))
        {
-        if ((f->open) && (f->file!=NULL)) { FILE *old=f->file; f->file=NULL; if (f->pipe) pclose(old); else fclose(old); }
+        if ((f->open) && (f->file!=NULL)) { FILE *old=f->file; f->file=NULL; if (f->pipe==2) { /* never close stdin */ } else if (f->pipe) pclose(old); else fclose(old); }
         free(f);
        }
       break;

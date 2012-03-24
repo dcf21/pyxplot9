@@ -30,7 +30,7 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_math.h>
 
-#include "expressions/expCompile.h"
+#include "expressions/expCompile_fns.h"
 #include "expressions/expEval.h"
 #include "expressions/traceback_fns.h"
 #include "settings/settingTypes.h"

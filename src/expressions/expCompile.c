@@ -28,7 +28,7 @@
 #include "coreUtils/errorReport.h"
 #include "stringTools/asciidouble.h"
 #include "userspace/context.h"
-#include "expressions/expCompile.h"
+#include "expressions/expCompile_fns.h"
 
 #include "pplConstants.h"
 
@@ -566,6 +566,7 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
   // malloc output structure
   *outExpr = (pplExpr *)calloc(1,sizeof(pplExpr));
   if (*outExpr==NULL) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); *end=-1; return; }
+  (*outExpr)->refCount = 1;
   (*outExpr)->srcId    = srcId;
   (*outExpr)->srcLineN = srcLineN;
   (*outExpr)->srcFname = (char *)malloc(strlen(srcFname)+1);
@@ -1087,6 +1088,7 @@ void ppl_reversePolishPrint(ppl_context *context, pplExpr *expIn, char *out)
 void pplExpr_free(pplExpr *inExpr)
  {
   if (inExpr==NULL) return;
+  if ( __sync_sub_and_fetch(&inExpr->refCount,1) > 0) return;
   if (inExpr->ascii!=NULL) free(inExpr->ascii);
   if (inExpr->srcFname!=NULL) free(inExpr->srcFname);
   if (inExpr->bytecode!=NULL) free(inExpr->bytecode);
@@ -1099,7 +1101,9 @@ pplExpr *pplExpr_cpy(pplExpr *i)
   pplExpr *o;
   if (i==NULL) return NULL;
   o = (pplExpr *)malloc(sizeof(pplExpr));
+  if (o==NULL) return NULL;
   memcpy(o, i, sizeof(pplExpr));
+  o->refCount = 1;
   if (i->ascii   !=NULL) { if ((o->ascii   =malloc(strlen(i->ascii   )+1))==NULL) return NULL; strcpy(o->ascii   , i->ascii   ); }
   if (i->srcFname!=NULL) { if ((o->srcFname=malloc(strlen(i->srcFname)+1))==NULL) return NULL; strcpy(o->srcFname, i->srcFname); }
   if (i->bytecode!=NULL) { if ((o->bytecode=malloc(i->bcLen             ))==NULL) return NULL; memcpy(o->bytecode, i->bytecode, i->bcLen); }

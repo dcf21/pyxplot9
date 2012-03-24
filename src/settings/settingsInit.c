@@ -164,11 +164,11 @@ void pplset_makedefault(ppl_context *context)
   s->graph_default.ContoursN             = 12;
   s->graph_default.ContoursUnit.refCount=1;
   pplObjNum(&s->graph_default.ContoursUnit,0,0.0,0.0);
-  ppl_withWordsZero(context,&(s->graph_default.DataStyle),1);
-  s->graph_default.DataStyle.linespoints = SW_STYLE_POINTS;
+  ppl_withWordsZero(context,&(s->graph_default.dataStyle));
+  s->graph_default.dataStyle.linespoints = SW_STYLE_POINTS;
   s->graph_default.FontSize              = 1.0;
-  ppl_withWordsZero(context,&(s->graph_default.FuncStyle),1);
-  s->graph_default.FuncStyle.linespoints = SW_STYLE_LINES;
+  ppl_withWordsZero(context,&(s->graph_default.funcStyle));
+  s->graph_default.funcStyle.linespoints = SW_STYLE_LINES;
   s->graph_default.grid                  = SW_ONOFF_OFF;
   for (i=0; i<MAX_AXES; i++) s->graph_default.GridAxisX[i] = 0;
   for (i=0; i<MAX_AXES; i++) s->graph_default.GridAxisY[i] = 0;
@@ -337,8 +337,8 @@ void pplset_makedefault(ppl_context *context)
   s->ppllabel_list = s->ppllabel_list_default = NULL;
 
   // Set up array of plot styles
-  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsZero(context,&(s->plot_styles        [i]),1);
-  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsZero(context,&(s->plot_styles_default[i]),1);
+  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsZero(context,&(s->plot_styles        [i]));
+  for (i=0; i<MAX_PLOTSTYLES; i++) ppl_withWordsZero(context,&(s->plot_styles_default[i]));
 
   // Set up current axes. Because default axis contains no malloced strings, we don't need to use AxisCopy() here.
   for (i=0; i<MAX_AXES; i++) s->XAxes[i] = s->YAxes[i] = s->ZAxes[i] = s->axis_default;

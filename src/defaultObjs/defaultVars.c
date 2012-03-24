@@ -253,6 +253,12 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d3,"filesize"      ,1,1,0,0,0,0,(void *)&pplfunc_osPathFilesize, "filesize(x)", "\\mathrm{filesize}@<@0@>", "filesize(x) returns the size, in bytes, of the file with pathname x");
     ppl_addSystemFunc(d3,"join"          ,1,9999,0,0,0,0,(void *)&pplfunc_osPathJoin , "join(...)", "\\mathrm{join}@<@0@>", "join(...) joins a series of strings intelligently into a pathname");
     ppl_addSystemFunc(d3,"mtime"         ,1,1,0,0,0,0,(void *)&pplfunc_osPathMTime, "mtime(x)", "\\mathrm{mtime}@<@0@>", "mtime(x) returns a date object representing the time of the last modification of the file with pathname x");
+    pplObjFile(&v, 1, 1, stderr, 2);
+    ppl_dictAppendCpy(d2 , "stderr"    , (void *)&v , sizeof(v)); // stderr
+    pplObjFile(&v, 1, 1, stdin, 2);
+    ppl_dictAppendCpy(d2 , "stdin"     , (void *)&v , sizeof(v)); // stdin
+    pplObjFile(&v, 1, 1, stdout, 2);
+    ppl_dictAppendCpy(d2 , "stdout"    , (void *)&v , sizeof(v)); // stdout
 
     // Default maths functions
     ppl_addSystemFunc(d,"abs"           ,1,1,1,1,0,0,(void *)&pplfunc_abs         , "abs(z)", "\\mathrm{abs}@<@1@>", "abs(z) returns the absolute magnitude of z");

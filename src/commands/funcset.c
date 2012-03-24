@@ -31,6 +31,7 @@
 #include "coreUtils/dict.h"
 #include "coreUtils/errorReport.h"
 
+#include "expressions/expCompile_fns.h"
 #include "expressions/traceback_fns.h"
 
 #include "parser/cmdList.h"

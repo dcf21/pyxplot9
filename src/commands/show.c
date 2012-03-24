@@ -26,6 +26,8 @@
 #include <math.h>
 #include <ctype.h>
 
+#include "commands/show.h"
+
 #include "coreUtils/dict.h"
 #include "coreUtils/memAlloc.h"
 #include "coreUtils/list.h"
@@ -592,14 +594,14 @@ static int directive_show2(ppl_context *c, char *word, char *itemSet, int intera
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "data", 1)>=0) || (ppl_strAutocomplete(word, "style", 1)>=0))
    {
-    ppl_withWordsPrint(c, &sg->DataStyle, buf);
-    directive_show3(c, out+i, itemSet, 1, interactive, "data style", buf, ppl_withWordsCmp(c,&c->set->graph_default.DataStyle,&sg->DataStyle), "Default plot options for plotting datafiles");
+    ppl_withWordsPrint(c, &sg->dataStyle, buf);
+    directive_show3(c, out+i, itemSet, 1, interactive, "data style", buf, ppl_withWordsCmp(c,&c->set->graph_default.dataStyle,&sg->dataStyle), "Default plot options for plotting datafiles");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "function", 1)>=0) || (ppl_strAutocomplete(word, "style", 1)>=0))
    {
-    ppl_withWordsPrint(c, &sg->FuncStyle, buf);
-    directive_show3(c, out+i, itemSet, 1, interactive, "function style", buf, ppl_withWordsCmp(c,&c->set->graph_default.FuncStyle,&sg->FuncStyle), "Default plot options for plotting functions");
+    ppl_withWordsPrint(c, &sg->funcStyle, buf);
+    directive_show3(c, out+i, itemSet, 1, interactive, "function style", buf, ppl_withWordsCmp(c,&c->set->graph_default.funcStyle,&sg->funcStyle), "Default plot options for plotting functions");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "terminal", 1)>=0))
@@ -1300,6 +1302,7 @@ void directive_show(ppl_context *c, parserLine *pl, parserOutput *in, int intera
    }
   else
    {
+    canvas_itemlist *canvas_items = c->canvas_items;
     canvas_item *ptr = canvas_items->first;
     int i, editNo = (int)round(stk[PARSE_show_editno].real);
     if ((editNo<1) || (editNo>MULTIPLOT_MAXINDEX) || (canvas_items == NULL)) { sprintf(c->errcontext.tempErrStr, "No multiplot item with index %d.", editNo); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return; }

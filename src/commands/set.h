@@ -1,4 +1,4 @@
-// expCompile.h
+// set.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,14 +19,13 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _EXPCOMPILE_H
-#define _EXPCOMPILE_H 1
+#ifndef _SET_H
+#define _SET_H 1
 
-typedef struct pplExpr {
-  int  refCount;
-  long srcId; int srcLineN; char *srcFname;
-  char *ascii; void *bytecode; int bcLen;
- } pplExpr;
+#include "parser/parser.h"
+#include "userspace/context.h"
+#include "userspace/pplObj.h"
+
+void directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
 
 #endif
-

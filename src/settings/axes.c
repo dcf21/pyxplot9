@@ -49,7 +49,7 @@
 // Functions for creating and destroying axis descriptors
 // ------------------------------------------------------
 
-void pplaxis_destroyAxis(ppl_context *context, pplset_axis *in)
+void pplaxis_destroy(ppl_context *context, pplset_axis *in)
  {
   int i;
   if (in->format    != NULL) { free(in->format   ); in->format    = NULL; }

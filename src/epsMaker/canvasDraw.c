@@ -1,4 +1,4 @@
-// expCompile.h
+// canvasDraw.c
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,14 +19,14 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _EXPCOMPILE_H
-#define _EXPCOMPILE_H 1
+#define _CANVASDRAW_C
 
-typedef struct pplExpr {
-  int  refCount;
-  long srcId; int srcLineN; char *srcFname;
-  char *ascii; void *bytecode; int bcLen;
- } pplExpr;
+#include <stdlib.h>
 
-#endif
+#include "userspace/context.h"
+
+void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops)
+ {
+  return;
+ }
 

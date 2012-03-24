@@ -63,7 +63,7 @@ static void ppl_parserStartNode(pplerr_context *c, parserNode **stk, int *i, int
   return;
  }
 
-static void ppl_parserRollBack(pplerr_context *c, parserNode **stk, int *i, int type, char *cmdText, int *NcharsTaken)
+static void ppl_parserRollBack(pplerr_context *c, parserNode **stk, int *i, int type, const char *cmdText, int *NcharsTaken)
  {
   int j=1; // Count characters taken; start at 1 for closing bracket
   int varNameStart=-1, varNameEnd=-1;

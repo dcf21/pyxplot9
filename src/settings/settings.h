@@ -58,7 +58,7 @@ typedef struct pplset_graph {
  char          c1label[FNAME_LENGTH], c1format[FNAME_LENGTH], c1formatset;
  double        c1LabelRotate, c1TickLabelRotate;
  int           c1TickLabelRotation;
- withWords     DataStyle, FuncStyle;
+ withWords     dataStyle, funcStyle;
  } pplset_graph;
 
 typedef struct pplset_axis {

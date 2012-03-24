@@ -31,7 +31,7 @@
 
 #include "coreUtils/errorReport.h"
 
-#include "expressions/expCompile.h"
+#include "expressions/expCompile_fns.h"
 #include "expressions/traceback_fns.h"
 
 #include "settings/epsColors.h"

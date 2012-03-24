@@ -1021,6 +1021,7 @@ void pplmethod_fileClose(ppl_context *c, pplObj *in, int nArgs, int *status, int
   pplFile *f = (pplFile *)in[-1].self_this->auxil;
   if (f->open)
    {
+    if (f->pipe==2) { *status=1; *errType=ERR_TYPE; strcpy(errText, "It is not permitted to close this file handle."); return; }
     f->open=0;
     if (!f->pipe) fclose(f->file);
     else          pplObjNum(&OUTPUT,0,pclose(f->file),0);

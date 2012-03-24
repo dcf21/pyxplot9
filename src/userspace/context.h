@@ -84,6 +84,9 @@ typedef struct ppl_context_struc
   int   ns_ptr , ns_branch;
   dict *namespaces[CONTEXT_DEPTH];
 
+  // canvas
+  void *canvas_items;
+
  } ppl_context;
 
 ppl_context *ppl_contextInit();

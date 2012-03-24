@@ -1,4 +1,4 @@
-// ppl_canvasitems.h
+// canvasItems.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,12 +19,13 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _PPL_CANVASITEMS_H
-#define _PPL_CANVASITEMS_H 1
+#ifndef _CANVASITEMS_H
+#define _CANVASITEMS_H 1
 
 #include "coreUtils/dict.h"
 
 #include "datafile.h"
+#include "expressions/expCompile.h"
 #include "settings/arrows.h"
 #include "settings/labels.h"
 #include "settings/settings.h"
@@ -57,7 +58,8 @@ typedef struct canvas_plotdesc {
  unsigned char           function, parametric, TRangeSet, VRangeSet, axis1set, axis2set, axis3set, ContinuitySet, IndexSet, EverySet, TitleSet, NoTitleSet;
  int                     NFunctions, axis1xyz, axis2xyz, axis3xyz, axis1, axis2, axis3, EveryList[6], index, continuity, UsingRowCols, NUsing;
  withWords               ww;
- char                   *filename, **functions, *label, *SelectCriterion, *title, **UsingList;
+ char                   *filename, *title;
+ pplExpr               **functions, *label, *SelectCriterion, **UsingList;
  pplObj                  Tmin, Tmax, Vmin, Vmax;
  struct canvas_plotdesc *next;
 
@@ -108,12 +110,9 @@ typedef struct canvas_itemlist {
  canvas_item  *last;
 } canvas_itemlist;
 
-#ifndef _PPL_CANVASITEMS_C
-extern canvas_itemlist *canvas_items;
-#endif
 
 int directive_clear   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
-char *canvas_item_textify(canvas_item *ptr, char *output);
+char *ppl_canvas_item_textify(ppl_context *c, canvas_item *ptr, char *output);
 int directive_list    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
 int directive_delete  (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
 int directive_undelete(ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
