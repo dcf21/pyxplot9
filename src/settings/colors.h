@@ -22,13 +22,13 @@
 #ifndef _COLORS_H
 #define _COLORS_H 1
 
-#include "coreUtils/dict.h"
+#include "parser/parser.h"
 #include "userspace/context.h"
 
-int ppl_colorFromDict  (ppl_context *c, dict *in, char *prefix, int *outcol, int *outcolspace,
+int ppl_colorFromDict  (ppl_context *c, parserOutput *in, parserLine *pl, const int *ptab,
+                        int fillColor, int *outcol, int *outcolspace, char **outcolS,
                         double *outcol1, double *outcol2, double *outcol3, double *outcol4,
-                        char **outcolS, char **outcol1S, char **outcol2S, char **outcol3S, char **outcol4S,
-                        unsigned char *USEcol, unsigned char *USEcol1234, int *errpos, unsigned char malloced);
+                        unsigned char *USEcol, unsigned char *USEcol1234);
 
 #endif
 

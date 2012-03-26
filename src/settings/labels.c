@@ -25,190 +25,175 @@
 
 #include <gsl/gsl_math.h>
 
-#include "stringTools/asciidouble.h"
-#include "stringTools/strConstants.h"
-
 #include "coreUtils/dict.h"
 #include "coreUtils/list.h"
 #include "coreUtils/errorReport.h"
-
-#include "pplConstants.h"
+#include "expressions/traceback_fns.h"
+#include "parser/cmdList.h"
+#include "parser/parser.h"
 #include "settings/settingTypes.h"
-
 #include "settings/arrows_fns.h"
 #include "settings/labels_fns.h"
 #include "settings/settings.h"
 #include "settings/withWords_fns.h"
-
+#include "stringTools/asciidouble.h"
+#include "stringTools/strConstants.h"
 #include "userspace/context.h"
 #include "userspace/pplObj_fns.h"
 #include "userspace/unitsArithmetic.h"
+#include "pplConstants.h"
 
 // -------------------------------------------
 // ROUTINES FOR MANIPULATING LABELS STRUCTURES
 // -------------------------------------------
 
-#define ASSERT_LENGTH(VAR) \
-  if (!(VAR->dimensionless)) \
-   { \
-    for (i=0; i<UNITS_MAX_BASEUNITS; i++) \
-     if (VAR->exponent[i] != (i==UNIT_LENGTH)) \
-      { \
-       sprintf(context->errcontext.tempErrStr,"The gap size supplied to the 'set label' command must have dimensions of length. Supplied gap size input has units of <%s>.",ppl_printUnit(context,VAR,NULL,NULL,1,1,0)); \
-       ppl_error(&context->errcontext,ERR_NUMERIC, -1, -1, NULL); \
-       return; \
-      } \
-   } \
-  else { VAR->real /= 100; } // By default, dimensionless positions are in centimetres
-
-#define ASSERT_ANGLE(VAR) \
-  if (!(VAR->dimensionless)) \
-   { \
-    for (i=0; i<UNITS_MAX_BASEUNITS; i++) \
-     if (VAR->exponent[i] != (i==UNIT_ANGLE)) \
-      { \
-       sprintf(context->errcontext.tempErrStr,"The rotation angle supplied to the 'set label' command must have dimensions of angle. Supplied input has units of <%s>.",ppl_printUnit(context,VAR,NULL,NULL,1,1,0)); \
-       ppl_error(&context->errcontext,ERR_NUMERIC, -1, -1, NULL); \
-       return; \
-      } \
-   } \
-  else { VAR->real *= M_PI/180.0; } // By default, dimensionless angles are in degrees
-
 #define CMPVAL(X,Y) (ppl_unitsDimEqual(&X,&Y) && ppl_dblEqual(X.real , Y.real))
 
-void ppllabel_add(ppl_context *context, ppllabel_object **inlist, dict *in)
+void ppllabel_add(ppl_context *context, ppllabel_object **inlist, parserOutput *in, parserLine *pl, const int *ptab)
  {
-  int             *tempint, i, system_x, system_y, system_z;
+  int              i, system_x, system_y, system_z;
   char            *tempstr, *label;
-  pplObj          *tempval, tempvalobj, *gap, *ang;
-  withWords        ww_temp1;
+  double           gap, ang;
   ppllabel_object *out;
 
-  pplarrow_add_get_system("x",system_x); pplarrow_add_get_system("y",system_y); pplarrow_add_get_system("z",system_z);
+  pplarrow_add_get_system(PARSE_INDEX_x_system , system_x);
+  pplarrow_add_get_system(PARSE_INDEX_y_system , system_y);
+  pplarrow_add_get_system(PARSE_INDEX_z_system , system_z);
 
-  pplarrow_add_check_dimensions("x",system_x); pplarrow_add_check_dimensions("y",system_y); pplarrow_add_check_dimensions("z",system_z);
+  pplarrow_add_check_dimensions(PARSE_INDEX_x , system_x);
+  pplarrow_add_check_dimensions(PARSE_INDEX_y , system_y);
+  pplarrow_add_check_dimensions(PARSE_INDEX_z , system_z);
 
-  pplarrow_add_check_axis("x"); pplarrow_add_check_axis("y"); pplarrow_add_check_axis("z");
+  pplarrow_add_check_axis(PARSE_INDEX_x);
+  pplarrow_add_check_axis(PARSE_INDEX_y);
+  pplarrow_add_check_axis(PARSE_INDEX_z);
 
-  tempstr = (char *)ppl_dictLookup(in,"ppllabel_text");
+  tempstr = (char *)in->stk[ptab[PARSE_INDEX_label_text]].auxil; // Read label text
   label = (char *)malloc(strlen(tempstr)+1);
   if (label == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1, "Out of memory"); return; }
   strcpy(label, tempstr);
 
-  // Check for rotation modifier
-  ang = (pplObj *)ppl_dictLookup(in, "rotation");
-  if (ang != NULL) { ASSERT_ANGLE(ang); }
-
-  // Check for gap modifier
-  gap = (pplObj *)ppl_dictLookup(in, "gap");
-  if (gap != NULL) { ASSERT_LENGTH(gap); }
+  ang = in->stk[ptab[PARSE_INDEX_rotation]].real; // Check for rotation modifier
+  gap = in->stk[ptab[PARSE_INDEX_gap]].real;      // Check for gap modifier
 
   // Look up ID number of the label we are adding and find appropriate place for it in label list
-  tempint = (int *)ppl_dictLookup(in,"ppllabel_id");
-  while ((*inlist != NULL) && ((*inlist)->id < *tempint)) inlist = &((*inlist)->next);
-  if ((*inlist != NULL) && ((*inlist)->id == *tempint))
+  i = (int)round(in->stk[ptab[PARSE_INDEX_label_id]].real);
+  while ((*inlist != NULL) && ((*inlist)->id < i)) inlist = &((*inlist)->next);
+  if ((*inlist != NULL) && ((*inlist)->id == i))
    {
     out = *inlist;
     ppl_withWordsDestroy(context, &out->style);
    } else {
-    out = (ppllabel_object *)malloc(sizeof(ppllabel_object));
+    out = (pplarrow_object *)malloc(sizeof(pplarrow_object));
     if (out == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1, "Out of memory"); return; }
-    out->id   = *tempint;
-    out->next = *inlist;
-    *inlist   = out;
+    out->id     = i;
+    out->next   = *inlist;
+    *inlist     = out;
    }
 
   // Check for halign or valign modifiers
-  tempstr = (char *)ppl_dictLookup(in,"halign");
+  tempstr = (char *)in->stk[ptab[PARSE_INDEX_halign]].auxil;
   if (tempstr != NULL) out->HAlign = ppl_fetchSettingByName(&context->errcontext, tempstr, SW_HALIGN_INT, SW_HALIGN_STR);
   else                 out->HAlign = context->set->graph_current.TextHAlign;
-  tempstr = (char *)ppl_dictLookup(in,"valign");
+  tempstr = (char *)in->stk[ptab[PARSE_INDEX_valign]].auxil;
   if (tempstr != NULL) out->VAlign = ppl_fetchSettingByName(&context->errcontext, tempstr, SW_VALIGN_INT, SW_VALIGN_STR);
   else                 out->VAlign = context->set->graph_current.TextVAlign;
 
-  if (ang != NULL) out->rotation = ang->real;
+  if (ang != NULL) out->rotation = ang;
   else             out->rotation = 0.0;
-  if (gap != NULL) out->gap      = gap->real;
+  if (gap != NULL) out->gap      = gap;
   else             out->gap      = 0.0;
 
-  ppl_withWordsFromDict(context, in, &ww_temp1, 1);
-  ppl_withWordsCpy(context, &out->style, &ww_temp1);
+  ppl_withWordsFromDict(context, in, pl, ptab, &out->style, 1);
   out->text  = label;
   out->system_x = system_x; out->system_y = system_y; out->system_z = system_z;
-  pplarrow_add_get_axis("x", out->axis_x); pplarrow_add_get_axis("y", out->axis_y); pplarrow_add_get_axis("z", out->axis_z);
-  pplarrow_add_copy_coordinate("x",system_x,out->x); pplarrow_add_copy_coordinate("y",system_y,out->y); pplarrow_add_copy_coordinate("z",system_z,out->z);
+  pplarrow_add_get_axis(PARSE_INDEX_x_axis, out->axis_x);
+  pplarrow_add_get_axis(PARSE_INDEX_y_axis, out->axis_y);
+  pplarrow_add_get_axis(PARSE_INDEX_z_axis, out->axis_z);
+  pplarrow_add_copy_coordinate(PARSE_INDEX_x, system_x, out->x);
+  pplarrow_add_copy_coordinate(PARSE_INDEX_y, system_y, out->y);
+  pplarrow_add_copy_coordinate(PARSE_INDEX_z, system_z, out->z);
   return;
  }
 
-void ppllabel_remove(ppl_context *context, ppllabel_object **inlist, dict *in)
+void ppllabel_remove(ppl_context *context, ppllabel_object **inlist, parserOutput *in, parserLine *pl, const int *ptab)
  {
-  int          *tempint;
-  ppllabel_object *obj, **first;
-  list         *templist;
-  dict         *tempdict;
-  listIterator *listiter;
+  int               pos;
+  ppllabel_object **first;
 
   first = inlist;
-  templist = (list *)ppl_dictLookup(in,"ppllabel_list,");
-  listiter = ppl_listIterateInit(templist);
-  if (listiter == NULL) ppllabel_list_destroy(context, inlist); // set nolabel with no number specified means all labels deleted
-  while (listiter != NULL)
+  pos   = ptab[PARSE_INDEX_0label_list];
+
+  if ((in->stk[pos].objType!=PPLOBJ_NUM)||(in->stk[pos].real<=0))
+    ppllabel_list_destroy(context, inlist); // set noarrow with no number specified means all arrows deleted
+  else
    {
-    tempdict = (dict *)listiter->data;
-    tempint = (int *)ppl_dictLookup(tempdict,"ppllabel_id");
-    inlist = first;
-    while ((*inlist != NULL) && ((*inlist)->id < *tempint)) inlist = &((*inlist)->next);
-    if ((*inlist != NULL) && ((*inlist)->id == *tempint))
+    while (in->stk[pos].objType == PPLOBJ_NUM)
      {
-      obj   = *inlist;
-      *inlist = (*inlist)->next;
-      ppl_withWordsDestroy(context, &obj->style);
-      free(obj->text);
-      free(obj);
-     } else {
-      //sprintf(context->errcontext.tempErrStr,"Label number %d is not defined", *tempint);
-      //ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, NULL);
+      int i;
+      pos = (int)round(in->stk[pos].real);
+      if (pos<=0) break;
+      i = (int)round(in->stk[pos+ptab[PARSE_INDEX_label_id]].real);
+      inlist = first;
+      while ((*inlist != NULL) && ((*inlist)->id < i)) inlist = &((*inlist)->next);
+      if ((*inlist != NULL) && ((*inlist)->id == i))
+       {
+        ppllabel_object *obj = *inlist;
+        *inlist = (*inlist)->next;
+        ppl_withWordsDestroy(context, &obj->style);
+        free(obj->text);
+        free(obj);
+       } else if (!quiet) {
+        sprintf(context->errcontext.tempErrStr,"Label number %d is not defined", i);
+        ppl_warning(&context->errcontext, ERR_GENERAL, NULL);
+       }
      }
-    ppl_listIterate(&listiter);
    }
   return;
  }
 
-void ppllabel_unset(ppl_context *context, ppllabel_object **inlist, dict *in)
+void ppllabel_unset(ppl_context *context, ppllabel_object **inlist, parserOutput *in, parserLine *pl, const int *ptab)
  {
-  int             *tempint;
-  ppllabel_object *obj, *new, **first;
-  list            *templist;
-  dict            *tempdict;
-  listIterator    *listiter;
+  int               pos;
+  ppllabel_object **first;
 
-  ppllabel_remove(context, inlist, in); // First of all, remove any labels which we are unsetting
+  ppllabel_remove(context, inlist, in, pl, ptab, 1); // First of all, remove any arrows which we are unsetting
   first = inlist;
-  templist = (list *)ppl_dictLookup(in,"ppllabel_list,");
-  listiter = ppl_listIterateInit(templist);
+  pos   = ptab[PARSE_INDEX_0label_list];
 
-  if (listiter == NULL) ppllabel_list_copy(context, inlist, &context->set->ppllabel_list_default); // Check to see whether we are unsetting ALL labels, and if so, use the copy command
-  while (listiter != NULL)
+  if ((in->stk[pos].objType!=PPLOBJ_NUM)||(in->stk[pos].real<=0))
    {
-    tempdict = (dict *)listiter->data;
-    tempint = (int *)ppl_dictLookup(tempdict,"ppllabel_id"); // Go through each ppllabel_id in supplied list and copy items from default list into current settings
-    obj  = context->set->ppllabel_list_default;
-    while ((obj != NULL) && (obj->id < *tempint)) obj = (obj->next);
-    if ((obj != NULL) && (obj->id == *tempint))
+    ppllabel_list_destroy(context, inlist);
+    ppllabel_list_copy(context, inlist, &context->set->ppllabel_list_default); // Check to see whether we are unsetting ALL arrows, and if so, use the copy command
+   }
+  else
+   {
+    while (in->stk[pos].objType == PPLOBJ_NUM)
      {
-      inlist = first;
-      while ((*inlist != NULL) && ((*inlist)->id < *tempint)) inlist = &((*inlist)->next);
-      new = (ppllabel_object *)malloc(sizeof(ppllabel_object));
-      if (new == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); return; }
-      *new = *obj;
-      new->next = *inlist;
-      new->text = (char *)malloc(strlen(obj->text)+1);
-      if (new->text == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); free(new); return; }
-      strcpy(new->text, obj->text);
-      ppl_withWordsCpy(context, &new->style, &obj->style);
-      *inlist = new;
+      int i;
+      ppllabel_object *obj;
+      pos = (int)round(in->stk[pos].real);
+      if (pos<=0) break;
+      i = (int)round(in->stk[pos+ptab[PARSE_INDEX_label_id]].real);
+
+      obj  = context->set->ppllabel_list_default;
+      while ((obj != NULL) && (obj->id < i)) obj = (obj->next);
+      if ((obj != NULL) && (obj->id == i))
+       {
+        pplarrow_object *new;
+        inlist = first;
+        while ((*inlist != NULL) && ((*inlist)->id < i)) inlist = &((*inlist)->next);
+        new = (ppllabel_object *)malloc(sizeof(ppllabel_object));
+        if (new == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); return; }
+        *new = *obj;
+        new->next = *inlist;
+        new->text = (char *)malloc(strlen(obj->text)+1);
+        if (new->text == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); free(new); return; }
+        strcpy(new->text, obj->text);
+        ppl_withWordsCpy(context, &new->style, &obj->style);
+        *inlist = new;
+       }
      }
-    ppl_listIterate(&listiter);
    }
   return;
  }

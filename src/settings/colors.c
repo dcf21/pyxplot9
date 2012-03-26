@@ -29,7 +29,10 @@
 
 #include "coreUtils/dict.h"
 #include "coreUtils/errorReport.h"
+#include "expressions/traceback_fns.h"
 #include "mathsTools/dcfmath.h"
+#include "parser/parser.h"
+#include "settings/colors.h"
 #include "settings/epsColors.h"
 #include "settings/settingTypes.h"
 #include "stringTools/asciidouble.h"
@@ -42,10 +45,11 @@
 
 #define COLMALLOC(X) (tmp = malloc(X)); if (tmp==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory"); *outcol1S=*outcol2S=*outcol3S=*outcol4S=NULL; return 1; }
 
-int ppl_colorFromDict  (ppl_context *c, dict *in, char *prefix, int *outcol, int *outcolspace,
+
+int ppl_colorFromDict  (ppl_context *c, parserOutput *in, parserLine *pl, const int *ptab, 
+                        int fillColor, int *outcol, int *outcolspace, char **outcolS,
                         double *outcol1, double *outcol2, double *outcol3, double *outcol4,
-                        char **outcolS, char **outcol1S, char **outcol2S, char **outcol3S, char **outcol4S,
-                        unsigned char *USEcol, unsigned char *USEcol1234, int *errpos, unsigned char malloced)
+                        unsigned char *USEcol, unsigned char *USEcol1234);
  {
   char   *tempstr, *tempstre, DictName[32];
   int     cindex, i, j, palette_index;
