@@ -352,6 +352,23 @@ void ppl_opMul(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
    {
     goto am_numeric;
    }
+  else if ( ((t1==PPLOBJ_COL)&&(t2==PPLOBJ_NUM)) || ((t1==PPLOBJ_NUM)&&(t2==PPLOBJ_COL)) ) // multiplying colors by numbers
+   {
+    double  r1,g1,b1;
+    pplObj *c = (t1==PPLOBJ_COL)?a:b;
+    pplObj *n = (t1==PPLOBJ_COL)?b:a;
+    double  m = n->real;
+    if ((!n->dimensionless) || (n->flagComplex) || (!gsl_finite(m)) || (m<0))
+     {
+      sprintf(errText, "Can only multiply colors by dimensionless, real, positive numbers.");
+      *errType=ERR_RANGE; *status=1; return;
+     }
+    if      (round(c->exponent[0])==SW_COLSPACE_RGB ) { r1=c->exponent[8]; g1=c->exponent[9]; b1=c->exponent[10]; }
+    else if (round(c->exponent[0])==SW_COLSPACE_CMYK) pplcol_CMYKtoRGB(c->exponent[8],c->exponent[9],c->exponent[10],c->exponent[11],&r1,&g1,&b1);
+    else                                              pplcol_HSBtoRGB (c->exponent[8],c->exponent[9],c->exponent[10],&r1,&g1,&b1);
+    r1*=m; g1*=m; b1*=m;
+    pplObjColor(o,0,SW_COLSPACE_RGB,r1,g1,b1,0);
+   }
   else if ((t1==PPLOBJ_VEC)&&(t2==PPLOBJ_VEC)) // multiplying vectors (scalar dot product)
    {
     gsl_vector *v1 = ((pplVector *)(a->auxil))->v;
@@ -450,6 +467,21 @@ void ppl_opDiv(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
   if ((t1==PPLOBJ_NUM)&&(t2==PPLOBJ_NUM))
    {
     goto am_numeric;
+   }
+  else if ((t1==PPLOBJ_COL)&&(t2==PPLOBJ_NUM)) // dividing colors by numbers
+   {
+    double  r1,g1,b1;
+    double  m = b->real;
+    if ((!b->dimensionless) || (b->flagComplex) || (!gsl_finite(m)) || (m<0))
+     {
+      sprintf(errText, "Can only divide colors by dimensionless, real, positive numbers.");
+      *errType=ERR_RANGE; *status=1; return;
+     }
+    if      (round(a->exponent[0])==SW_COLSPACE_RGB ) { r1=a->exponent[8]; g1=a->exponent[9]; b1=a->exponent[10]; }
+    else if (round(a->exponent[0])==SW_COLSPACE_CMYK) pplcol_CMYKtoRGB(a->exponent[8],a->exponent[9],a->exponent[10],a->exponent[11],&r1,&g1,&b1);
+    else                                              pplcol_HSBtoRGB (a->exponent[8],a->exponent[9],a->exponent[10],&r1,&g1,&b1);
+    r1/=m; g1/=m; b1/=m;
+    pplObjColor(o,0,SW_COLSPACE_RGB,r1,g1,b1,0);
    }
   else if ((t1==PPLOBJ_VEC)&&(t2==PPLOBJ_NUM)) // dividing vector by number
    {

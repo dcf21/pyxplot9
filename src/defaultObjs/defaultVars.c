@@ -132,6 +132,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     for (i=0; SW_COLOR_INT[i]>=0; i++)
      {
       pplObjColor(&v,1,SW_COLSPACE_CMYK,SW_COLOR_CMYK_C[i],SW_COLOR_CMYK_M[i],SW_COLOR_CMYK_Y[i],SW_COLOR_CMYK_K[i]);
+      v.exponent[2] = SW_COLOR_INT[i];
       ppl_dictAppendCpy(d2 , SW_COLOR_STR[i] , (void *)&v , sizeof(v));
      }
 

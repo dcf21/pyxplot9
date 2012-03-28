@@ -27,11 +27,8 @@
 
 #include "coreUtils/dict.h"
 #include "coreUtils/list.h"
-
-#include "expressions/expCompile.h"
-
+#include "expressions/expCompile_fns.h"
 #include "parser/parser.h"
-
 #include "userspace/garbageCollector.h"
 #include "userspace/pplObj.h"
 #include "userspace/pplObjFunc_fns.h"

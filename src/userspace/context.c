@@ -59,6 +59,8 @@ ppl_context *ppl_contextInit()
 
   out->errStat.status = out->errStat.tracebackDepth = 0; ppl_tbClear(out);
 
+  out->canvas_items = NULL;
+
   out->stackPtr = 0;
   out->willBeInteractive = 1;
   out->inputLineBuffer = NULL;

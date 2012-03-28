@@ -163,7 +163,22 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
         // Atom is an expression: evaluate it
         int lastOpAssign=0, passed=0, j=0, k=0, p=0;
         pplObj *val = ppl_expEval(c, item->expr, &lastOpAssign, 1, iterDepth+1);
-        if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,item->linePos); break; } // On error, stop
+        if (c->errStat.status)
+         {
+          if (item->options[1]=='E') // If expression has produced an error, and its second option is type E, store it for per-point evaluation
+           {
+            ppl_tbClear(c);
+            pplObjExpression(&stk[item->stackOutPos],0,(void *)item->expr);
+            item->expr->refCount++;
+            goto gotTypeCexpression;
+           }
+          else
+           {
+            strcpy(c->errStat.errBuff,"");
+            TBADD(ERR_GENERAL,item->linePos);
+            break; // On error, stop
+           }
+         }
 
         // Check type of pplObj produced by expression, and complain if the wrong type
         strcpy(eB+k,"Expression evaluates to the wrong type: needed"); k+=strlen(eB+k);
@@ -196,7 +211,9 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
               break;
             case 'c':
               strcpy(eB+k," a color"); k+=strlen(eB+k);
-              if (val->objType != PPLOBJ_COL) break;
+              if ( (val->objType!=PPLOBJ_COL) &&
+                  ((val->objType!=PPLOBJ_NUM)||(!val->dimensionless)||(val->flagComplex)||(val->real<INT_MIN)||(val->real>INT_MAX))
+                 )  break;
               passed=1;
               break;
             case 'd':
@@ -215,6 +232,9 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
               for (p=0; p<UNITS_MAX_BASEUNITS; p++) if (val->exponent[p] != UNIT_LENGTH) { p=-1; break; }
               passed=(p>0);
               break;
+            case 'E':
+              passed=0;
+              break;
             case 'f':
               strcpy(eB+k," a number"); k+=strlen(eB+k);
               if (val->objType != PPLOBJ_NUM) break;
@@ -228,7 +248,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
             case 'p':
             case 'P':
               strcpy(eB+k," a position vector"); k+=strlen(eB+k);
-              if (val->objType != PPLOBJ_VEC)
+              if (val->objType == PPLOBJ_VEC)
                {
                 double      m=1,x=0,y=0,z=0;
                 gsl_vector *v=((pplVector *)val->auxil)->v;
@@ -244,11 +264,12 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
                 if (l>1) y = gsl_vector_get(v,1) * m;
                 if (l>2) z = gsl_vector_get(v,2) * m;
                 ppl_garbageObject(val);
-                                           pplObjNum(val      ,0,x,0);
-                                           pplObjNum(&stk[i+1],0,y,0);
-                if (item->options[j]=='P') pplObjNum(&stk[i+2],0,z,0);
+                                           pplObjNum(val                      ,0,x,0);
+                                           pplObjNum(&stk[item->stackOutPos+1],0,y,0);
+                if (item->options[j]=='P') pplObjNum(&stk[item->stackOutPos+2],0,z,0);
+                passed=1;
                }
-              else if (val->objType != PPLOBJ_LIST)
+              else if (val->objType == PPLOBJ_LIST)
                {
                 double  x[3]={0,0,0};
                 list   *li=(list *)val->auxil;
@@ -269,9 +290,10 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
                   x[i] = xo->real * m;
                  }
                 ppl_garbageObject(val);
-                                           pplObjNum(val      ,0,x[0],0);
-                                           pplObjNum(&stk[i+1],0,x[1],0);
-                if (item->options[j]=='P') pplObjNum(&stk[i+2],0,x[2],0);
+                                           pplObjNum(val                      ,0,x[0],0);
+                                           pplObjNum(&stk[item->stackOutPos+1],0,x[1],0);
+                if (item->options[j]=='P') pplObjNum(&stk[item->stackOutPos+2],0,x[2],0);
+                passed=1;
                }
               break; // fail
             case 'q':
@@ -300,6 +322,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
         // Copy value produced by atom
         pplObjCpy(&stk[item->stackOutPos], val, 0, 0, 1);
        }
+gotTypeCexpression:
       stkCharPos[item->stackOutPos] = item->linePos;
       item = item->next;
      }

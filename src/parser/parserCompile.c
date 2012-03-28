@@ -474,125 +474,142 @@ finished_looking_for_tabcomp:
         int      explen=0, errPos=-1, errType;
         int      dollarAllowed = (node->matchString[1]=='E');
         int      equalsAllowed = (node->matchString[1]!='g');
+        int      vectorAllowed = (node->matchString[1]=='P')||(node->matchString[1]=='p');
+        int      vectorLength  = (node->matchString[1]=='P')?3:2;
+        int      vectorCount   = 0;
+        int      gotComma      = 0;
 
-        switch (node->matchString[1])
+        do
          {
-          case 's': case 'S': case 'r': case 'v':
+          gotComma=0;
+          switch (node->matchString[1])
            {
-            if      (node->matchString[1]=='r')
-              explen = strlen(line+*linepos);
-            else if (node->matchString[1]=='s')
+            case 's': case 'S': case 'r': case 'v':
              {
-              for (explen=0; ((isalpha(line[*linepos+explen]))||(line[*linepos+explen]=='_')); explen++);
-              if (explen==0) { status=0; goto item_cleanup; }
-             }
-            else if (node->matchString[1]=='S')
-             {
-              for (explen=0; ((line[*linepos+explen]>' ')&&(line[*linepos+explen]!='\'')&&(line[*linepos+explen]!='\"')); explen++);
-              if (explen==0) { status=0; goto item_cleanup; }
-             }
-            else if (node->matchString[1]=='v')
-             {
-              if (!isalpha(line[*linepos])) { status=0; goto item_cleanup; } // variable name must start with a letter
-              for (explen=1; ((isalnum(line[*linepos+explen]))||(line[*linepos+explen]=='_')); explen++); // afterwards, numbers and _ allowed
-             }
-            if ((s!=NULL) && writeOut)
-             {
-              char   *str = strDup(line+*linepos,explen);
-              pplObj  val;
-              if (str==NULL) { status=0; goto item_cleanup; }
-              val.refCount=1;
-              pplObjStr(&val,0,1,str);
-              ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
-             }
-            break;
-           }
-          case 'a':
-           {
-            int xyz;
-            if      ((line[*linepos]=='x')||(line[*linepos]=='X')) xyz=0;
-            else if ((line[*linepos]=='y')||(line[*linepos]=='Y')) xyz=1;
-            else if ((line[*linepos]=='z')||(line[*linepos]=='Z')) xyz=2;
-            else                                                   { status=0; goto item_cleanup; }
-            ppl_expCompile(c,srcLineN,srcId,srcFname,line+*linepos+1,&explen,dollarAllowed,equalsAllowed,0,&expr,&errPos,&errType,c->errStat.errBuff);
-            if (errPos>=0)
-             {
-              pplExpr_free(expr);
-              ppl_tbAdd(c,srcLineN,srcId,srcFname,0,errType,errPos+*linepos+1,line,"");
-              status=0;
-              goto item_cleanup;
-             }
-            if ((s==NULL)||(!writeOut)) pplExpr_free(expr);
-            else
-             {
-              char opt[8];
-              sprintf(opt,"a%d",xyz);
-              ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos+1, opt, expr, NULL);
-             }
-            explen++;
-            break;
-           }
-          case 'c': case 'C':
-           {
-            char nambuff[64];
-            int id, i;
-            for (i=0; ((i<63)&&(line[*linepos+i]>' ')); i++) nambuff[i] = line[*linepos+i];
-            nambuff[i] = '\0';
-            id = ppl_fetchSettingByName(&c->errcontext, nambuff, SW_COLOR_INT, SW_COLOR_STR);
-            if (id > 0)
-             {
-              pplObj val;
-              val.refCount=1;
-              pplObjNum(&val,0,id,0);
-              ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
-              explen=i;
+              if      (node->matchString[1]=='r')
+                explen = strlen(line+*linepos);
+              else if (node->matchString[1]=='s')
+               {
+                for (explen=0; ((isalpha(line[*linepos+explen]))||(line[*linepos+explen]=='_')); explen++);
+                if (explen==0) { status=0; goto item_cleanup; }
+               }
+              else if (node->matchString[1]=='S')
+               {
+                for (explen=0; ((line[*linepos+explen]>' ')&&(line[*linepos+explen]!='\'')&&(line[*linepos+explen]!='\"')); explen++);
+                if (explen==0) { status=0; goto item_cleanup; }
+               }
+              else if (node->matchString[1]=='v')
+               {
+                if (!isalpha(line[*linepos])) { status=0; goto item_cleanup; } // variable name must start with a letter
+                for (explen=1; ((isalnum(line[*linepos+explen]))||(line[*linepos+explen]=='_')); explen++); // afterwards, numbers and _ allowed
+               }
+              if ((s!=NULL) && writeOut)
+               {
+                char   *str = strDup(line+*linepos,explen);
+                pplObj  val;
+                if (str==NULL) { status=0; goto item_cleanup; }
+                val.refCount=1;
+                pplObjStr(&val,0,1,str);
+                ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
+               }
               break;
              }
-            // If supplied string did not match a named colour, treat it as an expression
-           }
-          default:
-           {
-            ppl_expCompile(c,srcLineN,srcId,srcFname,line+*linepos,&explen,dollarAllowed,equalsAllowed,0,&expr,&errPos,&errType,c->errStat.errBuff);
-            if (errPos>=0)
+            case 'a':
              {
-              pplExpr_free(expr);
-              ppl_tbAdd(c,srcLineN,srcId,srcFname,0,errType,errPos+*linepos,line,"");
-              status=0;
-              goto item_cleanup;
+              int xyz;
+              if      ((line[*linepos]=='x')||(line[*linepos]=='X')) xyz=0;
+              else if ((line[*linepos]=='y')||(line[*linepos]=='Y')) xyz=1;
+              else if ((line[*linepos]=='z')||(line[*linepos]=='Z')) xyz=2;
+              else                                                   { status=0; goto item_cleanup; }
+              ppl_expCompile(c,srcLineN,srcId,srcFname,line+*linepos+1,&explen,dollarAllowed,equalsAllowed,0,&expr,&errPos,&errType,c->errStat.errBuff);
+              if (errPos>=0)
+               {
+                pplExpr_free(expr);
+                ppl_tbAdd(c,srcLineN,srcId,srcFname,0,errType,errPos+*linepos+1,line,"");
+                status=0;
+                goto item_cleanup;
+               }
+              if ((s==NULL)||(!writeOut)) pplExpr_free(expr);
+              else
+               {
+                char opt[8];
+                sprintf(opt,"a%d",xyz);
+                ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos+1, opt, expr, NULL);
+               }
+              explen++;
+              break;
              }
-            if ((s==NULL)||(!writeOut)) pplExpr_free(expr);
-            else if ((node->matchString[1]!='C') && (node->matchString[1]!='e') && (node->matchString[1]!='E') && (node->matchString[1]!='g'))
+            case 'c':
              {
-              ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, node->matchString+1, expr, NULL);
-             }
-            else
-             {
-              int j, isInline=1;
-              if (!(strcmp(node->varName,"expression")==0)) isInline=0;
-              if (isInline && (strncmp(line+*linepos,"\"--\"",4)!=0) && (strncmp(line+*linepos,"'--'",4)!=0) ) isInline=0;
-              for (j=4; j<explen; j++) if (line[*linepos+j]>' ') isInline=0;
-              if (isInline)
+              char nambuff[64];
+              int id, i;
+              for (i=0; ((i<63)&&(line[*linepos+i]>' ')); i++) nambuff[i] = line[*linepos+i];
+              nambuff[i] = '\0';
+              id = ppl_fetchSettingByName(&c->errcontext, nambuff, SW_COLOR_INT, SW_COLOR_STR);
+              if (id > 0)
                {
                 pplObj val;
                 val.refCount=1;
-                pplObjStr(&val,0,0,"--");
-                pplExpr_free(expr);
+                pplObjColor(&val,0,SW_COLSPACE_CMYK,SW_COLOR_CMYK_C[id],SW_COLOR_CMYK_M[id],SW_COLOR_CMYK_Y[id],SW_COLOR_CMYK_K[id]);
+                val.exponent[2]=id;
                 ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
-                s->NinlineDatafiles++;
+                explen=i;
+                break;
+               }
+              // If supplied string did not match a named colour, treat it as an expression
+             }
+            default:
+             {
+              ppl_expCompile(c,srcLineN,srcId,srcFname,line+*linepos,&explen,dollarAllowed,equalsAllowed,0,&expr,&errPos,&errType,c->errStat.errBuff);
+              if (errPos>=0)
+               {
+                pplExpr_free(expr);
+                ppl_tbAdd(c,srcLineN,srcId,srcFname,0,errType,errPos+*linepos,line,"");
+                status=0;
+                goto item_cleanup;
+               }
+              if (vectorAllowed && (vectorCount+1 < vectorLength))
+               {
+                while ((line[*linepos+explen]>'\0')&&(line[*linepos+explen]<=' ')) explen++; // ffw over whitespace
+                if (line[*linepos+explen]==',') { explen++; gotComma=1; } // vector with another comma-separated component
+               }
+              if ((s==NULL)||(!writeOut)) pplExpr_free(expr);
+              else if ((node->matchString[1]!='e') && (node->matchString[1]!='E') && (node->matchString[1]!='g'))
+               {
+                char *t = node->matchString+1;
+                if (gotComma || (vectorCount>0)) t="D"; // not a vector, rather comma separated distances
+                ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos + vectorCount, *linepos, t, expr, NULL);
                }
               else
                {
-                pplObj val;
-                val.refCount=1;
-                pplObjExpression(&val,0,(void *)expr);
-                ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
+                int j, isInline=1;
+                if (!(strcmp(node->varName,"expression")==0)) isInline=0;
+                if (isInline && (strncmp(line+*linepos,"\"--\"",4)!=0) && (strncmp(line+*linepos,"'--'",4)!=0) ) isInline=0;
+                for (j=4; j<explen; j++) if (line[*linepos+j]>' ') isInline=0;
+                if (isInline)
+                 {
+                  pplObj val;
+                  val.refCount=1;
+                  pplObjStr(&val,0,0,"--");
+                  pplExpr_free(expr);
+                  ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
+                  s->NinlineDatafiles++;
+                 }
+                else
+                 {
+                  pplObj val;
+                  val.refCount=1;
+                  pplObjExpression(&val,0,(void *)expr);
+                  ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
+                 }
                }
-             }
-           }
-         }
-        *linepos += explen;
+             } // default
+           } // switch
+          *linepos += explen;
+          if (gotComma) vectorCount++;
+         } while (gotComma);
         status=1;
-       }
+       } // item beginning with %
 
       // If we're not running in tab-completion mode and have failed, return an "expecting" hint
 item_cleanup:
@@ -618,7 +635,6 @@ item_cleanup:
               case 'A': sprintf(s->expectingList+s->eLPos, "an angle%s", varname); break;
               case 'b': sprintf(s->expectingList+s->eLPos, "a boolean%s", varname); break;
               case 'c': sprintf(s->expectingList+s->eLPos, "a color%s", varname); break;
-              case 'C': sprintf(s->expectingList+s->eLPos, "a color%s", varname); break;
               case 'd': sprintf(s->expectingList+s->eLPos, "an integer%s", varname); break;
               case 'D': sprintf(s->expectingList+s->eLPos, "a distance%s", varname); break;
               case 'e': sprintf(s->expectingList+s->eLPos, "an algebraic expression%s", varname); break;

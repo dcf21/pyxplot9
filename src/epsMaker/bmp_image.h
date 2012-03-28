@@ -1,4 +1,4 @@
-// colors.h
+// bmp_image.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,16 +19,30 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _COLORS_H
-#define _COLORS_H 1
+#ifndef _BMP_IMAGE_H
+#define _BMP_IMAGE_H 1
 
-#include "parser/parser.h"
-#include "userspace/context.h"
+// Colour channel configurations
 
-int ppl_colorFromDict  (ppl_context *c, parserOutput *in, parserLine *pl, const int *ptab,
-                        int fillColor, int *outcol, int *outcolspace, pplExpr **EXPoutcol,
-                        double *outcol1, double *outcol2, double *outcol3, double *outcol4,
-                        unsigned char *USEcol, unsigned char *USEcol1234);
+#define BMP_COLOUR_BMP     1001
+#define BMP_COLOUR_PALETTE 1002
+#define BMP_COLOUR_GREY    1003
+#define BMP_COLOUR_RGB     1004
+
+// Image compression types
+
+#define BMP_ENCODING_NULL  1100
+#define BMP_ENCODING_LZW   1101
+#define BMP_ENCODING_FLATE 1102
+#define BMP_ENCODING_DCT   1103
+
+typedef struct bitmap_data
+ {
+  unsigned char *data, *palette, *trans;
+  unsigned long  data_len;
+  int            pal_len, width, height, depth, type, colour, TargetCompression, flags;
+  double         XDPI, YDPI;
+ } bitmap_data;
 
 #endif
 

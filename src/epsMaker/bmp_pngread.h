@@ -1,10 +1,12 @@
-// colors.h
+// bmp_pngread.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
 //               2008-2012 Ross Church
+//
+//               2009-2010 Michael Rutter
 //
 // $Id$
 //
@@ -19,16 +21,18 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _COLORS_H
-#define _COLORS_H 1
+// This file is edited from code which was kindly contributed to PyXPlot by
+// Michael Rutter. It reads in data from PNG files uses libpng.
 
-#include "parser/parser.h"
-#include "userspace/context.h"
+#ifndef _PPL_BMP_PNGREAD_H
+#define _PPL_BMP_PNGREAD_H 1
 
-int ppl_colorFromDict  (ppl_context *c, parserOutput *in, parserLine *pl, const int *ptab,
-                        int fillColor, int *outcol, int *outcolspace, pplExpr **EXPoutcol,
-                        double *outcol1, double *outcol2, double *outcol3, double *outcol4,
-                        unsigned char *USEcol, unsigned char *USEcol1234);
+#include <stdio.h>
+
+#include "coreUtils/errorReport.h"
+#include "epsMaker/bmp_image.h"
+
+void bmp_pngread(pplerr_context *ec, FILE *in, bitmap_data *image);
 
 #endif
 

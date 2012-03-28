@@ -104,12 +104,13 @@ static void canvas_item_delete(ppl_context *c, canvas_item *ptr)
 // Add a new multiplot canvas item to the list above
 static int canvas_itemlist_add(ppl_context *c, pplObj *command, int type, canvas_item **output, int *id, unsigned char includeAxes)
  {
-  canvas_itemlist *canvas_items = c->canvas_items;
+  canvas_itemlist *canvas_items;
   canvas_item     *ptr, *next, *prev, **insertpointA, **insertpointB;
-  int              i, PrevId=-2, editNo, gotEditNo;
+  int              i, editNo, gotEditNo;
 
   // If we're not in multiplot mode, clear the canvas now
   if (c->set->term_current.multiplot == SW_ONOFF_OFF) directive_clear(c, NULL, NULL, 0);
+  canvas_items = c->canvas_items;
 
   // Ensure that multiplot canvas list is initialised before trying to use it
   if (canvas_items == NULL)
@@ -122,17 +123,19 @@ static int canvas_itemlist_add(ppl_context *c, pplObj *command, int type, canvas
    }
 
   gotEditNo = (command[PARSE_arc_editno].objType == PPLOBJ_NUM);
-  editNo    = round(command[PARSE_arc_editno].real);
   if (!gotEditNo)
    {
+    int prevId;
     insertpointA = &(canvas_items->last);
     next         = NULL;
     prev         = (*insertpointA==NULL) ? NULL                   :   canvas_items->last;
     insertpointB = (*insertpointA==NULL) ? &(canvas_items->first) : &(canvas_items->last->next);
-    PrevId       = (*insertpointA==NULL) ? 0                      :   canvas_items->last->id;
+    prevId       = (*insertpointA==NULL) ? 0                      :   canvas_items->last->id;
+    editNo       = prevId+1;
    }
   else
    {
+    editNo       = (int)round(command[PARSE_arc_editno].real);
     insertpointB = &(canvas_items->first);
     prev         = NULL;
     while ((*insertpointB != NULL) && ((*insertpointB)->id < editNo)) { prev = *insertpointB; insertpointB = &((*insertpointB)->next); }
@@ -156,14 +159,14 @@ static int canvas_itemlist_add(ppl_context *c, pplObj *command, int type, canvas
   ptr = (canvas_item *)malloc(sizeof(canvas_item));
   if (ptr==NULL) return 1;
   *insertpointA = *insertpointB = ptr;
-  ptr->next    = next; // Link doubly-linked list
-  ptr->prev    = prev;
-  ptr->text    = NULL;
+  ptr->next       = next; // Link doubly-linked list
+  ptr->prev       = prev;
+  ptr->text       = NULL;
   ptr->plotitems  = NULL;
   ptr->plotranges = NULL;
-  ptr->id      = (!gotEditNo) ? (PrevId+1) : editNo;
-  ptr->type    = type;
-  ptr->deleted = 0;
+  ptr->id         = editNo;
+  ptr->type       = type;
+  ptr->deleted    = 0;
   ppl_withWordsZero(c, &ptr->with_data);
 
   // Copy the user's current settings
@@ -729,7 +732,7 @@ int directive_arrow(ppl_context *c, parserLine *pl, parserOutput *in, int intera
   ptr->ypos2 = y2 - y1;
 
   // Read in colour and linewidth information, if available
-  ppl_withWordsFromDict(c, stk, PARSE_TABLE_arrow_, &ptr->with_data);
+  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_arrow_, &ptr->with_data);
 
   // Work out whether this arrow is in the 'head', 'nohead' or 'twoway' style
   tempstr  = (char *)stk[PARSE_arrow_arrow_style].auxil; gotTempstr  = (stk[PARSE_arrow_arrow_style].objType == PPLOBJ_STR);
@@ -787,7 +790,7 @@ int directive_box(ppl_context *c, parserLine *pl, parserOutput *in, int interact
   else        { ptr->rotation = 0.0; }
 
   // Read in colour and linewidth information, if available
-  ppl_withWordsFromDict(c, stk, PARSE_TABLE_box_, &ptr->with_data);
+  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_box_, &ptr->with_data);
 
   // Redisplay the canvas as required
   if (c->set->term_current.display == SW_ONOFF_ON)
@@ -826,7 +829,7 @@ int directive_circle(ppl_context *c, parserLine *pl, parserOutput *in, int inter
   else       { ptr->xfset = 0; } // circle command
 
   // Read in colour and linewidth information, if available
-  ppl_withWordsFromDict(c, stk, amArc?PARSE_TABLE_arc_:PARSE_TABLE_circle_, &ptr->with_data);
+  ppl_withWordsFromDict(c, in, pl, amArc?PARSE_TABLE_arc_:PARSE_TABLE_circle_, &ptr->with_data);
 
   // Redisplay the canvas as required
   if (c->set->term_current.display == SW_ONOFF_ON)
@@ -1005,7 +1008,7 @@ int directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int inte
   if (gotSlr) { ptr->slrset= 1; ptr->slr= slr; }
 
   // Read in colour and linewidth information, if available
-  ppl_withWordsFromDict(c, stk, PARSE_TABLE_ellipse_, &ptr->with_data);
+  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_ellipse_, &ptr->with_data);
 
   // Redisplay the canvas as required
   if (c->set->term_current.display == SW_ONOFF_ON)
@@ -1080,7 +1083,7 @@ int directive_point(ppl_context *c, parserLine *pl, parserOutput *in, int intera
   ptr->ypos  = y;
 
   // Read in colour and linewidth information, if available
-  ppl_withWordsFromDict(c, stk, PARSE_TABLE_point_, &ptr->with_data);
+  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_point_, &ptr->with_data);
 
   // See whether this point is labelled
   if (stk[PARSE_point_label].objType==PPLOBJ_STR)
@@ -1139,7 +1142,7 @@ int directive_text(ppl_context *c, parserLine *pl, parserOutput *in, int interac
   ptr->text = text;
 
   // Read in colour information, if available
-  ppl_withWordsFromDict(c, stk, PARSE_TABLE_text_, &ptr->with_data);
+  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_text_, &ptr->with_data);
 
   // Redisplay the canvas as required
   if (c->set->term_current.display == SW_ONOFF_ON)

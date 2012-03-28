@@ -145,6 +145,7 @@ pplObj *pplObjColor(pplObj *in, unsigned char amMalloced, int scheme, double c1,
   in->amMalloced = amMalloced;
   in->immutable = 0;
   in->exponent[ 0] = scheme;
+  in->exponent[ 2] = 0;
   in->exponent[ 8] = c1;
   in->exponent[ 9] = c2;
   in->exponent[10] = c3;

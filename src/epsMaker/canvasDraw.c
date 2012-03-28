@@ -27,6 +27,10 @@
 
 void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops)
  {
+  int i;
+
+  // By default, we record all operations as having been successful
+  for (i=0;i<MULTIPLOT_MAXINDEX; i++) unsuccessful_ops[i]=0;
   return;
  }
 

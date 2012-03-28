@@ -47,11 +47,13 @@
 // ROUTINES FOR MANIPULATING LABELS STRUCTURES
 // -------------------------------------------
 
+#define TBADD(et,pos) ppl_tbAdd(context,pl->srcLineN,pl->srcId,pl->srcFname,0,et,pos,pl->linetxt,"")
+
 #define CMPVAL(X,Y) (ppl_unitsDimEqual(&X,&Y) && ppl_dblEqual(X.real , Y.real))
 
 void ppllabel_add(ppl_context *context, ppllabel_object **inlist, parserOutput *in, parserLine *pl, const int *ptab)
  {
-  int              i, system_x, system_y, system_z;
+  int              i, system_x, system_y, system_z, gotTempstr, gotGap, gotAng;
   char            *tempstr, *label;
   double           gap, ang;
   ppllabel_object *out;
@@ -73,8 +75,10 @@ void ppllabel_add(ppl_context *context, ppllabel_object **inlist, parserOutput *
   if (label == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1, "Out of memory"); return; }
   strcpy(label, tempstr);
 
-  ang = in->stk[ptab[PARSE_INDEX_rotation]].real; // Check for rotation modifier
-  gap = in->stk[ptab[PARSE_INDEX_gap]].real;      // Check for gap modifier
+  ang    =  in->stk[ptab[PARSE_INDEX_rotation]].real; // Check for rotation modifier
+  gotAng = (in->stk[ptab[PARSE_INDEX_rotation]].objType == PPLOBJ_NUM);
+  gap    =  in->stk[ptab[PARSE_INDEX_gap]].real;      // Check for gap modifier
+  gotGap = (in->stk[ptab[PARSE_INDEX_gap]].objType == PPLOBJ_NUM);
 
   // Look up ID number of the label we are adding and find appropriate place for it in label list
   i = (int)round(in->stk[ptab[PARSE_INDEX_label_id]].real);
@@ -84,7 +88,7 @@ void ppllabel_add(ppl_context *context, ppllabel_object **inlist, parserOutput *
     out = *inlist;
     ppl_withWordsDestroy(context, &out->style);
    } else {
-    out = (pplarrow_object *)malloc(sizeof(pplarrow_object));
+    out = (ppllabel_object *)malloc(sizeof(ppllabel_object));
     if (out == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1, "Out of memory"); return; }
     out->id     = i;
     out->next   = *inlist;
@@ -92,19 +96,21 @@ void ppllabel_add(ppl_context *context, ppllabel_object **inlist, parserOutput *
    }
 
   // Check for halign or valign modifiers
-  tempstr = (char *)in->stk[ptab[PARSE_INDEX_halign]].auxil;
-  if (tempstr != NULL) out->HAlign = ppl_fetchSettingByName(&context->errcontext, tempstr, SW_HALIGN_INT, SW_HALIGN_STR);
-  else                 out->HAlign = context->set->graph_current.TextHAlign;
-  tempstr = (char *)in->stk[ptab[PARSE_INDEX_valign]].auxil;
-  if (tempstr != NULL) out->VAlign = ppl_fetchSettingByName(&context->errcontext, tempstr, SW_VALIGN_INT, SW_VALIGN_STR);
-  else                 out->VAlign = context->set->graph_current.TextVAlign;
+  tempstr    = (char *)in->stk[ptab[PARSE_INDEX_halign]].auxil;
+  gotTempstr =        (in->stk[ptab[PARSE_INDEX_halign]].objType == PPLOBJ_STR);
+  if (gotTempstr) out->HAlign = ppl_fetchSettingByName(&context->errcontext, tempstr, SW_HALIGN_INT, SW_HALIGN_STR);
+  else            out->HAlign = context->set->graph_current.TextHAlign;
+  tempstr    = (char *)in->stk[ptab[PARSE_INDEX_valign]].auxil;
+  gotTempstr =        (in->stk[ptab[PARSE_INDEX_valign]].objType == PPLOBJ_STR);
+  if (gotTempstr) out->VAlign = ppl_fetchSettingByName(&context->errcontext, tempstr, SW_VALIGN_INT, SW_VALIGN_STR);
+  else            out->VAlign = context->set->graph_current.TextVAlign;
 
-  if (ang != NULL) out->rotation = ang;
-  else             out->rotation = 0.0;
-  if (gap != NULL) out->gap      = gap;
-  else             out->gap      = 0.0;
+  if (gotAng) out->rotation = ang;
+  else        out->rotation = 0.0;
+  if (gotGap) out->gap      = gap;
+  else        out->gap      = 0.0;
 
-  ppl_withWordsFromDict(context, in, pl, ptab, &out->style, 1);
+  ppl_withWordsFromDict(context, in, pl, ptab, &out->style);
   out->text  = label;
   out->system_x = system_x; out->system_y = system_y; out->system_z = system_z;
   pplarrow_add_get_axis(PARSE_INDEX_x_axis, out->axis_x);
@@ -116,7 +122,7 @@ void ppllabel_add(ppl_context *context, ppllabel_object **inlist, parserOutput *
   return;
  }
 
-void ppllabel_remove(ppl_context *context, ppllabel_object **inlist, parserOutput *in, parserLine *pl, const int *ptab)
+void ppllabel_remove(ppl_context *context, ppllabel_object **inlist, parserOutput *in, parserLine *pl, const int *ptab, int quiet)
  {
   int               pos;
   ppllabel_object **first;
@@ -180,7 +186,7 @@ void ppllabel_unset(ppl_context *context, ppllabel_object **inlist, parserOutput
       while ((obj != NULL) && (obj->id < i)) obj = (obj->next);
       if ((obj != NULL) && (obj->id == i))
        {
-        pplarrow_object *new;
+        ppllabel_object *new;
         inlist = first;
         while ((*inlist != NULL) && ((*inlist)->id < i)) inlist = &((*inlist)->next);
         new = (ppllabel_object *)malloc(sizeof(ppllabel_object));
