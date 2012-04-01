@@ -1,4 +1,4 @@
-// canvasDraw.h
+// eps_eps.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,18 +19,13 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _CANVASDRAW_H
-#define _CANVASDRAW_H 1
+#ifndef _PPL_EPS_EPS_H
+#define _PPL_EPS_EPS_H 1
 
 #include "epsMaker/eps_comm.h"
-#include "userspace/context.h"
 
-void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops);
-void canvas_CallLaTeX(EPSComm *x);
-void canvas_MakeEPSBuffer(EPSComm *x);
-void canvas_EPSWrite(EPSComm *x);
-void canvas_EPSRenderTextItem(EPSComm *x, char **strout, int pageno, double xpos, double ypos, int halign, int valign, char *colstr, double fontsize, double rotate, double *width, double *height);
-void canvas_EPSLandscapify(EPSComm *x, char *transform);
-void canvas_EPSEnlarge(EPSComm *x, char *transform);
+void eps_eps_RenderEPS(EPSComm *x);
+void eps_eps_ExtractBBox(EPSComm *x, FILE *in, double *bl, double *bb, double *br, double *bt, unsigned char *GotBox);
 
 #endif
+
