@@ -37,7 +37,7 @@ typedef struct ThreeDimBufferItem {
 extern unsigned char ThreeDimBuffer_ACTIVE;
 #endif
 
-void ThreeDimBuffer_Reset();
+void ThreeDimBuffer_Reset(EPSComm *x);
 int  ThreeDimBuffer_Activate(EPSComm *x);
 int  ThreeDimBuffer_Deactivate(EPSComm *x);
 int  ThreeDimBuffer_writeps(EPSComm *x, double z, int linetype, double linewidth, double offset, double pointsize, char *colstr, char *psfrag);

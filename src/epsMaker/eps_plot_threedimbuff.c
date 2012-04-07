@@ -45,7 +45,7 @@ static double  linewidth_old ; static int linewidth_old_SET ;
 static double  pointsize_old ; static int pointsize_old_SET ;
 static char   *colstr_old;
 
-void ThreeDimBuffer_Reset()
+void ThreeDimBuffer_Reset(EPSComm *x)
  {
   ThreeDimBuffer_ACTIVE        = 0;
   ThreeDimBuffer_LineSegmentID = 0;
@@ -87,7 +87,7 @@ int ThreeDimBuffer_Deactivate(EPSComm *x)
   ThreeDimBufferItem *item;
   listIterator *ListIter;
 
-  if (!ThreeDimBuffer_ACTIVE) { ThreeDimBuffer_Reset(); return 0; }
+  if (!ThreeDimBuffer_ACTIVE) { ThreeDimBuffer_Reset(x); return 0; }
   Nitems = ppl_listLen(ThreeDimBuffer_buffer);
   ThreeDimBuffer_ACTIVE = 0;
   if (Nitems > 0)
@@ -123,7 +123,7 @@ int ThreeDimBuffer_Deactivate(EPSComm *x)
      }
    }
   ThreeDimBuffer_linepenup(x);
-  ThreeDimBuffer_Reset();
+  ThreeDimBuffer_Reset(x);
   return 0;
  }
 
