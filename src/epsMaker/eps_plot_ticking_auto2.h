@@ -22,6 +22,7 @@
 #ifndef _PPL_EPS_PLOT_TICKING_AUTO2_H
 #define _PPL_EPS_PLOT_TICKING_AUTO2_H 1
 
+#include "epsMaker/eps_comm.h"
 #include "settings/settings.h"
 
 void eps_plot_ticking_auto2(EPSComm *x, pplset_axis *axis, double UnitMultiplier, unsigned char *AutoTicks, pplset_axis *linkedto);

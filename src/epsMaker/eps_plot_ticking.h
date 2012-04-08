@@ -22,6 +22,7 @@
 #ifndef _PPL_EPS_PLOT_TICKING_H
 #define _PPL_EPS_PLOT_TICKING_H 1
 
+#include "epsMaker/eps_comm.h"
 #include "settings/settings.h"
 #include "userspace/pplObj.h"
 

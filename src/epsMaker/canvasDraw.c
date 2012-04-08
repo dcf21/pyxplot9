@@ -19,16 +19,22 @@
 
 // ----------------------------------------------------------------------------
 
-#define _CANVASDRAW_C
+#define _CANVASDRAW_C 1
 
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <signal.h>
 #include <unistd.h>
+#include <errno.h>
+#include <signal.h>
+#include <time.h>
+#include <wordexp.h>
+#include <sys/select.h>
+#include <sys/wait.h>
 
 #include <gsl/gsl_math.h>
 
+#include "coreUtils/backup.h"
 #include "coreUtils/errorReport.h"
 #include "coreUtils/list.h"
 #include "coreUtils/memAlloc.h"
@@ -36,12 +42,61 @@
 #include "stringTools/asciidouble.h"
 #include "epsMaker/canvasDraw.h"
 #include "epsMaker/dvi_read.h"
+#include "epsMaker/eps_arrow.h"
+#include "epsMaker/eps_box.h"
+#include "epsMaker/eps_circle.h"
+#include "epsMaker/eps_ellipse.h"
+#include "epsMaker/eps_eps.h"
+#include "epsMaker/eps_image.h"
+#include "epsMaker/eps_point.h"
+#include "epsMaker/eps_plot.h"
+#include "epsMaker/eps_plot_threedimbuff.h"
+#include "epsMaker/eps_text.h"
 #include "epsMaker/eps_comm.h"
 #include "epsMaker/eps_core.h"
 #include "epsMaker/eps_settings.h"
 #include "userspace/context.h"
 #include "canvasItems.h"
 #include "children.h"
+#include "datafile.h"
+
+// Handy routine for copying files
+static int filecopy(EPSComm *x, const char *in, const char *out)
+ {
+  int status=0, n;
+  FILE *fi, *fo;
+  ppl_createBackupIfRequired(x->c, out);
+  fi = fopen(in, "rb");
+  fo = fopen(out, "wb");
+  if ((fo==NULL)||(fi==NULL)) status=1;
+  while ((!status) && ((n=fread((void *)x->c->errcontext.tempErrStr, 1, FNAME_LENGTH, fi)) > 0))
+   if (fwrite((void *)x->c->errcontext.tempErrStr, 1, n, fo) < n)
+    status=1;
+  if (fi != NULL) fclose(fi);
+  if (fo != NULL) fclose(fo);
+  return status;
+ }
+
+// Run ghostscript to convert postscript output into bitmap graphics
+#define BITMAP_TERMINAL_CLEANUP(X, Y, CanInvert) \
+    if (system(c->errcontext.tempErrStr) != 0) /* Run ghostscript */ \
+     { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Error encountered whilst using " X " to generate " Y " output"); } \
+    else \
+     { \
+      char *src = GSOutputTemp; \
+      if ((CanInvert) && (c->set->term_current.TermInvert==SW_ONOFF_ON)) \
+       { \
+        sprintf(c->errcontext.tempErrStr, "%s %s -negate %s", CONVERT_COMMAND, GSOutputTemp, GSOutputTemp2); \
+        if (system(c->errcontext.tempErrStr) != 0) /* Run convert to negate image */ \
+         { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Error encountered whilst using ImageMagick to generate negated " Y " output"); } \
+        src = GSOutputTemp2; \
+        remove(GSOutputTemp); \
+       } \
+      if (filecopy(&comm, src, comm.FinalFilename) != 0) /* Move ghostscript output to desire target file */ \
+       { sprintf(c->errcontext.tempErrStr, "Could not write output to file '%s'", comm.FinalFilename); ppl_error(&c->errcontext, ERR_FILE, -1, -1, NULL); } \
+      remove(src);  /* Delete temporary files */ \
+     } \
+    remove(comm.EPSFilename);
 
 // Standard postscript prolog text for EPS and PS files
 static char *EPS_PROLOG_TEXT = "\
@@ -70,12 +125,277 @@ static char *EPS_PROLOG_TEXT = "\
 static char *PS_PROLOG_TEXT = "\
 ";
 
+// Standard commandline flags to pass to ghostscript
+static char *GHOSTSCRIPT_STANDARD_FLAGS = "-dQUIET -dSAFER -P- -dBATCH -dNOPAUSE -dEPSCrop";
+
+// Table of the functions we call for each phase of the canvas drawing process for different object types
+static void(*ArrowHandlers[])(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , eps_arrow_RenderEPS, NULL};
+static void(*BoxHandlers[]  )(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , eps_box_RenderEPS  , NULL};
+static void(*CircHandlers[] )(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , eps_circ_RenderEPS , NULL};
+static void(*EllpsHandlers[])(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , eps_ellps_RenderEPS, NULL};
+static void(*EPSHandlers[]  )(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , eps_eps_RenderEPS  , NULL};
+static void(*ImageHandlers[])(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , eps_image_RenderEPS, NULL};
+static void(*PieHandlers[]  )(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , NULL               , NULL};
+static void(*PlotHandlers[] )(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , NULL               , NULL};
+static void(*PointHandlers[])(EPSComm *) = {NULL                       , NULL                    , NULL                     , eps_point_YieldUpText,NULL                , eps_point_RenderEPS, NULL};
+static void(*TextHandlers[] )(EPSComm *) = {NULL                       , NULL                    , NULL                     , eps_text_YieldUpText, NULL                , eps_text_RenderEPS , NULL};
+static void(*AfterHandlers[])(EPSComm *) = {NULL                       , NULL                    , NULL                     , canvas_CallLaTeX    , canvas_MakeEPSBuffer, canvas_EPSWrite    , NULL};
+
+
 void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops)
  {
-  int i;
+  int i, j, termtype, status=0, CSPCommand=0;
+  static long TempFile_counter=0, TeXFile_counter=0;
+  char EPSFilenameTemp[FNAME_LENGTH], TeXFilenameTemp[FNAME_LENGTH], TitleTemp[FNAME_LENGTH], FinalFilenameTemp[FNAME_LENGTH];
+  char GSOutputTemp[FNAME_LENGTH], GSOutputTemp2[FNAME_LENGTH];
+  wordexp_t WordExp;
+  char *EnvDisplay;
+  EPSComm comm;
+  canvas_item *item;
+  void(*ArrowHandler)(EPSComm *);
+  void(*BoxHandler  )(EPSComm *);
+  void(*CircHandler )(EPSComm *);
+  void(*EllpsHandler)(EPSComm *);
+  void(*EPSHandler  )(EPSComm *);
+  void(*ImageHandler)(EPSComm *);
+  void(*PieHandler  )(EPSComm *);
+  void(*PlotHandler )(EPSComm *);
+  void(*PointHandler)(EPSComm *);
+  void(*TextHandler )(EPSComm *);
+  void(*AfterHandler)(EPSComm *);
+
+  // Reset 3D rendering buffer
+  comm.c = c;
+  ThreeDimBuffer_Reset(&comm);
 
   // By default, we record all operations as having been successful
   for (i=0;i<MULTIPLOT_MAXINDEX; i++) unsuccessful_ops[i]=0;
+
+  // Work out filename to save output postscript to
+  comm.termtype = termtype = c->set->term_current.TermType;
+  comm.FinalFilename = c->set->term_current.output; // The final filename of whatever kind of output we're planning to produce
+  if ((comm.FinalFilename==NULL)||(comm.FinalFilename[0]=='\0'))
+   {
+    comm.FinalFilename = FinalFilenameTemp; // If final target filename is blank, use pyxplot.<filetype>
+    sprintf(FinalFilenameTemp, "pyxplot.%s", *(char **)ppl_fetchSettingName(&c->errcontext, termtype, SW_TERMTYPE_INT, (void *)SW_TERMTYPE_STR, sizeof(char *)));
+   }
+
+  // Perform expansion of shell filename shortcuts such as ~
+  if ((wordexp(comm.FinalFilename, &WordExp, 0) != 0) || (WordExp.we_wordc <= 0)) { sprintf(c->errcontext.tempErrStr, "Could not find directory containing filename '%s'.", comm.FinalFilename); ppl_error(&c->errcontext, ERR_FILE, -1, -1, NULL); return; }
+  if  (WordExp.we_wordc > 1) { sprintf(c->errcontext.tempErrStr, "Filename '%s' is ambiguous.", comm.FinalFilename); ppl_error(&c->errcontext, ERR_FILE, -1, -1, NULL); return; }
+  strcpy(FinalFilenameTemp, WordExp.we_wordv[0]);
+  wordfree(&WordExp);
+  comm.FinalFilename = FinalFilenameTemp;
+
+  // Create filename for temporary LaTeX document
+  comm.TeXFilename = TeXFilenameTemp;
+  TeXFile_counter++;
+  sprintf(TeXFilenameTemp, "%s%spyxplot_%d_%ld", c->errcontext.session_default.tempdir, PATHLINK, getpid(), TempFile_counter);
+
+  // Case 1: EPS and PS terminals. Postscript output will be saved immediately in situ.
+  if ((termtype == SW_TERMTYPE_EPS) || (termtype == SW_TERMTYPE_PS))
+   {
+    comm.EPSFilename = comm.FinalFilename; // eps or ps is actually what we're aiming to make, so save straight to user's chosen target
+    ppl_createBackupIfRequired(c, comm.EPSFilename);
+    comm.title    = comm.EPSFilename; // Filename 'foo/bar/myplot.eps' --> title 'myplot.eps'
+    for (i=0; comm.title[i]!='\0'; i++) if ((comm.title[i]==PATHLINK[0])&&((i==0)||(comm.title[i-1]!='\\'))) { comm.title += i+1; i=-1; }
+   }
+  else // Case 2: All other terminals. Create a temporary eps file for subsequent processing.
+   {
+    comm.EPSFilename = EPSFilenameTemp;
+    TempFile_counter++;
+    sprintf(EPSFilenameTemp, "%s%spyxplot_%d_%ld.eps", c->errcontext.session_default.tempdir, PATHLINK, getpid(), TempFile_counter);
+    if ((termtype==SW_TERMTYPE_X11S) || (termtype==SW_TERMTYPE_X11M) || (termtype==SW_TERMTYPE_X11P))
+     {
+      comm.title    = TitleTemp; // In X11 terminals, we give eps files numbered titles
+      sprintf(TitleTemp, "PyXPlot Output %ld", TempFile_counter);
+     } else {
+      comm.title = comm.FinalFilename; // In other terminals, we give eps files filename titles, with path cut off front
+      for (i=0; comm.title[i]!='\0'; i++) if ((comm.title[i]==PATHLINK[0])&&((i==0)||(comm.title[i-1]!='\\'))) { comm.title += i; i=0; }
+     }
+   }
+
+  // Make GSOutputTemp a temporary file that ghostscript can spit data out to (with a shell-safe filename)
+  sprintf(GSOutputTemp , "%s%spyxplot_%d_%ld%s",  c->errcontext.session_default.tempdir, PATHLINK, getpid(), TempFile_counter, (termtype==SW_TERMTYPE_GIF)?".gif":".tmp");
+  sprintf(GSOutputTemp2, "%s%spyxplot_%d_%ld_%s", c->errcontext.session_default.tempdir, PATHLINK, getpid(), TempFile_counter, (termtype==SW_TERMTYPE_GIF)?".gif":".tmp");
+
+  // Set up communications data structure for objects we are rendering
+  comm.itemlist             = (canvas_itemlist *)c->canvas_items;
+  comm.bb_left              = comm.bb_right = comm.bb_top = comm.bb_bottom = 0.0;
+  comm.bb_set               = 0;
+  comm.epsbuffer            = NULL;
+  comm.status               = &status;
+  comm.NTextItems           = 0; // Used to count items as we add them to text buffer
+  comm.TextItems            = ppl_listInit(0); // Empty list of pieces of text we are going to put on canvas
+  comm.LastPSColour[0]      = '\0';
+  comm.CurrentColour[0]     = '\0';
+  comm.CurrentFillColour[0] = '\0';
+  comm.LastLinewidth        = -1.0;
+  comm.LastLinetype         = 0;
+  comm.LaTeXpageno          = 0; // Used to count items off as we render them to postscript
+  comm.dvi                  = NULL;
+  for (i=0; i<N_POINTTYPES; i++) comm.PointTypesUsed[i] = 0; // Record which point and star macros we've used and need to include in postscript prolog
+  for (i=0; i<N_STARTYPES ; i++) comm.StarTypesUsed [i] = 0;
+
+  // Loop over all of the items on the canvas zeroing the plot bounding boxes
+  if (comm.itemlist != NULL)
+  for (item=comm.itemlist->first; item!=NULL; item=item->next)
+   {
+    item->PlotLeftMargin   = 0.0;
+    item->PlotRightMargin  = 0.0;
+    item->PlotTopMargin    = 0.0;
+    item->PlotBottomMargin = 0.0;
+   }
+
+  // Rendering of EPS occurs in a series of phases which we now loop over
+  for (j=0 ; ; j++)
+   {
+    ArrowHandler = ArrowHandlers[j]; // Each object type has a handler for each phase of postscript generation
+    BoxHandler   = BoxHandlers  [j];
+    CircHandler  = CircHandlers [j];
+    EllpsHandler = EllpsHandlers[j];
+    EPSHandler   = EPSHandlers  [j];
+    ImageHandler = ImageHandlers[j];
+    PlotHandler  = PlotHandlers [j];
+    PieHandler   = PieHandlers  [j];
+    PointHandler = PointHandlers[j];
+    TextHandler  = TextHandlers [j];
+    AfterHandler = AfterHandlers[j];
+    if ((ArrowHandler==NULL)&&(CircHandler==NULL)&&(EllpsHandler==NULL)&&(EPSHandler==NULL)&&(ImageHandler==NULL)&&(PieHandler==NULL)&&(PlotHandler==NULL)&&(PointHandler==NULL)&&(TextHandler==NULL)&&(AfterHandler==NULL)) break;
+
+    // Loop over all of the items on the canvas
+    if (comm.itemlist != NULL)
+    for (item=comm.itemlist->first; item!=NULL; item=item->next)
+     {
+      if (item->deleted)              continue; // ... except those which have been deleted
+      if (unsuccessful_ops[item->id]) continue; // ... or which have already failed
+      comm.LastPSColour[0]      = '\0'; // Make each item produce free-standing postscript for easy editing
+      comm.CurrentColour[0]     = '\0';
+      comm.CurrentFillColour[0] = '\0';
+      comm.LastLinewidth        = -1.0;
+      comm.LastLinetype         = 0;
+      comm.current              = item;
+      if      ((item->type == CANVAS_ARROW) && (ArrowHandler != NULL)) (*ArrowHandler)(&comm); // Call the relevant handler for each one
+      else if ((item->type == CANVAS_BOX  ) && (BoxHandler   != NULL)) (*BoxHandler  )(&comm);
+      else if ((item->type == CANVAS_CIRC ) && (CircHandler  != NULL)) (*CircHandler )(&comm);
+      else if ((item->type == CANVAS_ELLPS) && (EllpsHandler != NULL)) (*EllpsHandler)(&comm);
+      else if ((item->type == CANVAS_EPS  ) && (EPSHandler   != NULL)) (*EPSHandler  )(&comm);
+      else if ((item->type == CANVAS_IMAGE) && (ImageHandler != NULL)) (*ImageHandler)(&comm);
+      else if ((item->type == CANVAS_PIE  ) && (PieHandler   != NULL)) (*PieHandler  )(&comm);
+      else if ((item->type == CANVAS_PLOT ) && (PlotHandler  != NULL)) (*PlotHandler )(&comm);
+      else if ((item->type == CANVAS_POINT) && (PointHandler != NULL)) (*PointHandler)(&comm);
+      else if ((item->type == CANVAS_TEXT ) && (TextHandler  != NULL)) (*TextHandler )(&comm);
+      if (status) { unsuccessful_ops[item->id] = 1; } // If something went wrong... flag it up and give up on this object
+      status = 0;
+     }
+    if (AfterHandler != NULL) (*AfterHandler)(&comm); // At the end of each phase, a canvas-wide handler may be called
+    if (status) { if (comm.epsbuffer!=NULL) fclose(comm.epsbuffer); return; } // The failure of a canvas-wide handler is fatal
+   }
+
+  // Now convert eps output to bitmaped graphics if requested
+  if ((termtype==SW_TERMTYPE_X11S) || (termtype==SW_TERMTYPE_X11M) || (termtype==SW_TERMTYPE_X11P)) // X11 terminals
+   {
+    EnvDisplay = getenv("DISPLAY"); // Check whether the environment variable DISPLAY is set
+    if (c->set->term_current.viewer==SW_VIEWER_NULL)
+     {
+      ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "An attempt is being made to use an X11 terminal for output, but the required package 'ghostview' could not be found when PyXPlot was installed. If you have recently install ghostview, please reconfigure and recompile PyXPlot.");
+     }
+    else if ((EnvDisplay==NULL) || (EnvDisplay[0]=='\0'))
+     {
+      ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "An attempt is being made to use an X11 terminal for output, but your DISPLAY environment variable is not set; there is no accessible X11 display.");
+     }
+    else
+     {
+      if (!c->willBeInteractive)
+       {
+        if (termtype!=SW_TERMTYPE_X11P)
+         {
+          sprintf(c->errcontext.tempErrStr, "An attempt is being made to use the %s terminal in a non-interactive PyXPlot session. This won't work, as the window will close as soon as PyXPlot exits. Reverting to the X11_persist terminal instead.", *(char **)ppl_fetchSettingName(&c->errcontext, termtype, SW_TERMTYPE_INT, (void *)SW_TERMTYPE_STR, sizeof(char *)));
+          ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL);
+         }
+        CSPCommand = 2;
+       } else {
+        if      (termtype==SW_TERMTYPE_X11S) CSPCommand = 0;
+        else if (termtype==SW_TERMTYPE_X11M) CSPCommand = 1;
+        else if (termtype==SW_TERMTYPE_X11P) CSPCommand = 2;
+       }
+      if      (c->set->term_current.viewer==SW_VIEWER_GV)  sprintf(c->errcontext.tempErrStr, "%d%s %swatch %s\n", CSPCommand, GHOSTVIEW_COMMAND, GHOSTVIEW_OPT, comm.EPSFilename);
+      else if (c->set->term_current.viewer==SW_VIEWER_GGV) sprintf(c->errcontext.tempErrStr, "%d%s --watch %s\n", CSPCommand, GGV_COMMAND, comm.EPSFilename);
+      else                                                  sprintf(c->errcontext.tempErrStr, "%d%s %s\n", CSPCommand, c->set->term_current.ViewerCmd, comm.EPSFilename);
+      pplcsp_sendCommand(c, c->errcontext.tempErrStr);
+
+      // Pause after launching an X11 ghostview viewer to give stderr error messages a moment to come back to us
+      for (i=0;i<7;i++)
+       {
+        struct timespec waitperiod, waitedperiod;
+        waitperiod.tv_sec  = 0; waitperiod.tv_nsec = 40000000;
+        nanosleep(&waitperiod,&waitedperiod);
+       }
+     }
+   }
+  else if (termtype==SW_TERMTYPE_PDF) // PDF terminal
+   {
+    sprintf(c->errcontext.tempErrStr, "%s %s -sDEVICE=pdfwrite -sOutputFile=%s %s",
+        GHOSTSCRIPT_COMMAND, GHOSTSCRIPT_STANDARD_FLAGS, GSOutputTemp, comm.EPSFilename);
+    BITMAP_TERMINAL_CLEANUP("ghostscript", "pdf", 0);
+   }
+  else if (termtype==SW_TERMTYPE_PNG) // PNG terminal
+   {
+    sprintf(c->errcontext.tempErrStr, "%s %s -sDEVICE=%s -r%d %s -sOutputFile=%s %s",
+        GHOSTSCRIPT_COMMAND, GHOSTSCRIPT_STANDARD_FLAGS,
+        (c->set->term_current.TermTransparent==SW_ONOFF_ON)?"pngalpha":"png16m",
+        (int)floor(c->set->term_current.dpi),
+        (c->set->term_current.TermAntiAlias==SW_ONOFF_ON)?"-dGraphicsAlphaBits=4 -dTextAlphaBits=4":"-dGraphicsAlphaBits=0 -dTextAlphaBits=0",
+        GSOutputTemp, comm.EPSFilename);
+    BITMAP_TERMINAL_CLEANUP("ghostscript", "png", 1)
+   }
+  else if (termtype==SW_TERMTYPE_JPG) // JPEG terminal
+   {
+    sprintf(c->errcontext.tempErrStr, "%s %s -sDEVICE=jpeg -dJPEGQ=100 -r%d %s -sOutputFile=%s %s",
+        GHOSTSCRIPT_COMMAND, GHOSTSCRIPT_STANDARD_FLAGS,
+        (int)floor(c->set->term_current.dpi),
+        (c->set->term_current.TermAntiAlias==SW_ONOFF_ON)?"-dGraphicsAlphaBits=4 -dTextAlphaBits=4":"-dGraphicsAlphaBits=0 -dTextAlphaBits=0",
+        GSOutputTemp, comm.EPSFilename);
+    BITMAP_TERMINAL_CLEANUP("ghostscript", "jpeg", 1)
+   }
+  else if (termtype==SW_TERMTYPE_GIF) // GIF terminal
+   {
+    sprintf(c->errcontext.tempErrStr, "%s -density %d %s %s %s %s",
+        CONVERT_COMMAND,
+        (int)floor(c->set->term_current.dpi),
+        (c->set->term_current.TermTransparent==SW_ONOFF_ON)?"-alpha activate":"-alpha deactivate",
+        (c->set->term_current.TermAntiAlias==SW_ONOFF_ON)?"-antialias":"+antialias",
+        comm.EPSFilename, GSOutputTemp);
+    BITMAP_TERMINAL_CLEANUP("ImageMagick", "gif", 1);
+   }
+  else if (termtype==SW_TERMTYPE_BMP) // BMP terminal
+   {
+    sprintf(c->errcontext.tempErrStr, "%s %s -sDEVICE=bmp16m -r%d %s -sOutputFile=%s %s",
+        GHOSTSCRIPT_COMMAND, GHOSTSCRIPT_STANDARD_FLAGS,
+        (int)floor(c->set->term_current.dpi),
+        (c->set->term_current.TermAntiAlias==SW_ONOFF_ON)?"-dGraphicsAlphaBits=4 -dTextAlphaBits=4":"-dGraphicsAlphaBits=0 -dTextAlphaBits=0",
+        GSOutputTemp, comm.EPSFilename);
+    BITMAP_TERMINAL_CLEANUP("ghostscript", "bmp", 1)
+   }
+  else if (termtype==SW_TERMTYPE_TIF) // TIF terminal
+   {
+    sprintf(c->errcontext.tempErrStr, "%s %s -sDEVICE=tiff24nc -r%d %s -sOutputFile=%s %s",
+        GHOSTSCRIPT_COMMAND, GHOSTSCRIPT_STANDARD_FLAGS,
+        (int)floor(c->set->term_current.dpi),
+        (c->set->term_current.TermAntiAlias==SW_ONOFF_ON)?"-dGraphicsAlphaBits=4 -dTextAlphaBits=4":"-dGraphicsAlphaBits=0 -dTextAlphaBits=0",
+        GSOutputTemp, comm.EPSFilename);
+    BITMAP_TERMINAL_CLEANUP("ghostscript", "tif", 1)
+   }
+  else if (termtype==SW_TERMTYPE_SVG) // SVG terminal
+   {
+    sprintf(c->errcontext.tempErrStr, "%s %s -sDEVICE=svg -sOutputFile=%s %s > /dev/null 2> /dev/null",
+        GHOSTSCRIPT_COMMAND, GHOSTSCRIPT_STANDARD_FLAGS,
+        GSOutputTemp, comm.EPSFilename);
+    BITMAP_TERMINAL_CLEANUP("ghostscript", "svg", 0)
+   }
+
+  // Return to user's current working directory
+  if (chdir(c->errcontext.session_default.cwd) < 0) { ppl_fatal(&c->errcontext, __FILE__,__LINE__,"chdir into cwd failed."); }
   return;
  }
 
