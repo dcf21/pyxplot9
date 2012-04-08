@@ -32,6 +32,7 @@
 
 #include "coreUtils/memAlloc.h"
 #include "expressions/expEval.h"
+#include "expressions/traceback_fns.h"
 #include "mathsTools/dcfmath.h"
 #include "epsMaker/canvasDraw.h"
 #include "canvasItems.h"
@@ -50,6 +51,7 @@
 #include "settings/epsColors.h"
 #include "epsMaker/eps_plot.h"
 #include "epsMaker/eps_plot_canvas.h"
+#include "epsMaker/eps_plot_contourmap.h"
 #include "epsMaker/eps_plot_legend.h"
 #include "epsMaker/eps_settings.h"
 #include "epsMaker/eps_style.h"
@@ -96,7 +98,7 @@ void eps_plot_contourmap_YieldText(EPSComm *x, dataTable *data, pplset_graph *sg
 
   // Check that we have some data
   if ((data==NULL) || (data->Nrows<1)) return; // No data present
-  Ncol = data->Ncolumns;
+  Ncol = data->Ncolumns_real;
   blk  = data->first;
 
   // Work out normalisation of variable c1
@@ -113,7 +115,7 @@ void eps_plot_contourmap_YieldText(EPSComm *x, dataTable *data, pplset_graph *sg
    for (j=0; j<YSize; j++)
     for (i=0; i<XSize; i++)
      {
-      double val = blk->data_real[2 + Ncol*(i+XSize*j)].d;
+      double val = blk->data_real[2 + Ncol*(i+XSize*j)];
       if (!gsl_finite(val)) continue;
       if ((CMinAuto) && ((!CMinSet) || (CMin>val)) && ((!CLog)||(val>0.0))) { CMin=val; CMinSet=1; }
       if ((CMaxAuto) && ((!CMaxSet) || (CMax<val)) && ((!CLog)||(val>0.0))) { CMax=val; CMaxSet=1; }
@@ -224,7 +226,7 @@ static int IsBetween(double x, double a, double b, double *f)
 static int GetStartPoint(double c1, dataTable *data, unsigned char **flags, int XSize, int YSize, int x0, int y0, int EntryFace, int *ExitFace, int *xcell, int *ycell, double *Xout, double *Yout)
  {
   dataBlock *blk  = data->first;
-  int        Ncol = data->Ncolumns;
+  int        Ncol = data->Ncolumns_real;
   const int  pass = 0;
   double     f;
 
@@ -233,22 +235,22 @@ static int GetStartPoint(double c1, dataTable *data, unsigned char **flags, int 
 
   if (((EntryFace<0)||(EntryFace==FACE_T)) && (x0<=XSize-2) && (x0>= 0) && (y0>= 0) && (y0<=YSize-1) &&
        (((blk->split[(x0  )+(y0  )*XSize]>>(0+2*pass))&1)==0) &&
-       IsBetween(c1, blk->data_real[2+Ncol*((x0  )+(y0  )*XSize)].d, blk->data_real[2+Ncol*((x0+1)+(y0  )*XSize)].d,&f))
+       IsBetween(c1, blk->data_real[2+Ncol*((x0  )+(y0  )*XSize)], blk->data_real[2+Ncol*((x0+1)+(y0  )*XSize)],&f))
    { *flags = &blk->split[(x0  )+(y0  )*XSize]; *ExitFace=FACE_T; *Xout=x0+f; *Yout=y0; return 1; }
 
   if (((EntryFace<0)||(EntryFace==FACE_R)) && (x0<=XSize-2) && (x0>=-1) && (y0>= 0) && (y0<=YSize-2) &&
        (((blk->split[(x0+1)+(y0  )*XSize]>>(1+2*pass))&1)==0) &&
-       IsBetween(c1, blk->data_real[2+Ncol*((x0+1)+(y0  )*XSize)].d, blk->data_real[2+Ncol*((x0+1)+(y0+1)*XSize)].d,&f))
+       IsBetween(c1, blk->data_real[2+Ncol*((x0+1)+(y0  )*XSize)], blk->data_real[2+Ncol*((x0+1)+(y0+1)*XSize)],&f))
    { *flags = &blk->split[(x0+1)+(y0  )*XSize]; *ExitFace=FACE_R; *Xout=x0+1; *Yout=y0+f; return 1; }
 
   if (((EntryFace<0)||(EntryFace==FACE_B)) && (x0<=XSize-2) && (x0>= 0) && (y0>=-1) && (y0<=YSize-2) &&
        (((blk->split[(x0  )+(y0+1)*XSize]>>(0+2*pass))&1)==0) &&
-       IsBetween(c1, blk->data_real[2+Ncol*((x0  )+(y0+1)*XSize)].d, blk->data_real[2+Ncol*((x0+1)+(y0+1)*XSize)].d,&f))
+       IsBetween(c1, blk->data_real[2+Ncol*((x0  )+(y0+1)*XSize)], blk->data_real[2+Ncol*((x0+1)+(y0+1)*XSize)],&f))
    { *flags = &blk->split[(x0  )+(y0+1)*XSize]; *ExitFace=FACE_B; *Xout=x0+f; *Yout=y0+1; return 1; }
 
   if (((EntryFace<0)||(EntryFace==FACE_L)) && (x0<=XSize-1) && (x0>= 0) && (y0>= 0) && (y0<=YSize-2) &&
        (((blk->split[(x0  )+(y0  )*XSize]>>(1+2*pass))&1)==0) &&
-       IsBetween(c1, blk->data_real[2+Ncol*((x0  )+(y0  )*XSize)].d, blk->data_real[2+Ncol*((x0  )+(y0+1)*XSize)].d,&f))
+       IsBetween(c1, blk->data_real[2+Ncol*((x0  )+(y0  )*XSize)], blk->data_real[2+Ncol*((x0  )+(y0+1)*XSize)],&f))
    { *flags = &blk->split[(x0  )+(y0  )*XSize]; *ExitFace=FACE_L; *Xout=x0; *Yout=y0+f; return 1; }
   return 0;
  }
@@ -257,7 +259,7 @@ static int GetStartPoint(double c1, dataTable *data, unsigned char **flags, int 
 static int GetNextPoint(double c1, dataTable *data, int pass, int XSize, int YSize, int x0, int y0, int EntryFace, int *ExitFace, int *xcell, int *ycell, double *Xout, double *Yout)
  {
   dataBlock *blk  = data->first;
-  int        Ncol = data->Ncolumns;
+  int        Ncol = data->Ncolumns_real;
   int        j;
   double     f;
 
@@ -265,22 +267,22 @@ static int GetNextPoint(double c1, dataTable *data, int pass, int XSize, int YSi
    {
     if (((j==1       )||(EntryFace==FACE_B)) && (x0<=XSize-2) && (x0>= 0) && (y0>= 0) && (y0<=YSize-1) &&
          (((blk->split[(x0  )+(y0  )*XSize]>>(0+2*pass))&1)==0) &&
-         IsBetween(c1, blk->data_real[2+Ncol*((x0  )+(y0  )*XSize)].d, blk->data_real[2+Ncol*((x0+1)+(y0  )*XSize)].d,&f))
+         IsBetween(c1, blk->data_real[2+Ncol*((x0  )+(y0  )*XSize)], blk->data_real[2+Ncol*((x0+1)+(y0  )*XSize)],&f))
      { blk->split[(x0  )+(y0  )*XSize] |= 1<<(0+2*pass); *ExitFace=FACE_T; *xcell=x0; *ycell=y0-1; *Xout=x0+f; *Yout=y0; return 1; }
 
     if (((j==1       )||(EntryFace==FACE_L)) && (x0<=XSize-2) && (x0>=-1) && (y0>= 0) && (y0<=YSize-2) &&
          (((blk->split[(x0+1)+(y0  )*XSize]>>(1+2*pass))&1)==0) &&
-         IsBetween(c1, blk->data_real[2+Ncol*((x0+1)+(y0  )*XSize)].d, blk->data_real[2+Ncol*((x0+1)+(y0+1)*XSize)].d,&f))
+         IsBetween(c1, blk->data_real[2+Ncol*((x0+1)+(y0  )*XSize)], blk->data_real[2+Ncol*((x0+1)+(y0+1)*XSize)],&f))
      { blk->split[(x0+1)+(y0  )*XSize] |= 1<<(1+2*pass); *ExitFace=FACE_R; *xcell=x0+1; *ycell=y0; *Xout=x0+1; *Yout=y0+f; return 1; }
 
     if (((j==1       )||(EntryFace==FACE_T)) && (x0<=XSize-2) && (x0>= 0) && (y0>=-1) && (y0<=YSize-2) &&
          (((blk->split[(x0  )+(y0+1)*XSize]>>(0+2*pass))&1)==0) &&
-         IsBetween(c1, blk->data_real[2+Ncol*((x0  )+(y0+1)*XSize)].d, blk->data_real[2+Ncol*((x0+1)+(y0+1)*XSize)].d,&f))
+         IsBetween(c1, blk->data_real[2+Ncol*((x0  )+(y0+1)*XSize)], blk->data_real[2+Ncol*((x0+1)+(y0+1)*XSize)],&f))
      { blk->split[(x0  )+(y0+1)*XSize] |= 1<<(0+2*pass); *ExitFace=FACE_B; *xcell=x0; *ycell=y0+1; *Xout=x0+f; *Yout=y0+1; return 1; }
 
     if (((j==1       )||(EntryFace==FACE_R)) && (x0<=XSize-1) && (x0>= 0) && (y0>= 0) && (y0<=YSize-2) &&
          (((blk->split[(x0  )+(y0  )*XSize]>>(1+2*pass))&1)==0) &&
-         IsBetween(c1, blk->data_real[2+Ncol*((x0  )+(y0  )*XSize)].d, blk->data_real[2+Ncol*((x0  )+(y0+1)*XSize)].d,&f))
+         IsBetween(c1, blk->data_real[2+Ncol*((x0  )+(y0  )*XSize)], blk->data_real[2+Ncol*((x0  )+(y0+1)*XSize)],&f))
      { blk->split[(x0  )+(y0  )*XSize] |= 1<<(1+2*pass); *ExitFace=FACE_L; *xcell=x0-1; *ycell=y0; *Xout=x0; *Yout=y0+f; return 1; }
    }
   return 0;
@@ -344,7 +346,7 @@ int  eps_plot_contourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, in
   dataBlock     *blk;
   int            XSize = (x->current->settings.SamplesXAuto==SW_BOOL_TRUE) ? x->current->settings.samples : x->current->settings.SamplesX;
   int            YSize = (x->current->settings.SamplesYAuto==SW_BOOL_TRUE) ? x->current->settings.samples : x->current->settings.SamplesY;
-  int            i, j, k, cn, pass, Ncol, face, xcell, ycell;
+  int            i, j, k, cn, pass, face, xcell, ycell;
   double         xo, yo, Lx, Ly, ThetaX, ThetaY, CMin, CMax, xpos, ypos;
   double         col=GSL_NAN,col1=-1,col2=-1,col3=-1,col4=-1,fc=GSL_NAN,fc1=-1,fc2=-1,fc3=-1,fc4=-1;
   unsigned char  CLog, CMinAuto, CMaxAuto, CRenorm, *flags;
@@ -352,10 +354,12 @@ int  eps_plot_contourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, in
   pplObj        *CVar=NULL, CDummy;
   ContourDesc   *clist;
   int            cpos=0;
+  // int         Ncol_real, Ncol_obj;
 
   if ((data==NULL) || (data->Nrows<1)) return 0; // No data present
-  Ncol = data->Ncolumns;
-  // if (eps_plot_WithWordsCheckUsingItemsDimLess(&pd->ww_final, data->FirstEntries, Ncol, NULL)) return 1;
+  // Ncol_real = data->Ncolumns_real;
+  // Ncol_obj  = data->Ncolumns_obj;
+  // if (eps_plot_WithWordsCheckUsingItemsDimLess(&pd->ww_final, data->FirstEntries, Ncol_real, NULL, Ncol_obj)) return 1;
   if (!ThreeDim) { scale_x=width; scale_y=height; scale_z=1.0;    }
   else           { scale_x=width; scale_y=height; scale_z=zdepth; }
   blk = data->first;
@@ -643,24 +647,25 @@ GOT_CONTOURS:
         // Evaluate any expressions in style information for next contour
         for (i=0 ; ; i++)
          {
+          int            lOP;
           pplExpr       *expr [] = { pd->ww_final.EXPlinetype ,  pd->ww_final.EXPlinewidth ,  pd->ww_final.EXPpointlinewidth ,  pd->ww_final.EXPpointsize ,  pd->ww_final.EXPpointtype ,  pd->ww_final.EXPcolor     ,  pd->ww_final.EXPfillcolor     , NULL};
           double        *outD [] = { NULL                     , &pd->ww_final.linewidth    , &pd->ww_final.pointlinewidth    , &pd->ww_final.pointsize    ,  NULL                      , &col                       , &fc                            , NULL};
           int           *outI [] = {&pd->ww_final.linetype    ,  NULL                      ,  NULL                           ,  NULL                      , &pd->ww_final.pointtype    ,  NULL                      ,  NULL                          , NULL};
           unsigned char *flagU[] = {&pd->ww_final.USElinetype , &pd->ww_final.USElinewidth , &pd->ww_final.USEpointlinewidth , &pd->ww_final.USEpointsize , &pd->ww_final.USEpointtype ,  NULL                      ,  NULL                          , NULL};
           int           *flagA[] = {&pd->ww_final.AUTOlinetype,  NULL                      ,  NULL                           ,  NULL                      , &pd->ww_final.AUTOpointtype,  NULL                      ,  NULL                          , NULL};
           unsigned char  clip [] = {0,0,0,0,0,1,1,1,1,1,1,1,1,2};
-          pplObj outval; double dbl; int end=-1, errpos=-1;
+          pplObj *outval; double dbl; int errpos=-1;
 
           if (clip[i]>1) break;
           if (expr[i]==NULL) continue;
 
-          ppl_EvaluateAlgebra(expr[i], &outval, 0, &end, 0, &errpos, errtext, 1);
+          outval = ppl_expEval(x->c, expr[i], &lOP, 1, 1);
 
           if (errpos>=0) { sprintf(x->c->errcontext.tempErrStr, "Could not evaluate the style expression <%s>. The error, encountered at character position %d, was: '%s'", expr[i]->ascii, errpos, errtext); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); continue; }
-          if (!outval.dimensionless) { sprintf(x->c->errcontext.tempErrStr, "The style expression <%s> yielded a result which was not a dimensionless number.", expr[i]->ascii); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); continue; }
-          if (outval.flagComplex) { sprintf(x->c->errcontext.tempErrStr, "The style expression <%s> yielded a result which was a complex number.", expr[i]->ascii); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); continue; }
-          if (!gsl_finite(outval.real)) { sprintf(x->c->errcontext.tempErrStr, "The style expression <%s> yielded a result which was not a finite number.", expr[i]->ascii); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); continue; }
-          dbl = outval.real;
+          if (!outval->dimensionless) { sprintf(x->c->errcontext.tempErrStr, "The style expression <%s> yielded a result which was not a dimensionless number.", expr[i]->ascii); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); continue; }
+          if (outval->flagComplex) { sprintf(x->c->errcontext.tempErrStr, "The style expression <%s> yielded a result which was a complex number.", expr[i]->ascii); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); continue; }
+          if (!gsl_finite(outval->real)) { sprintf(x->c->errcontext.tempErrStr, "The style expression <%s> yielded a result which was not a finite number.", expr[i]->ascii); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); continue; }
+          dbl = outval->real;
 
           if (clip[i]) { if (dbl<0.0) dbl=0.0; if (dbl>1.0) dbl=1.0; }
           if (outD[i]!=NULL) *outD[i] = dbl;

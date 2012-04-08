@@ -131,7 +131,7 @@ void pplset_makedefault(ppl_context *context)
   s->graph_default.BoxWidth.refCount=1;
   pplObjNum(&(s->graph_default.BoxWidth),0,0.0,0.0);
   s->graph_default.BoxWidthAuto          = 1;
-  strcpy(s->graph_default.c1format, "");
+  s->graph_default.c1format              = NULL;
   s->graph_default.c1formatset           = 0;
   strcpy(s->graph_default.c1label, "");
   s->graph_default.c1LabelRotate         = 0.0;
@@ -152,12 +152,8 @@ void pplset_makedefault(ppl_context *context)
    }
   s->graph_default.ColKey                = SW_ONOFF_ON;
   s->graph_default.ColKeyPos             = SW_COLKEYPOS_R;
-  s->graph_default.ColMapColSpace        = SW_COLSPACE_RGB;
-  strcpy(s->graph_default.ColMapExpr1, "(c1)");
-  strcpy(s->graph_default.ColMapExpr2, "(c1)");
-  strcpy(s->graph_default.ColMapExpr3, "(c1)");
-  strcpy(s->graph_default.ColMapExpr4, "");
-  strcpy(s->graph_default.MaskExpr   , "");
+  s->graph_default.ColMapExpr            = NULL;
+  s->graph_default.MaskExpr              = NULL;
   s->graph_default.ContoursLabel         = SW_ONOFF_OFF;
   s->graph_default.ContoursListLen       = -1;
   for (i=0; i<MAX_CONTOURS; i++) s->graph_default.ContoursList[i] = 0.0;

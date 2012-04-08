@@ -44,7 +44,15 @@ int ppl_colorFromDict  (ppl_context *c, parserOutput *in, parserLine *pl, const 
                         unsigned char *USEcol, unsigned char *USEcol1234)
  {
   pplObj *col = &in->stk[ptab[ fillColor ? PARSE_INDEX_fillcolor : PARSE_INDEX_color]];
+  int s=ppl_colorFromObj(c, col, outcol, outcolspace, EXPoutcol, outcol1, outcol2, outcol3, outcol4, USEcol, USEcol1234);
+  if (s) ppl_error(&c->errcontext, ERR_INTERNAL, -1, -1, NULL);
+  return s;
+ }
 
+int ppl_colorFromObj   (ppl_context *c, const pplObj *col, int *outcol, int *outcolspace, pplExpr **EXPoutcol,
+                        double *outcol1, double *outcol2, double *outcol3, double *outcol4,
+                        unsigned char *USEcol, unsigned char *USEcol1234)
+ {
   switch (col->objType)
    {
     case PPLOBJ_ZOM: // no color specified
@@ -82,7 +90,6 @@ int ppl_colorFromDict  (ppl_context *c, parserOutput *in, parserLine *pl, const 
       if (EXPoutcol == NULL)
        {
         sprintf(c->errcontext.tempErrStr, "Colour specified as expression via %%C token, but no pointer given for output of this expression.");
-        ppl_error(&c->errcontext, ERR_INTERNAL, -1, -1, NULL);
         return 1;
        }
       if (*EXPoutcol == NULL) pplExpr_free(*EXPoutcol);
@@ -95,7 +102,6 @@ int ppl_colorFromDict  (ppl_context *c, parserOutput *in, parserLine *pl, const 
     default:
      {
       sprintf(c->errcontext.tempErrStr, "Colour specified as wrong type of object.");
-      ppl_error(&c->errcontext, ERR_INTERNAL, -1, -1, NULL);
       return 1;
      }
    }

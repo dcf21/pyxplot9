@@ -62,16 +62,13 @@ typedef struct rawDataTable {
 
 // DataTable structure, used for returning tables of VALUEs from ppl_datafile.c
 
-typedef union UnionDblStr {
-  double d;
-  char  *s;
- } UnionDblStr;
-
 typedef struct dataBlock {
-  UnionDblStr      *data_real; // Array of Ncolumns x array of length BlockLength
-  char            **text;      // Array of BlockLength x string labels for datapoints
-  long int         *FileLine;  // For each double above... store the line number in the data file that it came from
-  unsigned char    *split;     // Array of length BlockLength; TRUE if we should break data before this next datapoint
+  double           *data_real;     // Array of Ncolumns x array of length BlockLength
+  pplObj           *data_obj;
+  char            **text;          // Array of BlockLength x string labels for datapoints
+  long int         *FileLine_real; // For each double above... store the line number in the data file that it came from
+  long int         *FileLine_obj;
+  unsigned char    *split;         // Array of length BlockLength; TRUE if we should break data before this next datapoint
   long int          BlockLength;
   long int          BlockPosition; // Where have we filled up to?
   struct dataBlock *next;
@@ -79,7 +76,8 @@ typedef struct dataBlock {
  } dataBlock;
 
 typedef struct dataTable {
-  int               Ncolumns;
+  int               Ncolumns_real;
+  int               Ncolumns_obj;
   long int          Nrows;
   int               MemoryContext;
   pplObj           *FirstEntries; // Array of size Ncolumns; store units for data in each column here
@@ -89,14 +87,14 @@ typedef struct dataTable {
 
 // Functions in ppl_datafile.c
 
-dataTable *ppldata_NewDataTable(const int Ncolumns, const int MemoryContext, const int Length);
+dataTable *ppldata_NewDataTable(const int Ncolumns_real, const int Ncolumns_obj, const int MemoryContext, const int Length);
 
 void __inline__ ppldata_UsingConvert_FetchColumnByNumber(double ColumnNo, pplObj *output, const int NumericOut, const unsigned char MallocOut, int *status, char *errtext);
 void __inline__ ppldata_UsingConvert_FetchColumnByName(char *ColumnName, pplObj *output, const int NumericOut, const unsigned char MallocOut, int *status, char *errtext);
 
-void ppldata_read(dataTable **output, int *status, char *errout, char *filename, int index, int UsingRowCol, list *UsingList, unsigned char AutoUsingList, list *EveryList, char *LabelStr, int Ncolumns, char *SelectCriterion, int continuity, char *SortBy, int SortByContinuity, unsigned char persistent, int *ErrCounter);
+void ppldata_read(dataTable **output, int *status, char *errout, char *filename, int index, int UsingRowCol, list *UsingList, unsigned char AutoUsingList, list *EveryList, char *LabelStr, int Ncolumns_real, int Ncolumns_obj, char *SelectCriterion, int continuity, char *SortBy, int SortByContinuity, unsigned char persistent, int *ErrCounter);
 
-void ppldata_FromFunctions(double *OrdinateRaster, unsigned char FlagParametric, int RasterLen, pplObj *RasterUnits, double *OrdinateYRaster, int RasterYLen, pplObj *RasterYUnits, dataTable **output, int *status, char *errout, char **fnlist, int fnlist_len, list *UsingList, unsigned char AutoUsingList, char *LabelStr, int Ncolumns, char *SelectCriterion, int continuity, char *SortBy, int SortByContinuity, int *ErrCounter);
+void ppldata_FromFunctions(double *OrdinateRaster, unsigned char FlagParametric, int RasterLen, pplObj *RasterUnits, double *OrdinateYRaster, int RasterYLen, pplObj *RasterYUnits, dataTable **output, int *status, char *errout, char **fnlist, int fnlist_len, list *UsingList, unsigned char AutoUsingList, char *LabelStr, int Ncolumns_real, int Ncolumns_obj, char *SelectCriterion, int continuity, char *SortBy, int SortByContinuity, int *ErrCounter);
 
 dataTable *ppldata_tabSort(dataTable *in, int SortColumn, int IgnoreContinuity);
 

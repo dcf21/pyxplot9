@@ -118,16 +118,16 @@ void ppl_interp2d_grid(ppl_context *c, dataTable **output, const pplset_graph *s
   // If input data is NULL, return NULL
   if (in==NULL) { *output=NULL; return; }
 
-  k = in->Ncolumns;
-  *output = ppldata_NewDataTable(k, ppl_memAlloc_GetMemContext(), imax*jmax);
+  k = in->Ncolumns_real;
+  *output = ppldata_NewDataTable(k, 0, ppl_memAlloc_GetMemContext(), imax*jmax);
   if (*output == NULL) return; // Memory fail
 
   InSize = in->Nrows;
   (*output)->FirstEntries = in->FirstEntries;
   p2 = (*output)->current->BlockPosition = (*output)->Nrows = imax*jmax;
-  for (pc=0; pc<p2; pc++) (*output)->current->split   [pc] = 0;
-  for (pc=0; pc<p2; pc++) (*output)->current->text    [pc] = NULL;
-  for (pc=0; pc<p2; pc++) (*output)->current->FileLine[pc] = 0;
+  for (pc=0; pc<p2; pc++) (*output)->current->split        [pc] = 0;
+  for (pc=0; pc<p2; pc++) (*output)->current->text         [pc] = NULL;
+  for (pc=0; pc<p2; pc++) (*output)->current->FileLine_real[pc] = 0;
 
   // Extract data into a temporary array
   tempContext = ppl_memAlloc_DescendIntoNewContext();
@@ -142,7 +142,7 @@ void ppl_interp2d_grid(ppl_context *c, dataTable **output, const pplset_graph *s
   blk = in->first;
   while (blk != NULL)
    {
-    for (ct=0; ct<k; ct++) for (j=0; j<blk->BlockPosition; j++) *(d[ct]++) = blk->data_real[ct + k*j].d;
+    for (ct=0; ct<k; ct++) for (j=0; j<blk->BlockPosition; j++) *(d[ct]++) = blk->data_real[ct + k*j];
     blk=blk->next;
    }
 
@@ -167,11 +167,11 @@ void ppl_interp2d_grid(ppl_context *c, dataTable **output, const pplset_graph *s
      {
       double x = SampleToEdge ? pplaxis_InvGetPosition( (((double)i    )/(imax-1)) , axis_x)
                               : pplaxis_InvGetPosition( (((double)i+0.5)/(imax  )) , axis_x);
-      (*output)->current->data_real[p++].d = x;
-      (*output)->current->data_real[p++].d = y;
+      (*output)->current->data_real[p++] = x;
+      (*output)->current->data_real[p++] = y;
 
       for (ct=2; ct<k; ct++)
-        ppl_interp2d_eval(c, &(*output)->current->data_real[p++].d, sg, indata, InSize, ct, k, x, y);
+        ppl_interp2d_eval(c, &(*output)->current->data_real[p++], sg, indata, InSize, ct, k, x, y);
      }
    }
 

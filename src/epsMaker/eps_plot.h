@@ -27,7 +27,9 @@
 #include "epsMaker/eps_comm.h"
 #include "userspace/pplObj.h"
 
-int eps_plot_AddUsingItemsForWithWords(EPSComm *x, withWords *ww, int *NExpect, unsigned char *AutoUsingList, list *UsingList);
+int eps_plot_AddUsingItemsForWithWords(ppl_context *c, withWords *ww, int *NExpect, unsigned char *AutoUsingList, list *UsingList, int *NObjs);
+void eps_plot_WithWordsFromUsingItems(ppl_context *c, withWords *ww, double *DataRow, pplObj *ObjRow, int Ncolumns_real, int Ncolumns_obj);
+int  eps_plot_WithWordsCheckUsingItemsDimLess(ppl_context *c, withWords *ww, pplObj *FirstValues, int Ncolumns_real, int Ncolumns_obj, int *NDataCols);
 
 void eps_plot_ReadAccessibleData(EPSComm *x);
 void eps_plot_SampleFunctions(EPSComm *x);
@@ -35,8 +37,6 @@ void eps_plot_DecideAxisRanges(EPSComm *x);
 void eps_plot_YieldUpText(EPSComm *x);
 void eps_plot_RenderEPS(EPSComm *x);
 
-void eps_plot_WithWordsFromUsingItems(EPSComm *x, withWords *ww, double *DataRow, int Ncolumns);
-int  eps_plot_WithWordsCheckUsingItemsDimLess(EPSComm *x, withWords *ww, pplObj *FirstValues, int Ncolumns, int *NDataCols);
 
 #endif
 

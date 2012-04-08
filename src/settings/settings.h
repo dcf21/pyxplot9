@@ -48,14 +48,16 @@ typedef struct pplset_terminal {
  } pplset_terminal;
 
 typedef struct pplset_graph {
- int           AutoAspect, AutoZAspect, AxesColour, AxesCol1234Space, AxisUnitStyle, clip, Clog[4], Cminauto[4], Cmaxauto[4], Crenorm[4], Creverse[4], ColKey, ColKeyPos, ColMapColSpace, ContoursLabel, ContoursListLen, ContoursN, grid, GridMajColour, GridMajCol1234Space, GridMinColour, GridMinCol1234Space, key, KeyColumns, KeyPos, samples, SamplesX, SamplesXAuto, SamplesY, SamplesYAuto, Sample2DMethod, TextColour, TextCol1234Space, TextHAlign, TextVAlign, Tlog, Ulog, Vlog;
+ int           AutoAspect, AutoZAspect, AxesColour, AxesCol1234Space, AxisUnitStyle, clip, Clog[4], Cminauto[4], Cmaxauto[4], Crenorm[4], Creverse[4], ColKey, ColKeyPos, ContoursLabel, ContoursListLen, ContoursN, grid, GridMajColour, GridMajCol1234Space, GridMinColour, GridMinCol1234Space, key, KeyColumns, KeyPos, samples, SamplesX, SamplesXAuto, SamplesY, SamplesYAuto, Sample2DMethod, TextColour, TextCol1234Space, TextHAlign, TextVAlign, Tlog, Ulog, Vlog;
  double        AxesColour1, AxesColour2, AxesColour3, AxesColour4, GridMajColour1, GridMajColour2, GridMajColour3, GridMajColour4, GridMinColour1, GridMinColour2, GridMinColour3, GridMinColour4, TextColour1, TextColour2, TextColour3, TextColour4;
  double        aspect, zaspect, bar, ContoursList[MAX_CONTOURS], FontSize, LineWidth, PointSize, PointLineWidth, projection;
  unsigned char GridAxisX[MAX_AXES], GridAxisY[MAX_AXES], GridAxisZ[MAX_AXES];
  unsigned char BoxFromAuto, BoxWidthAuto, USE_T_or_uv;
  pplObj        BoxFrom, BoxWidth, Cmin[4], Cmax[4], ContoursUnit, KeyXOff, KeyYOff, OriginX, OriginY, TitleXOff, TitleYOff, Tmin, Tmax, Umin, Umax, Vmin, Vmax, width, XYview, YZview;
- char          title[FNAME_LENGTH], ColMapExpr1[FNAME_LENGTH], ColMapExpr2[FNAME_LENGTH], ColMapExpr3[FNAME_LENGTH], ColMapExpr4[FNAME_LENGTH], MaskExpr[FNAME_LENGTH];
- char          c1label[FNAME_LENGTH], c1format[FNAME_LENGTH], c1formatset;
+ char          title[FNAME_LENGTH];
+ void         *ColMapExpr, *MaskExpr;
+ char          c1label[FNAME_LENGTH], c1formatset;
+ void         *c1format;
  double        c1LabelRotate, c1TickLabelRotate;
  int           c1TickLabelRotation;
  withWords     dataStyle, funcStyle;
@@ -65,7 +67,8 @@ typedef struct pplset_axis {
  unsigned char atzero, enabled, invisible, linked, RangeReversed, topbottom, MTickMaxSet, MTickMinSet, MTickStepSet, TickMaxSet, TickMinSet, TickStepSet;
  int     ArrowType, LinkedAxisCanvasID, LinkedAxisToXYZ, LinkedAxisToNum, log, MaxSet, MinSet, MirrorType, MTickDir, TickDir, TickLabelRotation;
  double  LabelRotate, LogBase, max, min, MTickMax, MTickMin, MTickStep, TickLabelRotate, TickMax, TickMin, TickStep;
- char   *format, *label, *linkusing;
+ char   *label, *linkusing;
+ void   *format;
  double *MTickList, *TickList;
  char  **MTickStrs,**TickStrs;
  pplObj  unit;

@@ -29,9 +29,11 @@
 
 #include "coreUtils/memAlloc.h"
 
-#include "epsMaker/canvasDraw.h"
 #include "canvasItems.h"
 #include "coreUtils/errorReport.h"
+#include "expressions/traceback_fns.h"
+#include "expressions/expEval.h"
+#include "settings/colors.h"
 #include "settings/settings.h"
 #include "settings/settingTypes.h"
 #include "settings/withWords_fns.h"
@@ -41,6 +43,7 @@
 #include "userspace/unitsArithmetic.h"
 #include "userspace/pplObj_fns.h"
 
+#include "epsMaker/canvasDraw.h"
 #include "epsMaker/bmp_a85.h"
 #include "epsMaker/bmp_optimise.h"
 #include "epsMaker/eps_comm.h"
@@ -50,6 +53,7 @@
 #include "epsMaker/eps_plot.h"
 #include "epsMaker/eps_plot_axespaint.h"
 #include "epsMaker/eps_plot_canvas.h"
+#include "epsMaker/eps_plot_colourmap.h"
 #include "epsMaker/eps_plot_legend.h"
 #include "epsMaker/eps_plot_ticking.h"
 #include "epsMaker/eps_settings.h"
@@ -80,8 +84,8 @@ void eps_plot_colourmap_YieldText(EPSComm *x, dataTable *data, pplset_graph *sg,
 
   // Check that we have some data
   if ((data==NULL) || (data->Nrows<1)) return; // No data present
-  Ncol = data->Ncolumns;
-  blk = data->first;
+  Ncol = data->Ncolumns_real;
+  blk  = data->first;
 
   // Calculate positions of the four corners of graph
   origin_x = x->current->settings.OriginX.real * M_TO_PS;
@@ -106,7 +110,7 @@ void eps_plot_colourmap_YieldText(EPSComm *x, dataTable *data, pplset_graph *sg,
    for (j=0; j<YSize; j++)
     for (i=0; i<XSize; i++)
      {
-      double val = blk->data_real[2 + Ncol*(i+XSize*j)].d;
+      double val = blk->data_real[2 + Ncol*(i+XSize*j)];
       if (!gsl_finite(val)) continue;
       if ((CMinAuto) && ((!CMinSet) || (CMin>val)) && ((!CLog)||(val>0.0))) { CMin=val; CMinSet=1; }
       if ((CMaxAuto) && ((!CMaxSet) || (CMax<val)) && ((!CLog)||(val>0.0))) { CMax=val; CMaxSet=1; }
@@ -210,19 +214,20 @@ int  eps_plot_colourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int
   dataBlock     *blk;
   int            XSize = pd->GridXSize;
   int            YSize = pd->GridYSize;
-  int            i, j, c, cmax, errpos, Ncol, NcolsData;
+  int            i, j, c, cmax, Ncol_real, Ncol_obj, NcolsData;
   long           p;
   double         xo, yo, Lx, Ly, ThetaX, ThetaY, comp[4], CMin[4], CMax[4];
-  pplObj        *CVar[4], CDummy[4], outval;
+  pplObj        *CVar[4], *C1Var, CDummy[4];
   uLongf         zlen; // Length of buffer passed to zlib
   unsigned char *imagez, CMinAuto[4], CMinSet[4], CMaxAuto[4], CMaxSet[4], CLog[4];
-  char          *ColExpr[4] = {sg->ColMapExpr1 , sg->ColMapExpr2 , sg->ColMapExpr3 , sg->ColMapExpr4 }, *errtext;
+  char          *errtext;
   unsigned char  component_r, component_g, component_b, transparent[3] = {TRANS_R, TRANS_G, TRANS_B};
   bitmap_data    img;
 
   if ((data==NULL) || (data->Nrows<1)) return 0; // No data present
-  Ncol = data->Ncolumns;
-  if (eps_plot_WithWordsCheckUsingItemsDimLess(x, &pd->ww_final, data->FirstEntries, Ncol, &NcolsData)) return 1;
+  Ncol_real = data->Ncolumns_real;
+  Ncol_obj  = data->Ncolumns_obj;
+  if (eps_plot_WithWordsCheckUsingItemsDimLess(x->c, &pd->ww_final, data->FirstEntries, Ncol_real, Ncol_obj, &NcolsData)) return 1;
   if (!ThreeDim) { scale_x=width; scale_y=height; scale_z=1.0;    }
   else           { scale_x=width; scale_y=height; scale_z=zdepth; }
   blk = data->first;
@@ -311,7 +316,7 @@ int  eps_plot_colourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int
      for (j=0; j<YSize; j++)
       for (i=0; i<XSize; i++)
        {
-        double val = blk->data_real[c+2 + Ncol*(i+XSize*j)].d;
+        double val = blk->data_real[c+2 + Ncol_real*(i+XSize*j)];
         if (!gsl_finite(val)) continue;
         if ((CMinAuto[c]) && ((!CMinSet[c]) || (CMin[c]>val)) && ((!CLog[c])||(val>0.0))) { CMin[c]=val; CMinSet[c]=1; }
         if ((CMaxAuto[c]) && ((!CMaxSet[c]) || (CMax[c]<val)) && ((!CLog[c])||(val>0.0))) { CMax[c]=val; CMaxSet[c]=1; }
@@ -372,36 +377,53 @@ int  eps_plot_colourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int
      // Set values of c1...c4
      for (c=0;c<4; c++)
       if      (c>cmax)  /* No c<c> */         { *CVar[c]       = CDummy[c]; }
-      else if (sg->Crenorm[c]==SW_BOOL_FALSE) {  CVar[c]->real = blk->data_real[c+2 + Ncol*(i+XSize*j)].d; } // No renormalisation
-      else if (CMax[c]==CMin[c])  /* Ooops */ {  CVar[c]->real = (gsl_finite(blk->data_real[c+2 + Ncol*(i+XSize*j)].d))?0.5:(GSL_NAN); }
-      else if (!CLog[c]) /* Linear */         {  CVar[c]->real = (blk->data_real[c+2 + Ncol*(i+XSize*j)].d - CMin[c]) / (CMax[c] - CMin[c]); }
-      else               /* Logarithmic */    {  CVar[c]->real = log(blk->data_real[c+2 + Ncol*(i+XSize*j)].d / CMin[c]) / log(CMax[c] / CMin[c]); }
+      else if (sg->Crenorm[c]==SW_BOOL_FALSE) {  CVar[c]->real = blk->data_real[c+2 + Ncol_real*(i+XSize*j)]; } // No renormalisation
+      else if (CMax[c]==CMin[c])  /* Ooops */ {  CVar[c]->real = (gsl_finite(blk->data_real[c+2 + Ncol_real*(i+XSize*j)]))?0.5:(GSL_NAN); }
+      else if (!CLog[c]) /* Linear */         {  CVar[c]->real = (blk->data_real[c+2 + Ncol_real*(i+XSize*j)] - CMin[c]) / (CMax[c] - CMin[c]); }
+      else               /* Logarithmic */    {  CVar[c]->real = log(blk->data_real[c+2 + Ncol_real*(i+XSize*j)] / CMin[c]) / log(CMax[c] / CMin[c]); }
 
 #define SET_RGB_COLOR \
      /* Check if mask criterion is satisfied */ \
-     if (sg->MaskExpr[0]!='\0') \
+     { \
+     int colspace; \
+     if (sg->MaskExpr!=NULL) \
       { \
-       errpos=-1; \
-       ppl_EvaluateAlgebra(sg->MaskExpr, &outval, 0, NULL, 0, &errpos, errtext, 0); \
-       if (errpos>=0) { sprintf(x->c->errcontext.tempErrStr, "Could not evaluate mask expression <%s>. The error, encountered at character position %d, was: '%s'", sg->MaskExpr, errpos, errtext); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); return 1; } \
-       if (outval.real==0) { component_r = TRANS_R; component_g = TRANS_G; component_b = TRANS_B; goto write_rgb; } \
+       pplObj *v; \
+       int lOP; \
+       v = ppl_expEval(x->c, (pplExpr *)sg->MaskExpr, &lOP, 1, 1); \
+       if (x->c->errStat.status) { sprintf(x->c->errcontext.tempErrStr, "Could not evaluate mask expression <%s>.", ((pplExpr *)sg->MaskExpr)->ascii); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); ppl_tbWrite(x->c); ppl_tbClear(x->c); return 1; } \
+       if (v->real==0) { component_r = TRANS_R; component_g = TRANS_G; component_b = TRANS_B; goto write_rgb; } \
       } \
  \
      /* Compute RGB, HSB or CMYK components */ \
-     comp[3]=0.0; \
-     for (c=0; c<3+(sg->ColMapColSpace==SW_COLSPACE_CMYK); c++) \
+     if (sg->ColMapExpr == NULL) \
       { \
-       errpos=-1; \
-       ppl_EvaluateAlgebra(ColExpr[c], &outval, 0, NULL, 0, &errpos, errtext, 0); \
-       if (errpos>=0) { sprintf(x->c->errcontext.tempErrStr, "Could not evaluate color expression <%s>. The error, encountered at character position %d, was: '%s'", ColExpr[c], errpos, errtext); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); return 1; } \
-       if (!outval.dimensionless) { sprintf(x->c->errcontext.tempErrStr, "Expression <%s> for color component %d returns result with units of <%s>; this should be a dimensionless number in the range 0-1.",ColExpr[c], c+1, ppl_printUnit(x->c, &outval, NULL, NULL, 0, 1, 0)); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); return 1; } \
-       if (outval.flagComplex) { sprintf(x->c->errcontext.tempErrStr, "Expression <%s> for color component %d returns a complex result.", ColExpr[c], c+1); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); return 1; } \
-       if (!gsl_finite(outval.real)) { component_r = TRANS_R; component_g = TRANS_G; component_b = TRANS_B; goto write_rgb; } \
-       comp[c]=outval.real; \
+       colspace = SW_COLSPACE_RGB; \
+       comp[0] = comp[1] = comp[2] = C1Var->real; \
+      } \
+     else \
+      { \
+       pplObj *v; \
+       int lOP, outcol; \
+       unsigned char d1, d2; \
+       v = ppl_expEval(x->c, (pplExpr *)sg->ColMapExpr, &lOP, 1, 1); \
+       if (x->c->errStat.status) { sprintf(x->c->errcontext.tempErrStr, "Could not evaluate color expression <%s>.", ((pplExpr *)sg->MaskExpr)->ascii); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); ppl_tbWrite(x->c); ppl_tbClear(x->c); return 1; } \
+       lOP = ppl_colorFromObj(x->c, v, &outcol, &colspace, NULL, comp, comp+1, comp+2, comp+3, &d1, &d2); \
+       if (lOP) { ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); return 1; } \
+       if (outcol!=0) \
+        { \
+         colspace = SW_COLSPACE_CMYK; \
+         comp[0] = *(double *)ppl_fetchSettingName(&x->c->errcontext, outcol, SW_COLOR_INT, (void *)SW_COLOR_CMYK_C, sizeof(double)); \
+         comp[1] = *(double *)ppl_fetchSettingName(&x->c->errcontext, outcol, SW_COLOR_INT, (void *)SW_COLOR_CMYK_M, sizeof(double)); \
+         comp[2] = *(double *)ppl_fetchSettingName(&x->c->errcontext, outcol, SW_COLOR_INT, (void *)SW_COLOR_CMYK_Y, sizeof(double)); \
+         comp[3] = *(double *)ppl_fetchSettingName(&x->c->errcontext, outcol, SW_COLOR_INT, (void *)SW_COLOR_CMYK_K, sizeof(double)); \
+        } \
+       if ((!gsl_finite(comp[0]))||(!gsl_finite(comp[1]))||(!gsl_finite(comp[2]))||(!gsl_finite(comp[3]))) \
+           { component_r = TRANS_R; component_g = TRANS_G; component_b = TRANS_B; goto write_rgb; } \
       } \
  \
      /* Convert to RGB */ \
-     switch (sg->ColMapColSpace) \
+     switch (colspace) \
       { \
        case SW_COLSPACE_RGB: /* Convert RGB --> RGB */ \
         break; \
@@ -448,7 +470,9 @@ write_rgb: \
      img.data[p++] = component_r; \
      img.data[p++] = component_g; \
      img.data[p++] = component_b; \
+     }
 
+     C1Var = CVar[0];
      SET_RGB_COLOR;
     }
 
@@ -531,7 +555,7 @@ write_rgb: \
 
 int  eps_plot_colourmap_DrawScales(EPSComm *x, double origin_x, double origin_y, double width, double height, double zdepth)
  {
-  int              i, j, c, k, errpos;
+  int              i, j, k;
   long             p;
   double           xmin,xmax,ymin,ymax;
   char            *errtext;
@@ -592,9 +616,8 @@ int  eps_plot_colourmap_DrawScales(EPSComm *x, double origin_x, double origin_y,
       const unsigned char Lr = (sg->ColKeyPos==SW_COLKEYPOS_B)||(sg->ColKeyPos==SW_COLKEYPOS_R);
       uLongf              zlen; // Length of buffer passed to zlib
       unsigned char      *imagez;
-      char               *ColExpr[4] = {sg->ColMapExpr1 , sg->ColMapExpr2 , sg->ColMapExpr3 , sg->ColMapExpr4 };
       bitmap_data         img;
-      pplObj             *CVar=NULL, CDummy, outval;
+      pplObj             *CVar=NULL, *C1Var, CDummy;
 
       if      (sg->ColKeyPos==SW_COLKEYPOS_T) { x1 = xmin; x2 = xmax; y1 = y2 = x->current->PlotTopMargin   +MARGIN; }
       else if (sg->ColKeyPos==SW_COLKEYPOS_B) { x1 = xmin; x2 = xmax; y1 = y2 = x->current->PlotBottomMargin-MARGIN; }
@@ -650,6 +673,7 @@ int  eps_plot_colourmap_DrawScales(EPSComm *x, double origin_x, double origin_y,
           }
          else         CVar->real = ((double)i)/(XSize-1);
 
+         C1Var = CVar;
          SET_RGB_COLOR;
         }
        COMPRESS_POSTSCRIPT_IMAGE;

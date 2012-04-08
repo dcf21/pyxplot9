@@ -145,7 +145,7 @@ int eps_plot_styles_NDataColumns(EPSComm *x, int style, unsigned char ThreeDim)
  }
 
 // UpdateUsage... get content of row X from data table
-#define UUR(X) blk->data_real[X + Ncolumns*j].d
+#define UUR(X) blk->data_real[X + Ncolumns*j]
 
 // UpdateUsage... check whether position is within range of axis
 #define UUC(X,Y) \
@@ -261,7 +261,7 @@ int eps_plot_styles_UpdateUsage(EPSComm *x, dataTable *data, int style, unsigned
   else if (style == SW_STYLE_CONTOURMAP     ) { UUAU(xyz1,n1,a1,UURU(0)); UUAU(xyz2,n2,a2,UURU(1)); }
 
   // Cycle through data table, ensuring that axis ranges are sufficient to include all data
-  Ncolumns = data->Ncolumns;
+  Ncolumns = data->Ncolumns_real;
   blk = data->first;
   i=0;
   while (blk != NULL)
@@ -441,7 +441,7 @@ int eps_plot_styles_UpdateUsage(EPSComm *x, dataTable *data, int style, unsigned
 // Render a dataset to postscript
 int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char ThreeDim, pplset_axis *a1, pplset_axis *a2, pplset_axis *a3, int xn, int yn, int zn, pplset_graph *sg, canvas_plotdesc *pd, double origin_x, double origin_y, double width, double height, double zdepth)
  {
-  int             i, j, Ncolumns, pt=0, xrn, yrn, zrn;
+  int             i, j, Ncolumns, Ncol_obj, pt=0, xrn, yrn, zrn;
   double          xpos, ypos, depth, xap, yap, zap, scale_x, scale_y, scale_z;
   char            epsbuff[FNAME_LENGTH], *last_colstr=NULL;
   LineDrawHandle *ld;
@@ -450,8 +450,9 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
 
   if ((data==NULL) || (data->Nrows<1)) return 0; // No data present
 
-  Ncolumns = data->Ncolumns;
-  if (eps_plot_WithWordsCheckUsingItemsDimLess(x, &pd->ww_final, data->FirstEntries, Ncolumns, NULL)) return 1;
+  Ncolumns = data->Ncolumns_real;
+  Ncol_obj = data->Ncolumns_obj;
+  if (eps_plot_WithWordsCheckUsingItemsDimLess(x->c, &pd->ww_final, data->FirstEntries, Ncolumns, Ncol_obj, NULL)) return 1;
 
   if (!ThreeDim) { scale_x=width; scale_y=height; scale_z=1.0;    }
   else           { scale_x=width; scale_y=height; scale_z=zdepth; }
@@ -474,7 +475,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
       for (j=0; j<blk->BlockPosition; j++)
        {
         // Work out style information for next point
-        eps_plot_WithWordsFromUsingItems(x, &pd->ww_final, &blk->data_real[Ncolumns*j].d, Ncolumns);
+        eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj);
         eps_core_SetColour(x, &pd->ww_final, 0);
         if (blk->split[j]) { LineDraw_PenUp(x, ld); }
         IF_NOT_INVISIBLE
@@ -506,7 +507,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
          }
 
         // Work out style information for next point
-        eps_plot_WithWordsFromUsingItems(x, &pd->ww_final, &blk->data_real[Ncolumns*j].d, Ncolumns);
+        eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj);
         final_pointsize = pd->ww_final.pointsize;
         if      (style == SW_STYLE_DOTS ) final_pointsize *=  0.05; // Dots are 1/20th size of points
         else if (style == SW_STYLE_STARS) final_pointsize *= 12.0 ; // Stars are BIG
@@ -564,7 +565,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
       for (j=0; j<blk->BlockPosition; j++)
        {
         // Work out style information for next point
-        eps_plot_WithWordsFromUsingItems(x, &pd->ww_final, &blk->data_real[Ncolumns*j].d, Ncolumns);
+        eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj);
         eps_core_SetColour(x, &pd->ww_final, 0);
         LineDraw_PenUp(x, ld);
         IF_NOT_INVISIBLE
@@ -645,7 +646,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
         for (j=0; j<blk->BlockPosition; j++)
          {
           // Work out style information for next point
-          eps_plot_WithWordsFromUsingItems(x, &pd->ww_final, &blk->data_real[Ncolumns*j].d, Ncolumns);
+          eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj);
           eps_core_SetColour(x, &pd->ww_final, 0);
           LineDraw_PenUp(x, ld);
           IF_NOT_INVISIBLE
@@ -691,7 +692,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
       for (j=0; j<blk->BlockPosition; j++)
        {
         // Work out style information for next point
-        eps_plot_WithWordsFromUsingItems(x, &pd->ww_final, &blk->data_real[Ncolumns*j].d, Ncolumns);
+        eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj);
         eps_core_SetColour(x, &pd->ww_final, 0);
         LineDraw_PenUp(x, ld);
         IF_NOT_INVISIBLE
@@ -859,7 +860,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
              }
            }
           // Work out style information for next point
-          eps_plot_WithWordsFromUsingItems(x, &pd->ww_final, &blk->data_real[Ncolumns*j].d, Ncolumns);
+          eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj);
           eps_core_SetColour(x, &pd->ww_final, 0);
           if (style == SW_STYLE_WBOXES) { MAKE_BOX(ptCx, ptCy, UUR(2)/2); }
          }
@@ -883,7 +884,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
       for (j=0; j<blk->BlockPosition; j++)
        {
         // Work out style information for next point
-        eps_plot_WithWordsFromUsingItems(x, &pd->ww_final, &blk->data_real[Ncolumns*j].d, Ncolumns);
+        eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj);
         eps_core_SetColour(x, &pd->ww_final, 0);
         LineDraw_PenUp(x, ld);
         IF_NOT_INVISIBLE
@@ -951,7 +952,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
       for (j=0; j<blk->BlockPosition; j++)
        {
         // Work out style information for next point
-        eps_plot_WithWordsFromUsingItems(x, &pd->ww_final, &blk->data_real[Ncolumns*j].d, Ncolumns);
+        eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj);
         FilledRegion_Point(x, fr, UUR(xn), UUR(yn));
        }
       blk=blk->next;
@@ -986,7 +987,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
       for (j=blk->BlockPosition-1; j>=0; j--)
        {
         // Work out style information for next point
-        eps_plot_WithWordsFromUsingItems(x, &pd->ww_final, &blk->data_real[Ncolumns*j].d, Ncolumns);
+        eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj);
         if (xn==0) FilledRegion_Point(x, fr, UUR(0), UUR(2));
         else       FilledRegion_Point(x, fr, UUR(2), UUR(0));
        }
@@ -1025,7 +1026,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
         for (X=0; X<XSize-1; X++)
          {
           j = X + Y*((long)XSize);
-          eps_plot_WithWordsFromUsingItems(x, &pd->ww_final, &blk->data_real[Ncolumns*j].d, Ncolumns); // Work out style information for next point
+          eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj); // Work out style information for next point
           if (fill)
            {
             eps_core_SetFillColour(x, &pd->ww_final);

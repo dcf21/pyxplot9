@@ -236,8 +236,10 @@ static int directive_show2(ppl_context *c, char *word, char *itemSet, int intera
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "c1format",1)>=0))
    {
-    if (sg->c1formatset) sprintf(buf, "%s ", sg->c1format);
-    else                         buf[0]='\0';
+    pplExpr *c1format_current = (pplExpr *)sg->c1format;
+    pplExpr *c1format_default = (pplExpr *)c->set->graph_default.c1format;
+    if (sg->c1formatset) sprintf(buf, "%s ", c1format_current->ascii);
+    else                 buf[0]='\0';
     m = strlen(buf);
     sprintf(buf+m, "%s", *(char **)ppl_fetchSettingName(&c->errcontext, sg->c1TickLabelRotation, SW_TICLABDIR_INT, SW_TICLABDIR_STR , sizeof(char *))); m += strlen(buf+m);     
     if (sg->c1TickLabelRotation == SW_TICLABDIR_ROT)
@@ -250,7 +252,7 @@ static int directive_show2(ppl_context *c, char *word, char *itemSet, int intera
                     (  ( sg->c1TickLabelRotate   == c->set->graph_default.c1TickLabelRotate  ) &&
                        ( sg->c1TickLabelRotation == c->set->graph_default.c1TickLabelRotation) &&
                        ( sg->c1formatset         == c->set->graph_default.c1formatset        ) &&
-                      ((!sg->c1formatset) || (strcmp(sg->c1format,c->set->graph_default.c1format)==0))
+                      ((!sg->c1formatset) || (strcmp(c1format_current->ascii,c1format_default->ascii)==0))
                     ) ,
                     "Format string for the tick labels on the c1 axis");
     i += strlen(out+i) ; p=1;
@@ -299,16 +301,22 @@ static int directive_show2(ppl_context *c, char *word, char *itemSet, int intera
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "colmap",1)>=0) || (ppl_strAutocomplete(word, "colourmap",1)>=0) || (ppl_strAutocomplete(word, "colormap",1)>=0))
    {
-    int k;
-    sprintf(buf, "%s", *(char **)ppl_fetchSettingName(&c->errcontext, sg->ColMapColSpace, SW_COLSPACE_INT, SW_COLSPACE_STR , sizeof(char *)));
+    pplExpr *exp_default = (pplExpr *)c->set->graph_default.ColMapExpr;
+    pplExpr *exp_current = (pplExpr *)sg->ColMapExpr;
+    pplExpr *maskdefault = (pplExpr *)c->set->graph_default.MaskExpr;
+    pplExpr *maskcurrent = (pplExpr *)sg->MaskExpr;
+    int      k;
+    int      unchanged   = ((exp_default==NULL)==(exp_current==NULL)) &&
+                           ((exp_default==NULL)||(strcmp(exp_default->ascii,exp_current->ascii)==0)) &&
+                           ((maskdefault==NULL)==(maskcurrent==NULL)) &&
+                           ((maskdefault==NULL)||(strcmp(maskdefault->ascii,maskcurrent->ascii)==0));
+    if (exp_current != NULL) sprintf(buf, "%s", exp_current->ascii);
+    else                     sprintf(buf, "rgb(c1,c1,c1)");
     k =strlen(buf);
-    sprintf(buf+k, "%s:%s:%s", sg->ColMapExpr1, sg->ColMapExpr2, sg->ColMapExpr3);
+    if (maskcurrent==NULL)   sprintf(buf+k, " nomask");
+    else                     sprintf(buf+k, " mask %s", maskcurrent->ascii);
     k+=strlen(buf+k);
-    if (sg->ColMapColSpace==SW_COLSPACE_CMYK) sprintf(buf+k, ":%s", sg->ColMapExpr4);
-    k+=strlen(buf+k);
-    sprintf(buf+k, " %smask %s", (sg->MaskExpr[0]=='\0')?"no":"", sg->MaskExpr);
-    k+=strlen(buf+k);
-    directive_show3(c, out+i, itemSet, 1, interactive, "colmap", buf, (c->set->graph_default.ColMapColSpace==sg->ColMapColSpace)&&(strcmp(sg->ColMapExpr1,c->set->graph_default.ColMapExpr1)==0)&&(strcmp(sg->ColMapExpr2,c->set->graph_default.ColMapExpr2)==0)&&(strcmp(sg->ColMapExpr3,c->set->graph_default.ColMapExpr3)==0)&&(strcmp(sg->ColMapExpr4,c->set->graph_default.ColMapExpr4)==0)&&(strcmp(sg->MaskExpr,c->set->graph_default.MaskExpr)==0), "The mapping of ordinate value to colour used by the colourmap plot style");
+    directive_show3(c, out+i, itemSet, 1, interactive, "colmap", buf, unchanged, "The mapping of ordinate value to colour used by the colourmap plot style");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "contours",1)>=0))
@@ -868,7 +876,7 @@ static int directive_show2(ppl_context *c, char *word, char *itemSet, int intera
        sprintf(temp2, "%cformat"  , "xyzc"[k]   );
        if (l || (ppl_strAutocomplete(word, temp1, 1)>=0) || ((j==1)&&(ppl_strAutocomplete(word, temp2, 1)>=0)))
         {
-         if (axisPtr->format != NULL) sprintf(buf, "%s ", axisPtr->format);
+         if (axisPtr->format != NULL) sprintf(buf, "%s ", ((pplExpr *)axisPtr->format)->ascii);
          else                         buf[0]='\0';
          m = strlen(buf);
          sprintf(buf+m, "%s", *(char **)ppl_fetchSettingName(&c->errcontext, axisPtr->TickLabelRotation, SW_TICLABDIR_INT, SW_TICLABDIR_STR , sizeof(char *))); m += strlen(buf+m);
@@ -883,7 +891,7 @@ static int directive_show2(ppl_context *c, char *word, char *itemSet, int intera
                          (  ( axisPtr->TickLabelRotate  ==axisPtrDef->TickLabelRotate  ) &&
                             ( axisPtr->TickLabelRotation==axisPtrDef->TickLabelRotation) &&
                            (((axisPtr->format==NULL)&&(axisPtrDef->format==NULL)) ||
-                            ((axisPtr->format!=NULL)&&(axisPtrDef->format!=NULL)&&(strcmp(axisPtr->format,axisPtrDef->format)==0)))
+                            ((axisPtr->format!=NULL)&&(axisPtrDef->format!=NULL)&&(strcmp(((pplExpr *)axisPtr->format)->ascii,((pplExpr *)axisPtrDef->format)->ascii)==0)))
                          ) ,
                          buf2);
          i += strlen(out+i) ; p=1;
