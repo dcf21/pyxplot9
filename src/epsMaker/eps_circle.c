@@ -111,6 +111,9 @@ void eps_circ_RenderEPS(EPSComm *x)
      }
    }
 
+  // Free with words
+  ppl_withWordsDestroy(x->c, &ww);
+
   // Final newline at end of canvas item
   fprintf(x->epsbuffer, "\n");
   return;

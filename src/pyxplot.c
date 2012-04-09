@@ -44,6 +44,7 @@
 #include "coreUtils/dict.h"
 #include "coreUtils/memAlloc.h"
 #include "coreUtils/errorReport.h"
+#include "epsMaker/kpse_wrap.h"
 
 #include "children.h"
 #include "input.h"
@@ -179,6 +180,9 @@ int main(int argc, char **argv)
   // Launch child process
   if (DEBUG) ppl_log(&context->errcontext,"Launching the Child Support Process.");
   pplcsp_init(context);
+
+  // Set program name within kpathsea
+  ppl_kpse_wrap_init(&context->errcontext);
 
   // Set up SIGINT handler
   if (sigsetjmp(ppl_sigjmpToMain, 1) == 0)

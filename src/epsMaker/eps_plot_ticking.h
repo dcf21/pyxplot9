@@ -23,12 +23,13 @@
 #define _PPL_EPS_PLOT_TICKING_H 1
 
 #include "epsMaker/eps_comm.h"
+#include "expressions/expCompile.h"
 #include "settings/settings.h"
 #include "userspace/pplObj.h"
 
 void eps_plot_ticking(EPSComm *x, pplset_axis *axis, int AxisUnitStyle, pplset_axis *linkedto);
 void TickLabelAutoGen(EPSComm *X, char **output, double x, double log_base, int OutContext);
-void TickLabelFromFormat(EPSComm *X, char **output, char *FormatStr, double x, pplObj *xunit, int xyz, int OutContext);
+void TickLabelFromFormat(EPSComm *X, char **output, pplExpr *FormatExp, double x, pplObj *xunit, int xyz, int OutContext);
 
 #endif
 

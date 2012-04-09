@@ -57,6 +57,9 @@ void eps_arrow_RenderEPS(EPSComm *x)
   // Call primitive routine
   eps_primitive_arrow(x, x->current->ArrowType, x1, y1, NULL, x2, y2, NULL, &ww);
 
+  // Free with words
+  ppl_withWordsDestroy(x->c, &ww);
+
   // Final newline at end of canvas item
   fprintf(x->epsbuffer, "\n");
   return;

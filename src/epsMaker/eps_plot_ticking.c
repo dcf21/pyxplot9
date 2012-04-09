@@ -34,16 +34,20 @@
 
 #include "coreUtils/errorReport.h"
 #include "coreUtils/memAlloc.h"
+#include "expressions/expEval.h"
+#include "expressions/traceback_fns.h"
 #include "mathsTools/dcfmath.h"
 #include "stringTools/asciidouble.h"
 #include "settings/settings.h"
 #include "settings/settingTypes.h"
 #include "userspace/context.h"
 #include "userspace/contextVarDef.h"
+#include "userspace/garbageCollector.h"
 #include "userspace/pplObj_fns.h"
 #include "userspace/unitsArithmetic.h"
 #include "userspace/unitsDisp.h"
 
+#include "epsMaker/eps_core.h"
 #include "epsMaker/eps_plot_canvas.h"
 #include "epsMaker/eps_plot_ticking.h"
 #include "epsMaker/eps_plot_ticking_auto.h"
@@ -351,11 +355,14 @@ void TickLabelAutoGen(EPSComm *X, char **output, double x, double log_base, int 
   return;
  }
 
-void TickLabelFromFormat(EPSComm *X, char **output, char *FormatStr, double x, pplObj *xunit, int xyz, int OutContext)
+void TickLabelFromFormat(EPSComm *X, char **output, pplExpr *FormatExp, double x, pplObj *xunit, int xyz, int OutContext)
  {
-  int i,j=-1,k=-1;
-  char *VarName, tmp_string[LSTR_LENGTH], err_string[LSTR_LENGTH];
-  pplObj DummyTemp, *VarVal;
+  int       lOP;
+  const int stkLevelOld = X->c->stackPtr;
+  pplObj   *outval;
+  char     *VarName, *tmp_string;
+  pplObj    DummyTemp, *VarVal;
+
   if      (xyz==0) VarName = "x";
   else if (xyz==1) VarName = "y";
   else if (xyz==2) VarName = "z";
@@ -371,15 +378,14 @@ void TickLabelFromFormat(EPSComm *X, char **output, char *FormatStr, double x, p
   VarVal->real        = x;
 
   // Generate tick string
-  i = strlen(FormatStr);
-  while ((i>0)&&(FormatStr[i-1]<=' ')) i--;
-  j = -1;
-  ppl_GetQuotedString(FormatStr, tmp_string, 0, &j, 0, &k, err_string, 1);
-  if (k>=0) { sprintf(X->c->errcontext.tempErrStr, "Error encountered whilst using format string: %s",FormatStr); ppl_error(&X->c->errcontext,ERR_GENERAL, -1, -1, NULL); ppl_error(&X->c->errcontext,ERR_GENERAL, -1, -1, err_string); sprintf(tmp_string, "{\\bf ?}"); }
-  if (j< i) { sprintf(X->c->errcontext.tempErrStr, "Error encountered whilst using format string: %s",FormatStr); ppl_error(&X->c->errcontext,ERR_GENERAL, -1, -1, NULL); ppl_error(&X->c->errcontext,ERR_GENERAL, -1, -1, "Unexpected trailing matter."); sprintf(tmp_string, "{\\bf ?}"); }
+  outval = ppl_expEval(X->c, FormatExp, &lOP, 0, 1);
+  if (X->c->errStat.status) { sprintf(X->c->errcontext.tempErrStr, "Error encountered whilst using format string: %s",FormatExp->ascii); ppl_error(&X->c->errcontext,ERR_PREFORMED, -1, -1, NULL); ppl_tbWrite(X->c); ppl_tbClear(X->c); tmp_string = "{\\bf ?}"; }
+  else if (outval->objType != PPLOBJ_STR) { sprintf(X->c->errcontext.tempErrStr, "Error encountered whilst using format string: %s",FormatExp->ascii); ppl_error(&X->c->errcontext,ERR_PREFORMED, -1, -1, NULL); ppl_error(&X->c->errcontext,ERR_PREFORMED, -1, -1, "Tick label was not a string."); tmp_string = "{\\bf ?}"; }
+  else                       { tmp_string = (char *)outval->auxil; }
   *output = (char *)ppl_memAlloc_incontext(strlen(tmp_string)+3, OutContext);
   if ((*output)==NULL) return;
   sprintf(*output,"%s",tmp_string);
+  { EPSComm *x=X; EPS_STACK_POP; }
 
   // Restore original value of x (or y/z)
   ppl_contextRestoreVarPointer(X->c, VarName, &DummyTemp);

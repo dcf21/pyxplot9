@@ -261,7 +261,7 @@ void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops)
     PointHandler = PointHandlers[j];
     TextHandler  = TextHandlers [j];
     AfterHandler = AfterHandlers[j];
-    if ((ArrowHandler==NULL)&&(CircHandler==NULL)&&(EllpsHandler==NULL)&&(EPSHandler==NULL)&&(ImageHandler==NULL)&&(PieHandler==NULL)&&(PlotHandler==NULL)&&(PointHandler==NULL)&&(TextHandler==NULL)&&(AfterHandler==NULL)) break;
+    if ((j>4)&&(ArrowHandler==NULL)&&(CircHandler==NULL)&&(EllpsHandler==NULL)&&(EPSHandler==NULL)&&(ImageHandler==NULL)&&(PieHandler==NULL)&&(PlotHandler==NULL)&&(PointHandler==NULL)&&(TextHandler==NULL)&&(AfterHandler==NULL)) break;
 
     // Loop over all of the items on the canvas
     if (comm.itemlist != NULL)

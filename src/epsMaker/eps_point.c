@@ -109,6 +109,10 @@ void eps_point_RenderEPS(EPSComm *x)
      }
    }
 
+  // Free with words
+  ppl_withWordsDestroy(x->c, &ww);
+  ppl_withWordsDestroy(x->c, &ww_default);
+
   // Final newline at end of canvas item
   fprintf(x->epsbuffer, "\n");
   return;

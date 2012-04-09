@@ -39,6 +39,7 @@
 #include "settings/withWords_fns.h"
 #include "stringTools/asciidouble.h"
 #include "userspace/contextVarDef.h"
+#include "userspace/garbageCollector.h"
 #include "userspace/unitsDisp.h"
 #include "userspace/unitsArithmetic.h"
 #include "userspace/pplObj_fns.h"
@@ -386,6 +387,7 @@ int  eps_plot_colourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int
      /* Check if mask criterion is satisfied */ \
      { \
      int colspace; \
+     const int stkLevelOld = x->c->stackPtr; \
      if (sg->MaskExpr!=NULL) \
       { \
        pplObj *v; \
@@ -470,6 +472,7 @@ write_rgb: \
      img.data[p++] = component_r; \
      img.data[p++] = component_g; \
      img.data[p++] = component_b; \
+     EPS_STACK_POP; \
      }
 
      C1Var = CVar[0];

@@ -41,6 +41,7 @@
 #include "settings/withWords_fns.h"
 #include "settings/settingTypes.h"
 #include "stringTools/asciidouble.h"
+#include "userspace/garbageCollector.h"
 #include "userspace/unitsDisp.h"
 #include "userspace/unitsArithmetic.h"
 #include "userspace/pplObj_fns.h"
@@ -636,6 +637,8 @@ GOT_CONTOURS:
 
     for (cn=0; cn<cpos; cn++)
      {
+      const int stkLevelOld = x->c->stackPtr;
+
       if (clist[cn].Nvertices_max<1) continue;
 
       // Set value of c1
@@ -672,7 +675,9 @@ GOT_CONTOURS:
           if (outI[i]!=NULL) { if (dbl<INT_MIN) dbl=INT_MIN+1; if (dbl>INT_MAX) dbl=INT_MAX-1; *outI[i] = (int)dbl; }
           if (flagU[i]!=NULL) *flagU[i] = 1;
           if (flagA[i]!=NULL) *flagA[i] = 0;
+          EPS_STACK_POP;
          }
+        EPS_STACK_POP;
 
         if ((col1>=0.0)&&(col2>=0.0)&&(col3>=0.0)&&((pd->ww_final.    Col1234Space!=SW_COLSPACE_CMYK)||(col4>=0.0))) { pd->ww_final.color1=col1; pd->ww_final.color2=col2; pd->ww_final.color3=col3; pd->ww_final.color4=col4; pd->ww_final.USEcolor=0; pd->ww_final.USEcolor1234=1; pd->ww_final.AUTOcolor=0; }
         if ((fc1 >=0.0)&&(fc2 >=0.0)&&(fc3 >=0.0)&&((pd->ww_final.FillCol1234Space!=SW_COLSPACE_CMYK)||(fc4 >=0.0))) { pd->ww_final.fillcolor1=fc1; pd->ww_final.fillcolor2=fc2; pd->ww_final.fillcolor3=fc3; pd->ww_final.fillcolor4=fc4; pd->ww_final.USEfillcolor=0; pd->ww_final.USEfillcolor1234=1; }

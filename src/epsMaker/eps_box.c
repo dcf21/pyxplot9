@@ -106,6 +106,9 @@ void eps_box_RenderEPS(EPSComm *x)
     eps_core_BoundingBox(x, (x2-xo)*cos(r) - (y1-yo)*sin(r) + xo, (x2-xo)*sin(r) + (y1-yo)*cos(r) + yo, lw);
    }
 
+  // Free with words
+  ppl_withWordsDestroy(x->c, &ww);
+
   // Final newline at end of canvas item
   fprintf(x->epsbuffer, "\n");
   return;

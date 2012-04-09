@@ -88,6 +88,9 @@ void eps_text_RenderEPS(EPSComm *x)
   canvas_EPSRenderTextItem(x, NULL, pageno, x->current->xpos + xgap2, x->current->ypos + ygap2,
       x->current->settings.TextHAlign, x->current->settings.TextVAlign, x->CurrentColour, x->current->settings.FontSize, x->current->rotation, NULL, NULL);
 
+  // Free with words
+  ppl_withWordsDestroy(x->c, &merged);
+
   // Final newline at end of canvas item
   fprintf(x->epsbuffer, "\n");
   return;

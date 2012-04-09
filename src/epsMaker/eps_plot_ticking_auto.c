@@ -43,6 +43,7 @@
 #include "settings/settingTypes.h"
 #include "userspace/context.h"
 #include "userspace/contextVarDef.h"
+#include "userspace/pplObj_fns.h"
 #include "userspace/unitsDisp.h"
 
 #include "epsMaker/eps_plot_canvas.h"
@@ -320,13 +321,13 @@ static int AutoTickListFinalise(EPSComm *X, pplset_axis *axis, const double Unit
        k=l=-1;
        if (arg->StringArg) // Evaluate argument at midpoint of the interval we know it to be in
         {
-         ppl_GetQuotedString(format+start+CommaPositions[tick->ArgNo]+1, X->c->errcontext.tempErrStr, 0, &k, 0, &l, X->c->errcontext.tempErrStr, 1);
+         //ppl_GetQuotedString(format+start+CommaPositions[tick->ArgNo]+1, X->c->errcontext.tempErrStr, 0, &k, 0, &l, X->c->errcontext.tempErrStr, 1);
          if (l>=0) X->c->errcontext.tempErrStr[0]='\0';
          DiscreteMoveMin = (strcmp(X->c->errcontext.tempErrStr, arg->StringValues[tick->IntervalNum-1])==0);
         }
        else
         {
-         ppl_EvaluateAlgebra(format+start+CommaPositions[tick->ArgNo]+1, &DummyVal, 0, &k, 0, &l, X->c->errcontext.tempErrStr, 1);
+         //ppl_EvaluateAlgebra(format+start+CommaPositions[tick->ArgNo]+1, &DummyVal, 0, &k, 0, &l, X->c->errcontext.tempErrStr, 1);
          if (l>=0) DummyVal.real = GSL_NAN;
          DiscreteMoveMin = (DummyVal.real == arg->NumericValues[tick->IntervalNum-1]);
         }
@@ -441,10 +442,10 @@ void eps_plot_ticking_auto(EPSComm *x, pplset_axis *axis, double UnitMultiplier,
   for (i=0; i<NArgs; i++)
    {
     j=k=-1;
-    ppl_EvaluateAlgebra(format+start+CommaPositions[i]+1, &DummyVal, 0, &k, 0, &j, x->c->errcontext.tempErrStr, 1);
+    //ppl_EvaluateAlgebra(format+start+CommaPositions[i]+1, &DummyVal, 0, &k, 0, &j, x->c->errcontext.tempErrStr, 1);
     if (j<0) { args[i].StringArg=0; continue; }
     j=k=-1;
-    ppl_GetQuotedString(format+start+CommaPositions[i]+1,  DummyStr, 0, &k, 0, &j, x->c->errcontext.tempErrStr, 1);
+    //ppl_GetQuotedString(format+start+CommaPositions[i]+1,  DummyStr, 0, &k, 0, &j, x->c->errcontext.tempErrStr, 1);
     if (j<0) { args[i].StringArg=1; continue; }
     goto FAIL;
    }
@@ -473,14 +474,15 @@ void eps_plot_ticking_auto(EPSComm *x, pplset_axis *axis, double UnitMultiplier,
       k=l=-1;
       if (args[i].StringArg)
        {
-        ppl_GetQuotedString(format+start+CommaPositions[i]+1,  DummyStr, 0, &k, 0, &l, x->c->errcontext.tempErrStr, 1);
+        //ppl_GetQuotedString(format+start+CommaPositions[i]+1,  DummyStr, 0, &k, 0, &l, x->c->errcontext.tempErrStr, 1);
         if (l>=0)   args[i].StringValues[j]="";
         else      { args[i].StringValues[j]=(char *)ppl_memAlloc(strlen(DummyStr)+1); if (args[i].StringValues[j]==NULL) goto FAIL; strcpy(args[i].StringValues[j], DummyStr); }
         if ((j>0) && (strcmp(args[i].StringValues[j],args[i].StringValues[j-1])!=0)) args[i].NValueChanges++;
        }
       else
        {
-        ppl_EvaluateAlgebra(format+start+CommaPositions[i]+1, &DummyVal, 0, &k, 0, &l, x->c->errcontext.tempErrStr, 1);
+        pplObjNum(&DummyVal,0,0,0);
+        //ppl_EvaluateAlgebra(format+start+CommaPositions[i]+1, &DummyVal, 0, &k, 0, &l, x->c->errcontext.tempErrStr, 1);
         if (l>=0) DummyVal.real = GSL_NAN;
         args[i].NumericValues[j] = DummyVal.real;
         if ((j>0) && (args[i].NumericValues[j]!=args[i].NumericValues[j-1])) args[i].NValueChanges++;
