@@ -38,6 +38,7 @@ typedef struct CanvasTextItem {
 
 typedef struct EPSComm {
   ppl_context *c;
+  int iterDepth;
   canvas_itemlist *itemlist;
   canvas_item *current;
   double bb_left, bb_right, bb_top, bb_bottom;

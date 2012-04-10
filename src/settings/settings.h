@@ -67,7 +67,8 @@ typedef struct pplset_axis {
  unsigned char atzero, enabled, invisible, linked, RangeReversed, topbottom, MTickMaxSet, MTickMinSet, MTickStepSet, TickMaxSet, TickMinSet, TickStepSet;
  int     ArrowType, LinkedAxisCanvasID, LinkedAxisToXYZ, LinkedAxisToNum, log, MaxSet, MinSet, MirrorType, MTickDir, TickDir, TickLabelRotation;
  double  LabelRotate, LogBase, max, min, MTickMax, MTickMin, MTickStep, TickLabelRotate, TickMax, TickMin, TickStep;
- char   *label, *linkusing;
+ char   *label;
+ void   *linkusing;
  void   *format;
  double *MTickList, *TickList;
  char  **MTickStrs,**TickStrs;

@@ -100,11 +100,11 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
   else if (strcmp(d, "func_set")==0)
     directive_funcset(c,pl,in,interactive);
   else if (strcmp(d, "arrow")==0)
-    directive_arrow(c,pl,in,interactive);
+    directive_arrow(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "assert")==0)
     directive_assert(c,pl,in);
   else if (strcmp(d, "box")==0)
-    directive_box(c,pl,in,interactive);
+    directive_box(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "break")==0)
     directive_break(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "call")==0)
@@ -112,19 +112,19 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
   else if (strcmp(d, "cd")==0)
     directive_cd(c,pl,in);
   else if ((strcmp(d, "circle")==0)||(strcmp(d, "arc")==0))
-    directive_circle(c,pl,in,interactive);
+    directive_circle(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "clear")==0)
     { directive_clear(c,pl,in,interactive); pplcsp_sendCommand(c,"A\n"); }
   else if (strcmp(d, "continue")==0)
     directive_continue(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "delete")==0)
-    directive_delete(c,pl,in,interactive);
+    directive_delete(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "do")==0)
     directive_do(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "ellipse")==0)
-    directive_ellipse(c,pl,in,interactive);
+    directive_ellipse(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "eps")==0)
-    directive_eps(c,pl,in,interactive);
+    directive_eps(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "exec")==0)
     directive_load(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "for")==0)
@@ -152,14 +152,14 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
   else if (strcmp(d, "minimise")==0)
     directive_minimise(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "move")==0)
-    directive_move(c,pl,in,interactive);
+    directive_move(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "pling")==0)
    {
     if (system((char *)stk[PARSE_pling_cmd].auxil)) { if (DEBUG) ppl_log(&c->errcontext, "Pling command received non-zero return value."); }
     return;
    }
   else if (strcmp(d, "point")==0)
-    directive_point(c,pl,in,interactive);
+    directive_point(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "print")==0)
     directive_print(c,pl,in);
   else if (strcmp(d, "pwd")==0)
@@ -208,11 +208,11 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
   else if (strcmp(d, "subroutine")==0)
     directive_subrt(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "swap")==0)
-    directive_swap(c,pl,in,interactive);
+    directive_swap(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "text")==0)
-    directive_text(c,pl,in,interactive);
+    directive_text(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "undelete")==0)
-    directive_undelete(c,pl,in,interactive);
+    directive_undelete(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "unset_error")==0)
     directive_unseterror(c,pl,in,interactive);
   else if (strcmp(d, "while")==0)

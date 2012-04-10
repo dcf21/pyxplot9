@@ -378,7 +378,7 @@ void TickLabelFromFormat(EPSComm *X, char **output, pplExpr *FormatExp, double x
   VarVal->real        = x;
 
   // Generate tick string
-  outval = ppl_expEval(X->c, FormatExp, &lOP, 0, 1);
+  outval = ppl_expEval(X->c, FormatExp, &lOP, 0, X->iterDepth+1);
   if (X->c->errStat.status) { sprintf(X->c->errcontext.tempErrStr, "Error encountered whilst using format string: %s",FormatExp->ascii); ppl_error(&X->c->errcontext,ERR_PREFORMED, -1, -1, NULL); ppl_tbWrite(X->c); ppl_tbClear(X->c); tmp_string = "{\\bf ?}"; }
   else if (outval->objType != PPLOBJ_STR) { sprintf(X->c->errcontext.tempErrStr, "Error encountered whilst using format string: %s",FormatExp->ascii); ppl_error(&X->c->errcontext,ERR_PREFORMED, -1, -1, NULL); ppl_error(&X->c->errcontext,ERR_PREFORMED, -1, -1, "Tick label was not a string."); tmp_string = "{\\bf ?}"; }
   else                       { tmp_string = (char *)outval->auxil; }

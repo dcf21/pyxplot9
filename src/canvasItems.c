@@ -531,7 +531,7 @@ char *ppl_canvas_item_textify(ppl_context *c, canvas_item *ptr, char *output)
   return output;
  }
 
-// Implementation of the list command.
+// Implementation of the list command
 int directive_list(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
  {
   canvas_itemlist  *canvas_items = c->canvas_items;
@@ -552,7 +552,7 @@ int directive_list(ppl_context *c, parserLine *pl, parserOutput *in, int interac
   return 0;
  }
 
-// Implementation of the delete command.
+// Implementation of the delete command
 static int canvas_delete(ppl_context *c, const int id)
  {
   canvas_itemlist *canvas_items = c->canvas_items;
@@ -563,7 +563,7 @@ static int canvas_delete(ppl_context *c, const int id)
   return 0;
  }
 
-int directive_delete(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+int directive_delete(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj           *stk = in->stk;
   canvas_itemlist  *canvas_items = c->canvas_items;
@@ -584,13 +584,13 @@ int directive_delete(ppl_context *c, parserLine *pl, parserOutput *in, int inter
   if (c->set->term_current.display == SW_ONOFF_ON)
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
-    ppl_canvas_draw(c, unsuccessful_ops);
+    ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
    }
   return 0;
  }
 
-// Implementation of the undelete command.
-int directive_undelete(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+// Implementation of the undelete command
+int directive_undelete(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj           *stk = in->stk;
   canvas_itemlist  *canvas_items = c->canvas_items;
@@ -616,13 +616,13 @@ int directive_undelete(ppl_context *c, parserLine *pl, parserOutput *in, int int
   if (c->set->term_current.display == SW_ONOFF_ON)
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
-    ppl_canvas_draw(c, unsuccessful_ops);
+    ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
    }
   return 0;
  }
 
-// Implementation of the move command.
-int directive_move(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+// Implementation of the move command
+int directive_move(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj           *stk = in->stk;
   canvas_itemlist  *canvas_items = c->canvas_items;
@@ -661,13 +661,13 @@ int directive_move(ppl_context *c, parserLine *pl, parserOutput *in, int interac
   if (c->set->term_current.display == SW_ONOFF_ON)
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
-    ppl_canvas_draw(c, unsuccessful_ops);
+    ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
    }
   return 0;
  }
 
-// Implementation of the swap command.
-int directive_swap(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+// Implementation of the swap command
+int directive_swap(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj           *stk = in->stk;
   canvas_itemlist  *canvas_items = c->canvas_items;
@@ -704,13 +704,13 @@ int directive_swap(ppl_context *c, parserLine *pl, parserOutput *in, int interac
   if (c->set->term_current.display == SW_ONOFF_ON)
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
-    ppl_canvas_draw(c, unsuccessful_ops);
+    ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
    }
   return 0;
  }
 
-// Implementation of the arrow command.
-int directive_arrow(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+// Implementation of the arrow command
+int directive_arrow(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj           *stk = in->stk;
   canvas_item      *ptr;
@@ -744,14 +744,14 @@ int directive_arrow(ppl_context *c, parserLine *pl, parserOutput *in, int intera
   if (c->set->term_current.display == SW_ONOFF_ON)
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
-    ppl_canvas_draw(c, unsuccessful_ops);
+    ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
     if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Arrow has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }
 
-// Implementation of the box command.
-int directive_box(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+// Implementation of the box command
+int directive_box(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj           *stk = in->stk;
   canvas_item      *ptr;
@@ -796,14 +796,14 @@ int directive_box(ppl_context *c, parserLine *pl, parserOutput *in, int interact
   if (c->set->term_current.display == SW_ONOFF_ON)
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
-    ppl_canvas_draw(c, unsuccessful_ops);
+    ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
     if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Box has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }
 
-// Implementation of the circle command.
-int directive_circle(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+// Implementation of the circle command
+int directive_circle(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj       *stk = in->stk;
   canvas_item  *ptr;
@@ -835,14 +835,14 @@ int directive_circle(ppl_context *c, parserLine *pl, parserOutput *in, int inter
   if (c->set->term_current.display == SW_ONOFF_ON)
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
-    ppl_canvas_draw(c, unsuccessful_ops);
+    ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
     if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Circle has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }
 
-// Implementation of the ellipse command.
-int directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+// Implementation of the ellipse command
+int directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj           *stk = in->stk;
   canvas_item      *ptr;
@@ -1014,14 +1014,14 @@ int directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int inte
   if (c->set->term_current.display == SW_ONOFF_ON)
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
-    ppl_canvas_draw(c, unsuccessful_ops);
+    ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
     if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Ellipse has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }
 
-// Implementation of the eps command.
-int directive_eps(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+// Implementation of the eps command
+int directive_eps(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj       *stk = in->stk;
   canvas_item  *ptr;
@@ -1059,14 +1059,14 @@ int directive_eps(ppl_context *c, parserLine *pl, parserOutput *in, int interact
   if (c->set->term_current.display == SW_ONOFF_ON)
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
-    ppl_canvas_draw(c, unsuccessful_ops);
+    ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
     if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "EPS image has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }
 
-// Implementation of the point command.
-int directive_point(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+// Implementation of the point command
+int directive_point(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj        *stk = in->stk; 
   canvas_item   *ptr;
@@ -1100,14 +1100,14 @@ int directive_point(ppl_context *c, parserLine *pl, parserOutput *in, int intera
   if (c->set->term_current.display == SW_ONOFF_ON)
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
-    ppl_canvas_draw(c, unsuccessful_ops);
+    ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
     if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Point has been removed from multiplot, because it generated an error."); return 1; }
    } 
   return 0;
  }
 
-// Implementation of the text command.
-int directive_text(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+// Implementation of the text command
+int directive_text(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj        *stk = in->stk;
   canvas_item   *ptr;
@@ -1148,7 +1148,7 @@ int directive_text(ppl_context *c, parserLine *pl, parserOutput *in, int interac
   if (c->set->term_current.display == SW_ONOFF_ON)
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
-    ppl_canvas_draw(c, unsuccessful_ops);
+    ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
     if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Text item has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;

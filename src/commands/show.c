@@ -853,7 +853,7 @@ static int directive_show2(ppl_context *c, char *word, char *itemSet, int intera
            strcpy(buf+m, "linked"); m += strlen(buf+m);
            if (axisPtr->LinkedAxisCanvasID > 0) { sprintf(buf+m, " item %d", axisPtr->LinkedAxisCanvasID); m += strlen(buf+m); }
            sprintf(buf+m, " %c%d", "xyzc"[axisPtr->LinkedAxisToXYZ], axisPtr->LinkedAxisToNum); m += strlen(buf+m);
-           if (axisPtr->linkusing != NULL) { sprintf(buf+m, " using %s", axisPtr->linkusing); m += strlen(buf+m); }
+           if (axisPtr->linkusing != NULL) { sprintf(buf+m, " using %s", ((pplExpr *)axisPtr->linkusing)->ascii); m += strlen(buf+m); }
           }
          sprintf(buf2, "Settings for the %c%d axis", "xyzc"[k], j);
          directive_show3(c, out+i, itemSet, 1, interactive, "axis", buf,

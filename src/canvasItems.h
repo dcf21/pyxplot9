@@ -114,20 +114,20 @@ typedef struct canvas_itemlist {
 int directive_clear   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
 char *ppl_canvas_item_textify(ppl_context *c, canvas_item *ptr, char *output);
 int directive_list    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
-int directive_delete  (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
-int directive_undelete(ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
-int directive_move    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
-int directive_swap    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
-int directive_arrow   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
-int directive_box     (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
-int directive_circle  (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
-int directive_ellipse (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
-int directive_eps     (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
-int directive_piechart(ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
-int directive_point   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
-int directive_text    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
-int directive_image   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
-int directive_plot    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
+int directive_delete  (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+int directive_undelete(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+int directive_move    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+int directive_swap    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+int directive_arrow   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+int directive_box     (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+int directive_circle  (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+int directive_ellipse (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+int directive_eps     (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+int directive_piechart(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+int directive_point   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+int directive_text    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+int directive_image   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+int directive_plot    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 
 #endif
 

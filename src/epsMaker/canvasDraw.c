@@ -142,8 +142,9 @@ static void(*TextHandlers[] )(EPSComm *) = {NULL                       , NULL   
 static void(*AfterHandlers[])(EPSComm *) = {NULL                       , NULL                    , NULL                     , canvas_CallLaTeX    , canvas_MakeEPSBuffer, canvas_EPSWrite    , NULL};
 
 
-void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops)
+void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops, int iterDepth)
  {
+  static int lock=0;
   int i, j, termtype, status=0, CSPCommand=0;
   static long TempFile_counter=0, TeXFile_counter=0;
   char EPSFilenameTemp[FNAME_LENGTH], TeXFilenameTemp[FNAME_LENGTH], TitleTemp[FNAME_LENGTH], FinalFilenameTemp[FNAME_LENGTH];
@@ -164,8 +165,16 @@ void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops)
   void(*TextHandler )(EPSComm *);
   void(*AfterHandler)(EPSComm *);
 
+  // Try to get lock
+  if (__sync_add_and_fetch(&lock,1) > 1)
+   {
+    ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Recursive call to the plot command detected.");
+    return;
+   }
+
   // Reset 3D rendering buffer
-  comm.c = c;
+  comm.iterDepth = iterDepth;
+  comm.c         = c;
   ThreeDimBuffer_Reset(&comm);
 
   // By default, we record all operations as having been successful
@@ -181,8 +190,8 @@ void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops)
    }
 
   // Perform expansion of shell filename shortcuts such as ~
-  if ((wordexp(comm.FinalFilename, &WordExp, 0) != 0) || (WordExp.we_wordc <= 0)) { sprintf(c->errcontext.tempErrStr, "Could not find directory containing filename '%s'.", comm.FinalFilename); ppl_error(&c->errcontext, ERR_FILE, -1, -1, NULL); return; }
-  if  (WordExp.we_wordc > 1) { sprintf(c->errcontext.tempErrStr, "Filename '%s' is ambiguous.", comm.FinalFilename); ppl_error(&c->errcontext, ERR_FILE, -1, -1, NULL); return; }
+  if ((wordexp(comm.FinalFilename, &WordExp, 0) != 0) || (WordExp.we_wordc <= 0)) { sprintf(c->errcontext.tempErrStr, "Could not find directory containing filename '%s'.", comm.FinalFilename); ppl_error(&c->errcontext, ERR_FILE, -1, -1, NULL); lock=0; return; }
+  if  (WordExp.we_wordc > 1) { sprintf(c->errcontext.tempErrStr, "Filename '%s' is ambiguous.", comm.FinalFilename); ppl_error(&c->errcontext, ERR_FILE, -1, -1, NULL); lock=0; return; }
   strcpy(FinalFilenameTemp, WordExp.we_wordv[0]);
   wordfree(&WordExp);
   comm.FinalFilename = FinalFilenameTemp;
@@ -289,7 +298,7 @@ void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops)
       status = 0;
      }
     if (AfterHandler != NULL) (*AfterHandler)(&comm); // At the end of each phase, a canvas-wide handler may be called
-    if (status) { if (comm.epsbuffer!=NULL) fclose(comm.epsbuffer); return; } // The failure of a canvas-wide handler is fatal
+    if (status) { if (comm.epsbuffer!=NULL) fclose(comm.epsbuffer); lock=0; return; } // The failure of a canvas-wide handler is fatal
    }
 
   // Now convert eps output to bitmaped graphics if requested
@@ -396,6 +405,7 @@ void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops)
 
   // Return to user's current working directory
   if (chdir(c->errcontext.session_default.cwd) < 0) { ppl_fatal(&c->errcontext, __FILE__,__LINE__,"chdir into cwd failed."); }
+  lock=0;
   return;
  }
 

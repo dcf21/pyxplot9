@@ -34,6 +34,8 @@
 #include "coreUtils/list.h"
 #include "coreUtils/errorReport.h"
 
+#include "expressions/expCompile_fns.h"
+
 #include "pplConstants.h"
 #include "settings/settingTypes.h"
 
@@ -52,10 +54,10 @@
 void pplaxis_destroy(ppl_context *context, pplset_axis *in)
  {
   int i;
-  if (in->format    != NULL) { free(in->format   ); in->format    = NULL; }
-  if (in->label     != NULL) { free(in->label    ); in->label     = NULL; }
-  if (in->linkusing != NULL) { free(in->linkusing); in->linkusing = NULL; }
-  if (in->MTickList != NULL) { free(in->MTickList); in->MTickList = NULL; }
+  if (in->format    != NULL) { free        (           in->format   ); in->format    = NULL; }
+  if (in->label     != NULL) { free        (           in->label    ); in->label     = NULL; }
+  if (in->linkusing != NULL) { pplExpr_free((pplExpr *)in->linkusing); in->linkusing = NULL; }
+  if (in->MTickList != NULL) { free        (           in->MTickList); in->MTickList = NULL; }
   if (in->MTickStrs != NULL)
    {
     for (i=0; in->MTickStrs[i]!=NULL; i++) free(in->MTickStrs[i]);

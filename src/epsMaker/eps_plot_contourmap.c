@@ -662,7 +662,7 @@ GOT_CONTOURS:
           if (clip[i]>1) break;
           if (expr[i]==NULL) continue;
 
-          outval = ppl_expEval(x->c, expr[i], &lOP, 1, 1);
+          outval = ppl_expEval(x->c, expr[i], &lOP, 1, x->iterDepth+1);
 
           if (errpos>=0) { sprintf(x->c->errcontext.tempErrStr, "Could not evaluate the style expression <%s>. The error, encountered at character position %d, was: '%s'", expr[i]->ascii, errpos, errtext); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); continue; }
           if (!outval->dimensionless) { sprintf(x->c->errcontext.tempErrStr, "The style expression <%s> yielded a result which was not a dimensionless number.", expr[i]->ascii); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); continue; }
