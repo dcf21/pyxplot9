@@ -61,6 +61,8 @@
 #include "defaultObjs/defaultFuncsMacros.h"
 #include "defaultObjs/zetaRiemann.h"
 
+#include "texify.h"
+
 void ppl_addMagicFunction(dict *n, char *name, int id, char *shortdesc, char *latex, char *desc)
  {
   pplObj   v;
@@ -1368,6 +1370,22 @@ void pplfunc_tanh        (ppl_context *c, pplObj *in, int nArgs, int *status, in
   ELSE_REAL   { OUTPUT.real = tanh(in[0].real); }
   ENDIF
   CHECK_OUTPUT_OKAY;
+ }
+
+void pplfunc_texify      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *FunctionDescription = "texify(e)";
+  char *instr = (char*)in[0].auxil;
+  char *outstr;
+  int inlen=0;
+  if (nArgs != 1) { sprintf(errText,"The %s function takes exactly one argument; %d supplied.",FunctionDescription,nArgs); *errType=ERR_TYPE; *status=1; return; }
+  if (in[0].objType!=PPLOBJ_STR) { sprintf(errText,"The %s requires a single string argument; supplied argument had type <%s>.",FunctionDescription,pplObjTypeNames[in[0].objType]); *errType=ERR_TYPE; *status=1; return; }
+  outstr = (char *)malloc(LSTR_LENGTH);
+  if (outstr==NULL) { sprintf(errText,"Out of memory."); *errType=ERR_MEMORY; *status=1; return; }
+  texify_generic(c, instr, &inlen, outstr, LSTR_LENGTH);
+  pplObjStr(&OUTPUT,0,1,outstr);
+  if (inlen < strlen(instr)) { sprintf(errText,"Unexpected trailing matter at the end of texified expression (character position %d).",inlen); *errType=ERR_SYNTAX; *status=1; return; }
+  return;
  }
 
 void pplfunc_tophat      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)

@@ -208,11 +208,6 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
             expOp = 1;
             NEWSTATE(4,0,0);
            }
-          else if ((strncmp(in+scanpos,"texify",6)==0) && (!isalnum(in[scanpos+6])) && (in[scanpos+6]!='_')) // texify() function
-           {
-            expOp = 2;
-            NEWSTATE(6,0,0);
-           }
           else if (strncmp(in+scanpos,"int_d",5)==0) // int_d() function
            {
             if (!isalpha(in[scanpos+5])) { *errPos=scanpos; *errType=ERR_SYNTAX; strcpy(errText, "System function int_d should be followed by a variable name to integrate over."); *end=-1; *outlen=0; return; }

@@ -26,7 +26,7 @@
 #include <string.h>
 
 #include "coreUtils/memAlloc.h"
-#include "expressions/expCompile.h"
+#include "expressions/expCompile_fns.h"
 #include "settings/settingTypes.h"
 #include "stringTools/strConstants.h"
 #include "stringTools/asciidouble.h"
@@ -106,8 +106,18 @@ void texify_MakeGreek(const char *in, char *out)
   return;
  }
 
-void texify_generic(char *in, int *end, char *out, int outlen)
+void texify_generic(ppl_context *c, char *in, int *end, char *out, int outlen)
  {
+  const int  allowCommaOperator = 1;
+  const int  equalsAllowed      = 1;
+  const int  dollarAllowed      = 1;
+  int        errPos=-1, errType, tlen;
+  char       errbuff[LSTR_LENGTH];
+
+  // First tokenise expression
+  ppl_expTokenise(c, in, end, dollarAllowed, equalsAllowed, allowCommaOperator, 0, 0, 0, &tlen, &errPos, &errType, errbuff);
+  if (errPos>=0) { *end=0; return; }
+
   strcpy(out, "texify output");
   return;
  }

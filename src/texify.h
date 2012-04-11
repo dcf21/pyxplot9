@@ -22,7 +22,9 @@
 #ifndef _TEXIFY_H
 #define _TEXIFY_H 1
 
-void texify_generic(char *in, int *end, char *out, int outlen);
+#include "userspace/context.h"
+
+void texify_generic(ppl_context *c, char *in, int *end, char *out, int outlen);
 
 #endif
 

@@ -373,7 +373,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"sum"           ,0,1e9,0,0,0,0,(void *)&pplfunc_sum       , "sum(...)", "\\mathrm{sum}@<@0@>", "sum(...) returns the sum of its arguments");
     ppl_addSystemFunc(d,"tan"           ,1,1,1,1,0,0,(void *)&pplfunc_tan         , "tan(z)", "\\mathrm{tan}@<@1@>", "tan(x) returns the tangent of x. If x is dimensionless, it is assumed to be measured in radians");
     ppl_addSystemFunc(d,"tanh"          ,1,1,1,1,0,0,(void *)&pplfunc_tanh        , "tanh(z)", "\\mathrm{tanh}@<@1@>", "tanh(x) returns the hyperbolic tangent of x. x may either be a dimensionless number or may have units of angle");
-    ppl_addMagicFunction(d, "texify", 4, "texify(...)", "\\mathrm{texify}@<@0@>", "texify(str) converts an algebraic expression into a LaTeX command string representation");
+    ppl_addSystemFunc(d,"texify"        ,1,1,0,0,0,0,(void *)&pplfunc_texify      , "texify(e)", "\\mathrm{texify}@<@0@>", "texify(str) converts an algebraic expression into a LaTeX command string representation");
     ppl_addSystemFunc(d,"tophat"        ,2,2,1,1,1,0,(void *)&pplfunc_tophat      , "tophat(x,sigma)", "\\mathrm{tophat}@<@1,@2@>", "tophat(x,sigma) returns one if |x| <= |sigma|, and zero otherwise");
     ppl_addSystemFunc(d,"typeOf"        ,1,1,0,0,0,0,(void *)&pplfunc_typeOf      , "typeOf(x)", "\\mathrm{typeOf}@<@1@>", "typeof(x) returns the type of the object x");
     ppl_addMagicFunction(d, "unit", 1, "unit(...)", "\\mathrm{unit}@<@0@>", "unit(...) multiplies a number by a physical unit");

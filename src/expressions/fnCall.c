@@ -468,9 +468,6 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
       ppl_expIntegrate(context,inExpr,inExprCharPos,(char*)args[1].auxil,k,(char*)args[0].auxil,&args[2],&args[3],out,dollarAllowed,iterDepth);
       if (context->errStat.status) { goto cleanup; }
      }
-    else if (fn->minArgs==4) // texify()
-     {
-     }
    }
   else
    {
