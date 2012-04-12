@@ -35,16 +35,17 @@
 #include "userspace/context.h"
 #include "userspace/pplObj.h"
 
-#define CANVAS_ARROW 22001
-#define CANVAS_BOX   22002
-#define CANVAS_CIRC  22003
-#define CANVAS_ELLPS 22004
-#define CANVAS_EPS   22005
-#define CANVAS_IMAGE 22006
-#define CANVAS_PIE   22007
-#define CANVAS_PLOT  22008
-#define CANVAS_POINT 22009
-#define CANVAS_TEXT  22010
+#define CANVAS_ARROW   22001
+#define CANVAS_BOX     22002
+#define CANVAS_CIRC    22003
+#define CANVAS_ELLPS   22004
+#define CANVAS_EPS     22005
+#define CANVAS_IMAGE   22006
+#define CANVAS_PIE     22007
+#define CANVAS_PLOT    22008
+#define CANVAS_POINT   22009
+#define CANVAS_POLYGON 22010
+#define CANVAS_TEXT    22011
 
 typedef struct canvas_plotrange {
  double                   min, max;
@@ -93,16 +94,20 @@ typedef struct canvas_item {
  struct canvas_item *next, *prev;
 
  // Parameters which can be used to define ellipses
- double              x1,y1,x2,y2,xc,yc,xf,yf,a,b,ecc,slr; // Parameters which can be used to define ellipses
- unsigned char       x1set, xcset, xfset, aset, bset, eccset, slrset;
+ double              x1,y1,x2,y2,xc,yc,xf,yf,a,b,ecc,slr,arcfrom,arcto; // Parameters which can be used to define ellipses
+ unsigned char       x1set, xcset, xfset, aset, bset, eccset, slrset, arcset;
+
+ // Parameters which can be used to define polygons
+ double             *polygonPoints;
+ int                 NpolygonPoints;
 
  // Parameters which can be used to define plots
- unsigned char     ThreeDim;
- canvas_plotrange *plotranges;
- canvas_plotdesc  *plotitems;
- dataTable       **plotdata; // used at plot time
- double            PlotLeftMargin, PlotRightMargin, PlotTopMargin, PlotBottomMargin;
- int               FirstTextID, TitleTextID, LegendTextID, SetLabelTextID, *DatasetTextID;
+ unsigned char       ThreeDim;
+ canvas_plotrange   *plotranges;
+ canvas_plotdesc    *plotitems;
+ dataTable         **plotdata; // used at plot time
+ double              PlotLeftMargin, PlotRightMargin, PlotTopMargin, PlotBottomMargin;
+ int                 FirstTextID, TitleTextID, LegendTextID, SetLabelTextID, *DatasetTextID;
 } canvas_item;
 
 typedef struct canvas_itemlist {
@@ -125,6 +130,7 @@ int directive_ellipse (ppl_context *c, parserLine *pl, parserOutput *in, int int
 int directive_eps     (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 int directive_piechart(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 int directive_point   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+int directive_polygon (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 int directive_text    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 int directive_image   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 int directive_plot    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);

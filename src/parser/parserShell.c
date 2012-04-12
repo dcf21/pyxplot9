@@ -37,10 +37,14 @@
 #include "commands/help.h"
 
 #include "coreUtils/errorReport.h"
+#include "coreUtils/memAlloc.h"
+
+#include "epsMaker/canvasDraw.h"
 
 #include "settings/arrows_fns.h"
 #include "settings/axes_fns.h"
 #include "settings/labels_fns.h"
+#include "settings/settingTypes.h"
 #include "settings/withWords_fns.h"
 
 #include "stringTools/asciidouble.h"
@@ -160,12 +164,22 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
    }
   else if (strcmp(d, "point")==0)
     directive_point(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "polygon")==0)
+    directive_polygon(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "print")==0)
     directive_print(c,pl,in);
   else if (strcmp(d, "pwd")==0)
     ppl_report(&c->errcontext, c->errcontext.session_default.cwd);
   else if (strcmp(d, "quit")==0)
     c->shellExiting = 1;
+  else if (strcmp(d, "refresh")==0)
+   {
+    if (c->set->term_current.display == SW_ONOFF_ON)
+     {
+      unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
+      ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
+     }
+   }
   else if (strcmp(d, "reset")==0)
    {
     int i;

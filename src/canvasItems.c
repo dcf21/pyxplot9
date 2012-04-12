@@ -57,6 +57,7 @@ static void canvas_item_delete(ppl_context *c, canvas_item *ptr)
   canvas_plotrange *pr, *pr2;
   canvas_plotdesc  *pd, *pd2;
 
+  if (ptr->polygonPoints != NULL) free(ptr->polygonPoints);
   if (ptr->text  != NULL) free(ptr->text);
   ppl_withWordsDestroy(c, &(ptr->settings.dataStyle));
   ppl_withWordsDestroy(c, &(ptr->settings.funcStyle));
@@ -158,15 +159,16 @@ static int canvas_itemlist_add(ppl_context *c, pplObj *command, int type, canvas
    }
   ptr = (canvas_item *)malloc(sizeof(canvas_item));
   if (ptr==NULL) return 1;
-  *insertpointA = *insertpointB = ptr;
-  ptr->next       = next; // Link doubly-linked list
-  ptr->prev       = prev;
-  ptr->text       = NULL;
-  ptr->plotitems  = NULL;
-  ptr->plotranges = NULL;
-  ptr->id         = editNo;
-  ptr->type       = type;
-  ptr->deleted    = 0;
+  *insertpointA      = *insertpointB = ptr;
+  ptr->next          = next; // Link doubly-linked list
+  ptr->prev          = prev;
+  ptr->polygonPoints = NULL;
+  ptr->text          = NULL;
+  ptr->plotitems     = NULL;
+  ptr->plotranges    = NULL;
+  ptr->id            = editNo;
+  ptr->type          = type;
+  ptr->deleted       = 0;
   ppl_withWordsZero(c, &ptr->with_data);
 
   // Copy the user's current settings
@@ -318,6 +320,10 @@ char *ppl_canvas_item_textify(ppl_context *c, canvas_item *ptr, char *output)
              ppl_numericDisplay( ptr->slr *100, c->numdispBuff[0], c->set->term_current.SignificantFigures, (c->set->term_current.NumDisplay==SW_DISPLAY_L))
            );
     i += strlen(output+i);
+    if (ptr->arcset) sprintf(output+i, " arc from %s to %s",
+             ppl_numericDisplay( ptr->arcfrom*180/M_PI, c->numdispBuff[0], c->set->term_current.SignificantFigures, (c->set->term_current.NumDisplay==SW_DISPLAY_L)),
+             ppl_numericDisplay( ptr->arcto  *180/M_PI, c->numdispBuff[1], c->set->term_current.SignificantFigures, (c->set->term_current.NumDisplay==SW_DISPLAY_L))
+           );
     sprintf(output+i, " rotate %s",
              ppl_numericDisplay( ptr->rotation *180/M_PI , c->numdispBuff[0], c->set->term_current.SignificantFigures, (c->set->term_current.NumDisplay==SW_DISPLAY_L))
            );
@@ -509,6 +515,25 @@ char *ppl_canvas_item_textify(ppl_context *c, canvas_item *ptr, char *output)
     if (strlen(output+i+6)>0) { sprintf(output+i, " with"); output[i+5]=' '; }
     else                      { output[i]='\0'; }
    }
+  else if (ptr->type == CANVAS_POLYGON) // Produce textual representations of polygon commands
+   {
+    int p;
+    sprintf(output, "polygon item %d [", ptr->id);
+    i = strlen(output);
+    for (p=0; p<ptr->NpolygonPoints; p++)
+     {
+      if (p>0) output[i++]=',';
+      sprintf(output+i, "[%s,%s]", ppl_numericDisplay( ptr->polygonPoints[2*p  ]*100, c->numdispBuff[0], c->set->term_current.SignificantFigures, (c->set->term_current.NumDisplay==SW_DISPLAY_L)),
+                                   ppl_numericDisplay( ptr->polygonPoints[2*p+1]*100, c->numdispBuff[1], c->set->term_current.SignificantFigures, (c->set->term_current.NumDisplay==SW_DISPLAY_L))
+             );
+      i += strlen(output+i);
+     }
+    sprintf(output+i, "]");
+    i += strlen(output+i);
+    ppl_withWordsPrint(c, &ptr->with_data, output+i+6);
+    if (strlen(output+i+6)>0) { sprintf(output+i, " with"); output[i+5]=' '; }
+    else                      { output[i]='\0'; }
+   }
   else if (ptr->type == CANVAS_TEXT ) // Produce textual representations of text commands
    {
     sprintf(output, "text item %d ", ptr->id);
@@ -644,8 +669,33 @@ int directive_move(ppl_context *c, parserLine *pl, parserOutput *in, int interac
   rotatable = ((ptr->type!=CANVAS_ARROW)&&(ptr->type!=CANVAS_CIRC)&&(ptr->type!=CANVAS_PIE)&&(ptr->type!=CANVAS_PLOT)&&(ptr->type!=CANVAS_POINT));
   if (gotRotation && !rotatable) { sprintf(c->errcontext.tempErrStr, "It is not possible to rotate multiplot item %d.", moveno); ppl_warning(&c->errcontext, ERR_GENERAL, NULL); }
 
-  // Most canvas items are moved using the xpos and ypos fields
-  if ((ptr->type!=CANVAS_PLOT)&&(ptr->type!=CANVAS_PIE))
+  if (ptr->type==CANVAS_POLYGON)
+   {
+    int c;
+    if (!gotRotation)
+     {
+      double ox = x - ptr->polygonPoints[0];
+      double oy = y - ptr->polygonPoints[1];
+      for (c=0; c<ptr->NpolygonPoints; c++)
+       {
+        ptr->polygonPoints[2*c  ] += ox;
+        ptr->polygonPoints[2*c+1] += oy;
+       }
+     }
+    else
+     {
+      for (c=0; c<ptr->NpolygonPoints; c++)
+       {
+        double ox = ptr->polygonPoints[2*c  ] - ptr->polygonPoints[0];
+        double oy = ptr->polygonPoints[2*c+1] - ptr->polygonPoints[1];
+        ox = ox* cos(rotation) + oy*-sin(rotation);
+        oy = ox* sin(rotation) + oy* cos(rotation);
+        ptr->polygonPoints[2*c  ] = ox + x;
+        ptr->polygonPoints[2*c+1] = oy + y;
+       }
+     }
+   }
+  else if ((ptr->type!=CANVAS_PLOT)&&(ptr->type!=CANVAS_PIE)) // Most canvas items are moved using the xpos and ypos fields
    {
     ptr->xpos = x;
     ptr->ypos = y;
@@ -847,8 +897,8 @@ int directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int inte
   pplObj           *stk = in->stk;
   canvas_item      *ptr;
   int               e=0, r=0, p=0, id;
-  int               gotAng, gotX1, gotX2, gotY1, gotY2, gotXc, gotYc, gotXf, gotYf, gotA2, gotB2, gotA, gotB, gotSlr, gotLr, gotEcc;
-  double            ang, x1, x2, y1, y2, xc, yc, xf, yf, a2, b2, a, b, slr, lr, ecc;
+  int               gotAng, gotX1, gotX2, gotY1, gotY2, gotXc, gotYc, gotXf, gotYf, gotA2, gotB2, gotA, gotB, gotSlr, gotLr, gotEcc, gotarc;
+  double            ang, x1, x2, y1, y2, xc, yc, xf, yf, a2, b2, a, b, slr, lr, ecc, arcfrom, arcto;
   double            ratio;
 
   // Look up the input parameters which define the ellipse
@@ -868,6 +918,9 @@ int directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int inte
   slr  = stk[PARSE_ellipse_slr          ].real; gotSlr  = (stk[PARSE_ellipse_slr          ].objType==PPLOBJ_NUM);
   lr   = stk[PARSE_ellipse_lr           ].real; gotLr   = (stk[PARSE_ellipse_lr           ].objType==PPLOBJ_NUM);
   ecc  = stk[PARSE_ellipse_eccentricity ].real; gotEcc  = (stk[PARSE_ellipse_eccentricity ].objType==PPLOBJ_NUM);
+
+  arcfrom = stk[PARSE_ellipse_arcfrom   ].real; gotarc  = (stk[PARSE_ellipse_arcfrom      ].objType==PPLOBJ_NUM);
+  arcto   = stk[PARSE_ellipse_arcto     ].real;
 
   // Check that input parameters have the right units, and convert dimensionless lengths into cm
   if (gotAng) { r++; } else { ang=0.0; }
@@ -995,6 +1048,9 @@ int directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int inte
 
   // Add this ellipse to the linked list which decribes the canvas
   if (canvas_itemlist_add(c,stk,CANVAS_ELLPS,&ptr,&id,0)) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); return 1; }
+  ptr->xpos  = xc; ptr->ypos  = yc;
+  ptr->xpos2 = a ; ptr->ypos2 = b;
+  ptr->rotation = ang;
 
   // Add the exact parameterisation which we have been given to canvas item, so that "list" command prints it out in the form originally supplied
   ptr->x1set = ptr->xcset = ptr->xfset = ptr->aset = ptr->bset = ptr->eccset = ptr->slrset = 0;
@@ -1006,6 +1062,7 @@ int directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int inte
   if (gotB  ) { ptr-> bset = 1; ptr->b  = b  ; }
   if (gotEcc) { ptr->eccset= 1; ptr->ecc= ecc; }
   if (gotSlr) { ptr->slrset= 1; ptr->slr= slr; }
+  if (gotarc) { ptr->arcset= 1; ptr->arcfrom=arcfrom; ptr->arcto=arcto; }
 
   // Read in colour and linewidth information, if available
   ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_ellipse_, &ptr->with_data);
@@ -1103,6 +1160,94 @@ int directive_point(ppl_context *c, parserLine *pl, parserOutput *in, int intera
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
     if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Point has been removed from multiplot, because it generated an error."); return 1; }
    } 
+  return 0;
+ }
+
+// Implementation of the polygon command
+int directive_polygon(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+ {
+  pplObj           *stk = in->stk;
+  canvas_item      *ptr;
+  int               id, Npts, i;
+  double           *ptList;
+  list             *ptListObj;
+
+  // Count how many points have been supplied
+  if (stk[PARSE_polygon_pointlist].objType != PPLOBJ_LIST) { sprintf(c->errcontext.tempErrStr, "List of points in polygon should have been a list; supplied object was of type <%s>.", pplObjTypeNames[stk[PARSE_polygon_pointlist].objType]); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); return 1; }
+  ptListObj = (list *)stk[PARSE_polygon_pointlist].auxil;
+  Npts      = ppl_listLen(ptListObj);
+  ptList    = (double *)malloc(2*Npts*sizeof(double));
+  if (ptList==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); return 1; }
+  if (Npts<2) { printf(c->errcontext.tempErrStr, "A minimum of two points are required to specify the outline of a polygon."); goto fail; }
+  for (i=0; i<Npts; i++)
+   {
+    double  x,y;
+    pplObj *item = (pplObj *)ppl_listGetItem(ptListObj, i);
+    if (item->objType == PPLOBJ_VEC)
+     {
+      pplVector *v = (pplVector *)item->auxil;
+      int        l = v->v->size;
+      double     m=1;
+      if (item->dimensionless) m=0.01;
+      else
+       {
+        int p;
+        for (p=0; p<UNITS_MAX_BASEUNITS; p++) if (item->exponent[p] != (p==UNIT_LENGTH)) { p=-1; break; }
+        if (p<0) { printf(c->errcontext.tempErrStr, "Point %d of polygon should have specified as a position vector; supplied position had wrong units.", i+1); goto fail; }
+       }
+      if (l!=2) { printf(c->errcontext.tempErrStr, "Point %d of polygon should have specified as a two-component position vector; supplied vector had %d components.", i+1, l); goto fail; }
+      x = gsl_vector_get(v->v,0) * m;
+      y = gsl_vector_get(v->v,1) * m;
+     }
+    else if (item->objType == PPLOBJ_LIST)
+     {
+      int     j,p;
+      double  m=1;
+      list   *l = (list *)item->auxil;
+      pplObj *xo[2];
+      if (ppl_listLen(l)!=2) { printf(c->errcontext.tempErrStr, "Point %d of polygon should have specified as a two-component position vector; supplied vector had %d components.", i+1, ppl_listLen(l)); goto fail; }
+      for (j=0; j<2; j++)
+       {
+        xo[j] = (pplObj *)ppl_listGetItem(l,j);
+        if (xo[j]->objType != PPLOBJ_NUM) { printf(c->errcontext.tempErrStr, "Point %d of polygon should have specified as a position vector; supplied object had type <%s>.", i+1, pplObjTypeNames[xo[j]->objType]); goto fail; }
+        if (xo[j]->flagComplex) { printf(c->errcontext.tempErrStr, "Point %d of polygon should have specified as a position vector; supplied object was complex.", i+1); goto fail; }
+        if (xo[j]->dimensionless) m=0.01;
+        else
+         {
+          for (p=0; p<UNITS_MAX_BASEUNITS; p++) if (xo[j]->exponent[p] != UNIT_LENGTH) { p=-1; break; }
+          if (p<0) { printf(c->errcontext.tempErrStr, "Point %d of polygon should have specified as a position vector; supplied position had wrong units.", i+1); goto fail; }
+         }
+       }
+      x = xo[0]->real * m;
+      y = xo[1]->real * m;
+     }
+    else
+     {
+      sprintf(c->errcontext.tempErrStr, "Point %d of polygon should have specified as a vector or a list; supplied object was of type <%s>.", i+1, pplObjTypeNames[item->objType]);
+fail:
+      ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL);
+      free(ptList);
+      return 1;
+     }
+    ptList[2*i  ] = x;
+    ptList[2*i+1] = y;
+   }
+
+  // Add this polygon to the linked list which decribes the canvas
+  if (canvas_itemlist_add(c,stk,CANVAS_POLYGON,&ptr,&id,0)) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); return 1; }
+  ptr->NpolygonPoints = Npts;
+  ptr->polygonPoints  = ptList;
+
+  // Read in colour and linewidth information, if available
+  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_polygon_, &ptr->with_data);
+
+  // Redisplay the canvas as required
+  if (c->set->term_current.display == SW_ONOFF_ON)
+   {
+    unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
+    ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Arrow has been removed from multiplot, because it generated an error."); return 1; }
+   }
   return 0;
  }
 

@@ -43,8 +43,11 @@ int ppl_colorFromDict  (ppl_context *c, parserOutput *in, parserLine *pl, const 
                         double *outcol1, double *outcol2, double *outcol3, double *outcol4,
                         unsigned char *USEcol, unsigned char *USEcol1234)
  {
-  pplObj *col = &in->stk[ptab[ fillColor ? PARSE_INDEX_fillcolor : PARSE_INDEX_color]];
-  int s=ppl_colorFromObj(c, col, outcol, outcolspace, EXPoutcol, outcol1, outcol2, outcol3, outcol4, USEcol, USEcol1234);
+  int     pos = ptab[ fillColor ? PARSE_INDEX_fillcolor : PARSE_INDEX_color];
+  pplObj *col = &in->stk[pos];
+  int s;
+  if (pos<0) return 0;
+  s = ppl_colorFromObj(c, col, outcol, outcolspace, EXPoutcol, outcol1, outcol2, outcol3, outcol4, USEcol, USEcol1234);
   if (s) ppl_error(&c->errcontext, ERR_INTERNAL, -1, -1, NULL);
   return s;
  }
@@ -101,7 +104,7 @@ int ppl_colorFromObj   (ppl_context *c, const pplObj *col, int *outcol, int *out
      }
     default:
      {
-      sprintf(c->errcontext.tempErrStr, "Colour specified as wrong type of object.");
+      sprintf(c->errcontext.tempErrStr, "Colour specified as wrong type of object (type %d).", col->objType);
       return 1;
      }
    }

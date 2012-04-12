@@ -856,9 +856,9 @@ cleanup:
      }
    }
 
-  if  (status==1)              ppl_tbClear(c);
-  if  (status!=3)              s->blockDepth=0;
-  if ((status!=3)&&(level==0)) s->NinlineDatafiles=0;
+  if             (status==1)              ppl_tbClear(c);
+  if ((s!=NULL)&&(status!=3))             s->blockDepth=0;
+  if ((s!=NULL)&&(status!=3)&&(level==0)) s->NinlineDatafiles=0;
 //printf("%d %d %d %d\n",blockDepth,level,status,s->blockDepth);
   return status;
  }

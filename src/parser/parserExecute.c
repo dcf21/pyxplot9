@@ -202,7 +202,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
               if (val->objType != PPLOBJ_NUM) break;
               if (val->flagComplex) break;
               if (val->dimensionless) { val->real *= M_PI/180; passed=1; break; }
-              for (p=0; p<UNITS_MAX_BASEUNITS; p++) if (val->exponent[p] != UNIT_ANGLE) { p=-1; break; }
+              for (p=0; p<UNITS_MAX_BASEUNITS; p++) if (val->exponent[p] != (p==UNIT_ANGLE)) { p=-1; break; }
               passed=(p>0);
               break;
             case 'b':
@@ -229,7 +229,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
               if (val->objType != PPLOBJ_NUM) break;
               if (val->flagComplex) break;
               if (val->dimensionless) { val->real *= 0.01; passed=1; break; }
-              for (p=0; p<UNITS_MAX_BASEUNITS; p++) if (val->exponent[p] != UNIT_LENGTH) { p=-1; break; }
+              for (p=0; p<UNITS_MAX_BASEUNITS; p++) if (val->exponent[p] != (p==UNIT_LENGTH)) { p=-1; break; }
               passed=(p>0);
               break;
             case 'E':
@@ -257,7 +257,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
                 if (val->dimensionless) m=0.01;
                 else
                  {
-                  for (p=0; p<UNITS_MAX_BASEUNITS; p++) if (val->exponent[p] != UNIT_LENGTH) { p=-1; break; }
+                  for (p=0; p<UNITS_MAX_BASEUNITS; p++) if (val->exponent[p] != (p==UNIT_LENGTH)) { p=-1; break; }
                   if (p<0) break; // vector has wrong units
                  }
                 if (l>0) x = gsl_vector_get(v,0) * m;

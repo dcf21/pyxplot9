@@ -80,7 +80,8 @@ void eps_ellps_RenderEPS(EPSComm *x)
   // Fill ellipse
   IF_NOT_INVISIBLE
    {
-    fprintf(x->epsbuffer, "0 0 1 0 360 arc\nclosepath\nfill\n");
+    if (!x->current->arcset) fprintf(x->epsbuffer, "0 0 1 0 360 arc\nclosepath\nfill\n");
+    else                     fprintf(x->epsbuffer, "0 0 1 %.2f %.2f arc\n0 0 lineto\nclosepath\nfill\n", x->current->arcfrom*180/M_PI, x->current->arcto*180/M_PI);
     filled = 1;
    }
 
@@ -90,7 +91,8 @@ void eps_ellps_RenderEPS(EPSComm *x)
   // Make path representing the outline of ellipse
   IF_NOT_INVISIBLE
    {
-    fprintf(x->epsbuffer, "0 0 1 0 360 arc\nclosepath\n"); // NB: Leave this path unstroked until we've done a grestore
+    if (!x->current->arcset) fprintf(x->epsbuffer, "0 0 1 0 360 arc\nclosepath\n"); // NB: Leave this path unstroked until we've done a grestore
+    else                     fprintf(x->epsbuffer, "0 0 1 %.2f %.2f arc\n", x->current->arcfrom*180/M_PI, x->current->arcto*180/M_PI);
     stroked = 1;
    }
 

@@ -49,6 +49,7 @@
 #include "epsMaker/eps_eps.h"
 #include "epsMaker/eps_image.h"
 #include "epsMaker/eps_point.h"
+#include "epsMaker/eps_polygon.h"
 #include "epsMaker/eps_plot.h"
 #include "epsMaker/eps_plot_threedimbuff.h"
 #include "epsMaker/eps_text.h"
@@ -138,6 +139,7 @@ static void(*ImageHandlers[])(EPSComm *) = {NULL                       , NULL   
 static void(*PieHandlers[]  )(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , NULL               , NULL};
 static void(*PlotHandlers[] )(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , NULL               , NULL};
 static void(*PointHandlers[])(EPSComm *) = {NULL                       , NULL                    , NULL                     , eps_point_YieldUpText,NULL                , eps_point_RenderEPS, NULL};
+static void(*PolygHandlers[])(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , eps_polygon_RenderEPS,NULL};
 static void(*TextHandlers[] )(EPSComm *) = {NULL                       , NULL                    , NULL                     , eps_text_YieldUpText, NULL                , eps_text_RenderEPS , NULL};
 static void(*AfterHandlers[])(EPSComm *) = {NULL                       , NULL                    , NULL                     , canvas_CallLaTeX    , canvas_MakeEPSBuffer, canvas_EPSWrite    , NULL};
 
@@ -162,6 +164,7 @@ void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops, int iterDe
   void(*PieHandler  )(EPSComm *);
   void(*PlotHandler )(EPSComm *);
   void(*PointHandler)(EPSComm *);
+  void(*PolygHandler)(EPSComm *);
   void(*TextHandler )(EPSComm *);
   void(*AfterHandler)(EPSComm *);
 
@@ -268,9 +271,10 @@ void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops, int iterDe
     PlotHandler  = PlotHandlers [j];
     PieHandler   = PieHandlers  [j];
     PointHandler = PointHandlers[j];
+    PolygHandler = PolygHandlers[j];
     TextHandler  = TextHandlers [j];
     AfterHandler = AfterHandlers[j];
-    if ((j>4)&&(ArrowHandler==NULL)&&(CircHandler==NULL)&&(EllpsHandler==NULL)&&(EPSHandler==NULL)&&(ImageHandler==NULL)&&(PieHandler==NULL)&&(PlotHandler==NULL)&&(PointHandler==NULL)&&(TextHandler==NULL)&&(AfterHandler==NULL)) break;
+    if ((j>4)&&(ArrowHandler==NULL)&&(CircHandler==NULL)&&(EllpsHandler==NULL)&&(EPSHandler==NULL)&&(ImageHandler==NULL)&&(PieHandler==NULL)&&(PlotHandler==NULL)&&(PointHandler==NULL)&&(PolygHandler==NULL)&&(TextHandler==NULL)&&(AfterHandler==NULL)) break;
 
     // Loop over all of the items on the canvas
     if (comm.itemlist != NULL)
@@ -284,16 +288,17 @@ void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops, int iterDe
       comm.LastLinewidth        = -1.0;
       comm.LastLinetype         = 0;
       comm.current              = item;
-      if      ((item->type == CANVAS_ARROW) && (ArrowHandler != NULL)) (*ArrowHandler)(&comm); // Call the relevant handler for each one
-      else if ((item->type == CANVAS_BOX  ) && (BoxHandler   != NULL)) (*BoxHandler  )(&comm);
-      else if ((item->type == CANVAS_CIRC ) && (CircHandler  != NULL)) (*CircHandler )(&comm);
-      else if ((item->type == CANVAS_ELLPS) && (EllpsHandler != NULL)) (*EllpsHandler)(&comm);
-      else if ((item->type == CANVAS_EPS  ) && (EPSHandler   != NULL)) (*EPSHandler  )(&comm);
-      else if ((item->type == CANVAS_IMAGE) && (ImageHandler != NULL)) (*ImageHandler)(&comm);
-      else if ((item->type == CANVAS_PIE  ) && (PieHandler   != NULL)) (*PieHandler  )(&comm);
-      else if ((item->type == CANVAS_PLOT ) && (PlotHandler  != NULL)) (*PlotHandler )(&comm);
-      else if ((item->type == CANVAS_POINT) && (PointHandler != NULL)) (*PointHandler)(&comm);
-      else if ((item->type == CANVAS_TEXT ) && (TextHandler  != NULL)) (*TextHandler )(&comm);
+      if      ((item->type == CANVAS_ARROW  ) && (ArrowHandler != NULL)) (*ArrowHandler)(&comm); // Call the relevant handler for each one
+      else if ((item->type == CANVAS_BOX    ) && (BoxHandler   != NULL)) (*BoxHandler  )(&comm);
+      else if ((item->type == CANVAS_CIRC   ) && (CircHandler  != NULL)) (*CircHandler )(&comm);
+      else if ((item->type == CANVAS_ELLPS  ) && (EllpsHandler != NULL)) (*EllpsHandler)(&comm);
+      else if ((item->type == CANVAS_EPS    ) && (EPSHandler   != NULL)) (*EPSHandler  )(&comm);
+      else if ((item->type == CANVAS_IMAGE  ) && (ImageHandler != NULL)) (*ImageHandler)(&comm);
+      else if ((item->type == CANVAS_PIE    ) && (PieHandler   != NULL)) (*PieHandler  )(&comm);
+      else if ((item->type == CANVAS_PLOT   ) && (PlotHandler  != NULL)) (*PlotHandler )(&comm);
+      else if ((item->type == CANVAS_POINT  ) && (PointHandler != NULL)) (*PointHandler)(&comm);
+      else if ((item->type == CANVAS_POLYGON) && (PolygHandler != NULL)) (*PolygHandler)(&comm);
+      else if ((item->type == CANVAS_TEXT   ) && (TextHandler  != NULL)) (*TextHandler )(&comm);
       if (status) { unsuccessful_ops[item->id] = 1; } // If something went wrong... flag it up and give up on this object
       status = 0;
      }
