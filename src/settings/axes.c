@@ -81,9 +81,9 @@ void pplaxis_copy(ppl_context *context, pplset_axis *out, const pplset_axis *in)
  {
   void *tmp;
   *out = *in;
-  if (in->format    != NULL) { out->format   = (char   *)XMALLOC(strlen(in->format    )+1); strcpy(out->format   , in->format    ); }
-  if (in->label     != NULL) { out->label    = (char   *)XMALLOC(strlen(in->label     )+1); strcpy(out->label    , in->label     ); }
-  if (in->linkusing != NULL) { out->linkusing= (char   *)XMALLOC(strlen(in->linkusing )+1); strcpy(out->linkusing, in->linkusing ); }
+  if (in->format    != NULL) { out->format   = (char *)XMALLOC(strlen(in->format    )+1); strcpy(out->format   , in->format    ); }
+  if (in->label     != NULL) { out->label    = (char *)XMALLOC(strlen(in->label     )+1); strcpy(out->label    , in->label     ); }
+  if (in->linkusing != NULL) { out->linkusing= (void *)pplExpr_cpy((pplExpr *)in->linkusing); }
   pplaxis_copyTics (context,out,in);
   pplaxis_copyMTics(context,out,in);
   return;

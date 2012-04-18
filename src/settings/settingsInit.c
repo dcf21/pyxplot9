@@ -66,7 +66,15 @@ void pplset_makedefault(ppl_context *context)
   memset((void *)s, 0, sizeof(s));
 
   // Default palette
-  for (i=0; default_cols[i]>=0; i++) s->palette_default[i] = default_cols[i];
+  for (i=0; default_cols[i]>=0; i++)
+   {
+    s->palette_default [i] = default_cols[i];
+    s->paletteS_default[i] = SW_COLSPACE_CMYK;
+    s->palette1_default[i] = SW_COLOR_CMYK_C[default_cols[i]];
+    s->palette2_default[i] = SW_COLOR_CMYK_M[default_cols[i]];
+    s->palette3_default[i] = SW_COLOR_CMYK_Y[default_cols[i]];
+    s->palette4_default[i] = SW_COLOR_CMYK_K[default_cols[i]];
+   }
   s->palette_default[i] = -1;
 
   // Default Terminal Settings, used when these values are not changed by any configuration files
