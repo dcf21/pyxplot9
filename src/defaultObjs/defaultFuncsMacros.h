@@ -233,7 +233,7 @@
 
 #define CLEANUP_APPLYUNIT(UNIT) \
   OUTPUT.dimensionless = 0; \
-  OUTPUT.exponent[UNIT] = 1; \
+  if ((UNIT!=UNIT_ANGLE)||(c->set->term_current.UnitAngleDimless != SW_ONOFF_ON)) OUTPUT.exponent[UNIT] = 1; \
 
 
 #define CHECK_OUTPUT_OKAY \

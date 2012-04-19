@@ -401,7 +401,7 @@ char *ppl_printUnit(ppl_context *c, const pplObj *in, double *numberOutReal, dou
 // Function to evaluate strings of the form "m/s"
 // ------------------------------------------------
 
-static int unitNameCmp(const char *in, const char *unit, const unsigned char caseSensitive)
+int ppl_unitNameCmp(const char *in, const char *unit, const unsigned char caseSensitive)
  {
   int k;
   if (unit==NULL) return 0;
@@ -437,15 +437,15 @@ void ppl_unitsStringEvaluate(ppl_context *c, char *in, pplObj *out, int *end, in
     for (j=0; j<c->unit_pos; j++)
      {
       multiplier = 1.0;
-      if      ((k = unitNameCmp(in+i, c->unit_database[j].nameAp,1))!=0) p=1;
-      else if ((k = unitNameCmp(in+i, c->unit_database[j].nameAs,1))!=0) p=1;
-      else if ((k = unitNameCmp(in+i, c->unit_database[j].nameFp,0))!=0) p=1;
-      else if ((k = unitNameCmp(in+i, c->unit_database[j].nameFs,0))!=0) p=1;
-      else if ((k = unitNameCmp(in+i, c->unit_database[j].nameFp,0))!=0) p=1;
-      else if ((k = unitNameCmp(in+i, c->unit_database[j].alt1  ,0))!=0) p=1;
-      else if ((k = unitNameCmp(in+i, c->unit_database[j].alt2  ,0))!=0) p=1;
-      else if ((k = unitNameCmp(in+i, c->unit_database[j].alt3  ,0))!=0) p=1;
-      else if ((k = unitNameCmp(in+i, c->unit_database[j].alt4  ,0))!=0) p=1;
+      if      ((k = ppl_unitNameCmp(in+i, c->unit_database[j].nameAp,1))!=0) p=1;
+      else if ((k = ppl_unitNameCmp(in+i, c->unit_database[j].nameAs,1))!=0) p=1;
+      else if ((k = ppl_unitNameCmp(in+i, c->unit_database[j].nameFp,0))!=0) p=1;
+      else if ((k = ppl_unitNameCmp(in+i, c->unit_database[j].nameFs,0))!=0) p=1;
+      else if ((k = ppl_unitNameCmp(in+i, c->unit_database[j].nameFp,0))!=0) p=1;
+      else if ((k = ppl_unitNameCmp(in+i, c->unit_database[j].alt1  ,0))!=0) p=1;
+      else if ((k = ppl_unitNameCmp(in+i, c->unit_database[j].alt2  ,0))!=0) p=1;
+      else if ((k = ppl_unitNameCmp(in+i, c->unit_database[j].alt3  ,0))!=0) p=1;
+      else if ((k = ppl_unitNameCmp(in+i, c->unit_database[j].alt4  ,0))!=0) p=1;
       else
        {
         for (l=c->unit_database[j].minPrefix/3+8; l<=c->unit_database[j].maxPrefix/3+8; l++)
@@ -454,18 +454,18 @@ void ppl_unitsStringEvaluate(ppl_context *c, char *in, pplObj *out, int *end, in
           for (k=0; ((SIprefixes_full[l][k]!='\0') && (toupper(SIprefixes_full[l][k])==toupper(in[i+k]))); k++);
           if (SIprefixes_full[l][k]=='\0')
            {
-            if      ((m = unitNameCmp(in+i+k, c->unit_database[j].nameFp,0))!=0) { p=1; k+=m; multiplier=pow(10,(l-8)*3); break; }
-            else if ((m = unitNameCmp(in+i+k, c->unit_database[j].nameFs,0))!=0) { p=1; k+=m; multiplier=pow(10,(l-8)*3); break; }
-            else if ((m = unitNameCmp(in+i+k, c->unit_database[j].alt1  ,0))!=0) { p=1; k+=m; multiplier=pow(10,(l-8)*3); break; }
-            else if ((m = unitNameCmp(in+i+k, c->unit_database[j].alt2  ,0))!=0) { p=1; k+=m; multiplier=pow(10,(l-8)*3); break; }
-            else if ((m = unitNameCmp(in+i+k, c->unit_database[j].alt3  ,0))!=0) { p=1; k+=m; multiplier=pow(10,(l-8)*3); break; }
-            else if ((m = unitNameCmp(in+i+k, c->unit_database[j].alt4  ,0))!=0) { p=1; k+=m; multiplier=pow(10,(l-8)*3); break; }
+            if      ((m = ppl_unitNameCmp(in+i+k, c->unit_database[j].nameFp,0))!=0) { p=1; k+=m; multiplier=pow(10,(l-8)*3); break; }
+            else if ((m = ppl_unitNameCmp(in+i+k, c->unit_database[j].nameFs,0))!=0) { p=1; k+=m; multiplier=pow(10,(l-8)*3); break; }
+            else if ((m = ppl_unitNameCmp(in+i+k, c->unit_database[j].alt1  ,0))!=0) { p=1; k+=m; multiplier=pow(10,(l-8)*3); break; }
+            else if ((m = ppl_unitNameCmp(in+i+k, c->unit_database[j].alt2  ,0))!=0) { p=1; k+=m; multiplier=pow(10,(l-8)*3); break; }
+            else if ((m = ppl_unitNameCmp(in+i+k, c->unit_database[j].alt3  ,0))!=0) { p=1; k+=m; multiplier=pow(10,(l-8)*3); break; }
+            else if ((m = ppl_unitNameCmp(in+i+k, c->unit_database[j].alt4  ,0))!=0) { p=1; k+=m; multiplier=pow(10,(l-8)*3); break; }
            }
           for (k=0; ((SIprefixes_abbrev[l][k]!='\0') && (SIprefixes_abbrev[l][k]==in[i+k])); k++);
           if (SIprefixes_abbrev[l][k]=='\0')
            {
-            if      ((m = unitNameCmp(in+i+k, c->unit_database[j].nameAp,1))!=0) { p=1; k+=m; multiplier=pow(10,(l-8)*3); break; }
-            else if ((m = unitNameCmp(in+i+k, c->unit_database[j].nameAs,1))!=0) { p=1; k+=m; multiplier=pow(10,(l-8)*3); break; }
+            if      ((m = ppl_unitNameCmp(in+i+k, c->unit_database[j].nameAp,1))!=0) { p=1; k+=m; multiplier=pow(10,(l-8)*3); break; }
+            else if ((m = ppl_unitNameCmp(in+i+k, c->unit_database[j].nameAs,1))!=0) { p=1; k+=m; multiplier=pow(10,(l-8)*3); break; }
            }
          }
        }
@@ -535,15 +535,15 @@ void ppl_newPreferredUnit(ppl_context *c, PreferredUnit **output, char *instr, i
     while ((instr[i]<=' ')&&(instr[i]!='\0')) i++;
     for (j=0; j<c->unit_pos; j++)
      {
-      if      ((k = unitNameCmp(instr+i, c->unit_database[j].nameAp,1))!=0) p=1;
-      else if ((k = unitNameCmp(instr+i, c->unit_database[j].nameAs,1))!=0) p=1;
-      else if ((k = unitNameCmp(instr+i, c->unit_database[j].nameFp,0))!=0) p=1;
-      else if ((k = unitNameCmp(instr+i, c->unit_database[j].nameFs,0))!=0) p=1;
-      else if ((k = unitNameCmp(instr+i, c->unit_database[j].nameFp,0))!=0) p=1;
-      else if ((k = unitNameCmp(instr+i, c->unit_database[j].alt1  ,0))!=0) p=1;
-      else if ((k = unitNameCmp(instr+i, c->unit_database[j].alt2  ,0))!=0) p=1;
-      else if ((k = unitNameCmp(instr+i, c->unit_database[j].alt3  ,0))!=0) p=1;
-      else if ((k = unitNameCmp(instr+i, c->unit_database[j].alt4  ,0))!=0) p=1;
+      if      ((k = ppl_unitNameCmp(instr+i, c->unit_database[j].nameAp,1))!=0) p=1;
+      else if ((k = ppl_unitNameCmp(instr+i, c->unit_database[j].nameAs,1))!=0) p=1;
+      else if ((k = ppl_unitNameCmp(instr+i, c->unit_database[j].nameFp,0))!=0) p=1;
+      else if ((k = ppl_unitNameCmp(instr+i, c->unit_database[j].nameFs,0))!=0) p=1;
+      else if ((k = ppl_unitNameCmp(instr+i, c->unit_database[j].nameFp,0))!=0) p=1;
+      else if ((k = ppl_unitNameCmp(instr+i, c->unit_database[j].alt1  ,0))!=0) p=1;
+      else if ((k = ppl_unitNameCmp(instr+i, c->unit_database[j].alt2  ,0))!=0) p=1;
+      else if ((k = ppl_unitNameCmp(instr+i, c->unit_database[j].alt3  ,0))!=0) p=1;
+      else if ((k = ppl_unitNameCmp(instr+i, c->unit_database[j].alt4  ,0))!=0) p=1;
       else
        {
         for (l=c->unit_database[j].minPrefix/3+8; l<=c->unit_database[j].maxPrefix/3+8; l++)
@@ -552,18 +552,18 @@ void ppl_newPreferredUnit(ppl_context *c, PreferredUnit **output, char *instr, i
           for (k=0; ((SIprefixes_full[l][k]!='\0') && (toupper(SIprefixes_full[l][k])==toupper(instr[i+k]))); k++);
           if (SIprefixes_full[l][k]=='\0')
            {
-            if      ((m = unitNameCmp(instr+i+k, c->unit_database[j].nameFp,0))!=0) { p=1; k+=m; PrefixOut=l; break; }
-            else if ((m = unitNameCmp(instr+i+k, c->unit_database[j].nameFs,0))!=0) { p=1; k+=m; PrefixOut=l; break; }
-            else if ((m = unitNameCmp(instr+i+k, c->unit_database[j].alt1  ,0))!=0) { p=1; k+=m; PrefixOut=l; break; }
-            else if ((m = unitNameCmp(instr+i+k, c->unit_database[j].alt2  ,0))!=0) { p=1; k+=m; PrefixOut=l; break; }
-            else if ((m = unitNameCmp(instr+i+k, c->unit_database[j].alt3  ,0))!=0) { p=1; k+=m; PrefixOut=l; break; }
-            else if ((m = unitNameCmp(instr+i+k, c->unit_database[j].alt4  ,0))!=0) { p=1; k+=m; PrefixOut=l; break; }
+            if      ((m = ppl_unitNameCmp(instr+i+k, c->unit_database[j].nameFp,0))!=0) { p=1; k+=m; PrefixOut=l; break; }
+            else if ((m = ppl_unitNameCmp(instr+i+k, c->unit_database[j].nameFs,0))!=0) { p=1; k+=m; PrefixOut=l; break; }
+            else if ((m = ppl_unitNameCmp(instr+i+k, c->unit_database[j].alt1  ,0))!=0) { p=1; k+=m; PrefixOut=l; break; }
+            else if ((m = ppl_unitNameCmp(instr+i+k, c->unit_database[j].alt2  ,0))!=0) { p=1; k+=m; PrefixOut=l; break; }
+            else if ((m = ppl_unitNameCmp(instr+i+k, c->unit_database[j].alt3  ,0))!=0) { p=1; k+=m; PrefixOut=l; break; }
+            else if ((m = ppl_unitNameCmp(instr+i+k, c->unit_database[j].alt4  ,0))!=0) { p=1; k+=m; PrefixOut=l; break; }
            }
           for (k=0; ((SIprefixes_abbrev[l][k]!='\0') && (SIprefixes_abbrev[l][k]==instr[i+k])); k++);
           if (SIprefixes_abbrev[l][k]=='\0')
            {
-            if      ((m = unitNameCmp(instr+i+k, c->unit_database[j].nameAp,1))!=0) { p=1; k+=m; PrefixOut=l; break; }
-            else if ((m = unitNameCmp(instr+i+k, c->unit_database[j].nameAs,1))!=0) { p=1; k+=m; PrefixOut=l; break; }
+            if      ((m = ppl_unitNameCmp(instr+i+k, c->unit_database[j].nameAp,1))!=0) { p=1; k+=m; PrefixOut=l; break; }
+            else if ((m = ppl_unitNameCmp(instr+i+k, c->unit_database[j].nameAs,1))!=0) { p=1; k+=m; PrefixOut=l; break; }
            }
          }
        }

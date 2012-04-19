@@ -470,7 +470,7 @@ void eps_plot_LinkUsingBackPropagate(EPSComm *x, double val, pplset_axis *target
   pplObjNum(VarVal,0,1,0);
   for (commlink.mode=0; commlink.mode<UNITS_MAX_BASEUNITS+1; commlink.mode++)
    {
-    if ((commlink.mode==UNIT_ANGLE+1)&&(x->c->set->term_current.UnitAngleDimless == SW_ONOFF_ON)) continue;
+    // if ((commlink.mode==UNIT_ANGLE+1)&&(x->c->set->term_current.UnitAngleDimless == SW_ONOFF_ON)) continue;
     eps_plot_LAUFitter(&commlink);
     if (commlink.fail) break;
    }

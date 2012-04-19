@@ -795,6 +795,131 @@ void directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int interac
    {
     sg->TextVAlign = c->set->graph_default.TextVAlign;
    }
+  else if (strcmp_set && (strcmp(setoption,"unit")==0)) /* set unit */
+   {
+    int got, got2, got3;
+    char *tempstr, *tempstr2, *tempstr3;
+
+    tempstr = (char *)command[PARSE_set_unit_angle].auxil;
+    got     =        (command[PARSE_set_unit_angle].objType == PPLOBJ_STR);
+    if (got) c->set->term_current.UnitAngleDimless    = ppl_fetchSettingByName(&c->errcontext, tempstr, SW_ONOFF_INT, SW_ONOFF_STR);
+
+    tempstr = (char *)command[PARSE_set_unit_prefix].auxil;
+    got     =        (command[PARSE_set_unit_prefix].objType == PPLOBJ_STR);
+    if (got) c->set->term_current.UnitDisplayPrefix   = ppl_fetchSettingByName(&c->errcontext, tempstr, SW_ONOFF_INT, SW_ONOFF_STR);
+
+    tempstr = (char *)command[PARSE_set_unit_scheme].auxil;
+    got     =        (command[PARSE_set_unit_scheme].objType == PPLOBJ_STR);
+    if (got) c->set->term_current.UnitScheme          = ppl_fetchSettingByName(&c->errcontext, tempstr, SW_UNITSCH_INT, SW_UNITSCH_STR);
+
+    tempstr2= (char *)command[PARSE_set_unit_preferred_unit].auxil;
+    got2    =        (command[PARSE_set_unit_preferred_unit].objType == PPLOBJ_STR);
+    tempstr3= (char *)command[PARSE_set_unit_unpreferred_unit].auxil;
+    got3    =        (command[PARSE_set_unit_unpreferred_unit].objType == PPLOBJ_STR);
+
+    if (got2 || got3)
+     {
+      int i;
+      char *buf = (char *)ppl_memAlloc(LSTR_LENGTH);
+      PreferredUnit *pu, *pui;
+      if (buf==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1, "Out of memory."); }
+      else
+       for (i=0; i<2; i++)
+        {
+         int errpos=-1;
+         listIterator *listiter;
+         if (i==0) { if (!got2) continue; tempstr=tempstr2; }
+         else      { if (!got3) continue; tempstr=tempstr3; }
+         ppl_newPreferredUnit(c, &pu, tempstr, 0, &errpos, buf);
+         if (errpos>=0) { ppl_error(&c->errcontext, ERR_NUMERIC,-1,-1,buf); continue; }
+
+         // Remove any preferred unit which is dimensionally equal to new preferred unit
+         listiter = ppl_listIterateInit(c->unit_PreferredUnits);
+         while (listiter != NULL)
+          {
+           pui = (PreferredUnit *)listiter->data;
+           ppl_listIterate(&listiter);
+           if (ppl_unitsDimEqual(&pui->value , &pu->value) && (pui->value.tempType == pu->value.tempType))
+             ppl_listRemove(c->unit_PreferredUnits, (void *)pui );
+          }
+
+         // Add new preferred unit
+         if (i==0) ppl_listAppendCpy(c->unit_PreferredUnits, (void *)pu, sizeof(PreferredUnit));
+        }
+     }
+
+    {
+     int pos = PARSE_set_unit_preferred_units;
+     while (command[pos].objType == PPLOBJ_NUM)
+      {
+       int i=0, j=0, k=0, l=0, m=0, multiplier;
+       int p=0;
+       int pp=0;
+       char *quantity, *unit;
+       pos = (int)round(command[pos].real);
+       if (pos<=0) break;
+       quantity = (char *)command[pos+PARSE_set_unit_quantity_preferred_units].auxil;
+       unit     = (char *)command[pos+PARSE_set_unit_unit_preferred_units].auxil;
+       for (j=0; j<c->unit_pos; j++)
+        {
+         if (i>1) i=1;
+         if ((c->unit_database[j].quantity != NULL) && (ppl_strCmpNoCase(c->unit_database[j].quantity, quantity) == 0))
+          {
+           i=2;
+           c->unit_database[j].userSel = 0;
+          }
+
+         if (pp!=0) continue;
+         multiplier = 8;
+         if      ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].nameAp,1))!=0) p=1;
+         else if ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].nameAs,1))!=0) p=1;
+         else if ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].nameFp,0))!=0) p=1;
+         else if ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].nameFs,0))!=0) p=1;
+         else if ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].nameFp,0))!=0) p=1;
+         else if ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].alt1  ,0))!=0) p=1;
+         else if ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].alt2  ,0))!=0) p=1;
+         else if ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].alt3  ,0))!=0) p=1;
+         else if ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].alt4  ,0))!=0) p=1;
+         else
+          {
+           for (l=c->unit_database[j].minPrefix/3+8; l<=c->unit_database[j].maxPrefix/3+8; l++)
+            {
+             if (l==8) continue;
+             for (k=0; ((SIprefixes_full[l][k]!='\0') && (toupper(SIprefixes_full[l][k])==toupper(tempstr2[k]))); k++);
+             if (SIprefixes_full[l][k]=='\0')
+              {
+               if      ((m = ppl_unitNameCmp(tempstr2+k, c->unit_database[j].nameFp,0))!=0) { p=1; k+=m; multiplier=l; break; }
+               else if ((m = ppl_unitNameCmp(tempstr2+k, c->unit_database[j].nameFs,0))!=0) { p=1; k+=m; multiplier=l; break; }
+               else if ((m = ppl_unitNameCmp(tempstr2+k, c->unit_database[j].alt1  ,0))!=0) { p=1; k+=m; multiplier=l; break; }
+               else if ((m = ppl_unitNameCmp(tempstr2+k, c->unit_database[j].alt2  ,0))!=0) { p=1; k+=m; multiplier=l; break; }
+               else if ((m = ppl_unitNameCmp(tempstr2+k, c->unit_database[j].alt3  ,0))!=0) { p=1; k+=m; multiplier=l; break; }
+               else if ((m = ppl_unitNameCmp(tempstr2+k, c->unit_database[j].alt4  ,0))!=0) { p=1; k+=m; multiplier=l; break; }
+              }
+             for (k=0; ((SIprefixes_abbrev[l][k]!='\0') && (SIprefixes_abbrev[l][k]==tempstr2[k])); k++);
+             if (SIprefixes_abbrev[l][k]=='\0')
+              {
+               if      ((m = ppl_unitNameCmp(tempstr2+k, c->unit_database[j].nameAp,1))!=0) { p=1; k+=m; multiplier=l; break; }
+               else if ((m = ppl_unitNameCmp(tempstr2+k, c->unit_database[j].nameAs,1))!=0) { p=1; k+=m; multiplier=l; break; }
+              }
+            }
+          }
+         if (p==0) continue;
+         if (i!=2)
+          {
+           if ((c->unit_database[j].quantity!=NULL) && (c->unit_database[j].quantity[0]!='\0'))
+            { sprintf(c->errcontext.tempErrStr, "'%s' is not a unit of '%s', but of '%s'.", unit, quantity, c->unit_database[j].quantity); ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); }
+           else
+            { sprintf(c->errcontext.tempErrStr, "'%s' is not a unit of '%s'.", unit, quantity); ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); }
+          }
+         c->unit_database[j].userSel = 1;
+         c->unit_database[j].userSelPrefix = multiplier;
+         pp=1;
+        }
+       if (i==0) { sprintf(c->errcontext.tempErrStr, "No such quantity as a '%s'.", quantity); ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); }
+       if (p==0) { sprintf(c->errcontext.tempErrStr, "No such unit as a '%s'.", unit); ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); }
+      }
+    }
+   }
   else
    {
     ppl_error(&c->errcontext, ERR_INTERNAL, -1, -1, "PyXPlot's set command could not find handler for this set command.");
