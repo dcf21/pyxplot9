@@ -711,7 +711,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
          }
 
         // Execute subroutine
-        ppl_parserExecute(context, (parserLine *)fn->functionPtr, 0, iterDepth+1);
+        ppl_parserExecute(context, (parserLine *)fn->functionPtr, NULL, 0, iterDepth+1);
 
         // Garbage subroutine's namespace
         ppl_garbageNamespace(d);

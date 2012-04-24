@@ -160,7 +160,7 @@ void directive_do(ppl_context *c, parserLine *pl, parserOutput *in, int interact
    {
     int lastOpAssign, dollarAllowed=1;
     pplObj *val;
-    ppl_parserExecute(c, plc, interactive, iterDepth+1);
+    ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
     if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"do loop"); goto cleanup; }
     while (c->stackPtr>stkLevelOld) { STACK_POP; }
     if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; continue; }
@@ -229,7 +229,7 @@ void directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int interac
       ppl_contextGetVarPointer(c, varname, &varObj, &vartmp);
       pplObjNum(varObj, varObj->amMalloced, iter, 0);
       ppl_unitsDimCpy(varObj, beginVal);
-      ppl_parserExecute(c, plc, interactive, iterDepth+1);
+      ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
       ppl_contextRestoreVarPointer(c, varname, &vartmp);
       if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"for loop"); goto cleanup; }
       while (c->stackPtr>stkLevelOld) { STACK_POP; }
@@ -260,7 +260,7 @@ void directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int interac
         while (c->stackPtr>stkLevelOld) { STACK_POP; }
         if (!criterion) break;
        }
-      ppl_parserExecute(c, plc, interactive, iterDepth+1);
+      ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
       if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"for loop"); goto cleanup; }
       while (c->stackPtr>stkLevelOld) { STACK_POP; }
       if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; continue; }
@@ -314,7 +314,7 @@ void directive_foreach(ppl_context *c, parserLine *pl, parserOutput *in, int int
         pplObj *varObj, vartmp;
         ppl_contextGetVarPointer(c, varname, &varObj, &vartmp);
         pplObjStr(varObj, varObj->amMalloced, 0, g.gl_pathv[j]);
-        ppl_parserExecute(c, plc, interactive, iterDepth+1);
+        ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
         ppl_contextRestoreVarPointer(c, varname, &vartmp);
         if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"foreach loop"); }
         while (c->stackPtr>stkLevelOld) { STACK_POP; }
@@ -335,7 +335,7 @@ void directive_foreach(ppl_context *c, parserLine *pl, parserOutput *in, int int
       ppl_contextGetVarPointer(c, varname, &varObj, &vartmp);
       pplObjNum(varObj, varObj->amMalloced, gsl_vector_get(vin, i), 0);
       ppl_unitsDimCpy(varObj, iter);
-      ppl_parserExecute(c, plc, interactive, iterDepth+1);
+      ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
       ppl_contextRestoreVarPointer(c, varname, &vartmp);
       if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"foreach loop"); }
       while (c->stackPtr>stkLevelOld) { STACK_POP; }
@@ -353,7 +353,7 @@ void directive_foreach(ppl_context *c, parserLine *pl, parserOutput *in, int int
       pplObj *varObj, vartmp;
       ppl_contextGetVarPointer(c, varname, &varObj, &vartmp);
       pplObjCpy(varObj, obj, 0, varObj->amMalloced, 1);
-      ppl_parserExecute(c, plc, interactive, iterDepth+1);
+      ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
       ppl_contextRestoreVarPointer(c, varname, &vartmp);
       if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"foreach loop"); }
       while (c->stackPtr>stkLevelOld) { STACK_POP; }
@@ -401,7 +401,7 @@ void directive_if(ppl_context *c, parserLine *pl, parserOutput *in, int interact
   while (c->stackPtr>stkLevelOld) { STACK_POP; }
   if (criterion)
    {
-    ppl_parserExecute(c, pl_if, interactive, iterDepth+1);
+    ppl_parserExecute(c, pl_if, NULL, interactive, iterDepth+1);
     if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"if statement"); return; }
     while (c->stackPtr>stkLevelOld) { STACK_POP; }
     return;
@@ -425,7 +425,7 @@ void directive_if(ppl_context *c, parserLine *pl, parserOutput *in, int interact
     while (c->stackPtr>stkLevelOld) { STACK_POP; }
     if (criterion)
      {
-      ppl_parserExecute(c, pl_elif, interactive, iterDepth+1);
+      ppl_parserExecute(c, pl_elif, NULL, interactive, iterDepth+1);
       if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"if statement"); return; }
       while (c->stackPtr>stkLevelOld) { STACK_POP; }
       return;
@@ -435,7 +435,7 @@ void directive_if(ppl_context *c, parserLine *pl, parserOutput *in, int interact
   // else
   if (gotelse)
    {
-    ppl_parserExecute(c, pl_else, interactive, iterDepth+1);
+    ppl_parserExecute(c, pl_else, NULL, interactive, iterDepth+1);
     if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"if statement"); return; }
     while (c->stackPtr>stkLevelOld) { STACK_POP; }
     return;
@@ -553,7 +553,7 @@ void directive_while(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     criterion = (val->real != 0);
     while (c->stackPtr>stkLevelOld) { STACK_POP; }
     if (!criterion) break;
-    ppl_parserExecute(c, plc, interactive, iterDepth+1);
+    ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
     if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"while loop"); goto cleanup; }
     while (c->stackPtr>stkLevelOld) { STACK_POP; }
     if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; continue; }
@@ -586,7 +586,7 @@ void directive_with(ppl_context *c, parserLine *pl, parserOutput *in, int intera
   d->refCount++;
   c->namespaces[++c->ns_ptr] = d;
 
-  ppl_parserExecute(c, pl2, interactive, iterDepth+1);
+  ppl_parserExecute(c, pl2, NULL, interactive, iterDepth+1);
 
   // Leave namespace
   if ((--d->refCount)<1) ppl_dictFree(d);

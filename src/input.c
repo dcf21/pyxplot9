@@ -298,7 +298,7 @@ int ppl_ProcessStatement(ppl_context *context, parserStatus *ps, char *line, int
 
   if ( (!stat) && (!context->errStat.status) && (ps->blockDepth==0) )
    {
-    ppl_parserExecute(context, *ps->rootpl, interactive, iterDepth);
+    ppl_parserExecute(context, *ps->rootpl, NULL, interactive, iterDepth);
    }
 
   if (stat || context->errStat.status)

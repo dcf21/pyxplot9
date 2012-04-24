@@ -91,9 +91,13 @@ void ppl_error(pplerr_context *context, int ErrType, int HighlightPos1, int High
 
   for (j=0; msg[j]!='\0'; j++)
    {
-    if (ApplyHighlighting && ((j==HighlightPos1-1) || (j==HighlightPos2-1))) { if (reverse==0) { snprintf(temp_stringB+i, BLEN-i, "\x1b[7m"); i+=strlen(temp_stringB+i); } reverse=3; }
-    else if (ApplyHighlighting && (reverse==1)) { snprintf(temp_stringB+i, BLEN-i, "\x1b[27m"); i+=strlen(temp_stringB+i); reverse=0; }
-    else if (ApplyHighlighting && (reverse> 1)) reverse--;
+    if (ApplyHighlighting)
+     {
+      if      (j==HighlightPos1-1) { if (reverse==0) { snprintf(temp_stringB+i, BLEN-i, "\x1b[7m"); i+=strlen(temp_stringB+i); } reverse=3; HighlightPos1=-1; }
+      else if (j==HighlightPos2-1) { if (reverse==0) { snprintf(temp_stringB+i, BLEN-i, "\x1b[7m"); i+=strlen(temp_stringB+i); } reverse=3; HighlightPos2=-1; }
+      else if (reverse==1) { snprintf(temp_stringB+i, BLEN-i, "\x1b[27m"); i+=strlen(temp_stringB+i); reverse=0; }
+      else if (reverse> 1) reverse--;
+     }
     if (i<BLEN)
      {
       if ((msg[j]=='\n') && (reverse>0)) { temp_stringB[i++] = ' '; j--; } // If newline is highlighted, add spaces to end of line so that we can highlight them

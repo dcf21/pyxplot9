@@ -1,4 +1,4 @@
-// texify.h
+// readConf.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,13 +19,12 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _TEXIFY_H
-#define _TEXIFY_H 1
+#ifndef _READCONF_H
+#define _READCONF_H 1
 
 #include "userspace/context.h"
 
-void ppl_texify_string(char *in, char *out, int outlen);
-void ppl_texify_generic(ppl_context *c, char *in, int *end, char *out, int outlen);
+void ppl_readconfig(ppl_context *c);
 
 #endif
 

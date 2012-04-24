@@ -43,7 +43,6 @@ void ppl_makeDefaultUnits(ppl_context *context)
   int   i=0,j=0;
   int   unit_pos = 0;
   unit *unit_database;
-  list *unit_PreferredUnits;
 
   context->unit_database = (unit *)malloc(UNITS_MAX*sizeof(unit));
   if (context->unit_database == NULL) { ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Out of memory error whilst trying to malloc units database."); exit(1); }
@@ -51,7 +50,8 @@ void ppl_makeDefaultUnits(ppl_context *context)
 
   context->unit_PreferredUnits = ppl_listInit(1);
   if (context->unit_PreferredUnits == NULL) { ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Out of memory error whilst trying to malloc units database."); exit(1); }
-  unit_PreferredUnits = context->unit_PreferredUnits;
+  context->unit_PreferredUnits_default = ppl_listInit(1);
+  if (context->unit_PreferredUnits_default == NULL) { ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Out of memory error whilst trying to malloc units database."); exit(1); }
 
   context->unit_pos     = 0;
   context->baseunit_pos = UNIT_FIRSTUSER;

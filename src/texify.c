@@ -42,7 +42,7 @@ static char *LatexVarNamesFr[] = {"alpha"  ,"beta"   ,"gamma"  ,"delta"  ,"epsil
 
 static char *LatexVarNamesTo[] = {"\\alpha","\\beta","\\gamma","\\delta","\\epsilon","\\zeta","\\eta","\\theta","\\iota","\\kappa","\\lambda","\\mu","\\nu","\\xi","\\pi","\\rho","\\sigma","\\tau","\\upsilon","\\phi","\\chi","\\psi","\\omega","\\Gamma","\\Delta","\\Theta","\\Lambda","\\Xi","\\Pi","\\Sigma","\\Upsilon","\\Phi","\\Psi","\\Omega","\\aleph",NULL};
 
-void texify_MakeGreek(const char *in, char *out)
+void ppl_texify_MakeGreek(const char *in, char *out)
  {
   int i,ji=0,jg,k,l,m;
   char *outno_=out;
@@ -106,7 +106,34 @@ void texify_MakeGreek(const char *in, char *out)
   return;
  }
 
-void texify_generic(ppl_context *c, char *in, int *end, char *out, int outlen)
+void ppl_texify_string(char *in, char *out, int outlen)
+ {
+  int i,j,DoubleQuoteLevel=0,QuoteLevel=0;
+
+  for (i=j=0; in[i]!='\0'; i++)
+   {
+    if (j>outlen-16) { strcpy(out+j, "..."); j+=strlen(out+j); break; }
+    if      (in[i]=='\\') { strcpy(out+j, "$\\backslash$"); j+=strlen(out+j); }
+    else if (in[i]=='_' ) { out[j++]='\\'; out[j++]=in[i]; }
+    else if (in[i]=='&' ) { out[j++]='\\'; out[j++]=in[i]; }
+    else if (in[i]=='%' ) { out[j++]='\\'; out[j++]=in[i]; }
+    else if (in[i]=='$' ) { out[j++]='\\'; out[j++]=in[i]; }
+    else if (in[i]=='{' ) { out[j++]='\\'; out[j++]=in[i]; }
+    else if (in[i]=='}' ) { out[j++]='\\'; out[j++]=in[i]; }
+    else if (in[i]=='#' ) { out[j++]='\\'; out[j++]=in[i]; }
+    else if (in[i]=='^' ) { strcpy(out+j, "\\verb|^|"); j+=strlen(out+j); }
+    else if (in[i]=='~' ) { strcpy(out+j, "$\\sim$"); j+=strlen(out+j); }
+    else if (in[i]=='<' ) { strcpy(out+j, "$<$"); j+=strlen(out+j); }
+    else if (in[i]=='>' ) { strcpy(out+j, "$>$"); j+=strlen(out+j); }
+    else if ((in[i]=='\"')&&((i==0)||(in[i-1]!='\\'))) { out[j++]=DoubleQuoteLevel?'\'':'`'; out[j++]=DoubleQuoteLevel?'\'':'`'; DoubleQuoteLevel=!DoubleQuoteLevel; }
+    else if ((in[i]=='\'')&&((i==0)||(in[i-1]!='\\'))) { out[j++]=QuoteLevel?'\'':'`'; QuoteLevel=!QuoteLevel; }
+    else                  { out[j++]=in[i]; }
+   }
+  out[j++]='\0';
+  return;
+ }
+
+void ppl_texify_generic(ppl_context *c, char *in, int *end, char *out, int outlen)
  {
   const int  allowCommaOperator = 1;
   const int  equalsAllowed      = 1;

@@ -68,6 +68,18 @@ int ppl_listLen(list *in)
 
 #define alloc(X) ( in->useMalloc ? malloc(X) : ppl_memAlloc_incontext(X, in->memory_context) )
 
+list *ppl_listCpy(list *in, int useMalloc, int itemSize)
+ {
+  listItem *i;
+  list     *out;
+  if (in==NULL) return NULL;
+  out = ppl_listInit(useMalloc);
+  if (out==NULL) return NULL;
+  i = in->first;
+  while (i!=NULL) { ppl_listAppendCpy(in, i->data, itemSize); i=i->next; }
+  return out;
+ }
+
 int ppl_listAppend(list *in, void *item)
  {
   listItem *ptrnew;

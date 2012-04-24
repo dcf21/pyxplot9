@@ -77,6 +77,7 @@ void pplfunc_ellE        (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_ellP        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_erf         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_erfc        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_eval        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_exp         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_expm1       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_expint      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
@@ -85,6 +86,7 @@ void pplfunc_finite      (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_floor       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_gamma       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_globals     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_gray        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_heaviside   (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_hsb         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_hyperg_0F1  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
@@ -134,6 +136,7 @@ void pplfunc_sum         (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_tan         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_tanh        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_texify      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_texifyText  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_tophat      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_typeOf      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_zernike     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);

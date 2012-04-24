@@ -38,6 +38,7 @@
 #include "stringTools/asciidouble.h"
 #include "stringTools/strConstants.h"
 
+#include "parser/cmdList.h"
 #include "parser/parser.h"
 
 #include "userspace/context.h"
@@ -101,7 +102,7 @@ void ppl_parserOutFree(parserOutput *in)
     } \
    } \
 
-void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iterDepth)
+void ppl_parserExecute(ppl_context *c, parserLine *in, char *dirName, int interactive, int iterDepth)
  {
   int           i;
   parserOutput *out  = NULL;
@@ -131,7 +132,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, int interactive, int iter
       if (ps==NULL) { strcpy(eB,"Out of memory."); TBADD(ERR_MEMORY,0); return; }
       stat = ppl_parserCompile(c, ps, in->srcLineN, in->srcId, in->srcFname, in->linetxt, 1, iterDepth+1);
       if (stat || c->errStat.status) break;
-      ppl_parserExecute(c, pl, interactive, iterDepth+1);
+      ppl_parserExecute(c, pl, dirName, interactive, iterDepth+1);
       ppl_parserStatFree(&ps);
       in = in->next;
       continue;
@@ -330,7 +331,16 @@ gotTypeCexpression:
     // If no error, pass command to shell
     if (!c->errStat.status)
      {
-      ppl_parserShell(c, in, out, interactive, iterDepth);
+      char *cmd = (char *)stk[PARSE_arc_directive].auxil;
+      if ((dirName != NULL) && (strcmp(dirName, cmd)!=0) && ((strcmp(dirName,"set")!=0)||(strcmp(cmd,"set_error")!=0)))
+       {
+        sprintf(eB,"Command of type '%s' is not allowed in this section of a configuration file.", cmd); TBADD(ERR_SYNTAX,0);
+       }
+      else if ((dirName != NULL) && (stk[PARSE_arc_editno].objType==PPLOBJ_NUM))
+       {
+        sprintf(eB,"Settings may not be edited for canvas items within a configuration file."); TBADD(ERR_SYNTAX,0);
+       }
+      else { ppl_parserShell(c, in, out, interactive, iterDepth); }
      }
 
     // Free output stack

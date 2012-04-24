@@ -49,6 +49,8 @@
 #include "settings/settings.h"
 #include "stringTools/asciidouble.h"
 
+#include "expressions/expCompile_fns.h"
+#include "expressions/expEval.h"
 #include "expressions/expEvalOps.h"
 #include "userspace/garbageCollector.h"
 #include "userspace/pplObj_fns.h"
@@ -565,6 +567,36 @@ void pplfunc_erfc        (ppl_context *c, pplObj *in, int nArgs, int *status, in
   CHECK_OUTPUT_OKAY;
  }
 
+void pplfunc_eval        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  const int stkLevelOld = c->stackPtr;
+  int       explen=-1, errPos=-1, lastOpAssign;
+  char     *exp;
+  pplExpr  *e;
+  pplObj   *output;
+  if (in[0].objType!=PPLOBJ_STR) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The eval() function requires a string argument."); return; }
+  exp = (char *)in[0].auxil;
+  explen = strlen(exp);
+  ppl_error_setstreaminfo(&c->errcontext, 1, "evaluated expression");
+  ppl_expCompile(c,c->errcontext.error_input_linenumber,c->errcontext.error_input_sourceId,c->errcontext.error_input_filename,exp,&explen,1,1,1,&e,&errPos,errType,errText);
+  if (errPos>=0) { pplExpr_free(e); *status=1; return; }
+  if (explen<strlen(exp)) { strcpy(errText, "Unexpected trailing matter at the end of expression."); *status=1; *errType=ERR_SYNTAX; pplExpr_free(e); return; }
+  output = ppl_expEval(c, e, &lastOpAssign, 1, 1);
+  pplExpr_free(e);
+  if (c->errStat.status) { *status=1; *errType=ERR_GENERAL; strcpy(errText, "Error in evaluated expression"); return; }
+  pplObjCpy(&OUTPUT,output,0,0,1);
+  while (c->stackPtr>stkLevelOld)
+   {
+    c->stackPtr--;
+    if (c->stack[c->stackPtr].objType!=PPLOBJ_NUM) // optimisation: Don't waste time garbage collecting numbers
+     {
+      ppl_garbageObject(&c->stack[c->stackPtr]);
+      if (c->stack[c->stackPtr].refCount != 0) { ppl_error(&c->errcontext,ERR_INTERNAL,-1,-1,"Stack forward reference detected."); }
+     }
+   }
+  return;
+ }
+
 void pplfunc_exp         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "exp(z)";
@@ -632,6 +664,11 @@ void pplfunc_gamma       (ppl_context *c, pplObj *in, int nArgs, int *status, in
   char *FunctionDescription = "gamma(x)";
   OUTPUT.real = gsl_sf_gamma(in[0].real);
   CHECK_OUTPUT_OKAY;
+ }
+
+void pplfunc_gray        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObjColor(&OUTPUT,0,SW_COLSPACE_RGB,in[0].real,in[0].real,in[0].real,0);
  }
 
 void pplfunc_heaviside   (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -1382,9 +1419,23 @@ void pplfunc_texify      (ppl_context *c, pplObj *in, int nArgs, int *status, in
   if (in[0].objType!=PPLOBJ_STR) { sprintf(errText,"The %s requires a single string argument; supplied argument had type <%s>.",FunctionDescription,pplObjTypeNames[in[0].objType]); *errType=ERR_TYPE; *status=1; return; }
   outstr = (char *)malloc(LSTR_LENGTH);
   if (outstr==NULL) { sprintf(errText,"Out of memory."); *errType=ERR_MEMORY; *status=1; return; }
-  texify_generic(c, instr, &inlen, outstr, LSTR_LENGTH);
+  ppl_texify_generic(c, instr, &inlen, outstr, LSTR_LENGTH);
   pplObjStr(&OUTPUT,0,1,outstr);
   if (inlen < strlen(instr)) { sprintf(errText,"Unexpected trailing matter at the end of texified expression (character position %d).",inlen); *errType=ERR_SYNTAX; *status=1; return; }
+  return;
+ }
+
+void pplfunc_texifyText  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *FunctionDescription = "texifyText(s)";
+  char *instr = (char*)in[0].auxil;
+  char *outstr;
+  if (nArgs != 1) { sprintf(errText,"The %s function takes exactly one argument; %d supplied.",FunctionDescription,nArgs); *errType=ERR_TYPE; *status=1; return; }
+  if (in[0].objType!=PPLOBJ_STR) { sprintf(errText,"The %s requires a single string argument; supplied argument had type <%s>.",FunctionDescription,pplObjTypeNames[in[0].objType]); *errType=ERR_TYPE; *status=1; return; }
+  outstr = (char *)malloc(LSTR_LENGTH);
+  if (outstr==NULL) { sprintf(errText,"Out of memory."); *errType=ERR_MEMORY; *status=1; return; }
+  ppl_texify_string(instr, outstr, LSTR_LENGTH);
+  pplObjStr(&OUTPUT,0,1,outstr);
   return;
  }
 

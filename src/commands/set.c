@@ -920,6 +920,29 @@ void directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int interac
       }
     }
    }
+  else if (strcmp_unset && (strcmp(setoption,"unit")==0)) /* unset unit */
+   {
+    c->set->term_current.UnitAngleDimless    = c->set->term_default.UnitAngleDimless;
+    c->set->term_current.UnitDisplayAbbrev   = c->set->term_default.UnitDisplayAbbrev;
+    c->set->term_current.UnitDisplayPrefix   = c->set->term_default.UnitDisplayPrefix;
+    c->set->term_current.UnitScheme          = c->set->term_default.UnitScheme;
+    for (i=0; i<c->unit_pos; i++) c->unit_database[i].userSel = 0;
+    ppl_listFree(c->unit_PreferredUnits);
+    c->unit_PreferredUnits = ppl_listCpy(c->unit_PreferredUnits_default, 1, sizeof(PreferredUnit));
+   }
+  else if (strcmp_unset && (strcmp(setoption,"unit_angle")==0)) /* unset unit angle */
+   {
+    c->set->term_current.UnitAngleDimless    = c->set->term_default.UnitAngleDimless;
+   }
+  else if (strcmp_unset && (strcmp(setoption,"unit_display")==0)) /* unset unit display */
+   {
+    c->set->term_current.UnitDisplayAbbrev   = c->set->term_default.UnitDisplayAbbrev;
+    c->set->term_current.UnitDisplayPrefix   = c->set->term_default.UnitDisplayPrefix;
+   }
+  else if (strcmp_unset && (strcmp(setoption,"unit_scheme")==0)) /* unset unit scheme */
+   {
+    c->set->term_current.UnitScheme          = c->set->term_default.UnitScheme;
+   }
   else
    {
     ppl_error(&c->errcontext, ERR_INTERNAL, -1, -1, "PyXPlot's set command could not find handler for this set command.");

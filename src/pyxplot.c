@@ -61,6 +61,7 @@
 #include "userspace/pplObj_fns.h"
 
 #include "pyxplot.h"
+#include "readConf.h"
 
 // SIGINT Handling information
 
@@ -111,6 +112,12 @@ int main(int argc, char **argv)
   if      (strcmp(GHOSTVIEW_COMMAND, "/bin/false")!=0) context->set->term_current.viewer = context->set->term_default.viewer = SW_VIEWER_GV;
   else if (strcmp(GGV_COMMAND      , "/bin/false")!=0) context->set->term_current.viewer = context->set->term_default.viewer = SW_VIEWER_GGV;
   else                                                 context->set->term_current.viewer = context->set->term_default.viewer = SW_VIEWER_NULL;
+
+  // Initialise settings and read configuration file; do this BEFORE processing command line arguments which take precedence
+  if (DEBUG) ppl_log(&context->errcontext,"Reading configuration file.");
+  ppl_readconfig(context);
+
+  // Revert default terminal to postscript if we can't access display
   if ( (context->termtypeSetInConfigfile == 0) && ((context->willBeInteractive==0) ||
                                                 (EnvDisplay==NULL) ||
                                                 (EnvDisplay[0]=='\0') ||

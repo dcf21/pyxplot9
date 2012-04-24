@@ -138,7 +138,7 @@ void ppl_tbWrite(ppl_context *c)
     const int lp  = c->errStat.errPosCmd;
     const int lp2 = c->errStat.errPosExpr;
     traceback *t = &c->errStat.tbLevel[0];
-    if (t->sourceId == c->errStat.sourceIdCmd)
+    if ((t->sourceId == c->errStat.sourceIdCmd) && (lp>=0))
      {
       snprintf(out+i, outLen-i, "%s\n", c->errStat.errMsgCmd); i+=strlen(out+i);
       for (k=0;((k<lp)&&(i<outLen));k++,i++) out[i]=' ';
@@ -149,7 +149,7 @@ void ppl_tbWrite(ppl_context *c)
      }
     h2 = i + 1 + lp2;
     snprintf(out+i, outLen-i, " %s\n", t->linetext); i+=strlen(out+i);
-    if (t->sourceId == c->errStat.sourceIdExpr)
+    if ((t->sourceId == c->errStat.sourceIdExpr) && (lp2>=0))
      {
       for (k=0;((k<lp2)&&(i<outLen));k++,i++) out[i]=' ';
       snprintf(out+i, outLen-i, "/|\\\n"); i+=strlen(out+i);

@@ -315,6 +315,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"ellP"          ,2,2,1,1,1,1,(void *)&pplfunc_ellP        , "ellipticintP(k,n)", "\\mathrm{ellipticintP}@<@1,@2@>", "ellipticintP(k,n) evaluates the complete elliptic integral P(k,n)");
     ppl_addSystemFunc(d,"erf"           ,1,1,1,1,1,1,(void *)&pplfunc_erf         , "erf(x)", "\\mathrm{erf}@<@1@>", "erf(x) evaluates the error function at x");
     ppl_addSystemFunc(d,"erfc"          ,1,1,1,1,1,1,(void *)&pplfunc_erfc        , "erfc(x)", "\\mathrm{erfc}@<@1@>", "erfc(x) evaluates the complimentary error function at x");
+    ppl_addSystemFunc(d,"eval"          ,1,1,0,0,0,0,(void *)&pplfunc_eval        , "eval(s)", "\\mathrm{eval}@<@0@>", "eval(s) evaluates the string expression s and returns the result");
     ppl_addSystemFunc(d,"exp"           ,1,1,1,1,0,0,(void *)&pplfunc_exp         , "exp(z)", "\\mathrm{exp}@<@1@>", "exp(x) returns e to the power of x. x may either be a dimensionless number or may have units of angle");
     ppl_addSystemFunc(d,"expm1"         ,1,1,1,1,0,0,(void *)&pplfunc_expm1       , "expm1(x)", "\\mathrm{expm1}@<@1@>", "expm1(x) accurately evaluates exp(x)-1");
     ppl_addSystemFunc(d,"expint"        ,2,2,1,1,1,1,(void *)&pplfunc_expint      , "expint(n,x)", "\\mathrm{expint}@<@1,@2@>", "expint(n,x) evaluates the integral of exp(-xt)/t**n between one and infinity");
@@ -323,6 +324,8 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"floor"         ,1,1,1,1,1,1,(void *)&pplfunc_floor       , "floor(x)", "\\mathrm{floor}@<@1@>", "floor(x) returns the largest integer value smaller than or equal to x");
     ppl_addSystemFunc(d,"gamma"         ,1,1,1,1,1,1,(void *)&pplfunc_gamma       , "gamma(x)", "\\mathrm{\\Gamma}@<@1@>", "gamma(x) evaluates the gamma function at x");
     ppl_addSystemFunc(d,"globals"       ,0,0,1,1,1,1,(void *)&pplfunc_globals     , "globals()", "\\mathrm{globals}@<@>", "globals() returns a dictionary of all currently-defined global variables");
+    ppl_addSystemFunc(d,"gray"          ,1,1,1,1,1,1,(void *)&pplfunc_gray        , "gray(x)", "\\mathrm{gray}@<@1@>", "gray(x) returns a shade of gray with brightness x in the range 0-1");
+    ppl_addSystemFunc(d,"grey"          ,1,1,1,1,1,1,(void *)&pplfunc_gray        , "grey(x)", "\\mathrm{grey}@<@1@>", "grey(x) returns a shade of grey with brightness x in the range 0-1");
     ppl_addSystemFunc(d,"heaviside"     ,1,1,1,1,1,0,(void *)&pplfunc_heaviside   , "heaviside(x)", "\\mathrm{heaviside}@<@1@>", "heaviside(x) returns the Heaviside function, defined to be one for x>=0 and zero otherwise");
     ppl_addSystemFunc(d,"hsb"           ,3,3,1,1,1,1,(void *)&pplfunc_hsb         , "hsb(h,s,b)", "\\mathrm{hsb}@<@1,@2,@3@>", "hsb(h,s,b) returns a colour with specified hue, saturation and brightness in the range 0-1");
     ppl_addSystemFunc(d,"hyperg_0F1"    ,2,2,1,1,1,1,(void *)&pplfunc_hyperg_0F1  , "hyperg_0F1(c,x)", "\\mathrm{hyperg\\_}_0\\mathrm{F}_1}@<@1,@2@>", "hyperg_0F1(c,x) evaluates the hypergeometric function 0F1(c,x)");
@@ -373,7 +376,8 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"sum"           ,0,1e9,0,0,0,0,(void *)&pplfunc_sum       , "sum(...)", "\\mathrm{sum}@<@0@>", "sum(...) returns the sum of its arguments");
     ppl_addSystemFunc(d,"tan"           ,1,1,1,1,0,0,(void *)&pplfunc_tan         , "tan(z)", "\\mathrm{tan}@<@1@>", "tan(x) returns the tangent of x. If x is dimensionless, it is assumed to be measured in radians");
     ppl_addSystemFunc(d,"tanh"          ,1,1,1,1,0,0,(void *)&pplfunc_tanh        , "tanh(z)", "\\mathrm{tanh}@<@1@>", "tanh(x) returns the hyperbolic tangent of x. x may either be a dimensionless number or may have units of angle");
-    ppl_addSystemFunc(d,"texify"        ,1,1,0,0,0,0,(void *)&pplfunc_texify      , "texify(e)", "\\mathrm{texify}@<@0@>", "texify(str) converts an algebraic expression into a LaTeX command string representation");
+    ppl_addSystemFunc(d,"texify"        ,1,1,0,0,0,0,(void *)&pplfunc_texify      , "texify(e)", "\\mathrm{texify}@<@0@>", "texify(str) converts an algebraic expression into a LaTeX representation");
+    ppl_addSystemFunc(d,"texifyText"    ,1,1,0,0,0,0,(void *)&pplfunc_texifyText  , "texifyText(s)", "\\mathrm{texifyText}@<@0@>", "texifyText(str) converts a text string into a LaTeX representation");
     ppl_addSystemFunc(d,"tophat"        ,2,2,1,1,1,0,(void *)&pplfunc_tophat      , "tophat(x,sigma)", "\\mathrm{tophat}@<@1,@2@>", "tophat(x,sigma) returns one if |x| <= |sigma|, and zero otherwise");
     ppl_addSystemFunc(d,"typeOf"        ,1,1,0,0,0,0,(void *)&pplfunc_typeOf      , "typeOf(x)", "\\mathrm{typeOf}@<@1@>", "typeof(x) returns the type of the object x");
     ppl_addMagicFunction(d, "unit", 1, "unit(...)", "\\mathrm{unit}@<@0@>", "unit(...) multiplies a number by a physical unit");
