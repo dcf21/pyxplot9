@@ -224,7 +224,7 @@ static void multiMinIterate(MMComm *commlink, parserLine *pl)
   ppl_context                        *c = commlink->context;
   size_t                              iter = 0,iter2 = 0;
   int                                 i, Nparams, status=0;
-  double                              size=0,sizelast=0,sizelast2=0,testval;
+  double                              size=0,sizelast=0,sizelast2=0;
   const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex; // We don't use nmsimplex2 here because it was new in gsl 1.12
   gsl_multimin_fminimizer            *s;
   gsl_vector                         *x, *ss;
@@ -271,7 +271,7 @@ static void multiMinIterate(MMComm *commlink, parserLine *pl)
     gsl_multimin_fminimizer_set (s, &fn, x, ss);
 
     // If initial value we are giving the minimiser produces an algebraic error, it's not worth continuing
-    testval = MultiMinSlave(x,(void *)commlink);
+    MultiMinSlave(x,(void *)commlink);
     if (c->errStat.status) return;
     if (commlink->warnPos>=0)
      {

@@ -746,7 +746,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
 
   else if ((style == SW_STYLE_BOXES) || (style == SW_STYLE_WBOXES) || (style == SW_STYLE_STEPS) || (style == SW_STYLE_FSTEPS) || (style == SW_STYLE_HISTEPS)) // BOXES, WBOXES, STEPS, FSTEPS, HISTEPS
    {
-    double ptAx, ptAy, ptBx=0, ptBy=0, ptCx=0, ptCy=0;
+    double ptAx, ptBx=0, ptBy=0, ptCx=0, ptCy=0;
     unsigned char ptAset=0, ptBset=0, ptCset=0;
 
     ld = LineDraw_Init(x, a[xn], a[yn], a[zn], xrn, yrn, zrn, sg, ThreeDim, origin_x, origin_y, scale_x, scale_y, scale_z);
@@ -837,7 +837,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
         for (j=0; j<blk->BlockPosition; j++)
          {
           if (blk->split[j]) { FINISH_ROW_OF_BOXES; }
-          ptAx=ptBx; ptAy=ptBy; ptAset=ptBset;
+          ptAx=ptBx;            ptAset=ptBset;
           ptBx=ptCx; ptBy=ptCy; ptBset=ptCset;
           ptCx=logaxis?log(UUR(0)):(UUR(0)); ptCy=UUR(1); ptCset=1;
           if (ptBset)

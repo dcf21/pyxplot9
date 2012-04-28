@@ -70,7 +70,7 @@
 void directive_assert(ppl_context *c, parserLine *pl, parserOutput *in)
  {
   pplObj *stk = in->stk;
-  int     lt, gtreq;
+  int     lt;
   char   *txt, *version;
   pplObj *val;
 
@@ -78,7 +78,6 @@ void directive_assert(ppl_context *c, parserLine *pl, parserOutput *in)
   version = (stk[PARSE_assert_version].objType==PPLOBJ_STR) ? (char *)stk[PARSE_assert_version].auxil : NULL;
   val     = &stk[PARSE_assert_expr];
   lt      = (stk[PARSE_assert_lt     ].objType==PPLOBJ_STR);
-  gtreq   = (stk[PARSE_assert_gtreq  ].objType==PPLOBJ_STR);
 
   if (val->objType != PPLOBJ_ZOM)
    {

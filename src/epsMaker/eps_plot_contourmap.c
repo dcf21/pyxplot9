@@ -762,7 +762,7 @@ GOT_CONTOURS:
           double xlab0= (clist[cn].posdata[2*((i  )%n)+0] + clist[cn].posdata[2*((i+1)%n)+0] )/2;
           double ylab0= (clist[cn].posdata[2*((i  )%n)+1] + clist[cn].posdata[2*((i+1)%n)+1] )/2;
           double xlab, ylab, wlab, hlab;
-          double bb_left,bb_right,bb_top,bb_bottom,ab_left,ab_right,ab_top,ab_bottom;
+          double bb_top,bb_bottom,ab_left,ab_right;
           postscriptPage *dviPage;
   
           xlab = xo + Lx*xlab0/(XSize-1)*sin(ThetaX) + Ly*ylab0/(YSize-1)*sin(ThetaY);
@@ -770,14 +770,14 @@ GOT_CONTOURS:
           if (x->dvi == NULL) { continue; }
           dviPage = (postscriptPage *)ppl_listGetItem(x->dvi->output->pages, page+1);
           if (dviPage== NULL) { continue; }
-          bb_left   = dviPage->boundingBox[0];
+          //bb_left   = dviPage->boundingBox[0];
           bb_bottom = dviPage->boundingBox[1];
-          bb_right  = dviPage->boundingBox[2];
+          //bb_right  = dviPage->boundingBox[2];
           bb_top    = dviPage->boundingBox[3];
           ab_left   = dviPage->textSizeBox[0];
-          ab_bottom = dviPage->textSizeBox[1];
+          //ab_bottom = dviPage->textSizeBox[1];
           ab_right  = dviPage->textSizeBox[2];
-          ab_top    = dviPage->textSizeBox[3];
+          //ab_top    = dviPage->textSizeBox[3];
           hlab      = (fabs(bb_top - bb_bottom) + 2) * x->current->settings.FontSize;
           wlab      = (fabs(ab_right - ab_left) + 2) * x->current->settings.FontSize;
 

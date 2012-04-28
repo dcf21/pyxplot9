@@ -242,8 +242,7 @@ void directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int interac
     if (beginGot)
      {
       int lastOpAssign, dollarAllowed=1;
-      pplObj *val;
-      val = ppl_expEval(context, begin, &lastOpAssign, dollarAllowed, iterDepth+1);
+      ppl_expEval(context, begin, &lastOpAssign, dollarAllowed, iterDepth+1);
       if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"for loop initialisation expression"); goto cleanup; }
       while (c->stackPtr>stkLevelOld) { STACK_POP; }
      }
@@ -268,8 +267,7 @@ void directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int interac
       if (endGot)
        {
         int lastOpAssign, dollarAllowed=1;
-        pplObj *val;
-        val = ppl_expEval(context, end, &lastOpAssign, dollarAllowed, iterDepth+1);
+        ppl_expEval(context, end, &lastOpAssign, dollarAllowed, iterDepth+1);
         if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"for loop stopping criterion"); goto cleanup; }
         while (c->stackPtr>stkLevelOld) { STACK_POP; }
        }

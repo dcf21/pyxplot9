@@ -764,7 +764,7 @@ int directive_arrow(ppl_context *c, parserLine *pl, parserOutput *in, int intera
  {
   pplObj           *stk = in->stk;
   canvas_item      *ptr;
-  int               id, gotTempstr, gotTempstr2;
+  int               id, gotTempstr;
   double            x1, x2, y1, y2;
   char             *tempstr, *tempstr2;
 
@@ -786,7 +786,7 @@ int directive_arrow(ppl_context *c, parserLine *pl, parserOutput *in, int intera
 
   // Work out whether this arrow is in the 'head', 'nohead' or 'twoway' style
   tempstr  = (char *)stk[PARSE_arrow_arrow_style].auxil; gotTempstr  = (stk[PARSE_arrow_arrow_style].objType == PPLOBJ_STR);
-  tempstr2 = (char *)stk[PARSE_arrow_directive  ].auxil; gotTempstr2 = (stk[PARSE_arrow_directive  ].objType == PPLOBJ_STR);
+  tempstr2 = (char *)stk[PARSE_arrow_directive  ].auxil;
   if (gotTempstr) ptr->ArrowType = ppl_fetchSettingByName(&c->errcontext, tempstr, SW_ARROWTYPE_INT, SW_ARROWTYPE_STR);
   else            ptr->ArrowType = (strcmp(tempstr2,"arrow")==0) ? SW_ARROWTYPE_HEAD : SW_ARROWTYPE_NOHEAD;
 
@@ -897,20 +897,20 @@ int directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int inte
   pplObj           *stk = in->stk;
   canvas_item      *ptr;
   int               e=0, r=0, p=0, id;
-  int               gotAng, gotX1, gotX2, gotY1, gotY2, gotXc, gotYc, gotXf, gotYf, gotA2, gotB2, gotA, gotB, gotSlr, gotLr, gotEcc, gotarc;
+  int               gotAng, gotX1, gotXc, gotXf, gotA2, gotB2, gotA, gotB, gotSlr, gotLr, gotEcc, gotarc;
   double            ang, x1, x2, y1, y2, xc, yc, xf, yf, a2, b2, a, b, slr, lr, ecc, arcfrom, arcto;
   double            ratio;
 
   // Look up the input parameters which define the ellipse
   ang  = stk[PARSE_ellipse_rotation     ].real; gotAng  = (stk[PARSE_ellipse_rotation     ].objType==PPLOBJ_NUM);
   x1   = stk[PARSE_ellipse_p1           ].real; gotX1   = (stk[PARSE_ellipse_p1           ].objType==PPLOBJ_NUM);
-  y1   = stk[PARSE_ellipse_p1+1         ].real; gotY1   = (stk[PARSE_ellipse_p1+1         ].objType==PPLOBJ_NUM);
-  x2   = stk[PARSE_ellipse_p2           ].real; gotX2   = (stk[PARSE_ellipse_p2           ].objType==PPLOBJ_NUM);
-  y2   = stk[PARSE_ellipse_p2+1         ].real; gotY2   = (stk[PARSE_ellipse_p2+1         ].objType==PPLOBJ_NUM);
+  y1   = stk[PARSE_ellipse_p1+1         ].real;
+  x2   = stk[PARSE_ellipse_p2           ].real;
+  y2   = stk[PARSE_ellipse_p2+1         ].real;
   xc   = stk[PARSE_ellipse_center       ].real; gotXc   = (stk[PARSE_ellipse_center       ].objType==PPLOBJ_NUM);
-  yc   = stk[PARSE_ellipse_center+1     ].real; gotYc   = (stk[PARSE_ellipse_center+1     ].objType==PPLOBJ_NUM);
+  yc   = stk[PARSE_ellipse_center+1     ].real;
   xf   = stk[PARSE_ellipse_focus        ].real; gotXf   = (stk[PARSE_ellipse_focus        ].objType==PPLOBJ_NUM);
-  yf   = stk[PARSE_ellipse_focus+1      ].real; gotYf   = (stk[PARSE_ellipse_focus+1      ].objType==PPLOBJ_NUM);
+  yf   = stk[PARSE_ellipse_focus+1      ].real;
   a2   = stk[PARSE_ellipse_majoraxis    ].real; gotA2   = (stk[PARSE_ellipse_majoraxis    ].objType==PPLOBJ_NUM);
   b2   = stk[PARSE_ellipse_minoraxis    ].real; gotB2   = (stk[PARSE_ellipse_minoraxis    ].objType==PPLOBJ_NUM);
   a    = stk[PARSE_ellipse_semimajoraxis].real; gotA    = (stk[PARSE_ellipse_semimajoraxis].objType==PPLOBJ_NUM);

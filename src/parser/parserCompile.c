@@ -676,8 +676,8 @@ item_cleanup:
       int        first=1, separator=1;
       char       sepStr[4];
       parserNode sepNode;
-      int        oldStackOffset = s->pl[blockDepth]->stackOffset;
-      s->oldStackOffset[blockDepth][level] = oldStackOffset;
+      int        oldStackOffset = (s==NULL) ? 0 : s->pl[blockDepth]->stackOffset;
+      if (s!=NULL) s->oldStackOffset[blockDepth][level] = oldStackOffset;
       sepStr[0] = node->varName[strlen(node->varName)-1];
       sepStr[1] = '\0';
       if (isalnum(sepStr[0])) separator=0;
@@ -740,7 +740,7 @@ item_cleanup:
         first=0;
        }
 repCleanup:
-      s->pl[blockDepth]->stackOffset = oldStackOffset;
+      if (s!=NULL) s->pl[blockDepth]->stackOffset = oldStackOffset;
       goto cleanup;
      }
     case PN_TYPE_OPT:
@@ -1009,7 +1009,7 @@ void ppl_parserLineFree(parserLine *in)
 int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId, char *srcFname, char *line, int expandMacros, int blockDepth)
  {
   listIterator *cmdIter=NULL;
-  int           i, cln, containsMacros=0, fail=0;
+  int           i, cln, containsMacros=0;
   int           obLen = LSTR_LENGTH, obPos;
   char         *outbuff = NULL;
 
@@ -1018,8 +1018,9 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
   // Deal with macros and ` ` substitutions
   if (!expandMacros)
    {
+    int fail=0;
     TEST_FOR_MACROS;
-    if ((containsMacros)&&(s!=NULL)) // If we're not expanding macros at this stage, flag this parserLine as containing macros, and exit
+    if (containsMacros && (s!=NULL) && !fail) // If we're not expanding macros at this stage, flag this parserLine as containing macros, and exit
      {
       if (s->waitingForBrace) { sprintf(c->errStat.errBuff,"Cannot process a macro on the same line as the opening brace of a loop."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,0,line,""); ppl_parserStatReInit(s); return 1; }
       parserLine *output=NULL;
@@ -1042,13 +1043,12 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
   else
    {
     char *lineOriginal = line;
-    int   l=0;
-    for (l=0; l<16; l++) // Repeatedly test for and substitute macros; nested macros are allowed
+    int   l=0, fail=0;;
+    for (l=0; (l<16)&&!fail; l++) // Repeatedly test for and substitute macros; nested macros are allowed
      {
       TEST_FOR_MACROS;
-      if (!containsMacros) break;
+      if (fail || !containsMacros) break;
        {
-        int fail=0;
         outbuff = (char *)malloc(obLen);
         obPos   = 0;
         if (outbuff!=NULL) LOOP_OVER_LINE
@@ -1056,7 +1056,7 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
         // First, substitute for ` ` expressions
         else if ((quoteChar=='\0') && (line[i]=='`'))
          {
-          int   is=++i, status, fail=0;
+          int   is=++i, status;
           char *key=NULL;
           FILE *substPipe;
           for ( ; ((line[i]!='\0')&&(line[i]!='`')) ; i++); // Find end of ` ` expression
@@ -1125,9 +1125,9 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
         // Clean up after macro substitution
         if ((!fail)&&(outbuff!=NULL)) { if (line!=lineOriginal) free(line); line = outbuff; }
         else if (outbuff!=NULL) { free(outbuff); outbuff=NULL; }
-        if (fail) { ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,0,line,""); ppl_parserStatReInit(s); return 1; }
        }
      }
+    if (fail) { ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,0,line,""); ppl_parserStatReInit(s); return 1; }
    }
 
   // If we are returning to add more code into a codeblock, do that now

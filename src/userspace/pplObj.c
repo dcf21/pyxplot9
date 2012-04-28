@@ -36,7 +36,7 @@
 #include "userspace/pplObjUnits.h"
 
 // Items with ! should never be displayed because they are internal markers
-const char *pplObjTypeNames[] = {"number","string","boolean","date","color","dictionary","module","list","vector","matrix","file handle","function","type","null","exception","!global","!zombie","!expression","!bytecode","instance",NULL};
+const char *pplObjTypeNames[] = {"number","string","boolean","date","color","dictionary","module","list","vector","matrix","fileHandle","function","type","null","exception","!global","!zombie","!expression","!bytecode","instance",NULL};
 const int   pplObjTypeOrder[] = { 2      , 4      , 2       , 3    , 5     ,  9          , 11    , 7    , 6      , 8      , 13          , 12       , 14    , 0   , 15        , 0       , 0       , 0           , 0         , 10       };
 pplObj     *pplObjPrototypes;
 

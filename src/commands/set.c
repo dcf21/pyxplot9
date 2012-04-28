@@ -236,9 +236,9 @@ void directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int interac
         if (pos<=0) break;
         anum = (int)round(command[pos+PARSE_unset_axis_axis_axes].real);
         i    = (int)round(command[pos+PARSE_unset_axis_axis_axes].exponent[0]);
-        if      (i==1) { pplaxis_destroy(c, &(ya[i]) ); pplaxis_copy(c, &(ya[i]), &(c->set->YAxesDefault[i])); }
-        else if (i==2) { pplaxis_destroy(c, &(za[i]) ); pplaxis_copy(c, &(za[i]), &(c->set->ZAxesDefault[i])); }
-        else           { pplaxis_destroy(c, &(xa[i]) ); pplaxis_copy(c, &(xa[i]), &(c->set->XAxesDefault[i])); }
+        if      (i==1) { pplaxis_destroy(c, &(ya[anum]) ); pplaxis_copy(c, &(ya[anum]), &(c->set->YAxesDefault[anum])); }
+        else if (i==2) { pplaxis_destroy(c, &(za[anum]) ); pplaxis_copy(c, &(za[anum]), &(c->set->ZAxesDefault[anum])); }
+        else           { pplaxis_destroy(c, &(xa[anum]) ); pplaxis_copy(c, &(xa[anum]), &(c->set->XAxesDefault[anum])); }
        }
      }
    }
@@ -799,6 +799,10 @@ void directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int interac
    {
     int got, got2, got3;
     char *tempstr, *tempstr2, *tempstr3;
+
+    tempstr = (char *)command[PARSE_set_unit_abbrev].auxil;
+    got     =        (command[PARSE_set_unit_abbrev].objType == PPLOBJ_STR);
+    if (got) c->set->term_current.UnitDisplayAbbrev   = ppl_fetchSettingByName(&c->errcontext, tempstr, SW_ONOFF_INT, SW_ONOFF_STR);
 
     tempstr = (char *)command[PARSE_set_unit_angle].auxil;
     got     =        (command[PARSE_set_unit_angle].objType == PPLOBJ_STR);

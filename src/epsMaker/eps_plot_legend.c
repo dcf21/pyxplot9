@@ -94,7 +94,7 @@ void GraphLegend_YieldUpText(EPSComm *x)
   canvas_plotdesc *pd;
   CanvasTextItem  *i;
   char *cptr, *buffer;
-  int j, k, BracketLevel, inlen, status;
+  int j, k, inlen;
 
   if (x->current->settings.key != SW_ONOFF_ON) return;
 
@@ -113,12 +113,12 @@ void GraphLegend_YieldUpText(EPSComm *x)
         k=0;
         if (pd->parametric) { sprintf(cptr+k, "parametric"); k+=strlen(cptr+k); }
         if (pd->TRangeSet)  { sprintf(cptr+k, " [%s:%s]", ppl_unitsNumericDisplay(x->c,&pd->Tmin,0,SW_DISPLAY_L,0), ppl_unitsNumericDisplay(x->c,&pd->Tmax,1,SW_DISPLAY_L,0)); k+=strlen(cptr+k); }
-        if (!pd->function) { cptr[k++]=' '; ppl_strEscapify(pd->filename, buffer); inlen=strlen(buffer); BracketLevel=0; status=-1; ppl_texify_generic(x->c, buffer, &inlen, cptr+k, LSTR_LENGTH-k); k+=strlen(cptr+k); } // Filename of datafile we are plotting
+        if (!pd->function) { cptr[k++]=' '; ppl_strEscapify(pd->filename, buffer); inlen=strlen(buffer); ppl_texify_generic(x->c, buffer, &inlen, cptr+k, LSTR_LENGTH-k); k+=strlen(cptr+k); } // Filename of datafile we are plotting
         else
          for (j=0; j<pd->NFunctions; j++) // Print out the list of functions which we are plotting
           {
            cptr[k++]=(j!=0)?':':' ';
-           inlen=strlen(pd->functions[j]->ascii); BracketLevel=0; status=-1;
+           inlen=strlen(pd->functions[j]->ascii);
            ppl_texify_generic(x->c, pd->functions[j]->ascii, &inlen, cptr+k, LSTR_LENGTH-k);
            k+=strlen(cptr+k);
           }
@@ -141,15 +141,15 @@ void GraphLegend_YieldUpText(EPSComm *x)
         if (pd->EverySet>4) { sprintf(cptr+k, ":$%d$", pd->EveryList[4]); k+=strlen(cptr+k); }
         if (pd->EverySet>5) { sprintf(cptr+k, ":$%d$", pd->EveryList[5]); k+=strlen(cptr+k); }
         if (pd->IndexSet) { sprintf(cptr+k, " index $%d$", pd->index); k+=strlen(cptr+k); } // Print index to use
-        if (pd->label!=NULL) { sprintf(cptr+k, " label "); k+=strlen(cptr+k); inlen=strlen(pd->label->ascii); BracketLevel=0; status=-1; ppl_texify_generic(x->c, pd->label->ascii, &inlen, cptr+k, LSTR_LENGTH-k); k+=strlen(cptr+k); } // Print label string
-        if (pd->SelectCriterion!=NULL) { strcpy(cptr+k, " select "); k+=strlen(cptr+k); inlen=strlen(pd->SelectCriterion->ascii); BracketLevel=0; status=-1; ppl_texify_generic(x->c, pd->SelectCriterion->ascii, &inlen, cptr+k, LSTR_LENGTH-k); k+=strlen(cptr+k); } // Print select criterion
+        if (pd->label!=NULL) { sprintf(cptr+k, " label "); k+=strlen(cptr+k); inlen=strlen(pd->label->ascii); ppl_texify_generic(x->c, pd->label->ascii, &inlen, cptr+k, LSTR_LENGTH-k); k+=strlen(cptr+k); } // Print label string
+        if (pd->SelectCriterion!=NULL) { strcpy(cptr+k, " select "); k+=strlen(cptr+k); inlen=strlen(pd->SelectCriterion->ascii); ppl_texify_generic(x->c, pd->SelectCriterion->ascii, &inlen, cptr+k, LSTR_LENGTH-k); k+=strlen(cptr+k); } // Print select criterion
         if ((pd->NUsing>0)||(pd->UsingRowCols!=DATAFILE_COL))
          {
           sprintf(cptr+k, " using %s", (pd->UsingRowCols==DATAFILE_COL)?"":"rows"); k+=strlen(cptr+k); // Print using list
           for (j=0; j<pd->NUsing; j++)
            {
             cptr[k++]=(j!=0)?':':' ';
-            inlen=strlen(pd->UsingList[j]->ascii); BracketLevel=0; status=-1;
+            inlen=strlen(pd->UsingList[j]->ascii);
             ppl_texify_generic(x->c, pd->UsingList[j]->ascii, &inlen, cptr+k, LSTR_LENGTH-k);
             k+=strlen(cptr+k);
            }
@@ -210,7 +210,7 @@ void GraphLegend_Render(EPSComm *x, double width, double height, double zdepth)
   double ColumnX[MAX_LEGEND_COLUMNS], ColumnHeight[MAX_LEGEND_COLUMNS];
   double BestHeight, AttainedHeight, TrialHeight;
   int    Ncolumns, ColumnNItems[MAX_LEGEND_COLUMNS];
-  double height1,height2,bb_left,bb_right,bb_top,bb_bottom,ab_left,ab_right,ab_top,ab_bottom;
+  double height1,height2,bb_top,bb_bottom,ab_left,ab_right,ab_top,ab_bottom;
   unsigned char hfixed=0, vfixed=0;
   canvas_plotdesc *pd;
   int    pageno, j, kp=x->current->settings.KeyPos;
@@ -226,9 +226,9 @@ void GraphLegend_Render(EPSComm *x, double width, double height, double zdepth)
     if (x->dvi == NULL) { pd->TitleFinal_width=0; pd->TitleFinal_height=0; pd=pd->next; pageno++; continue; }
     dviPage = (postscriptPage *)ppl_listGetItem(x->dvi->output->pages, pageno+1);
     if (dviPage== NULL) { pd->TitleFinal_width=0; pd->TitleFinal_height=0; pd=pd->next; pageno++; continue; } // Such doom will trigger errors later
-    bb_left   = dviPage->boundingBox[0];
+    //bb_left   = dviPage->boundingBox[0];
     bb_bottom = dviPage->boundingBox[1];
-    bb_right  = dviPage->boundingBox[2];
+    //bb_right  = dviPage->boundingBox[2];
     bb_top    = dviPage->boundingBox[3];
     ab_left   = dviPage->textSizeBox[0];
     ab_bottom = dviPage->textSizeBox[1];

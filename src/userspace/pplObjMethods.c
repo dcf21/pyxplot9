@@ -93,7 +93,8 @@ void pplmethod_data(ppl_context *c, pplObj *in, int nArgs, int *status, int *err
     di = ppl_dictIterateInit((dict *)iter->auxil);
     while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
      {
-      int i; for (i=0; i<count; count++) if (strcmp(key,keys[i])==0) continue;
+      int i,new=1; for (i=0; i<count; i++) if (strcmp(key,keys[i])==0) { new=0; break; }
+      if (!new) continue;
       if (item->objType==PPLOBJ_FUNC) continue; // Non-methods only
       COPYSTR(tmp,key); pplObjStr(&v,1,1,tmp); ppl_listAppendCpy(l, (void *)&v, sizeof(pplObj));
       keys[count++]=key; if (count>4094) break;
@@ -102,7 +103,8 @@ void pplmethod_data(ppl_context *c, pplObj *in, int nArgs, int *status, int *err
   di = ppl_dictIterateInit( pplObjMethods[st->objType] );
   while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
    {
-    int i; for (i=0; i<count; count++) if (strcmp(key,keys[i])==0) continue;
+    int i,new=1; for (i=0; i<count; i++) if (strcmp(key,keys[i])==0) { new=0; break; }
+    if (!new) continue;
     if (item->objType==PPLOBJ_FUNC) continue; // Non-methods only
     COPYSTR(tmp,key); pplObjStr(&v,1,1,tmp); ppl_listAppendCpy(l, (void *)&v, sizeof(pplObj));
     keys[count++]=key; if (count>4094) break;
@@ -128,7 +130,8 @@ void pplmethod_contents(ppl_context *c, pplObj *in, int nArgs, int *status, int 
     di = ppl_dictIterateInit((dict *)iter->auxil);
     while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
      {
-      int i; for (i=0; i<count; count++) if (strcmp(key,keys[i])==0) continue;
+      int i,new=1; for (i=0; i<count; i++) if (strcmp(key,keys[i])==0) { new=0; break; }
+      if (!new) continue;
       COPYSTR(tmp,key); pplObjStr(&v,1,1,tmp); ppl_listAppendCpy(l, (void *)&v, sizeof(pplObj));
       keys[count++]=key; if (count>4094) break;
      }
@@ -136,7 +139,8 @@ void pplmethod_contents(ppl_context *c, pplObj *in, int nArgs, int *status, int 
   di = ppl_dictIterateInit( pplObjMethods[st->objType] );
   while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
    {
-    int i; for (i=0; i<count; count++) if (strcmp(key,keys[i])==0) continue;
+    int i,new=1; for (i=0; i<count; i++) if (strcmp(key,keys[i])==0) { new=0; break; }
+    if (!new) continue;
     COPYSTR(tmp,key); pplObjStr(&v,1,1,tmp); ppl_listAppendCpy(l, (void *)&v, sizeof(pplObj));
     keys[count++]=key; if (count>4094) break;
    }
@@ -161,7 +165,8 @@ void pplmethod_methods(ppl_context *c, pplObj *in, int nArgs, int *status, int *
     di = ppl_dictIterateInit((dict *)iter->auxil);
     while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
      {
-      int i; for (i=0; i<count; count++) if (strcmp(key,keys[i])==0) continue;
+      int i,new=1; for (i=0; i<count; i++) if (strcmp(key,keys[i])==0) { new=0; break; }
+      if (!new) continue;
       if (item->objType!=PPLOBJ_FUNC) continue; // List methods only
       COPYSTR(tmp,key); pplObjStr(&v,1,1,tmp); ppl_listAppendCpy(l, (void *)&v, sizeof(pplObj));
       keys[count++]=key; if (count>4094) break;
@@ -170,7 +175,8 @@ void pplmethod_methods(ppl_context *c, pplObj *in, int nArgs, int *status, int *
   di = ppl_dictIterateInit( pplObjMethods[st->objType] );
   while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
    {
-    int i; for (i=0; i<count; count++) if (strcmp(key,keys[i])==0) continue;
+    int i,new=1; for (i=0; i<count; i++) if (strcmp(key,keys[i])==0) { new=0; break; }
+    if (!new) continue;
     if (item->objType!=PPLOBJ_FUNC) continue; // List methods only
     COPYSTR(tmp,key); pplObjStr(&v,1,1,tmp); ppl_listAppendCpy(l, (void *)&v, sizeof(pplObj));
     keys[count++]=key; if (count>4094) break;
@@ -642,6 +648,22 @@ void pplmethod_vectorLen(ppl_context *c, pplObj *in, int nArgs, int *status, int
   pplObjNum(&OUTPUT,0,v->size,0);
  }
 
+void pplmethod_vectorList(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj     *st  = in[-1].self_this;
+  gsl_vector *vec = ((pplVector *)st->auxil)->v;
+  int         i;
+  const int   l = vec->size;
+  pplObj      v;
+  list       *lo;
+  if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { strcpy(errText, "Out of memory."); *status=1; *errType=ERR_MEMORY; return; }
+  lo = (list *)OUTPUT.auxil;
+  v.refCount = 1;
+  pplObjNum(&v,1,0,0);
+  ppl_unitsDimCpy(&v, st);
+  for (i=0; i<l; i++) { v.real = gsl_vector_get(vec,i); ppl_listAppendCpy(lo, &v, sizeof(pplObj)); }
+ }
+
 void pplmethod_vectorNorm(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   pplObj *st = in[-1].self_this;
@@ -741,6 +763,34 @@ void pplmethod_listLen(ppl_context *c, pplObj *in, int nArgs, int *status, int *
   pplObjNum(&OUTPUT,0,l->length,0);
  }
 
+void pplmethod_listMax(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *st = in[-1].self_this;
+  list   *l  = (list *)st->auxil;
+  pplObj *item, *best=NULL;
+  listIterator *li = ppl_listIterateInit(l);
+  while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
+   {
+    if ((best==NULL)||(pplObjCmpQuiet((void*)&item, (void*)&best)==1)) best=item;
+   }
+  if (best==NULL) pplObjNull(&OUTPUT,0);
+  else            pplObjCpy (&OUTPUT,best,0,0,1);
+ }
+
+void pplmethod_listMin(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *st = in[-1].self_this;
+  list   *l  = (list *)st->auxil;
+  pplObj *item, *best=NULL;
+  listIterator *li = ppl_listIterateInit(l);
+  while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
+   {
+    if ((best==NULL)||(pplObjCmpQuiet((void*)&item, (void*)&best)==-1)) best=item;
+   }
+  if (best==NULL) pplObjNull(&OUTPUT,0);
+  else            pplObjCpy (&OUTPUT,best,0,0,1);
+ }
+
 void pplmethod_listPop(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   pplObj *obj;
@@ -768,7 +818,8 @@ void pplmethod_listPop(ppl_context *c, pplObj *in, int nArgs, int *status, int *
 void pplmethod_listReverse(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   long      i;
-  list     *l     = (list *)in[-1].self_this->auxil;
+  pplObj   *st    = in[-1].self_this;
+  list     *l     = (list *)st->auxil;
   listItem *l1    = l->first;
   listItem *l2    = l->last;
   long      n     = l->length;
@@ -779,13 +830,15 @@ void pplmethod_listReverse(ppl_context *c, pplObj *in, int nArgs, int *status, i
     void *tmp = l1->data; l1->data=l2->data; l2->data=tmp;
     l1=l1->next; l2=l2->prev;
    }
+  pplObjCpy(&OUTPUT,st,0,0,1);
  }
 
 void pplmethod_listSort(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   long     i;
-  list    *l     = (list *)in[-1].self_this->auxil;
-  long     n     = l->length;
+  pplObj  *st = in[-1].self_this;
+  list    *l  = (list *)st->auxil;
+  long     n  = l->length;
   pplObj **items;
   listIterator *li = ppl_listIterateInit(l);
   if (n<2) return;
@@ -796,6 +849,7 @@ void pplmethod_listSort(ppl_context *c, pplObj *in, int nArgs, int *status, int 
   li = ppl_listIterateInit(l);
   i=0; while (li!=NULL) { li->data=(void*)items[i++]; ppl_listIterate(&li); }
   free(items);
+  pplObjCpy(&OUTPUT,st,0,0,1);
  }
 
 // Dictionary methods
@@ -1143,6 +1197,10 @@ void pplmethod_fileSetpos(ppl_context *c, pplObj *in, int nArgs, int *status, in
   if (!f->open) { pplObjNull(&OUTPUT,0); return; }
   if (!in[0].dimensionless) fp/=8;
   if (fseek(f->file,fp,SEEK_SET)!=0) { *status=1; *errType=ERR_FILE; strcpy(errText, strerror(errno)); return; }
+
+  if ((fp = ftell(f->file))<0) { *status=1; *errType=ERR_FILE; strcpy(errText, strerror(errno)); return; }
+  pplObjNum(&OUTPUT,0,fp*8,0);
+  CLEANUP_APPLYUNIT(UNIT_BIT);
  }
 
 void pplmethod_fileWrite(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -1227,6 +1285,7 @@ void pplObjMethodsInit(ppl_context *c)
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"extend",1,1,0,0,0,0,(void *)pplmethod_vectorExtend, "extend(x)", "\\mathrm{extend}@<@0@>", "extend(x) appends the members of the list x to the end of a vector");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"insert",2,2,0,0,0,0,(void *)pplmethod_vectorInsert, "insert(n,x)", "\\mathrm{insert}@<@0@>", "insert(n,x) inserts the object x into a vector at position n");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"len",0,0,1,1,1,1,(void *)pplmethod_vectorLen, "len()", "\\mathrm{len}@<@>", "len() returns the number of dimensions of a vector");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"list",0,0,1,1,1,1,(void *)pplmethod_vectorList, "list()", "\\mathrm{list}@<@>", "list() returns a list representation of a vector");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"norm",0,0,1,1,1,1,(void *)pplmethod_vectorNorm, "norm()", "\\mathrm{norm}@<@>", "norm() returns the norm (quadrature sum) of a vector's elements");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"reverse",0,0,1,1,1,1,(void *)pplmethod_vectorReverse, "reverse()", "\\mathrm{reverse}@<@>", "reverse() reverses the order of the elements of a vector");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"sort",0,0,1,1,1,1,(void *)pplmethod_vectorSort, "sort()", "\\mathrm{sort}@<@>", "sort() sorts the members of a vector");
@@ -1236,6 +1295,8 @@ void pplObjMethodsInit(ppl_context *c)
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"extend",1,1,0,0,0,0,(void *)pplmethod_listExtend, "extend(x)", "\\mathrm{extend}@<@0}@>", "extend(x) appends the members of the list x to the end of a list");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"insert",2,2,0,0,0,0,(void *)pplmethod_listInsert, "insert(n,x)", "\\mathrm{insert}@<@0@>", "insert(n,x) inserts the object x into a list at position n");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"len",0,0,1,1,1,1,(void *)pplmethod_listLen, "len()", "\\mathrm{len}@<@>", "len() returns the length of a list");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"max",0,0,1,1,1,1,(void *)pplmethod_listMax, "max()", "\\mathrm{max}@<@>", "max() returns the highest-valued item in a list");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"min",0,0,1,1,1,1,(void *)pplmethod_listMin, "min()", "\\mathrm{min}@<@>", "min() returns the lowest-valued item in a list");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"pop",0,1,1,1,1,1,(void *)pplmethod_listPop, "pop()", "\\mathrm{pop}@<@0@>", "pop(n) removes the nth item from a list and returns it. If n is not specified, the last list item is popped.");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"reverse",0,0,1,1,1,1,(void *)pplmethod_listReverse, "reverse()", "\\mathrm{reverse}@<@>", "reverse() reverses the order of the members of a list");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"sort",0,0,1,1,1,1,(void *)pplmethod_listSort, "sort()", "\\mathrm{sort}@<@>", "sort() sorts the members of a list");

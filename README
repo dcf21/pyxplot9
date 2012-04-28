@@ -85,15 +85,15 @@ advantage of their presence.
 
 Debian and Ubuntu users can find the above software in the following packages:
 
-fftw3-dev, gcc, gs, gv, imagemagick, libc6-dev, libcfitsio3-dev, libgsl0-dev,
-libkpathsea-dev, libpng12-dev, libreadline5-dev, libxml2-dev, make,
+fftw3-dev, gcc, ghostscript, gv, imagemagick, libc6-dev, libcfitsio3-dev,
+libgsl0-dev, libkpathsea-dev, libpng12-dev, libreadline-dev, libxml2-dev, make,
 texlive-latex-extra, texlive-latex-recommended, texlive-fonts-extra,
 texlive-fonts-recommended, wget, zlib1g-dev.
 
 These packages may be installed from a command prompt by typing, all on one
 line:
 
-sudo apt-get install fftw3-dev gcc gs gv imagemagick libc6-dev libcfitsio3-dev libgsl0-dev libkpathsea-dev libpng12-dev libreadline5-dev libxml2-dev make texlive-latex-extra texlive-latex-recommended texlive-fonts-extra texlive-fonts-recommended wget zlib1g-dev
+sudo apt-get install fftw3-dev gcc ghostscript gv imagemagick libc6-dev libcfitsio3-dev libgsl0-dev libkpathsea-dev libpng12-dev libreadline-dev libxml2-dev make texlive-latex-extra texlive-latex-recommended texlive-fonts-extra texlive-fonts-recommended wget zlib1g-dev
 
 Users of MacOS X can find the above software in the following MacPorts packages:
 

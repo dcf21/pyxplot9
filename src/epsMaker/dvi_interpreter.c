@@ -971,9 +971,9 @@ int dviPostscriptClosepathFill(pplerr_context *ec, dviInterpreterState *interp)
  {
   int err=0;
   char s[SSTR_LENGTH];
-  double x, y;
-  x = interp->state->h * interp->scale;
-  y = 765 - interp->state->v * interp->scale;
+  //double x, y;
+  //x = interp->state->h * interp->scale;
+  //y = 765 - interp->state->v * interp->scale;
   snprintf(s, SSTR_LENGTH, "closepath fill\n");
   if ((err=dviPostscriptAppend(ec, interp, s))!=0) return err;
   if (interp->output->currentPosition == NULL)

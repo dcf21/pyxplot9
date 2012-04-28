@@ -92,17 +92,17 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
     linecounter++;
     ppl_file_readline(infile, linebuffer, LSTR_LENGTH);
     ppl_strStrip(linebuffer, linebuffer);
-    if             (linebuffer[0] == '\0')                    continue;
-    else if (strcmp(linebuffer, "[settings]" )==0) {state= 1; continue;}
-    else if (strcmp(linebuffer, "[terminal]" )==0) {state= 2; continue;}
-    else if (strcmp(linebuffer, "[colours]"  )==0) {state= 3; continue;}
-    else if (strcmp(linebuffer, "[latex]"    )==0) {state= 4; continue;}
-    else if (strcmp(linebuffer, "[variables]")==0) {state= 5; continue;}
-    else if (strcmp(linebuffer, "[functions]")==0) {state= 6; continue;}
-    else if (strcmp(linebuffer, "[units]"    )==0) {state= 7; continue;}
-    else if (strcmp(linebuffer, "[filters]"  )==0) {state= 8; continue;}
-    else if (strcmp(linebuffer, "[script]"   )==0) {state= 9; continue;}
-    else if (strcmp(linebuffer, "[styling]"  )==0) {state=10; continue;}
+    if                       (linebuffer[0] == '\0')                    continue;
+    else if (ppl_strCmpNoCase(linebuffer, "[settings]" )==0) {state= 1; continue;}
+    else if (ppl_strCmpNoCase(linebuffer, "[terminal]" )==0) {state= 2; continue;}
+    else if (ppl_strCmpNoCase(linebuffer, "[colours]"  )==0) {state= 3; continue;}
+    else if (ppl_strCmpNoCase(linebuffer, "[latex]"    )==0) {state= 4; continue;}
+    else if (ppl_strCmpNoCase(linebuffer, "[variables]")==0) {state= 5; continue;}
+    else if (ppl_strCmpNoCase(linebuffer, "[functions]")==0) {state= 6; continue;}
+    else if (ppl_strCmpNoCase(linebuffer, "[units]"    )==0) {state= 7; continue;}
+    else if (ppl_strCmpNoCase(linebuffer, "[filters]"  )==0) {state= 8; continue;}
+    else if (ppl_strCmpNoCase(linebuffer, "[script]"   )==0) {state= 9; continue;}
+    else if (ppl_strCmpNoCase(linebuffer, "[styling]"  )==0) {state=10; continue;}
 
     _ReadConfig_FetchKey  (linebuffer, setkey  );
     _ReadConfig_FetchValue(linebuffer, setvalue);
@@ -514,7 +514,7 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
       // If line is blank, ignore it
       { int i=0,j=0; for (i=0; linebuffer[i]!='\0'; i++) if (linebuffer[i]>' ') { j=1; break; } if (j==0) continue; }
 
-      stat = ppl_parserCompile(c, ps, c->errcontext.error_input_linenumber,c->errcontext.error_input_sourceId,c->errcontext.error_input_filename, linebuffer, 0, 1);
+      stat = ppl_parserCompile(c, ps, c->errcontext.error_input_linenumber,c->errcontext.error_input_sourceId,c->errcontext.error_input_filename, linebuffer, 0, 0);
       if ( (!stat) && (!c->errStat.status) && (ps->blockDepth==0) ) ppl_parserExecute(c, *ps->rootpl, "var_set", 0, 1);
       if (stat || c->errStat.status) ppl_tbWrite(c);
       ppl_parserStatFree(&ps);
@@ -532,7 +532,7 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
       // If line is blank, ignore it
       { int i=0,j=0; for (i=0; linebuffer[i]!='\0'; i++) if (linebuffer[i]>' ') { j=1; break; } if (j==0) continue; }
 
-      stat = ppl_parserCompile(c, ps, c->errcontext.error_input_linenumber,c->errcontext.error_input_sourceId,c->errcontext.error_input_filename, linebuffer, 0, 1);
+      stat = ppl_parserCompile(c, ps, c->errcontext.error_input_linenumber,c->errcontext.error_input_sourceId,c->errcontext.error_input_filename, linebuffer, 0, 0);
       if ( (!stat) && (!c->errStat.status) && (ps->blockDepth==0) ) ppl_parserExecute(c, *ps->rootpl, "func_set", 0, 1);
       if (stat || c->errStat.status) ppl_tbWrite(c);
       ppl_parserStatFree(&ps);
@@ -640,7 +640,7 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
       // If line is blank, ignore it
       { int i=0,j=0; for (i=0; linebuffer[i]!='\0'; i++) if (linebuffer[i]>' ') { j=1; break; } if (j==0) continue; }
 
-      stat = ppl_parserCompile(c, ps, c->errcontext.error_input_linenumber,c->errcontext.error_input_sourceId,c->errcontext.error_input_filename, linebuffer, 0, 1);
+      stat = ppl_parserCompile(c, ps, c->errcontext.error_input_linenumber,c->errcontext.error_input_sourceId,c->errcontext.error_input_filename, linebuffer, 0, 0);
       if ( (!stat) && (!c->errStat.status) && (ps->blockDepth==0) ) ppl_parserExecute(c, *ps->rootpl, "set", 0, 1);
       if (stat || c->errStat.status) ppl_tbWrite(c);
       ppl_parserStatFree(&ps);

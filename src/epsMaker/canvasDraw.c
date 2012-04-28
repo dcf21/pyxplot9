@@ -632,7 +632,7 @@ void canvas_MakeEPSBuffer(EPSComm *x)
 void canvas_EPSWrite(EPSComm *x)
  {
   int i;
-  double PAGEwidth, PAGEheight, margin_left, margin_top, margin_right, margin_bottom;
+  double PAGEwidth, PAGEheight, margin_left, margin_top, margin_bottom;
   FILE *epsout, *PFAfile;
   char LandscapifyText[FNAME_LENGTH], EnlargementText[FNAME_LENGTH], *PaperName, *PFAfilename;
   listIterator *ListIter;
@@ -662,7 +662,6 @@ void canvas_EPSWrite(EPSComm *x)
   margin_top  = PAGEheight / 14;
   margin_left *= M_TO_PS;
   margin_top  *= M_TO_PS;
-  margin_right  =   margin_left;
   margin_bottom = 2*margin_top;
 
   // Open output postscript file for writing

@@ -218,20 +218,20 @@ double ppl_hebrewToUnixTime(ppl_context *ct, int year, int month, int day, int h
 
 void ppl_hebrewFromUnixTime(ppl_context *ct, double UT, int *year, int *month, int *day, int *status, char *errText)
  {
-  long   a,b,c,d,e,f;
+  long   a,c,d,e,f;
   int    i,j;
-  int    JulDay, JulMon, JulYr;
+  int    JulMon, JulYr;
   int    YearNumbers[3], YearTypes[3];
   double JDs[3];
   double JD = (UT / 86400.0) + 2440587.5;
 
   // First work out date in Julian calendar
   a = JD + 0.5; // Number of whole Julian days. b = Number of centuries since the Council of Nicaea. c = Julian Day number as if century leap years happened.
-  b=0; c=a+1524;
+  c = a+1524;
   d = (c-122.1)/365.25;   // Number of 365.25 periods, starting the year at the end of February
   e = 365*d + d/4; // Number of days accounted for by these
   f = (c-e)/30.6001;      // Number of 30.6001 days periods (a.k.a. months) in remainder
-  JulDay = (int)floor(c-e-(int)(30.6001*f));
+  //JulDay = (int)floor(c-e-(int)(30.6001*f));
   JulMon = (int)floor(f-1-12*(f>=14));
   JulYr  = (int)floor(d-4715-(JulMon>=3));
 
@@ -281,7 +281,7 @@ void ppl_islamicFromUnixTime(ppl_context *ct, double UT, int *year, int *month, 
  {
   long a,b,c,d,e,f;
   int  JulDay, JulMon, JulYr;
-  long alpha,beta,W,N,A,B,C,C2,D,Q,R,J,K,O,H,JJ,CL,DL,S,m;
+  long W,N,A,B,C,C2,D,Q,R,J,K,O,H,JJ,CL,DL,S,m;
   double C1;
   double JD = (UT / 86400.0) + 2440587.5;
 
@@ -297,10 +297,10 @@ void ppl_islamicFromUnixTime(ppl_context *ct, double UT, int *year, int *month, 
   JulMon = (int)floor(f-1-12*(f>=14));
   JulYr  = (int)floor(d-4715-(JulMon>=3));
 
-  alpha = (JD-1867216.25)/36524.25; // See pages 75-76 of "Astronomical Algorithms", by Jean Meeus
+  //alpha = (JD-1867216.25)/36524.25; // See pages 75-76 of "Astronomical Algorithms", by Jean Meeus
 
-  if (JD<2299161)  beta = (JD+0.5);
-  else             beta = (JD+0.5) + 1 + alpha - ((long)(alpha/4));
+  //if (JD<2299161)  beta = (JD+0.5);
+  //else             beta = (JD+0.5) + 1 + alpha - ((long)(alpha/4));
 
   c  = (b-122.1)/365.25;
   d  = 365.25*c;

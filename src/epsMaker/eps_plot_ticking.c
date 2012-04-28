@@ -200,7 +200,6 @@ void eps_plot_ticking(EPSComm *x, pplset_axis *axis, int AxisUnitStyle, pplset_a
     // Minor ticks. Then major ticks.
     for (MajMin=0; MajMin<2; MajMin++)
      {
-      int           TickDir;
       double        TickMax, TickMin, TickStep;
       unsigned char TickMaxSet, TickMinSet, TickStepSet;
       double       *TickList;
@@ -208,8 +207,8 @@ void eps_plot_ticking(EPSComm *x, pplset_axis *axis, int AxisUnitStyle, pplset_a
       double      **TickListPositions;
       char       ***TickListStrings;
 
-      if (MajMin==0) { TickDir = axis->MTickDir; TickMax = axis->MTickMax; TickMin = axis->MTickMin; TickStep = axis->MTickStep; TickMaxSet = axis->MTickMaxSet; TickMinSet = axis->MTickMinSet; TickStepSet = axis->MTickStepSet; TickList = axis->MTickList; TickStrs = axis->MTickStrs; TickListPositions = &axis->MTickListPositions; TickListStrings = &axis->MTickListStrings; }
-      else           { TickDir = axis-> TickDir; TickMax = axis-> TickMax; TickMin = axis-> TickMin; TickStep = axis-> TickStep; TickMaxSet = axis-> TickMaxSet; TickMinSet = axis-> TickMinSet; TickStepSet = axis-> TickStepSet; TickList = axis-> TickList; TickStrs = axis-> TickStrs; TickListPositions = &axis-> TickListPositions; TickListStrings = &axis-> TickListStrings; }
+      if (MajMin==0) { TickMax = axis->MTickMax; TickMin = axis->MTickMin; TickStep = axis->MTickStep; TickMaxSet = axis->MTickMaxSet; TickMinSet = axis->MTickMinSet; TickStepSet = axis->MTickStepSet; TickList = axis->MTickList; TickStrs = axis->MTickStrs; TickListPositions = &axis->MTickListPositions; TickListStrings = &axis->MTickListStrings; }
+      else           { TickMax = axis-> TickMax; TickMin = axis-> TickMin; TickStep = axis-> TickStep; TickMaxSet = axis-> TickMaxSet; TickMinSet = axis-> TickMinSet; TickStepSet = axis-> TickStepSet; TickList = axis-> TickList; TickStrs = axis-> TickStrs; TickListPositions = &axis-> TickListPositions; TickListStrings = &axis-> TickListStrings; }
 
       if (TickList != NULL) // Ticks have been specified as an explicit list
        {

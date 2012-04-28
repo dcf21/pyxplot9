@@ -103,7 +103,7 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     directive_varset(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "func_set")==0)
     directive_funcset(c,pl,in,interactive);
-  else if (strcmp(d, "arrow")==0)
+  else if ((strcmp(d, "arrow")==0)||(strcmp(d,"line")==0))
     directive_arrow(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "assert")==0)
     directive_assert(c,pl,in);
@@ -227,6 +227,8 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     directive_text(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "undelete")==0)
     directive_undelete(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "unset")==0)
+    directive_set(c,pl,in,interactive);
   else if (strcmp(d, "unset_error")==0)
     directive_unseterror(c,pl,in,interactive);
   else if (strcmp(d, "while")==0)

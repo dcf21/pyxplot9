@@ -44,7 +44,7 @@
 
 void bmp_jpegread(pplerr_context *ec, FILE *jpeg, bitmap_data *image)
  {
-  int  comps=0, prec=0;
+  int  comps=0;
   long i, j, len, chunk=64*1024;
 
   unsigned int width=0, height=0, save;
@@ -122,7 +122,7 @@ void bmp_jpegread(pplerr_context *ec, FILE *jpeg, bitmap_data *image)
      {
       if (comp) { ppl_error(ec, ERR_FILE, -1, -1, "Cannot decode JPEG image file: it contains multiple images?"); return; }
       comp   = type;
-      prec   = buff[0];
+      //prec   = buff[0];
       height = 256*buff[1]+buff[2];
       width  = 256*buff[3]+buff[4];
       comps  = buff[5];

@@ -647,6 +647,7 @@ void pplfunc_factors(ppl_context *c, pplObj *in, int nArgs, int *status, int *er
 
 void pplfunc_finite      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
+  pplObjBool(&OUTPUT,0,0);
   if ((c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && (in[0].flagComplex)) return;
   if ((!gsl_finite(in[0].real)) || (!gsl_finite(in[0].imag))) return;
   OUTPUT.real = 1;
@@ -895,7 +896,6 @@ void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
      {
       if ((best==NULL)||(pplObjCmpQuiet((void*)&item, (void*)&best)==1)) best=item;
-      if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjCpy (&OUTPUT,best,0,0,1);
@@ -908,7 +908,6 @@ void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
      {
       if ((best==NULL)||(pplObjCmpQuiet((void*)&item, (void*)&best)==1)) best=item;
-      if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjCpy (&OUTPUT,best,0,0,1);
@@ -941,7 +940,6 @@ void pplfunc_max         (ppl_context *c, pplObj *in, int nArgs, int *status, in
      {
       pplObj *x=&in[i];
       if (pplObjCmpQuiet((void*)&x, (void*)&best)==1) best=&in[i];
-      if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjCpy (&OUTPUT,best,0,0,1);
@@ -958,7 +956,6 @@ void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
      {
       if ((best==NULL)||(pplObjCmpQuiet((void*)&item, (void*)&best)==-1)) best=item;
-      if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjCpy (&OUTPUT,best,0,0,1);
@@ -971,7 +968,6 @@ void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, in
     while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
      {
       if ((best==NULL)||(pplObjCmpQuiet((void*)&item, (void*)&best)==-1)) best=item;
-      if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjCpy (&OUTPUT,best,0,0,1);
@@ -1004,7 +1000,6 @@ void pplfunc_min         (ppl_context *c, pplObj *in, int nArgs, int *status, in
      {
       pplObj *x=&in[i];
       if (pplObjCmpQuiet((void*)&x, (void*)&best)==-1) best=&in[i];
-      if (status) return;
      }
     if (best==NULL) pplObjNull(&OUTPUT,0);
     else            pplObjCpy (&OUTPUT,best,0,0,1);
@@ -1101,6 +1096,11 @@ void pplfunc_primefactors(ppl_context *c, pplObj *in, int nArgs, int *status, in
   int     i,n=(int)in[0].real;
   char   *FunctionDescription = "primeFactors(x)";
   CHECK_NEEDINT(in[0], "x", "function's argument must be");
+  if (in[0].real < 1)
+   {
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The %s function's argument must be in the range 1 <= x < %d.",FunctionDescription,INT_MAX); return; }
+    else { NULL_OUTPUT; }
+   }
   if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   v.refCount=1;
   l = (list *)OUTPUT.auxil;
