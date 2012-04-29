@@ -190,7 +190,7 @@ void help_explore(pplerr_context *c, xmlNode *node, xmlNode **matchNode, list *t
   return;
  }
 
-void directive_help(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+void ppl_directive_help(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
  {
   pplerr_context *e     = &c->errcontext;
   list    *topicWords   = NULL; // A list of the help topic words supplied by the user

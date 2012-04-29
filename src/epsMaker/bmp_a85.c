@@ -38,7 +38,7 @@
 
 #define LINELEN 56
 
-unsigned int bmp_A85(pplerr_context *ec, FILE* fout, unsigned char* in, int len)
+unsigned int ppl_bmp_A85(pplerr_context *ec, FILE* fout, unsigned char* in, int len)
  {
   int           i, j;
   unsigned int  tmp, t, line, length=0;

@@ -67,7 +67,7 @@
 
 #define TBADD(et,pos) ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,pos,pl->linetxt,"")
 
-void directive_assert(ppl_context *c, parserLine *pl, parserOutput *in)
+void ppl_directive_assert(ppl_context *c, parserLine *pl, parserOutput *in)
  {
   pplObj *stk = in->stk;
   int     lt;
@@ -132,7 +132,7 @@ void directive_assert(ppl_context *c, parserLine *pl, parserOutput *in)
   return;
  }
 
-void directive_cd(ppl_context *c, parserLine *pl, parserOutput *in)
+void ppl_directive_cd(ppl_context *c, parserLine *pl, parserOutput *in)
  {
   pplObj *stk = in->stk;
   int     pos = PARSE_cd_path;
@@ -162,7 +162,7 @@ void directive_cd(ppl_context *c, parserLine *pl, parserOutput *in)
   return;
  }
 
-void directive_exec(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_exec(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj       *stk = in->stk;
   char         *cmd = (char *)stk[PARSE_exec_command].auxil;
@@ -184,7 +184,7 @@ void directive_exec(ppl_context *c, parserLine *pl, parserOutput *in, int intera
   return;
  }
 
-void directive_global(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_global(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj *stk = in->stk;
   int     pos;
@@ -222,7 +222,7 @@ void directive_global(ppl_context *c, parserLine *pl, parserOutput *in, int inte
   return;
  }
 
-void directive_history(ppl_context *c, parserLine *pl, parserOutput *in)
+void ppl_directive_history(ppl_context *c, parserLine *pl, parserOutput *in)
  {
 #ifdef HAVE_READLINE
   pplObj *stk = in->stk;
@@ -247,7 +247,7 @@ void directive_history(ppl_context *c, parserLine *pl, parserOutput *in)
 #endif
  }
 
-void directive_load(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_load(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj *stk = in->stk;
   char   *fn  = (char *)stk[PARSE_load_filename].auxil;
@@ -267,7 +267,7 @@ void directive_load(ppl_context *c, parserLine *pl, parserOutput *in, int intera
   return;
  }
 
-void directive_local(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_local(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj *stk = in->stk;
   int     pos;
@@ -292,7 +292,7 @@ void directive_local(ppl_context *c, parserLine *pl, parserOutput *in, int inter
   return;
  }
 
-void directive_print(ppl_context *c, parserLine *pl, parserOutput *in)
+void ppl_directive_print(ppl_context *c, parserLine *pl, parserOutput *in)
  {
   pplObj *stk = in->stk;
   int     pos = PARSE_print_0print_list;
@@ -311,7 +311,7 @@ void directive_print(ppl_context *c, parserLine *pl, parserOutput *in)
   return;
  }
 
-void directive_save(ppl_context *c, parserLine *pl, parserOutput *in)
+void ppl_directive_save(ppl_context *c, parserLine *pl, parserOutput *in)
  {
 #ifdef HAVE_READLINE
   pplObj *stk = in->stk;
@@ -349,7 +349,7 @@ void directive_save(ppl_context *c, parserLine *pl, parserOutput *in)
 #endif
  }
 
-void directive_seterror(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+void ppl_directive_seterror(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
  {
   pplObj *o = &in->stk[PARSE_set_error_set_option];
   char *tempstr = (o->objType==PPLOBJ_STR) ? (char *)in->stk[PARSE_set_error_set_option].auxil : NULL;
@@ -366,7 +366,7 @@ void directive_seterror(ppl_context *c, parserLine *pl, parserOutput *in, int in
   return;
  }
 
-void directive_unseterror(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+void ppl_directive_unseterror(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
  {
   pplObj *o = &in->stk[PARSE_set_error_set_option];
   char *tempstr = (o->objType==PPLOBJ_STR) ? (char *)in->stk[PARSE_set_error_set_option].auxil : NULL;
@@ -383,7 +383,7 @@ void directive_unseterror(ppl_context *c, parserLine *pl, parserOutput *in, int 
   return;
  }
 
-void directive_varset(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_varset(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj *stk = in->stk;
   int     om, rc;

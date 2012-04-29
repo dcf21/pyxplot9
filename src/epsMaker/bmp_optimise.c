@@ -38,7 +38,7 @@
 #include "epsMaker/bmp_optimise.h"
 #include "epsMaker/bmp_image.h"
 
-void bmp_colour_count(pplerr_context *ec, bitmap_data *image)
+void ppl_bmp_colour_count(pplerr_context *ec, bitmap_data *image)
  {
   unsigned long size, i;
   int ncols,j,colour;
@@ -107,7 +107,7 @@ void bmp_colour_count(pplerr_context *ec, bitmap_data *image)
   return;
  }
 
-void bmp_palette_check(pplerr_context *ec, bitmap_data *image)
+void ppl_bmp_palette_check(pplerr_context *ec, bitmap_data *image)
  {
   int i;
   unsigned long size;
@@ -130,7 +130,7 @@ void bmp_palette_check(pplerr_context *ec, bitmap_data *image)
   return;
  }
 
-void bmp_grey_check(pplerr_context *ec, bitmap_data *image)
+void ppl_bmp_grey_check(pplerr_context *ec, bitmap_data *image)
  {
   int           i,grey,depth=8,magic,test;
   unsigned int  ncols;
@@ -196,9 +196,9 @@ void bmp_grey_check(pplerr_context *ec, bitmap_data *image)
   image->palette = NULL;
   if (depth <= 4)
    {
-    image->pal_len = 1<<depth; // Fudge settings so that bmp_compact is happy
+    image->pal_len = 1<<depth; // Fudge settings so that ppl_bmp_compact is happy
     image->type    = BMP_COLOUR_PALETTE;
-    bmp_compact(ec, image);
+    ppl_bmp_compact(ec, image);
    }
   image->type    = BMP_COLOUR_BMP;
   image->colour  = BMP_COLOUR_GREY;
@@ -206,7 +206,7 @@ void bmp_grey_check(pplerr_context *ec, bitmap_data *image)
   return;
  }
 
-void bmp_compact(pplerr_context *ec, bitmap_data *image)
+void ppl_bmp_compact(pplerr_context *ec, bitmap_data *image)
  {
   int ncols,i,j,height,width;
   unsigned char *p,*p2,ctmp;

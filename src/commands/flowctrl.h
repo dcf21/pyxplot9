@@ -26,18 +26,18 @@
 #include "userspace/context.h"
 #include "userspace/pplObj.h"
 
-void directive_break   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
-void directive_continue(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
-void directive_return  (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+void ppl_directive_break   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+void ppl_directive_continue(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+void ppl_directive_return  (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 
-void directive_do      (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
-void directive_for     (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
-void directive_foreach (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
-void directive_fordata (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
-void directive_if      (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
-void directive_subrt   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
-void directive_while   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
-void directive_with    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+void ppl_directive_do      (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+void ppl_directive_for     (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+void ppl_directive_foreach (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+void ppl_directive_fordata (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+void ppl_directive_if      (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+void ppl_directive_subrt   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+void ppl_directive_while   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+void ppl_directive_with    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 
 #endif
 

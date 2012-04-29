@@ -50,7 +50,7 @@
 
 #define TBADD(et,charpos) ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,charpos,pl->linetxt,"")
 
-void directive_funcset(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+void ppl_directive_funcset(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
  {
   pplObj  *stk = in->stk;
   pplFunc *f   = NULL;

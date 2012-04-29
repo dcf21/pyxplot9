@@ -54,8 +54,8 @@ void eps_ellps_RenderEPS(EPSComm *x)
   // Expand any numbered styles which may appear in the with words we are passed
   ppl_withWordsMerge(x->c, &ww, &x->current->with_data, NULL, NULL, NULL, NULL, 1);
 
-  // Set colour of outline of ellipse
-  eps_core_SetColour(x, &ww, 1);
+  // Set color of outline of ellipse
+  eps_core_SetColor(x, &ww, 1);
 
   // Set linewidth and linetype of outline
   if (ww.USElinewidth) lw_scale = ww.linewidth;
@@ -73,9 +73,9 @@ void eps_ellps_RenderEPS(EPSComm *x)
   fprintf(x->epsbuffer, "%.2f rotate\n", r*180/M_PI);
   fprintf(x->epsbuffer, "%.2f %.2f scale\n", a, b);
 
-  // Set fill colour of ellipse
-  eps_core_SetFillColour(x, &ww);
-  eps_core_SwitchTo_FillColour(x,1);
+  // Set fill color of ellipse
+  eps_core_SetFillColor(x, &ww);
+  eps_core_SwitchTo_FillColor(x,1);
 
   // Fill ellipse
   IF_NOT_INVISIBLE
@@ -85,8 +85,8 @@ void eps_ellps_RenderEPS(EPSComm *x)
     filled = 1;
    }
 
-  // Set colour of outline of ellipse
-  eps_core_SetColour(x, &ww, 1);
+  // Set color of outline of ellipse
+  eps_core_SetColor(x, &ww, 1);
 
   // Make path representing the outline of ellipse
   IF_NOT_INVISIBLE
@@ -106,7 +106,7 @@ void eps_ellps_RenderEPS(EPSComm *x)
 
   // Undo scaling of postscript axes
   fprintf(x->epsbuffer, "grestore\n");
-  x->LastLinewidth = -1; x->LastLinetype = -1; x->LastPSColour[0]='\0';
+  x->LastLinewidth = -1; x->LastLinetype = -1; x->LastPSColor[0]='\0';
 
   // Factor ellipse into EPS file's bounding box
   if (filled || stroked)

@@ -33,8 +33,8 @@
 #define EPS_BASE_AXES_MINTICKLEN   ( 0.000848528137 ) /* 0.0012 divided by sqrt(2) */
 #define EPS_BASE_AXES_SEPARATION   ( 0.008          )
 #define EPS_BASE_AXES_TEXTGAP      ( 0.003          )
-#define EPS_BASE_COLOURSCALE_MARG  ( 3e-3           )
-#define EPS_BASE_COLOURSCALE_WIDTH ( 4e-3           )
+#define EPS_BASE_COLORSCALE_MARG   ( 3e-3           )
+#define EPS_BASE_COLORSCALE_WIDTH  ( 4e-3           )
 #define EPS_BASE_GRID_MAJLINEWIDTH ( 1.0            )
 #define EPS_BASE_GRID_MINLINEWIDTH ( 0.5            )
 
@@ -51,8 +51,8 @@ extern double EPS_AXES_MAJTICKLEN;
 extern double EPS_AXES_MINTICKLEN;
 extern double EPS_AXES_SEPARATION;
 extern double EPS_AXES_TEXTGAP;
-extern double EPS_COLOURSCALE_MARGIN;
-extern double EPS_COLOURSCALE_WIDTH;
+extern double EPS_COLORSCALE_MARGIN;
+extern double EPS_COLORSCALE_WIDTH;
 extern double EPS_GRID_MAJLINEWIDTH;
 extern double EPS_GRID_MINLINEWIDTH;
 #endif

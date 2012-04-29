@@ -54,9 +54,9 @@ void          pplarrow_print       (ppl_context *context, pplarrow_object  *in, 
 #define pplarrow_add_check_axis(X) \
  { \
   pplObj *o = &in->stk[ptab[X]]; /* e.g. x0_axis */ \
-  int     i = (int)round(o->real); \
   if (o->objType == PPLOBJ_NUM) \
    { \
+    int i = (int)round(o->real); \
     if ((i<0)||(i>=MAX_AXES)) \
      { \
       sprintf(context->errStat.errBuff, "Axis number %d is out of range; axis numbers must be in the range 0 - %d", i, MAX_AXES-1); \

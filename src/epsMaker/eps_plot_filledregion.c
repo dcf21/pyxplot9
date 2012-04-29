@@ -315,7 +315,7 @@ void FilledRegion_Finish(EPSComm *X, FilledRegionHandle *fr, int linetype, doubl
   li = fr->points->first;
   if (l < 2) return; // No points on outline to stroke
   if (!fr->EverInside) return; // Path never ventures within clip region
-  eps_core_WritePSColour(fr->x);
+  eps_core_WritePSColor(fr->x);
 
   // Path never goes outside the clip region
   if (fr->Naxiscrossings < 1)
@@ -332,7 +332,7 @@ void FilledRegion_Finish(EPSComm *X, FilledRegionHandle *fr, int linetype, doubl
        }
       fprintf(fr->x->epsbuffer, "closepath eofill\n");
      }
-    eps_core_SwitchFrom_FillColour(fr->x,1);
+    eps_core_SwitchFrom_FillColor(fr->x,1);
     if (!StrokeOutline) return;
     eps_core_SetLinewidth(fr->x, linewidth, linetype, 0.0);
     li = fr->points->first;
@@ -440,7 +440,7 @@ void FilledRegion_Finish(EPSComm *X, FilledRegionHandle *fr, int linetype, doubl
   if (DEBUG) { ppl_log(&fr->x->c->errcontext,"New filled region which crosses edge of clip region."); }
   if (DEBUG) { ppl_log(&fr->x->c->errcontext,"1. Fill it."); }
   IF_NOT_INVISIBLE OutputPath(fr, CrossPointList, j, "eofill", linewidth);
-  eps_core_SwitchFrom_FillColour(fr->x,1);
+  eps_core_SwitchFrom_FillColor(fr->x,1);
   if (!StrokeOutline) return;
   eps_core_SetLinewidth(fr->x, linewidth, linetype, 0.0);
   li = fr->points->first;

@@ -67,16 +67,16 @@ void eps_text_RenderEPS(EPSComm *x)
 
   // Work out text color
   ppl_withWordsZero(x->c , &def);
-  def.color    = x->current->settings.TextColour;
-  def.color1   = x->current->settings.TextColour1;
-  def.color2   = x->current->settings.TextColour2;
-  def.color3   = x->current->settings.TextColour3;
-  def.color4   = x->current->settings.TextColour4;
+  def.color    = x->current->settings.TextColor;
+  def.color1   = x->current->settings.TextColor1;
+  def.color2   = x->current->settings.TextColor2;
+  def.color3   = x->current->settings.TextColor3;
+  def.color4   = x->current->settings.TextColor4;
   def.Col1234Space = x->current->settings.TextCol1234Space;
   def.USEcolor     = (def.color!=0);
   def.USEcolor1234 = (def.color==0);
   ppl_withWordsMerge(x->c , &merged, &x->current->with_data, &def, NULL, NULL, NULL, 1);
-  eps_core_SetColour(x, &merged, 1);
+  eps_core_SetColor(x, &merged, 1);
 
   // Render text item to eps
   xgap  = -(x->current->settings.TextHAlign - SW_HALIGN_CENT) * x->current->xpos2;
@@ -86,7 +86,7 @@ void eps_text_RenderEPS(EPSComm *x)
   ygap2 = xgap*sin(x->current->rotation) + ygap*cos(x->current->rotation);
 
   canvas_EPSRenderTextItem(x, NULL, pageno, x->current->xpos + xgap2, x->current->ypos + ygap2,
-      x->current->settings.TextHAlign, x->current->settings.TextVAlign, x->CurrentColour, x->current->settings.FontSize, x->current->rotation, NULL, NULL);
+      x->current->settings.TextHAlign, x->current->settings.TextVAlign, x->CurrentColor, x->current->settings.FontSize, x->current->rotation, NULL, NULL);
 
   // Free with words
   ppl_withWordsDestroy(x->c, &merged);

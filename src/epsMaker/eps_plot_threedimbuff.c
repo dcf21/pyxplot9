@@ -92,7 +92,7 @@ int ThreeDimBuffer_Deactivate(EPSComm *x)
   ThreeDimBuffer_ACTIVE = 0;
   if (Nitems > 0)
    {
-    eps_core_WritePSColour(x);
+    eps_core_WritePSColor(x);
 
     // Display all items in 3D display buffer, from back to front
     DepthArray = (struct DepthArrayEntry *)ppl_memAlloc(Nitems * sizeof(struct DepthArrayEntry));
@@ -136,8 +136,8 @@ int ThreeDimBuffer_writeps(EPSComm *x, double z, int linetype, double linewidth,
    {
     if ((!pointsize_old_SET) || (pointsize_old != pointsize)) { pointsize_old_SET=1; pointsize_old=pointsize; fprintf(x->epsbuffer, "/ps { %f } def\n", pointsize * EPS_DEFAULT_PS); }
     colstr_old = colstr;
-    strcpy(x->CurrentColour, colstr);
-    eps_core_WritePSColour(x);
+    strcpy(x->CurrentColor, colstr);
+    eps_core_WritePSColor(x);
     eps_core_SetLinewidth(x, linewidth * EPS_DEFAULT_LINEWIDTH, linetype, offset);
     fprintf(x->epsbuffer, "%s\n", psfrag);
    }
@@ -185,7 +185,7 @@ int ThreeDimBuffer_linesegment(EPSComm *x, double z, int linetype, double linewi
       linetype_old     = linetype;
       linewidth_old    = linewidth;
       eps_core_SetLinewidth(x, linewidth * EPS_DEFAULT_LINEWIDTH, linetype, broken ? (LengthOffset-hypot(x1-x0,y1-y0)) : 0.0);
-      if ((colstr_old == NULL) || (strcmp(colstr_old, colstr)!=0)) { colstr_old = colstr; strcpy(x->CurrentColour, colstr); eps_core_WritePSColour(x); }
+      if ((colstr_old == NULL) || (strcmp(colstr_old, colstr)!=0)) { colstr_old = colstr; strcpy(x->CurrentColor, colstr); eps_core_WritePSColor(x); }
 
 
       if (FirstSegment) fprintf(x->epsbuffer, "newpath\n%.2f %.2f moveto\n%.2f %.2f lineto\n", x1, y1, x2, y2);

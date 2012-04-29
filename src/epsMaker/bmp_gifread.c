@@ -36,7 +36,7 @@
 #include "epsMaker/bmp_image.h"
 #include "epsMaker/bmp_gifread.h"
 
-void bmp_gifread(pplerr_context *ec, FILE *in, bitmap_data *image)
+void ppl_bmp_gifread(pplerr_context *ec, FILE *in, bitmap_data *image)
  {
   unsigned char buff[8],flags,len,*rawz;
   int gcm,ncols,interlaced;
@@ -169,7 +169,7 @@ void bmp_gifread(pplerr_context *ec, FILE *in, bitmap_data *image)
   image->data = (unsigned char *)ppl_memAlloc(width*height);
   if (image->data == NULL) { ppl_error(ec, ERR_MEMORY, -1, -1,"Out of memory"); return; }
 
-  datalen = bmp_de_lzw(ec,rawz,image->data,width*height,lzwcs);
+  datalen = ppl_bmp_de_lzw(ec,rawz,image->data,width*height,lzwcs);
 
   if (datalen == 0) { image->data = NULL; return; } // Subroutine failed
   if (datalen != width*height) { sprintf(ec->tempErrStr, "Decoding error whilst processing GIF image file. Expecting %ld bytes of decoded data, but received %ld.",width*height,datalen); ppl_error(ec, ERR_FILE, -1, -1, NULL); return; }
@@ -183,12 +183,12 @@ void bmp_gifread(pplerr_context *ec, FILE *in, bitmap_data *image)
 
   if (interlaced)
    {
-    if (bmp_de_gifinterlace(ec,image)) { image->data = NULL; return; } // Subroutine failed
+    if (ppl_bmp_de_gifinterlace(ec,image)) { image->data = NULL; return; } // Subroutine failed
    }
   return;
  }
 
-int bmp_de_gifinterlace(pplerr_context *ec, bitmap_data *image)
+int ppl_bmp_de_gifinterlace(pplerr_context *ec, bitmap_data *image)
  {
   int i,j;
   unsigned char *out,*in,*outp;
@@ -240,7 +240,7 @@ int bmp_de_gifinterlace(pplerr_context *ec, bitmap_data *image)
 
 #define MAXCS 12
 
-unsigned long bmp_de_lzw(pplerr_context *ec, unsigned char *buff, unsigned char *out, unsigned long len, int cs)
+unsigned long ppl_bmp_de_lzw(pplerr_context *ec, unsigned char *buff, unsigned char *out, unsigned long len, int cs)
  {
   unsigned char store[256], *start, *end;
   unsigned int off,tpos,eoi,clr;
@@ -266,12 +266,12 @@ unsigned long bmp_de_lzw(pplerr_context *ec, unsigned char *buff, unsigned char 
     store[i]     = (unsigned char)i;
    }
 
-  i = bmp_de_lzw_bits(ec,buff,0,ccs);
+  i = ppl_bmp_de_lzw_bits(ec,buff,0,ccs);
   if (i!=clr) { sprintf(ec->tempErrStr, "Whilst decoding GIF image file, encountered de_lzw error: ClearCode not first code, but instead got %x",i); ppl_error(ec, ERR_FILE, -1, -1, NULL); return 0; }
 
   while(1)
    {
-    i = bmp_de_lzw_bits(ec,buff+(off>>3),off&7,ccs);
+    i = ppl_bmp_de_lzw_bits(ec,buff+(off>>3),off&7,ccs);
     off += ccs;
 
     if (i==clr)
@@ -302,7 +302,7 @@ unsigned long bmp_de_lzw(pplerr_context *ec, unsigned char *buff, unsigned char 
   return 0;
  }
 
-unsigned int bmp_de_lzw_bits(pplerr_context *ec, unsigned char *c,int st, int len)
+unsigned int ppl_bmp_de_lzw_bits(pplerr_context *ec, unsigned char *c,int st, int len)
  {
   unsigned tmp,mask;
 

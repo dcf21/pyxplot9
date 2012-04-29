@@ -168,10 +168,10 @@ void eps_plot_axispaint(EPSComm *x, withWords *ww, pplset_axis *a, const int xyz
               if (z1==NULL) fprintf(x->epsbuffer, "newpath %.2f %.2f moveto %.2f %.2f lineto stroke\n", tic_x2, tic_y2, tic_x3, tic_y3);
               else
                {
-                if ((last_colstr==NULL)||(strcmp(last_colstr,x->CurrentColour)!=0)) last_colstr = (char *)ppl_memAlloc(strlen(x->CurrentColour)+1);
+                if ((last_colstr==NULL)||(strcmp(last_colstr,x->CurrentColor)!=0)) last_colstr = (char *)ppl_memAlloc(strlen(x->CurrentColor)+1);
                 if (last_colstr!=NULL)
                  {
-                  strcpy(last_colstr, x->CurrentColour);
+                  strcpy(last_colstr, x->CurrentColor);
                   sprintf(x->c->errcontext.tempErrStr, "newpath %.2f %.2f moveto %.2f %.2f lineto stroke\n", tic_x2, tic_y2, tic_x3, tic_y3);
                   ThreeDimBuffer_writeps(x, *z1 + (*z2-*z1)*TLP[l], lt, lw, 0.0, 1, last_colstr, x->c->errcontext.tempErrStr);
                  }
@@ -194,16 +194,16 @@ void eps_plot_axispaint(EPSComm *x, withWords *ww, pplset_axis *a, const int xyz
             IF_NOT_INVISIBLE
              {
               char *text=NULL;
-              canvas_EPSRenderTextItem(x, &text, pageno, xlab, ylab, HALIGN_THIS, VALIGN_THIS, x->CurrentColour, x->current->settings.FontSize, theta, &width, &height);
+              canvas_EPSRenderTextItem(x, &text, pageno, xlab, ylab, HALIGN_THIS, VALIGN_THIS, x->CurrentColor, x->current->settings.FontSize, theta, &width, &height);
               if (text!=NULL)
                {
                 if (z1==NULL) fprintf(x->epsbuffer, "%s", text);
                 else
                  {
-                  if ((last_colstr==NULL)||(strcmp(last_colstr,x->CurrentColour)!=0)) last_colstr = (char *)ppl_memAlloc(strlen(x->CurrentColour)+1);
+                  if ((last_colstr==NULL)||(strcmp(last_colstr,x->CurrentColor)!=0)) last_colstr = (char *)ppl_memAlloc(strlen(x->CurrentColor)+1);
                   if (last_colstr!=NULL)
                    {
-                    strcpy(last_colstr, x->CurrentColour);
+                    strcpy(last_colstr, x->CurrentColor);
                     ThreeDimBuffer_writeps(x, *z1 + (*z2-*z1)*TLP[l], lt, lw, 0.0, 1, last_colstr, text);
                    }
                  }
@@ -241,17 +241,17 @@ void eps_plot_axispaint(EPSComm *x, withWords *ww, pplset_axis *a, const int xyz
         if (theta_text >  M_PI  ) theta_text -= 2*M_PI;
         if (theta_text >  M_PI/2) theta_text -=   M_PI;
         if (theta_text < -M_PI/2) theta_text +=   M_PI;
-        canvas_EPSRenderTextItem(x, &text, pageno, xlab, ylab, HALIGN, VALIGN, x->CurrentColour, x->current->settings.FontSize, theta_text, &width, &height);
+        canvas_EPSRenderTextItem(x, &text, pageno, xlab, ylab, HALIGN, VALIGN, x->CurrentColor, x->current->settings.FontSize, theta_text, &width, &height);
         *OutputWidth += (EPS_AXES_TEXTGAP * M_TO_PS + height*fabs(cos(theta_pinpoint)) + width*fabs(sin(theta_pinpoint)) ); // Allow gap after label
         if (text!=NULL)
          {
           if (z1==NULL) fprintf(x->epsbuffer, "%s", text);
           else
            {
-            if ((last_colstr==NULL)||(strcmp(last_colstr,x->CurrentColour)!=0)) last_colstr = (char *)ppl_memAlloc(strlen(x->CurrentColour)+1);
+            if ((last_colstr==NULL)||(strcmp(last_colstr,x->CurrentColor)!=0)) last_colstr = (char *)ppl_memAlloc(strlen(x->CurrentColor)+1);
             if (last_colstr!=NULL)
              {
-              strcpy(last_colstr, x->CurrentColour);
+              strcpy(last_colstr, x->CurrentColor);
               ThreeDimBuffer_writeps(x, (*z2+*z1)/2, lt, lw, 0.0, 1, last_colstr, text);
              }
            }
@@ -273,13 +273,13 @@ void eps_plot_axespaint(EPSComm *x, double origin_x, double origin_y, double wid
 
   if ((pass==0) && (!x->current->ThreeDim)) return; // 2D plots do not have back axes
 
-  // Set colour for painting axes
+  // Set color for painting axes
   ppl_withWordsZero(x->c,&ww);
-  if (x->current->settings.AxesColour > 0) { ww.color = x->current->settings.AxesColour; ww.USEcolor = 1; }
-  else                                     { ww.Col1234Space = x->current->settings.AxesCol1234Space; ww.color1 = x->current->settings.AxesColour1; ww.color2 = x->current->settings.AxesColour2; ww.color3 = x->current->settings.AxesColour3; ww.color4 = x->current->settings.AxesColour4; ww.USEcolor1234 = 1; }
+  if (x->current->settings.AxesColor > 0) { ww.color = x->current->settings.AxesColor; ww.USEcolor = 1; }
+  else                                    { ww.Col1234Space = x->current->settings.AxesCol1234Space; ww.color1 = x->current->settings.AxesColor1; ww.color2 = x->current->settings.AxesColor2; ww.color3 = x->current->settings.AxesColor3; ww.color4 = x->current->settings.AxesColor4; ww.USEcolor1234 = 1; }
   ww.linewidth = EPS_AXES_LINEWIDTH; ww.USElinewidth = 1;
   ww.linetype  = 1;                  ww.USElinetype  = 1;
-  eps_core_SetColour(x, &ww, 1);
+  eps_core_SetColor(x, &ww, 1);
   IF_NOT_INVISIBLE eps_core_SetLinewidth(x, EPS_AXES_LINEWIDTH * EPS_DEFAULT_LINEWIDTH, 1, 0.0);
 
   // Reset plot bounding box; we're about to make this sensible below by factoring in plot vertices

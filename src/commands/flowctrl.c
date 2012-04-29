@@ -74,7 +74,7 @@
     } \
    } \
 
-void directive_break(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_break(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj      *stk   = in->stk;
   int          named = (stk[PARSE_break_loopname].objType == PPLOBJ_STR);
@@ -99,7 +99,7 @@ void directive_break(ppl_context *c, parserLine *pl, parserOutput *in, int inter
   return;
  }
 
-void directive_continue(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_continue(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj      *stk   = in->stk;
   int          named = (stk[PARSE_continue_loopname].objType == PPLOBJ_STR);
@@ -124,7 +124,7 @@ void directive_continue(ppl_context *c, parserLine *pl, parserOutput *in, int in
   return;
  }
 
-void directive_return(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_return(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj *stk    = in->stk;
   pplObj *retval = &stk[PARSE_return_return_value];
@@ -140,7 +140,7 @@ void directive_return(ppl_context *c, parserLine *pl, parserOutput *in, int inte
   return;
  }
 
-void directive_do(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_do(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   int          criterion = 1;
   pplObj      *stk  = in->stk;
@@ -180,7 +180,7 @@ cleanup:
   return;
  }
 
-void directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj      *stk       = in->stk;
   int          BASICstyle= (stk[PARSE_for_var_name].objType == PPLOBJ_STR);
@@ -281,7 +281,7 @@ cleanup:
   return;
  }
 
-void directive_foreach(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_foreach(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj      *stk     = in->stk;
   pplObj      *iter    = &stk[PARSE_foreach_item_list];
@@ -373,12 +373,12 @@ cleanup:
   return;
  }
 
-void directive_fordata(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_fordata(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   return;
  }
 
-void directive_if(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_if(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj      *stk     = in->stk;
   parserLine  *pl_if   = (parserLine *)stk[PARSE_if_code     ].auxil;
@@ -441,7 +441,7 @@ void directive_if(ppl_context *c, parserLine *pl, parserOutput *in, int interact
   return;
  }
 
-void directive_subrt(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_subrt(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj     *stk   = in->stk;
   parserLine *plsub = (parserLine *)stk[PARSE_subroutine_code     ].auxil;
@@ -525,7 +525,7 @@ fail:
   return;
  }
 
-void directive_while(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_while(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   int          criterion = 1;
   pplObj      *stk  = in->stk;
@@ -565,7 +565,7 @@ cleanup:
   return;
  }
 
-void directive_with(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_with(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj     *stk         = in->stk;
   parserLine *pl2         = (parserLine *)stk[PARSE_with_code].auxil;

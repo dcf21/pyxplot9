@@ -71,12 +71,12 @@ static void _ReadConfig_FetchValue(char *line, char *out)
 
 static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
  {
-  char   linebuffer[LSTR_LENGTH], setkey[LSTR_LENGTH], setvalue[LSTR_LENGTH], ColourName[SSTR_LENGTH], *StringScan;
+  char   linebuffer[LSTR_LENGTH], setkey[LSTR_LENGTH], setvalue[LSTR_LENGTH], ColorName[SSTR_LENGTH], *StringScan;
   char   errtext[LSTR_LENGTH];
   FILE  *infile;
   int    state=-1;
   int    linecounter=0;
-  int    i, j, k, PalettePos, ColourNumber;
+  int    i, j, k, PalettePos, ColorNumber;
   double fl, PaperHeight, PaperWidth;
 
   if (DEBUG) { sprintf(c->errcontext.tempErrStr, "Scanning configuration file %s.", ConfigFname); ppl_log(&c->errcontext, NULL); }
@@ -96,6 +96,7 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
     else if (ppl_strCmpNoCase(linebuffer, "[settings]" )==0) {state= 1; continue;}
     else if (ppl_strCmpNoCase(linebuffer, "[terminal]" )==0) {state= 2; continue;}
     else if (ppl_strCmpNoCase(linebuffer, "[colours]"  )==0) {state= 3; continue;}
+    else if (ppl_strCmpNoCase(linebuffer, "[colors]"   )==0) {state= 3; continue;}
     else if (ppl_strCmpNoCase(linebuffer, "[latex]"    )==0) {state= 4; continue;}
     else if (ppl_strCmpNoCase(linebuffer, "[variables]")==0) {state= 5; continue;}
     else if (ppl_strCmpNoCase(linebuffer, "[functions]")==0) {state= 6; continue;}
@@ -128,9 +129,9 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
       else if (strcmp(setkey, "AUTOZASPECT"  )==0)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_ONOFF_INT, SW_ONOFF_STR ))>0)                      c->set->graph_default.AutoZAspect    = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting AutoZAspect."  , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
-      else if (strcmp(setkey, "AXESCOLOUR"   )==0)
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_COLOR_INT,SW_COLOR_STR))>0)                      c->set->graph_default.AxesColour    = i;
-        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Colour."       , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
+      else if((strcmp(setkey, "AXESCOLOUR"   )==0) || (strcmp(setkey, "AXESCOLOR")==0))
+        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_COLOR_INT,SW_COLOR_STR))>0)                      c->set->graph_default.AxesColor    = i;
+        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Color."       , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "AXISUNITSTYLE")==0)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_AXISUNITSTY_INT,SW_AXISUNITSTY_STR))>0)            c->set->graph_default.AxisUnitStyle = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting AxisUnitStyle.", linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
@@ -171,9 +172,9 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
       else if (strcmp(setkey, "COLKEYPOS"    )==0)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_COLKEYPOS_INT,SW_COLKEYPOS_STR))>0)                c->set->graph_default.ColKeyPos     = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting ColKeyPos."    , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
-      else if (strcmp(setkey, "COLOUR"       )==0)
+      else if((strcmp(setkey, "COLOUR"       )==0) || (strcmp(setkey, "COLOR")==0))
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_ONOFF_INT, SW_ONOFF_STR ))>0)                      c->set->term_default .color         = i;
-        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Colour."       , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
+        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Color."       , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "CONTOURS"     )==0)
         if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->graph_default.ContoursN     = ppl_max((int)fl, 2);
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Contours."     , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
@@ -247,12 +248,12 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
           c->set->graph_default.GridAxisZ[(int)fl] = 1;
          }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting GridAxisZ."    , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
-      else if (strcmp(setkey, "GRIDMAJCOLOUR")==0)
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_COLOR_INT,SW_COLOR_STR))>0)                      c->set->graph_default.GridMajColour = i;
-        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting GridMajColour.", linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
-      else if (strcmp(setkey, "GRIDMINCOLOUR")==0)
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_COLOR_INT,SW_COLOR_STR))>0)                      c->set->graph_default.GridMinColour = i;
-        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting GridMinColour.", linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
+      else if((strcmp(setkey, "GRIDMAJCOLOUR")==0) || (strcmp(setkey, "GRIDMAJCOLOR")==0))
+        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_COLOR_INT,SW_COLOR_STR))>0)                      c->set->graph_default.GridMajColor = i;
+        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting GridMajColor.", linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
+      else if((strcmp(setkey, "GRIDMINCOLOUR")==0) || (strcmp(setkey, "GRIDMINCOLOR")==0))
+        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_COLOR_INT,SW_COLOR_STR))>0)                      c->set->graph_default.GridMinColor = i;
+        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting GridMinColor.", linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "KEY"          )==0)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_ONOFF_INT, SW_ONOFF_STR ))>0)                      c->set->graph_default.key           = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Key."          , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
@@ -364,9 +365,9 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
       else if (strcmp(setkey, "TERMTYPE"     )==0)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_TERMTYPE_INT,SW_TERMTYPE_STR))>0)                  c->set->term_default.TermType  = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting TermType."     , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
-      else if (strcmp(setkey, "TEXTCOLOUR"   )==0)
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_COLOR_INT,SW_COLOR_STR))>0)                      c->set->graph_default.TextColour    = i;
-        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting TextColour."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
+      else if((strcmp(setkey, "TEXTCOLOUR"   )==0) || (strcmp(setkey, "TEXTCOLOR")==0))
+        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_COLOR_INT,SW_COLOR_STR))>0)                      c->set->graph_default.TextColor    = i;
+        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting TextColor."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "TEXTHALIGN"   )==0)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_HALIGN_INT,SW_HALIGN_STR))>0)                      c->set->graph_default.TextHAlign    = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting TextHAlign."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
@@ -435,32 +436,32 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
     else if (state == 2) // [terminal] section
      {
       ppl_strUpper(setkey, setkey);
-      if      (strcmp(setkey, "COLOUR"       )==0)
+      if     ((strcmp(setkey, "COLOUR"       )==0) || (strcmp(setkey, "COLOR"       )==0))
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue, SW_ONOFF_INT,   SW_ONOFF_STR  ))>0)                      c->errcontext.session_default.color      = i;
-        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Colour."       , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
-      else if (strcmp(setkey, "COLOUR_ERR"   )==0)
+        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Color."       , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
+      else if((strcmp(setkey, "COLOUR_ERR"   )==0) || (strcmp(setkey, "COLOR_ERR"   )==0))
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue, SW_TERMCOL_INT, SW_TERMCOL_STR))>0)                      c->errcontext.session_default.color_err  = i;
-        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Colour_Err."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
-      else if (strcmp(setkey, "COLOUR_REP"   )==0)
+        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Color_Err."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
+      else if((strcmp(setkey, "COLOUR_REP"   )==0) || (strcmp(setkey, "COLOR_REP"   )==0))
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue, SW_TERMCOL_INT, SW_TERMCOL_STR))>0)                      c->errcontext.session_default.color_rep  = i;
-        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Colour_Rep."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
-      else if (strcmp(setkey, "COLOUR_WRN"   )==0)
+        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Color_Rep."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
+      else if((strcmp(setkey, "COLOUR_WRN"   )==0) || (strcmp(setkey, "COLOR_WRN"   )==0))
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue, SW_TERMCOL_INT, SW_TERMCOL_STR))>0)                      c->errcontext.session_default.color_wrn  = i;
-        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Colour_Wrn."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
+        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Color_Wrn."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "SPLASH"       )==0)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue, SW_ONOFF_INT,   SW_ONOFF_STR  ))>0)                      c->errcontext.session_default.splash     = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Splash."       , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else
        { sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Unrecognised setting name '%s'.", linecounter, ConfigFname, setkey); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
      }
-    else if (state == 3) // [colours] section
+    else if (state == 3) // [colors] section
      {
       ppl_strUpper(setkey, setkey);
       if      (strcmp(setkey, "PALETTE"      )==0)
        {
         PalettePos = 0;
         StringScan = setvalue;
-        while (strlen(ppl_strCommaSeparatedListScan(&StringScan, ColourName)) != 0)
+        while (strlen(ppl_strCommaSeparatedListScan(&StringScan, ColorName)) != 0)
          {
           if (PalettePos == PALETTE_LENGTH-1)
            {
@@ -468,13 +469,13 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
             c->set->palette_default[PalettePos] = -1;
             continue;
            } else {
-            ppl_strUpper(ColourName,ColourName);
-            ColourNumber = ppl_fetchSettingByName(&c->errcontext,ColourName, SW_COLOR_INT, SW_COLOR_STR);
-            if (ColourNumber<=0)
+            ppl_strUpper(ColorName,ColorName);
+            ColorNumber = ppl_fetchSettingByName(&c->errcontext,ColorName, SW_COLOR_INT, SW_COLOR_STR);
+            if (ColorNumber<=0)
              {
-              sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Colour '%s' not recognised.", linecounter, ConfigFname, ColourName); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr);
+              sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Color '%s' not recognised.", linecounter, ConfigFname, ColorName); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr);
              } else {
-              c->set->palette_default [PalettePos  ] = ColourNumber;
+              c->set->palette_default [PalettePos  ] = ColorNumber;
               c->set->paletteS_default[PalettePos  ] = 0;
               c->set->palette1_default[PalettePos  ] = 0.0;
               c->set->palette2_default[PalettePos  ] = 0.0;
@@ -487,7 +488,7 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
          {
           c->set->palette_default[PalettePos] = -1;
          } else {
-          sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: The specified palette does not contain any colours.", linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr);
+          sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: The specified palette does not contain any colors.", linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr);
          }
        }
       else
@@ -700,12 +701,12 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
       else if (strcmp(setkey, "AXES_MINTICKLEN"     )==0)
         if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue)))) EPS_AXES_MINTICKLEN   = fl * EPS_BASE_AXES_MINTICKLEN;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Axes_MinTickLen."      , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
-      else if (strcmp(setkey, "COLOURSCALE_MARGIN"  )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue)))) EPS_COLOURSCALE_MARGIN= fl * EPS_BASE_COLOURSCALE_MARG;
-        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting ColourScale_Margin."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
-      else if (strcmp(setkey, "COLOURSCALE_WIDTH"   )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue)))) EPS_COLOURSCALE_WIDTH = fl * EPS_BASE_COLOURSCALE_WIDTH;
-        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting ColourScale_Width."    , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
+      else if((strcmp(setkey, "COLOURSCALE_MARGIN"  )==0) || (strcmp(setkey, "COLORSCALE_MARGIN"  )==0))
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue)))) EPS_COLORSCALE_MARGIN= fl * EPS_BASE_COLORSCALE_MARG;
+        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting ColorScale_Margin."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
+      else if((strcmp(setkey, "COLOURSCALE_WIDTH"   )==0) || (strcmp(setkey, "COLORSCALE_WIDTH"   )==0))
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue)))) EPS_COLORSCALE_WIDTH = fl * EPS_BASE_COLORSCALE_WIDTH;
+        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting ColorScale_Width."    , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "GRID_MAJLINEWIDTH"      )==0)
         if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue)))) EPS_GRID_MAJLINEWIDTH    = fl * EPS_BASE_GRID_MAJLINEWIDTH;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Grid_MajLineWidth."    , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }

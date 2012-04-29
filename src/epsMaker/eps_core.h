@@ -22,7 +22,7 @@
 #ifndef _PPL_EPS_CORE_H
 #define _PPL_EPS_CORE_H 1
 
-#define IF_NOT_INVISIBLE if (x->CurrentColour[0]!='\0')
+#define IF_NOT_INVISIBLE if (x->CurrentColor[0]!='\0')
 
 #define EPS_STACK_POP \
   while (x->c->stackPtr>stkLevelOld) \
@@ -37,15 +37,15 @@
 
 #include "epsMaker/eps_comm.h"
 
-void eps_core_clear                (EPSComm *x);
-void eps_core_WritePSColour        (EPSComm *x);
-void eps_core_SetColour            (EPSComm *x, withWords *ww, unsigned char WritePS);
-void eps_core_SetFillColour        (EPSComm *x, withWords *ww);
-void eps_core_SwitchTo_FillColour  (EPSComm *x, unsigned char WritePS);
-void eps_core_SwitchFrom_FillColour(EPSComm *x, unsigned char WritePS);
-void eps_core_SetLinewidth         (EPSComm *x, double lw, int lt, double offset);
-void eps_core_BoundingBox          (EPSComm *x, double xpos, double ypos, double lw);
-void eps_core_PlotBoundingBox      (EPSComm *x, double xpos, double ypos, double lw, unsigned char UpdatePsBB);
+void eps_core_clear               (EPSComm *x);
+void eps_core_WritePSColor        (EPSComm *x);
+void eps_core_SetColor            (EPSComm *x, withWords *ww, unsigned char WritePS);
+void eps_core_SetFillColor        (EPSComm *x, withWords *ww);
+void eps_core_SwitchTo_FillColor  (EPSComm *x, unsigned char WritePS);
+void eps_core_SwitchFrom_FillColor(EPSComm *x, unsigned char WritePS);
+void eps_core_SetLinewidth        (EPSComm *x, double lw, int lt, double offset);
+void eps_core_BoundingBox         (EPSComm *x, double xpos, double ypos, double lw);
+void eps_core_PlotBoundingBox     (EPSComm *x, double xpos, double ypos, double lw, unsigned char UpdatePsBB);
 
 #endif
 

@@ -34,7 +34,7 @@
 #include "coreUtils/errorReport.h"
 #include "epsMaker/bmp_image.h"
 
-void bmp_jpegread(pplerr_context *ec, FILE *jpeg, bitmap_data *image);
+void ppl_bmp_jpegread(pplerr_context *ec, FILE *jpeg, bitmap_data *image);
 
 #endif
 

@@ -56,7 +56,7 @@
 // static void fftwindow_blackman    (pplObj *x, int Ndim, int *Npos, int *Nstep) { double y=1.0; const double alpha=0.16; int i; for (i=0; i<Ndim; i++) { y*=(1.0-alpha)/2.0 - 0.5*cos(2*M_PI*((double)Npos[i])/((double)(Nstep[i]-1))) + alpha/2.0*cos(4*M_PI*((double)Npos[i])/((double)(Nstep[i]-1))); } x->real*=y; x->imag*=y; if (x->imag==0.0) { x->imag=0.0; x->flagComplex=0; } }
 
 // Main entry point for the FFT command
-void directive_fft(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+void ppl_directive_fft(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
  {
   return;
  }

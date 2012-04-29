@@ -47,19 +47,19 @@ void eps_plot_gridlines(EPSComm *x, double origin_x, double origin_y, double wid
   withWords      ww;
 
 #define MAJOR_GRIDCOL \
-  /* Set colour for major axis axes */ \
+  /* Set color for major axis axes */ \
   ppl_withWordsZero(x->c, &ww); \
-  if (x->current->settings.GridMajColour > 0) { ww.color = x->current->settings.GridMajColour; ww.USEcolor = 1; } \
-  else                                        { ww.Col1234Space = x->current->settings.GridMajCol1234Space; ww.color1 = x->current->settings.GridMajColour1; ww.color2 = x->current->settings.GridMajColour2; ww.color3 = x->current->settings.GridMajColour3; ww.color4 = x->current->settings.GridMajColour4; ww.USEcolor1234 = 1; } \
-  eps_core_SetColour(x, &ww, 1); \
+  if (x->current->settings.GridMajColor > 0) { ww.color = x->current->settings.GridMajColor; ww.USEcolor = 1; } \
+  else                                       { ww.Col1234Space = x->current->settings.GridMajCol1234Space; ww.color1 = x->current->settings.GridMajColor1; ww.color2 = x->current->settings.GridMajColor2; ww.color3 = x->current->settings.GridMajColor3; ww.color4 = x->current->settings.GridMajColor4; ww.USEcolor1234 = 1; } \
+  eps_core_SetColor(x, &ww, 1); \
   IF_NOT_INVISIBLE eps_core_SetLinewidth(x, EPS_GRID_MAJLINEWIDTH * EPS_DEFAULT_LINEWIDTH, 1, 0.0);
 
 #define MINOR_GRIDCOL \
-  /* Set colour for minor axis axes */ \
+  /* Set color for minor axis axes */ \
   ppl_withWordsZero(x->c, &ww); \
-  if (x->current->settings.GridMinColour > 0) { ww.color = x->current->settings.GridMinColour; ww.USEcolor = 1; } \
-  else                                        { ww.Col1234Space = x->current->settings.GridMinCol1234Space; ww.color1 = x->current->settings.GridMinColour1; ww.color2 = x->current->settings.GridMinColour2; ww.color3 = x->current->settings.GridMinColour3; ww.color4 = x->current->settings.GridMinColour4; ww.USEcolor1234 = 1; } \
-  eps_core_SetColour(x, &ww, 1); \
+  if (x->current->settings.GridMinColor > 0) { ww.color = x->current->settings.GridMinColor; ww.USEcolor = 1; } \
+  else                                       { ww.Col1234Space = x->current->settings.GridMinCol1234Space; ww.color1 = x->current->settings.GridMinColor1; ww.color2 = x->current->settings.GridMinColor2; ww.color3 = x->current->settings.GridMinColor3; ww.color4 = x->current->settings.GridMinColor4; ww.USEcolor1234 = 1; } \
+  eps_core_SetColor(x, &ww, 1); \
   IF_NOT_INVISIBLE eps_core_SetLinewidth(x, EPS_GRID_MINLINEWIDTH * EPS_DEFAULT_LINEWIDTH, 1, 0.0);
 
   if (x->current->settings.grid != SW_ONOFF_ON) return; // Grid lines are off

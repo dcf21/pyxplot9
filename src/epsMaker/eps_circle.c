@@ -62,9 +62,9 @@ void eps_circ_RenderEPS(EPSComm *x)
   // Expand any numbered styles which may appear in the with words we are passed
   ppl_withWordsMerge(x->c, &ww, &x->current->with_data, NULL, NULL, NULL, NULL, 1);
 
-  // Set fill colour of circle
-  eps_core_SetFillColour(x, &ww);
-  eps_core_SwitchTo_FillColour(x,1);
+  // Set fill color of circle
+  eps_core_SetFillColor(x, &ww);
+  eps_core_SwitchTo_FillColor(x,1);
 
   // Fill circle
   IF_NOT_INVISIBLE
@@ -75,8 +75,8 @@ void eps_circ_RenderEPS(EPSComm *x)
     filled=1;
    }
 
-  // Set colour of outline of circle
-  eps_core_SetColour(x, &ww, 1);
+  // Set color of outline of circle
+  eps_core_SetColor(x, &ww, 1);
 
   // Set linewidth and linetype of outline
   if (ww.USElinewidth) lw_scale = ww.linewidth;

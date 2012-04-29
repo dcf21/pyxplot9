@@ -48,8 +48,8 @@ typedef struct pplset_terminal {
  } pplset_terminal;
 
 typedef struct pplset_graph {
- int           AutoAspect, AutoZAspect, AxesColour, AxesCol1234Space, AxisUnitStyle, clip, Clog[4], Cminauto[4], Cmaxauto[4], Crenorm[4], Creverse[4], ColKey, ColKeyPos, ContoursLabel, ContoursListLen, ContoursN, grid, GridMajColour, GridMajCol1234Space, GridMinColour, GridMinCol1234Space, key, KeyColumns, KeyPos, samples, SamplesX, SamplesXAuto, SamplesY, SamplesYAuto, Sample2DMethod, TextColour, TextCol1234Space, TextHAlign, TextVAlign, Tlog, Ulog, Vlog;
- double        AxesColour1, AxesColour2, AxesColour3, AxesColour4, GridMajColour1, GridMajColour2, GridMajColour3, GridMajColour4, GridMinColour1, GridMinColour2, GridMinColour3, GridMinColour4, TextColour1, TextColour2, TextColour3, TextColour4;
+ int           AutoAspect, AutoZAspect, AxesColor, AxesCol1234Space, AxisUnitStyle, clip, Clog[4], Cminauto[4], Cmaxauto[4], Crenorm[4], Creverse[4], ColKey, ColKeyPos, ContoursLabel, ContoursListLen, ContoursN, grid, GridMajColor, GridMajCol1234Space, GridMinColor, GridMinCol1234Space, key, KeyColumns, KeyPos, samples, SamplesX, SamplesXAuto, SamplesY, SamplesYAuto, Sample2DMethod, TextColor, TextCol1234Space, TextHAlign, TextVAlign, Tlog, Ulog, Vlog;
+ double        AxesColor1, AxesColor2, AxesColor3, AxesColor4, GridMajColor1, GridMajColor2, GridMajColor3, GridMajColor4, GridMinColor1, GridMinColor2, GridMinColor3, GridMinColor4, TextColor1, TextColor2, TextColor3, TextColor4;
  double        aspect, zaspect, bar, ContoursList[MAX_CONTOURS], FontSize, LineWidth, PointSize, PointLineWidth, projection;
  unsigned char GridAxisX[MAX_AXES], GridAxisY[MAX_AXES], GridAxisZ[MAX_AXES];
  unsigned char BoxFromAuto, BoxWidthAuto, USE_T_or_uv;

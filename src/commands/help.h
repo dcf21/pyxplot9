@@ -26,7 +26,7 @@
 #include "userspace/context.h"
 #include "userspace/pplObj.h"
 
-void directive_help(ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
+void ppl_directive_help(ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
 
 #endif
 

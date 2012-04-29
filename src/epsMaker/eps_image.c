@@ -104,10 +104,10 @@ void eps_image_RenderEPS(EPSComm *x)
   // Read data from file using appropriate input filter
   switch (ImageType)
    {
-    case SW_BITMAP_BMP: bmp_bmpread (&x->c->errcontext , infile , &data); break;
-    case SW_BITMAP_GIF: bmp_gifread (&x->c->errcontext , infile , &data); break;
-    case SW_BITMAP_JPG: bmp_jpegread(&x->c->errcontext , infile , &data); break;
-    case SW_BITMAP_PNG: bmp_pngread (&x->c->errcontext , infile , &data); break;
+    case SW_BITMAP_BMP: ppl_bmp_bmpread (&x->c->errcontext , infile , &data); break;
+    case SW_BITMAP_GIF: ppl_bmp_gifread (&x->c->errcontext , infile , &data); break;
+    case SW_BITMAP_JPG: ppl_bmp_jpegread(&x->c->errcontext , infile , &data); break;
+    case SW_BITMAP_PNG: ppl_bmp_pngread (&x->c->errcontext , infile , &data); break;
     default: ppl_error(&x->c->errcontext, ERR_INTERNAL, -1, -1, "Unrecognised image type"); *(x->status) = 1; fclose(infile); return;
    }
   fclose(infile);
@@ -116,12 +116,12 @@ void eps_image_RenderEPS(EPSComm *x)
   if (data.data == NULL) { *(x->status) = 1; return; }
 
   // Apply palette optimisations to images if possible
-  if ((data.depth ==  8) && (data.type==BMP_COLOUR_PALETTE)) bmp_palette_check(&x->c->errcontext , &data); // If we did not construct palette, check for trailing unused entries
-  if ((data.depth == 24) && (data.type==BMP_COLOUR_BMP    )) bmp_colour_count(&x->c->errcontext , &data);  // Check full colour image to ensure more than 256 colours
-  if ((data.depth ==  8) && (data.type==BMP_COLOUR_PALETTE)) bmp_grey_check(&x->c->errcontext , &data);    // Check paletted images for greyscale conversion
-  if ((data.type == BMP_COLOUR_PALETTE) && (data.pal_len <= 16) && (data.depth == 8)) bmp_compact(&x->c->errcontext , &data); // Compact images with few palette entries
+  if ((data.depth ==  8) && (data.type==BMP_COLOUR_PALETTE)) ppl_bmp_palette_check(&x->c->errcontext , &data); // If we did not construct palette, check for trailing unused entries
+  if ((data.depth == 24) && (data.type==BMP_COLOUR_BMP    )) ppl_bmp_colour_count(&x->c->errcontext , &data);  // Check full color image to ensure more than 256 colors
+  if ((data.depth ==  8) && (data.type==BMP_COLOUR_PALETTE)) ppl_bmp_grey_check(&x->c->errcontext , &data);    // Check paletted images for greyscale conversion
+  if ((data.type == BMP_COLOUR_PALETTE) && (data.pal_len <= 16) && (data.depth == 8)) ppl_bmp_compact(&x->c->errcontext , &data); // Compact images with few palette entries
 
-  // If user has specified a transparent colour, change transparency properties now
+  // If user has specified a transparent color, change transparency properties now
   if (x->current->CustomTransparency)
    {
     data.trans = NULL; // Turn off any transparency which may have been present in the original image
@@ -148,10 +148,10 @@ void eps_image_RenderEPS(EPSComm *x)
      {
       int magic;
 
-      if      (data.depth == 1) { magic=255   ; } //   2-colour greyscale
-      else if (data.depth == 2) { magic=255/ 3; } //   4-colour greyscale
-      else if (data.depth == 4) { magic=255/15; } //  16-colour greyscale
-      else                      { magic=  1   ; } // 256-colour greyscale
+      if      (data.depth == 1) { magic=255   ; } //   2-color greyscale
+      else if (data.depth == 2) { magic=255/ 3; } //   4-color greyscale
+      else if (data.depth == 4) { magic=255/15; } //  16-color greyscale
+      else                      { magic=  1   ; } // 256-color greyscale
 
       if ((x->current->TransColR % magic)==0)
        {
@@ -165,7 +165,7 @@ void eps_image_RenderEPS(EPSComm *x)
   switch (data.TargetCompression)
    {
     case BMP_ENCODING_NULL: break; // No image compression
-    case BMP_ENCODING_DCT: break; // Special case: JPEG data is encoded in DCT, but is already supplied from bmp_jpegread() in encoded form
+    case BMP_ENCODING_DCT: break; // Special case: JPEG data is encoded in DCT, but is already supplied from ppl_bmp_jpegread() in encoded form
     case BMP_ENCODING_FLATE:
       zlen   = data.data_len*1.01+12; // Nasty guess at size of buffer needed.
       imagez = (unsigned char *)ppl_memAlloc(zlen);
@@ -226,7 +226,7 @@ void eps_image_RenderEPS(EPSComm *x)
   else if (data.colour == BMP_COLOUR_PALETTE) // Indexed palette
    {
     fprintf(x->epsbuffer, "[/Indexed /DeviceRGB %d <~\n", data.pal_len-1);
-    bmp_A85(&x->c->errcontext, x->epsbuffer, data.palette, 3*data.pal_len);
+    ppl_bmp_A85(&x->c->errcontext, x->epsbuffer, data.palette, 3*data.pal_len);
     fprintf(x->epsbuffer, "] setcolorspace\n\n");
    }
 
@@ -237,7 +237,7 @@ void eps_image_RenderEPS(EPSComm *x)
   fprintf(x->epsbuffer, "\n /BitsPerComponent %d\n /Decode [0 %d%s]\n", (data.colour==BMP_COLOUR_RGB)?(data.depth/3):(data.depth),
                                                                         (data.type==BMP_COLOUR_PALETTE)?((1<<data.depth)-1):1,
                                                                         (data.colour==BMP_COLOUR_RGB)?" 0 1 0 1":"");
-  if ((!x->current->NoTransparency) && (data.trans != NULL)) // If image has transparency, set mask colour
+  if ((!x->current->NoTransparency) && (data.trans != NULL)) // If image has transparency, set mask color
    {
     fprintf(x->epsbuffer," /MaskColor [");
     if (data.colour == BMP_COLOUR_RGB) fprintf(x->epsbuffer, "%d %d %d]\n",(int)data.trans[0], (int)data.trans[1], (int)data.trans[2]);
@@ -245,7 +245,7 @@ void eps_image_RenderEPS(EPSComm *x)
    }
   if (x->current->smooth) fprintf(x->epsbuffer, " /Interpolate true\n"); // If image has smooth flag set, tell postscript interpretter to interpolate image
   fprintf(x->epsbuffer, ">> image\n");
-  bmp_A85(&x->c->errcontext, x->epsbuffer, data.data, data.data_len);
+  ppl_bmp_A85(&x->c->errcontext, x->epsbuffer, data.data, data.data_len);
   fprintf(x->epsbuffer, "grestore\n");
 
   // Update postscript bounding box

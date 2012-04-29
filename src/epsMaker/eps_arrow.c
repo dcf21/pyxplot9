@@ -73,13 +73,13 @@ void eps_primitive_arrow(EPSComm *x, int ArrowType, double x1, double y1, const 
   unsigned char ThreeDim = (z1!=NULL)&&(z2!=NULL);
   char         *last_colstr=NULL;
 
-  // Set colour of arrow
-  eps_core_SetColour(x, with_data, !ThreeDim);
+  // Set color of arrow
+  eps_core_SetColor(x, with_data, !ThreeDim);
   if (ThreeDim)
   {
-   last_colstr = (char *)ppl_memAlloc(strlen(x->CurrentColour)+1);
+   last_colstr = (char *)ppl_memAlloc(strlen(x->CurrentColor)+1);
    if (last_colstr==NULL) return;
-   strcpy(last_colstr, x->CurrentColour);
+   strcpy(last_colstr, x->CurrentColor);
   }
 
   // Set linewidth and linetype

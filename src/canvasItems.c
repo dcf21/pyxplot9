@@ -110,7 +110,7 @@ static int canvas_itemlist_add(ppl_context *c, pplObj *command, int type, canvas
   int              i, editNo, gotEditNo;
 
   // If we're not in multiplot mode, clear the canvas now
-  if (c->set->term_current.multiplot == SW_ONOFF_OFF) directive_clear(c, NULL, NULL, 0);
+  if (c->set->term_current.multiplot == SW_ONOFF_OFF) ppl_directive_clear(c, NULL, NULL, 0);
   canvas_items = c->canvas_items;
 
   // Ensure that multiplot canvas list is initialised before trying to use it
@@ -207,7 +207,7 @@ static int canvas_itemlist_add(ppl_context *c, pplObj *command, int type, canvas
  }
 
 // Implementation of the clear command. Also called whenever the canvas is to be cleared.
-int directive_clear(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+int ppl_directive_clear(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
  {
   canvas_itemlist *canvas_items = c->canvas_items;
   canvas_item     *ptr, *next;
@@ -557,7 +557,7 @@ char *ppl_canvas_item_textify(ppl_context *c, canvas_item *ptr, char *output)
  }
 
 // Implementation of the list command
-int directive_list(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+int ppl_directive_list(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
  {
   canvas_itemlist  *canvas_items = c->canvas_items;
   int               i;
@@ -588,7 +588,7 @@ static int canvas_delete(ppl_context *c, const int id)
   return 0;
  }
 
-int directive_delete(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+int ppl_directive_delete(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj           *stk = in->stk;
   canvas_itemlist  *canvas_items = c->canvas_items;
@@ -615,7 +615,7 @@ int directive_delete(ppl_context *c, parserLine *pl, parserOutput *in, int inter
  }
 
 // Implementation of the undelete command
-int directive_undelete(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+int ppl_directive_undelete(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj           *stk = in->stk;
   canvas_itemlist  *canvas_items = c->canvas_items;
@@ -647,7 +647,7 @@ int directive_undelete(ppl_context *c, parserLine *pl, parserOutput *in, int int
  }
 
 // Implementation of the move command
-int directive_move(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+int ppl_directive_move(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj           *stk = in->stk;
   canvas_itemlist  *canvas_items = c->canvas_items;
@@ -717,7 +717,7 @@ int directive_move(ppl_context *c, parserLine *pl, parserOutput *in, int interac
  }
 
 // Implementation of the swap command
-int directive_swap(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+int ppl_directive_swap(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj           *stk = in->stk;
   canvas_itemlist  *canvas_items = c->canvas_items;
@@ -760,7 +760,7 @@ int directive_swap(ppl_context *c, parserLine *pl, parserOutput *in, int interac
  }
 
 // Implementation of the arrow command
-int directive_arrow(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+int ppl_directive_arrow(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj           *stk = in->stk;
   canvas_item      *ptr;
@@ -801,7 +801,7 @@ int directive_arrow(ppl_context *c, parserLine *pl, parserOutput *in, int intera
  }
 
 // Implementation of the box command
-int directive_box(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+int ppl_directive_box(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj           *stk = in->stk;
   canvas_item      *ptr;
@@ -853,7 +853,7 @@ int directive_box(ppl_context *c, parserLine *pl, parserOutput *in, int interact
  }
 
 // Implementation of the circle command
-int directive_circle(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+int ppl_directive_circle(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj       *stk = in->stk;
   canvas_item  *ptr;
@@ -892,7 +892,7 @@ int directive_circle(ppl_context *c, parserLine *pl, parserOutput *in, int inter
  }
 
 // Implementation of the ellipse command
-int directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+int ppl_directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj           *stk = in->stk;
   canvas_item      *ptr;
@@ -1078,7 +1078,7 @@ int directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int inte
  }
 
 // Implementation of the eps command
-int directive_eps(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+int ppl_directive_eps(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj       *stk = in->stk;
   canvas_item  *ptr;
@@ -1123,7 +1123,7 @@ int directive_eps(ppl_context *c, parserLine *pl, parserOutput *in, int interact
  }
 
 // Implementation of the point command
-int directive_point(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+int ppl_directive_point(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj        *stk = in->stk; 
   canvas_item   *ptr;
@@ -1164,7 +1164,7 @@ int directive_point(ppl_context *c, parserLine *pl, parserOutput *in, int intera
  }
 
 // Implementation of the polygon command
-int directive_polygon(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+int ppl_directive_polygon(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj           *stk = in->stk;
   canvas_item      *ptr;
@@ -1252,7 +1252,7 @@ fail:
  }
 
 // Implementation of the text command
-int directive_text(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+int ppl_directive_text(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj        *stk = in->stk;
   canvas_item   *ptr;

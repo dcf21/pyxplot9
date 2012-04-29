@@ -32,7 +32,7 @@
 #include <stdio.h>
 #include "coreUtils/errorReport.h"
 
-unsigned int bmp_A85(pplerr_context *ec, FILE* fout, unsigned char* in, int len);
+unsigned int ppl_bmp_A85(pplerr_context *ec, FILE* fout, unsigned char* in, int len);
 
 #endif
 

@@ -65,7 +65,7 @@
 
 #define TBADD(et,pos) ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,pos,pl->linetxt,"")
 
-void directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
+void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
  {
   pplset_graph     *sg;
   pplarrow_object **al;
@@ -219,7 +219,7 @@ void directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int interac
    }
   else if (strcmp_unset && (strcmp(setoption,"axis")==0)) /* unset axis */
    {
-    int pos = PARSE_unset_axis_axes;
+    int pos = PARSE_unset_axis_0axes;
     if (command[pos].objType!=PPLOBJ_NUM)
      {
       int i;
@@ -431,20 +431,20 @@ void directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int interac
    {
     sg->FontSize = c->set->graph_default.FontSize;
    }
-  else if ((strcmp(setoption,"axescolour")==0) || (strcmp(setoption,"gridmajcolour")==0) || (strcmp(setoption,"gridmincolour")==0) || (strcmp(setoption,"textcolour")==0)) /* set axescolour | set gridmajcolour | set gridmincolour */
+  else if ((strcmp(setoption,"axescolor")==0) || (strcmp(setoption,"gridmajcolor")==0) || (strcmp(setoption,"gridmincolor")==0) || (strcmp(setoption,"textcolor")==0)) /* set axescolor | set gridmajcolor | set gridmincolor */
    {
     if (strcmp_unset)
      {
-      if (strcmp(setoption,"axescolour"   )==0) { sg->AxesColour=c->set->graph_default.AxesColour; sg->AxesCol1234Space=c->set->graph_default.AxesCol1234Space; sg->AxesColour1=c->set->graph_default.AxesColour1; sg->AxesColour2=c->set->graph_default.AxesColour2; sg->AxesColour3=c->set->graph_default.AxesColour3; sg->AxesColour4=c->set->graph_default.AxesColour4; }
-      if (strcmp(setoption,"gridmajcolour")==0) { sg->GridMajColour=c->set->graph_default.GridMajColour; sg->GridMajCol1234Space=c->set->graph_default.GridMajCol1234Space; sg->GridMajColour1=c->set->graph_default.GridMajColour1; sg->GridMajColour2=c->set->graph_default.GridMajColour2; sg->GridMajColour3=c->set->graph_default.GridMajColour3; sg->GridMajColour4=c->set->graph_default.GridMajColour4; }
-      if (strcmp(setoption,"gridmincolour")==0) { sg->GridMinColour=c->set->graph_default.GridMinColour; sg->GridMinCol1234Space=c->set->graph_default.GridMinCol1234Space; sg->GridMinColour1=c->set->graph_default.GridMinColour1; sg->GridMinColour2=c->set->graph_default.GridMinColour2; sg->GridMinColour3=c->set->graph_default.GridMinColour3; sg->GridMinColour4=c->set->graph_default.GridMinColour4; }
-      if (strcmp(setoption,"textcolour"   )==0) { sg->TextColour=c->set->graph_default.TextColour; sg->TextCol1234Space=c->set->graph_default.TextCol1234Space; sg->TextColour1=c->set->graph_default.TextColour1; sg->TextColour2=c->set->graph_default.TextColour2; sg->TextColour3=c->set->graph_default.TextColour3; sg->TextColour4=c->set->graph_default.TextColour4; }
+      if (strcmp(setoption,"axescolor"   )==0) { sg->AxesColor=c->set->graph_default.AxesColor; sg->AxesCol1234Space=c->set->graph_default.AxesCol1234Space; sg->AxesColor1=c->set->graph_default.AxesColor1; sg->AxesColor2=c->set->graph_default.AxesColor2; sg->AxesColor3=c->set->graph_default.AxesColor3; sg->AxesColor4=c->set->graph_default.AxesColor4; }
+      if (strcmp(setoption,"gridmajcolor")==0) { sg->GridMajColor=c->set->graph_default.GridMajColor; sg->GridMajCol1234Space=c->set->graph_default.GridMajCol1234Space; sg->GridMajColor1=c->set->graph_default.GridMajColor1; sg->GridMajColor2=c->set->graph_default.GridMajColor2; sg->GridMajColor3=c->set->graph_default.GridMajColor3; sg->GridMajColor4=c->set->graph_default.GridMajColor4; }
+      if (strcmp(setoption,"gridmincolor")==0) { sg->GridMinColor=c->set->graph_default.GridMinColor; sg->GridMinCol1234Space=c->set->graph_default.GridMinCol1234Space; sg->GridMinColor1=c->set->graph_default.GridMinColor1; sg->GridMinColor2=c->set->graph_default.GridMinColor2; sg->GridMinColor3=c->set->graph_default.GridMinColor3; sg->GridMinColor4=c->set->graph_default.GridMinColor4; }
+      if (strcmp(setoption,"textcolor"   )==0) { sg->TextColor=c->set->graph_default.TextColor; sg->TextCol1234Space=c->set->graph_default.TextCol1234Space; sg->TextColor1=c->set->graph_default.TextColor1; sg->TextColor2=c->set->graph_default.TextColor2; sg->TextColor3=c->set->graph_default.TextColor3; sg->TextColor4=c->set->graph_default.TextColor4; }
      } else {
       unsigned char useCol, use1234;
-      if (strcmp(setoption,"axescolour"   )==0) ppl_colorFromObj(c,&command[PARSE_set_axescolour_color   ],&sg->AxesColour   ,&sg->AxesCol1234Space   ,NULL,&sg->AxesColour1   ,&sg->AxesColour2   ,&sg->AxesColour3   ,&sg->AxesColour4   ,&useCol,&use1234);
-      if (strcmp(setoption,"gridmajcolour")==0) ppl_colorFromObj(c,&command[PARSE_set_gridmajcolour_color],&sg->GridMajColour,&sg->GridMajCol1234Space,NULL,&sg->GridMajColour1,&sg->GridMajColour2,&sg->GridMajColour3,&sg->GridMajColour4,&useCol,&use1234);
-      if (strcmp(setoption,"gridmincolour")==0) ppl_colorFromObj(c,&command[PARSE_set_gridmincolour_color],&sg->GridMinColour,&sg->GridMinCol1234Space,NULL,&sg->GridMinColour1,&sg->GridMinColour2,&sg->GridMinColour3,&sg->GridMinColour4,&useCol,&use1234);
-      if (strcmp(setoption,"textcolour"   )==0) ppl_colorFromObj(c,&command[PARSE_set_textcolour_color   ],&sg->TextColour   ,&sg->TextCol1234Space   ,NULL,&sg->TextColour1   ,&sg->TextColour2   ,&sg->TextColour3   ,&sg->TextColour4   ,&useCol,&use1234);
+      if (strcmp(setoption,"axescolor"   )==0) ppl_colorFromObj(c,&command[PARSE_set_axescolor_color   ],&sg->AxesColor   ,&sg->AxesCol1234Space   ,NULL,&sg->AxesColor1   ,&sg->AxesColor2   ,&sg->AxesColor3   ,&sg->AxesColor4   ,&useCol,&use1234);
+      if (strcmp(setoption,"gridmajcolor")==0) ppl_colorFromObj(c,&command[PARSE_set_gridmajcolor_color],&sg->GridMajColor,&sg->GridMajCol1234Space,NULL,&sg->GridMajColor1,&sg->GridMajColor2,&sg->GridMajColor3,&sg->GridMajColor4,&useCol,&use1234);
+      if (strcmp(setoption,"gridmincolor")==0) ppl_colorFromObj(c,&command[PARSE_set_gridmincolor_color],&sg->GridMinColor,&sg->GridMinCol1234Space,NULL,&sg->GridMinColor1,&sg->GridMinColor2,&sg->GridMinColor3,&sg->GridMinColor4,&useCol,&use1234);
+      if (strcmp(setoption,"textcolor"   )==0) ppl_colorFromObj(c,&command[PARSE_set_textcolor_color   ],&sg->TextColor   ,&sg->TextCol1234Space   ,NULL,&sg->TextColor1   ,&sg->TextColor2   ,&sg->TextColor3   ,&sg->TextColor4   ,&useCol,&use1234);
      }
    }
   else if (strcmp_set && (strcmp(setoption,"grid")==0)) /* set grid */
@@ -606,7 +606,7 @@ void directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int interac
    }
   else if (strcmp_unset && (strcmp(setoption,"multiplot")==0)) /* unset multiplot */
    {
-    if ((c->set->term_default.multiplot == SW_ONOFF_OFF) && (c->set->term_current.multiplot == SW_ONOFF_ON)) directive_clear(c,pl,in,interactive);
+    if ((c->set->term_default.multiplot == SW_ONOFF_OFF) && (c->set->term_current.multiplot == SW_ONOFF_ON)) ppl_directive_clear(c,pl,in,interactive);
     c->set->term_current.multiplot = c->set->term_default.multiplot;
    }
   else if (strcmp_set && (strcmp(setoption,"nobackup")==0)) /* set nobackup */
@@ -631,7 +631,7 @@ void directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int interac
    }
   else if (strcmp_set && (strcmp(setoption,"nomultiplot")==0)) /* set nomultiplot */
    {
-    if (c->set->term_current.multiplot != SW_ONOFF_OFF) directive_clear(c,pl,in,interactive);
+    if (c->set->term_current.multiplot != SW_ONOFF_OFF) ppl_directive_clear(c,pl,in,interactive);
     c->set->term_current.multiplot = SW_ONOFF_OFF;
    }
   else if (strcmp_set && (strcmp(setoption,"notitle")==0)) /* set notitle */
@@ -784,6 +784,10 @@ void directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int interac
     if (command[PARSE_set_texthalign_left  ].objType == PPLOBJ_STR) sg->TextHAlign = SW_HALIGN_LEFT;
     if (command[PARSE_set_texthalign_centre].objType == PPLOBJ_STR) sg->TextHAlign = SW_HALIGN_CENT;
     if (command[PARSE_set_texthalign_right ].objType == PPLOBJ_STR) sg->TextHAlign = SW_HALIGN_RIGHT;
+   }
+  else if (strcmp_unset && (strcmp(setoption,"texthalign")==0)) /* unset texthalign */
+   {
+    sg->TextHAlign = c->set->graph_default.TextHAlign;
    }
   else if (strcmp_set && (strcmp(setoption,"textvalign")==0)) /* set textvalign */
    {

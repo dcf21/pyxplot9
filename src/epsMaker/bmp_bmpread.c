@@ -36,7 +36,7 @@
 #include "epsMaker/bmp_image.h"
 #include "epsMaker/bmp_bmpread.h"
 
-void bmp_bmpread(pplerr_context *ec, FILE *in, bitmap_data *image)
+void ppl_bmp_bmpread(pplerr_context *ec, FILE *in, bitmap_data *image)
  {
   unsigned char buff[60],encode,*p,c;
   unsigned width,height,depth,dw,excess;
@@ -167,7 +167,7 @@ void bmp_bmpread(pplerr_context *ec, FILE *in, bitmap_data *image)
 
   if (depth==16)
    {
-    bmp_bmp16read(ec, in, buff, image);
+    ppl_bmp_bmp16read(ec, in, buff, image);
     return;
   }
 
@@ -199,12 +199,12 @@ void bmp_bmpread(pplerr_context *ec, FILE *in, bitmap_data *image)
     p = ppl_memAlloc(size);
     if (p==NULL) { ppl_error(ec, ERR_MEMORY, -1, -1,"Out of memory"); image->data = NULL; return; }
     if (fread(p,size,1,in)!=1) { ppl_error(ec, ERR_FILE, -1, -1,"This bitmap file appears to be corrupted"); return; }
-    if (bmp_demsrle(ec,image,p,size) != 0) { image->data = NULL; return; }
+    if (ppl_bmp_demsrle(ec,image,p,size) != 0) { image->data = NULL; return; }
    }
   return;
  }
 
-void bmp_bmp16read(pplerr_context *ec, FILE *in, unsigned char *header, bitmap_data *image)
+void ppl_bmp_bmp16read(pplerr_context *ec, FILE *in, unsigned char *header, bitmap_data *image)
  {
   unsigned char *palette;
   unsigned char *rowptr,*ptr;
@@ -265,7 +265,7 @@ void bmp_bmp16read(pplerr_context *ec, FILE *in, unsigned char *header, bitmap_d
   return;
  }
 
-int bmp_demsrle(pplerr_context *ec, bitmap_data *image, unsigned char *in, unsigned long len)
+int ppl_bmp_demsrle(pplerr_context *ec, bitmap_data *image, unsigned char *in, unsigned long len)
  {
   unsigned char *out,*c_in,*c_out,code,*end,odd,even;
   unsigned long i,j,delta,size,height,width;

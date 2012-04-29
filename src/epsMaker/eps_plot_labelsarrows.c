@@ -196,9 +196,9 @@ void eps_plot_labelsarrows(EPSComm *x, double origin_x, double origin_y, double 
       }
    }
 
-  // By default, use 'set textcolour' colour for text labels
-  if (x->current->settings.TextColour > 0) { ww_default.color = x->current->settings.TextColour; ww_default.USEcolor = 1; ww_default.USEcolor1234 = 0; }
-  else                                     { ww_default.Col1234Space = x->current->settings.TextCol1234Space; ww_default.color1 = x->current->settings.TextColour1; ww_default.color2 = x->current->settings.TextColour2; ww_default.color3 = x->current->settings.TextColour3; ww_default.color4 = x->current->settings.TextColour4; ww_default.USEcolor = 0; ww_default.USEcolor1234 = 1; }
+  // By default, use 'set textcolor' color for text labels
+  if (x->current->settings.TextColor > 0) { ww_default.color = x->current->settings.TextColor; ww_default.USEcolor = 1; ww_default.USEcolor1234 = 0; }
+  else                                     { ww_default.Col1234Space = x->current->settings.TextCol1234Space; ww_default.color1 = x->current->settings.TextColor1; ww_default.color2 = x->current->settings.TextColor2; ww_default.color3 = x->current->settings.TextColor3; ww_default.color4 = x->current->settings.TextColor4; ww_default.USEcolor = 0; ww_default.USEcolor1234 = 1; }
 
   // Loop through all text labels, rendering them in turn
   for (li=x->current->label_list; li!=NULL; li=li->next)
@@ -231,15 +231,15 @@ void eps_plot_labelsarrows(EPSComm *x, double origin_x, double origin_y, double 
        xgap2 = xgap*cos(li->rotation) - ygap*sin(li->rotation);
        ygap2 = xgap*sin(li->rotation) + ygap*cos(li->rotation);
        ppl_withWordsMerge(x->c, &ww, &li->style, &ww_default, NULL, NULL, NULL, 1);
-       eps_core_SetColour(x, &ww, 0);
+       eps_core_SetColor(x, &ww, 0);
        IF_NOT_INVISIBLE if ((gsl_finite(xpos_))&&(gsl_finite(ypos_))&&(gsl_finite(depth)))
         {
          char *colstr=NULL, *text=NULL;
-         colstr = (char *)ppl_memAlloc(strlen(x->CurrentColour)+1);
+         colstr = (char *)ppl_memAlloc(strlen(x->CurrentColor)+1);
          if (colstr!=NULL)
           {
-           strcpy(colstr, x->CurrentColour);
-           canvas_EPSRenderTextItem(x, &text, pageno, xpos_/M_TO_PS+xgap2, ypos_/M_TO_PS+ygap2, hal, val, x->CurrentColour, x->current->settings.FontSize, li->rotation, NULL, NULL);
+           strcpy(colstr, x->CurrentColor);
+           canvas_EPSRenderTextItem(x, &text, pageno, xpos_/M_TO_PS+xgap2, ypos_/M_TO_PS+ygap2, hal, val, x->CurrentColor, x->current->settings.FontSize, li->rotation, NULL, NULL);
            if (text!=NULL) ThreeDimBuffer_writeps(x, depth, 1, 1, 0, 1, colstr, text);
           }
         }

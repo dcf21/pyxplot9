@@ -730,8 +730,8 @@ GOT_CONTOURS:
       // PASS 1: Fill path, if required
       if (pass==1)
        {
-//      eps_core_SetFillColour(x, &pd->ww_final);
-//      eps_core_SwitchTo_FillColour(x,1);
+//      eps_core_SetFillColor(x, &pd->ww_final);
+//      eps_core_SwitchTo_FillColor(x,1);
 //      IF_NOT_INVISIBLE
 //       {
 //        double xps, yps; long c=0;
@@ -788,7 +788,7 @@ GOT_CONTOURS:
       // PASS 3: Stroke path
       else if (pass==3)
        {
-        eps_core_SetColour(x, &pd->ww_final, 1);
+        eps_core_SetColor(x, &pd->ww_final, 1);
         eps_core_SetLinewidth(x, EPS_DEFAULT_LINEWIDTH * pd->ww_final.linewidth, pd->ww_final.linetype, 0);
         IF_NOT_INVISIBLE
          {
@@ -819,9 +819,9 @@ GOT_CONTOURS:
 
         if (n<1) continue;
         ppl_withWordsZero(x->c,&ww);
-        if (x->current->settings.TextColour > 0) { ww.color = x->current->settings.TextColour; ww.USEcolor = 1; }
-        else                                     { ww.Col1234Space = x->current->settings.TextCol1234Space; ww.color1 = x->current->settings.TextColour1; ww.color2 = x->current->settings.TextColour2; ww.color3 = x->current->settings.TextColour3; ww.color4 = x->current->settings.TextColour4; ww.USEcolor1234 = 1; }
-        eps_core_SetColour(x, &ww, 1);
+        if (x->current->settings.TextColor > 0) { ww.color = x->current->settings.TextColor; ww.USEcolor = 1; }
+        else                                    { ww.Col1234Space = x->current->settings.TextCol1234Space; ww.color1 = x->current->settings.TextColor1; ww.color2 = x->current->settings.TextColor2; ww.color3 = x->current->settings.TextColor3; ww.color4 = x->current->settings.TextColor4; ww.USEcolor1234 = 1; }
+        eps_core_SetColor(x, &ww, 1);
 
         IF_NOT_INVISIBLE
          {
@@ -830,7 +830,7 @@ GOT_CONTOURS:
           canvas_EPSRenderTextItem(x, NULL, x->current->DatasetTextID[pdn]+clist[cn].i,
                                    (xo + Lx*xlab/(XSize-1)*sin(ThetaX) + Ly*ylab/(YSize-1)*sin(ThetaY))/M_TO_PS,
                                    (yo + Lx*xlab/(XSize-1)*cos(ThetaX) + Ly*ylab/(YSize-1)*cos(ThetaY))/M_TO_PS,
-                                   SW_HALIGN_CENT, SW_VALIGN_CENT, x->CurrentColour, x->current->settings.FontSize,
+                                   SW_HALIGN_CENT, SW_VALIGN_CENT, x->CurrentColor, x->current->settings.FontSize,
                                    0.0, NULL, NULL);
          }
        }

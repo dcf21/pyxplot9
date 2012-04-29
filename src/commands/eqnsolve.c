@@ -380,7 +380,7 @@ static void minOrMax(ppl_context *c, parserLine *pl, parserOutput *in, int inter
   return;
  }
 
-void directive_solve(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_solve(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj       *stk = in->stk;
   int           pos;
@@ -454,12 +454,12 @@ void directive_solve(ppl_context *c, parserLine *pl, parserOutput *in, int inter
   return;
  }
 
-void directive_minimise(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_minimise(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   minOrMax(c, pl, in, interactive, iterDepth,  1.0);
  }
 
-void directive_maximise(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+void ppl_directive_maximise(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   minOrMax(c, pl, in, interactive, iterDepth, -1.0);
  }

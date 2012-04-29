@@ -406,10 +406,10 @@ void GraphLegend_Render(EPSComm *x, double width, double height, double zdepth)
     eps_plot_LegendIcon(x, iDataSet, pd, pd->TitleFinal_xpos + MARGIN_HSIZE_LEFT/2, pd->TitleFinal_ypos - pd->TitleFinal_height/2, MARGIN_HSIZE_LEFT, a1, a2, a3, xyzaxis[0], xyzaxis[1], xyzaxis[2]);
     pageno = x->LaTeXpageno++;
     ppl_withWordsZero(x->c,&ww);
-    if (x->current->settings.TextColour > 0) { ww.color = x->current->settings.TextColour; ww.USEcolor = 1; }
-    else                                     { ww.Col1234Space = x->current->settings.TextCol1234Space; ww.color1 = x->current->settings.TextColour1; ww.color2 = x->current->settings.TextColour2; ww.color3 = x->current->settings.TextColour3; ww.color4 = x->current->settings.TextColour4; ww.USEcolor1234 = 1; }
-    eps_core_SetColour(x, &ww, 1);
-    IF_NOT_INVISIBLE canvas_EPSRenderTextItem(x, NULL, pageno, (pd->TitleFinal_xpos+MARGIN_HSIZE_LEFT)/M_TO_PS, (pd->TitleFinal_ypos - pd->TitleFinal_height/2)/ M_TO_PS, SW_HALIGN_LEFT, SW_VALIGN_CENT, x->CurrentColour, fs, 0.0, NULL, NULL);
+    if (x->current->settings.TextColor > 0) { ww.color = x->current->settings.TextColor; ww.USEcolor = 1; }
+    else                                    { ww.Col1234Space = x->current->settings.TextCol1234Space; ww.color1 = x->current->settings.TextColor1; ww.color2 = x->current->settings.TextColor2; ww.color3 = x->current->settings.TextColor3; ww.color4 = x->current->settings.TextColor4; ww.USEcolor1234 = 1; }
+    eps_core_SetColor(x, &ww, 1);
+    IF_NOT_INVISIBLE canvas_EPSRenderTextItem(x, NULL, pageno, (pd->TitleFinal_xpos+MARGIN_HSIZE_LEFT)/M_TO_PS, (pd->TitleFinal_ypos - pd->TitleFinal_height/2)/ M_TO_PS, SW_HALIGN_LEFT, SW_VALIGN_CENT, x->CurrentColor, fs, 0.0, NULL, NULL);
   END_LOOP_OVER_DATASETS
   return;
  }

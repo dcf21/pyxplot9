@@ -53,9 +53,9 @@ void eps_box_RenderEPS(EPSComm *x)
   // Expand any numbered styles which may appear in the with words we are passed
   ppl_withWordsMerge(x->c, &ww, &x->current->with_data, NULL, NULL, NULL, NULL, 1);
 
-  // Set fill colour of box
-  eps_core_SetFillColour(x, &ww);
-  eps_core_SwitchTo_FillColour(x,1);
+  // Set fill color of box
+  eps_core_SetFillColor(x, &ww);
+  eps_core_SwitchTo_FillColor(x,1);
 
   // Work out the origin that we're rotating about
   if (!x->current->xpos2set) { xo=(x1+x2)/2.0; yo=(y1+y2)/2.0; } // Rotate about centre of box if specified as 'from .... to ....'
@@ -73,8 +73,8 @@ void eps_box_RenderEPS(EPSComm *x)
     filled=1;
    }
 
-  // Set colour of outline of box
-  eps_core_SetColour(x, &ww, 1);
+  // Set color of outline of box
+  eps_core_SetColor(x, &ww, 1);
 
   // Set linewidth and linetype of outline
   if (ww.USElinewidth) lw_scale = ww.linewidth;
@@ -95,7 +95,7 @@ void eps_box_RenderEPS(EPSComm *x)
 
   // Undo scaling of postscript axes
   fprintf(x->epsbuffer, "grestore\n");
-  x->LastLinewidth = -1; x->LastLinetype = -1; x->LastPSColour[0]='\0';
+  x->LastLinewidth = -1; x->LastLinetype = -1; x->LastPSColor[0]='\0';
 
   // Factor four corners of box into EPS file's bounding box
   if (filled || stroked)

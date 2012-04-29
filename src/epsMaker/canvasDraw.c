@@ -239,9 +239,9 @@ void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops, int iterDe
   comm.status               = &status;
   comm.NTextItems           = 0; // Used to count items as we add them to text buffer
   comm.TextItems            = ppl_listInit(0); // Empty list of pieces of text we are going to put on canvas
-  comm.LastPSColour[0]      = '\0';
-  comm.CurrentColour[0]     = '\0';
-  comm.CurrentFillColour[0] = '\0';
+  comm.LastPSColor[0]       = '\0';
+  comm.CurrentColor[0]      = '\0';
+  comm.CurrentFillColor[0]  = '\0';
   comm.LastLinewidth        = -1.0;
   comm.LastLinetype         = 0;
   comm.LaTeXpageno          = 0; // Used to count items off as we render them to postscript
@@ -282,9 +282,9 @@ void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops, int iterDe
      {
       if (item->deleted)              continue; // ... except those which have been deleted
       if (unsuccessful_ops[item->id]) continue; // ... or which have already failed
-      comm.LastPSColour[0]      = '\0'; // Make each item produce free-standing postscript for easy editing
-      comm.CurrentColour[0]     = '\0';
-      comm.CurrentFillColour[0] = '\0';
+      comm.LastPSColor[0]       = '\0'; // Make each item produce free-standing postscript for easy editing
+      comm.CurrentColor[0]      = '\0';
+      comm.CurrentFillColor[0]  = '\0';
       comm.LastLinewidth        = -1.0;
       comm.LastLinetype         = 0;
       comm.current              = item;
@@ -879,7 +879,7 @@ void canvas_EPSRenderTextItem(EPSComm *x, char **strout, int pageno, double xpos
     while (*cptr!='\0')
      {
       if (*cptr!='\x01') snprintf(out+bufpos, BUFLEN-bufpos, "%c", *cptr);
-      else               snprintf(out+bufpos, BUFLEN-bufpos, "%s", colstr); // ASCII x01 is a magic code to tell us to revert to default colour
+      else               snprintf(out+bufpos, BUFLEN-bufpos, "%s", colstr); // ASCII x01 is a magic code to tell us to revert to default color
       bufpos+=strlen(out+bufpos);
       cptr++;
      }

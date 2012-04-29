@@ -32,10 +32,10 @@
 #include "coreUtils/errorReport.h"
 #include "epsMaker/bmp_image.h"
 
-void bmp_colour_count (pplerr_context *ec, bitmap_data *image);
-void bmp_palette_check(pplerr_context *ec, bitmap_data *image);
-void bmp_grey_check   (pplerr_context *ec, bitmap_data *image);
-void bmp_compact      (pplerr_context *ec, bitmap_data *image);
+void ppl_bmp_colour_count (pplerr_context *ec, bitmap_data *image);
+void ppl_bmp_palette_check(pplerr_context *ec, bitmap_data *image);
+void ppl_bmp_grey_check   (pplerr_context *ec, bitmap_data *image);
+void ppl_bmp_compact      (pplerr_context *ec, bitmap_data *image);
 
 #endif
 

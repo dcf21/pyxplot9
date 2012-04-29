@@ -36,7 +36,7 @@
 #include "epsMaker/bmp_image.h"
 #include "epsMaker/bmp_pngread.h"
 
-void bmp_pngread(pplerr_context *ec, FILE *in, bitmap_data *image)
+void ppl_bmp_pngread(pplerr_context *ec, FILE *in, bitmap_data *image)
  {
   int depth,ncols,ntrans,png_colour_type,i,j;
   unsigned width,height,row_bytes;

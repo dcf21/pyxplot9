@@ -488,9 +488,9 @@ write_rgb: \
 
 #define COMPRESS_POSTSCRIPT_IMAGE \
   /* Consider converting RGB data into a paletted image */ \
-  if ((img.depth == 24) && (img.type==BMP_COLOUR_BMP    )) bmp_colour_count(&x->c->errcontext,&img);  /* Check full color image to ensure more than 256 colors */ \
-  if ((img.depth ==  8) && (img.type==BMP_COLOUR_PALETTE)) bmp_grey_check(&x->c->errcontext,&img);    /* Check paletted images for greyscale conversion */ \
-  if ((img.type == BMP_COLOUR_PALETTE) && (img.pal_len <= 16) && (img.depth == 8)) bmp_compact(&x->c->errcontext,&img); /* Compact images with few palette entries */ \
+  if ((img.depth == 24) && (img.type==BMP_COLOUR_BMP    )) ppl_bmp_colour_count(&x->c->errcontext,&img);  /* Check full color image to ensure more than 256 colors */ \
+  if ((img.depth ==  8) && (img.type==BMP_COLOUR_PALETTE)) ppl_bmp_grey_check(&x->c->errcontext,&img);    /* Check paletted images for greyscale conversion */ \
+  if ((img.type == BMP_COLOUR_PALETTE) && (img.pal_len <= 16) && (img.depth == 8)) ppl_bmp_compact(&x->c->errcontext,&img); /* Compact images with few palette entries */ \
  \
   /* Apply compression to image data */ \
   switch (img.TargetCompression) \
@@ -532,7 +532,7 @@ write_rgb: \
   else if (img.colour == BMP_COLOUR_PALETTE) /* Indexed palette */ \
    { \
     fprintf(x->epsbuffer, "[/Indexed /DeviceRGB %d <~\n", img.pal_len-1); \
-    bmp_A85(&x->c->errcontext, x->epsbuffer, img.palette, 3*img.pal_len); \
+    ppl_bmp_A85(&x->c->errcontext, x->epsbuffer, img.palette, 3*img.pal_len); \
     fprintf(x->epsbuffer, "] setcolorspace\n\n"); \
    } \
  \
@@ -549,7 +549,7 @@ write_rgb: \
     else                             fprintf(x->epsbuffer, "%d]\n"      ,(int)img.trans[0]); \
    } \
   fprintf(x->epsbuffer, ">> image\n"); \
-  bmp_A85(&x->c->errcontext, x->epsbuffer, img.data, img.data_len); \
+  ppl_bmp_A85(&x->c->errcontext, x->epsbuffer, img.data, img.data_len); \
 
   WRITE_POSTSCRIPT_IMAGE;
   fprintf(x->epsbuffer, "grestore\n");
@@ -571,11 +571,11 @@ int  eps_plot_colourmap_DrawScales(EPSComm *x, double origin_x, double origin_y,
 
   // Set color for painting axes
   ppl_withWordsZero(x->c, &ww);
-  if (x->current->settings.AxesColour > 0) { ww.color = x->current->settings.AxesColour; ww.USEcolor = 1; }
-  else                                     { ww.Col1234Space = x->current->settings.AxesCol1234Space; ww.color1 = x->current->settings.AxesColour1; ww.color2 = x->current->settings.AxesColour2; ww.color3 = x->current->settings.AxesColour3; ww.color4 = x->current->settings.AxesColour4; ww.USEcolor1234 = 1; }
+  if (x->current->settings.AxesColor > 0) { ww.color = x->current->settings.AxesColor; ww.USEcolor = 1; }
+  else                                    { ww.Col1234Space = x->current->settings.AxesCol1234Space; ww.color1 = x->current->settings.AxesColor1; ww.color2 = x->current->settings.AxesColor2; ww.color3 = x->current->settings.AxesColor3; ww.color4 = x->current->settings.AxesColor4; ww.USEcolor1234 = 1; }
   ww.linewidth = EPS_AXES_LINEWIDTH; ww.USElinewidth = 1;
   ww.linetype  = 1;                  ww.USElinetype  = 1;
-  eps_core_SetColour(x, &ww, 1);
+  eps_core_SetColor(x, &ww, 1);
   IF_NOT_INVISIBLE eps_core_SetLinewidth(x, EPS_AXES_LINEWIDTH * EPS_DEFAULT_LINEWIDTH, 1, 0.0);
   else return 0;
 
@@ -614,8 +614,8 @@ int  eps_plot_colourmap_DrawScales(EPSComm *x, double origin_x, double origin_y,
       double              x1,y1,x2,y2  ,  x3,y3,x4,y4  ,  theta,dummy  ,  comp[4],CMin,CMax;
       double              Lx, Ly, ThetaX, ThetaY;
       unsigned char       CLog;
-      const double        MARGIN = EPS_COLOURSCALE_MARGIN * M_TO_PS;
-      const double        WIDTH  = EPS_COLOURSCALE_WIDTH * M_TO_PS;
+      const double        MARGIN = EPS_COLORSCALE_MARGIN * M_TO_PS;
+      const double        WIDTH  = EPS_COLORSCALE_WIDTH * M_TO_PS;
       const unsigned char Lr = (sg->ColKeyPos==SW_COLKEYPOS_B)||(sg->ColKeyPos==SW_COLKEYPOS_R);
       uLongf              zlen; // Length of buffer passed to zlib
       unsigned char      *imagez;

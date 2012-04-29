@@ -42,7 +42,7 @@
 
 #define HEADLEN 8*1024
 
-void bmp_jpegread(pplerr_context *ec, FILE *jpeg, bitmap_data *image)
+void ppl_bmp_jpegread(pplerr_context *ec, FILE *jpeg, bitmap_data *image)
  {
   int  comps=0;
   long i, j, len, chunk=64*1024;
