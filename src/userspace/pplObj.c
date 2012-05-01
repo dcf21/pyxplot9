@@ -399,6 +399,7 @@ pplObj *pplObjUser(pplObj *in, unsigned char amMalloced, unsigned char auxilMall
   in->auxilLen = 0;
   in->objPrototype = (pplObj *)malloc(sizeof(pplObj));
   if (in->objPrototype==NULL) return NULL;
+  in->objPrototype->refCount = 1;
   pplObjCpy(in->objPrototype, prototype, 0, 1, 1);
   in->self_lval = NULL; in->self_dval = NULL;
   in->self_this = NULL;

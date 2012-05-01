@@ -640,7 +640,6 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    }
   else if (strcmp_set && (strcmp(setoption,"numerics")==0)) /* set numerics */
    {
-    int   tempint;
     char *tempstr = (char *)command[PARSE_set_numerics_complex].auxil;
     int   got     =        (command[PARSE_set_numerics_complex].objType == PPLOBJ_STR);
     if (got) c->set->term_current.ComplexNumbers = ppl_fetchSettingByName(&c->errcontext, tempstr, SW_ONOFF_INT, SW_ONOFF_STR);
@@ -649,10 +648,10 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     got     =        (command[PARSE_set_numerics_errortype].objType == PPLOBJ_STR);
     if (got) c->set->term_current.ExplicitErrors = ppl_fetchSettingByName(&c->errcontext, tempstr, SW_ONOFF_INT, SW_ONOFF_STR);
 
-    tempint = (int)round(command[PARSE_set_numerics_number_significant_figures].real);
     got     =        (command[PARSE_set_numerics_number_significant_figures].objType == PPLOBJ_NUM);
     if (got)
      {
+      int tempint = (int)round(command[PARSE_set_numerics_number_significant_figures].real);
       if (tempint <  1) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Numbers cannot be displayed to fewer than one significant figure."); return; }
       if (tempint > 30) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "It is not sensible to try to display numbers to more than 30 significant figures. Calculations in PyXPlot are only accurate to double precision."); return; }
       c->set->term_current.SignificantFigures = tempint;

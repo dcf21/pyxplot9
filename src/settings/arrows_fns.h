@@ -46,9 +46,8 @@ void          pplarrow_print       (ppl_context *context, pplarrow_object  *in, 
 #define pplarrow_add_get_axis(X,Y) \
  { \
   pplObj *o = &in->stk[ptab[X]]; /* e.g. x0_axis */ \
-  int     i = (int)round(o->real); \
   if   (o->objType != PPLOBJ_NUM) Y = 0; \
-  else                            Y = i; \
+  else                            Y = (int)round(o->real); \
  }
 
 #define pplarrow_add_check_axis(X) \

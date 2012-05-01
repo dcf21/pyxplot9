@@ -92,8 +92,8 @@ void pplarrow_add(ppl_context *context, pplarrow_object **inlist, parserOutput *
 
   // Check whether arrow head type has been specified
   tempstr = (char *)in->stk[ptab[PARSE_INDEX_arrow_style]].auxil;
-  if (tempstr==NULL) out->pplarrow_style = SW_ARROWTYPE_HEAD;
-  else               out->pplarrow_style = ppl_fetchSettingByName(&context->errcontext, tempstr, SW_ARROWTYPE_INT, SW_ARROWTYPE_STR);
+  if (in->stk[ptab[PARSE_INDEX_arrow_style]].objType==PPLOBJ_STR) out->pplarrow_style = SW_ARROWTYPE_HEAD;
+  else                                                            out->pplarrow_style = ppl_fetchSettingByName(&context->errcontext, tempstr, SW_ARROWTYPE_INT, SW_ARROWTYPE_STR);
 
   // Check what style keywords have been specified in the 'with' clause
   ppl_withWordsFromDict(context, in, pl, ptab, &out->style);
