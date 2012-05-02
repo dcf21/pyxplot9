@@ -182,11 +182,13 @@ void pplset_makedefault(ppl_context *context)
   s->graph_default.GridAxisY[1]  = 1;
   s->graph_default.GridAxisZ[1]  = 1;
   s->graph_default.GridMajColor  = COLOR_GREY60;
+  s->graph_default.GridMajCol1234Space = SW_COLSPACE_RGB;
   s->graph_default.GridMajColor1 = 0;
   s->graph_default.GridMajColor2 = 0;
   s->graph_default.GridMajColor3 = 0;
   s->graph_default.GridMajColor4 = 0;
   s->graph_default.GridMinColor  = COLOR_GREY85;
+  s->graph_default.GridMinCol1234Space = SW_COLSPACE_RGB;
   s->graph_default.GridMinColor1 = 0;
   s->graph_default.GridMinColor2 = 0;
   s->graph_default.GridMinColor3 = 0;

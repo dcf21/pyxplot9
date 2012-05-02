@@ -310,9 +310,9 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"deepcopy"      ,1,1,0,0,0,0,(void *)&pplfunc_deepcopy    , "deepcopy(x)", "\\mathrm{deepcopy}@<@1@>", "deepcopy(x) returns a deep copy of the data structure x, copying also any nested data structures");
     ppl_addSystemFunc(d,"degrees"       ,1,1,1,1,1,0,(void *)&pplfunc_degrees     , "degrees(x)", "\\mathrm{degrees}@<@1@>", "degrees(x) converts angles measured in radians into degrees");
     ppl_addMagicFunction(d, "diff_d", 2, "diff_d...(e,min,max)", "\\left.\\frac{\\mathrm{d}}{\\mathrm{d}@?}\\right|_{@?=@2}@<@1@>", "diff_d<v>(e,x,step) numerically differentiates an expression e wrt <v> at x, using a step size of step. <v> can be any variable name");
-    ppl_addSystemFunc(d,"ellK"          ,1,1,1,1,1,1,(void *)&pplfunc_ellK        , "ellipticintK(k)", "\\mathrm{ellipticintK}@<@1@>", "ellipticintK(k) evaluates the complete elliptic integral K(k)");
-    ppl_addSystemFunc(d,"ellE"          ,1,1,1,1,1,1,(void *)&pplfunc_ellE        , "ellipticintE(k)", "\\mathrm{ellipticintE}@<@1@>", "ellipticintE(k) evaluates the complete elliptic integral E(k)");
-    ppl_addSystemFunc(d,"ellP"          ,2,2,1,1,1,1,(void *)&pplfunc_ellP        , "ellipticintP(k,n)", "\\mathrm{ellipticintP}@<@1,@2@>", "ellipticintP(k,n) evaluates the complete elliptic integral P(k,n)");
+    ppl_addSystemFunc(d,"ellipticintK"  ,1,1,1,1,1,1,(void *)&pplfunc_ellK        , "ellipticintK(k)", "\\mathrm{ellipticintK}@<@1@>", "ellipticintK(k) evaluates the complete elliptic integral K(k)");
+    ppl_addSystemFunc(d,"ellipticintE"  ,1,1,1,1,1,1,(void *)&pplfunc_ellE        , "ellipticintE(k)", "\\mathrm{ellipticintE}@<@1@>", "ellipticintE(k) evaluates the complete elliptic integral E(k)");
+    ppl_addSystemFunc(d,"ellipticintP"  ,2,2,1,1,1,1,(void *)&pplfunc_ellP        , "ellipticintP(k,n)", "\\mathrm{ellipticintP}@<@1,@2@>", "ellipticintP(k,n) evaluates the complete elliptic integral P(k,n)");
     ppl_addSystemFunc(d,"erf"           ,1,1,1,1,1,1,(void *)&pplfunc_erf         , "erf(x)", "\\mathrm{erf}@<@1@>", "erf(x) evaluates the error function at x");
     ppl_addSystemFunc(d,"erfc"          ,1,1,1,1,1,1,(void *)&pplfunc_erfc        , "erfc(x)", "\\mathrm{erfc}@<@1@>", "erfc(x) evaluates the complimentary error function at x");
     ppl_addSystemFunc(d,"eval"          ,1,1,0,0,0,0,(void *)&pplfunc_eval        , "eval(s)", "\\mathrm{eval}@<@0@>", "eval(s) evaluates the string expression s and returns the result");

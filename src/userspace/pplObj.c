@@ -460,6 +460,7 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char lval, unsigned char out
       pplObj *p = (pplObj *)malloc(sizeof(pplObj)); // Copy prototype pointer object
       if (p==NULL) { out->objType=PPLOBJ_ZOM; return NULL; }
       pplObjCpy(p,out->objPrototype,0,1,1);
+      p->refCount=1;
       out->objPrototype=p;
      }
     case PPLOBJ_DICT: // dictionary -- pass by pointer

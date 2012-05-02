@@ -45,6 +45,7 @@
 #include "settings/colors.h"
 #include "settings/epsColors.h"
 #include "settings/labels_fns.h"
+#include "settings/papersizes.h"
 #include "settings/settings.h"
 #include "settings/settingTypes.h"
 #include "settings/textConstants.h"
@@ -707,6 +708,73 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     strncpy(c->set->term_current.output, c->set->term_default.output, FNAME_LENGTH-1);
     c->set->term_current.output[FNAME_LENGTH-1]='\0';
    }
+  else if (strcmp_set && (strcmp(setoption,"papersize")==0)) /* set papersize */
+   {
+    if (command[PARSE_set_papersize_paper_name].objType==PPLOBJ_STR)
+     {
+      double d1,d2;
+      char *paperName = (char *)command[PARSE_set_papersize_paper_name].auxil;
+      ppl_PaperSizeByName(paperName, &d1, &d2);
+      if (d1>0)
+       {
+        c->set->term_current.PaperHeight.real = d1/1000;
+        c->set->term_current.PaperWidth.real  = d2/1000;
+        ppl_GetPaperName(c->set->term_current.PaperName, &d1, &d2);
+       }
+      else
+       {
+        sprintf(c->errcontext.tempErrStr, "Unrecognised paper size '%s'.", paperName); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return;
+       }
+     }
+    else
+     {
+      double d1 = command[PARSE_set_papersize_size  ].real;
+      double d2 = command[PARSE_set_papersize_size+1].real;
+      if ((!gsl_finite(d1))||(!gsl_finite(d2))) { sprintf(c->errcontext.tempErrStr, "The size coordinates supplied to the 'set papersize' command was not finite."); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return; }
+      c->set->term_current.PaperWidth .real = d1;
+      c->set->term_current.PaperHeight.real = d2;
+      d1 *= 1000; // Function below takes size input in mm
+      d2 *= 1000;
+      ppl_GetPaperName(c->set->term_current.PaperName, &d1, &d2);
+     }
+   }
+  else if (strcmp_unset && (strcmp(setoption,"palette")==0)) /* unset palette */
+   {
+    for (i=0; i<PALETTE_LENGTH; i++) c->set->palette_current [i] = c->set->palette_default [i];
+    for (i=0; i<PALETTE_LENGTH; i++) c->set->paletteS_current[i] = c->set->paletteS_default[i];
+    for (i=0; i<PALETTE_LENGTH; i++) c->set->palette1_current[i] = c->set->palette1_default[i];
+    for (i=0; i<PALETTE_LENGTH; i++) c->set->palette2_current[i] = c->set->palette2_default[i];
+    for (i=0; i<PALETTE_LENGTH; i++) c->set->palette3_current[i] = c->set->palette3_default[i];
+    for (i=0; i<PALETTE_LENGTH; i++) c->set->palette4_current[i] = c->set->palette4_default[i];
+   }
+  else if (strcmp_unset && (strcmp(setoption,"papersize")==0)) /* unset papersize */
+   {
+    c->set->term_current.PaperHeight.real = c->set->term_default.PaperHeight.real;
+    c->set->term_current.PaperWidth .real = c->set->term_default.PaperWidth .real;
+    strcpy(c->set->term_current.PaperName, c->set->term_default.PaperName);
+   }
+  else if (strcmp_set && (strcmp(setoption,"pointlinewidth")==0)) /* set pointlinewidth */
+   {
+    double tempdbl = command[PARSE_set_pointlinewidth_pointlinewidth].real;
+    if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The value supplied to the 'set pointlinewidth' command was not finite."); return; }
+    if (tempdbl <= 0.0) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Line widths are not allowed to be less than or equal to zero."); return; }
+    sg->PointLineWidth = tempdbl;
+   }
+  else if (strcmp_unset && (strcmp(setoption,"pointlinewidth")==0)) /* unset pointlinewidth */
+   {
+    sg->PointLineWidth = c->set->graph_default.PointLineWidth;
+   }
+  else if (strcmp_set && (strcmp(setoption,"pointsize")==0)) /* set pointsize */
+   {
+    double tempdbl = command[PARSE_set_pointsize_pointsize].real;
+    if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The value supplied to the 'set pointsize' command was not finite."); return; }
+    if (tempdbl <= 0.0) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Point sizes are not allowed to be less than or equal to zero."); return; }
+    sg->PointSize = tempdbl;
+   }
+  else if (strcmp_unset && (strcmp(setoption,"pointsize")==0)) /* unset pointsize */
+   {
+    sg->PointSize = c->set->graph_default.PointSize;
+   }
   else if (strcmp_set && (strcmp(setoption,"preamble")==0)) /* set preamble */
    {
     char *tempstr = (char *)command[PARSE_set_preamble_preamble].auxil;
@@ -797,6 +865,24 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
   else if (strcmp_unset && (strcmp(setoption,"textvalign")==0)) /* unset textvalign */
    {
     sg->TextVAlign = c->set->graph_default.TextVAlign;
+   }
+  else if (strcmp_set && (strcmp(setoption,"title")==0)) /* set title */
+   {
+    if (command[PARSE_set_title_title].objType==PPLOBJ_STR)
+     {
+      char *tempstr = (char *)command[PARSE_set_title_title].auxil;
+      strncpy(sg->title, tempstr, FNAME_LENGTH-1);
+      sg->title[FNAME_LENGTH-1]='\0';
+     }
+    if (command[PARSE_set_title_offset  ].objType==PPLOBJ_NUM) sg->TitleXOff = command[PARSE_set_title_offset  ];
+    if (command[PARSE_set_title_offset+1].objType==PPLOBJ_NUM) sg->TitleYOff = command[PARSE_set_title_offset+1];
+   }
+  else if (strcmp_unset && (strcmp(setoption,"title")==0)) /* unset title */
+   {
+    strncpy(sg->title, c->set->graph_default.title, FNAME_LENGTH-1);
+    sg->title[FNAME_LENGTH-1]='\0';
+    sg->TitleXOff = c->set->graph_default.TitleXOff;
+    sg->TitleYOff = c->set->graph_default.TitleYOff;
    }
   else if (strcmp_set && (strcmp(setoption,"unit")==0)) /* set unit */
    {

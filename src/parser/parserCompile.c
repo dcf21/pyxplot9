@@ -24,6 +24,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+#include <limits.h>
 
 #ifdef HAVE_READLINE
 #include <readline/readline.h>
@@ -516,27 +518,29 @@ finished_looking_for_tabcomp:
              }
             case 'a':
              {
-              int xyz;
+              int    xyz , anum=1;
               if      ((line[*linepos]=='x')||(line[*linepos]=='X')) xyz=0;
               else if ((line[*linepos]=='y')||(line[*linepos]=='Y')) xyz=1;
               else if ((line[*linepos]=='z')||(line[*linepos]=='Z')) xyz=2;
               else                                                   { status=0; goto item_cleanup; }
-              ppl_expCompile(c,srcLineN,srcId,srcFname,line+*linepos+1,&explen,dollarAllowed,equalsAllowed,0,&expr,&errPos,&errType,c->errStat.errBuff);
-              if (errPos>=0)
+              if      (ppl_validFloat(line+*linepos+1,NULL))
                {
-                pplExpr_free(expr);
-                ppl_tbAdd(c,srcLineN,srcId,srcFname,0,errType,errPos+*linepos+1,line,"");
-                status=0;
-                goto item_cleanup;
+                double ad = ppl_getFloat(line+*linepos+1,&explen);
+                if      ((ad<=0)||(ad>=INT_MAX)) { status=0; goto item_cleanup; }
+                anum = (int)floor(ad);
+                explen++;
                }
-              if ((s==NULL)||(!writeOut)) pplExpr_free(expr);
               else
+               { explen=1; }
+              if ((s!=NULL)&&(writeOut))
                {
                 char opt[8];
+                pplObj val;
+                val.refCount=1;
+                pplObjNum(&val,1,anum,0);
                 sprintf(opt,"a%d",xyz);
-                ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos+1, opt, expr, NULL);
+                ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos+1, opt, NULL, &val);
                }
-              explen++;
               break;
              }
             case 'c':
