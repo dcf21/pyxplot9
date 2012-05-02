@@ -34,6 +34,8 @@
 #include "coreUtils/memAlloc.h"
 #include "coreUtils/list.h"
 
+#include "defaultObjs/moduleRandom.h"
+
 #include "expressions/expCompile_fns.h"
 #include "expressions/traceback_fns.h"
 
@@ -151,8 +153,11 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
       if (!SetAll)
        while (command[pos].objType==PPLOBJ_NUM)
         {
-         int i = (int)round(command[pos+PARSE_set_axis_axis_axes].real);
-         int j = (int)round(command[pos+PARSE_set_axis_axis_axes].exponent[0]);
+         int i,j;
+         pos = (int)round(command[pos].real);
+         if (pos<=0) break;
+         i = (int)round(command[pos+PARSE_set_autoscale_axis_0axes].real);
+         j = (int)round(command[pos+PARSE_set_autoscale_axis_0axes].exponent[0]);
          SET_AUTOSCALE_AXIS;
         }
       else
@@ -405,7 +410,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    {
     char *tempstr  = (char *)command[PARSE_set_filter_filename].auxil;
     char *tempstr2 = (char *)command[PARSE_set_filter_filter  ].auxil;
-    char *tempstr3 = (char *)malloc(strlen(tempstr2));
+    char *tempstr3 = (char *)malloc(strlen(tempstr2)+1);
     pplObj val;
     if (tempstr3==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1, "Out of memory."); return; }
     strcpy(tempstr3, tempstr2);
@@ -573,10 +578,17 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    }
   else if (strcmp_set && (strcmp(setoption,"keycolumns")==0)) /* set keycolumns */
    {
-    double tempdbl = command[PARSE_set_keycolumns_key_columns].real;
-    if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The value supplied to the 'set keycolumns' command was not finite."); return; }
-    if (tempdbl <= 0.0) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Number of key columns is not allowed to be less than or equal to zero."); return; }
-    sg->KeyColumns = (int)round(tempdbl);
+    if (command[PARSE_set_keycolumns_key_columns].objType==PPLOBJ_NUM)
+     {
+      double tempdbl = command[PARSE_set_keycolumns_key_columns].real;
+      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The value supplied to the 'set keycolumns' command was not finite."); return; }
+      if (tempdbl <= 0.0) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Number of key columns is not allowed to be less than or equal to zero."); return; }
+      sg->KeyColumns = (int)round(tempdbl);
+     }
+    else
+     {
+      sg->KeyColumns = c->set->graph_default.KeyColumns; // set keycolumns auto -- equivalent to unset
+     }
    }
   else if (strcmp_unset && (strcmp(setoption,"keycolumns")==0)) /* unset keycolumns */
    {
@@ -610,6 +622,10 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if ((c->set->term_default.multiplot == SW_ONOFF_OFF) && (c->set->term_current.multiplot == SW_ONOFF_ON)) ppl_directive_clear(c,pl,in,interactive);
     c->set->term_current.multiplot = c->set->term_default.multiplot;
    }
+  else if (strcmp_set && (strcmp(setoption,"noarrow")==0)) /* set noarrow */
+   {
+    if (al!=NULL) pplarrow_remove(c, al, in, pl, PARSE_TABLE_set_noarrow_, 0);
+   }
   else if (strcmp_set && (strcmp(setoption,"nobackup")==0)) /* set nobackup */
    {
     c->set->term_current.backup = SW_ONOFF_OFF;
@@ -629,6 +645,10 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
   else if (strcmp_set && (strcmp(setoption,"nokey")==0)) /* set nokey */
    {
     sg->key = SW_ONOFF_OFF;
+   }
+  else if (strcmp_set && (strcmp(setoption,"nolabel")==0)) /* set nolabel */
+   {
+    if (ll!=NULL) ppllabel_remove(c, ll, in, pl, PARSE_TABLE_set_nolabel_, 0);
    }
   else if (strcmp_set && (strcmp(setoption,"nomultiplot")==0)) /* set nomultiplot */
    {
@@ -786,6 +806,35 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     strncpy(c->set->term_current.LatexPreamble, c->set->term_default.LatexPreamble, FNAME_LENGTH-1);
     c->set->term_current.LatexPreamble[FNAME_LENGTH-1]='\0';
    }
+  else if (strcmp_set && (strcmp(setoption,"samples")==0)) /* set samples */
+   {
+    if (command[PARSE_set_samples_samples].objType==PPLOBJ_NUM)
+     {
+      int i = (int)round(command[PARSE_set_samples_samples].real);
+      if (i<2) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Graphs cannot be constucted based on fewer than two samples."); i=2; }
+      sg->samples = i;
+     }
+    if (command[PARSE_set_samples_samplesX].objType==PPLOBJ_NUM)
+     {
+      int i = (int)round(command[PARSE_set_samples_samplesX].real);
+      if (i<2) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Graphs cannot be constucted based on fewer than two samples."); i=2; }
+      sg->SamplesX = i;
+      sg->SamplesXAuto = SW_BOOL_FALSE;
+     }
+    if (command[PARSE_set_samples_samplesY].objType==PPLOBJ_NUM)
+     {
+      int i = (int)round(command[PARSE_set_samples_samplesY].real);
+      if (i<2) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Graphs cannot be constucted based on fewer than two samples."); i=2; }
+      sg->SamplesY = i;
+      sg->SamplesYAuto = SW_BOOL_FALSE;
+     }
+    if (command[PARSE_set_samples_samplesXauto].objType==PPLOBJ_STR) sg->SamplesXAuto = SW_BOOL_TRUE;
+    if (command[PARSE_set_samples_samplesYauto].objType==PPLOBJ_STR) sg->SamplesYAuto = SW_BOOL_TRUE;
+    if (command[PARSE_set_samples_method].objType==PPLOBJ_STR)
+     {
+      sg->Sample2DMethod = ppl_fetchSettingByName(&c->errcontext, (char *)command[PARSE_set_samples_method].auxil, SW_SAMPLEMETHOD_INT, SW_SAMPLEMETHOD_STR);
+     }
+   }
   else if (strcmp_unset && (strcmp(setoption,"samples")==0)) /* unset samples */
    {
     sg->samples        = c->set->graph_default.samples;
@@ -794,6 +843,69 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     sg->SamplesY       = c->set->graph_default.SamplesY;
     sg->SamplesYAuto   = c->set->graph_default.SamplesYAuto;
     sg->Sample2DMethod = c->set->graph_default.Sample2DMethod;
+   }
+  else if (strcmp_set && (strcmp(setoption,"seed")==0)) /* set seed */
+   {
+    long li;
+    double d = command[PARSE_set_seed_seed].real;
+    if (!gsl_finite(d)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The value supplied to the 'set seed' command was not finite."); return; }
+    if      (d < LONG_MIN) li = LONG_MIN;
+    else if (d > LONG_MAX) li = LONG_MAX;
+    else                   li = (long)d;
+    c->set->term_current.RandomSeed = li;
+    pplfunc_setRandomSeed(li);
+   }
+  else if (strcmp_unset && (strcmp(setoption,"seed")==0)) /* unset seed */
+   {
+    c->set->term_current.RandomSeed = c->set->term_default.RandomSeed;
+    pplfunc_setRandomSeed(c->set->term_current.RandomSeed);
+   }
+  else if (strcmp_set && (strcmp(setoption,"size")==0)) /* set size */
+   {
+    if (command[PARSE_set_size_width].objType==PPLOBJ_NUM)
+     {
+      if (!gsl_finite(command[PARSE_set_size_width].real)) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "The width supplied to the 'set size' command was not finite."); return; }
+      sg->width=command[PARSE_set_size_width];
+     }
+    if (command[PARSE_set_size_height].objType==PPLOBJ_NUM)
+     {
+      double r = command[PARSE_set_size_height].real / sg->width.real;
+      if ((!gsl_finite(r)) || (fabs(r) < 1e-6) || (fabs(r) > 1e4)) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "The requested y/x aspect ratios for graphs must be in the range 1e-6 to 10000."); return; }
+      sg->aspect = r;
+      sg->AutoAspect = SW_ONOFF_OFF;
+     }
+    if (command[PARSE_set_size_depth].objType==PPLOBJ_NUM)
+     {
+      double r = command[PARSE_set_size_depth].real / sg->width.real;
+      if ((!gsl_finite(r)) || (fabs(r) < 1e-6) || (fabs(r) > 1e4)) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "The requested z/x aspect ratios for graphs must be in the range 1e-6 to 10000."); return; }
+      sg->zaspect = r;
+      sg->AutoZAspect = SW_ONOFF_OFF;
+     }
+    if (command[PARSE_set_size_ratio].objType==PPLOBJ_NUM)
+     {
+      double r = command[PARSE_set_size_ratio].real;
+      if ((!gsl_finite(r)) || (fabs(r) < 1e-6) || (fabs(r) > 1e4)) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "The requested y/x aspect ratios for graphs must be in the range 1e-6 to 10000."); return; }
+      sg->aspect = r;
+      sg->AutoAspect = SW_ONOFF_OFF;
+     }
+    if (command[PARSE_set_size_zratio].objType==PPLOBJ_NUM)
+     {
+      double r = command[PARSE_set_size_ratio].real;
+      if ((!gsl_finite(r)) || (fabs(r) < 1e-6) || (fabs(r) > 1e4)) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "The requested z/x aspect ratios for graphs must be in the range 1e-6 to 10000."); return; }
+      sg->zaspect = r;
+      sg->AutoZAspect = SW_ONOFF_OFF;
+     }
+    if (command[PARSE_set_size_square].objType==PPLOBJ_STR) { sg->aspect = 1; sg->AutoAspect = SW_ONOFF_OFF; }
+    if (command[PARSE_set_size_noratio].objType==PPLOBJ_STR) { sg->aspect = c->set->graph_default.aspect; sg->AutoAspect = 1; }
+    if (command[PARSE_set_size_nozratio].objType==PPLOBJ_STR) { sg->zaspect = c->set->graph_default.zaspect; sg->AutoZAspect = 1; }
+   }
+  else if (strcmp_unset && (strcmp(setoption,"size")==0)) /* unset size */
+   {
+    sg->width.real   = c->set->graph_default.width.real;
+    sg->aspect       = c->set->graph_default.aspect;
+    sg->AutoAspect   = c->set->graph_default.AutoAspect;
+    sg->zaspect      = c->set->graph_default.zaspect;
+    sg->AutoZAspect  = c->set->graph_default.AutoZAspect;
    }
   else if (strcmp_set && (strcmp(setoption,"terminal")==0)) /* set terminal */
    {
@@ -964,35 +1076,35 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
 
          if (pp!=0) continue;
          multiplier = 8;
-         if      ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].nameAp,1))!=0) p=1;
-         else if ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].nameAs,1))!=0) p=1;
-         else if ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].nameFp,0))!=0) p=1;
-         else if ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].nameFs,0))!=0) p=1;
-         else if ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].nameFp,0))!=0) p=1;
-         else if ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].alt1  ,0))!=0) p=1;
-         else if ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].alt2  ,0))!=0) p=1;
-         else if ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].alt3  ,0))!=0) p=1;
-         else if ((k = ppl_unitNameCmp(tempstr2, c->unit_database[j].alt4  ,0))!=0) p=1;
+         if      ((k = ppl_unitNameCmp(unit, c->unit_database[j].nameAp,1))!=0) p=1;
+         else if ((k = ppl_unitNameCmp(unit, c->unit_database[j].nameAs,1))!=0) p=1;
+         else if ((k = ppl_unitNameCmp(unit, c->unit_database[j].nameFp,0))!=0) p=1;
+         else if ((k = ppl_unitNameCmp(unit, c->unit_database[j].nameFs,0))!=0) p=1;
+         else if ((k = ppl_unitNameCmp(unit, c->unit_database[j].nameFp,0))!=0) p=1;
+         else if ((k = ppl_unitNameCmp(unit, c->unit_database[j].alt1  ,0))!=0) p=1;
+         else if ((k = ppl_unitNameCmp(unit, c->unit_database[j].alt2  ,0))!=0) p=1;
+         else if ((k = ppl_unitNameCmp(unit, c->unit_database[j].alt3  ,0))!=0) p=1;
+         else if ((k = ppl_unitNameCmp(unit, c->unit_database[j].alt4  ,0))!=0) p=1;
          else
           {
            for (l=c->unit_database[j].minPrefix/3+8; l<=c->unit_database[j].maxPrefix/3+8; l++)
             {
              if (l==8) continue;
-             for (k=0; ((SIprefixes_full[l][k]!='\0') && (toupper(SIprefixes_full[l][k])==toupper(tempstr2[k]))); k++);
+             for (k=0; ((SIprefixes_full[l][k]!='\0') && (toupper(SIprefixes_full[l][k])==toupper(unit[k]))); k++);
              if (SIprefixes_full[l][k]=='\0')
               {
-               if      ((m = ppl_unitNameCmp(tempstr2+k, c->unit_database[j].nameFp,0))!=0) { p=1; k+=m; multiplier=l; break; }
-               else if ((m = ppl_unitNameCmp(tempstr2+k, c->unit_database[j].nameFs,0))!=0) { p=1; k+=m; multiplier=l; break; }
-               else if ((m = ppl_unitNameCmp(tempstr2+k, c->unit_database[j].alt1  ,0))!=0) { p=1; k+=m; multiplier=l; break; }
-               else if ((m = ppl_unitNameCmp(tempstr2+k, c->unit_database[j].alt2  ,0))!=0) { p=1; k+=m; multiplier=l; break; }
-               else if ((m = ppl_unitNameCmp(tempstr2+k, c->unit_database[j].alt3  ,0))!=0) { p=1; k+=m; multiplier=l; break; }
-               else if ((m = ppl_unitNameCmp(tempstr2+k, c->unit_database[j].alt4  ,0))!=0) { p=1; k+=m; multiplier=l; break; }
+               if      ((m = ppl_unitNameCmp(unit+k, c->unit_database[j].nameFp,0))!=0) { p=1; k+=m; multiplier=l; break; }
+               else if ((m = ppl_unitNameCmp(unit+k, c->unit_database[j].nameFs,0))!=0) { p=1; k+=m; multiplier=l; break; }
+               else if ((m = ppl_unitNameCmp(unit+k, c->unit_database[j].alt1  ,0))!=0) { p=1; k+=m; multiplier=l; break; }
+               else if ((m = ppl_unitNameCmp(unit+k, c->unit_database[j].alt2  ,0))!=0) { p=1; k+=m; multiplier=l; break; }
+               else if ((m = ppl_unitNameCmp(unit+k, c->unit_database[j].alt3  ,0))!=0) { p=1; k+=m; multiplier=l; break; }
+               else if ((m = ppl_unitNameCmp(unit+k, c->unit_database[j].alt4  ,0))!=0) { p=1; k+=m; multiplier=l; break; }
               }
-             for (k=0; ((SIprefixes_abbrev[l][k]!='\0') && (SIprefixes_abbrev[l][k]==tempstr2[k])); k++);
+             for (k=0; ((SIprefixes_abbrev[l][k]!='\0') && (SIprefixes_abbrev[l][k]==unit[k])); k++);
              if (SIprefixes_abbrev[l][k]=='\0')
               {
-               if      ((m = ppl_unitNameCmp(tempstr2+k, c->unit_database[j].nameAp,1))!=0) { p=1; k+=m; multiplier=l; break; }
-               else if ((m = ppl_unitNameCmp(tempstr2+k, c->unit_database[j].nameAs,1))!=0) { p=1; k+=m; multiplier=l; break; }
+               if      ((m = ppl_unitNameCmp(unit+k, c->unit_database[j].nameAp,1))!=0) { p=1; k+=m; multiplier=l; break; }
+               else if ((m = ppl_unitNameCmp(unit+k, c->unit_database[j].nameAs,1))!=0) { p=1; k+=m; multiplier=l; break; }
               }
             }
           }
@@ -1035,6 +1147,42 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
   else if (strcmp_unset && (strcmp(setoption,"unit_scheme")==0)) /* unset unit scheme */
    {
     c->set->term_current.UnitScheme          = c->set->term_default.UnitScheme;
+   }
+  else if (strcmp_set && (strcmp(setoption,"view")==0)) /* set view */
+   {
+    if (command[PARSE_set_view_xy_angle].objType==PPLOBJ_NUM)
+     {
+      double d=command[PARSE_set_view_xy_angle].real;
+      if (!gsl_finite(d)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The viewing angles supplied to the 'set view' command were not finite."); return; }
+      sg->XYview.real = d;
+     }
+    if (command[PARSE_set_view_yz_angle].objType==PPLOBJ_NUM) 
+     {
+      double d=command[PARSE_set_view_yz_angle].real;
+      if (!gsl_finite(d)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The viewing angles supplied to the 'set view' command were not finite."); return; }
+      sg->YZview.real = d;
+     }
+    sg->XYview.real = fmod(sg->XYview.real , 2*M_PI);
+    sg->YZview.real = fmod(sg->YZview.real , 2*M_PI);
+    while (sg->XYview.real < 0.0) sg->XYview.real += 2*M_PI;
+    while (sg->YZview.real < 0.0) sg->YZview.real += 2*M_PI;
+   }
+  else if (strcmp_unset && (strcmp(setoption,"view")==0)) /* unset view */
+   {
+    sg->XYview.real = c->set->graph_default.XYview.real;
+    sg->YZview.real = c->set->graph_default.YZview.real;
+   }
+  else if (strcmp_set && (strcmp(setoption,"width")==0)) /* set width */
+   {
+    if (command[PARSE_set_width_width].objType==PPLOBJ_NUM)
+     {
+      if (!gsl_finite(command[PARSE_set_width_width].real)) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "The width supplied to the 'set width' command was not finite."); return; }
+      sg->width=command[PARSE_set_width_width];
+     }
+   }
+  else if (strcmp_unset && (strcmp(setoption,"width")==0)) /* unset width */
+   {
+    sg->width.real = c->set->graph_default.width.real;
    }
   else
    {

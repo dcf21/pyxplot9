@@ -223,6 +223,7 @@ void pplset_makedefault(ppl_context *context)
   s->graph_default.SamplesYAuto  = SW_BOOL_FALSE;
   s->graph_default.Sample2DMethod= SW_SAMPLEMETHOD_NEAREST;
   s->graph_default.TextColor     = COLOR_BLACK;
+  s->graph_default.TextCol1234Space = SW_COLSPACE_RGB;
   s->graph_default.TextColor1    = 0;
   s->graph_default.TextColor2    = 0;
   s->graph_default.TextColor3    = 0;
