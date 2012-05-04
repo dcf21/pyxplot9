@@ -171,7 +171,7 @@ void eps_plot_ticking_auto2(EPSComm *x, pplset_axis *axis, double UnitMultiplier
   if (axis->AxisLinearInterpolation != NULL) goto FAIL;
 
   // Work out factors of log base of axis. In fact, work out factors of log base ** 2, so that ten divides by four.
-  LogBase = IsLog ? axis->LogBase : 10;
+  LogBase = IsLog ? axis->tics.logBase : 10;
   factorise(pow(10.0,FACTOR_MULTIPLY), FactorsTen, MAX_FACTORS, axis->PhysicalLengthMinor, &NFactorsTen);
 
   // Work out order of magnitude of axis range
@@ -364,7 +364,7 @@ FAIL:
     X = ((double)i)/(N-1);
     axis->TickListPositions[i] = X;
     X = eps_plot_axis_InvGetPosition(X, axis);
-    if (axis->format == NULL) TickLabelAutoGen(x, &axis->TickListStrings[i] , X * UnitMultiplier , axis->LogBase, OutContext);
+    if (axis->format == NULL) TickLabelAutoGen(x, &axis->TickListStrings[i] , X * UnitMultiplier , axis->tics.logBase, OutContext);
     else                      TickLabelFromFormat(x, &axis->TickListStrings[i], axis->format, X, &axis->DataUnit, axis->xyz, OutContext);
     if (axis->TickListStrings[i]==NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1, "Out of memory"); axis->TickListPositions = NULL; axis->TickListStrings = NULL; goto CLEANUP; }
    }

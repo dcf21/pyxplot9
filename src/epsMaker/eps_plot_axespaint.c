@@ -122,10 +122,10 @@ void eps_plot_axispaint(EPSComm *x, withWords *ww, pplset_axis *a, const int xyz
            {
             double        theta_ab = m ? theta_a : theta_b;
             if (!gsl_finite(theta_ab)) continue;
-            tic_x2 = tic_x1 + (a->TickDir==SW_TICDIR_IN  ? 0.0 :  1.0) * sin(theta_ab) * TLEN * M_TO_PS; // top of tick
-            tic_y2 = tic_y1 + (a->TickDir==SW_TICDIR_IN  ? 0.0 :  1.0) * cos(theta_ab) * TLEN * M_TO_PS;
-            tic_x3 = tic_x1 + (a->TickDir==SW_TICDIR_OUT ? 0.0 : -1.0) * sin(theta_ab) * TLEN * M_TO_PS; // bottom of tick
-            tic_y3 = tic_y1 + (a->TickDir==SW_TICDIR_OUT ? 0.0 : -1.0) * cos(theta_ab) * TLEN * M_TO_PS;
+            tic_x2 = tic_x1 + (a->tics.tickDir==SW_TICDIR_IN  ? 0.0 :  1.0) * sin(theta_ab) * TLEN * M_TO_PS; // top of tick
+            tic_y2 = tic_y1 + (a->tics.tickDir==SW_TICDIR_IN  ? 0.0 :  1.0) * cos(theta_ab) * TLEN * M_TO_PS;
+            tic_x3 = tic_x1 + (a->tics.tickDir==SW_TICDIR_OUT ? 0.0 : -1.0) * sin(theta_ab) * TLEN * M_TO_PS; // bottom of tick
+            tic_y3 = tic_y1 + (a->tics.tickDir==SW_TICDIR_OUT ? 0.0 : -1.0) * cos(theta_ab) * TLEN * M_TO_PS;
 
             // Check for special case of ticks at zero on axes crossed by atzero axes
             HALIGN_THIS = HALIGN;

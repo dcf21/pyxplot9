@@ -57,19 +57,19 @@ void pplaxis_destroy(ppl_context *context, pplset_axis *in)
   if (in->format    != NULL) { free        (           in->format   ); in->format    = NULL; }
   if (in->label     != NULL) { free        (           in->label    ); in->label     = NULL; }
   if (in->linkusing != NULL) { pplExpr_free((pplExpr *)in->linkusing); in->linkusing = NULL; }
-  if (in->MTickList != NULL) { free        (           in->MTickList); in->MTickList = NULL; }
-  if (in->MTickStrs != NULL)
+  if (in->ticsM.tickList != NULL) { free(in->ticsM.tickList); in->ticsM.tickList = NULL; }
+  if (in->ticsM.tickStrs != NULL)
    {
-    for (i=0; in->MTickStrs[i]!=NULL; i++) free(in->MTickStrs[i]);
-    free(in->MTickStrs);
-    in->MTickStrs = NULL;
+    for (i=0; in->ticsM.tickStrs[i]!=NULL; i++) free(in->ticsM.tickStrs[i]);
+    free(in->ticsM.tickStrs);
+    in->ticsM.tickStrs = NULL;
    }
-  if (in->TickList  != NULL) { free(in->TickList ); in->TickList  = NULL; }
-  if (in->TickStrs  != NULL)
+  if (in->tics.tickList  != NULL) { free(in->tics.tickList ); in->tics.tickList  = NULL; }
+  if (in->tics.tickStrs  != NULL)
    {
-    for (i=0; in->TickStrs[i]!=NULL; i++) free(in->TickStrs[i]);
-    free(in->TickStrs );
-    in->TickStrs  = NULL;
+    for (i=0; in->tics.tickStrs[i]!=NULL; i++) free(in->tics.tickStrs[i]);
+    free(in->tics.tickStrs );
+    in->tics.tickStrs  = NULL;
    }
   return;
  }
@@ -93,17 +93,17 @@ void pplaxis_copyTics(ppl_context *context, pplset_axis *out, const pplset_axis 
  {
   int   i=0,j;
   void *tmp;
-  if (in->TickStrs != NULL)
+  if (in->tics.tickStrs != NULL)
    {
-    for (i=0; in->TickStrs[i]!=NULL; i++);
-    out->TickStrs= XMALLOC((i+1)*sizeof(char *));
-    for (j=0; j<i; j++) { out->TickStrs[j] = XMALLOC(strlen(in->TickStrs[j])+1); strcpy(out->TickStrs[j], in->TickStrs[j]); }
-    out->TickStrs[i] = NULL;
+    for (i=0; in->tics.tickStrs[i]!=NULL; i++);
+    out->tics.tickStrs= XMALLOC((i+1)*sizeof(char *));
+    for (j=0; j<i; j++) { out->tics.tickStrs[j] = XMALLOC(strlen(in->tics.tickStrs[j])+1); strcpy(out->tics.tickStrs[j], in->tics.tickStrs[j]); }
+    out->tics.tickStrs[i] = NULL;
    }
-  if (in->TickList != NULL)
+  if (in->tics.tickList != NULL)
    {
-    out->TickList= (double *)XMALLOC((i+1)*sizeof(double));
-    memcpy(out->TickList, in->TickList, (i+1)*sizeof(double)); // NB: For this to be safe, TickLists MUST have double to correspond to NULL in TickStrs
+    out->tics.tickList= (double *)XMALLOC((i+1)*sizeof(double));
+    memcpy(out->tics.tickList, in->tics.tickList, (i+1)*sizeof(double)); // NB: For this to be safe, tics.tickLists MUST have double to correspond to NULL in tics.tickStrs
    }
   return;
  }
@@ -112,49 +112,41 @@ void pplaxis_copyMTics(ppl_context *context, pplset_axis *out, const pplset_axis
  {
   int   i=0,j;
   void *tmp;
-  if (in->MTickStrs != NULL)
+  if (in->ticsM.tickStrs != NULL)
    {
-    for (i=0; in->MTickStrs[i]!=NULL; i++);
-    out->MTickStrs= XMALLOC((i+1)*sizeof(char *));
-    for (j=0; j<i; j++) { out->MTickStrs[j] = XMALLOC(strlen(in->MTickStrs[j])+1); strcpy(out->MTickStrs[j], in->MTickStrs[j]); }
-    out->MTickStrs[i] = NULL;
+    for (i=0; in->ticsM.tickStrs[i]!=NULL; i++);
+    out->ticsM.tickStrs= XMALLOC((i+1)*sizeof(char *));
+    for (j=0; j<i; j++) { out->ticsM.tickStrs[j] = XMALLOC(strlen(in->ticsM.tickStrs[j])+1); strcpy(out->ticsM.tickStrs[j], in->ticsM.tickStrs[j]); }
+    out->ticsM.tickStrs[i] = NULL;
    }
-  if (in->MTickList != NULL)
+  if (in->ticsM.tickList != NULL)
    {
-    out->MTickList= (double *)XMALLOC((i+1)*sizeof(double));
-    memcpy(out->MTickList, in->MTickList, (i+1)*sizeof(double)); // NB: For this to be safe, TickLists MUST have double to correspond to NULL in TickStrs
+    out->ticsM.tickList= (double *)XMALLOC((i+1)*sizeof(double));
+    memcpy(out->ticsM.tickList, in->ticsM.tickList, (i+1)*sizeof(double)); // NB: For this to be safe, tics.tickLists MUST have double to correspond to NULL in tics.tickStrs
    }
   return;
  }
 
-unsigned char pplaxis_cmpTics(ppl_context *context, const pplset_axis *a, const pplset_axis *b)
+unsigned char pplaxis_cmpTics(ppl_context *context, const pplset_tics *ta, const pplset_tics *tb, const pplObj *ua, const pplObj *ub, const int la, const int lb)
  {
   int i,j;
-  if ((a->TickList==NULL)&&(b->TickList==NULL)) return 1;
-  if ((a->TickList==NULL)||(b->TickList==NULL)) return 0;
-  for (i=0; a->TickStrs[i]!=NULL; i++);
-  for (j=0; b->TickStrs[j]!=NULL; j++);
-  if (i!=j) return 0; // Tick lists have different lengths
+  if (la != lb) return 0;
+  if (!ppl_unitsDimEqual(ua,ub)) return 0;
+  if (ta->tickMinSet!=tb->tickMinSet) return 0;
+  if (ta->tickMaxSet!=tb->tickMaxSet) return 0;
+  if (ta->tickStepSet!=tb->tickStepSet) return 0;
+  if (ta->tickMinSet && (ta->tickMin!=tb->tickMin)) return 0;
+  if (ta->tickMaxSet && (ta->tickMax!=tb->tickMax)) return 0;
+  if (ta->tickStepSet && (ta->tickStep!=tb->tickStep)) return 0;
+  if ((ta->tickList==NULL)&&(tb->tickList==NULL)) return 1;
+  if ((ta->tickList==NULL)||(tb->tickList==NULL)) return 0;
+  for (i=0; ta->tickStrs[i]!=NULL; i++);
+  for (j=0; tb->tickStrs[j]!=NULL; j++);
+  if (i!=j) return 0; // tick lists have different lengths
   for (j=0; j<i; j++)
    {
-    if (a->TickList[j] != b->TickList[j]) return 0;
-    if (strcmp(a->TickStrs[j], b->TickStrs[j])!=0) return 0;
-   }
-  return 1;
- }
-
-unsigned char pplaxis_cmpMTics(ppl_context *context, const pplset_axis *a, const pplset_axis *b)
- {
-  int i,j;
-  if ((a->MTickList==NULL)&&(b->MTickList==NULL)) return 1;
-  if ((a->MTickList==NULL)||(b->MTickList==NULL)) return 0;
-  for (i=0; a->MTickStrs[i]!=NULL; i++);
-  for (j=0; b->MTickStrs[j]!=NULL; j++);
-  if (i!=j) return 0; // Tick lists have different lengths
-  for (j=0; j<i; j++)
-   {
-    if (a->MTickList[j] != b->MTickList[j]) return 0;
-    if (strcmp(a->MTickStrs[j], b->MTickStrs[j])!=0) return 0;
+    if (ta->tickList[j] != tb->tickList[j]) return 0;
+    if (strcmp(ta->tickStrs[j], tb->tickStrs[j])!=0) return 0;
    }
   return 1;
  }

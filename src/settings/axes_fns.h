@@ -29,8 +29,7 @@ void          pplaxis_destroy  (ppl_context *context, pplset_axis *in);
 void          pplaxis_copy     (ppl_context *context, pplset_axis *out, const pplset_axis *in);
 void          pplaxis_copyTics (ppl_context *context, pplset_axis *out, const pplset_axis *in);
 void          pplaxis_copyMTics(ppl_context *context, pplset_axis *out, const pplset_axis *in);
-unsigned char pplaxis_cmpTics  (ppl_context *context, const pplset_axis *a, const pplset_axis *b);
-unsigned char pplaxis_cmpMTics (ppl_context *context, const pplset_axis *a, const pplset_axis *b);
+unsigned char pplaxis_cmpTics  (ppl_context *context, const pplset_tics *ta, const pplset_tics *tb, const pplObj *ua, const pplObj *ub, const int la, const int lb);
 
 double        pplaxis_GetPosition   (double xin, pplset_axis *xa, int xrn, unsigned char AllowOffBounds);
 double        pplaxis_InvGetPosition(double xin, pplset_axis *xa);

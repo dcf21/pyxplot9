@@ -74,6 +74,47 @@ if (interactive!=0) /* On interactive sessions, highlight those settings which h
   i += strlen(out+i); \
  } \
 
+#define SHOW_TICKS(T,TD,U,UD,amLog,amLogD,A,B) \
+         sprintf(buf2, "Sets where the major ticks are placed along the %c%d axis, and how they appear", A, B); \
+         sprintf(buf, "%s ", *(char **)ppl_fetchSettingName(&c->errcontext, T.tickDir, SW_TICDIR_INT, SW_TICDIR_STR , sizeof(char *))); m = strlen(buf); \
+         if      ((!T.tickStepSet) && (T.tickList == NULL)) \
+          { \
+           sprintf(buf+m, "autofreq"); \
+          } \
+         else if (T.tickList == NULL) \
+          { \
+           if (T.tickMinSet) \
+            { \
+             U.real = T.tickMin; \
+             sprintf(buf+m, "%s", ppl_unitsNumericDisplay(c,&(U),0,0,0)); m += strlen(buf+m); \
+            } \
+           if (T.tickStepSet) \
+            { \
+             U.real = T.tickStep; \
+             if (amLog==SW_BOOL_FALSE) sprintf(buf+m, "%s%s", (T.tickMinSet)?", ":"", ppl_unitsNumericDisplay(c,&(U),0,0,0)); \
+             else                      sprintf(buf+m, "%s%s", (T.tickMinSet)?", ":"", ppl_numericDisplay(T.tickStep,c->numdispBuff[0],c->set->term_current.SignificantFigures,(c->set->term_current.NumDisplay==SW_DISPLAY_L))); \
+             m += strlen(buf+m); \
+            } \
+           if (T.tickMaxSet) \
+            { \
+             U.real = T.tickMax; \
+             sprintf(buf+m, ", %s", ppl_unitsNumericDisplay(c,&(U),0,0,0)); m += strlen(buf+m); \
+            } \
+          } \
+         else \
+          { \
+           buf[m++]='('; \
+           for (n=0; T.tickStrs[n]!=NULL; n++) \
+            { \
+             strcpy(buf+m, (n==0)?"":", "); m += strlen(buf+m); \
+             if (T.tickStrs[n][0]!='\xFF') { ppl_strEscapify(T.tickStrs[n], buf+m); m += strlen(buf+m); } \
+             U.real = T.tickList[n]; \
+             sprintf(buf+m, " %s", ppl_unitsNumericDisplay(c,&(U),0,0,0)); \
+             m += strlen(buf+m); \
+            } \
+           sprintf(buf+m, ")"); \
+          } \
+         ppl_directive_show3(c, out+i, itemSet, 1, interactive, temp1, buf, (T.tickDir == TD.tickDir) && (pplaxis_cmpTics(c, &T, &TD, &U, &UD, amLog, amLogD)), buf2);
 
 static void ppl_directive_show3(ppl_context *c, char *out, char *itemSet, unsigned char itemSetShow, int interactive, char *setting_name, char *setting_value, int modified, char *description)
  {
@@ -920,7 +961,7 @@ static int ppl_directive_show2(ppl_context *c, char *word, char *itemSet, int in
          if (axisPtr->log==SW_BOOL_TRUE) bufp = "logscale";
          else                            bufp = "nologscale";
          sprintf(buf, "%c%d", "xyzc"[k], j); m = strlen(buf);
-         if (axisPtr->log==SW_BOOL_TRUE) sprintf(buf+m, " base %d", (int)axisPtr->LogBase);
+         if (axisPtr->log==SW_BOOL_TRUE) sprintf(buf+m, " base %d", (int)axisPtr->tics.logBase);
          sprintf(buf2, "Sets whether the %c%d axis scales linearly or logarithmically", "xyzc"[k], j);
          ppl_directive_show3(c, out+i, itemSet, 1, interactive, bufp, buf, (axisPtr->log==axisPtrDef->log), buf2);
          i += strlen(out+i) ; p=1;
@@ -948,56 +989,10 @@ static int ppl_directive_show2(ppl_context *c, char *word, char *itemSet, int in
        sprintf(temp1, "%c%dtics", "xyzc"[k], j);
        sprintf(temp2, "%ctics"  , "xyzc"[k]   );
        m=0;
+
        if (l || (ppl_strAutocomplete(word, temp1, 1)>=0) || ((j==1)&&(ppl_strAutocomplete(word, temp2, 1)>=0)))
         {
-         sprintf(buf2, "Sets where the major ticks are placed along the %c%d axis, and how they appear", "xyzc"[k], j);
-         sprintf(buf, "%s ", *(char **)ppl_fetchSettingName(&c->errcontext, axisPtr->TickDir, SW_TICDIR_INT, SW_TICDIR_STR , sizeof(char *))); m = strlen(buf);
-         if      ((!axisPtr->TickStepSet) && (axisPtr->TickList == NULL))
-          {
-           sprintf(buf+m, "autofreq");
-          }
-         else if (axisPtr->TickList == NULL)
-          {
-           if (axisPtr->TickMinSet)
-            {
-             axisPtr->unit.real = axisPtr->TickMin;
-             sprintf(buf+m, "%s", ppl_unitsNumericDisplay(c,&(axisPtr->unit),0,0,0)); m += strlen(buf+m);
-            }
-           if (axisPtr->TickStepSet)
-            {
-             axisPtr->unit.real = axisPtr->TickStep;
-             if (axisPtr->log==SW_BOOL_FALSE) sprintf(buf+m, "%s%s", (axisPtr->TickMinSet)?", ":"", ppl_unitsNumericDisplay(c,&(axisPtr->unit),0,0,0));
-             else                             sprintf(buf+m, "%s%s", (axisPtr->TickMinSet)?", ":"", ppl_numericDisplay(axisPtr->TickStep,c->numdispBuff[0],c->set->term_current.SignificantFigures,(c->set->term_current.NumDisplay==SW_DISPLAY_L)));
-             m += strlen(buf+m);
-            }
-           if (axisPtr->TickMaxSet)
-            {
-             axisPtr->unit.real = axisPtr->TickMax;
-             sprintf(buf+m, ", %s", ppl_unitsNumericDisplay(c,&(axisPtr->unit),0,0,0)); m += strlen(buf+m);
-            }
-          }
-         else
-          {
-           buf[m++]='(';
-           for (n=0; axisPtr->TickStrs[n]!=NULL; n++)
-            {
-             strcpy(buf+m, (n==0)?"":", "); m += strlen(buf+m);
-             if (axisPtr->TickStrs[n][0]!='\xFF') { ppl_strEscapify(axisPtr->TickStrs[n], buf+m); m += strlen(buf+m); }
-             axisPtr->unit.real = axisPtr->TickList[n];
-             sprintf(buf+m, " %s", ppl_unitsNumericDisplay(c,&(axisPtr->unit),0,0,0));
-             m += strlen(buf+m);
-            }
-           sprintf(buf+m, ")");
-          }
-         ppl_directive_show3(c, out+i, itemSet, 1, interactive, temp1, buf, (axisPtr->TickDir     == axisPtrDef->TickDir    ) &&
-                                                                        (axisPtr->TickMax     == axisPtrDef->TickMax    ) &&
-                                                                        (axisPtr->TickMaxSet  == axisPtrDef->TickMaxSet ) &&
-                                                                        (axisPtr->TickStep    == axisPtrDef->TickStep   ) &&
-                                                                        (axisPtr->TickStepSet == axisPtrDef->TickStepSet) &&
-                                                                        (axisPtr->TickMin     == axisPtrDef->TickMin    ) &&
-                                                                        (axisPtr->TickMinSet  == axisPtrDef->TickMinSet ) &&
-                                                                        (pplaxis_cmpTics(c, axisPtr, axisPtrDef)        )    ,
-                         buf2);
+         SHOW_TICKS(axisPtr->tics, axisPtrDef->tics, axisPtr->unit, axisPtrDef->unit, axisPtr->log, axisPtrDef->log, "xyzc"[k], j);
          i += strlen(out+i) ; p=1;
          m=1; // If we've shown major tics, also show minor ticks too.
         }
@@ -1006,55 +1001,9 @@ static int ppl_directive_show2(ppl_context *c, char *word, char *itemSet, int in
        sprintf(temp2, "m%ctics"  , "xyzc"[k]   );
        if (l || m || (ppl_strAutocomplete(word, temp1, 1)>=0) || ((j==1)&&(ppl_strAutocomplete(word, temp2, 1)>=0)))
         {
-         sprintf(buf2, "Sets where the minor ticks are placed along the %c%d axis, and how they appear", "xyzc"[k], j);
-         sprintf(buf, "%s ", *(char **)ppl_fetchSettingName(&c->errcontext, axisPtr->MTickDir, SW_TICDIR_INT, SW_TICDIR_STR , sizeof(char *))); m = strlen(buf);
-         if      ((!axisPtr->MTickStepSet) && (axisPtr->MTickList == NULL))
-          {
-           sprintf(buf+m, "autofreq");
-          }
-         else if (axisPtr->MTickList == NULL)
-          {
-           if (axisPtr->MTickMinSet)
-            {
-             axisPtr->unit.real = axisPtr->MTickMin;
-             sprintf(buf+m, "%s", ppl_unitsNumericDisplay(c,&(axisPtr->unit),0,0,0)); m += strlen(buf+m);
-            }
-           if (axisPtr->MTickStepSet)
-            {
-             axisPtr->unit.real = axisPtr->MTickStep;
-             sprintf(buf+m, "%s%s", (axisPtr->MTickMinSet)?", ":"", ppl_unitsNumericDisplay(c,&(axisPtr->unit),0,0,0)); m += strlen(buf+m);
-            }
-           if (axisPtr->MTickMaxSet)
-            {
-             axisPtr->unit.real = axisPtr->MTickMax;
-             sprintf(buf+m, ", %s", ppl_unitsNumericDisplay(c,&(axisPtr->unit),0,0,0)); m += strlen(buf+m);
-            }
-          }
-         else
-          {
-           buf[m++]='(';
-           for (n=0; axisPtr->MTickStrs[n]!=NULL; n++)
-            {
-             strcpy(buf+m, (n==0)?"":", "); m += strlen(buf+m);
-             if (axisPtr->MTickStrs[n][0]!='\xFF') { ppl_strEscapify(axisPtr->MTickStrs[n], buf+m); m += strlen(buf+m); }
-             axisPtr->unit.real = axisPtr->MTickList[n];
-             sprintf(buf+m, " %s", ppl_unitsNumericDisplay(c,&(axisPtr->unit),0,0,0));
-             m += strlen(buf+m);
-            }
-           sprintf(buf+m, ")");
-          }
-         ppl_directive_show3(c, out+i, itemSet, 1, interactive, temp1, buf, (axisPtr->MTickDir      == axisPtrDef->MTickDir    ) &&
-                                                                        (axisPtr->MTickMax      == axisPtrDef->MTickMax    ) &&
-                                                                        (axisPtr->MTickMaxSet   == axisPtrDef->MTickMaxSet ) &&
-                                                                        (axisPtr->MTickStep     == axisPtrDef->MTickStep   ) &&
-                                                                        (axisPtr->MTickStepSet  == axisPtrDef->MTickStepSet) &&
-                                                                        (axisPtr->MTickMin      == axisPtrDef->MTickMin    ) &&
-                                                                        (axisPtr->MTickMinSet   == axisPtrDef->MTickMinSet ) &&
-                                                                        (pplaxis_cmpMTics(c, axisPtr, axisPtrDef)          )    ,
-                         buf2);
+         SHOW_TICKS(axisPtr->ticsM, axisPtrDef->ticsM, axisPtr->unit, axisPtrDef->unit, axisPtr->log, axisPtrDef->log, "xyzc"[k], j);
          i += strlen(out+i) ; p=1;
         }
-
       } // loop over axes
    } // if axis data structures are not null
 

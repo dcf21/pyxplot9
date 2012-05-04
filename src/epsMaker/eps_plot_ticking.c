@@ -172,12 +172,12 @@ void eps_plot_ticking(EPSComm *x, pplset_axis *axis, int AxisUnitStyle, pplset_a
     int OutContext;
 
     // If ticks have been manually specified, check that units are right
-    if ((!ppl_unitsDimEqual(&axis->unit,&axis->DataUnit)) && ((axis->TickList!=NULL)||(((axis->log==SW_BOOL_TRUE)?(axis->TickMinSet):(axis->TickStepSet))!=0)||(axis->MTickList!=NULL)||(((axis->log==SW_BOOL_TRUE)?(axis->MTickMinSet):(axis->MTickStepSet))!=0)))
+    if ((!ppl_unitsDimEqual(&axis->unit,&axis->DataUnit)) && ((axis->tics.tickList!=NULL)||(((axis->log==SW_BOOL_TRUE)?(axis->tics.tickMinSet):(axis->tics.tickStepSet))!=0)||(axis->ticsM.tickList!=NULL)||(((axis->log==SW_BOOL_TRUE)?(axis->ticsM.tickMinSet):(axis->ticsM.tickStepSet))!=0)))
      {
       sprintf(x->c->errcontext.tempErrStr, "Cannot put any ticks on axis %c%d because their positions are specified in units of <%s> whilst the axis has units of <%s>.", "xyzc"[axis->xyz], axis->axis_n, ppl_printUnit(x->c,&axis->unit,NULL,NULL,0,1,0), ppl_printUnit(x->c,&axis->DataUnit,NULL,NULL,1,1,0));
       ppl_error(&x->c->errcontext,ERR_GENERAL,-1,-1,NULL);
-      axis-> TickListPositions = NULL; axis-> TickListStrings = NULL;
-      axis->MTickListPositions = NULL; axis->MTickListStrings = NULL;
+      axis->TickListPositions = NULL; axis->TickListStrings = NULL;
+      axis->TickListPositions = NULL; axis->TickListStrings = NULL;
       return;
      }
 
@@ -207,8 +207,8 @@ void eps_plot_ticking(EPSComm *x, pplset_axis *axis, int AxisUnitStyle, pplset_a
       double      **TickListPositions;
       char       ***TickListStrings;
 
-      if (MajMin==0) { TickMax = axis->MTickMax; TickMin = axis->MTickMin; TickStep = axis->MTickStep; TickMaxSet = axis->MTickMaxSet; TickMinSet = axis->MTickMinSet; TickStepSet = axis->MTickStepSet; TickList = axis->MTickList; TickStrs = axis->MTickStrs; TickListPositions = &axis->MTickListPositions; TickListStrings = &axis->MTickListStrings; }
-      else           { TickMax = axis-> TickMax; TickMin = axis-> TickMin; TickStep = axis-> TickStep; TickMaxSet = axis-> TickMaxSet; TickMinSet = axis-> TickMinSet; TickStepSet = axis-> TickStepSet; TickList = axis-> TickList; TickStrs = axis-> TickStrs; TickListPositions = &axis-> TickListPositions; TickListStrings = &axis-> TickListStrings; }
+      if (MajMin==0) { TickMax = axis->ticsM.tickMax; TickMin = axis->ticsM.tickMin; TickStep = axis->ticsM.tickStep; TickMaxSet = axis->ticsM.tickMaxSet; TickMinSet = axis->ticsM.tickMinSet; TickStepSet = axis->ticsM.tickStepSet; TickList = axis->ticsM.tickList; TickStrs = axis->ticsM.tickStrs; TickListPositions = &axis->MTickListPositions; TickListStrings = &axis->MTickListStrings; }
+      else           { TickMax = axis->tics .tickMax; TickMin = axis->tics .tickMin; TickStep = axis->tics .tickStep; TickMaxSet = axis->tics .tickMaxSet; TickMinSet = axis->tics .tickMinSet; TickStepSet = axis->tics .tickStepSet; TickList = axis->tics .tickList; TickStrs = axis->tics .tickStrs; TickListPositions = &axis->TickListPositions;  TickListStrings = &axis->TickListStrings;  }
 
       if (TickList != NULL) // Ticks have been specified as an explicit list
        {
@@ -223,7 +223,7 @@ void eps_plot_ticking(EPSComm *x, pplset_axis *axis, int AxisUnitStyle, pplset_a
            if ( (!gsl_finite((*TickListPositions)[j])) || ((*TickListPositions)[j]<0.0) || ((*TickListPositions)[j]>1.0) ) continue; // Filter out ticks which are off the end of the axis
            if      (TickStrs[i][0]!='\xFF')    (*TickListStrings)[j] = TickStrs[i];
            else if (MajMin==0)                 (*TickListStrings)[j] = "";
-           else if (axis->format == NULL)        TickLabelAutoGen(x, &(*TickListStrings)[j], TickList[i] * UnitMultiplier, axis->LogBase , OutContext);
+           else if (axis->format == NULL)        TickLabelAutoGen(x, &(*TickListStrings)[j], TickList[i] * UnitMultiplier, axis->tics.logBase , OutContext);
            else                                  TickLabelFromFormat(x, &(*TickListStrings)[j], axis->format, TickList[i], &axis->DataUnit, axis->xyz, OutContext);
            j++;
           }
@@ -295,7 +295,7 @@ void eps_plot_ticking(EPSComm *x, pplset_axis *axis, int AxisUnitStyle, pplset_a
             (*TickListPositions)[j] = eps_plot_axis_GetPosition(tmp, axis, xrn, 0);
             if ( (!gsl_finite((*TickListPositions)[j])) || ((*TickListPositions)[j]<0.0) || ((*TickListPositions)[j]>1.0) ) continue; // Filter out ticks which are off the end of the axis
             if      (MajMin==0)            (*TickListStrings)[j] = "";
-            else if (axis->format == NULL) TickLabelAutoGen(x, &(*TickListStrings)[j], tmp * UnitMultiplier, axis->LogBase, OutContext);
+            else if (axis->format == NULL) TickLabelAutoGen(x, &(*TickListStrings)[j], tmp * UnitMultiplier, axis->tics.logBase, OutContext);
             else                           TickLabelFromFormat(x, &(*TickListStrings)[j], axis->format, tmp, &axis->DataUnit, axis->xyz, OutContext);
             if ((*TickListStrings)[j]==NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1, "Out of memory"); *TickListPositions = NULL; *TickListStrings = NULL; return; }
             j++;

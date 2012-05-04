@@ -47,6 +47,14 @@ typedef struct pplset_terminal {
  char   ViewerCmd[FNAME_LENGTH];
  } pplset_terminal;
 
+typedef struct pplset_tics {
+ int           logBase, tickDir;
+ unsigned char tickMaxSet, tickMinSet, tickStepSet;
+ double        tickMax, tickMin, tickStep;
+ double       *tickList;
+ char        **tickStrs;
+ } pplset_tics;
+
 typedef struct pplset_graph {
  int           AutoAspect, AutoZAspect, AxesColor, AxesCol1234Space, AxisUnitStyle, clip, Clog[4], Cminauto[4], Cmaxauto[4], Crenorm[4], Creverse[4], ColKey, ColKeyPos, ContoursLabel, ContoursListLen, ContoursN, grid, GridMajColor, GridMajCol1234Space, GridMinColor, GridMinCol1234Space, key, KeyColumns, KeyPos, samples, SamplesX, SamplesXAuto, SamplesY, SamplesYAuto, Sample2DMethod, TextColor, TextCol1234Space, TextHAlign, TextVAlign, Tlog, Ulog, Vlog;
  double        AxesColor1, AxesColor2, AxesColor3, AxesColor4, GridMajColor1, GridMajColor2, GridMajColor3, GridMajColor4, GridMinColor1, GridMinColor2, GridMinColor3, GridMinColor4, TextColor1, TextColor2, TextColor3, TextColor4;
@@ -61,18 +69,19 @@ typedef struct pplset_graph {
  double        c1LabelRotate, c1TickLabelRotate;
  int           c1TickLabelRotation;
  withWords     dataStyle, funcStyle;
+ pplset_tics   ticsCM, ticsC;
+ pplObj        unitC;
  } pplset_graph;
 
 typedef struct pplset_axis {
- unsigned char atzero, enabled, invisible, linked, RangeReversed, topbottom, MTickMaxSet, MTickMinSet, MTickStepSet, TickMaxSet, TickMinSet, TickStepSet;
- int     ArrowType, LinkedAxisCanvasID, LinkedAxisToXYZ, LinkedAxisToNum, log, MaxSet, MinSet, MirrorType, MTickDir, TickDir, TickLabelRotation;
- double  LabelRotate, LogBase, max, min, MTickMax, MTickMin, MTickStep, TickLabelRotate, TickMax, TickMin, TickStep;
- char   *label;
- void   *linkusing;
- void   *format;
- double *MTickList, *TickList;
- char  **MTickStrs,**TickStrs;
- pplObj  unit;
+ unsigned char atzero, enabled, invisible, linked, RangeReversed, topbottom;
+ int           ArrowType, LinkedAxisCanvasID, LinkedAxisToXYZ, LinkedAxisToNum, log, MaxSet, MinSet, MirrorType, TickLabelRotation;
+ double        LabelRotate, max, min, TickLabelRotate;
+ char         *label;
+ void         *linkusing;
+ void         *format;
+ pplset_tics   ticsM, tics;
+ pplObj        unit;
 
  // Temporary data fields which are used when rendering an axis to postscript
  int           AxisValueTurnings;

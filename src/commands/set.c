@@ -64,9 +64,17 @@
 #include "userspace/unitsDisp.h"
 
 #include "canvasItems.h"
+#include "children.h"
 #include "pplConstants.h"
 
 #define TBADD(et,pos) ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,pos,pl->linetxt,"")
+
+static void tics_rm(pplset_tics *a)
+ {
+  a->tickMinSet = a->tickMaxSet = a->tickStepSet = 0;
+  if (a->tickList!=NULL) { free(a->tickList); a->tickList=NULL; }
+  if (a->tickStrs!=NULL) { int i; for (i=0; a->tickStrs[i]!=NULL; i++) { free(a->tickStrs[i]); } free(a->tickStrs); a->tickStrs=NULL; }
+ }
 
 void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
  {
@@ -357,6 +365,53 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     sg->BoxWidth     = c->set->graph_default.BoxWidth;
     sg->BoxWidthAuto = c->set->graph_default.BoxWidthAuto;
    }
+  else if (strcmp_set && (strcmp(setoption,"c1format")==0)) /* set c1format */
+   {
+    if (command[PARSE_set_c1format_format_string].objType == PPLOBJ_EXP)
+     {
+      if (sg->c1format != NULL) pplExpr_free((pplExpr *)sg->c1format);
+      sg->c1format = (void *)pplExpr_cpy((pplExpr *)command[PARSE_set_c1format_format_string].auxil);
+      sg->c1formatset = 1;
+     }
+    if (command[PARSE_set_c1format_orient].objType == PPLOBJ_STR)
+     {
+      sg->c1TickLabelRotation = ppl_fetchSettingByName(&c->errcontext, (char *)command[PARSE_set_c1format_orient].auxil, SW_TICLABDIR_INT, SW_TICLABDIR_STR);
+      sg->c1TickLabelRotate   = c->set->graph_default.c1TickLabelRotate;
+     }
+    if (command[PARSE_set_c1format_rotation].objType == PPLOBJ_NUM)
+     {
+      double r = command[PARSE_set_c1format_rotation].real;
+      if (!gsl_finite(r)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The rotation angle supplied to the 'set c1format' command was not finite."); return; }
+      sg->c1TickLabelRotate = r; // TickLabelRotation will already have been set by "rotate" keyword mapping to "orient"
+     }
+   }
+  else if (strcmp_unset && (strcmp(setoption,"c1format")==0)) /* unset c1format */
+   {
+    if (sg->c1format != NULL) pplExpr_free((pplExpr *)sg->c1format);
+    sg->c1format            = (void *)pplExpr_cpy((pplExpr *)c->set->graph_default.c1format);
+    sg->c1formatset         = c->set->graph_default.c1formatset;
+    sg->c1TickLabelRotate   = c->set->graph_default.c1TickLabelRotate;
+    sg->c1TickLabelRotation = c->set->graph_default.c1TickLabelRotation;
+   }
+  else if (strcmp_set && (strcmp(setoption,"c1label")==0)) /* set c1label */
+   {
+    if (command[PARSE_set_c1label_label_text].objType == PPLOBJ_STR)
+     {
+      snprintf(sg->c1label, FNAME_LENGTH, "%s", (char *)command[PARSE_set_c1label_label_text].auxil);
+      sg->c1label[FNAME_LENGTH-1]='\0';
+     }
+    if (command[PARSE_set_c1label_rotation].objType == PPLOBJ_NUM)
+     {
+      double r = command[PARSE_set_c1label_rotation].real;
+      if (!gsl_finite(r)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The rotation angle supplied to the 'set c1label' command was not finite."); return; }
+      sg->c1LabelRotate = r;
+     }
+   }
+  else if (strcmp_unset && (strcmp(setoption,"c1label")==0)) /* unset c1label */
+   {
+    strcpy(sg->c1label, c->set->graph_default.c1label);
+    sg->c1LabelRotate = c->set->graph_default.c1LabelRotate;
+   }
   else if (strcmp_set && (strcmp(setoption,"calendar")==0)) /* set calendar */
    {
     char *tempstr = (char *)command[PARSE_set_calendar_calendar].auxil;
@@ -398,6 +453,82 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     sg->ColKey    = c->set->graph_default.ColKey;
     sg->ColKeyPos = c->set->graph_default.ColKeyPos;
    }
+  else if (strcmp_set && (strcmp(setoption,"colmap")==0)) /* set colmap */
+   {
+    if (command[PARSE_set_colmap_color].objType == PPLOBJ_EXP)
+     {
+      if (sg->ColMapExpr != NULL) pplExpr_free((pplExpr *)sg->ColMapExpr);
+      sg->ColMapExpr = (void *)pplExpr_cpy((pplExpr *)command[PARSE_set_colmap_color].auxil);
+     }
+    if (command[PARSE_set_colmap_mask].objType == PPLOBJ_EXP)
+     {
+      if (sg->MaskExpr != NULL) pplExpr_free((pplExpr *)sg->MaskExpr);
+      sg->MaskExpr = (void *)pplExpr_cpy((pplExpr *)command[PARSE_set_colmap_mask].auxil);
+     }
+    if (command[PARSE_set_colmap_nomask].objType == PPLOBJ_STR)
+     {
+      if (sg->MaskExpr != NULL) pplExpr_free((pplExpr *)sg->MaskExpr);
+      sg->MaskExpr = NULL;
+     }
+   }
+  else if (strcmp_unset && (strcmp(setoption,"colmap")==0)) /* unset colmap */
+   {
+    if (sg->ColMapExpr != NULL) pplExpr_free((pplExpr *)sg->ColMapExpr);
+    sg->ColMapExpr = (void *)pplExpr_cpy((pplExpr *)c->set->graph_default.ColMapExpr);
+    if (sg->MaskExpr != NULL) pplExpr_free((pplExpr *)sg->MaskExpr);
+    sg->MaskExpr = (void *)pplExpr_cpy((pplExpr *)c->set->graph_default.MaskExpr);
+   }
+  else if (strcmp_set && (strcmp(setoption,"crange")==0)) /* set crange */
+   {
+    char   *cstr = (char *)command[PARSE_set_crange_c_number].auxil;
+    int     C    = (int)(cstr[0]-'1');
+    pplObj *min  = &command[PARSE_set_crange_min];
+    pplObj *max  = &command[PARSE_set_crange_max];
+    int     mina = (command[PARSE_set_crange_minauto].objType == PPLOBJ_STR);
+    int     maxa = (command[PARSE_set_crange_maxauto].objType == PPLOBJ_STR);
+    if (command[PARSE_set_crange_reverse      ].objType == PPLOBJ_STR) sg->Creverse[C] = SW_BOOL_TRUE;
+    if (command[PARSE_set_crange_noreverse    ].objType == PPLOBJ_STR) sg->Creverse[C] = SW_BOOL_FALSE;
+    if (command[PARSE_set_crange_renormalise  ].objType == PPLOBJ_STR) sg->Crenorm [C] = SW_BOOL_TRUE;
+    if (command[PARSE_set_crange_norenormalise].objType == PPLOBJ_STR) sg->Crenorm [C] = SW_BOOL_FALSE;
+    if ((!mina)&&(min->objType!=PPLOBJ_NUM)&&(sg->Cminauto[C]==SW_BOOL_FALSE)) min = &sg->Cmin[C];
+    if ((!maxa)&&(max->objType!=PPLOBJ_NUM)&&(sg->Cmaxauto[C]==SW_BOOL_FALSE)) max = &sg->Cmax[C];
+    if ((min->objType==PPLOBJ_NUM)&&(!gsl_finite(min->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set crange' command had non-finite limits."); return; }
+    if ((max->objType==PPLOBJ_NUM)&&(!gsl_finite(max->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set crange' command had non-finite limits."); return; }
+    if ((min->objType==PPLOBJ_NUM)&&(max->objType==PPLOBJ_NUM)&&(!ppl_unitsDimEqual(min,max))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "Attempt to set crange with dimensionally incompatible minimum and maximum."); return; }
+    if (min->objType==PPLOBJ_NUM) { sg->Cmin[C] = *min; sg->Cminauto[C] = SW_BOOL_FALSE; }
+    if (max->objType==PPLOBJ_NUM) { sg->Cmax[C] = *max; sg->Cmaxauto[C] = SW_BOOL_FALSE; }
+    if (mina) sg->Cminauto[C] = SW_BOOL_TRUE;
+    if (maxa) sg->Cmaxauto[C] = SW_BOOL_TRUE;
+    if (C==0)
+     {
+      pplObj *newunit = (sg->Cminauto[0]!=SW_BOOL_TRUE) ? &sg->Cmin[0] : &sg->Cmax[0];
+      if ((sg->Cminauto[0]!=SW_BOOL_TRUE)||(sg->Cmaxauto[0]!=SW_BOOL_TRUE))
+       {
+        if (!ppl_unitsDimEqual(&sg->unitC,newunit)) { sg->unitC = *newunit; }
+        tics_rm(&sg->ticsC); tics_rm(&sg->ticsCM);
+       }
+     }
+   }
+  else if (strcmp_unset && (strcmp(setoption,"crange")==0)) /* unset crange */
+   {
+    char *cstr = (char *)command[PARSE_set_crange_c_number].auxil;
+    int   C    = (int)(cstr[0]-'1');
+    sg->Cmin[C]     = c->set->graph_default.Cmin[C];
+    sg->Cminauto[C] = c->set->graph_default.Cminauto[C];
+    sg->Cmax[C]     = c->set->graph_default.Cmax[C];
+    sg->Cmaxauto[C] = c->set->graph_default.Cmaxauto[C];
+    sg->Crenorm[C]  = c->set->graph_default.Crenorm[C];
+    sg->Creverse[C] = c->set->graph_default.Creverse[C];
+    if (C==0)
+     {
+      pplObj *newunit = (sg->Cminauto[0]!=SW_BOOL_TRUE) ? &sg->Cmin[0] : &sg->Cmax[0];
+      if ((sg->Cminauto[0]!=SW_BOOL_TRUE)||(sg->Cmaxauto[0]!=SW_BOOL_TRUE))
+       {
+        if (!ppl_unitsDimEqual(&sg->unitC,newunit)) { sg->unitC = *newunit; }
+        tics_rm(&sg->ticsC); tics_rm(&sg->ticsCM);
+       }
+     }
+   }
   else if (strcmp_set && (strcmp(setoption,"display")==0)) /* set display */
    {
     c->set->term_current.display = SW_ONOFF_ON;
@@ -415,7 +546,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if (tempstr3==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1, "Out of memory."); return; }
     strcpy(tempstr3, tempstr2);
     val.refCount=1;
-    pplObjStr(&val,1,1,tempstr3);
+    pplObjStr(&val,0,1,tempstr3); // declare object not to be malloced, since ppl_dictRemoveKey will free it
     ppl_dictAppendCpy(c->set->filters,tempstr,&val,sizeof(pplObj));
    }
   else if (strcmp_unset && (strcmp(setoption,"filter")==0)) /* unset filter */
@@ -613,6 +744,102 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    {
     sg->LineWidth = c->set->graph_default.LineWidth;
    }
+  else if ( (strcmp_set   && (strcmp(setoption,"logscale")==0)) || /* set logscale */
+            (strcmp_unset && (strcmp(setoption,"logscale")==0)) || /* unset logscale */
+            (strcmp_set   && (strcmp(setoption,"nologscale")==0)) )
+   {
+    const int sl = (strcmp_set   && (strcmp(setoption,"logscale")==0));
+    const int ul = (strcmp_unset && (strcmp(setoption,"logscale")==0));
+    const int snl= (strcmp_set   && (strcmp(setoption,"nologscale")==0));
+    int       b  = 10;
+    int       pos= sl ? PARSE_set_logscale_0axes       : (ul ? PARSE_unset_logscale_0axes       : PARSE_set_nologscale_0axes);
+    const int ap = sl ? PARSE_set_logscale_axis_0axes  : (ul ? PARSE_unset_logscale_axis_0axes  : PARSE_set_nologscale_axis_0axes);
+    const int c1p= sl ? PARSE_set_logscale_c1log_0axes : (ul ? PARSE_unset_logscale_c1log_0axes : PARSE_set_nologscale_c1log_0axes);
+    const int c2p= sl ? PARSE_set_logscale_c2log_0axes : (ul ? PARSE_unset_logscale_c2log_0axes : PARSE_set_nologscale_c2log_0axes);
+    const int c3p= sl ? PARSE_set_logscale_c3log_0axes : (ul ? PARSE_unset_logscale_c3log_0axes : PARSE_set_nologscale_c3log_0axes);
+    const int c4p= sl ? PARSE_set_logscale_c4log_0axes : (ul ? PARSE_unset_logscale_c4log_0axes : PARSE_set_nologscale_c4log_0axes);
+    const int tp = sl ? PARSE_set_logscale_tlog_0axes  : (ul ? PARSE_unset_logscale_tlog_0axes  : PARSE_set_nologscale_tlog_0axes );
+    const int up = sl ? PARSE_set_logscale_ulog_0axes  : (ul ? PARSE_unset_logscale_ulog_0axes  : PARSE_set_nologscale_ulog_0axes );
+    const int vp = sl ? PARSE_set_logscale_vlog_0axes  : (ul ? PARSE_unset_logscale_vlog_0axes  : PARSE_set_nologscale_vlog_0axes );
+    const int setAll = (command[pos].objType!=PPLOBJ_NUM);
+
+    if (sl && (command[PARSE_set_logscale_base].objType==PPLOBJ_NUM))
+     {
+      b = (int)round(command[PARSE_set_logscale_base].real);
+      if ((b<2)||(b>1024)) { sprintf(c->errcontext.tempErrStr, "Attempt to use log axis with base %d. PyXPlot only supports bases in the range 2 - 1024. Defaulting to base 10.", b); ppl_warning(&c->errcontext, ERR_GENERAL, NULL); b=10; }
+     }
+
+    if (!setAll)
+     {
+      while (command[pos].objType==PPLOBJ_NUM)
+       {
+        pos = (int)round(command[pos].real);
+        if (pos<=0) break;
+        if (command[pos+ap].objType==PPLOBJ_NUM)
+         {
+          int i = (int)round(command[pos+ap].real);
+          int j = (int)round(command[pos+ap].exponent[0]);
+          int newstate;
+          pplset_axis *a, *ad;
+          if      (j==1) { a = &ya[i]; ad = &c->set->YAxesDefault[i]; }
+          else if (j==2) { a = &za[i]; ad = &c->set->ZAxesDefault[i]; }
+          else           { a = &xa[i]; ad = &c->set->XAxesDefault[i]; }
+          if      (sl ) { a->enabled = 1; newstate = SW_BOOL_TRUE; }
+          else if (snl) { a->enabled = 1; newstate = SW_BOOL_FALSE; }
+          else          {                 newstate = ad->log; }
+
+          if (a->log != newstate) { tics_rm(&a->tics); tics_rm(&a->ticsM); }
+          a->log     = newstate;
+          a->tics .logBase = b;
+          a->ticsM.logBase = b;
+         }
+        else
+         {
+          if (command[pos+c1p].objType==PPLOBJ_STR)
+           {
+            int newstate = sl ? SW_BOOL_TRUE : (ul ? c->set->graph_default.Clog[0] : SW_BOOL_FALSE);
+            if (sg->Clog[0] != newstate) { tics_rm(&sg->ticsC); tics_rm(&sg->ticsCM); }
+            sg->Clog[0]  = newstate;
+            sg->ticsC .logBase = b;
+            sg->ticsCM.logBase = b;
+           }
+          if (command[pos+c2p].objType==PPLOBJ_STR) { sg->Clog[1] = sl ? SW_BOOL_TRUE : (ul ? c->set->graph_default.Clog[1] : SW_BOOL_FALSE); }
+          if (command[pos+c3p].objType==PPLOBJ_STR) { sg->Clog[2] = sl ? SW_BOOL_TRUE : (ul ? c->set->graph_default.Clog[2] : SW_BOOL_FALSE); }
+          if (command[pos+c4p].objType==PPLOBJ_STR) { sg->Clog[3] = sl ? SW_BOOL_TRUE : (ul ? c->set->graph_default.Clog[3] : SW_BOOL_FALSE); }
+          if (command[pos+tp ].objType==PPLOBJ_STR) { sg->Tlog    = sl ? SW_BOOL_TRUE : (ul ? c->set->graph_default.Tlog    : SW_BOOL_FALSE); }
+          if (command[pos+up ].objType==PPLOBJ_STR) { sg->Ulog    = sl ? SW_BOOL_TRUE : (ul ? c->set->graph_default.Ulog    : SW_BOOL_FALSE); }
+          if (command[pos+vp ].objType==PPLOBJ_STR) { sg->Vlog    = sl ? SW_BOOL_TRUE : (ul ? c->set->graph_default.Vlog    : SW_BOOL_FALSE); }
+         }
+       }
+     }
+    else if (!ul) // set logscale or nologscale on all axes
+     {
+      int i;
+      pplset_axis *a;
+      int newstate = sl ? SW_BOOL_TRUE : SW_BOOL_FALSE;
+      if (sg->Clog[0] != newstate) { tics_rm(&sg->ticsC); tics_rm(&sg->ticsCM); }
+      sg->Clog[0] = sg->Clog[1] = sg->Clog[2] = sg->Clog[3] = sg->Tlog = sg->Ulog = sg->Vlog = newstate;
+      for (i=0;i<MAX_AXES;i++) { a=&xa[i]; if (a->enabled) { if (a->log != newstate) { tics_rm(&a->tics); tics_rm(&a->ticsM); } a->log=newstate; a->tics.logBase=a->ticsM.logBase=b; } }
+      for (i=0;i<MAX_AXES;i++) { a=&ya[i]; if (a->enabled) { if (a->log != newstate) { tics_rm(&a->tics); tics_rm(&a->ticsM); } a->log=newstate; a->tics.logBase=a->ticsM.logBase=b; } }
+      for (i=0;i<MAX_AXES;i++) { a=&za[i]; if (a->enabled) { if (a->log != newstate) { tics_rm(&a->tics); tics_rm(&a->ticsM); } a->log=newstate; a->tics.logBase=a->ticsM.logBase=b; } }
+     }
+    else // unset logscale on all axes
+     {
+      int i;
+      pplset_axis *a, *ad;
+      if (sg->Clog[0] != c->set->graph_default.Clog[0]) { tics_rm(&sg->ticsC); tics_rm(&sg->ticsCM); }
+      sg->Clog[0] = c->set->graph_default.Clog[0];
+      sg->Clog[1] = c->set->graph_default.Clog[1];
+      sg->Clog[2] = c->set->graph_default.Clog[2];
+      sg->Clog[3] = c->set->graph_default.Clog[3];
+      sg->Tlog    = c->set->graph_default.Tlog;
+      sg->Ulog    = c->set->graph_default.Ulog;
+      sg->Vlog    = c->set->graph_default.Vlog;
+      for (i=0;i<MAX_AXES;i++) { a=&xa[i]; ad=&c->set->XAxesDefault[i]; if (a->enabled) { if (a->log != ad->log) { tics_rm(&a->tics); tics_rm(&a->ticsM); } a->log=ad->log; a->tics.logBase=a->ticsM.logBase=b; } }
+      for (i=0;i<MAX_AXES;i++) { a=&ya[i]; ad=&c->set->YAxesDefault[i]; if (a->enabled) { if (a->log != ad->log) { tics_rm(&a->tics); tics_rm(&a->ticsM); } a->log=ad->log; a->tics.logBase=a->ticsM.logBase=b; } }
+      for (i=0;i<MAX_AXES;i++) { a=&za[i]; ad=&c->set->ZAxesDefault[i]; if (a->enabled) { if (a->log != ad->log) { tics_rm(&a->tics); tics_rm(&a->ticsM); } a->log=ad->log; a->tics.logBase=a->ticsM.logBase=b; } }
+     }
+   }
   else if (strcmp_set && (strcmp(setoption,"multiplot")==0)) /* set multiplot */
    {
     c->set->term_current.multiplot = SW_ONOFF_ON;
@@ -629,6 +856,11 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
   else if (strcmp_set && (strcmp(setoption,"nobackup")==0)) /* set nobackup */
    {
     c->set->term_current.backup = SW_ONOFF_OFF;
+   }
+  else if (strcmp_set && (strcmp(setoption,"noc1format")==0)) /* set noc1format */
+   {
+    strcpy(sg->c1format, "");
+    sg->c1formatset = 0;
    }
   else if (strcmp_set && (strcmp(setoption,"noclip")==0)) /* set noclip */
    {
@@ -658,6 +890,22 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
   else if (strcmp_set && (strcmp(setoption,"notitle")==0)) /* set notitle */
    {
     strcpy(sg->title, "");
+   }
+  else if (strcmp_set && (strcmp(setoption,"xformat")==0)) /* set noxformat */
+   {
+    int i = (int)round(command[PARSE_set_noxformat_axis].real);
+    int j = (int)round(command[PARSE_set_noxformat_axis].exponent[0]);
+    if ( !((xa==NULL)||(ya==NULL)||(za==NULL)) )
+     {
+      pplset_axis *a, *ad;
+      if      (j==1) { a = &ya[i]; ad = &c->set->YAxesDefault[i]; }
+      else if (j==2) { a = &za[i]; ad = &c->set->ZAxesDefault[i]; }
+      else           { a = &xa[i]; ad = &c->set->XAxesDefault[i]; }
+
+      if (a->format != NULL) { pplExpr_free((pplExpr *)a->format); a->format=NULL; }
+      a->TickLabelRotation = ad->TickLabelRotation;
+      a->TickLabelRotate   = ad->TickLabelRotate;
+     }
    }
   else if (strcmp_set && (strcmp(setoption,"numerics")==0)) /* set numerics */
    {
@@ -996,6 +1244,34 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     sg->TitleXOff = c->set->graph_default.TitleXOff;
     sg->TitleYOff = c->set->graph_default.TitleYOff;
    }
+  else if (strcmp_set && (strcmp(setoption,"trange")==0)) /* set trange */
+   {
+    if (command[PARSE_set_trange_range].objType==PPLOBJ_STR)
+     {
+      pplObj *min  = &command[PARSE_set_trange_min];
+      pplObj *max  = &command[PARSE_set_trange_max];
+      if ((min->objType!=PPLOBJ_NUM)) min = &sg->Tmin;
+      if ((max->objType!=PPLOBJ_NUM)) max = &sg->Tmax;
+      if ((!gsl_finite(min->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set trange' command had non-finite limits."); return; }
+      if ((!gsl_finite(max->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set trange' command had non-finite limits."); return; }
+      if ((!ppl_unitsDimEqual(min,max))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "Attempt to set trange with dimensionally incompatible minimum and maximum."); return; }
+      sg->Tmin = *min;
+      sg->Tmax = *max;
+     }
+    if (command[PARSE_set_trange_reverse].objType==PPLOBJ_STR)
+     {
+      pplObj tmp = sg->Tmin;
+      sg->Tmin   = sg->Tmax;
+      sg->Tmax   = tmp;
+     }
+    sg->USE_T_or_uv = 1;
+   }
+  else if (strcmp_unset && (strcmp(setoption,"trange")==0)) /* unset trange */
+   {
+    sg->USE_T_or_uv = c->set->graph_default.USE_T_or_uv;
+    sg->Tmin        = c->set->graph_default.Tmin;
+    sg->Tmax        = c->set->graph_default.Tmax;
+   }
   else if (strcmp_set && (strcmp(setoption,"unit")==0)) /* set unit */
    {
     int got, got2, got3;
@@ -1148,6 +1424,62 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    {
     c->set->term_current.UnitScheme          = c->set->term_default.UnitScheme;
    }
+  else if (strcmp_set && (strcmp(setoption,"urange")==0)) /* set urange */
+   {
+    if (command[PARSE_set_urange_range].objType==PPLOBJ_STR)
+     {
+      pplObj *min  = &command[PARSE_set_urange_min];
+      pplObj *max  = &command[PARSE_set_urange_max];
+      if ((min->objType!=PPLOBJ_NUM)) min = &sg->Umin;
+      if ((max->objType!=PPLOBJ_NUM)) max = &sg->Umax;
+      if ((!gsl_finite(min->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set urange' command had non-finite limits."); return; }
+      if ((!gsl_finite(max->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set urange' command had non-finite limits."); return; }
+      if ((!ppl_unitsDimEqual(min,max))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "Attempt to set urange with dimensionally incompatible minimum and maximum."); return; }
+      sg->Umin = *min;
+      sg->Umax = *max;
+     }
+    if (command[PARSE_set_urange_reverse].objType==PPLOBJ_STR)
+     {
+      pplObj tmp = sg->Umin;
+      sg->Umin   = sg->Umax;
+      sg->Umax   = tmp;
+     }
+    sg->USE_T_or_uv = 0;
+   }
+  else if (strcmp_unset && (strcmp(setoption,"urange")==0)) /* unset urange */
+   {
+    sg->USE_T_or_uv = c->set->graph_default.USE_T_or_uv;
+    sg->Umin        = c->set->graph_default.Umin;
+    sg->Umax        = c->set->graph_default.Umax;
+   }
+  else if (strcmp_set && (strcmp(setoption,"vrange")==0)) /* set vrange */
+   {
+    if (command[PARSE_set_vrange_range].objType==PPLOBJ_STR)
+     {
+      pplObj *min  = &command[PARSE_set_vrange_min];
+      pplObj *max  = &command[PARSE_set_vrange_max];
+      if ((min->objType!=PPLOBJ_NUM)) min = &sg->Tmin;
+      if ((max->objType!=PPLOBJ_NUM)) max = &sg->Tmax;
+      if ((!gsl_finite(min->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set vrange' command had non-finite limits."); return; }
+      if ((!gsl_finite(max->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set vrange' command had non-finite limits."); return; }
+      if ((!ppl_unitsDimEqual(min,max))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "Attempt to set vrange with dimensionally incompatible minimum and maximum."); return; }
+      sg->Vmin = *min;
+      sg->Vmax = *max;
+     }
+    if (command[PARSE_set_vrange_reverse].objType==PPLOBJ_STR)
+     {
+      pplObj tmp = sg->Vmin;
+      sg->Vmin   = sg->Vmax;
+      sg->Vmax   = tmp;
+     }
+    sg->USE_T_or_uv = 0;
+   }
+  else if (strcmp_unset && (strcmp(setoption,"vrange")==0)) /* unset vrange */
+   {
+    sg->USE_T_or_uv = c->set->graph_default.USE_T_or_uv;
+    sg->Vmin        = c->set->graph_default.Vmin;
+    sg->Vmax        = c->set->graph_default.Vmax;
+   }
   else if (strcmp_set && (strcmp(setoption,"view")==0)) /* set view */
    {
     if (command[PARSE_set_view_xy_angle].objType==PPLOBJ_NUM)
@@ -1183,6 +1515,121 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
   else if (strcmp_unset && (strcmp(setoption,"width")==0)) /* unset width */
    {
     sg->width.real = c->set->graph_default.width.real;
+   }
+  else if (strcmp_set && (strcmp(setoption,"viewer")==0)) /* set viewer */
+   {
+    int changedViewer = 0;
+    if (command[PARSE_set_viewer_auto_viewer].objType == PPLOBJ_STR)
+     {
+      int viewerOld = c->set->term_current.viewer;
+      if      (strcmp(GHOSTVIEW_COMMAND, "/bin/false")!=0) c->set->term_current.viewer = SW_VIEWER_GV;
+      else if (strcmp(GGV_COMMAND      , "/bin/false")!=0) c->set->term_current.viewer = SW_VIEWER_GGV;
+      else                                                 c->set->term_current.viewer = SW_VIEWER_NULL;
+      changedViewer = (viewerOld != c->set->term_current.viewer);
+     }
+    else
+     {
+      char *nv = (char *)command[PARSE_set_viewer_viewer].auxil;
+      if (c->set->term_current.viewer != SW_VIEWER_CUSTOM) { changedViewer=1; c->set->term_current.viewer = SW_VIEWER_CUSTOM; }
+      if (strcmp(c->set->term_current.ViewerCmd, nv)!=0)   { changedViewer=1; snprintf(c->set->term_current.ViewerCmd, FNAME_LENGTH, "%s", nv); }
+      c->set->term_current.ViewerCmd[FNAME_LENGTH-1]='\0';
+     }
+    if (changedViewer) pplcsp_sendCommand(c,"A\n"); // Clear away SingleWindow viewer
+   }
+  else if (strcmp_unset && (strcmp(setoption,"viewer")==0)) /* unset viewer */
+   {
+    int changedViewer = ( (c->set->term_current.viewer != c->set->term_default.viewer) || (strcmp(c->set->term_current.ViewerCmd,c->set->term_default.ViewerCmd)!=0) );
+    c->set->term_current.viewer = c->set->term_default.viewer;
+    strcpy(c->set->term_current.ViewerCmd, c->set->term_default.ViewerCmd);
+    if (changedViewer) pplcsp_sendCommand(c,"A\n"); // Clear away SingleWindow viewer
+   }
+  else if (strcmp(setoption,"xformat")==0) /* set xformat | unset xformat */
+   {
+    int i,j;
+    if (strcmp_set) { i = (int)round(command[PARSE_set_xformat_axis  ].real); j = (int)round(command[PARSE_set_xformat_axis  ].exponent[0]); }
+    else            { i = (int)round(command[PARSE_unset_xformat_axis].real); j = (int)round(command[PARSE_unset_xformat_axis].exponent[0]); }
+    if ( !((xa==NULL)||(ya==NULL)||(za==NULL)) )
+     {
+      pplset_axis *a, *ad;
+      if      (j==1) { a = &ya[i]; ad = &c->set->YAxesDefault[i]; }
+      else if (j==2) { a = &za[i]; ad = &c->set->ZAxesDefault[i]; }
+      else           { a = &xa[i]; ad = &c->set->XAxesDefault[i]; }
+
+      if (strcmp_set)
+       {
+        if (command[PARSE_set_xformat_format_string].objType == PPLOBJ_EXP)
+         { 
+          if (a->format != NULL) pplExpr_free((pplExpr *)a->format);
+          a->format = (void *)pplExpr_cpy((pplExpr *)command[PARSE_set_xformat_format_string].auxil);
+         }
+        if (command[PARSE_set_xformat_orient].objType == PPLOBJ_STR)
+         {
+          a->TickLabelRotation = ppl_fetchSettingByName(&c->errcontext, (char *)command[PARSE_set_xformat_orient].auxil, SW_TICLABDIR_INT, SW_TICLABDIR_STR);
+          a->TickLabelRotate   = ad->TickLabelRotate;
+         }
+        if (command[PARSE_set_xformat_rotation].objType == PPLOBJ_NUM)
+         { 
+          double r = command[PARSE_set_xformat_rotation].real;
+          if (!gsl_finite(r)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The rotation angle supplied to the 'set format' command was not finite."); return; }
+          a->TickLabelRotate = r; // TickLabelRotation will already have been set by "rotate" keyword mapping to "orient"
+         }
+       }
+      else
+       {
+        if (a->format != NULL) { pplExpr_free((pplExpr *)a->format); a->format=NULL; }
+        a->format = (void *)pplExpr_cpy((pplExpr *)ad->format);
+        a->TickLabelRotation = ad->TickLabelRotation;
+        a->TickLabelRotate   = ad->TickLabelRotate;
+       }
+     }
+   }
+  else if (strcmp(setoption,"range")==0) /* set xrange | unset xrange */
+   {
+    int i,j;
+    if (strcmp_set) { i = (int)round(command[PARSE_set_range_axis  ].real); j = (int)round(command[PARSE_set_range_axis  ].exponent[0]); }
+    else            { i = (int)round(command[PARSE_unset_range_axis].real); j = (int)round(command[PARSE_unset_range_axis].exponent[0]); }
+    if ( !((xa==NULL)||(ya==NULL)||(za==NULL)) )
+     {
+      pplset_axis *a, *ad;
+      pplObj      *unitNew, unitOld;
+      if      (j==1) { a = &ya[i]; ad = &c->set->YAxesDefault[i]; }
+      else if (j==2) { a = &za[i]; ad = &c->set->ZAxesDefault[i]; }
+      else           { a = &xa[i]; ad = &c->set->XAxesDefault[i]; }
+      unitOld = a->unit;
+
+      if (strcmp_set)
+       {
+        pplObj *min  = &command[PARSE_set_range_min], d1, d2;
+        pplObj *max  = &command[PARSE_set_range_max];
+        int     mina = (command[PARSE_set_range_minauto].objType == PPLOBJ_STR);
+        int     maxa = (command[PARSE_set_range_maxauto].objType == PPLOBJ_STR);
+        if (command[PARSE_set_range_reverse      ].objType == PPLOBJ_STR) a->RangeReversed = 1;
+        if (command[PARSE_set_range_noreverse    ].objType == PPLOBJ_STR) a->RangeReversed = 0;
+        if ((!mina)&&(min->objType!=PPLOBJ_NUM)&&(a->MinSet==SW_BOOL_TRUE)) { min=&d1; d1=a->unit; d1.real=a->min; }
+        if ((!maxa)&&(max->objType!=PPLOBJ_NUM)&&(a->MaxSet==SW_BOOL_TRUE)) { max=&d2; d2=a->unit; d2.real=a->max; }
+        if ((min->objType==PPLOBJ_NUM)&&(!gsl_finite(min->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set range' command had non-finite limits."); return; }
+        if ((max->objType==PPLOBJ_NUM)&&(!gsl_finite(max->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set range' command had non-finite limits."); return; }
+        if ((min->objType==PPLOBJ_NUM)&&(max->objType==PPLOBJ_NUM)&&(!ppl_unitsDimEqual(min,max))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "Attempt to set range with dimensionally incompatible minimum and maximum."); return; }
+        if (min->objType==PPLOBJ_NUM) { a->unit = *min; a->min = min->real; a->MinSet = SW_BOOL_TRUE; }
+        if (max->objType==PPLOBJ_NUM) { a->unit = *max; a->max = max->real; a->MaxSet = SW_BOOL_TRUE; }
+        if (mina) { a->MinSet = SW_BOOL_FALSE; a->min = ad->min; }
+        if (maxa) { a->MaxSet = SW_BOOL_FALSE; a->max = ad->max; }
+        a->enabled = 1;
+       }
+      else
+       {
+        a->unit          = ad->unit;
+        a->max           = ad->max;
+        a->MaxSet        = ad->MaxSet;
+        a->min           = ad->min;
+        a->MinSet        = ad->MinSet;
+        a->RangeReversed = ad->RangeReversed;
+       }
+
+      // Check whether ticks need removing, if units of axis have changed
+      unitNew = &a->unit;
+      if (!ppl_unitsDimEqual(unitNew,&unitOld)) { tics_rm(&a->tics); tics_rm(&a->ticsM); }
+     }
    }
   else
    {

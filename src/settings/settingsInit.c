@@ -289,35 +289,34 @@ void pplset_makedefault(ppl_context *context)
   s->axis_default.MaxSet      = SW_BOOL_FALSE;
   s->axis_default.MinSet      = SW_BOOL_FALSE;
   s->axis_default.MirrorType  = SW_AXISMIRROR_AUTO;
-  s->axis_default.MTickDir    = SW_TICDIR_IN;
-  s->axis_default.MTickMaxSet = 0;
-  s->axis_default.MTickMinSet = 0;
-  s->axis_default.MTickStepSet= 0;
-  s->axis_default.TickDir     = SW_TICDIR_IN;
   s->axis_default.TickLabelRotation  = SW_TICLABDIR_HORI;
-  s->axis_default.TickMaxSet  = 0;
-  s->axis_default.TickMinSet  = 0;
-  s->axis_default.TickStepSet = 0;
   s->axis_default.LabelRotate =  0.0;
-  s->axis_default.LogBase     = 10.0;
   s->axis_default.max         =  0.0;
   s->axis_default.min         =  0.0;
-  s->axis_default.MTickMax    =  0.0;
-  s->axis_default.MTickMin    =  0.0;
-  s->axis_default.MTickStep   =  0.0;
   s->axis_default.TickLabelRotate = 0.0;
-  s->axis_default.TickMax     =  0.0;
-  s->axis_default.TickMin     =  0.0;
-  s->axis_default.TickStep    =  0.0;
   s->axis_default.format      = NULL;
   s->axis_default.label       = NULL;
   s->axis_default.linkusing   = NULL;
-  s->axis_default.MTickList   = NULL;
-  s->axis_default.TickList    = NULL;
-  s->axis_default.MTickStrs   = NULL;
-  s->axis_default.TickStrs    = NULL;
   s->axis_default.unit.refCount=1;
   pplObjNum(&(s->axis_default.unit),0,0.0,0.0);
+
+  s->axis_default.tics.tickDir    = SW_TICDIR_IN;
+  s->axis_default.tics.logBase    = 10;
+  s->axis_default.tics.tickMaxSet = 0;
+  s->axis_default.tics.tickMinSet = 0;
+  s->axis_default.tics.tickStepSet= 0;
+  s->axis_default.tics.tickMax    =  0.0;
+  s->axis_default.tics.tickMin    =  0.0;
+  s->axis_default.tics.tickStep   =  0.0;
+  s->axis_default.tics.tickList   = NULL;
+  s->axis_default.tics.tickStrs   = NULL;
+  s->axis_default.ticsM           = s->axis_default.tics;
+
+  // Set up C ticks
+  s->graph_default.ticsC  = s->axis_default.tics;
+  s->graph_default.ticsCM = s->axis_default.tics;
+  s->graph_default.unitC.refCount=1;
+  pplObjNum(&(s->graph_default.unitC),0,0.0,0.0);
 
   // Set up list of input filters
   tempval.refCount=1;

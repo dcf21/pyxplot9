@@ -356,7 +356,7 @@ static int AutoTickListFinalise(EPSComm *X, pplset_axis *axis, const double Unit
      if (TicksAccepted[i]==1) // Major tick, with label
       {
        axis->TickListPositions[jMAJ] = axispos;
-       if (axis->format == NULL) TickLabelAutoGen   (X, &axis->TickListStrings[jMAJ], x * UnitMultiplier, axis->LogBase, OutContext);
+       if (axis->format == NULL) TickLabelAutoGen   (X, &axis->TickListStrings[jMAJ], x * UnitMultiplier, axis->tics.logBase, OutContext);
        else                      TickLabelFromFormat(X, &axis->TickListStrings[jMAJ], axis->format, x, &axis->DataUnit, axis->xyz, OutContext);
        if (axis->TickListStrings[jMAJ]==NULL) goto FAIL;
        jMAJ++;
@@ -406,7 +406,7 @@ void eps_plot_ticking_auto(EPSComm *x, pplset_axis *axis, double UnitMultiplier,
   VarName[0] = "xyzc"[axis->xyz];
   if (axis->format == NULL) { sprintf(FormatTemp, "\"%%s\"%%(%s)", VarName); format=FormatTemp; }
   else                      { format=axis->format; }
-  if ((format==FormatTemp) && (axis->AxisLinearInterpolation==NULL) && (axis->LogFinal==SW_BOOL_TRUE) && (log(axis->MaxFinal / axis->MinFinal) / log(axis->LogBase) > axis->PhysicalLengthMajor)) { sprintf(FormatTemp, "\"%%s\"%%(logn(%s,%f))", VarName, axis->LogBase); }
+  if ((format==FormatTemp) && (axis->AxisLinearInterpolation==NULL) && (axis->LogFinal==SW_BOOL_TRUE) && (log(axis->MaxFinal / axis->MinFinal) / log(axis->tics.logBase) > axis->PhysicalLengthMajor)) { sprintf(FormatTemp, "\"%%s\"%%(logn(%s,%d))", VarName, axis->tics.logBase); }
   for (i=0; ((format[i]!='\0')&&(format[i]!='\'')&&(format[i]!='\"')); i++);
   QuoteType = format[i];
   if (QuoteType=='\0') goto FAIL;
@@ -498,7 +498,7 @@ void eps_plot_ticking_auto(EPSComm *x, pplset_axis *axis, double UnitMultiplier,
    }
 
   // Work out factors of log base of axis. In fact, work out factors of log base ** 2, so that ten divides by four.
-  LogBase = (axis->LogFinal == SW_BOOL_TRUE) ? axis->LogBase : 10;
+  LogBase = (axis->LogFinal == SW_BOOL_TRUE) ? axis->tics.logBase : 10;
   factorise(pow(LogBase,FACTOR_MULTIPLY), FactorsLogBase, MAX_FACTORS, axis->PhysicalLengthMinor*1.2, &NFactorsLogBase);
 
   // Work out throw of each argument (i.e. the spread of values that it takes)

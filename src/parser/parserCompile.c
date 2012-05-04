@@ -538,6 +538,7 @@ finished_looking_for_tabcomp:
                 pplObj val;
                 val.refCount=1;
                 pplObjNum(&val,1,anum,0);
+                val.exponent[0] = xyz;
                 sprintf(opt,"a%d",xyz);
                 ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos+1, opt, NULL, &val);
                }
