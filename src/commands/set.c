@@ -1138,7 +1138,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
      }
     if (command[PARSE_set_size_zratio].objType==PPLOBJ_NUM)
      {
-      double r = command[PARSE_set_size_ratio].real;
+      double r = command[PARSE_set_size_zratio].real;
       if ((!gsl_finite(r)) || (fabs(r) < 1e-6) || (fabs(r) > 1e4)) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "The requested z/x aspect ratios for graphs must be in the range 1e-6 to 10000."); return; }
       sg->zaspect = r;
       sg->AutoZAspect = SW_ONOFF_OFF;
