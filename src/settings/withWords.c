@@ -95,7 +95,7 @@ void ppl_withWordsFromDict(ppl_context *context, parserOutput *in, parserLine *p
   if (got) { tempdbl = stk[pos].real;             out->pointlinewidth    = tempdbl; out->USEpointlinewidth = 1; }
   pos     = ptab[PARSE_INDEX_pointlinewidth];  got = (pos>=0) && (stk[pos].objType==PPLOBJ_EXP);
   if (got) { tempexp = (pplExpr *)stk[pos].auxil; out->EXPpointlinewidth = tempexp; tempexp->refCount++; }
-  pos     = ptab[PARSE_INDEX_style         ];  got = (pos>=0) && (stk[pos].objType==PPLOBJ_EXP);
+  pos     = ptab[PARSE_INDEX_style         ];  got = (pos>=0) && (stk[pos].objType==PPLOBJ_STR);
   if (got)
    {
     tempstr = (char *)stk[pos].auxil;

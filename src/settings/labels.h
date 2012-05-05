@@ -31,6 +31,8 @@ typedef struct ppllabel_object {
  int         system_x,system_y,system_z;
  int         axis_x  ,axis_y  ,axis_z;
  char       *text;
+ double      fontsize;
+ int         fontsizeSet;
  withWords   style;
  double      rotation, gap;
  int         HAlign, VAlign;

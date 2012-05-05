@@ -76,6 +76,25 @@ static void tics_rm(pplset_tics *a)
   if (a->tickStrs!=NULL) { int i; for (i=0; a->tickStrs[i]!=NULL; i++) { free(a->tickStrs[i]); } free(a->tickStrs); a->tickStrs=NULL; }
  }
 
+static void tics_cp(pplset_tics *o, pplset_tics *i)
+ {
+  *o = *i;
+  if (i->tickList!=NULL)
+   {
+    int j,l; for (l=0; i->tickStrs[l]!=NULL; l++);
+    o->tickList = (double *)malloc((l+1)*sizeof(double));
+    o->tickStrs = (char  **)malloc((l+1)*sizeof(char *));
+    if ((o->tickList==NULL)||(o->tickStrs==NULL)) { o->tickList=NULL; o->tickStrs=NULL; return; }
+    memcpy(o->tickList, i->tickList, (l+1)*sizeof(double));
+    for (j=0; j<l; j++)
+     {
+      o->tickStrs[j] = (char *)malloc(strlen(i->tickStrs[j])+1);
+      if (o->tickStrs[j]==NULL) { o->tickList=NULL; o->tickStrs=NULL; return; }
+      strcpy(o->tickStrs[j], i->tickStrs[j]);
+     }
+   }
+ }
+
 void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
  {
   pplset_graph     *sg;
@@ -104,11 +123,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
 
     if ((editNo < 1) || (editNo>MULTIPLOT_MAXINDEX) || (canvas_items == NULL)) {sprintf(c->errcontext.tempErrStr, "No multiplot item with index %d.", editNo); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return;}
     ptr = canvas_items->first;
-    for (i=1; i<editNo; i++)
-     {
-      if (ptr==NULL) break;
-      ptr=ptr->next;
-     }
+    while ((ptr!=NULL)&&(ptr->id!=editNo)) ptr=ptr->next;
     if (ptr == NULL) { sprintf(c->errcontext.tempErrStr, "No multiplot item with index %d.", editNo); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return; }
 
     sg = &(ptr->settings);
@@ -477,6 +492,59 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     sg->ColMapExpr = (void *)pplExpr_cpy((pplExpr *)c->set->graph_default.ColMapExpr);
     if (sg->MaskExpr != NULL) pplExpr_free((pplExpr *)sg->MaskExpr);
     sg->MaskExpr = (void *)pplExpr_cpy((pplExpr *)c->set->graph_default.MaskExpr);
+   }
+  else if (strcmp_set && (strcmp(setoption,"contours")==0)) /* set contours */
+   {
+    if (command[PARSE_set_contours_label   ].objType == PPLOBJ_STR) sg->ContoursLabel = SW_ONOFF_ON;
+    if (command[PARSE_set_contours_nolabel ].objType == PPLOBJ_STR) sg->ContoursLabel = SW_ONOFF_OFF;
+    if (command[PARSE_set_contours_contours].objType == PPLOBJ_NUM)
+     {
+      double n = command[PARSE_set_contours_contours].real;
+      if (n<2) { sprintf(c->errcontext.tempErrStr, "Contour plots must have at least two contours."); ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, NULL); return; }
+      if (n>MAX_CONTOURS) { sprintf(c->errcontext.tempErrStr, "Contour maps cannot be constucted with more than %d contours.", MAX_CONTOURS); ppl_error(&c->errcontext, ERR_GENERAL,-1,-1,NULL); return; }
+      sg->ContoursN       = (int)round(n);
+      sg->ContoursListLen = -1;
+     }
+    else if (command[PARSE_set_contours_contour_list].objType == PPLOBJ_NUM)
+     {
+      int pos = PARSE_set_contours_contour_list, i=0;
+      pplObj *first=NULL;
+      while (command[pos].objType==PPLOBJ_NUM)
+       {
+        pplObj *o;
+        pos = (int)round(command[pos].real);
+        if (pos<=0) break;
+        o = &command[pos+PARSE_set_contours_contour_contour_list];
+        if (o->objType != PPLOBJ_NUM) { sprintf(c->errcontext.tempErrStr, "Contours can only be set at numeric values; supplied value is of type <%s>.", pplObjTypeNames[o->objType]); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); return; }
+        if (!gsl_finite(o->real)) { sprintf(c->errcontext.tempErrStr, "Contours can only be set at finite numeric values; supplied value is not finite."); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); return; }
+        if (o->flagComplex) { sprintf(c->errcontext.tempErrStr, "Contours can only be set at real numeric values; supplied value is complex."); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); return; }
+        if (i==0) first=o;
+        else if (!ppl_unitsDimEqual(first,o)) { sprintf(c->errcontext.tempErrStr, "Contour positions must all have the same physical units; supplied list has multiple units, including <%s> and <%s>.", ppl_printUnit(c, first, NULL, NULL, 0, 1, 0), ppl_printUnit(c, o, NULL, NULL, 1, 1, 0)); ppl_error(&c->errcontext, ERR_UNIT, -1, -1, NULL); return; }
+        i++;
+       }
+      if (first==NULL) { ppl_error(&c->errcontext, ERR_INTERNAL, -1, -1, "Empty list of contours."); return; }
+      sg->ContoursUnit = *first;
+      sg->ContoursListLen = i;
+      pos = PARSE_set_contours_contour_list;
+      i=0;
+      while (command[pos].objType==PPLOBJ_NUM)
+       {
+        pplObj *o;
+        pos = (int)round(command[pos].real);
+        if (pos<=0) break;
+        o = &command[pos+PARSE_set_contours_contour_contour_list];
+        sg->ContoursList[i] = o->real;
+        i++;
+       }
+     }
+   }
+  else if (strcmp_unset && (strcmp(setoption,"contours")==0)) /* unset contours */
+   {
+    sg->ContoursN       = c->set->graph_default.ContoursN;
+    memcpy((void*)sg->ContoursList, (void*)c->set->graph_default.ContoursList, MAX_CONTOURS*sizeof(double));
+    sg->ContoursListLen = c->set->graph_default.ContoursListLen;
+    sg->ContoursUnit    = c->set->graph_default.ContoursUnit;
+    sg->ContoursLabel   = c->set->graph_default.ContoursLabel;
    }
   else if (strcmp_set && (strcmp(setoption,"crange")==0)) /* set crange */
    {
@@ -862,6 +930,16 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     strcpy(sg->c1format, "");
     sg->c1formatset = 0;
    }
+  else if (strcmp_set && (strcmp(setoption,"noc1label")==0)) /* set noc1label */
+   {
+    sg->c1label[0] = '\0';
+   }
+  else if (strcmp_set && (strcmp(setoption,"noc1tics")==0)) /* set noc1tics */
+   {
+    int m = (command[PARSE_set_notics_minor].objType==PPLOBJ_STR);
+    if (!m) tics_rm(&sg->ticsC);
+    tics_rm(&sg->ticsCM);
+   }
   else if (strcmp_set && (strcmp(setoption,"noclip")==0)) /* set noclip */
    {
     sg->clip = SW_ONOFF_OFF;
@@ -873,6 +951,28 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
   else if (strcmp_set && (strcmp(setoption,"nodisplay")==0)) /* set nodisplay */
    {
     c->set->term_current.display = SW_ONOFF_OFF;
+   }
+  else if (strcmp_set && (strcmp(setoption,"nogrid")==0)) /* set nogrid */
+   {
+    int pos = PARSE_set_nogrid_0axes;
+    if (command[pos].objType!=PPLOBJ_NUM)
+     {
+      sg->grid = SW_ONOFF_OFF;
+     }
+    else
+     {
+      int i, anum;
+      while (command[pos].objType==PPLOBJ_NUM)
+       {
+        pos = (int)round(command[pos].real);
+        if (pos<=0) break;
+        anum = (int)round(command[pos+PARSE_set_nogrid_axis_0axes].real);
+        i    = (int)round(command[pos+PARSE_set_nogrid_axis_0axes].exponent[0]);
+        if      (i==1) { sg->GridAxisY[anum] = 0; }
+        else if (i==2) { sg->GridAxisZ[anum] = 0; }
+        else           { sg->GridAxisX[anum] = 0; }
+       }
+     }
    }
   else if (strcmp_set && (strcmp(setoption,"nokey")==0)) /* set nokey */
    {
@@ -886,6 +986,28 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    {
     if (c->set->term_current.multiplot != SW_ONOFF_OFF) ppl_directive_clear(c,pl,in,interactive);
     c->set->term_current.multiplot = SW_ONOFF_OFF;
+   }
+  else if (strcmp_set && (strcmp(setoption,"notics")==0)) /* set notics */
+   {
+    int m = (command[PARSE_set_notics_minor].objType==PPLOBJ_STR);
+    if (command[PARSE_set_notics_axis].objType==PPLOBJ_NUM)
+     {
+      int i = (int)round(command[PARSE_set_notics_axis].real);
+      int j = (int)round(command[PARSE_set_notics_axis].exponent[0]);
+      if ( !((xa==NULL)||(ya==NULL)||(za==NULL)) )
+       {
+        if      (j==1) { pplset_axis *a = &ya[i]; if (!m) tics_rm(&a->tics); tics_rm(&a->ticsM); }
+        else if (j==2) { pplset_axis *a = &za[i]; if (!m) tics_rm(&a->tics); tics_rm(&a->ticsM); }
+        else           { pplset_axis *a = &xa[i]; if (!m) tics_rm(&a->tics); tics_rm(&a->ticsM); }
+       }
+     }
+    else
+     {
+      int i;
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &xa[i]; if (a->enabled) { if (!m) tics_rm(&a->tics); tics_rm(&a->ticsM); } }
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &ya[i]; if (a->enabled) { if (!m) tics_rm(&a->tics); tics_rm(&a->ticsM); } }
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &za[i]; if (a->enabled) { if (!m) tics_rm(&a->tics); tics_rm(&a->ticsM); } }
+     }
    }
   else if (strcmp_set && (strcmp(setoption,"notitle")==0)) /* set notitle */
    {
@@ -905,6 +1027,19 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
       if (a->format != NULL) { pplExpr_free((pplExpr *)a->format); a->format=NULL; }
       a->TickLabelRotation = ad->TickLabelRotation;
       a->TickLabelRotate   = ad->TickLabelRotate;
+     }
+   }
+  else if (strcmp_set && (strcmp(setoption,"noxlabel")==0)) /* set noxlabel */
+   {
+    int i = (int)round(command[PARSE_set_noxlabel_axis].real);
+    int j = (int)round(command[PARSE_set_noxlabel_axis].exponent[0]);
+    if ( !((xa==NULL)||(ya==NULL)||(za==NULL)) )
+     {
+      pplset_axis *a;
+      if      (j==1) a = &ya[i];
+      else if (j==2) a = &za[i];
+      else           a = &xa[i];
+      a->label[0] = '\0';
      }
    }
   else if (strcmp_set && (strcmp(setoption,"numerics")==0)) /* set numerics */
@@ -976,6 +1111,56 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     strncpy(c->set->term_current.output, c->set->term_default.output, FNAME_LENGTH-1);
     c->set->term_current.output[FNAME_LENGTH-1]='\0';
    }
+  else if (strcmp_unset && (strcmp(setoption,"palette")==0)) /* set palette */
+   {
+    if (command[PARSE_set_palette_palette].objType==PPLOBJ_NUM)
+     {
+      int pos = PARSE_set_palette_palette, count=0;
+      while (command[pos].objType==PPLOBJ_NUM)
+       {
+        unsigned char d1,d2;
+        pplObj *co;
+        pos = (int)round(command[pos].real);
+        if (pos<=0) break;
+        if (count>=PALETTE_LENGTH-1) { ppl_warning(&c->errcontext, ERR_GENERAL, "The 'set palette' command has been passed a palette which is too long; truncating it."); break; }
+        co = &command[pos+PARSE_set_palette_color_palette];
+        ppl_colorFromObj(c,co,&c->set->palette_current[count],&c->set->paletteS_current[count],NULL,&c->set->palette1_current[count],&c->set->palette2_current[count],&c->set->palette3_current[count],&c->set->palette4_current[count],&d1,&d2);
+        count++;
+       }
+      c->set->palette_current[count] = -1;
+     }
+    else
+     {
+      pplObj *lo = &command[PARSE_set_palette_list];
+      list   *l  = (list *)lo->auxil;
+      int     ll,i;
+      if (lo->objType!=PPLOBJ_LIST) { sprintf(c->errcontext.tempErrStr, "The 'set palette' command can only generate palettes from objects of type list; supplied object has type <%s>.", pplObjTypeNames[lo->objType]); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); return; }
+      ll = ppl_listLen(l);
+      if (ll<1) { sprintf(c->errcontext.tempErrStr, "The 'set palette' command was passed a palette of zero length."); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); return; }
+      for (i=0; i<ll; i++)
+       {
+        pplObj *o = ppl_listGetItem(l,i);
+        if ((o->objType!=PPLOBJ_NUM)&&(o->objType!=PPLOBJ_COL)) { sprintf(c->errcontext.tempErrStr, "Object of type <%s> in list supplied to the 'set palette' command could not be converted to a color.", pplObjTypeNames[o->objType]); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); return; }
+       }
+      for (i=0; i<ll; i++)
+       {
+        unsigned char d1,d2;
+        pplObj *o = ppl_listGetItem(l,i);
+        if (i>=PALETTE_LENGTH-1) { ppl_warning(&c->errcontext, ERR_GENERAL, "The 'set palette' command has been passed a palette which is too long; truncating it."); break; }
+        ppl_colorFromObj(c,o,&c->set->palette_current[i],&c->set->paletteS_current[i],NULL,&c->set->palette1_current[i],&c->set->palette2_current[i],&c->set->palette3_current[i],&c->set->palette4_current[i],&d1,&d2);
+       }
+      c->set->palette_current[i] = -1;
+     }
+   }
+  else if (strcmp_unset && (strcmp(setoption,"palette")==0)) /* unset palette */
+   {
+    for (i=0; i<PALETTE_LENGTH; i++) c->set->palette_current [i] = c->set->palette_default [i];
+    for (i=0; i<PALETTE_LENGTH; i++) c->set->paletteS_current[i] = c->set->paletteS_default[i];
+    for (i=0; i<PALETTE_LENGTH; i++) c->set->palette1_current[i] = c->set->palette1_default[i];
+    for (i=0; i<PALETTE_LENGTH; i++) c->set->palette2_current[i] = c->set->palette2_default[i];
+    for (i=0; i<PALETTE_LENGTH; i++) c->set->palette3_current[i] = c->set->palette3_default[i];
+    for (i=0; i<PALETTE_LENGTH; i++) c->set->palette4_current[i] = c->set->palette4_default[i];
+   }
   else if (strcmp_set && (strcmp(setoption,"papersize")==0)) /* set papersize */
    {
     if (command[PARSE_set_papersize_paper_name].objType==PPLOBJ_STR)
@@ -1005,15 +1190,6 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
       d2 *= 1000;
       ppl_GetPaperName(c->set->term_current.PaperName, &d1, &d2);
      }
-   }
-  else if (strcmp_unset && (strcmp(setoption,"palette")==0)) /* unset palette */
-   {
-    for (i=0; i<PALETTE_LENGTH; i++) c->set->palette_current [i] = c->set->palette_default [i];
-    for (i=0; i<PALETTE_LENGTH; i++) c->set->paletteS_current[i] = c->set->paletteS_default[i];
-    for (i=0; i<PALETTE_LENGTH; i++) c->set->palette1_current[i] = c->set->palette1_default[i];
-    for (i=0; i<PALETTE_LENGTH; i++) c->set->palette2_current[i] = c->set->palette2_default[i];
-    for (i=0; i<PALETTE_LENGTH; i++) c->set->palette3_current[i] = c->set->palette3_default[i];
-    for (i=0; i<PALETTE_LENGTH; i++) c->set->palette4_current[i] = c->set->palette4_default[i];
    }
   else if (strcmp_unset && (strcmp(setoption,"papersize")==0)) /* unset papersize */
    {
@@ -1155,6 +1331,66 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     sg->zaspect      = c->set->graph_default.zaspect;
     sg->AutoZAspect  = c->set->graph_default.AutoZAspect;
    }
+  else if (strcmp_set && (strcmp(setoption,"style")==0)) /* set style data / function */
+   {
+    char      *type     = (char *)command[PARSE_set_style_numbered_dataset_type].auxil;
+    withWords *outstyle = (type[0]=='d') ? &sg->dataStyle : &sg->funcStyle;
+    withWords  ww_tmp, ww_tmp2;
+    ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_set_style_numbered_, &ww_tmp); // this is correct!
+    ppl_withWordsMerge   (c, &ww_tmp2, &ww_tmp, outstyle, NULL, NULL, NULL, 0);
+    ppl_withWordsDestroy (c, &ww_tmp);
+    *outstyle = ww_tmp2;
+    ppl_withWordsDestroy (c, &ww_tmp2);
+   }
+  else if (strcmp_set && (strcmp(setoption,"style_numbered")==0)) /* set style */
+   {
+    double     nd = command[PARSE_set_style_numbered_style_set_number].real;
+    int        n;
+    withWords *outstyle, ww_tmp, ww_tmp2;
+    if ((nd<0)||(nd>=MAX_PLOTSTYLES)) { sprintf(c->errcontext.tempErrStr, "plot style numbers must be in the range 0-%d", MAX_PLOTSTYLES-1); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return; }
+    n = (int)floor(nd);
+    outstyle = &(c->set->plot_styles[n]);
+    ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_set_style_numbered_, &ww_tmp);
+    ppl_withWordsMerge   (c, &ww_tmp2, &ww_tmp, outstyle, NULL, NULL, NULL, 0);
+    ppl_withWordsDestroy (c, &ww_tmp);
+    ppl_withWordsDestroy (c, outstyle);
+    *outstyle = ww_tmp2;
+   }
+  else if ( (strcmp_unset && (strcmp(setoption,"style")==0)) || /* unset style */
+            (strcmp_set && (strcmp(setoption,"nostyle")==0)) )
+   {
+    const int dataset_type = strcmp_set ? PARSE_set_nostyle_dataset_type : PARSE_unset_style_dataset_type;
+    const int style_ids    = strcmp_set ? PARSE_set_nostyle_0style_ids : PARSE_unset_style_0style_ids;
+    const int id_style_ids = strcmp_set ? PARSE_set_nostyle_id_0style_ids : PARSE_unset_style_id_0style_ids;
+
+    if (command[dataset_type].objType==PPLOBJ_STR)
+     {
+      char      *type     = (char *)command[dataset_type].auxil;
+      withWords *instyle  = (type[0]=='d') ? &c->set->graph_default.dataStyle : &c->set->graph_default.funcStyle;
+      withWords *outstyle = (type[0]=='d') ?                   &sg->dataStyle :                   &sg->funcStyle;
+      ppl_withWordsDestroy (c, outstyle);
+      ppl_withWordsCpy     (c, outstyle, instyle);
+     }
+    else
+     {
+      int pos = style_ids;
+      while (command[pos].objType == PPLOBJ_NUM)
+       {
+        double     nd;
+        int        n;
+        withWords *outstyle, *instyle;
+        pos = (int)round(command[pos].real);
+        if (pos<=0) break;
+        nd = command[pos+id_style_ids].real;
+        if ((nd<0)||(nd>=MAX_PLOTSTYLES)) { sprintf(c->errcontext.tempErrStr, "plot style numbers must be in the range 0-%d", MAX_PLOTSTYLES-1); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return; }
+        n = (int)floor(nd);
+        outstyle = &(c->set->plot_styles[n]);
+        instyle  = &(c->set->plot_styles_default[n]);
+        ppl_withWordsDestroy (c, outstyle);
+        ppl_withWordsCpy     (c, outstyle, instyle);
+       }
+     }
+   }
   else if (strcmp_set && (strcmp(setoption,"terminal")==0)) /* set terminal */
    {
     double tempdbl;
@@ -1226,6 +1462,53 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    {
     sg->TextVAlign = c->set->graph_default.TextVAlign;
    }
+  else if (strcmp_set && (strcmp(setoption,"tics")==0)) /* set tics */
+   {
+
+#define SET_TICKS(T) \
+
+    int m = (command[PARSE_set_tics_minor].objType==PPLOBJ_STR);
+    if (command[PARSE_unset_tics_axis].objType==PPLOBJ_NUM)
+     {
+      int i = (int)round(command[PARSE_unset_tics_axis].real);
+      int j = (int)round(command[PARSE_unset_tics_axis].exponent[0]);
+      if ( !((xa==NULL)||(ya==NULL)||(za==NULL)) )
+       {
+        if      (j==1) { pplset_axis *a=&ya[i]; if (!m) { tics_rm(&a->tics); SET_TICKS(&a->tics); } else { tics_rm(&a->ticsM); SET_TICKS(&a->ticsM); } }
+        else if (j==2) { pplset_axis *a=&za[i]; if (!m) { tics_rm(&a->tics); SET_TICKS(&a->tics); } else { tics_rm(&a->ticsM); SET_TICKS(&a->ticsM); } }
+        else           { pplset_axis *a=&xa[i]; if (!m) { tics_rm(&a->tics); SET_TICKS(&a->tics); } else { tics_rm(&a->ticsM); SET_TICKS(&a->ticsM); } }
+       }
+     }
+    else
+     {
+      int i;
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &xa[i]; if (a->enabled) { if (!m) { tics_rm(&a->tics); SET_TICKS(&a->tics); } else { tics_rm(&a->ticsM); SET_TICKS(&a->ticsM); } } }
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &ya[i]; if (a->enabled) { if (!m) { tics_rm(&a->tics); SET_TICKS(&a->tics); } else { tics_rm(&a->ticsM); SET_TICKS(&a->ticsM); } } }
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &za[i]; if (a->enabled) { if (!m) { tics_rm(&a->tics); SET_TICKS(&a->tics); } else { tics_rm(&a->ticsM); SET_TICKS(&a->ticsM); } } }
+     }
+   }
+  else if (strcmp_unset && (strcmp(setoption,"tics")==0)) /* unset tics */
+   {
+    int m = (command[PARSE_unset_tics_minor].objType==PPLOBJ_STR);
+    if (command[PARSE_unset_tics_axis].objType==PPLOBJ_NUM)
+     {
+      int i = (int)round(command[PARSE_unset_tics_axis].real);
+      int j = (int)round(command[PARSE_unset_tics_axis].exponent[0]);
+      if ( !((xa==NULL)||(ya==NULL)||(za==NULL)) )
+       {
+        if      (j==1) { pplset_axis *a=&ya[i], *ad=&c->set->YAxesDefault[i]; if (!m) { tics_rm(&a->tics); tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); tics_cp(&a->ticsM,&ad->ticsM); }
+        else if (j==2) { pplset_axis *a=&za[i], *ad=&c->set->ZAxesDefault[i]; if (!m) { tics_rm(&a->tics); tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); tics_cp(&a->ticsM,&ad->ticsM); }
+        else           { pplset_axis *a=&xa[i], *ad=&c->set->XAxesDefault[i]; if (!m) { tics_rm(&a->tics); tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); tics_cp(&a->ticsM,&ad->ticsM); }
+       }
+     }
+    else
+     {
+      int i;
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a=&xa[i], *ad=&c->set->XAxesDefault[i]; if (a->enabled) { if (!m) { tics_rm(&a->tics); tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); tics_cp(&a->ticsM,&ad->ticsM); } }
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a=&ya[i], *ad=&c->set->YAxesDefault[i]; if (a->enabled) { if (!m) { tics_rm(&a->tics); tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); tics_cp(&a->ticsM,&ad->ticsM); } }
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a=&za[i], *ad=&c->set->ZAxesDefault[i]; if (a->enabled) { if (!m) { tics_rm(&a->tics); tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); tics_cp(&a->ticsM,&ad->ticsM); } }
+     }
+   }
   else if (strcmp_set && (strcmp(setoption,"title")==0)) /* set title */
    {
     if (command[PARSE_set_title_title].objType==PPLOBJ_STR)
@@ -1275,7 +1558,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
   else if (strcmp_set && (strcmp(setoption,"unit")==0)) /* set unit */
    {
     int got, got2, got3;
-    char *tempstr, *tempstr2, *tempstr3;
+    char *tempstr, *tempstr2=NULL, *tempstr3=NULL;
 
     tempstr = (char *)command[PARSE_set_unit_abbrev].auxil;
     got     =        (command[PARSE_set_unit_abbrev].objType == PPLOBJ_STR);
@@ -1293,10 +1576,10 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     got     =        (command[PARSE_set_unit_scheme].objType == PPLOBJ_STR);
     if (got) c->set->term_current.UnitScheme          = ppl_fetchSettingByName(&c->errcontext, tempstr, SW_UNITSCH_INT, SW_UNITSCH_STR);
 
-    tempstr2= (char *)command[PARSE_set_unit_preferred_unit].auxil;
-    got2    =        (command[PARSE_set_unit_preferred_unit].objType == PPLOBJ_STR);
-    tempstr3= (char *)command[PARSE_set_unit_unpreferred_unit].auxil;
-    got3    =        (command[PARSE_set_unit_unpreferred_unit].objType == PPLOBJ_STR);
+    got2               =            (command[PARSE_set_unit_preferred_unit].objType == PPLOBJ_EXP);
+    if (got2) tempstr2 = ((pplExpr *)command[PARSE_set_unit_preferred_unit].auxil)->ascii;
+    got3               =            (command[PARSE_set_unit_unpreferred_unit].objType == PPLOBJ_EXP);
+    if (got3) tempstr3 = ((pplExpr *)command[PARSE_set_unit_unpreferred_unit].auxil)->ascii;
 
     if (got2 || got3)
      {
@@ -1329,6 +1612,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
         }
      }
 
+   // set unit of length meter
     {
      int pos = PARSE_set_unit_preferred_units;
      while (command[pos].objType == PPLOBJ_NUM)
@@ -1580,6 +1864,38 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
         a->format = (void *)pplExpr_cpy((pplExpr *)ad->format);
         a->TickLabelRotation = ad->TickLabelRotation;
         a->TickLabelRotate   = ad->TickLabelRotate;
+       }
+     }
+   }
+  else if (strcmp(setoption,"xlabel")==0) /* set xlabel */
+   {
+    int i = (int)round(command[strcmp_set ? PARSE_set_xlabel_axis : PARSE_unset_xlabel_axis].real);
+    int j = (int)round(command[strcmp_set ? PARSE_set_xlabel_axis : PARSE_unset_xlabel_axis].exponent[0]);
+    if ( !((xa==NULL)||(ya==NULL)||(za==NULL)) )
+     {
+      pplset_axis *a;
+      if      (j==1) a = &ya[i];
+      else if (j==2) a = &za[i];
+      else           a = &xa[i];
+
+      if (strcmp_set)
+       {
+        if (command[PARSE_set_xlabel_label_text].objType == PPLOBJ_STR)
+         {
+          snprintf(a->label, FNAME_LENGTH, "%s", (char *)command[PARSE_set_xlabel_label_text].auxil);
+          a->label[FNAME_LENGTH-1]='\0';
+         }
+        if (command[PARSE_set_xlabel_rotation].objType == PPLOBJ_NUM)
+         {
+          double r = command[PARSE_set_xlabel_rotation].real;
+          if (!gsl_finite(r)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The rotation angle supplied to the set axis label command was not finite."); return; }
+          a->LabelRotate = r;
+         }
+       }
+      else
+       {
+        strcpy(a->label, c->set->axis_default.label);
+        a->LabelRotate = c->set->axis_default.LabelRotate;
        }
      }
    }

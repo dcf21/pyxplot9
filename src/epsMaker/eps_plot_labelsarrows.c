@@ -238,8 +238,10 @@ void eps_plot_labelsarrows(EPSComm *x, double origin_x, double origin_y, double 
          colstr = (char *)ppl_memAlloc(strlen(x->CurrentColor)+1);
          if (colstr!=NULL)
           {
+           double fs = x->current->settings.FontSize;
+           if (li->fontsizeSet) fs = li->fontsize;
            strcpy(colstr, x->CurrentColor);
-           canvas_EPSRenderTextItem(x, &text, pageno, xpos_/M_TO_PS+xgap2, ypos_/M_TO_PS+ygap2, hal, val, x->CurrentColor, x->current->settings.FontSize, li->rotation, NULL, NULL);
+           canvas_EPSRenderTextItem(x, &text, pageno, xpos_/M_TO_PS+xgap2, ypos_/M_TO_PS+ygap2, hal, val, x->CurrentColor, fs, li->rotation, NULL, NULL);
            if (text!=NULL) ThreeDimBuffer_writeps(x, depth, 1, 1, 0, 1, colstr, text);
           }
         }

@@ -33,6 +33,7 @@
 #include "epsMaker/canvasDraw.h"
 #include "expressions/expCompile_fns.h"
 #include "expressions/traceback_fns.h"
+#include "mathsTools/dcfmath.h"
 #include "settings/arrows_fns.h"
 #include "settings/axes_fns.h"
 #include "settings/labels_fns.h"
@@ -1100,7 +1101,7 @@ int ppl_directive_eps(ppl_context *c, parserLine *pl, parserOutput *in, int inte
   if (text == NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); return 1; }
   strcpy(text, fname);
 
-  // Add this ellipse to the linked list which decribes the canvas
+  // Add this eps image to the linked list which decribes the canvas
   if (canvas_itemlist_add(c,stk,CANVAS_EPS,&ptr,&id,0)) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); free(text); return 1; }
 
   if (gotX     ) { ptr->xpos     = x     ; }                    else { ptr->xpos     = c->set->graph_current.OriginX.real; }
@@ -1295,6 +1296,58 @@ int ppl_directive_text(ppl_context *c, parserLine *pl, parserOutput *in, int int
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
     if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Text item has been removed from multiplot, because it generated an error."); return 1; }
+   }
+  return 0;
+ }
+
+// Implementation of the image command
+int ppl_directive_image(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+ {
+  pplObj       *stk = in->stk;
+  canvas_item  *ptr;
+  int           id, transR=0, transG=0, transB=0, smooth, noTrans, cTrans;
+  double        x, y, ang, width, height;
+  int           gotX, gotY, gotAng, gotWidth, gotHeight;
+  char         *text, *fname;
+
+  x       = stk[PARSE_image_p       ].real; gotX      = (stk[PARSE_image_p       ].objType==PPLOBJ_NUM); 
+  y       = stk[PARSE_image_p+1     ].real; gotY      = (stk[PARSE_image_p+1     ].objType==PPLOBJ_NUM);
+  ang     = stk[PARSE_image_rotation].real; gotAng    = (stk[PARSE_image_rotation].objType==PPLOBJ_NUM);
+  width   = stk[PARSE_image_width   ].real; gotWidth  = (stk[PARSE_image_width   ].objType==PPLOBJ_NUM);
+  height  = stk[PARSE_image_height  ].real; gotHeight = (stk[PARSE_image_height  ].objType==PPLOBJ_NUM);
+  smooth  = (stk[PARSE_image_smooth].objType==PPLOBJ_STR);
+  noTrans = (stk[PARSE_image_notrans].objType==PPLOBJ_STR);
+  cTrans  = (stk[PARSE_image_colorR].objType==PPLOBJ_STR);
+  if (cTrans)
+   {
+    transR  = (int)floor(stk[PARSE_image_colorR].real*255); transR = ppl_max(ppl_min(transR,255),0);
+    transG  = (int)floor(stk[PARSE_image_colorG].real*255); transG = ppl_max(ppl_min(transG,255),0);
+    transB  = (int)floor(stk[PARSE_image_colorB].real*255); transB = ppl_max(ppl_min(transB,255),0);
+   }
+  fname   = (char *)stk[PARSE_eps_filename].auxil;
+  text    = (char *)malloc(strlen(fname)+1);
+  if (text == NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); return 1; }
+  strcpy(text, fname);
+
+  // Add this eps image to the linked list which decribes the canvas
+  if (canvas_itemlist_add(c,stk,CANVAS_IMAGE,&ptr,&id,0)) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); free(text); return 1; }
+
+  if (gotX     ) { ptr->xpos     = x     ; }                    else { ptr->xpos     = c->set->graph_current.OriginX.real; }
+  if (gotY     ) { ptr->ypos     = y     ; }                    else { ptr->ypos     = c->set->graph_current.OriginY.real; }
+  if (gotAng   ) { ptr->rotation = ang   ; }                    else { ptr->rotation = 0.0;                                 }
+  if (gotWidth ) { ptr->xpos2    = width ; ptr->xpos2set = 1; } else { ptr->xpos2    = 0.0; ptr->xpos2set = 0; }
+  if (gotHeight) { ptr->ypos2    = height; ptr->ypos2set = 1; } else { ptr->ypos2    = 0.0; ptr->ypos2set = 0; }
+  ptr->text     = text;
+  if (smooth   ) { ptr->smooth   = 1; }                               else { ptr->smooth   = 0; }
+  if (noTrans  ) { ptr->NoTransparency = 1; } else { ptr->NoTransparency = 0; }
+  if (cTrans   ) { ptr->CustomTransparency = 1; ptr->TransColR = transR; ptr->TransColG = transG; ptr->TransColB = transB; }
+
+  // Redisplay the canvas as required
+  if (c->set->term_current.display == SW_ONOFF_ON)
+   {
+    unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
+    ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "EPS image has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }

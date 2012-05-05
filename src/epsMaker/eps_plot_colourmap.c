@@ -155,6 +155,8 @@ void eps_plot_colourmap_YieldText(EPSComm *x, dataTable *data, pplset_graph *sg,
   pd->C1Axis.label = sg->c1label;
   pd->C1Axis.LabelRotate = sg->c1LabelRotate;
   pd->C1Axis.format = sg->c1formatset ? sg->c1format : NULL;
+  pd->C1Axis.tics = sg->ticsC;
+  pd->C1Axis.ticsM = sg->ticsCM;
   pd->C1Axis.TickLabelRotation = sg->c1TickLabelRotation;
   pd->C1Axis.TickLabelRotate = sg->c1TickLabelRotate;
   pd->C1Axis.enabled = pd->C1Axis.FinalActive = pd->C1Axis.RangeFinalised = 1;

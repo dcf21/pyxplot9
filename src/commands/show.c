@@ -728,7 +728,7 @@ static int ppl_directive_show2(ppl_context *c, char *word, char *itemSet, int in
     ppl_directive_show3(c, out+i, itemSet, 1, interactive, "title", buf, ((strcmp(c->set->graph_default.title,sg->title)==0)&&(c->set->graph_default.TitleXOff.real==sg->TitleXOff.real)&&(c->set->graph_default.TitleYOff.real==sg->TitleYOff.real)), "A title to be displayed above graphs");
     i += strlen(out+i) ; p=1;
    }
-  if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "trange", 1)>=0))
+  if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "trange", 1)>=0) || (ppl_strAutocomplete(word, "urange", 1)>=0) || (ppl_strAutocomplete(word, "vrange", 1)>=0))
   if (sg->USE_T_or_uv)
    {
     sprintf(buf, "[%s:%s]", ppl_unitsNumericDisplay(c,&(sg->Tmin), 0, 0, 0), ppl_unitsNumericDisplay(c,&(sg->Tmax), 1, 0, 0));
@@ -790,7 +790,7 @@ static int ppl_directive_show2(ppl_context *c, char *word, char *itemSet, int in
      }
     }
    }
-  if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "urange", 1)>=0))
+  if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "urange", 1)>=0) || (ppl_strAutocomplete(word, "trange", 1)>=0))
   if (!sg->USE_T_or_uv)
    {
     sprintf(buf, "[%s:%s]", ppl_unitsNumericDisplay(c,&(sg->Umin), 0, 0, 0), ppl_unitsNumericDisplay(c,&(sg->Umax), 1, 0, 0));
@@ -822,7 +822,7 @@ static int ppl_directive_show2(ppl_context *c, char *word, char *itemSet, int in
     ppl_directive_show3(c, out+i, itemSet, 0, interactive, "viewer", (c->set->term_current.viewer != SW_VIEWER_CUSTOM)?"auto":c->set->term_current.ViewerCmd, !changed, buf);
     i += strlen(out+i) ; p=1;
    }
-  if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "vrange", 1)>=0))
+  if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "vrange", 1)>=0) || (ppl_strAutocomplete(word, "trange", 1)>=0))
   if (!sg->USE_T_or_uv)
    {
     sprintf(buf, "[%s:%s]", ppl_unitsNumericDisplay(c,&(sg->Vmin), 0, 0, 0), ppl_unitsNumericDisplay(c,&(sg->Vmax), 1, 0, 0));

@@ -30,6 +30,7 @@
 
 #include "coreUtils/errorReport.h"
 #include "coreUtils/memAlloc.h"
+#include "settings/settingTypes.h"
 #include "stringTools/asciidouble.h"
 
 #include "epsMaker/eps_comm.h"
@@ -39,10 +40,11 @@
 
 void eps_eps_RenderEPS(EPSComm *x)
  {
-  FILE  *inf;
-  char   filename[FNAME_LENGTH];
-  double bb_left=0.0, bb_right=0.0, bb_top=0.0, bb_bottom=0.0;
-  double xscale, yscale, r;
+  FILE         *inf;
+  char          filename[FNAME_LENGTH];
+  double        bb_left=0.0, bb_right=0.0, bb_top=0.0, bb_bottom=0.0;
+  double        xscale, yscale, r;
+  double        xanchor=0, yanchor=0, xbotleft, ybotleft;
   unsigned char GotBBox;
 
   fprintf(x->epsbuffer, "%% Canvas item %d [eps image]\n", x->current->id);
@@ -105,9 +107,22 @@ void eps_eps_RenderEPS(EPSComm *x)
     yscale = 1.0;
    }
 
+  // Work out position of bottom-left corner
+  r = x->current->rotation;
+  if      (x->current->settings.TextHAlign == SW_HALIGN_LEFT ) xanchor = 0;
+  else if (x->current->settings.TextHAlign == SW_HALIGN_CENT ) xanchor = (xscale)/2;
+  else if (x->current->settings.TextHAlign == SW_HALIGN_RIGHT) xanchor = (xscale);
+  if      (x->current->settings.TextVAlign == SW_VALIGN_TOP  ) yanchor = (yscale);
+  else if (x->current->settings.TextVAlign == SW_VALIGN_CENT ) yanchor = (yscale)/2;
+  else if (x->current->settings.TextVAlign == SW_VALIGN_BOT  ) yanchor = 0;
+  xanchor *= (bb_right - bb_left  );
+  yanchor *= (bb_top   - bb_bottom);
+  xbotleft = x->current->xpos*M_TO_PS-(xanchor*cos(r)-yanchor*sin(r));
+  ybotleft = x->current->ypos*M_TO_PS-(xanchor*sin(r)+yanchor*cos(r));
+
   // Begin encapsulation of EPS file
   fprintf(x->epsbuffer, "BeginEPSF\n");
-  fprintf(x->epsbuffer, "%.2f %.2f translate %% Position the EPS file\n", x->current->xpos * M_TO_PS, x->current->ypos * M_TO_PS);
+  fprintf(x->epsbuffer, "%.2f %.2f translate %% Position the EPS file\n", xbotleft, ybotleft);
   fprintf(x->epsbuffer, "%.2f rotate         %% Rotation of EPS graphic\n", x->current->rotation * 180 / M_PI);
   fprintf(x->epsbuffer, "%f %f scale         %% Scale to desired size\n", xscale, yscale);
   fprintf(x->epsbuffer, "%f %f translate     %% Move to lower left of the EPS\n", -bb_left, -bb_bottom);
@@ -137,13 +152,12 @@ void eps_eps_RenderEPS(EPSComm *x)
   fprintf(x->epsbuffer, "%%%%EOF\n%%%%EndDocument\n\n%% ---- End of included EPS graphic ----\nEndEPSF\n");
 
   // Update postscript bounding box
-  r = x->current->rotation;
   xscale *= (bb_right - bb_left); // Multiply scaling factors by width and height to give total size of resulting image in points
   yscale *= (bb_top - bb_bottom);
-  eps_core_BoundingBox(x, x->current->xpos*M_TO_PS                                  , x->current->ypos*M_TO_PS                                 , 0);
-  eps_core_BoundingBox(x, x->current->xpos*M_TO_PS + xscale*cos(r)                  , x->current->ypos*M_TO_PS + xscale*sin(r)                 , 0);
-  eps_core_BoundingBox(x, x->current->xpos*M_TO_PS                 + yscale*-sin(r) , x->current->ypos*M_TO_PS                 + yscale*cos(r) , 0);
-  eps_core_BoundingBox(x, x->current->xpos*M_TO_PS + xscale*cos(r) + yscale*-sin(r) , x->current->ypos*M_TO_PS + xscale*sin(r) + yscale*cos(r) , 0);
+  eps_core_BoundingBox(x, xbotleft                                  , ybotleft                                 , 0);
+  eps_core_BoundingBox(x, xbotleft + xscale*cos(r)                  , ybotleft + xscale*sin(r)                 , 0);
+  eps_core_BoundingBox(x, xbotleft                 + yscale*-sin(r) , ybotleft                 + yscale*cos(r) , 0);
+  eps_core_BoundingBox(x, xbotleft + xscale*cos(r) + yscale*-sin(r) , ybotleft + xscale*sin(r) + yscale*cos(r) , 0);
 
   // Final newline at end of canvas item
   fprintf(x->epsbuffer, "\n");

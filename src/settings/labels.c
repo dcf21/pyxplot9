@@ -110,6 +110,16 @@ void ppllabel_add(ppl_context *context, ppllabel_object **inlist, parserOutput *
   if (gotGap) out->gap      = gap;
   else        out->gap      = 0.0;
 
+  // See if fontsize is specified
+  out->fontsizeSet = (in->stk[ptab[PARSE_INDEX_fontsize]].objType==PPLOBJ_NUM);
+  if (out->fontsizeSet)
+   {
+    double f = in->stk[ptab[PARSE_INDEX_fontsize]].real;
+    if (f < 0) { f=1; ppl_error(&context->errcontext,ERR_MEMORY, -1, -1, "Fontsize specified in 'set fontsize' command was less than zero."); return; }
+    if (!gsl_finite(f)) { f=1; ppl_error(&context->errcontext,ERR_MEMORY, -1, -1, "Fontsize specified in 'set fontsize' command was not finite."); return; }
+    out->fontsize = f;
+   }
+
   ppl_withWordsFromDict(context, in, pl, ptab, &out->style);
   out->text  = label;
   out->system_x = system_x; out->system_y = system_y; out->system_z = system_z;
@@ -210,6 +220,7 @@ unsigned char ppllabel_compare(ppl_context *context, ppllabel_object *a, ppllabe
   if ( (!CMPVAL(a->x , b->x)) || (!CMPVAL(a->y , b->y)) || (!CMPVAL(a->z , b->z)) ) return 0;
   if ( (a->system_x!=b->system_x) || (a->system_y!=b->system_y) || (a->system_z!=b->system_z) ) return 0;
   if ( (a->axis_x!=b->axis_x) || (a->axis_y!=b->axis_y) || (a->axis_z!=b->axis_z) ) return 0;
+  if ( (a->fontsizeSet!=b->fontsizeSet) || ((a->fontsizeSet)&&(a->fontsize!=b->fontsize)) ) return 0;
   if (!ppl_withWordsCmp(context, &a->style , &b->style)) return 0;
   if (strcmp(a->text , b->text)!=0) return 0;
   return 1;
@@ -274,8 +285,10 @@ void ppllabel_print(ppl_context *context, ppllabel_object *in, char *out)
              ppl_numericDisplay( in->gap * 100          , context->numdispBuff[0], context->set->term_current.SignificantFigures, (context->set->term_current.NumDisplay==SW_DISPLAY_L))
            ); i+=strlen(out+i); }
   ppl_withWordsPrint(context, &in->style, out+i+6);
-  if (strlen(out+i+6)>0) { sprintf(out+i, " with"); out[i+5]=' '; }
-  else                   { out[i]='\0'; }
+  if ((strlen(out+i+6)>0)||in->fontsizeSet) { sprintf(out+i, " with"); out[i+5]=' '; }
+  else                                      { out[i]='\0'; }
+  i+=strlen(out+i);
+  if (in->fontsizeSet) { sprintf(out+i, " fontsize %s", ppl_numericDisplay(in->fontsize, context->numdispBuff[0], context->set->term_current.SignificantFigures, (context->set->term_current.NumDisplay==SW_DISPLAY_L))); i+=strlen(out+i); }
   return;
  }
 

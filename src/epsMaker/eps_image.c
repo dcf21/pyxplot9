@@ -52,6 +52,7 @@ void eps_image_RenderEPS(EPSComm *x)
   FILE         *infile;
   int           ImageType, i, j;
   double        xscale, yscale, r;
+  double        xanchor=0, yanchor=0, xbotleft, ybotleft;
   unsigned char buff[10], *imagez;
   char          filename[FNAME_LENGTH];
   uLongf        zlen; // Length of buffer passed to zlib
@@ -215,9 +216,20 @@ void eps_image_RenderEPS(EPSComm *x)
     yscale = ((double)data.height) / data.YDPI * 72;
    }
 
+  // Work out position of bottom-left corner
+  r = x->current->rotation;
+  if      (x->current->settings.TextHAlign == SW_HALIGN_LEFT ) xanchor = 0;
+  else if (x->current->settings.TextHAlign == SW_HALIGN_CENT ) xanchor = (xscale)/2;
+  else if (x->current->settings.TextHAlign == SW_HALIGN_RIGHT) xanchor = (xscale);
+  if      (x->current->settings.TextVAlign == SW_VALIGN_TOP  ) yanchor = (yscale);
+  else if (x->current->settings.TextVAlign == SW_VALIGN_CENT ) yanchor = (yscale)/2;
+  else if (x->current->settings.TextVAlign == SW_VALIGN_BOT  ) yanchor = 0;
+  xbotleft = x->current->xpos*M_TO_PS-(xanchor*cos(r)-yanchor*sin(r));
+  ybotleft = x->current->ypos*M_TO_PS-(xanchor*sin(r)+yanchor*cos(r));
+
   // Make it into postscript
   fprintf(x->epsbuffer, "gsave\n");
-  fprintf(x->epsbuffer, "%.2f %.2f translate\n", x->current->xpos * M_TO_PS, x->current->ypos * M_TO_PS);
+  fprintf(x->epsbuffer, "%.2f %.2f translate\n", xbotleft, ybotleft);
   fprintf(x->epsbuffer, "%.2f rotate\n", x->current->rotation * 180 / M_PI);
   fprintf(x->epsbuffer, "%.2f %.2f scale\n", xscale, yscale); // We render image onto a unit square; use scale to make it the size we actually want
 
@@ -249,11 +261,10 @@ void eps_image_RenderEPS(EPSComm *x)
   fprintf(x->epsbuffer, "grestore\n");
 
   // Update postscript bounding box
-  r = x->current->rotation;
-  eps_core_BoundingBox(x, x->current->xpos*M_TO_PS                                  , x->current->ypos*M_TO_PS                                 , 0);
-  eps_core_BoundingBox(x, x->current->xpos*M_TO_PS + xscale*cos(r)                  , x->current->ypos*M_TO_PS + xscale*sin(r)                 , 0);
-  eps_core_BoundingBox(x, x->current->xpos*M_TO_PS                 + yscale*-sin(r) , x->current->ypos*M_TO_PS                 + yscale*cos(r) , 0);
-  eps_core_BoundingBox(x, x->current->xpos*M_TO_PS + xscale*cos(r) + yscale*-sin(r) , x->current->ypos*M_TO_PS + xscale*sin(r) + yscale*cos(r) , 0);
+  eps_core_BoundingBox(x, xbotleft                                  , ybotleft                                 , 0);
+  eps_core_BoundingBox(x, xbotleft + xscale*cos(r)                  , ybotleft + xscale*sin(r)                 , 0);
+  eps_core_BoundingBox(x, xbotleft                 + yscale*-sin(r) , ybotleft                 + yscale*cos(r) , 0);
+  eps_core_BoundingBox(x, xbotleft + xscale*cos(r) + yscale*-sin(r) , ybotleft + xscale*sin(r) + yscale*cos(r) , 0);
 
   // Final newline at end of canvas item
   fprintf(x->epsbuffer, "\n");

@@ -145,6 +145,8 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     ppl_directive_history(c,pl,in);
   else if (strcmp(d, "if")==0)
     ppl_directive_if(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "image")==0)
+    ppl_directive_image(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "list")==0)
     ppl_directive_list(c,pl,in,interactive);
   else if (strcmp(d, "load")==0)

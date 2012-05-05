@@ -84,7 +84,7 @@ void pplarrow_add(ppl_context *context, pplarrow_object **inlist, parserOutput *
     ppl_withWordsDestroy(context, &out->style);
    } else {
     out = (pplarrow_object *)malloc(sizeof(pplarrow_object));
-    if (out == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1, "Out of memory"); return; }
+    if (out == NULL) { ppl_error(&context->errcontext,ERR_MEMORY, -1, -1, "Out of memory."); return; }
     out->id     = i;
     out->next   = *inlist;
     *inlist     = out;
