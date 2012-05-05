@@ -1,0 +1,49 @@
+# EX_TORUS.PPL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_torus"
+load "examples/fig_init.ppl"
+set term colour
+
+# Main body of figure script
+R = 3
+r = 0.5
+f(u,v) = (R+r*cos(v))*cos(u)
+g(u,v) = (R+r*cos(v))*sin(u)
+h(u,v) = r*sin(v)
+
+set urange [0:2*pi]
+set vrange [0:2*pi]
+set zrange [-2.5:2.5]
+
+set nokey
+set size 8 square
+set grid
+set sample grid 50x20
+plot 3d parametric f(u,v):g(u,v):h(u,v) with surf fillcol blue
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

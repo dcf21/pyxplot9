@@ -1,0 +1,279 @@
+% INTRODUCTION.TEX
+%
+% The documentation in this file is part of PyXPlot
+% <http://www.pyxplot.org.uk>
+%
+% Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+%               2008-2011 Ross Church
+%
+% $Id$
+%
+% PyXPlot is free software; you can redistribute it and/or modify it under the
+% terms of the GNU General Public License as published by the Free Software
+% Foundation; either version 2 of the License, or (at your option) any later
+% version.
+%
+% You should have received a copy of the GNU General Public License along with
+% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+% ----------------------------------------------------------------------------
+
+% LaTeX source for the PyXPlot Users' Guide
+
+\chapter{Introduction}
+
+\label{ch:introduction}
+
+{\sc PyXPlot} is a multi-purpose command-line tool for performing simple data
+processing and for producing graphs and vector graphics. The central philosophy
+of PyXPlot's interface is that common tasks -- for example, plotting labelled
+graphs of data -- should be accessible via short, simple and intuitive commands
+which require minimal typing to produce a first draft result.  At the same
+time, these commands also take a sufficient range of optional arguments and
+settings to allow these figures to be subsequently fine-tuned into a wide range
+of different styles, appropriate for inclusion in reports, talks or academic
+journals.
+
+As well as being a graph-plotting package, PyXPlot also has facilities for
+fitting mathematical functions to data, for numerically solving simple systems
+of equations, and for converting \datafile s between different formats.  Its
+mathematical environment can interpolate datasets, integrate and differentiate
+them, and take Fourier transforms.  PyXPlot's ability to keep track of the
+physical units in which data are expressed, and to convert data between
+different units of measurement, mean that it can be used as a powerful desktop
+calculator.
+
+\section{PyXPlot's Heritage: \gnuplot}
+
+PyXPlot's interface bears some striking similarities to that of \gnuplot.
+Specifically, the commands used for plotting {\it simple} graphs in the two
+programs are virtually identical, though the syntax used for more advanced
+plotting often differs and PyXPlot's mathematical environment is hugely
+extended over that of \gnuplot. This means that \gnuplot\ users will have a
+head start with PyXPlot: simple \gnuplot\ scripts will often run in PyXPlot
+with minimal modification.
+
+\section{The Structure of this Manual}
+
+This manual aims to serve both as a tutorial guide to PyXPlot, and also as a
+reference manual. Part~I provides a step-by-step tutorial and overview of
+PyXPlot's features, including numerous worked examples. Part~II provides a more
+detailed survey of PyXPlot's plotting and vector graphics commands. Part~III
+provides alphabetical reference guides to all of PyXPlot's commands,
+mathematical functions and plotting options.  Finally, the appendices provide
+information which is likely to be of more specialist interest.
+
+Broadly speaking, Chapter~\ref{ch:first_steps} covers those commands which are
+common between PyXPlot and \gnuplot, and those experienced in working with
+\gnuplot\ may find that they can skim rather briefly over this chapter. An
+approximate list of those features of \gnuplot\ which are either not supported,
+or which are substantially different in PyXPlot can be found in
+Appendix~\ref{ch:gnuplot_diffs}.
+
+\section{A Whirlwind Tour}
+
+Before beginning a more systematic tutorial in Chapter~\ref{ch:first_steps}, we
+provide a brief tour of a subset of PyXPlot's features, with references to
+those chapters of this manual where further details can be found. This section
+should provide some flavour of the wide range of tasks for which PyXPlot can be
+used. This is not the place for long-winded explanations of the syntax of each
+of the quoted PyXPlot commands, but most of the examples will work if pasted
+directly into a PyXPlot command prompt.
+
+We will assume that the user has already successfully installed PyXPlot, and
+has just opened a new PyXPlot command prompt. For instructions on how to
+install PyXPlot, see Chapter~\ref{ch:installation}.
+
+The first command which any such tour must visit -- the workhorse command of
+PyXPlot -- is the \indcmdt{plot}. This can be used to plot graphs of either
+mathematical functions, by typing, for example
+
+\begin{verbatim}
+plot log(x)
+\end{verbatim}
+
+\noindent or \datafile s, by typing\footnote{This example requires you to have a
+plain text data file called {\tt datafile.dat} in your current working directory,
+and is the only example in this section which may not work out of the box.}
+
+\begin{verbatim}
+plot 'datafile.dat'
+\end{verbatim}
+
+\noindent There are many commands which allow you to configure the appearance
+of the plots produced by the \indcmdt{plot}, or to select which data from a
+\datafile\ are plotted; these will be discussed at length in
+Chapters~\ref{ch:first_steps} and~\ref{ch:plotting}.
+
+PyXPlot has extensive facilities for converting \datafile s between different
+physical units -- for example, you can tell it that a column of a \datafile\
+represents lengths measured in inches, and request it to plot those lengths on
+a graph in millimetres. These facilities can also be applied to numerical
+quantities entered by the user.  For example, you can define a variable which
+has physical dimensions of length, and then display its value in different
+units as follows:
+
+\begin{verbatim}
+x = 2 * unit(m)
+print x / unit(inch)
+\end{verbatim}
+
+When arithmetic operations are applied to numerical quantities which have
+physical units, the units propagate intuitively: in the above example, {\tt
+x*x} would compute to four square metres. However, the expression {\tt x*x+x}
+would throw an error message because it is not dimensionally correct: the first
+term has dimensions of area whilst the second term has dimensions of length,
+and these cannot be added.  More details of the use of physical units in
+PyXPlot are given in Section~\ref{sec:units}, and Appendix~\ref{ch:unit_list}
+lists all of the physical units which PyXPlot recognises by default.
+
+Users can add their own units to those recognised by PyXPlot by means of a
+configuration file, and these can be declared either as alternative measures of
+existing quantities such as length or mass, or as measures of new base
+quantities such as man-hours of labour or numbers of CPU cycles. More details
+about how to do this are given in Chapter~\ref{ch:configuration}.
+
+The way in which physical units are displayed can be extensively configured --
+for example, the automatic use of SI prefixes such as milli- and kilo- is
+optional, and the user can request that quantities be displayed in CGS or
+imperial units by default. Other settings instruct PyXPlot to display numerical
+results in a way which can be pasted into future PyXPlot sessions -- {\tt
+2*unit(m)} instead of $2\,\mathrm{m}$ -- or in LaTeX source code, as {\tt
+\$$2\backslash$,$\backslash$mathrm\{m\}\$}.
+
+PyXPlot can perform algebra on complex as well as real numbers. By default,
+evaluation of {\tt sqrt(-1)} throws an error, as the emergence of complex
+numbers is often an indication that a calculation has gone wrong.  Complex
+arithmetic can be enabled by typing\indcmd{set numerics complex}
+
+\begin{verbatim}
+set numerics complex
+print sqrt(-1)
+\end{verbatim}
+
+\noindent Many of the mathematical functions which are built into PyXPlot, a
+complete list of which can be found in Appendix~\ref{ch:function_list} or by
+typing {\tt show functions}, can take complex arguments, for example
+
+\begin{verbatim}
+print exp(2+3*i)
+print sin(i)
+\end{verbatim}
+
+\noindent For more details, see Section~\ref{sec:complex_numbers}.
+
+In the above example, the variable {\tt i} is a pre-defined constant in
+PyXPlot, in this case set to equal $\sqrt{-1}$. PyXPlot has many other
+pre-defined physical and mathematical constants, and complete list of which can
+found in Appendix~\ref{ch:constants} or by typing {\tt show variables}. These,
+together with the physical units which are built into PyXPlot make it easy to
+answer a wide range of questions very quickly. In the following examples, and
+throughout this Users' Guide, we show the commands typed by the user in {\tt\bf
+bold face}, preceded by PyXPlot prompts {\tt pyxplot>} and followed by the text
+returned by PyXPlot. Any comments are shown in {\tt\it italic face} preceded by
+a hash character ({\tt\it \#}).
+
+\begin{itemize}
+\item What is $80^\circ$F in Celsius?
+
+\vspace{3mm}
+\noindent{\tt pyxplot> {\bf print 80*unit(oF) / unit(oC)}}\newline
+\noindent{\tt 26.666667}
+\vspace{3mm}
+
+\item How long does it take for light to travel from the Sun to the Earth?
+
+\vspace{3mm}
+\noindent{\tt pyxplot> {\bf print unit(AU) / phy\_c}}\newline
+\noindent{\tt 499.00478 s}
+\vspace{3mm}
+
+\item What wavelength of light corresponds to the ionisation energy of hydrogen (13.6\,eV)?
+
+\vspace{3mm}
+\noindent{\tt pyxplot> {\bf print phy\_c * phy\_h / (13.6 * unit(eV))}}\newline
+\noindent{\tt 91.164844 nm}
+\vspace{3mm}
+
+\item What is the escape velocity of the Earth?
+
+\vspace{3mm}
+\noindent{\tt pyxplot> {\bf print sqrt(2 * phy\_G * unit(Mearth) / unit(Rearth))}}\newline
+\noindent{\tt 11.186948 km/s}
+\vspace{3mm}
+\end{itemize}
+
+In addition, PyXPlot provides extensive functions for numerically solving
+equations, which will be described in detail in Chapter~\ref{ch:numerics}. The
+following example evaluates $\int_{0\,\mathrm{s}}^{2\,\mathrm{s}}
+x^2\,\mathrm{d}x$:
+
+\vspace{3mm}
+\noindent{\tt pyxplot> {\bf print int\_dx(x**2,0*unit(s),2*unit(s))}}\newline
+\noindent{\tt 2.6666667 s**3}
+\vspace{3mm}
+
+\noindent This example solves a simple pair of simultaneous equations of two variables:
+
+\vspace{3mm}
+\noindent{\tt pyxplot> {\bf solve x+y=1 , 2*x+3*y=7 via x,y}}\newline
+\noindent{\tt pyxplot> {\bf print "x=\%s; y=\%s"\%(x,y)}}\newline
+\noindent{\tt x=-4; y=5}
+\vspace{3mm}
+
+\noindent And this third example searches for the minimum of the function $\cos(x)$ closest to $x=0.5$:
+
+\vspace{3mm}
+\noindent{\tt pyxplot> {\bf x=0.5}}\newline
+\noindent{\tt pyxplot> {\bf minimise cos(x) via x}}\newline
+\noindent{\tt pyxplot> {\bf print x}}\newline
+\noindent{\tt 3.1415927}
+\vspace{3mm}
+
+This tour has touched briefly upon a few areas of PyXPlot's functionality, but
+has not described its facilities for producing vector graphics, which will be
+discussed in detail in Chapter~\ref{ch:vector_graphics} with numerous examples.
+
+\section{Acknowledgments}
+
+The inspiration for PyXPlot came from two sources, to which PyXPlot owes a
+considerable historical debt. PyXPlot's interface was heavily motivated by
+\gnuplot's simple and intuitive interface, which was devised by Thomas Williams
+and Colin Kelley and has more recently been developed by many others. PyXPlot's
+graphical output engine was heavily motivated by the PyX\index{PyX} graphics
+library for Python, originally written by J\"org Lehmann and Andr\'e Wobst and
+more recently developed by a larger team.  Versions of PyXPlot prior to $0.8$
+used PyX to produce their graphical output, and though version~$0.8$ uses its
+own graphics engine, it continues to bear many similarities to PyX.
+
+Several other people have made very substantial contributions to PyXPlot's
+development. The writing of PyXPlot's PostScript engine was substantially eased
+thanks to the help of Michael Rutter, who happily shared his code and past
+experiences with us; the implementation of the {\tt image} command is
+substantially his work. Matthew Smith provided extensive advice on many
+mathematical matters which arose during its development, provided C
+implementations of the Airy functions and the Riemann zeta function for general
+complex inputs, and suggested many other mathematical functions which ought to
+be made available.  Zolt\'an V\"or\"os worked on our development team from 2010
+until 2011.  Dave Ansell provided many good ideas which have helped to shape
+PyXPlot's interface.
+
+We are also very grateful to our team of alpha testers, without whose work this
+release of PyXPlot would doubtless contain many more bugs than it does:
+especial thanks go to Rachel Holdforth and Stuart Prescott. Of course, the
+authors remain solely responsible for any bugs which remain.
+
+Finally, we would like to think all of the users who have got in touch with us
+by email since PyXPlot was first released on the web in~2006. Your feedback and
+suggestions have been gratefully received.
+
+\section{License}
+
+This manual and the software which it describes are both copyright \copyright\
+Dominic Ford~2006--2012 and Ross Church~2008--2012.  They are distributed under
+the GNU General Public License (GPL) Version~2, a copy of which is provided in
+the {\tt COPYING} file in this distribution.\index{General Public
+License}\index{license} Alternatively, it may be downloaded from the web, from
+the following location:\\ \url{http://www.gnu.org/copyleft/gpl.html}.
+

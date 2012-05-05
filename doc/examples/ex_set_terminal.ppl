@@ -1,0 +1,102 @@
+# EX_SET_TERMINAL.PPL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_set_terminal"
+load "examples/fig_init.ppl"
+
+# Main body of figure script
+set preamble '\usepackage{wasysym}'
+set multiplot
+set nodisplay
+set axis x invisible
+set nokey
+set noclip
+set texthalign centre
+set textvalign centre
+text "{\bf Image Formats}" at -2,12/4*0.4*5+2.0
+set axis x2 mirror top
+set width 5
+set size ratio 12/4*0.4
+set x2label "{\bf Properties}"
+set x2range[0.2:4.3]
+set x2tics ("Live Display" 1, "Vector Graphics" 2, "Rasterised Graphics" 3, "Lossy Format" 4)
+set x2format auto rotate 30
+set axis y visible mirror left
+set yrange[12.6:0.4]
+set ytics ( \
+"{\tt bmp}" 1, \
+"{\tt eps}" 2, \
+"{\tt gif}" 3, \
+"{\tt jpeg}" 4, \
+"{\tt pdf}" 5, \
+"{\tt png}" 6, \
+"{\tt postscript}" 7, \
+"{\tt svg}$^{\bf\ddagger}$" 8, \
+"{\tt tif}" 9, \
+"{\tt X11\_MultiWindow}" 10, \
+"{\tt X11\_Persist}" 11, \
+"{\tt X11\_SingleWindow}" 12 \
+)
+set grid x2y1
+set gridmajcol grey80
+set gridmincol null
+
+yes   = "\CIRCLE"
+no    = "\Circle"
+maybe = "$\bf\dagger$"
+
+i=1
+foreach datum a,b,c,d in '--'
+ {
+  set label 10*i+1 conditionalS(a==2,maybe,conditionalS(a,yes,no)) at second 1, first i
+  set label 10*i+2 conditionalS(b==2,maybe,conditionalS(b,yes,no)) at second 2, first i
+  set label 10*i+3 conditionalS(c==2,maybe,conditionalS(c,yes,no)) at second 3, first i
+  set label 10*i+4 conditionalS(d==2,maybe,conditionalS(d,yes,no)) at second 4, first i
+  i=i+1
+ }
+0 0 1 0
+0 1 0 0
+0 0 1 2
+0 0 1 1
+0 1 0 0
+0 0 1 0
+0 1 0 0
+0 1 0 0
+0 0 1 0
+1 1 0 0
+1 1 0 0
+1 1 0 0
+END
+
+plot
+
+text "\parbox{10cm}{$\bf\dagger$ -- Although the {\tt gif} image format is not lossy in the traditional sense, it reduces the number of colours to a palette of no more than 256~unique colours. Thus, whilst it is lossless for images which only contain small numbers of unique colours, some colour distortion may occur in colourful images.\vspace{2mm}\newline$\bf\ddagger$ -- The {\tt svg} terminal is experimental and may be unstable. It relies upon the use of the {\tt svg} output device in Ghostscript, which may not be present on all systems.}" at -4,-0.5 hal l val t
+
+set display
+refresh
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

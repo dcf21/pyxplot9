@@ -1,0 +1,1087 @@
+% VECTOR_GRAPHICS.TEX
+%
+% The documentation in this file is part of PyXPlot
+% <http://www.pyxplot.org.uk>
+%
+% Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+%               2008-2011 Ross Church
+%
+% $Id$
+%
+% PyXPlot is free software; you can redistribute it and/or modify it under the
+% terms of the GNU General Public License as published by the Free Software
+% Foundation; either version 2 of the License, or (at your option) any later
+% version.
+%
+% You should have received a copy of the GNU General Public License along with
+% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+% ----------------------------------------------------------------------------
+
+% LaTeX source for the PyXPlot Users' Guide
+
+\chapter{Producing Vector Graphics}
+\label{ch:vector_graphics}
+
+In the previous two chapters, we have seen how the \indcmdt{plot} may be used
+to produce single graphs of functions and \datafile s, how the \indcmdt{set
+terminal} can be used to produce graphical output in a wide range of different
+image formats (see Section~\ref{sec:set_terminal}), and how the \indcmdt{set
+papersize} can be used to produce PostScript output to fit on different sizes
+of paper (see Section~\ref{sec:set_papersize}). Often, however, there is a need
+to produce more sophisticated vector graphics.  For example, several plots may
+be wanted side-by-side, or some line-art annotations may be wanted on top of a
+graph. Additionally, PyXPlot can also produce technical diagrams as well as
+graphs. In this chapter, we turn our attention to such cases.
+
+Several of the vector graphics commands described in this chapter take rotation
+angles as one of their inputs.  It should be stressed that PyXPlot has two
+modes for handling angles: they can either be treated as dimensionless numbers
+or as being an additional base unit within the SI system (see
+Section~\ref{sec:angles}).  Where the vector graphics commands described in
+this chapter take rotation angles, a choice is always provided between
+expressing the angles as dimensionless numbers, measured in degrees, or as
+quantities with physical dimensions of angle. Thus, the following ways of
+specifying angles are all valid:
+
+\begin{dodo}
+set unit angle nodimensionless\newline
+text "foo" rotate unit(pi*rad)\newline
+text "foo" rotate 180\newline
+text "foo" rotate unit(0.25*revolution)
+\end{dodo}
+
+\noindent as are these ways:
+
+\begin{dodo}
+set unit angle dimensionless\newline
+text "foo" rotate 180\newline
+text "foo" rotate degrees(pi)
+\end{dodo}
+
+\noindent The following is {\it not} valid, because the angle of $180^\circ$ is
+passed to the {\tt text} command in radians:
+
+\begin{dontdo}
+set unit angle dimensionless\newline
+text "foo" rotate unit(180*deg)
+\end{dontdo}
+
+\section{Multiplot Mode}
+\label{sec:multiplot}
+\index{multiplot}
+
+PyXPlot has two modes in which it can produce graphical output. In {\it
+singleplot} mode, the default, each time the {\tt plot} command is issued, the
+canvas is wiped clean and the new plot is placed alone on a blank page. In {\it
+multiplot} mode, vector graphics objects accumulate on the canvas. Each time
+the {\tt plot} command is issued, the new graph is placed on top of any other
+objects which were already on the canvas, and many plots can be placed
+side-by-side.
+
+The user can switch between these two modes of operation by issuing the
+commands \indcmdts{set multiplot} and \indcmdts{set nomultiplot}. The
+\indcmdt{set origin} is required for multiplot mode to be useful when placing
+plots side-by-side: it sets the position on the page of the lower-left corner
+of the next plot. It takes a comma-separated $(x,y)$ coordinate pair, which may
+have units of length, or, if dimensionless, are assumed to be measured in
+centimetres. The following example plots a graph of $\sin(x)$ to the left of a
+plot of $\cos(x)$:
+\begin{verbatim}
+set multiplot
+set width 8
+plot sin(x)
+set origin 10,0
+plot cos(x)
+\end{verbatim}
+
+All objects on a multiplot canvas have a unique identification number.  By
+default, these count up from one, such that the first item placed on the canvas
+is number one, the next is number two, and so forth. Alternatively, the user
+may specify a particular number for a particular object by supplying the
+modifier {\tt item} to the {\tt plot} command, followed by an integer
+identification number, as in the following example:
+\begin{verbatim}
+plot item 6 'data.dat'
+\end{verbatim}
+If there were already an object on the canvas with identification number~6,
+this object would be deleted and replaced with the new object.
+
+A list of all of the objects on the current multiplot canvas can be obtained
+using the \indcmdt{list}, which produces output in the following format:
+\begin{verbatim}
+# ID   Command
+    1  plot item 1 'data1.dat'
+    2  plot item 2 'data2.dat'
+    3  [deleted] plot item 3 'data3.dat'
+\end{verbatim}
+
+A multiplot canvas can be wiped clean by issuing the \indcmdt{clear}, which
+removes all items currently on the canvas. Alternatively, individual items may
+be removed using the \indcmdt{delete}, which should be followed by a
+comma-separated list of the identification numbers of the objects to be
+deleted.  Deleted items may be restored using the \indcmdt{undelete}, which
+likewise takes a comma-separated list of the identification numbers of the
+objects to be restored, e.g.:
+\begin{verbatim}
+delete 1,2
+undelete 2
+\end{verbatim}
+Once a canvas has been cleared using the \indcmdt{clear}, however, there is no
+way to restore it.  Objects may be moved around on the canvas using the
+\indcmdt{move}. For example, the following would move item 23 to position
+$(8,8)$ measured in inches:
+\begin{verbatim}
+move 23 to 8*unit(in), 8*unit(in)
+\end{verbatim}
+
+\subsection{Settings Associated with Multiplot Items}
+
+Of the settings which can be set with the \indcmdt{set}, some refer to
+PyXPlot's global environment and whole multiplot canvases. Others, such as {\tt
+set width} and {\tt set origin} refer specifically to individual graphs and
+vector graphics items. For this reason, whenever a new multiplot graphics item
+is produced, it takes a copy of the settings which are specific to it, allowing
+these settings to be changed by the user before producing other multiplot
+items, without affecting previous items. The settings associated with a
+particular multiplot item can be queried by passing the modifier {\tt item} to
+the \indcmdt{show}, followed by the integer identification number of the item,
+as in the examples:
+\begin{verbatim}
+show item 3 width    # Shows the width of item 3
+show item 3 settings # Shows all settings associated with item 3
+\end{verbatim}
+
+The settings associated with a particular multiplot item can be changed by
+passing the same {\tt item} modifier to the \indcmdt{set}, as in the example,
+which sets the width of item~3 to be $10\,\mathrm{cm}$:
+\begin{verbatim}
+set item 3 width 10*unit(cm)
+\end{verbatim}
+After making such changes, the \indcmdt{refresh} is useful: it produces a new
+graphical image of the current multiplot to reflect any settings which have
+been changed. The following example would produce a pair of plots, and then
+change the colour of the text on the first plot:
+\begin{verbatim}
+set multiplot
+plot f(x)
+set origin 10,0
+plot g(x)
+set item 1 textcolour red
+refresh
+\end{verbatim}
+
+Another common use of the \indcmdt{refresh} is to produce multiple
+copies of an image in different graphical formats. For example, having just
+developed a multiplot canvas interactively in the {\tt X11\_singlewindow},
+copies can be produced as {\tt eps} and {\tt jpeg} images using the following
+commands:
+\begin{verbatim}
+set terminal eps
+set output 'figure.eps'
+refresh
+set terminal jpeg
+set output 'figure.jpg'
+refresh
+\end{verbatim}
+
+\subsection{Reordering Multiplot Items}
+
+Items on multiplot canvases are drawn in order of increasing identification
+number, and thus items with low identification numbers are drawn first, at the
+back of the multiplot, and items with higher identification numbers are later,
+towards the front of the multiplot. When new items are added, they are given
+higher identification numbers than previous items and appear at the front of
+the multiplot.
+
+If this is not the desired ordering, then the \indcmdt{swap} may be used to
+rearrange items. It takes the identification numbers of two multiplot items and
+swaps their identification numbers and hence their positions in the ordered
+sequence.  Thus, if, for example, the corner of item~3 disappears behind the
+corner of item~5, when the converse effect is actually desired, the following
+command should be issued:
+\begin{verbatim}
+swap 3 5
+\end{verbatim}
+
+\subsection{The Construction of Large Multiplots}
+\label{sec:set_display}
+
+By default, whenever an item is added to a multiplot, or an existing item moved
+or replotted, the whole multiplot is replotted to show the change. This can be
+a time consuming process on large and complex multiplots. For this reason, the
+\indcmdt{set nodisplay} is provided, which stops PyXPlot from producing any
+output. The \indcmdt{set display} can subsequently be issued to return to
+normal behaviour.
+
+This can be especially useful in scripts which produce large multiplots. There
+is no point in producing output at each step in the construction of a large
+multiplot, and a great speed increase can be achieved by wrapping the script
+with:
+
+\begin{verbatim}
+set nodisplay
+[...prepare large multiplot...]
+set display
+refresh
+\end{verbatim}
+
+\section{Linked Axes and Galleries of Plots}
+
+In the previous chapter (Section~\ref{sec:linked_axes}), linked axes were
+introduced as a mechanism by which several axes on a single plot could be set
+to have the same range, or to be algebraically related to one another. Another
+common use for them is to make several plots on a multiplot canvas share common
+axes. Just as the following statement links two axes on a single plot to one
+another
+\begin{verbatim}
+set axis x2 linked x
+\end{verbatim}
+axes on the current plot can be linked to those of previous plots which are
+already on the multiplot canvas using syntax of the form:
+\begin{verbatim}
+set axis x2 linked item 2 x
+\end{verbatim}
+
+A common reason for doing this is to produce galleries of side-by-side plots.
+The following series of commands would produce a $2\times2$ grid of plots, with
+axes only labelled along the bottom and left sides of the grid:
+
+\vspace{3mm}
+{\footnotesize
+\noindent{\tt set multiplot}\newline
+\noindent{\tt set nodisplay}\newline
+\noindent{\tt width=5.4}\newline
+}\\{\footnotesize
+\noindent{\tt set width width}\newline
+\noindent{\tt set xrange [0:23.999]}\newline
+\noindent{\tt set yrange [0:0.11]}\newline
+\noindent{\tt set nokey}\newline
+\noindent{\tt set texthalign left}\newline
+\noindent{\tt set textvalign centre}\newline
+}\\{\footnotesize
+\noindent{\tt \# Plot 1 (bottom left)}\newline
+\noindent{\tt set xlabel "\$x\$"}\newline
+\noindent{\tt set ylabel ""}\newline
+\noindent{\tt set label 1 "(c) fsteps" at graph width*0.03 , graph width*gold\_ratio*0.9}\newline
+\noindent{\tt plot "examples/ex\_barchart1.dat" with fsteps, "" with points}\newline
+}\\{\footnotesize
+\noindent{\tt set axis x linked item 1 x}\newline
+\noindent{\tt set axis y linked item 1 y}\newline
+}\\{\footnotesize
+\noindent{\tt \# Plot 2 (bottom right)}\newline
+\noindent{\tt set origin 1*width, 0*width*gold\_ratio}\newline
+\noindent{\tt set yformat ""}\newline
+\noindent{\tt set label 1 "(d) histeps" at graph width*0.03 , graph width*gold\_ratio*0.9}\newline
+\noindent{\tt plot "examples/ex\_barchart1.dat" with histeps, "" with points}\newline
+}\\{\footnotesize
+\noindent{\tt \# Plot 3 (top left)}\newline
+\noindent{\tt set origin 0*width, 1*width*gold\_ratio}\newline
+\noindent{\tt set xformat "" ; set xlabel ""}\newline
+\noindent{\tt unset yformat ; set ylabel texify(poissonPDF(x,18))}\newline
+\noindent{\tt set label 1 "(a) impulses" at graph width*0.03 , graph width*gold\_ratio*0.9}\newline
+\noindent{\tt plot "examples/ex\_barchart1.dat" with impulses, "" with points}\newline
+}\\{\footnotesize
+\noindent{\tt \# Plot 4 (top right)}\newline
+\noindent{\tt set origin 1*width, 1*width*gold\_ratio}\newline
+\noindent{\tt set yformat "" ; set ylabel ""}\newline
+\noindent{\tt set label 1 "(b) steps" at graph width*0.03 , graph width*gold\_ratio*0.9}\newline
+\noindent{\tt plot "examples/ex\_barchart1.dat" with steps, "" with points}\newline
+}\\{\footnotesize
+\noindent{\tt \# Now that we are finished preparing multiplot, turn display on}\newline
+\noindent{\tt set display}\newline
+\noindent{\tt refresh}
+}\vspace{3mm}
+
+\centerline{\includegraphics[width=\textwidth]{examples/eps/ex_gallery}}
+
+\section{The {\tt replot} Command Revisited}
+
+In multiplot mode, the \indcmdt{replot} can be used to modify the last plot
+added to the page. For example, the following would change the title of the
+latest plot to `foo', and add a plot of the function $g(x)$ to it:
+
+\begin{verbatim}
+set title 'foo'
+replot cos(x)
+\end{verbatim}
+
+Additionally, it is possible to modify any plot on the page by adding an {\tt
+item} modifier to the {\tt replot} statement to specify which plot should be
+replotted.  The following example would produce two plots, and then add an
+additional function to the first plot:
+
+\begin{verbatim}
+set multiplot
+plot f(x)
+set origin 10,0
+plot g(x)
+replot item 1 h(x)
+\end{verbatim}
+
+If no {\tt item} number is specified, then the \indcmdt{replot} acts by default
+upon the most recent plot to have been added to the multiplot canvas.
+
+\section{Adding Other Vector Graphics Objects}
+
+In addition to graphs, a range of other objects can be placed on multiplot
+canvases:
+\begin{itemize}
+\item Arcs of circles (the \indcmdt{arc}).
+\item Arrows (the \indcmdt{arrow}).
+\item Rectangular boxes (the \indcmdt{box}).
+\item Circles (the \indcmdt{circle}).
+\item Ellipses (the \indcmdt{ellipse}).
+\item Encapsulated PostScript images (the \indcmdt{eps}).
+\item Graphical images in {\tt bmp}, {\tt gif}, {\tt jpeg} or {\tt png} formats (the \indcmdt{image}).
+\item Lines (the \indcmdt{line}).
+\item Piecharts (the \indcmdt{piechart}).
+\item Points labelled by crosses and other symbols (the \indcmdt{point}).
+\item Text labels (the \indcmdt{text}).
+\end{itemize}
+Put together, these commands can be used to produce a wide range of vector
+graphics. In the remainder of this chapter, we describe these commands in turn,
+providing a variety of examples of their use.
+
+\subsection{The {\tt text} Command}
+
+Text labels may be added to multiplot canvases using the \indcmdt{text}. This
+has the following syntax:
+
+\begin{verbatim}
+text 'This is some text' at x,y
+\end{verbatim}
+
+In this case, the string `This is some text' would be rendered at position
+$(x,y)$ on the multiplot. As with the \indcmdt{set label}, a colour may
+optionally be specified with the {\tt with colour} modifier, as well as a
+rotation angle to rotate text labels through any given angle, measured in
+degrees counter-clockwise. For example:\indkey{rotate}
+
+\begin{verbatim}
+text 'This is some text' at x,y rotate r with colour red
+\end{verbatim}
+
+The commands \indcmdts{set textcolour}, \indcmdts{set texthalign} and
+\indcmdts{set textvalign} can be used to set the colour and alignment of the
+text produced with the \indcmdt{text}. Alternatively, the \indcmdt{text} takes
+three modifiers to control the alignment of the text which override these {\tt
+set} commands. The {\tt halign} and {\tt valign} modifiers may be followed by
+any of the settings which may follow the {\tt set texthalign} and {\tt set
+textvalign} commands respectively, as in the following examples:
+
+\begin{verbatim}
+text 'This is some text' at 0,0 halign left valign top
+text 'This is some text' at 0,0 halign right valign centre
+\end{verbatim}
+
+\noindent The {\tt gap} modifier allows a gap to be inserted in the alignment
+of the text. For example, the string {\tt halign left gap 3*unit(mm)} would
+cause text to be rendered with its left side $3\,\mathrm{mm}$ to the right of
+the position specified for the text. This is useful for labelling points on
+diagrams, where the labels should be slightly offset from the points that they
+are associated with. If the {\tt gap} modifier is followed by a dimensionless
+number, rather than one with dimensions of lengths, then it is assumed to be
+measured in centimetres.
+
+It should be noted that the \indcmdt{text} can also be used outside of the
+multiplot environment, to render a single piece of short text instead of a
+graph. One obvious application is to produce equations rendered as graphical
+files which can subsequently be imported into documents, slideshows or
+webpages.\index{presentations}
+
+\subsection{The {\tt arrow} and {\tt line} Commands}
+
+Arrows may also be added to multiplot canvases using the \indcmdt{arrow}, which
+has syntax:
+
+\begin{verbatim}
+arrow from x,y to x,y
+\end{verbatim}
+
+The \indcmdt{arrow} may be followed by the \indmodt{with} keyword to specify to
+style of the arrow. The line type, line width and colour of the arrow, may be
+specified using the same syntax as used in the plot command, using the {\tt
+linetype}, {\tt linewidth} and {\tt colour} modifiers after the word {\tt
+with}, as in the example:
+
+\begin{verbatim}
+arrow from 0,0 to 10,10 \
+with linetype 2 linewidth 5 colour red
+\end{verbatim}
+
+\noindent The style of the arrow may also be specified after the word {\tt
+with}, and three options are available: {\tt head} (the default), {\tt nohead},
+which produces line segments with no arrowheads on them, and {\tt twoway},
+which produces bidirectional  arrows with heads on both ends.
+
+The \indcmdt{arrow} has a twin, the \indcmdt{line}, which has the same syntax
+but with a different style setting of {\tt nohead}.
+
+\example{ex:notice}{A simple notice generated with the {\tt text} and {\tt arrow} commands}{
+In this example script, we use PyXPlot's {\tt arrow} and {\tt text} commands to
+produce a simple notice advertising that a lecture has moved to a different
+seminar room:
+\nlscf
+\noindent {\tt \# Turn on multiplot mode }\newline
+\noindent {\tt set multiplot ; set nodisplay }\newline
+\\
+\noindent {\tt \# Set the dimensions of the notice }\newline
+\noindent {\tt w = 20~~~~~~~~\# Width of notice / cm }\newline
+\noindent {\tt h = w/sqrt(2)~\# Height of notice / cm }\newline
+\\
+\noindent {\tt \# Put a rectangular box around the notice }\newline
+\noindent {\tt line from 0,0 to w,0 with linewidth 5 }\newline
+\noindent {\tt line from w,0 to w,h with linewidth 5 }\newline
+\noindent {\tt line from w,h to 0,h with linewidth 5 }\newline
+\noindent {\tt line from 0,h to 0,0 with linewidth 5 }\newline
+\\
+\noindent {\tt \# Write the text of the notice in big letters }\newline
+\noindent {\tt set texthalign centre ; set fontsize 3 }\newline
+\noindent {\tt text "$\backslash$bf Astrophysical Fluids Lecture" at w/2,3/4*h }\newline
+\noindent {\tt text "$\backslash$bf MOVED to Seminar Room 3" at w/2, h/2 }\newline
+\noindent {\tt arrow from w/4, h/4 to 3/4*w, h/4 with linewidth 8 }\newline
+\\
+\noindent {\tt \# Display the notice }\newline
+\noindent {\tt set display ; refresh }\newline
+\nlfcf
+The resulting notice is shown below:
+\nlscf
+\centerline{\includegraphics[width=\textwidth]{examples/eps/ex_notice}}
+}
+
+\example{ex:euclid}{A diagram from Euclid's {\it Elements}}{
+In this more extended example script, we use PyXPlot's {\tt arrow} and {\tt
+text} commands to reproduce a diagram illustrating the 47th Proposition from
+Euclid's First Book of {\it Elements}, better known as Pythagoras' Theorem. A
+full text of the proof which accompanies this diagram can be found at
+\url{http://www.gutenberg.org/etext/21076}.
+\nlscf
+{\footnotesize
+\noindent {\tt set multiplot ; set nodisplay}\newline
+}\\{\footnotesize
+\noindent {\tt \# Lengths of three sides of triangle}\newline
+\noindent {\tt AB = 2*unit(cm)}\newline
+\noindent {\tt AC = 4*unit(cm)}\newline
+\noindent {\tt BC = hypot(AC, AB) \# Hypotenuse}\newline
+\noindent {\tt CBA = atan2(AC, AB) \# Angle CBA}\newline
+}\\{\footnotesize
+\noindent {\tt \# Positions of three corners of triangle}\newline
+\noindent {\tt Bx = 0*unit(cm)~~~~~~~; By = 0*unit(cm) \# The origin}\newline
+\noindent {\tt Cx = Bx + BC~~~~~~~~~~; Cy = By}\newline
+\noindent {\tt Ax = Bx + AB*cos(CBA) ; Ay = By + AB*sin(CBA)}\newline
+}\\{\footnotesize
+\noindent {\tt \# Positions of constructed points}\newline
+\noindent {\tt Dx = Bx~~~~~~~~~~~~~~~; Dy = -BC}\newline
+\noindent {\tt Lx = Ax~~~~~~~~~~~~~~~; Ly = Dy}\newline
+\noindent {\tt Ex = Cx~~~~~~~~~~~~~~~; Ey = Dy}\newline
+}\\{\footnotesize
+\noindent {\tt Hx = Bx + (AB + AC) * cos(CBA)}\newline
+\noindent {\tt Hy = By + (AB + AC) * sin(CBA)}\newline
+\noindent {\tt Kx = Cx + (~~~~~AC) * cos(CBA)}\newline
+\noindent {\tt Ky = Cy + (~~~~~AC) * sin(CBA)}\newline
+}\\{\footnotesize
+\noindent {\tt Fx = Bx + AB*cos(CBA+90*unit(deg))}\newline
+\noindent {\tt Fy = By + AB*sin(CBA+90*unit(deg))}\newline
+\noindent {\tt Gx = Ax + AB*cos(CBA+90*unit(deg))}\newline
+\noindent {\tt Gy = Ay + AB*sin(CBA+90*unit(deg))}\newline
+}\\{\footnotesize
+\noindent {\tt \# Construct diagram}\newline
+\noindent {\tt box from Dx,Dy to Cx,Cy with fillcol grey80}\newline
+\noindent {\tt box at Ax,Ay width AC height AC rot CBA-90*unit(deg) with fillcol grey80}\newline
+\noindent {\tt box at Bx,By width AB height AB rot CBA with fillcol grey80}\newline
+\noindent {\tt line from Bx,By to Kx,Ky}\newline
+\noindent {\tt line from Fx,Fy to Cx,Cy}\newline
+\noindent {\tt line from Ax,Ay to Dx,Dy}\newline
+\noindent {\tt line from Ax,Ay to Lx,Ly}\newline
+\noindent {\tt line from Ax,Ay to Ex,Ey}\newline
+}\\{\footnotesize
+\noindent {\tt \# Label diagram}\newline
+\noindent {\tt set fontsize 1.3}\newline
+\noindent {\tt TG = 0.5*unit(mm) \# Gap left between labels and figure}\newline
+\noindent {\tt text "A" at Ax,Ay gap TG*5 hal c val b}\newline
+\noindent {\tt text "B" at Bx,By gap TG~~~hal r val t}\newline
+\noindent {\tt text "C" at Cx,Cy gap TG~~~hal l val t}\newline
+\noindent {\tt text "D" at Dx,Dy gap TG~~~hal c val t}\newline
+\noindent {\tt text "E" at Ex,Ey gap TG~~~hal c val t}\newline
+\noindent {\tt text "F" at Fx,Fy gap TG~~~hal r val c}\newline
+\noindent {\tt text "G" at Gx,Gy gap TG~~~hal c val b}\newline
+\noindent {\tt text "H" at Hx,Hy gap TG~~~hal c val b}\newline
+\noindent {\tt text "K" at Kx,Ky gap TG~~~hal l val c}\newline
+\noindent {\tt text "L" at Lx,Ly gap TG~~~hal c val t}\newline
+}\\{\footnotesize
+\noindent {\tt \# Display diagram}\newline
+\noindent {\tt set display ; refresh}\newline
+}
+\nlfcf
+The resulting diagram is shown below:
+\nlscf
+\centerline{\includegraphics[width=8cm]{examples/eps/ex_euclid_I_47}}
+}
+
+\example{ex:nanotubes}{A diagram of the conductivity of nanotubes}{
+In this example we produce a diagram of the {\it irreducible wedge} of possible
+carbon nanotube configurations, highlighting those configurations which are
+electrically conductive. We use PyXPlot's loop constructs to automate the
+production of the hexagonal grid which forms the basis of the diagram.
+\nlscf
+{\footnotesize
+\noindent{\tt BASIS\_ANGLE\_X = (0  )*unit(deg)}\newline
+\noindent{\tt BASIS\_ANGLE\_Y = (120)*unit(deg)}\newline
+\noindent{\tt LINELEN       = unit(5*mm)}\newline
+}\\{\footnotesize
+\noindent{\tt subroutine line(x1,y1,x2,y2,lw)}\newline
+\noindent{\tt \phantom{x}\{}\newline
+\noindent{\tt \phantom{xx}line from (x1*sin(BASIS\_ANGLE\_X)+y1*sin(BASIS\_ANGLE\_Y))*LINELEN, $\backslash$}\newline
+\noindent{\tt \phantom{xxxxxxxxxxxx}(x1*cos(BASIS\_ANGLE\_X)+y1*cos(BASIS\_ANGLE\_Y))*LINELEN $\backslash$}\newline
+\noindent{\tt \phantom{xxxxxxx}to   (x2*sin(BASIS\_ANGLE\_X)+y2*sin(BASIS\_ANGLE\_Y))*LINELEN, $\backslash$}\newline
+\noindent{\tt \phantom{xxxxxxxxxxxx}(x2*cos(BASIS\_ANGLE\_X)+y2*cos(BASIS\_ANGLE\_Y))*LINELEN $\backslash$}\newline
+\noindent{\tt \phantom{xxxxxxx}with linewidth lw}\newline
+\noindent{\tt \phantom{x}\}}\newline
+}\\{\footnotesize
+\noindent{\tt subroutine hexagon(x,y,lw)}\newline
+\noindent{\tt \phantom{x}\{}\newline
+\noindent{\tt \phantom{xx}call line(x  ,y  ,x  ,y-1,lw)}\newline
+\noindent{\tt \phantom{xx}call line(x  ,y-1,x+1,y-1,lw)}\newline
+\noindent{\tt \phantom{xx}call line(x+1,y-1,x+2,y  ,lw)}\newline
+\noindent{\tt \phantom{xx}call line(x+2,y  ,x+2,y+1,lw)}\newline
+\noindent{\tt \phantom{xx}call line(x+2,y+1,x+1,y+1,lw)}\newline
+\noindent{\tt \phantom{xx}call line(x+1,y+1,x  ,y  ,lw)}\newline
+\noindent{\tt \phantom{x}\}}\newline
+}\\{\footnotesize
+\noindent{\tt set multiplot}\newline
+\noindent{\tt set nodisplay}\newline
+}\\{\footnotesize
+\noindent{\tt for XPOS=0 to 10}\newline
+\noindent{\tt \phantom{x}\{}\newline
+\noindent{\tt \phantom{xx}for YPOS=0 to XPOS+1}\newline
+\noindent{\tt \phantom{xxx}\{}\newline
+\noindent{\tt \phantom{xxxx}x = 1*XPOS + 2*YPOS}\newline
+\noindent{\tt \phantom{xxxx}y = 2*XPOS + 1*YPOS}\newline
+\noindent{\tt \phantom{xxxx}call hexagon(x,y, conditionalN((XPOS-YPOS)\%3==0,4,1))}\newline
+\noindent{\tt \phantom{xxxx}text '\%d,\%d'\%(XPOS,YPOS) $\backslash$}\newline
+\noindent{\tt \phantom{xxxxxx}at ((x+1)*sin(BASIS\_ANGLE\_X)+y*sin(BASIS\_ANGLE\_Y))*LINELEN, $\backslash$}\newline
+\noindent{\tt \phantom{xxxxxxxxx}((x+1)*cos(BASIS\_ANGLE\_X)+y*cos(BASIS\_ANGLE\_Y))*LINELEN $\backslash$}\newline
+\noindent{\tt \phantom{xxxxxx}hal cen val cen}\newline
+\noindent{\tt \phantom{xxx}\}}\newline
+\noindent{\tt \phantom{x}\}}\newline
+}\\{\footnotesize
+\noindent{\tt set display}\newline
+\noindent{\tt refresh}}
+\nlscf
+\centerline{\includegraphics[width=9cm]{examples/eps/ex_nanotubes}}
+}
+
+\subsection{The {\tt image} Command}
+
+Graphical images in {\tt bmp}, {\tt gif}, {\tt jpeg} or {\tt png} format may be
+placed on multiplot canvases using the \indcmdt{image}\footnote{To maintain
+compatibility with historic versions of PyXPlot, the {\tt image} command may
+also be spelt {\tt jpeg}, with the identical syntax thereafter.}. In its
+simplest form, this has the syntax:
+\begin{verbatim}
+image 'filename' at x,y width w
+\end{verbatim}
+
+As an alternative to the \indkeyt{width} keyword the height of the image can be
+specified, using the analogous \indkeyt{height} keyword.  An optional angle can
+also be specified using the \indkeyt{rotate} keyword; this causes the included
+image to be rotated counter-clockwise by a specified angle, measured in
+degrees.  The keyword {\tt smooth} may optionally be supplied to cause the
+pixels of the image to be interpolated\footnote{Many commonly-used PostScript
+display engines, including Ghostscript, do not support this functionality.}.
+
+Images which include transparency are supported. The optional keyword {\tt
+notransparent} may be supplied to the \indcmdt{image} to cause transparent
+regions to be filled with the image's default background colour. Alternatively,
+an RGB colour may be specified in the form {\tt rgb<r>:<g>:<b>} after the
+keyword {\tt transparent} to cause that particular colour to become
+transparent; the three components of the RGB colour should be in the range~0
+to~255.
+
+\subsection{The {\tt eps} Command}
+
+Vector graphic images in eps format may be placed on multiplot canvases
+using the \indcmdt{eps}, which has a syntax analogous to the {\tt image}
+command.  However neither height nor width need be specified; in this case the
+image will be included at its native size.  For example:
+
+\begin{verbatim}
+eps 'filename' at 3,2 rotate 5
+\end{verbatim}
+
+\noindent will place the eps file with its bottom-left corner at position
+$(3,2)$\,cm from the origin, rotated counter-clockwise through 5 degrees.
+
+\subsection{The {\tt box} and {\tt circle} Commands}
+\label{sec:rectangle}
+
+Rectangular boxes and circles may be placed on multiplot canvases
+using the {\tt box} and {\tt circle} commands\indcmd{box}\indcmd{circle}, as
+in:
+
+\begin{verbatim}
+box from 0*unit(mm),0*unit(mm) to 25*unit(mm),70*unit(mm)
+circle at 0*unit(mm),0*unit(mm) radius 70*unit(mm)
+\end{verbatim}
+
+\noindent In the former case, two corners of the rectangle are specified,
+meanwhile in the latter case the centre of the circle and its radius are
+specified. The \indcmdt{box} may also be invoked by the synonym {\tt
+rectangle}\indcmd{rectangle}. Boxes may be rotated using an optional {\tt
+rotate} modifier, which may be followed by a counter-clockwise rotational angle
+which may either have dimensions of angle, or is assumed to be in degrees if
+dimensionless. The rotation is performed about the centre of the rectangle:
+
+\begin{verbatim}
+box from 0,0 to 10,3 rotate 45
+\end{verbatim}
+
+The positions and dimensions of boxes may also be specified by giving the
+position of one of the corners of the box, together with its width and height.
+The specified corner is assumed to be the bottom-left corner if both the
+specified width and height are positive; other corners may be specified if the
+supplied width and/or height are negative. If such boxes are rotated, the
+rotation is about the specified corner:
+
+\begin{verbatim}
+box at 0,0 width 10 height 3 rotate 45
+\end{verbatim}
+
+The line type, line width, and colour of line with which the outlines of boxes
+and circles are drawn may be specified as in the {\tt arrow} command, for
+example:
+
+\begin{verbatim}
+circle at 0,0 radius 5 with linetype 1 linewidth 2 colour red
+\end{verbatim}
+
+\noindent The shapes may be filled by specifying a {\tt fillcolour}:
+
+\begin{verbatim}
+circle at 0,0 radius 5 with lw 10 colour red fillcolour yellow
+\end{verbatim}
+
+\example{ex:noentry}{A simple no-entry sign}{
+In this example script, we use PyXPlot's {\tt box} and {\tt circle} commands to
+produce a no-entry sign warning passers by that code monkeys can turn nasty
+when interrupted from their work.
+\nlscf
+\noindent {\tt set multiplot ; set nodisplay}\newline
+\noindent {\tt }\newline
+\noindent {\tt w = 10 \# Width of sign / cm}\newline
+\\
+\noindent {\tt \# Make no-entry sign}\newline
+\noindent {\tt circle at 0,0 radius w with col null fillcol red}\newline
+\noindent {\tt box from -(0.8*w),-(0.2*w) to (0.8*w),(0.2*w) $\backslash$}\newline
+\noindent {\tt \phantom{xxxx}with col null fillcol white}\newline
+\\
+\noindent {\tt \# Put a warning beneath the sign}\newline
+\noindent {\tt set fontsize 3}\newline
+\noindent {\tt set texthalign centre ; set textvalign centre}\newline
+\noindent {\tt text "$\backslash$bf Keep Out! Code Monkey at work!"}\newline
+\\
+\noindent {\tt \# Display sign}\newline
+\noindent {\tt set display ; refresh}\newline
+\vspace{2mm}\\
+\nlfcf
+The resulting sign is shown below:
+\nlscf
+\centerline{\includegraphics[width=5cm]{examples/eps/ex_noentry}}
+}
+
+\subsection{The {\tt arc} Command}
+\label{sec:arc}
+
+Partial arcs of circles may be drawn using the \indcmdt{arc}. This has similar
+syntax to the \indcmdt{circle}, but takes two additional angles, measured
+clockwise from the upward vertical direction, which specify the extent of the
+arc to be drawn. The arc is drawn clockwise from start to end, and hence the
+following two instructions draw two complementary arcs which together form a
+complete circle:
+
+\begin{verbatim}
+set multiplot
+arc at 0,0 radius 5 from -90 to   0 with lw 3 col red
+arc at 0,0 radius 5 from   0 to -90 with lw 3 col green
+\end{verbatim}
+
+\noindent If a {\tt fillcolour} is specified, then a pie-wedge is drawn:
+
+\begin{verbatim}
+arc at 0,0 radius 5 from 0 to 30 with lw 3 fillcolour red
+\end{verbatim}
+
+\example{ex:triangle}{A labelled diagram of a triangle}{
+In this example, we make a subroutine to draw labelled diagrams of the interior
+angles of triangles, taking as its inputs the lengths of the three sides of the
+triangle to be drawn and the position of its lower-left corner. The subroutine
+calculates the positions of the three vertices of the triangle and then labels
+them. We use PyXPlot's automatic handling of physical units to generate the
+\LaTeX\ strings required to label the side lengths in centimetres and the
+angles in degrees. We use PyXPlot's {\tt arc} command to draw angle symbols in
+the three corners of a triangle.
+\nlscf
+{\footnotesize
+\noindent {\tt \# Define subroutine for drawing triangles}\newline
+\noindent {\tt subroutine TriangleDraw(Bx,By,AB,AC,BC)}\newline
+\noindent {\tt \phantom{x}\{}\newline
+\noindent {\tt \phantom{xx}\# Use cosine rule to find interior angles}\newline
+\noindent {\tt \phantom{xx}ABC = acos((AB**2 + BC**2 - AC**2) / (2*AB*BC))}\newline
+\noindent {\tt \phantom{xx}BCA = acos((BC**2 + AC**2 - AB**2) / (2*BC*AC))}\newline
+\noindent {\tt \phantom{xx}CAB = acos((AC**2 + AB**2 - BC**2) / (2*AC*AB))}\newline
+}\\{\footnotesize
+\noindent {\tt \phantom{xx}\# Positions of three corners of triangle}\newline
+\noindent {\tt \phantom{xx}Cx = Bx + BC~~~~~~~~~~; Cy = By}\newline
+\noindent {\tt \phantom{xx}Ax = Bx + AB*cos(ABC) ; Ay = By + AB*sin(ABC)}\newline
+}\\{\footnotesize
+\noindent {\tt \phantom{xx}\# Draw triangle}\newline
+\noindent {\tt \phantom{xx}line from Ax,Ay to Bx,By}\newline
+\noindent {\tt \phantom{xx}line from Ax,Ay to Cx,Cy}\newline
+\noindent {\tt \phantom{xx}line from Bx,By to Cx,Cy}\newline
+}\\{\footnotesize
+\noindent {\tt \phantom{xx}\# Draw angle symbols}\newline
+\noindent {\tt \phantom{xx}ArcRad = 4*unit(mm) \# Radius of angle arcs}\newline
+\noindent {\tt \phantom{xx}arc at Bx,By radius ArcRad from~~90*unit(deg)-ABC to~~90*unit(deg)}\newline
+\noindent {\tt \phantom{xx}arc at Cx,Cy radius ArcRad from -90*unit(deg)~~~~~to -90*unit(deg)+BCA}\newline
+\noindent {\tt \phantom{xx}arc at Ax,Ay radius ArcRad from~~90*unit(deg)+BCA to 270*unit(deg)-ABC}\newline
+}\\{\footnotesize
+\noindent {\tt \phantom{xx}\# Label lengths of sides}\newline
+\noindent {\tt \phantom{xx}set unit of length cm \# Display lengths in cm}\newline
+\noindent {\tt \phantom{xx}set numeric sigfig 3 display latex \# Correct to 3 significant figure}\newline
+\noindent {\tt \phantom{xx}set fontsize 1.2 \# And in slightly bigger text than normal}\newline
+\noindent {\tt \phantom{xx}TextGap = 1*unit(mm)}\newline
+\noindent {\tt \phantom{xx}text "\%s"\%(BC) at (Bx+Cx)/2,(By+Cy)/2 gap TextGap hal c val t}\newline
+\noindent {\tt \phantom{xx}text "\%s"\%(AB) at (Ax+Bx)/2,(Ay+By)/2 gap TextGap rot  ABC hal c val b}\newline
+\noindent {\tt \phantom{xx}text "\%s"\%(AC) at (Ax+Cx)/2,(Ay+Cy)/2 gap TextGap rot -BCA hal c val b}\newline
+}\\{\footnotesize
+\noindent {\tt \phantom{xx}\# Label angles}\newline
+\noindent {\tt \phantom{xx}set unit of angle degree \# Display angles in degrees}\newline
+\noindent {\tt \phantom{xx}ArcRad2 = 1.4 * ArcRad \# Distance of text from apex of angles}\newline
+\noindent {\tt \phantom{xx}text "\%s"\%(CAB) at Ax+ArcRad2*sin(ABC-BCA),Ay-ArcRad2*cos(ABC-BCA) hal c val t}\newline
+\noindent {\tt \phantom{xx}text "\%s"\%(ABC) at Bx+ArcRad2*cos(ABC/2),By+ArcRad2*sin(ABC/2) hal l val c}\newline
+\noindent {\tt \phantom{xx}text "\%s"\%(BCA) at Cx-ArcRad2*cos(BCA/2),Cy+ArcRad2*sin(BCA/2) hal r val c}\newline
+}\\{\footnotesize
+\noindent {\tt \phantom{xx}\# Label points ABC}\newline
+\noindent {\tt \phantom{xx}text "A" at Ax,Ay gap TextGap hal c val b}\newline
+\noindent {\tt \phantom{xx}text "B" at Bx,By gap TextGap hal r val c}\newline
+\noindent {\tt \phantom{xx}text "C" at Cx,Cy gap TextGap hal l val c}\newline
+\noindent {\tt \phantom{x}\}}\newline
+}\\{\footnotesize
+\noindent {\tt \# Display diagram with three triangles}\newline
+\noindent {\tt set multiplot ; set nodisplay}\newline
+\noindent {\tt call TriangleDraw(2.8*unit(cm),3.4*unit(cm), 3*unit(cm),4*unit(cm),4*unit(cm))}\newline
+\noindent {\tt call TriangleDraw(0.0*unit(cm),0.0*unit(cm), 3*unit(cm),4*unit(cm),5*unit(cm))}\newline
+\noindent {\tt call TriangleDraw(6.5*unit(cm),0.0*unit(cm), 3*unit(cm),3*unit(cm),3*unit(cm))}\newline
+\noindent {\tt set display ; refresh}\newline
+}
+\nlfcf
+The resulting diagram is shown below:
+\nlscf
+\centerline{\includegraphics{examples/eps/ex_triangle}}
+}
+
+\example{ex:lens}{A labelled diagram of a converging lens forming a real image}{
+In this example, we make a subroutine to draw labelled diagrams of converging
+lenses forming real images.
+\nlscf
+{\footnotesize
+\noindent {\tt subroutine LensDraw(x0,y0,u,h,f)}\newline
+\noindent {\tt \phantom{x}\{}\newline
+\noindent {\tt \phantom{xx}\# Use the thin-lens equation to find v and H}\newline
+\noindent {\tt \phantom{xx}v = 1/(1/f - 1/u)}\newline
+\noindent {\tt \phantom{xx}H = h * v / u}\newline
+}\\{\footnotesize
+\noindent {\tt \phantom{xx}\# Draw lens}\newline
+\noindent {\tt \phantom{xx}lc = 5.5*unit(cm) \# Radius of curvature of lens}\newline
+\noindent {\tt \phantom{xx}lt = 0.5*unit(cm) \# Thickness of lens}\newline
+\noindent {\tt \phantom{xx}la = acos((lc-lt/2)/lc) \# Angular size of lens from centre of curvature}\newline
+\noindent {\tt \phantom{xx}lh = lc*sin(la) \# Physical height of lens on paper}\newline
+\noindent {\tt \phantom{xx}arc at x0-(lc-lt/2),y0 radius lc from~~90*unit(deg)-la to~~90*unit(deg)+la}\newline
+\noindent {\tt \phantom{xx}arc at x0+(lc-lt/2),y0 radius lc from 270*unit(deg)-la to 270*unit(deg)+la}\newline
+\noindent {\tt \phantom{xx}set texthalign right ; set textvalign top}\newline
+\noindent {\tt \phantom{xx}point at x0-f,y0 label "\$f\$"}\newline
+\noindent {\tt \phantom{xx}set texthalign left~~; set textvalign bottom}\newline
+\noindent {\tt \phantom{xx}point at x0+f,y0 label "\$f\$"}\newline
+}\\{\footnotesize
+\noindent {\tt \phantom{xx}\# Draw object and image}\newline
+\noindent {\tt \phantom{xx}arrow from x0-u,y0 to x0-u,y0+h with lw 2}\newline
+\noindent {\tt \phantom{xx}arrow from x0+v,y0 to x0+v,y0-H with lw 2}\newline
+\noindent {\tt \phantom{xx}text "\$h\$" at x0-u,y0+h/2 hal l val c gap unit(mm)}\newline
+\noindent {\tt \phantom{xx}text "\$H\$" at x0+v,y0-H/2 hal l val c gap unit(mm)}\newline
+}\\{\footnotesize
+\noindent {\tt \phantom{xx}\# Draw construction lines}\newline
+\noindent {\tt \phantom{xx}line from x0-u,y0 to x0+v,y0 with lt 2 \# Optic axis}\newline
+\noindent {\tt \phantom{xx}line from x0-u,y0+h to x0+v,y0-H \# Undeflected ray through origin}\newline
+\noindent {\tt \phantom{xx}line from x0-u,y0+h to x0,y0+h}\newline
+\noindent {\tt \phantom{xx}line from x0,y0+h to x0+v,y0-H}\newline
+\noindent {\tt \phantom{xx}line from x0+v,y0-H to x0,y0-H}\newline
+\noindent {\tt \phantom{xx}line from x0,y0-H to x0-u,y0+h}\newline
+}\\{\footnotesize
+\noindent {\tt \phantom{xx}\# Label distances u and v}\newline
+\noindent {\tt \phantom{xx}ylabel = y0-lh-2*unit(mm)}\newline
+\noindent {\tt \phantom{xx}arrow from x0-u,ylabel to x0,ylabel with twoway lt 2}\newline
+\noindent {\tt \phantom{xx}arrow from x0+v,ylabel to x0,ylabel with twoway lt 2}\newline
+\noindent {\tt \phantom{xx}text "\$u\$" at x0-u/2,ylabel hal c val t gap unit(mm)}\newline
+\noindent {\tt \phantom{xx}text "\$v\$" at x0+v/2,ylabel hal c val t gap unit(mm)}\newline
+\noindent {\tt \phantom{x}\}}\newline
+}\\{\footnotesize
+\noindent {\tt \# Display diagram of lens}\newline
+\noindent {\tt set unit angle nodimensionless}\newline
+\noindent {\tt set multiplot ; set nodisplay}\newline
+\noindent {\tt call LensDraw(0*unit(cm),0*unit(cm), 5*unit(cm),1.5*unit(cm),2*unit(cm))}\newline
+\noindent {\tt set display ; refresh}\newline
+}
+\nlfcf
+The resulting diagram is shown below:
+\nlscf
+\centerline{\includegraphics{examples/eps/ex_lenses}}
+}
+
+\subsection{The {\tt point} Command}
+\label{sec:point}
+
+The \indcmdt{point} places a single point on a multiplot canvases, in the same
+style which would be used when plotting a dataset on a graph with the {\tt
+points} plotting style. It is useful for marking significant points on
+technical diagrams with crosses or other motifs.
+
+The \indcmdt{point} that the position of the point to be marked be specified
+after the {\tt at} modifier. A text label to be attached next to the point may
+optionally be specified using the same {\tt label} modifier as taken by the
+{\tt plot} command. A {\tt with} modifier may then be supplied, followed by any
+of the style modifiers: {\tt colour}, {\tt pointlinewidth}, {\tt pointsize},
+{\tt pointtype}, {\tt style}.
+
+The following example labels the origin as such:
+\begin{verbatim}
+set texthalign left
+set textvalign centre
+point at 0,0 label "The Origin" with ps 2
+\end{verbatim}
+
+\subsection{The {\tt ellipse} Command}
+\label{sec:ellipse}
+
+Ellipses may be placed on multiplot canvases using the \indcmdt{ellipse}. The
+shape of the ellipse may be specified in many different ways, by specifying
+
+\begin{enumerate}[(i)]
+\item the position of two corners of the smallest rectangle which can enclose
+the ellipse when its major axis is horizontal, together with an optional
+counter-clockwise rotation angle, applied about the centre of the ellipse.
+For example:
+
+\begin{verbatim}
+ellipse from 0,0 to 4,1 rot 70
+\end{verbatim}
+
+\item the position of both the centre and one of the foci of the ellipse,
+together with any one of the following additional pieces of information: the
+ellipse's major axis length, its semi-major axis length, its minor axis length,
+its semi-minor axis length, its eccentricity, its latus rectum, or its
+semi-latus rectum.  For example:
+
+\begin{verbatim}
+ellipse focus 0,0 centre 2,2 majoraxis 4
+ellipse focus 0,0 centre 2,2 minoraxis 4
+ellipse focus 0,0 centre 2,2 ecc 0.5
+ellipse focus 0,0 centre 2,2 LatusRectum 6
+ellipse focus 0,0 centre 2,2 slr 3
+\end{verbatim}
+
+\item the position of either the centre or one of the foci of the ellipse,
+together with any two of the following additional pieces of information: the
+ellipse's major axis length, its semi-major axis length, its minor axis length,
+its semi-minor axis length, its eccentricity, its latus rectum, or its
+semi-latus rectum. An optional counter-clockwise rotation angle may also be
+specified, applied about either the centre or one of the foci of the ellipse,
+whichever is specified. If no rotation angle is given, then the major axis of
+the ellipse is horizontal.  For example:
+
+\begin{verbatim}
+ellipse centre 0,0 majoraxis 4 minoraxis 4
+\end{verbatim}
+\end{enumerate}
+
+The line type, line width, and colour of line with which the outlines of
+ellipses are drawn may be specified after the keyword {\tt with}, as in the
+{\tt box} and {\tt circle} commands above. Likewise, ellipses may be filled in
+the same manner.
+
+\example{ex:ellipse}{A labelled diagram of an ellipse}{
+In this example script, we illustrate the text of Section~\ref{sec:ellipse} by
+using PyXPlot's {\tt ellipse} command, together with arrows and text labels, to
+produce a labelled diagram of an ellipse. We label the semi-major axis $a$, the
+semi-minor axis $b$, the semi-latus rectum $L$, and the distance between the
+centre of the ellipse and one of its foci with the length $ae$, where $e$ is
+the eccentricity of the ellipse.
+\nlscf
+{\footnotesize
+\noindent {\tt set multiplot ; set nodisplay }\newline
+\noindent {\tt }\newline
+\noindent {\tt a~~~= 6.0~~~~~~~~~~~~~~\# Semi-major axis }\newline
+\noindent {\tt b~~~= 4.0~~~~~~~~~~~~~~\# Semi-minor axis }\newline
+\noindent {\tt e~~~= sqrt(1-(b/a)**2)~\# Eccentricity }\newline
+\noindent {\tt slr~= a*(1-e**2)~~~~~~~\# Length of semi-latus rectum }\newline
+\noindent {\tt fd~~= a*e~~~~~~~~~~~~~~\# Distance of focus from centre }\newline
+}\\{\footnotesize
+\noindent {\tt \# Draw ellipse }\newline
+\noindent {\tt ellipse centre 0,0 SemiMajor a SemiMinor b with lw 3 }\newline
+\noindent {\tt }\newline
+\noindent {\tt \# Draw points at centre and focus}\newline
+\noindent {\tt set texthalign centre ; set textvalign top}\newline
+\noindent {\tt set fontsize 1.5}\newline
+\noindent {\tt point at 0,0 label "Centre" with pointsize 2 plw 2}\newline
+\noindent {\tt point at -fd,0 label "Focus" with pointsize 2 plw 2}\newline
+}\\{\footnotesize
+\noindent {\tt \# Draw arrows and dotted lines on ellipse }\newline
+\noindent {\tt arrow from 0,0 to 0,b with twohead lw 2 lt 3~~~\# Semi-minor axis}\newline
+\noindent {\tt arrow from 0,0 to a,0 with twohead lw 2 lt 3~~~\# Semi-major axis}\newline
+\noindent {\tt arrow from -fd,0 to -fd,slr with tw lw 2 lt 3~~\# SLR}\newline
+\noindent {\tt arrow from 0,0 to -fd,0 with twohead lw 2 lt 3 \# Focus $<$-$>$ Centre}\newline
+}\\{\footnotesize
+\noindent {\tt \# Label ellipse }\newline
+\noindent {\tt set texthalign centre ; set textvalign centre}\newline
+\noindent {\tt text '\$ae\$' at -fd/2,-0.3}\newline
+\noindent {\tt text '\$a\$' at a/2,+0.3}\newline
+\noindent {\tt text '\$b\$' at 0.3,b/2}\newline
+\noindent {\tt set texthalign left ; set textvalign centre}\newline
+\noindent {\tt text '\$L=a(1-e\^{}2)\$' at  0.2-fd,slr/2}\newline
+}\\{\footnotesize
+\noindent {\tt \# Display diagram }\newline
+\noindent {\tt set display ; refresh }\newline
+}
+\nlfcf
+The resulting diagram is shown below:
+\nlscf
+\centerline{\includegraphics[width=8cm]{examples/eps/ex_ellipse}}
+}
+
+\subsection{The {\tt piechart} Command}
+\label{sec:piechart}
+
+The \indcmdt{piechart} produces piecharts based upon single columns of data
+read from \datafile s, which are taken to indicate the sizes of the pie wedges.
+The \indcmdt{piechart} has the following syntax:
+\begin{verbatim}
+piechart ('<filename>'|<function>)
+     [using <using specifier>]
+     [select <select specifier>]
+     [index <index specifier>]
+     [every <every specifier>]
+     [label <auto|key|inside|outside> <label>]
+     [format <format string>]
+     [with <style> [<style modifier> ... ] ]
+\end{verbatim}
+
+Immediately after the {\tt piechart} keyword, the file (or indeed, function)
+from which the data is to be taken should be specified; any of the modifiers
+taken by the {\tt plot} command -- i.e.\ {\tt using}, {\tt index}, etc.\ -- may
+be used to specify which data from this \datafile\ should be used. The {\tt
+label} modifier should be used to specify how a name for each pie wedge should
+be drawn from the \datafile, and has a similar syntax to the equivalent
+modifier in the {\tt plot} command, except that the name string may be
+prefixed by a keyword to specify how the pie wedge names should be positioned.
+Four options are available:
+
+\noindent
+\begin{itemize}
+\item {\tt auto} -- specifies that the {\tt inside} positioning mode should be used on wide pie wedges, and the {\tt outside} positioning mode should be used on narrow pie wedges. {\bf [default]}
+\item {\tt key} -- specifies that all of the labels should be arranged in a vertical list to the right-hand side of the piechart.
+\item {\tt inside} -- specifies that the labels should be placed within the pie wedges themselves.
+\item {\tt outside} -- specifies that the labels should be arranged around the circumference of the pie chart.
+\end{itemize}
+
+Having specified a name for each wedge using the {\tt label} modifier, the {\tt
+format} modifier determines the final text which is printed along side each
+wedge.  For example, a wedge with name `Europe' might be labelled as `27\%
+Europe', applying the default format string:
+\begin{verbatim}
+"%.1d\%% %s"%(percentage,label)
+\end{verbatim}
+Three variables may be used in format strings: {\tt label} contains the name of
+the wedge as specified by the {\tt label} modifier, {\tt percentage} contains
+the numerical percentage size of the wedge, and {\tt wedgesize} contains the
+absolute unnormalised size of the wedge, as read from the input \datafile,
+before the sizes were renormalised to sum to 100\%.
+
+The {\tt with} modifier may be followed by the keywords {\tt colour}, {\tt
+linewidth}, {\tt style}, which all apply to the lines drawn around the
+circumference of the piechart and between its wedges. The fill colour of the
+wedges themselves are taken sequentially from the current palette, as set by
+the {\tt set palette} command. Note that PyXPlot's default palette is optimised
+more for producing plots with datasets in different and distinct colours than
+for producing piecharts in aesthetically pleasing shades, where a little more
+subtly may be desirable. A suitable call to the {\tt set palette} command is
+highly recommended before the \indcmdt{piechart} is used.
+
+As with the {\tt plot} command, the position and size of the piechart are
+governed by the {\tt set origin} and {\tt set size} commands. The former
+determines where the centre of the piechart is positioned; the latter
+determines its diameter.
+
+\example{ex:piechart}{A piechart of the composition of the Universe}{
+In this example, we use PyXPlot's {\tt piechart} command to produce a diagram
+of the composition of the Universe, showing that of the mass in the Universe,
+only 4\% is in the form of the baryonic matter; of the rest, 22\% is in the
+form of dark matter and 74\% in the form of dark energy:
+\nlscf
+\noindent{\tt set palette grey40, grey60, grey80}\newline
+\noindent{\tt set width 6}\newline
+\noindent{\tt piechart '--' using \$1 label key "\%s"\%(\$2)}\newline
+\noindent{\tt 0.22 Dark$\sim$Matter}\newline
+\noindent{\tt 0.04 Baryonic$\sim$Matter}\newline
+\noindent{\tt 0.74 Dark$\sim$Energy}\newline
+\noindent{\tt END}
+\nlscf
+\centerline{\includegraphics{examples/eps/ex_piechart}}
+\nlfcf
+Below, we show the change produced by replacing the line\vspace{2mm}\newline
+\noindent{\tt piechart '--' using \$1 label key "\%s"\%(\$2)}\vspace{2mm}\newline
+with\vspace{2mm}\newline
+\noindent{\tt piechart '--' using \$1 label auto "\%s"\%(\$2)}\vspace{2mm}\newline
+Note that the labels on the piechart are placed either within the pie, in the
+cases of large wedges, and around the edge of the pie for those wedges which
+are too narrow for this.
+\nlscf
+\centerline{\includegraphics{examples/eps/ex_piechart2}}
+}
+
+\section{LaTeX and PyXPlot}
+
+The \indcmdt{text} can straightforwardly be used to render simple one-line
+\LaTeX\index{latex} strings, but sometimes the need arises to place more
+substantial blocks of text onto a plot. For this purpose, it can be useful to
+use the \LaTeX\ {\tt parbox} or {\tt minipage} environments\footnote{Remember,
+any valid \LaTeX\ string can be passed to the \indcmdt{text} and \indcmdt{set
+label}.}. For example:
+
+\begin{verbatim}
+text '\parbox[t]{6cm}{\setlength{\parindent}{1cm} \
+\noindent There once was a lady from Hyde, \newline \
+Who ate a green apple and died, \newline \
+\indent While her lover lamented, \newline \
+\indent The apple fermented, \newline \
+and made cider inside her inside.}'
+\end{verbatim}
+
+\begin{center}
+\fbox{\includegraphics{examples/eps/ex_text1}}
+\end{center}
+
+If unusual mathematical symbols are required, for example those in the {\tt
+amsmath} package\index{amsmath package@{\tt amsmath} package}, such a package
+can be loaded using the \indcmdt{set preamble}. For example:
+
+\begin{verbatim}
+set preamble \usepackage{marvosym}
+text "{\Huge\Dontwash\ \NoIroning\ \NoTumbler}$\;$ Do not \
+wash, iron or tumble-dry this plot."
+\end{verbatim}
+
+\begin{center}
+\fbox{\includegraphics{examples/eps/ex_text2}}
+\end{center}
+

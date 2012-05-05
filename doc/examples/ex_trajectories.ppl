@@ -1,0 +1,53 @@
+# EX_TRAJECTORIES.PPL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_trajectories"
+load "examples/fig_init.ppl"
+
+# Main body of figure script
+
+# Some numerical constants
+g   = 9.81    # Acceleration due to gravity
+d2r = pi/180  # Convert degrees to radians
+
+# The mathematical equation of a trajectory
+h(x,theta,v) = x*tan(theta*d2r) - 0.5*g*x**2/(v**2*cos(theta*d2r)**2)
+
+# Plot configuration
+set xlabel "$x/{\rm m}$"
+set ylabel "$h/{\rm m}$"
+set xrange [0:20]
+set yrange [0:]
+set key below
+set title 'Trajectories of projectiles fired with speed $v$ and angle $\theta$'
+plot h(x,30,10) title "$\theta=30^\circ;\qquad v=10\,{\rm m\,s^{-1}}$", \
+     h(x,45,10) title "$\theta=45^\circ;\qquad v=10\,{\rm m\,s^{-1}}$", \
+     h(x,60,10) title "$\theta=60^\circ;\qquad v=10\,{\rm m\,s^{-1}}$", \
+     h(x,30,15) title "$\theta=30^\circ;\qquad v=15\,{\rm m\,s^{-1}}$", \
+     h(x,60,15) title "$\theta=60^\circ;\qquad v=15\,{\rm m\,s^{-1}}$"
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

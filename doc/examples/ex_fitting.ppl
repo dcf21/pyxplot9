@@ -1,0 +1,37 @@
+# EX_FITTING.PPL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_fitting"
+load "examples/fig_init.ppl"
+
+# Main body of figure script
+f(x) = a1*sin(x) + a3*sin(3*x) + a5*sin(5*x)
+fit f() withouterrors 'examples/ex_fitting.dat' via a1, a3, a5
+set xlabel '$x$' ; set ylabel '$y$'
+plot [-3.5:3.5] 'examples/ex_fitting.dat' title 'Data' with points pointsize 2, f(x) title 'Fitted function' with lines
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

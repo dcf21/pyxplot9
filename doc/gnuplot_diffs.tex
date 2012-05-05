@@ -1,0 +1,156 @@
+% GNUPLOT_DIFFS.TEX
+%
+% The documentation in this file is part of PyXPlot
+% <http://www.pyxplot.org.uk>
+%
+% Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+%               2008-2011 Ross Church
+%
+% $Id$
+%
+% PyXPlot is free software; you can redistribute it and/or modify it under the
+% terms of the GNU General Public License as published by the Free Software
+% Foundation; either version 2 of the License, or (at your option) any later
+% version.
+%
+% You should have received a copy of the GNU General Public License along with
+% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+% ----------------------------------------------------------------------------
+
+% LaTeX source for the PyXPlot Users' Guide
+
+\chapter{Summary of Differences Between PyXPlot and \gnuplot}
+\chaptermark{Differences Between PyXPlot \& \gnuplot}
+\label{ch:gnuplot_diffs}
+
+PyXPlot's commandline interface is based loosely upon that of \gnuplot, but
+does not completely re-implement the entirety of \gnuplot's command language.
+Moreover, PyXPlot's command language includes many extensions of \gnuplot's
+interface. In this Appendix, we outline some of the most significant areas in
+which \gnuplot\ and PyXPlot differ. This is far from an exhaustive list, but
+may provide a useful reference for \gnuplot\ users.
+
+\section{The Typesetting of Text}
+
+PyXPlot renders all text labels automatically in the \LaTeX\ typesetting
+environment. This brings many advantages: it produces neater labels than the
+default typesetting engine used by \gnuplot, makes it straightforward to label
+graphs with mathematical expressions, and moreover makes it straightforward
+when importing graphs into \LaTeX\ documents to match the fonts used in figures
+with those used in the main text of the document.  It does, however, also
+necessarily introduce some incompatibility with \gnuplot.  Some strings which
+are valid in \gnuplot\ are not valid in PyXPlot (see
+Section~\ref{sec:latex_incompatibility} for more details). For
+example,\index{latex}
+
+\begin{dontdo}
+set xlabel 'x\^{}2'
+\end{dontdo}
+
+\noindent is a valid label in \gnuplot, but is not valid input for \LaTeX\ and
+therefore fails in PyXPlot.  In PyXPlot, it needs to be written in \LaTeX\
+mathmode as:
+
+\begin{dodo}
+set xlabel '\$x\^{}2\$'
+\end{dodo}
+
+\noindent A useful introduction to \LaTeX's syntax can be found in Tobias
+Oetiker's\index{Tobias Oetiker} excellent free tutorial, {\it The Not So Short
+Guide to \LaTeX\ $2\epsilon$}\index{Not So Short Guide to \LaTeX\ $2\epsilon$,
+The}, which is available for free download from:
+
+\noindent \url{http://www.ctan.org/tex-archive/info/lshort/english/lshort.pdf}
+
+PyXPlot's built-in {\tt texify()} function can also assist by automatically
+converting mathematical expressions and  strings of text into \LaTeX, as in the
+following examples:
+
+\vspace{3mm}
+\noindent{\tt pyxplot> {\bf a=50}}\newline
+\noindent{\tt pyxplot> {\bf print texify("A \%d\% increase"\%(a))}}\newline
+\noindent{\tt A 50$\backslash$\% increase}\newline
+\noindent{\tt pyxplot> {\bf print texify(sqrt(x**2+1))}}\newline
+\noindent{\tt \$\\displaystyle $\backslash$sqrt\{x\^{}\{2\}+1\}\$}
+\vspace{3mm}
+
+\section{Complex Numbers}
+
+The syntax used for representing complex numbers in PyXPlot differs from that
+used in \gnuplot. Whereas \gnuplot\ expects the real and imaginary components
+of complex numbers to be represented {\tt \{a,b\}}, PyXPlot uses the syntax
+{\tt a+b*i}, assuming that the variable {\tt i} has been defined to equal {\tt
+sqrt(-1)}.  In addition, in PyXPlot complex arithmetic must first be enabled
+using the {\tt set numerics complex} command before complex numbers may be
+entered.  This is illustrated by the following example:
+
+\vspace{3mm}
+\noindent{\tt gnuplot> {\bf print \{1,2\} + \{3,4\}}}\newline
+\noindent{\tt \{4.0, 6.0\}}
+\vspace{3mm}\newline
+\noindent{\tt pyxplot> {\bf set numerics complex}}\newline
+\noindent{\tt pyxplot> {\bf print (1+2*i) + (3+4*i)}}\newline
+\noindent{\tt (4+6i)}
+\vspace{3mm}
+
+\section{The Multiplot Environment}
+
+\gnuplot's multiplot environment, used for placing many graphs alongside one
+another, is massively extended in PyXPlot.  As well as making it much easier to
+produce galleries of plots and inset graphs, a wide range of vector graphs
+objects can also be added to the multiplot canvas. This is described in detail
+in Chapter~\ref{ch:vector_graphics}.
+
+\section{Plots with Multiple Axes}
+
+In \gnuplot, a maximum of two horizontal and two vertical axes may be
+associated with each graph, placed in each case with one on either side of the
+plot. These are referred to as the {\tt x} (bottom) and {\tt x2} (top), or {\tt
+y} (left) and {\tt y2} (right) axes.  This behaviour is reproduced in PyXPlot,
+and so the syntax
+
+\begin{verbatim}
+set x2label 'Axis label'
+\end{verbatim}
+
+\noindent works similarly in both programs. However, in PyXPlot the position of
+each axis may be set individually using syntax such as
+
+\begin{verbatim}
+set axis x2 top
+\end{verbatim}
+
+\noindent and furthermore up to~128 axes may be placed parallel to one another:
+
+\begin{verbatim}
+set axis x127 top
+set x127label "This is axis number 127"
+\end{verbatim}
+
+\noindent More details of how to configure axes can be found in
+Section~\ref{sec:multiple_axes}.
+
+\section{Plotting Parametric Functions}
+
+The syntax used for plotting parametric functions differs between \gnuplot\ and
+PyXPlot. Whereas parametric plotting is enabled in \gnuplot\ using the {\tt set
+parametric} command, in PyXPlot it is enabled on a per-dataset basis by placing
+the keyword {\tt parametric} before the algebraic expression to be plotted:
+
+\vspace{3mm}
+\noindent{\tt gnuplot> {\bf set parametric}}\newline
+\noindent{\tt gnuplot> {\bf set trange [0:2*pi]}}\newline
+\noindent{\tt gnuplot> {\bf plot sin(t),cos(t)}}
+\vspace{3mm}\newline
+\noindent{\tt pyxplot> {\bf set trange [0:2*pi]}}\newline
+\noindent{\tt pyxplot> {\bf plot parametric sin(t):cos(t)}}
+\vspace{3mm}
+
+\noindent This makes it straightforward to plot parametric functions alongside
+non-parametric functions. For more information, see
+Section~\ref{sec:parametric_plotting}.
+
+%\section{Displaying Times and Dates on Axes}
+

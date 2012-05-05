@@ -1,0 +1,67 @@
+% DEFINITIONS.TEX
+%
+% The documentation in this file is part of PyXPlot
+% <http://www.pyxplot.org.uk>
+%
+% Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+%               2008-2011 Ross Church
+%
+% $Id$
+%
+% PyXPlot is free software; you can redistribute it and/or modify it under the
+% terms of the GNU General Public License as published by the Free Software
+% Foundation; either version 2 of the License, or (at your option) any later
+% version.
+%
+% You should have received a copy of the GNU General Public License along with
+% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+% ----------------------------------------------------------------------------
+
+% LaTeX source for the PyXPlot Users' Guide
+
+% This file contains a list of macro definitions used in the manual
+
+\def\version{0.9.0}
+\def\reldate{Pre-release version}
+
+\newif\ifplastex
+\plastexfalse
+
+% Put ticks and crosses next to code examples
+\newlength{\dontdowidth}
+\setlength{\dontdowidth}{\textwidth}
+\addtolength{\dontdowidth}{-2.5cm}
+\newenvironment{dontdo}{\vspace{3mm}\noindent\begin{tabular}{p{1cm}p{\dontdowidth}}\noindent{\ifplastex\includegraphics{cross}\else\Large \XSolidBrush\fi }&\noindent\begin{minipage}{\dontdowidth}\tt}{\end{minipage}\end{tabular}\vspace{3mm}}
+\newenvironment{dodo}  {\vspace{3mm}\noindent\begin{tabular}{p{1cm}p{\dontdowidth}}\noindent{\ifplastex\includegraphics{tick}\else\Large \CheckmarkBold\fi}&\noindent\begin{minipage}{\dontdowidth}\tt}{\end{minipage}\end{tabular}\vspace{3mm}}
+
+% Place commands in the index in typewriter face
+\newcommand\indcmd[1]{\index{#1 command@{\tt #1} command}}
+\newcommand\indmod[1]{\index{#1 modifier@{\tt #1} modifier}}
+\newcommand\indfun[1]{\index{#1 function@{\tt #1} function}}
+\newcommand\indps [1]{\index{#1 plot style@{\tt #1} plot style}\index{plot styles!#1@{\tt #1}}}
+\newcommand\indkey[1]{\index{#1 keyword@{\tt #1} keyword}}
+\newcommand\indco [1]{\index{coordinate systems!#1@{\tt #1}}}
+
+% As above, but also insert command name in text
+\newcommand\indcmdt [1]{{\tt #1} command\indcmd{#1}}
+\newcommand\indcmdts[1]{{\tt #1}\indcmd{#1}}
+\newcommand\indmodt [1]{{\tt #1}\indmod{#1}}
+\newcommand\indfunt [1]{{\tt #1}\indfun{#1}}
+\newcommand\indpst  [1]{{\tt #1}\indps{#1}}
+\newcommand\indkeyt [1]{{\tt #1}\indkey{#1}}
+\newcommand\indcot  [1]{{\tt #1}\indco{#1}}
+
+% Names of software packages where there's controversy over capitalisation
+\newcommand\gnuplot{Gnuplot}
+\newcommand\ghostview{Ghostview}
+\newcommand\imagemagick{ImageMagick}
+
+% There's some controversy over whether these should have a space in them
+\newcommand\datafile{datafile}
+\newcommand\Datafile{Datafile}
+\newcommand\datapoint{datapoint} % "Datum", surely?
+
+\def\sinc{{\rm sinc}}
+

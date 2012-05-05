@@ -1,0 +1,75 @@
+# EX_NANOTUBES.PPL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_nanotubes"
+load "examples/fig_init.ppl"
+
+# Main body of figure script
+BASIS_ANGLE_X = (0  )*unit(deg)
+BASIS_ANGLE_Y = (120)*unit(deg)
+LINELEN       = unit(5*mm)
+
+subroutine line(x1,y1,x2,y2,lw)
+ {
+  line from (x1*sin(BASIS_ANGLE_X)+y1*sin(BASIS_ANGLE_Y))*LINELEN, \
+            (x1*cos(BASIS_ANGLE_X)+y1*cos(BASIS_ANGLE_Y))*LINELEN \
+       to   (x2*sin(BASIS_ANGLE_X)+y2*sin(BASIS_ANGLE_Y))*LINELEN, \
+            (x2*cos(BASIS_ANGLE_X)+y2*cos(BASIS_ANGLE_Y))*LINELEN \
+       with linewidth lw
+ }
+
+subroutine hexagon(x,y,lw)
+ {
+  call line(x  ,y  ,x  ,y-1,lw)
+  call line(x  ,y-1,x+1,y-1,lw)
+  call line(x+1,y-1,x+2,y  ,lw)
+  call line(x+2,y  ,x+2,y+1,lw)
+  call line(x+2,y+1,x+1,y+1,lw)
+  call line(x+1,y+1,x  ,y  ,lw)
+ }
+
+set multiplot
+set nodisplay
+
+for XPOS=0 to 10
+ {
+  for YPOS=0 to XPOS+1
+   {
+    x = 1*XPOS + 2*YPOS
+    y = 2*XPOS + 1*YPOS
+    call hexagon(x,y, conditionalN((XPOS-YPOS)%3==0,4,1))
+    text '%d,%d'%(XPOS,YPOS) \
+      at ((x+1)*sin(BASIS_ANGLE_X)+y*sin(BASIS_ANGLE_Y))*LINELEN, \
+         ((x+1)*cos(BASIS_ANGLE_X)+y*cos(BASIS_ANGLE_Y))*LINELEN \
+      hal cen val cen
+   }
+ }
+
+set display
+refresh
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

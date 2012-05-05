@@ -1,0 +1,839 @@
+% DATA.TEX
+%
+% The documentation in this file is part of PyXPlot
+% <http://www.pyxplot.org.uk>
+%
+% Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+%               2008-2011 Ross Church
+%
+% $Id$
+%
+% PyXPlot is free software; you can redistribute it and/or modify it under the
+% terms of the GNU General Public License as published by the Free Software
+% Foundation; either version 2 of the License, or (at your option) any later
+% version.
+%
+% You should have received a copy of the GNU General Public License along with
+% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+% ----------------------------------------------------------------------------
+
+% LaTeX source for the PyXPlot Users' Guide
+
+\chapter{Working with Data}
+\label{ch:numerics}
+
+In this chapter, we return to PyXPlot's commands for acting upon data stored in
+files. First, we review some of the features which are common to all of the
+commands which act upon \datafile s, and then we move on to introduce each
+command in turn. We leave the {\tt plot} command, which was introduced in
+Chapter~\ref{ch:first_steps}, to be described in more detail in
+Chapter~\ref{ch:plotting}.
+
+\section{Input Filters}
+\label{sec:filters}
+
+By default, PyXPlot expects \datafile s to be in a simple plaintext format
+which is described in Section~\ref{sec:plot_datafiles}. Input filters provide a
+mechanism by which \datafile s in arbitrary formats can be read into PyXPlot.
+For each filter, a filename wildcard is supplied, and the filter is then applied to
+all \datafile s whose filenames match this wildcard. For example, by default
+PyXPlot has five input filters installed, as the {\tt show filters} command
+reveals:
+
+\begin{verbatim}
+set filter "*.fits"   "/usr/local/lib/pyxplot/pyxplot_fitshelper"
+set filter "*.gz"     "/bin/gunzip -c"
+set filter "*.log"    "/usr/local/lib/pyxplot/pyxplot_timehelper"
+set filter "ftp://*"  "/usr/bin/wget -O -"
+set filter "http://*" "/usr/bin/wget -O -"
+\end{verbatim}
+
+Each filter takes the form of a program which is launched by PyXPlot whenever a
+\datafile\ with matching filename is read. The program is passed the filename of
+the \datafile\ as a command line argument immediately following any arguments
+specified in the filter's definition. It is then expected to return the data
+contained in the file to PyXPlot in plaintext format using its {\tt stdout}
+stream. Any errors which such a program returns to {\tt stderr} are passed to
+the user as error messages.
+
+The above set of filters allows PyXPlot to read data from gzipped plaintext
+\datafile s, data tables in FITS format\index{FITS format}, and from \datafile
+s available over the web via HTTP\index{HTTP} or FTP\index{FTP}. Finally, a
+filter is provided for converting textual dates in log files into numbers
+representing days, months and years. To add to this list of filters, it is
+necessary to write a short program or shell script, and the simple filters
+provided in PyXPlot's source code for {\tt .log} and {.fits} files may provide
+a useful model.
+
+\section{Reading Data from a Pipe}
+
+PyXPlot usually reads data from files, but it is also possible to read data
+from pipes from other processes if these are directed to PyXPlot's standard
+input stream.  To do this, one uses the magic filename {\tt -}:
+
+\begin{verbatim}
+plot '-' with lines
+\end{verbatim}
+
+This makes it possible to call PyXPlot from within another program and pass it
+data to plot without ever storing the data on disk. Whilst this facility has
+great power, the authors would urge caution in this practice.  Whilst it is
+tempting to write programs which both perform calculations and plot the results
+immediately, this can make it difficult to replot graphs later. A few months
+after the event, when the need arises to replot the same data in a different
+form or in a different style, remembering how to use a sizable program can
+prove tricky -- especially if the person struggling to do so is not you! But a
+simple \datafile\ is quite straightforward to plot time and again.
+
+\section{Including Data within Command Scripts}
+
+It is also possible to embed data directly within PyXPlot scripts, which may be
+useful when a small number of markers are wanted at particular pre-defined
+positions on a graph, or when it is desirable to roll a PyXPlot script and the
+data it takes into a single file for easy storage or transmission. To do this,
+one uses the magic filename {\tt --} and terminates the data with the string
+{\tt END}:
+
+\begin{verbatim}
+plot '--' with lines
+0 0
+1 1
+2 0
+3 1
+END
+print "More PyXPlot commands can be placed after END"
+\end{verbatim}
+
+\section{Special Comment Lines in Datafiles}
+\label{sec:special_comments}
+\index{comment lines!in datafiles}
+
+Whilst most comment lines in \datafile s -- those lines which begin with a hash
+character -- are ignored by PyXPlot, lines which begin with any of the
+following four strings are parsed:
+\begin{verbatim}
+# Columns:
+# ColumnUnits:
+
+# Rows:
+# RowUnits:
+\end{verbatim}
+The first pair of special comments affect the behaviour of PyXPlot when
+plotting {\tt using columns}, while the second pair affect the behaviour of
+PyXPlot when plotting {\tt using rows} (see
+Section~\ref{sec:horizontal_datafiles}). Within each pair, the first may be
+used to tell PyXPlot the names of each of the columns/rows in the \datafile,
+while the second may be used to tell PyXPlot the physical units of the values
+in each of the columns/rows. These special comments may appear multiple times
+throughout a single \datafile\ to indicate changes to the format of the data.
+
+For example, a \datafile\ prefixed with the lines
+\begin{verbatim}
+# Columns:      Time   Distance
+# ColumnUnits:   s      10*m
+\end{verbatim}
+contains two columns of data, the first containing times measured in seconds
+and the second containing distances measured in tens of metres. Note that
+because the entries on each of these lines are whitespace-separated, spaces are
+not allowed in column names or within units such as {\tt 10*m}. This \datafile\
+could be plotted using any of the following forms equivalently
+\begin{verbatim}
+plot 'data' using Time:Distance
+plot 'data' using $Time:$Distance
+plot 'data' using 1:2
+\end{verbatim}
+and the axes of the graph would indicate the units of the data (see
+Section~\ref{sec:set_axisunitstyle}).
+
+\section{Tabulating Functions and Slicing Data Files}
+\label{sec:tabulate}
+
+PyXPlot's \indcmdt{tabulate} is similar to its {\tt plot} command, but instead
+of plotting a series of \datapoint s onto a graph, it writes them to \datafile
+s. This can be used to produce text files containing samples of functions, to
+rearrange/filter the columns in \datafile s, to change the units in which data
+are expressed in \datafile s, and so forth.  The following example would produce
+a \datafile\ called {\tt gamma.dat} containing a list of values of the gamma
+function:
+
+\begin{verbatim}
+set output 'gamma.dat'
+tabulate [1:5] gamma(x)
+\end{verbatim}
+
+\noindent Multiple functions may be tabulated into the same file, either by
+using the \indmodt{using} modifier, as in the example
+
+\begin{verbatim}
+tabulate [0:2*pi] sin(x):cos(x):tan(x) using 1:2:3:4
+\end{verbatim}
+
+\noindent or by placing them in a comma-separated list, as in the {\tt plot}
+command:
+
+\begin{verbatim}
+tabulate [0:2*pi] sin(x), cos(x), tan(x)
+\end{verbatim}
+
+In the former case, the functions are tabulated horizontally alongside one
+another in a series of columns. In the latter case, the functions are tabulated
+one after another in a series of index blocks separated by double linefeeds
+(see Section~\ref{sec:plot_datafiles}).
+
+The {\tt samples} setting can be used to control the number of points that are
+produced when tabulating functions, in the same way that it controls the {\tt
+plot} command:\indcmd{set samples}
+
+\begin{verbatim}
+set samples 200
+\end{verbatim}
+
+\noindent If the abscissa axis is set to be logarithmic then the points at which
+functions are evaluated are spaced logarithmically, otherwise they are spaced
+linearly.
+
+The \indmodt{select}, \indmodt{using} and \indmodt{every} modifiers operate in
+the same manner in the {\tt tabulate} command as in the {\tt plot} command.
+Thus the following example would write out the third, sixth and ninth columns
+of the \datafile\ {\tt input.dat}, but only when the arcsine of the value in the
+fourth column is positive:
+
+\begin{verbatim}
+set output 'filtered.dat'
+tabulate 'input.dat' using 3:6:9 select (asin($4)>0)
+\end{verbatim}
+
+The numerical display format used in each column of the output file is chosen
+automatically to preserve accuracy whilst simultaneously being as easily human
+readable as possible.  Thus, columns which contain only integers are displayed
+as such, and scientific notation is only used in columns which contain very
+large or very small values.  If desired, however, a format statement may be
+specified using the {\tt with format} specifier. The syntax for this is similar
+to that expected by the string substitution operator ({\tt \%}; see
+Section~\ref{sec:stringsubop}). As an example, to tabulate the values of $x^2$
+to very many significant figures with some additional text, one could use:
+
+\begin{verbatim}
+tabulate x**2 with format "x = %f ; x**2 = %27.20e"
+\end{verbatim}
+
+\noindent This might produce the following output:
+
+\begin{verbatim}
+x = 0.000000 ; x**2 =  0.00000000000000000000e+00
+x = 0.833333 ; x**2 =  6.94444444444442421371e-01
+x = 1.666667 ; x**2 =  2.77777777777778167589e+00
+\end{verbatim}
+
+The data produced by the {\tt tabulate} command can be sorted in order of any
+arbitrary metric by supplying an expression after the {\tt sortby} modifier;
+where such expressions are supplied, the data are sorted in order from the
+smallest value of the expression to the largest.
+
+
+\section{Function Fitting}
+\label{sec:fit_command}
+
+The \indcmdt{fit} can be used to fit arbitrary functional forms to \datapoint s
+read from files. It can be used to produce best-fit lines\index{best fit
+lines}\footnote{Another way of producing best-fit lines is to use the {\tt
+interpolate} command; more details are given in
+Section~\ref{sec:spline_command}} for datasets, or to determine gradients and
+other mathematical properties of data by looking at the parameters associated
+with the best-fitting functional form.
+
+The following simple example fits a straight line to data in a file called {\tt
+data.dat}:
+
+\begin{verbatim}
+f(x) = a*x+b
+fit f() 'data.dat' index 1 using 2:3 via a,b
+\end{verbatim}
+
+\noindent The first line specifies the functional form which is to be used.
+The coefficients within this function, {\tt a} and {\tt b}, which are to be
+varied during the fitting process are listed after the keyword \indkeyt{via}
+in the {\tt fit} command.  The modifiers \indmodt{index}, \indmodt{every},
+\indmodt{select} and \indmodt{using} have the same meanings in the {\tt fit}
+command as in the {\tt plot} command. When fitting a function of $n$
+variables, at least $n+1$ columns (or rows -- see
+Section~\ref{sec:horizontal_datafiles}) of data must be specified after the {\tt using}
+modifier. By default, the first $n+1$ columns are used. These correspond to the
+values of each of the $n$ arguments to the function, plus finally the value which
+the output from the function is aiming to match.  If an additional column is
+specified, then this is taken to contain the standard error in the value that
+the output from the function is aiming to match, and can be used to weight the
+\datapoint s which are being used to constrain the fit.
+
+As an example, below we generate a \datafile\ containing samples of a square
+wave using the {\tt tabulate} command and fit the first three terms of a
+truncated Fourier series to it:
+
+\begin{verbatim}
+set samples 10
+set output 'square.dat'
+tabulate [-pi:pi] 1-2*heaviside(x)
+
+f(x) = a1*sin(x) + a3*sin(3*x) + a5*sin(5*x)
+fit f() 'square.dat' via a1, a3, a5
+set xlabel '$x$' ; set ylabel '$y$'
+plot 'square.dat' title 'data' with points pointsize 2, \
+     f(x) title 'Fitted function' with lines
+\end{verbatim}
+
+\begin{center}
+\includegraphics[width=8cm]{examples/eps/ex_fitting}
+\end{center}
+
+As the \indcmdt{fit} works, it displays statistics including the best fit
+values of each of the fitting parameters, the uncertainties in each of them,
+and the covariance matrix. These can be useful for analysing the security of
+the fit achieved, but calculating the uncertainties in the best fit parameters
+and the covariance matrix can be time consuming, especially when many
+parameters are being fitted simultaneously. The optional word {\tt
+withouterrors} can be included immediately before the filename of the input
+\datafile\ to substantially speed up cases where this information is not
+required.
+
+By default, the starting values for each of the fitting parameters is
+$1.0$. However, if the variables to be used in the fitting process are already
+set before the {\tt fit} command is called, these initial values are used
+instead. For example, the following would use the initial values
+$\{a=100,b=50\}$:
+\begin{verbatim}
+f(x) = a*x+b
+a = 100
+b = 50
+fit f() 'data.dat' index 1 using 2:3 via a,b
+\end{verbatim}
+
+A few points are worth noting:
+
+\begin{itemize}
+\item A series of ranges may be specified after the {\tt fit} command, using
+the same syntax as in the {\tt plot} command, as described in
+Section~\ref{sec:plot_ranges}. If ranges are specified then only \datapoint s
+falling within these ranges are used in the fitting process; the ranges refer
+to each of the $n$ variables of the fitted function in order:
+\begin{verbatim}
+fit [0:10] f() 'data.dat' via a
+\end{verbatim}
+
+\item As with all numerical fitting procedures, the {\tt fit} command comes
+with caveats. It uses a generic fitting algorithm, and may not work well with
+poorly behaved or ill-constrained problems. It works best when all of the
+values it is attempting to fit are of order unity. For example, in a problem
+where $a$ was of order $10^{10}$, the following might fail:
+\begin{verbatim}
+f(x) = a*x
+fit f() 'data.dat' via a
+\end{verbatim}
+However, better results might be achieved if $a$ were artificially made of
+order unity, as in the following script:
+\begin{verbatim}
+f(x) = 1e10*a*x
+fit f() 'data.dat' via a
+\end{verbatim}
+
+\item For those interested in the mathematical details, the workings of the
+{\tt fit} command are discussed in more detail in Appendix~\ref{ch:fit_maths}.
+
+\end{itemize}
+
+\section{Datafile Interpolation}
+\label{sec:spline_command}
+\index{best fit lines}
+
+The \indcmdt{interpolate} can be used to generate a special function within
+PyXPlot's mathematical environment which interpolates a set of \datapoint s
+supplied from a \datafile. Either one- or two-dimensional interpolation is
+possible.
+
+In the case of one-dimensional interpolation, various different types of
+interpolation are supported: linear interpolation, power law interpolation,
+polynomial interpolation, cubic spline interpolation and akima spline
+interpolation. Stepwise interpolation returns the value of the datapoint
+nearest to the requested point in argument space. The use of polynomial
+interpolation with large datasets is strongly discouraged, as polynomial fits
+tend to show severe oscillations between \datapoint s.  Except in the case of
+stepwise interpolation, extrapolation is not permitted; if an attempt is made
+to evaluate an interpolated function beyond the limits of the \datapoint s
+which it interpolates, PyXPlot returns an error or value of not-a-number.
+
+In the case of two-dimensional interpolation, the type of interpolation to be
+used is set using the {\tt interpolate} modifier to the \indcmdt{set samples},
+and may be changed at any time after the interpolation function has been
+created.  The options available are nearest neighbour interpolation -- which is
+the two-dimensional equivalent of stepwise interpolation, inverse square
+interpolation -- which returns a weighted average of the supplied \datapoint s,
+using the inverse squares of their distances from the requested point in
+argument space as weights, and Monaghan Lattanzio interpolation, which uses the
+weighting function (Monaghan \& Lattanzio 1985)
+\begin{eqnarray*}
+w(x) & = 1 - \nicefrac{3}{2}v^2 + \nicefrac{3}{4}v^3 & \,\mathrm{for~}0\leq v\leq 1 \\
+     & = \nicefrac{1}{4}(2-v)^3                      & \,\mathrm{for~}1\leq v\leq 2
+\end{eqnarray*}
+where $v=r/h$ for $h=\sqrt{A/n}$, $A$ is the product
+$(x_\mathrm{max}-x_\mathrm{min})(y_\mathrm{max}-y_\mathrm{min})$ and $n$ is the
+number of input datapoints. These are selected as follows:
+
+\begin{verbatim}
+set samples interpolate NearestNeighbour
+set samples interpolate InverseSquare
+set samples interpolate MonaghanLattanzio
+\end{verbatim}
+
+Finally, data can be imported from graphical images in bitmap ({\tt .bmp})
+format to produce a function of two arguments returning a value in the
+range~$0\to1$ which represents the data in one of the image's three colour
+channels. The two arguments are the horizontal and vertical position within the
+bitmap image, as measured in pixels.
+
+The \indcmdt{interpolate} has similar syntax to the \indcmdt{fit}:
+
+\begin{verbatim}
+interpolate ( akima | linear | loglinear | polynomial |
+              spline | stepwise |
+              2d [( bmp_r | bmp_g | bmp_b )] )
+            [<range specification>] <function name>"()"
+            '<filename>'
+            [ every <expression> {:<expression} ]
+            [ index <value> ]
+            [ select <expression> ]
+            [ using <expression> {:<expression} ]
+\end{verbatim}
+
+A very common application of the \indcmdt{interpolate} is to perform arithmetic
+functions such as addition or subtraction on datasets which are not sampled at
+the same abscissa values. The following example would plot the difference
+between two such datasets:
+
+\begin{verbatim}
+interpolate linear f() 'data1.dat'
+interpolate linear g() 'data2.dat'
+plot [min:max] f(x)-g(x)
+\end{verbatim}
+
+\noindent Note that it is advisable to supply a range to the {\tt plot} command
+in this example: because the two datasets have been turned into continuous
+functions, the {\tt plot} command has to guess a range over which to plot them
+unless one is explicitly supplied.
+
+The \indcmdt{spline} is an alias for {\tt interpolate spline}; the following
+two statements are equivalent:
+
+\begin{verbatim}
+spline f() 'data1.dat'
+interpolate spline f() 'data1.dat'
+\end{verbatim}
+
+\example{ex:interpolation}{A demonstration of the {\tt linear}, {\tt spline} and {\tt akima} modes of interpolation}{
+In this example, we demonstrate the {\tt linear}, {\tt spline} and {\tt akima}
+modes of interpolation using an example \datafile\ with non-smooth data
+generated using the {\tt tabulate} command (see Section~\ref{sec:tabulate}):
+\nlscf
+\noindent{\tt f(x) = 0}\newline
+\noindent{\tt f(x)[0:1] = 0.5}\newline
+\noindent{\tt f(x)[2:4] = cos((x-3)*pi/2)}\newline
+\noindent{\tt set samples 20}\newline
+\noindent{\tt tabulate [0:4] f(x)}
+\nlscf
+Having set three functions to interpolate these non-smooth data in different
+ways, we plot them with a vertical offset of~$0.1$ between them for clarity.
+The interpolated \datafile is plotted with points three times to show where
+each of the interpolation functions is pinned.
+\nlscf
+\noindent{\tt interpolate linear f\_linear() "data.dat"}\newline
+\noindent{\tt interpolate spline f\_spline() "data.dat"}\newline
+\noindent{\tt interpolate akima  f\_akima () "data.dat"}\newline
+\\
+\noindent{\tt set key top left}\newline
+\noindent{\tt plot [0:4][-0.1:1.3] $\backslash$}\newline
+\noindent{\tt \phantom{xxx}"data.dat" using 1:(\$2+0.0) notitle with points pt 1, $\backslash$}\newline
+\noindent{\tt \phantom{xxx}f\_linear(x)+0.0 title "Linear", $\backslash$}\newline
+\noindent{\tt \phantom{xxx}"data.dat" using 1:(\$2+0.1) notitle with points pt 1, $\backslash$}\newline
+\noindent{\tt \phantom{xxx}f\_spline(x)+0.1 title "Spline", $\backslash$}\newline
+\noindent{\tt \phantom{xxx}"data.dat" using 1:(\$2+0.2) notitle with points pt 1, $\backslash$}\newline
+\noindent{\tt \phantom{xxx}f\_akima (x)+0.2 title "Akima"}\newline
+\nlscf
+The resulting plot is shown below:
+\nlscf
+\centerline{\includegraphics[width=\textwidth]{examples/eps/ex_interpolation}}
+}
+
+\section{Fourier Transforms}
+
+The {\tt fft} and {\tt ifft} commands\indcmd{fft}\indcmd{ifft} take Fourier
+transforms and inverse Fourier transforms respectively of data supplied either
+from a file or from a function. In each case, a regular grid of abscissa values
+must be specified on which to take the discrete Fourier transform, which can
+extend over an arbitrary number of dimensions. The following example
+demonstrates the syntax of these commands as applied to a two-dimensional
+top-hat function:
+
+\begin{verbatim}
+step(x,y) = tophat(x,0.2) * tophat(y,0.4)
+fft  [  0: 1:0.01][  0: 1:0.01] f() of step()
+ifft [-50:49:1   ][-50:49:1   ] g() of f()
+\end{verbatim}
+
+\noindent In the {\tt fft} command above, $N_x=100$~equally-spaced samples of
+the function {\tt step}$(x,y)$ are taken between limits of $x_\mathrm{min}=0$
+and $x_\mathrm{max}=1$ for each of $N_y=100$~equally-spaced values of $y$ on an
+identical raster, giving a total of $10^4$ samples. These are converted into a
+rectangular grid of $10^4$~samples of the Fourier transform {\tt
+f}$(\omega_x,\omega_y)$ at
+
+\begin{eqnarray}
+\omega_x = \frac{j}{\Delta x} & \textrm{for} & -\frac{N_x}{2}\leq j <\frac{N_x}{2} \; \left(\textrm{equivalently, for} -\frac{N_x}{2\Delta x}\leq \omega_x <\frac{N_x}{2\Delta x} \right), \nonumber \\
+\omega_y = \frac{k}{\Delta y} & \textrm{for} & -\frac{N_y}{2}\leq k <\frac{N_y}{2} \; \left(\textrm{equivalently, for} -\frac{N_y}{2\Delta y}\leq \omega_y <\frac{N_y}{2\Delta y} \right). \nonumber
+\end{eqnarray}
+
+\noindent where $\Delta x=x_\mathrm{max}-x_\mathrm{min}$ and $\Delta y$ is
+analogously defined. These samples are interpolated stepwise, such that an
+evaluation of the function {\tt f}$(\omega_x,\omega_y)$ for general inputs
+yields the nearest sample, or zero outside the rectangular grid where samples
+are available. In general, even the Fourier transforms of real functions are
+complex, and their evaluation when complex arithmetic is not enabled (see
+Section~\ref{sec:complex_numbers}) is likely to fail. For this reason, a
+warning is issued if complex arithmetic is disabled when a Fourier transform
+function is evaluated.
+
+In the example above, we go on to convert this set of samples back into the
+function with which we started by instructing the \indcmdt{ifft} to take
+$N_x=100$~equally-spaced samples along the $\omega_x$-axis between
+$\omega_{x,\mathrm{min}}=-{N_x}/{2\Delta x}$ and
+$\omega_{x,\mathrm{max}}=(N_x-1)/{2\Delta x}$, with similar sampling along the
+$\omega_y$-axis.
+
+Taking the simpler example of a one-dimensional Fourier transform for clarity,
+as might be calculated by the instructions
+\begin{verbatim}
+step(x) = tophat(x,0.2)
+fft  [  0: 1:0.01] f() of step()
+\end{verbatim}
+the {\tt fft} and {\tt ifft} commands\indcmd{fft}\indcmd{ifft} compute,
+respectively, discrete sets of samples $F_m$ and $I_n$ of the functions
+$F(\omega_x)$ and $I(x)$, which are given by
+\begin{displaymath}
+F_j = \sum_{m=0}^{N-1} I_m e^{-2\pi ijm/N} \,\delta x,\;\textrm{for}\; -\frac{N}{2}\leq j <\frac{N}{2} ,
+\end{displaymath}
+\noindent and
+\begin{displaymath}
+I_j = \sum_{m=0}^{N-1} F_m e^{ 2\pi ijm/N} \,\delta \omega_x,\;\textrm{for}\; -\frac{N}{2}\leq j <\frac{N}{2} ,
+\end{displaymath}
+\noindent where:
+\begin{tabular}{rcp{9cm}}
+$I(x)$        & = & Function being Fourier transformed. \\
+$F(\omega_x)$ & = & Fourier transform of $I()$. \\
+$N$           & = & The number of values sampled along the abscissa axis. \\
+$\delta x$    & = & Spacing of values sampled along the abscissa axis. \\
+$\delta \omega_x$ & = & Spacing of abscissa values sampled along the $\omega_x$ axis. \\
+$i$           & = & $\sqrt{-1}$. \\
+\end{tabular}
+\vspace{2mm}
+
+It may be shown in the limit that $\delta x$ becomes small -- i.e.\ when the
+number of samples taken becomes very large -- that these sums approximate the
+integrals
+\begin{equation}
+F(\omega_x) = \int I(x) e^{-2\pi ix\omega_x} \,\mathrm{d}x ,
+\end{equation}
+\noindent and
+\begin{equation}
+I(x) = \int F(\omega_x) e^{ 2\pi ix\omega_x} \,\mathrm{d}\omega_x .
+\end{equation}
+
+Fourier transforms may also be taken of data stored in \datafile s using syntax
+of the form
+\begin{verbatim}
+fft [-10:10:0.1] f() of 'datafile.dat'
+\end{verbatim}
+
+\noindent In such cases, the data read from the \datafile\ for an
+$N$-dimensional FFT must be arranged in $N+1$ columns\footnote{The {\tt using},
+{\tt every}, {\tt index} and {\tt select} modifiers can be used to arrange it
+into this form.}, with the first $N$ containing the abscissa values for each of
+the $N$ dimensions, and the final column containing the data to be Fourier
+transformed. The abscissa values must strictly match those in the raster
+specified in the {\tt fft} or {\tt ifft} command, and must be arranged strictly
+in row-major order.
+
+\example{ex:fourier}{The Fourier transform of a top-hat function}{
+It is straightforward to show that the Fourier transform of a top-hat function
+of unit width is the function $\sinc(x^\prime=\pi x)=\sin(x^\prime)/x^\prime$. If
+\begin{displaymath}
+f(x)=\left\{\begin{array}{l}1\;|x|\leq\nicefrac{1}{2}\\0\;|x|>\nicefrac{1}{2}\end{array}\right. ,
+\end{displaymath}
+the Fourier transform $F(\omega)$ of $f(x)$ is
+\begin{eqnarray*}
+F(\omega) & = & \int_0^\infty f(x) \exp \left(-2\pi ix\omega\right) \,\mathrm{d}x
+            =   \int_{-\nicefrac{1}{2}}^{\nicefrac{1}{2}} \exp\left(-2\pi ix\omega\right) \,\mathrm{d}x
+\\        & = & \frac{1}{2\pi\omega}\left[ \exp\left(\pi i\omega\right) - \exp\left(-\pi i\omega\right) \right]
+            = \frac{\sin(\pi\omega)}{\pi\omega}
+            = \sinc(\pi\omega).
+\end{eqnarray*}
+\nlnp
+In this example, we demonstrate this numerically by taking the Fourier
+transform of such a step function, and comparing the result against the
+function {\tt sinc(x)} which is pre-defined within PyXPlot:
+\nlscf
+\noindent{\tt set numerics complex}\newline
+\noindent{\tt step(x) = tophat(x,0.5)}\newline
+\noindent{\tt fft [-1:1:0.01] f() of step()}\newline
+\noindent{\tt plot [-10:10] Re(f(x)), sinc(pi*x)}
+\nlscf
+Note that the function {\tt Re(x)} is needed in the {\tt plot} statement here,
+since although the Fourier transform of a symmetric function is in theory real,
+in practice any numerical Fourier transform will yield a small imaginary
+component at the level of the accuracy of the numerical method used. Although
+the calculated numerical Fourier transform is defined throughout the range
+$-50\leq x<50$, discretised with steps of size $\Updelta x=0.5$, we only plot
+the central region in order to show clearly the stepping of the function:
+\nlscf
+\begin{center}
+\includegraphics{examples/eps/ex_fft}
+\end{center}
+\nlscf
+In the following steps, we take the square of the function $\sinc(\pi x)$ just
+calculated, and then plot the numerical inverse Fourier transform of the
+result:
+\nlscf
+\noindent{\tt g(x) = f(x)**2}\newline
+\noindent{\tt ifft [-50:49.5:0.5] h(x) of g(x)}\newline
+\noindent{\tt plot [-2:2] Re(h(x))}
+\nlscf
+\begin{center}
+\includegraphics{examples/eps/ex_fft2}
+\end{center}
+\nlscf
+As can be seen, the result is a triangle function. This is the result which
+would be expected from the convolution theorem, which states that when the
+Fourier transforms of two functions are multiplied together and then inverse
+transformed, the result is the convolution of the two original functions. The
+convolution of a top-hat function with itself is, indeed, a triangle function.
+}
+
+\subsection{Window Functions}
+\index{window functions}
+
+A range of commonly-used window functions may automatically be applied to data
+as it is read into the {\tt fft} and {\tt ifft} commands; these are listed
+together with their algebraic forms in Table~\ref{tab:windowfuncs} and shown in
+Figure~\ref{fig:windowfuncs}. In each case, the window functions are given for
+sample number $n$, which ranges between $0$ and $N_x$. The window functions may
+be invoked using the following syntax:
+
+\begin{verbatim}
+fft [...] <out>() of <in>() window <window_name>
+\end{verbatim}
+
+\noindent Where multi-dimensional FFTs are performed, window functions are
+applied to each dimension in turn.  Other arbitrary window functions may be
+implemented by pre-multiplying data before entry to the {\tt fft} and {\tt
+ifft} commands.
+
+\begin{table}
+\newlength{\wfgap}
+\setlength{\wfgap}{30pt}
+\begin{center}
+\begin{tabular}{|>{\columncolor{LightGrey}}l>{\columncolor{LightGrey}}l|}
+\hline
+{\bf Window Name} & {\bf Algebraic Definition} \\
+\hline
+Bartlett     & $\displaystyle w(n) = \left( \frac{2}{N_x-1} \right) \left( \frac{N_x-1}{2} - \left| n - \frac{N_x-1}{2} \right| \right)$ \vphantom{\rule{0pt}{20pt}}\\
+BartlettHann & $\displaystyle w(n) = a_0 - a_1\left|\frac{n}{N_x-1}-\frac{1}{2}\right| - a_2\cos\left(\frac{2\pi n}{N_x-1}\right),\;\textrm{for}$ \vphantom{\rule{0pt}{\wfgap}}\\
+             & $a_0=0.62,\; a_1=0.48,\; a_2=0.38.$ \vphantom{\rule{0pt}{20pt}}\\
+Cosine       & $\displaystyle w(n) = \cos\left(\frac{\pi n}{N_x-1} - \frac{\pi}{2} \right)$ \vphantom{\rule{0pt}{\wfgap}}\\
+Gauss        & $\displaystyle w(n) = \exp \left\{ -\frac{1}{2}\left[ \frac{n-(N_x-1)/2}{\sigma(N_x-1)/2} \right]^2 \right\},\;\textrm{for}\;\sigma=0.5$ \vphantom{\rule{0pt}{\wfgap}}\\
+Hamming      & $\displaystyle w(n) = 0.54 - 0.46\cos\left(\frac{2\pi n}{N_x-1}\right)$ \vphantom{\rule{0pt}{\wfgap}}\\
+Hann         & $\displaystyle w(n) = 0.5 \left[ 1 - \cos\left(\frac{2\pi n}{N_x-1}\right) \right]$ \vphantom{\rule{0pt}{\wfgap}}\\
+Lanczos      & $\displaystyle w(n) = \mathrm{sinc}\left( \frac{2n}{N_x-1} - 1 \right)$ \vphantom{\rule{0pt}{\wfgap}}\\
+Rectangular  & $\displaystyle w(n) = 1$ \vphantom{\rule{0pt}{\wfgap}}\\
+Triangular   & $\displaystyle w(n) = \left( \frac{2}{N_x} \right) \left( \frac{N_x}{2} - \left| n - \frac{N_x-1}{2} \right| \right)$ \vphantom{\rule{0pt}{\wfgap}}\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Window functions available in the {\tt fft} and {\tt ifft} commands.}
+\label{tab:windowfuncs}
+\end{table}
+
+\begin{figure}
+\begin{center}
+\includegraphics{examples/eps/ex_windowfuncs}
+\end{center}
+\caption{Window functions available in the {\tt fft} and {\tt ifft} commands.}
+\label{fig:windowfuncs}
+\end{figure}
+
+\section{Histograms}
+\label{sec:histogram}
+
+The \indcmdt{histogram} takes a single column of data from a file and produces
+a function that represents the frequency distribution of the supplied data
+values. The output function consists of a series of discrete intervals which we
+term {\it bins}. Within each interval the output function has a constant value,
+determined such that the area under each interval -- i.e.\ the integral of the
+function over each interval -- is equal to the number of datapoints found
+within that interval.  The following simple example
+
+\begin{verbatim}
+histogram f() 'input.dat'
+\end{verbatim}
+
+\noindent produces a frequency distribution of the data values found in the
+first column of the file {\tt input.dat}, which it stores in the function
+$f(x)$. The value of this function at any given point is equal to the number of
+items in the bin at that point, divided by the width of the bins used. If the
+input datapoints are not dimensionless then the output frequency distribution
+adopts appropriate units, thus a histogram of data with units of length has
+units of one over length.
+
+The number and arrangement of bins used by the \indcmdt{histogram} can be
+controlled by means of various modifiers.  The \indmodt{binwidth} modifier sets
+the width of the bins used. The \indmodt{binorigin} modifier controls where
+their boundaries lie; the \indcmdt{histogram} selects a system of bins which,
+if extended to infinity in both directions, would put a bin boundary at the
+value specified in the {\tt binorigin} modifier. Thus, if {\tt binorigin 0.1}
+were specified, together with a bin width of~20, bin boundaries might lie
+at~$20.1$, $40.1$, $60.1$, and so on. Alternatively global defaults for the bin
+width and the bin origin can be specified using the {\tt set binwidth} and {\tt
+set binorigin} commands respectively. The example
+
+\begin{verbatim}
+histogram h() 'input.dat' binorigin 0.5 binwidth 2
+\end{verbatim}
+
+\noindent would bin data into bins between $0.5$ and $2.5$, between $2.5$ and
+$4.5$, and so forth.
+
+Alternatively the set of bins to be used can be controlled more precisely using
+the \indmodt{bins} modifier, which allows an arbitrary set of bin boundaries to
+be specified. The example
+
+\begin{verbatim}
+histogram g() 'input.dat' bins (1, 2, 4)
+\end{verbatim}
+
+\noindent would bin the data into two bins, $x=1\to 2$ and $x=2\to 4$.
+
+A range can be supplied immediately following the {\tt histogram} command,
+using the same syntax as in the {\tt plot} and {\tt fit} commands; if such a
+range is supplied, only points that fall within that range will be binned.  In
+the same way as in the {\tt plot} command, the \indmodt{index},
+\indmodt{every}, \indmodt{using} and \indmodt{select} modifiers can be used to
+specify which subsets of a \datafile\ should be used.
+
+Two points about the {\tt histogram} command are worthy of note. First,
+although histograms are similar to bar charts, they are not the same.  A bar
+chart conventionally has the height of each bar equal to the number of points
+that it represents, whereas a histogram is a continuous function in which the
+area underneath each interval is equal to the number of points within it.
+Thus, to produce a bar chart using the {\tt histogram} command, the end result
+should be multiplied by the bin width used.
+
+Second, if the function produced by the {\tt histogram} command is plotted
+using the {\tt plot} command, samples are automatically taken not at evenly
+spaced intervals along the abscissa axis, but at the centres of each bin. If
+the \indpst{boxes} plot style is used, the box boundaries are conveniently
+drawn to coincide with the bins into which the data were sorted.
+
+\section{Random Data Generation}
+
+PyXPlot has a range of mathematical functions which draw random samples from a
+variety of probability distributions. These are:
+
+\begin{itemize}
+\item {\tt random()} -- returns a random real number between 0 and~1.
+\indfun{random()}
+\item {\tt random\_binomial($p,n$)} -- returns a random sample from a binomial distribution with $n$ independent trials and a success probability $p$.
+\indfun{random\_\-binomial($p,n$)}
+\item {\tt random\_chisq($\nu$)} -- returns a random sample from a $\chi$-squared distribution with $\nu$ degrees of freedom.
+\indfun{random\_\-chisq($\nu$)}
+\item {\tt random\_gaussian($\sigma$)} -- returns a random sample from a Gaussian (normal) distribution of standard deviation $\sigma$ and centred upon zero.
+\indfun{random\_\-gaussian($\sigma$)}
+\item {\tt random\_lognormal($\zeta,\sigma$)} -- returns a random sample from the log normal distribution centred on $\zeta$, and of width $\sigma$.
+\indfun{random\_\-lognormal($\zeta,\sigma$)}
+\item {\tt random\_poisson($n$)} -- returns a random integer from a Poisson distribution with mean $n$.
+\indfun{random\_\-poisson($n$)}
+\item {\tt random\_tdist($\nu$)} -- returns a random sample from a $t$-distribution with $\nu$ degrees of freedom.
+\indfun{random\_\-tdist($\nu$)}
+\end{itemize}
+
+\noindent These functions all rely upon a common underlying random number
+generator, whose seed may be set using the \indcmdt{set seed}, which should be
+followed by any integer.
+
+\example{ex:random}{Using random numbers to estimate the value of $\pi$}{
+PyXPlot's functions for generating random numbers are most commonly used for
+adding noise to artificially-generated data. In this example, however, we use
+them to implement a rather inefficient algorithm for estimating the value of
+the mathematical constant $\pi$.  The algorithm works by spreading
+randomly-placed samples in the square $\left\{ -1<x<1;\; -1<y<1\right\}$. The
+number of these which lie within the circle of unit radius about the origin are
+then counted. Since the square has an area of $4\,\mathrm{unit}^2$ and the
+circle an area of $\pi\,\mathrm{unit}^2$, the fraction of the points which
+lie within the unit circle equals the ratio of these two areas: $\pi/4$.
+\nlnp
+The following script performs this calculation using $N=5000$~randomly placed
+samples. Firstly, the positions of the random samples are generated using the
+{\tt random()} function, and written to a file called {\tt random.dat} using the
+{\tt tabulate} command. Then, the {\tt foreach datum} command -- which will be
+introduced in Section~\ref{sec:foreach_datum} -- is used to loop over these,
+counting how many lie within the unit circle.
+\nlscf
+\noindent {\tt Nsamples = 5000 }\newline
+\noindent {\tt }\newline
+\noindent {\tt set samp Nsamples }\newline
+\noindent {\tt set output "random.dat" }\newline
+\noindent {\tt tabulate 1-2*random():1-2*random() using 0:2:3 }\newline
+\noindent {\tt }\newline
+\noindent {\tt n=0 }\newline
+\noindent {\tt foreach datum i,j in 'random.dat' using 2:3 \{ }\newline
+\noindent {\tt \phantom{xx}n = n + (hypot(i,j)<1) }\newline
+\noindent {\tt \} }\newline
+\noindent {\tt }\newline
+\noindent {\tt print "pi=\%s"\%(n / Nsamples * 4) }
+\nlfcf
+On the author's machine, this script returns a value of $3.1352$ when executed
+using the random samples which are returned immediately after starting PyXPlot.
+This method of estimating $\pi$ is well modelled as a Poisson process, and the
+uncertainty in this result can be estimated from the Poisson distribution to be
+$1/\sqrt{N}$. In this case, the uncertainty is $0.01$, in close agreement with
+the deviation of the returned value of $3.1352$ from more accurate measures of
+$\pi$.
+\nlnp
+With a little modification, this script can be adapted to produce a diagram of
+the datapoints used in its calculation. Below is a modified version of the
+second half of the script, which loops over the \datapoint s stored in the
+\datafile\ {\tt random.dat}. It uses PyXPlot's vector graphics commands, which
+will be introduced in Chapter~\ref{ch:vector_graphics}, to produce such a
+diagram:
+
+\nlscf
+\noindent {\tt set multiplot ; set nodisplay}\newline
+\noindent {\tt \# Draw a unit circle and a unit square}\newline
+\noindent {\tt box from -width/2,-width/2 to width/2,width/2}\newline
+\noindent {\tt circle at 0,0 radius width/2 with lt 2}\newline
+\noindent {\tt }\newline
+\noindent {\tt \# Now plot the positions of the random data points}\newline
+\noindent {\tt n=0}\newline
+\noindent {\tt foreach datum i,j in 'random.dat' using 2:3}\newline
+\noindent {\tt \phantom{x}\{}\newline
+\noindent {\tt \phantom{xx}point at width/2*i , width/2*j with ps 0.1}\newline
+\noindent {\tt \phantom{xx}n = n + (hypot(i,j)<1)}\newline
+\noindent {\tt \phantom{x}\}}\newline
+\noindent {\tt set display ; refresh}\newline
+\noindent {\tt }\newline
+\noindent {\tt print "pi=\%s"\%(n / Nsamples * 4) }
+\nlscf
+The graphical output from this script is shown below. The number of datapoints
+has been reduced to {\tt Nsamples}$=500$ for clarity:
+\nlscf
+\begin{center}
+\includegraphics{examples/eps/ex_pi_estimation}
+\end{center}
+}
+

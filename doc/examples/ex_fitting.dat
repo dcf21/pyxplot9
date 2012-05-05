@@ -1,0 +1,34 @@
+# EX_FITTING.DAT
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This data produces a figure for the PyXPlot Users' Guide
+
+  -3.141593          1 
+  -2.443461          1 
+  -1.745329          1 
+  -1.047198          1 
+  -0.349066          1 
+   0.349066         -1 
+   1.047198         -1 
+   1.745329         -1 
+   2.443461         -1 
+   3.141593         -1 
+

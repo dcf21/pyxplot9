@@ -1,0 +1,48 @@
+# EX_SURFACE_SINC.PPL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_surface_sinc"
+load "examples/fig_init.ppl"
+
+# Main body of figure script
+set numerics complex
+set xlabel "$x$"
+set ylabel "$y$"
+set zlabel "$z$"
+set xformat "%s$\pi$"%(x/pi)
+set yformat "%s$\pi$"%(y/pi)
+set xtics 3*pi ; set mxtics pi
+set ytics 3*pi ; set mytics pi
+set ztics
+set key below
+set size 8 square
+set grid
+plot 3d [-6*pi:6*pi][-6*pi:6*pi][-0.3:1] sinc(hypot(x,y)) \
+     with surface col black \
+     fillcol hsb(atan2($1,$2)/(2*pi)+0.5):hypot($1,$2)/30+0.2:($3*0.5+0.5)
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

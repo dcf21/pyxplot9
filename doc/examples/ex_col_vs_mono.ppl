@@ -1,0 +1,61 @@
+# EX_COL_VS_MONO.PPL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_col_vs_mono"
+load "examples/fig_init.ppl"
+
+# Main body of figure script
+W=unit(5*cm)
+
+set multiplot
+set nodisplay
+set width W
+set size ratio 1
+set noxtics
+set terminal colour
+set title 'colour'
+set nokey
+set samples 8
+plot [][6:0] 1 with lp c 1 lt 1 pt 1, \
+             2 with lp c 2 lt 1 pt 2, \
+             3 with lp c 3 lt 1 pt 3, \
+             4 with lp c 4 lt 1 pt 4, \
+             5 with lp c 5 lt 1 pt 5
+
+set terminal monochrome
+set origin W+unit(1.5*cm),0
+set title 'monochrome'
+plot [][6:0] 1 with lp c 1 lt 1 pt 1, \ 
+             2 with lp c 1 lt 2 pt 2, \
+             3 with lp c 1 lt 3 pt 3, \
+             4 with lp c 1 lt 4 pt 4, \
+             5 with lp c 1 lt 5 pt 5
+
+set display
+refresh
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

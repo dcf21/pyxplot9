@@ -1,0 +1,33 @@
+# EX_BARCHART2.DAT
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This data produces a figure for the PyXPlot Users' Guide
+
+1.0 1.0 0.4
+1.5 0.9 0.4
+2.0 0.8 0.4
+2.5 0.7 0.4
+4.0 0.6 1.0
+5.5 0.5 0.2
+5.75 0.4 0.1
+6.0 0.3 0.1
+8.0 0.2 1.5
+10.0 0.1 0.2

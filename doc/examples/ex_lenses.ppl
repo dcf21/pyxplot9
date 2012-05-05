@@ -1,0 +1,80 @@
+# EX_LENSES.PPL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_lenses"
+load "examples/fig_init.ppl"
+
+# Main body of figure script
+
+# Define subroutine for drawing lens diagrams
+subroutine LensDraw(x0,y0,u,h,f)
+ {
+  # Use the thin-lens equation to find v and H
+  v = 1/(1/f - 1/u)
+  H = h * v / u
+
+  # Draw lens
+  lc = 5.5*unit(cm) # Radius of curvature of lens
+  lt = 0.5*unit(cm) # Thickness of lens
+  la = acos((lc-lt/2)/lc) # Angular size of lens from centre of curvature
+  lh = lc*sin(la) # Physical height of lens on paper
+  arc at x0-(lc-lt/2),y0 radius lc from  90*unit(deg)-la to  90*unit(deg)+la
+  arc at x0+(lc-lt/2),y0 radius lc from 270*unit(deg)-la to 270*unit(deg)+la
+  set texthalign right ; set textvalign top
+  point at x0-f,y0 label "$f$"
+  set texthalign left  ; set textvalign bottom
+  point at x0+f,y0 label "$f$"
+
+  # Draw object and image
+  arrow from x0-u,y0 to x0-u,y0+h with lw 2
+  arrow from x0+v,y0 to x0+v,y0-H with lw 2
+  text "$h$" at x0-u,y0+h/2 hal l val c gap unit(mm)
+  text "$H$" at x0+v,y0-H/2 hal l val c gap unit(mm)
+
+  # Draw construction lines
+  line from x0-u,y0 to x0+v,y0 with lt 2 # Optic axis
+  line from x0-u,y0+h to x0+v,y0-H # Undeflected ray through origin
+  line from x0-u,y0+h to x0,y0+h
+  line from x0,y0+h to x0+v,y0-H
+  line from x0+v,y0-H to x0,y0-H
+  line from x0,y0-H to x0-u,y0+h
+
+  # Label distances u and v
+  ylabel = y0-lh-2*unit(mm)
+  arrow from x0-u,ylabel to x0,ylabel with twoway lt 2
+  arrow from x0+v,ylabel to x0,ylabel with twoway lt 2
+  text "$u$" at x0-u/2,ylabel hal c val t gap unit(mm)
+  text "$v$" at x0+v/2,ylabel hal c val t gap unit(mm)
+ }
+
+# Display diagram of lens
+set unit angle nodimensionless
+set multiplot ; set nodisplay
+call LensDraw(0*unit(cm),0*unit(cm), 5*unit(cm),1.5*unit(cm),2*unit(cm))
+set display ; refresh
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

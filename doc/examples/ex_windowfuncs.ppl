@@ -1,0 +1,126 @@
+# EX_WINDOWFUNCS.PPL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_windowfuncs"
+load "examples/fig_init.ppl"
+
+# Define window functions
+a0    = 0.62
+a1    = 0.48
+a2    = 0.38
+sigma = 0.5
+N     = 20
+
+bartlett(n)      = 0
+bartlett_hann(n) = 0
+cosine(n)        = 0
+gauss(n)         = 0
+hamming(n)       = 0
+hann(n)          = 0
+lanczos(n)       = 0
+rectangular(n)   = 0
+triangular(n)    = 0
+
+bartlett(n)      [0:N-1] = (2/(N-1))*( (N-1)/2 - abs(n - (N-1)/2))
+bartlett_hann(n) [0:N-1] = a0 - a1*abs(n/(N-1)-0.5) - a2*cos(2*pi*n/(N-1))
+cosine(n)        [0:N-1] = cos(pi*n/(N-1) - pi/2)
+gauss(n)         [0:N-1] = exp(-0.5*((n-(N-1)/2)/(sigma*(N-1)/2))**2)
+hamming(n)       [0:N-1] = 0.54 - 0.46*cos(2*pi*n/(N-1))
+hann(n)          [0:N-1] = 0.5*(1-cos(2*pi*n/(N-1)))
+lanczos(n)       [0:N-1] = sinc(2*n/(N-1)-1)
+rectangular(n)   [0:N-1] = 1
+triangular(n)    [0:N-1] = (2/N)*(N/2 - abs(n-(N-1)/2))
+
+# Main body of figure script
+set multiplot
+set nodisplay
+width = 5
+height = width*gold_ratio
+set width width
+set nokey
+set xtics (0,0.5,1)
+set ytics (0,0.5,1)
+set xrange [-0.1:1.1]
+set yrange [-0.1:1.1]
+set texthalign centre
+set textvalign bottom
+
+set origin 0*width , 0*height
+set label 1 "(a) Bartlett" at 0.5,0
+set xformat "" ; set xlabel ""
+set ylabel ""
+plot bartlett(x*(N-1))
+
+set axis x linked item 1 x
+set axis y linked item 1 y
+
+set origin 1*width , 0*height
+set label 1 "(b) Hann" at 0.5,0
+set yformat ""
+plot bartlett_hann(x*(N-1))
+
+set origin 2*width , 0*height
+set label 1 "(c) Cosine" at 0.5,0
+plot cosine(x*(N-1))
+
+set origin 0*width ,-1*height
+set label 1 "(d) Gauss" at 0.5,0
+unset yformat ; set ylabel "$w(n)$"
+plot gauss(x*(N-1))
+
+set origin 1*width ,-1*height
+set label 1 "(e) Hamming" at 0.5,0
+set yformat "" ; set ylabel ""
+plot hamming(x*(N-1))
+
+set origin 2*width ,-1*height
+set label 1 "(f) Hann" at 0.5,0
+plot hann(x*(N-1))
+
+set origin 0*width ,-2*height
+set label 1 "(g) Lanczos" at 0.5,0
+unset xformat
+unset yformat
+plot lanczos(x*(N-1))
+
+set origin 1*width ,-2*height
+set label 1 "(h) Rectangular" at 0.5,0
+set xlabel "$n/(N-1)$"
+set yformat ""
+plot rectangular(x*(N-1))
+
+set origin 2*width ,-2*height
+set label 1 "(i) Triangular" at 0.5,0
+set xlabel ""
+plot triangular(x*(N-1))
+
+# Produce output
+set term landscape
+set display
+refresh
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

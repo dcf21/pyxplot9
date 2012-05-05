@@ -1,0 +1,85 @@
+# EX_TRIANGLE.PPL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_triangle"
+load "examples/fig_init.ppl"
+
+# Main body of figure script
+set unit angle nodimensionless
+
+# Define subroutine for drawing triangles
+subroutine TriangleDraw(Bx,By,AB,AC,BC)
+ {
+  # Use cosine rule to find interior angles
+  ABC = acos((AB**2 + BC**2 - AC**2) / (2*AB*BC))
+  BCA = acos((BC**2 + AC**2 - AB**2) / (2*BC*AC))
+  CAB = acos((AC**2 + AB**2 - BC**2) / (2*AC*AB))
+
+  # Positions of three corners of triangle
+  Cx = Bx + BC          ; Cy = By
+  Ax = Bx + AB*cos(ABC) ; Ay = By + AB*sin(ABC)
+
+  # Draw triangle
+  line from Ax,Ay to Bx,By
+  line from Ax,Ay to Cx,Cy
+  line from Bx,By to Cx,Cy
+
+  # Draw angle symbols
+  ArcRad = 4*unit(mm) # Radius of angle arcs
+  arc at Bx,By radius ArcRad from  90*unit(deg)-ABC to  90*unit(deg)
+  arc at Cx,Cy radius ArcRad from -90*unit(deg)     to -90*unit(deg)+BCA
+  arc at Ax,Ay radius ArcRad from  90*unit(deg)+BCA to 270*unit(deg)-ABC
+
+  # Label lengths of sides
+  set unit of length cm # Display lengths in cm
+  set numeric sigfig 3 display latex # Correct to 3 significant figure
+  TextGap = 1*unit(mm)
+  text "%s"%(BC) at (Bx+Cx)/2,(By+Cy)/2 gap TextGap hal c val t
+  text "%s"%(AB) at (Ax+Bx)/2,(Ay+By)/2 gap TextGap rot  ABC hal c val b
+  text "%s"%(AC) at (Ax+Cx)/2,(Ay+Cy)/2 gap TextGap rot -BCA hal c val b
+
+  # Label angles
+  set unit of angle degree # Display angles in degrees
+  ArcRad2 = 1.4 * ArcRad # Distance of text from apex of angles
+  text "%s"%(CAB) at Ax+ArcRad2*sin(ABC-BCA),Ay-ArcRad2*cos(ABC-BCA) hal c val t
+  text "%s"%(ABC) at Bx+ArcRad2*cos(ABC/2),By+ArcRad2*sin(ABC/2) hal l val c
+  text "%s"%(BCA) at Cx-ArcRad2*cos(BCA/2),Cy+ArcRad2*sin(BCA/2) hal r val c
+
+  # Label points ABC
+  text "A" at Ax,Ay gap TextGap hal c val b
+  text "B" at Bx,By gap TextGap hal r val c
+  text "C" at Cx,Cy gap TextGap hal l val c
+ }
+
+# Display diagram with three triangles
+set multiplot ; set nodisplay
+call TriangleDraw(2.8*unit(cm),3.2*unit(cm), 3*unit(cm),4*unit(cm),4*unit(cm))
+call TriangleDraw(0.0*unit(cm),0.0*unit(cm), 3*unit(cm),4*unit(cm),5*unit(cm))
+call TriangleDraw(6.5*unit(cm),0.0*unit(cm), 3*unit(cm),3*unit(cm),3*unit(cm))
+set display ; refresh
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

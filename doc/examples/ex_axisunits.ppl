@@ -1,0 +1,59 @@
+# EX_AXISUNITS.PPL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_axisunits"
+load "examples/fig_init.ppl"
+
+# Initialise
+set unit preferred kg*m/s
+s = unit(-2.2*cm)
+x = unit(kg*m/s)
+
+# Main body of figure script
+set multiplot
+set nodisplay
+set size ratio 1e-3
+set xlabel "Momentum"
+set axis y invisible
+set axis x nomirror
+
+set origin 0,0*s
+set axisunitstyle ratio
+plot [0*x:10*x]
+
+set origin 0,1*s
+set axisunitstyle bracketed
+plot [0*x:10*x]
+
+set origin 0,2*s
+set axisunitstyle square
+plot [0*x:10*x]
+
+set display
+refresh
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

@@ -1,0 +1,31 @@
+# EX_MAP_2.DAT
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This data produces a figure for the PyXPlot Users' Guide
+
+115.859 -31.952 # Perth
+130.833 -12.25  # Darwin
+138.601 -34.929 # Adelaide
+144.963 -37.814 # Melbourne
+149.124 -35.308 # Canberra
+151.211 -33.427 # Sydney
+153.028 -27.468 # Brisbane
+147.325 -42.881 # Hobart

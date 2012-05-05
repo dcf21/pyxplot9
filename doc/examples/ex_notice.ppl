@@ -1,0 +1,52 @@
+# EX_NOTICE.PPL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_notice"
+load "examples/fig_init.ppl"
+
+# Main body of figure script
+set multiplot ; set nodisplay
+
+w = 20         # Width of notice / cm
+h = w/sqrt(2) # Height of notice / cm
+
+# Put a rectangular box around notice
+line from 0,0 to w,0 with linewidth 5
+line from w,0 to w,h with linewidth 5
+line from w,h to 0,h with linewidth 5
+line from 0,h to 0,0 with linewidth 5
+
+# Write text of notice
+set texthalign centre ; set fontsize 3
+text "\bf Astrophysical Fluids Lecture" at w/2,3/4*h
+text "\bf MOVED to Seminar Room 3" at w/2, h/2
+arrow from w/4, h/4 to 3/4*w, h/4 with linewidth 8
+
+# Display notice
+set display ; refresh
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

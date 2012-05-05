@@ -1,0 +1,338 @@
+% UNITS.TEX
+%
+% The documentation in this file is part of PyXPlot
+% <http://www.pyxplot.org.uk>
+%
+% Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+%               2008-2011 Ross Church
+%
+% $Id$
+%
+% PyXPlot is free software; you can redistribute it and/or modify it under the
+% terms of the GNU General Public License as published by the Free Software
+% Foundation; either version 2 of the License, or (at your option) any later
+% version.
+%
+% You should have received a copy of the GNU General Public License along with
+% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+% ----------------------------------------------------------------------------
+
+% LaTeX source for the PyXPlot Users' Guide
+
+\chapter{List of Physical Units}
+\label{ch:unit_list}
+\index{units!list}
+
+The following table lists all of the physical units which PyXPlot recognises by
+default. Each unit may be referred to by either a long or an abbreviated name,
+and both of these have singular and plural forms. Some units also have further
+alternative names.
+
+\begin{landscape}
+\begin{center}
+\begin{longtable}{|lllll|}
+\hline \endfoot
+\hline
+\multicolumn{4}{|l}{\bf Name} & \\
+\multicolumn{2}{|l}{\bf Full} & \multicolumn{2}{l}{\bf Abbrev} & {\bf Unit of} \\
+{\bf sing.} & {\bf pl.} & {\bf sing.} & {\bf pl.} & \\ \hline \endhead
+{\tt\footnotesize acre} & {\tt\footnotesize acres} & {\tt\footnotesize acre} & {\tt\footnotesize acres} & area \\
+{\tt\footnotesize ampere} & {\tt\footnotesize amperes} & {\tt\footnotesize A} & {\tt\footnotesize A} & current \\
+\multicolumn{5}{|r|}{\footnotesize Also known as the {\tt amp} and the {\tt amps}.} \\
+{\tt\footnotesize angstrom} & {\tt\footnotesize angstroms} & {\tt\footnotesize ang} & {\tt\footnotesize ang} & length \\
+{\tt\footnotesize arcminute} & {\tt\footnotesize arcminutes} & {\tt\footnotesize arcmin} & {\tt\footnotesize arcmins} & angle \\
+{\tt\footnotesize arcsecond} & {\tt\footnotesize arcseconds} & {\tt\footnotesize arcsec} & {\tt\footnotesize arcsecs} & angle \\
+{\tt\footnotesize are} & {\tt\footnotesize ares} & {\tt\footnotesize are} & {\tt\footnotesize ares} & area \\
+{\tt\footnotesize astronomical\_unit} & {\tt\footnotesize astronomical\_units} & {\tt\footnotesize AU} & {\tt\footnotesize AU} & length \\
+{\tt\footnotesize atmosphere} & {\tt\footnotesize atmospheres} & {\tt\footnotesize atm} & {\tt\footnotesize atms} & pressure \\
+{\tt\footnotesize bar} & {\tt\footnotesize bars} & {\tt\footnotesize bar} & {\tt\footnotesize bars} & pressure \\
+{\tt\footnotesize barn} & {\tt\footnotesize barns} & {\tt\footnotesize barn} & {\tt\footnotesize barns} & area \\
+{\tt\footnotesize barye} & {\tt\footnotesize baryes} & {\tt\footnotesize Ba} & {\tt\footnotesize Ba} & pressure \\
+{\tt\footnotesize bath} & {\tt\footnotesize baths} & {\tt\footnotesize bath} & {\tt\footnotesize baths} & volume \\
+{\tt\footnotesize becquerel} & {\tt\footnotesize becquerel} & {\tt\footnotesize Bq} & {\tt\footnotesize Bq} & frequency \\
+{\tt\footnotesize billion\_electronvolts} & {\tt\footnotesize billion\_electronvolts} & {\tt\footnotesize BeV} & {\tt\footnotesize BeV} & energy \\
+{\tt\footnotesize bit} & {\tt\footnotesize bits} & {\tt\footnotesize bit} & {\tt\footnotesize bits} & information\_content \\
+{\tt\footnotesize British Thermal Unit} & {\tt\footnotesize British Thermal Units} & {\tt\footnotesize BTU} & {\tt\footnotesize BTU} & energy \\
+{\tt\footnotesize bushel\_UK} & {\tt\footnotesize bushels\_UK} & {\tt\footnotesize bushel\_UK} & {\tt\footnotesize bushels\_UK} & volume (UK imperial) \\
+{\tt\footnotesize bushel\_US} & {\tt\footnotesize bushels\_US} & {\tt\footnotesize bushel\_US} & {\tt\footnotesize bushels\_US} & volume (US customary) \\
+{\tt\footnotesize byte} & {\tt\footnotesize bytes} & {\tt\footnotesize B} & {\tt\footnotesize B} & information\_content \\
+{\tt\footnotesize cable} & {\tt\footnotesize cables} & {\tt\footnotesize cable} & {\tt\footnotesize cables} & length \\
+{\tt\footnotesize calorie} & {\tt\footnotesize calories} & {\tt\footnotesize cal} & {\tt\footnotesize cal} & energy \\
+{\tt\footnotesize candela} & {\tt\footnotesize candelas} & {\tt\footnotesize cd} & {\tt\footnotesize cd} & light\_intensity \\
+{\tt\footnotesize candlepower} & {\tt\footnotesize candlepower} & {\tt\footnotesize candlepower} & {\tt\footnotesize candlepower} & light\_intensity \\
+{\tt\footnotesize carat} & {\tt\footnotesize carats} & {\tt\footnotesize CD} & {\tt\footnotesize CDs} & mass \\
+{\tt\footnotesize centimetre} & {\tt\footnotesize centimetres} & {\tt\footnotesize cm} & {\tt\footnotesize cm} & length \\
+{\tt\footnotesize chain} & {\tt\footnotesize chains} & {\tt\footnotesize chain} & {\tt\footnotesize chains} & length \\
+{\tt\footnotesize clo} & {\tt\footnotesize clos} & {\tt\footnotesize clo} & {\tt\footnotesize clos} & thermal\_insulation \\
+{\tt\footnotesize coulomb} & {\tt\footnotesize coulombs} & {\tt\footnotesize C} & {\tt\footnotesize C} & charge \\
+{\tt\footnotesize cubic\_centimetre} & {\tt\footnotesize cubic\_centimetres} & {\tt\footnotesize cubic\_cm} & {\tt\footnotesize cubic\_cm} & volume \\
+{\tt\footnotesize cubic\_foot} & {\tt\footnotesize cubic\_feet} & {\tt\footnotesize cubic\_ft} & {\tt\footnotesize cubic\_ft} & volume \\
+{\tt\footnotesize cubic\_inch} & {\tt\footnotesize cubic\_inches} & {\tt\footnotesize cubic\_in} & {\tt\footnotesize cubic\_in} & volume \\
+{\tt\footnotesize cubic\_metre} & {\tt\footnotesize cubic\_metres} & {\tt\footnotesize cubic\_m} & {\tt\footnotesize cubic\_m} & volume \\
+{\tt\footnotesize cubit} & {\tt\footnotesize cubits} & {\tt\footnotesize cubit} & {\tt\footnotesize cubits} & length \\
+{\tt\footnotesize cup\_US} & {\tt\footnotesize cups\_US} & {\tt\footnotesize cup\_US} & {\tt\footnotesize cups\_US} & volume (US customary) \\
+{\tt\footnotesize day} & {\tt\footnotesize days} & {\tt\footnotesize day} & {\tt\footnotesize days} & time \\
+{\tt\footnotesize decimetre} & {\tt\footnotesize decimetres} & {\tt\footnotesize dm} & {\tt\footnotesize dm} & length \\
+{\tt\footnotesize degree} & {\tt\footnotesize degrees} & {\tt\footnotesize deg} & {\tt\footnotesize deg} & angle \\
+{\tt\footnotesize degree\_celsius} & {\tt\footnotesize degrees\_celsius} & {\tt\footnotesize oC} & {\tt\footnotesize oC} & temperature \\
+\multicolumn{5}{|r|}{\footnotesize Also known as the {\tt degree\_centigrade}, the {\tt degrees\_centigrade}, the {\tt centigrade} and the {\tt celsius}.} \\
+{\tt\footnotesize degree\_fahrenheit} & {\tt\footnotesize degrees\_fahrenheit} & {\tt\footnotesize oF} & {\tt\footnotesize oF} & temperature \\
+\multicolumn{5}{|r|}{\footnotesize Also known as the {\tt fahrenheit}.} \\
+{\tt\footnotesize dioptre} & {\tt\footnotesize dioptres} & {\tt\footnotesize dioptre} & {\tt\footnotesize dioptres} & lens\_power \\
+{\tt\footnotesize drachm} & {\tt\footnotesize drachms} & {\tt\footnotesize drachm} & {\tt\footnotesize drachms} & mass \\
+{\tt\footnotesize dyne} & {\tt\footnotesize dynes} & {\tt\footnotesize dyn} & {\tt\footnotesize dyn} & force \\
+{\tt\footnotesize earth\_mass} & {\tt\footnotesize earth\_masses} & {\tt\footnotesize Mearth} & {\tt\footnotesize Mearth} & mass \\
+{\tt\footnotesize earth\_radius} & {\tt\footnotesize earth\_radii} & {\tt\footnotesize Rearth} & {\tt\footnotesize Rearth} & length \\
+{\tt\footnotesize electronvolt} & {\tt\footnotesize electronvolts} & {\tt\footnotesize eV} & {\tt\footnotesize eV} & energy \\
+{\tt\footnotesize erg} & {\tt\footnotesize ergs} & {\tt\footnotesize erg} & {\tt\footnotesize erg} & energy \\
+{\tt\footnotesize euro} & {\tt\footnotesize euros} & {\tt\footnotesize euro} & {\tt\footnotesize euros} & cost \\
+{\tt\footnotesize farad} & {\tt\footnotesize farad} & {\tt\footnotesize F} & {\tt\footnotesize F} & capacitance \\
+{\tt\footnotesize fathom} & {\tt\footnotesize fathoms} & {\tt\footnotesize fathom} & {\tt\footnotesize fathoms} & length \\
+{\tt\footnotesize firkin\_UK\_ale} & {\tt\footnotesize firkins\_UK\_ale} & {\tt\footnotesize firkin\_UK\_ale} & {\tt\footnotesize firkins\_UK\_ale} & volume \\
+{\tt\footnotesize firkin\_wine} & {\tt\footnotesize firkins\_wine} & {\tt\footnotesize firkin\_UK\_wine} & {\tt\footnotesize firkins\_UK\_wine} & volume \\
+{\tt\footnotesize fluid\_ounce\_UK} & {\tt\footnotesize fluid\_ounce\_UK} & {\tt\footnotesize fl\_oz\_UK} & {\tt\footnotesize fl\_oz\_UK} & volume (UK imperial) \\
+{\tt\footnotesize fluid\_ounce\_US} & {\tt\footnotesize fluid\_ounce\_US} & {\tt\footnotesize fl\_oz\_US} & {\tt\footnotesize fl\_oz\_US} & volume (US customary) \\
+{\tt\footnotesize foot} & {\tt\footnotesize feet} & {\tt\footnotesize ft} & {\tt\footnotesize ft} & length \\
+{\tt\footnotesize furlong} & {\tt\footnotesize furlongs} & {\tt\footnotesize furlong} & {\tt\footnotesize furlongs} & length \\
+{\tt\footnotesize gallon\_UK} & {\tt\footnotesize gallons\_UK} & {\tt\footnotesize gallon\_UK} & {\tt\footnotesize gallons\_UK} & volume (UK imperial) \\
+{\tt\footnotesize gallon\_US} & {\tt\footnotesize gallons\_US} & {\tt\footnotesize gallon\_US} & {\tt\footnotesize gallons\_US} & volume (US customary) \\
+{\tt\footnotesize gauss} & {\tt\footnotesize gauss} & {\tt\footnotesize G} & {\tt\footnotesize G} & magnetic\_field \\
+{\tt\footnotesize gibibit} & {\tt\footnotesize gibibits} & {\tt\footnotesize Gib} & {\tt\footnotesize Gib} & information\_content \\
+{\tt\footnotesize gibibyte} & {\tt\footnotesize gibibytes} & {\tt\footnotesize GiB} & {\tt\footnotesize GiB} & information\_content \\
+{\tt\footnotesize grain} & {\tt\footnotesize grains} & {\tt\footnotesize grain} & {\tt\footnotesize grains} & mass \\
+{\tt\footnotesize gram} & {\tt\footnotesize grams} & {\tt\footnotesize g} & {\tt\footnotesize g} & mass \\
+{\tt\footnotesize gramme} & {\tt\footnotesize grammes} & {\tt\footnotesize g} & {\tt\footnotesize g} & mass \\
+{\tt\footnotesize gray} & {\tt\footnotesize gray} & {\tt\footnotesize Gy} & {\tt\footnotesize Gy} & radiation\_dose \\
+{\tt\footnotesize hectare} & {\tt\footnotesize hectares} & {\tt\footnotesize hectare} & {\tt\footnotesize hectares} & area \\
+{\tt\footnotesize henry} & {\tt\footnotesize henry} & {\tt\footnotesize H} & {\tt\footnotesize H} & inductance \\
+{\tt\footnotesize hertz} & {\tt\footnotesize hertz} & {\tt\footnotesize Hz} & {\tt\footnotesize Hz} & frequency \\
+{\tt\footnotesize homer} & {\tt\footnotesize homers} & {\tt\footnotesize homer} & {\tt\footnotesize homers} & volume \\
+{\tt\footnotesize horsepower} & {\tt\footnotesize horsepower} & {\tt\footnotesize horsepower} & {\tt\footnotesize horsepower} & power \\
+{\tt\footnotesize hour} & {\tt\footnotesize hours} & {\tt\footnotesize hr} & {\tt\footnotesize hr} & time \\
+{\tt\footnotesize hundredweight\_UK} & {\tt\footnotesize hundredweight\_UK} & {\tt\footnotesize cwt\_UK} & {\tt\footnotesize cwt\_UK} & mass (UK imperial) \\
+{\tt\footnotesize hundredweight\_US} & {\tt\footnotesize hundredweight\_US} & {\tt\footnotesize cwt\_US} & {\tt\footnotesize cwt\_US} & mass (US customary) \\
+{\tt\footnotesize inch} & {\tt\footnotesize inches} & {\tt\footnotesize in} & {\tt\footnotesize in} & length \\
+{\tt\footnotesize inch\_of\_mercury} & {\tt\footnotesize inches\_of\_mercury} & {\tt\footnotesize inHg} & {\tt\footnotesize inHg} & pressure \\
+{\tt\footnotesize inch\_of\_water} & {\tt\footnotesize inches\_of\_water} & {\tt\footnotesize inAq} & {\tt\footnotesize inAq} & pressure \\
+{\tt\footnotesize jansky} & {\tt\footnotesize janskys} & {\tt\footnotesize Jy} & {\tt\footnotesize Jy} & flux\_density \\
+{\tt\footnotesize joule} & {\tt\footnotesize joules} & {\tt\footnotesize J} & {\tt\footnotesize J} & energy \\
+{\tt\footnotesize jupiter\_mass} & {\tt\footnotesize jupiter\_masses} & {\tt\footnotesize Mjupiter} & {\tt\footnotesize Mjupiter} & mass \\
+\multicolumn{5}{|r|}{\footnotesize Also known as the {\tt Mjove} and the {\tt Mjovian}.} \\
+{\tt\footnotesize jupiter\_radius} & {\tt\footnotesize jupiter\_radii} & {\tt\footnotesize Rjupiter} & {\tt\footnotesize Rjupiter} & length \\
+\multicolumn{5}{|r|}{\footnotesize Also known as the {\tt Rjove} and the {\tt Rjovian}.} \\
+{\tt\footnotesize katal} & {\tt\footnotesize katals} & {\tt\footnotesize kat} & {\tt\footnotesize kat} & catalytic\_activity \\
+{\tt\footnotesize kayser} & {\tt\footnotesize kaysers} & {\tt\footnotesize kayser} & {\tt\footnotesize kaysers} & wavenumber \\
+{\tt\footnotesize kelvin} & {\tt\footnotesize kelvin} & {\tt\footnotesize K} & {\tt\footnotesize K} & temperature \\
+{\tt\footnotesize kibibit} & {\tt\footnotesize kibibits} & {\tt\footnotesize Kib} & {\tt\footnotesize Kib} & information\_content \\
+{\tt\footnotesize kibibyte} & {\tt\footnotesize kibibytes} & {\tt\footnotesize KiB} & {\tt\footnotesize KiB} & information\_content \\
+{\tt\footnotesize kilderkin\_UK\_ale} & {\tt\footnotesize kilderkins\_UK\_ale} & {\tt\footnotesize kilderkin\_UK\_ale} & {\tt\footnotesize kilderkins\_UK\_ale} & volume \\
+{\tt\footnotesize kilogram} & {\tt\footnotesize kilograms} & {\tt\footnotesize kg} & {\tt\footnotesize kg} & mass \\
+{\tt\footnotesize kilowatt\_hour} & {\tt\footnotesize kilowatt\_hours} & {\tt\footnotesize kWh} & {\tt\footnotesize kWh} & energy \\
+{\tt\footnotesize knot} & {\tt\footnotesize knots} & {\tt\footnotesize kn} & {\tt\footnotesize kn} & velocity \\
+{\tt\footnotesize light\_year} & {\tt\footnotesize light\_years} & {\tt\footnotesize lyr} & {\tt\footnotesize lyr} & length \\
+{\tt\footnotesize link} & {\tt\footnotesize links} & {\tt\footnotesize link} & {\tt\footnotesize links} & length \\
+{\tt\footnotesize litre} & {\tt\footnotesize litres} & {\tt\footnotesize l} & {\tt\footnotesize l} & volume \\
+{\tt\footnotesize long\_ton} & {\tt\footnotesize long\_tons} & {\tt\footnotesize ton} & {\tt\footnotesize tons} & mass (UK imperial) \\
+{\tt\footnotesize lumen} & {\tt\footnotesize lumens} & {\tt\footnotesize lm} & {\tt\footnotesize lm} & power \\
+{\tt\footnotesize lunar\_distance} & {\tt\footnotesize lunar\_distances} & {\tt\footnotesize lunar\_distance} & {\tt\footnotesize lunar\_distances} & length \\
+{\tt\footnotesize lux} & {\tt\footnotesize luxs} & {\tt\footnotesize lx} & {\tt\footnotesize lx} & power \\
+{\tt\footnotesize maxwell} & {\tt\footnotesize maxwell} & {\tt\footnotesize Mx} & {\tt\footnotesize Mx} & magnetic\_flux \\
+{\tt\footnotesize mebibit} & {\tt\footnotesize mebibits} & {\tt\footnotesize Mib} & {\tt\footnotesize Mib} & information\_content \\
+{\tt\footnotesize mebibyte} & {\tt\footnotesize mebibytes} & {\tt\footnotesize MiB} & {\tt\footnotesize MiB} & information\_content \\
+{\tt\footnotesize metre} & {\tt\footnotesize metres} & {\tt\footnotesize m} & {\tt\footnotesize m} & length \\
+{\tt\footnotesize mho} & {\tt\footnotesize mhos} & {\tt\footnotesize mho} & {\tt\footnotesize mhos} & conductance \\
+{\tt\footnotesize mile} & {\tt\footnotesize miles} & {\tt\footnotesize mi} & {\tt\footnotesize mi} & length \\
+{\tt\footnotesize mile\_per\_hour} & {\tt\footnotesize miles\_per\_hour} & {\tt\footnotesize mph} & {\tt\footnotesize mph} & velocity \\
+{\tt\footnotesize mina} & {\tt\footnotesize minas} & {\tt\footnotesize mina} & {\tt\footnotesize minas} & mass \\
+{\tt\footnotesize minute} & {\tt\footnotesize minutes} & {\tt\footnotesize min} & {\tt\footnotesize min} & time \\
+{\tt\footnotesize mole} & {\tt\footnotesize moles} & {\tt\footnotesize mol} & {\tt\footnotesize mol} & moles \\
+{\tt\footnotesize nautical\_mile} & {\tt\footnotesize nautical\_miles} & {\tt\footnotesize nautical\_mile} & {\tt\footnotesize nautical\_miles} & length \\
+{\tt\footnotesize newton} & {\tt\footnotesize newtons} & {\tt\footnotesize N} & {\tt\footnotesize N} & force \\
+{\tt\footnotesize ohm} & {\tt\footnotesize ohms} & {\tt\footnotesize ohm} & {\tt\footnotesize ohms} & resistance \\
+{\tt\footnotesize ounce} & {\tt\footnotesize ounces} & {\tt\footnotesize oz} & {\tt\footnotesize oz} & mass \\
+{\tt\footnotesize parsec} & {\tt\footnotesize parsecs} & {\tt\footnotesize pc} & {\tt\footnotesize pc} & length \\
+{\tt\footnotesize parts\_per\_billion} & {\tt\footnotesize parts\_per\_billion} & {\tt\footnotesize ppb} & {\tt\footnotesize ppb} & dimensionlessness \\
+{\tt\footnotesize parts\_per\_million} & {\tt\footnotesize parts\_per\_million} & {\tt\footnotesize ppm} & {\tt\footnotesize ppm} & dimensionlessness \\
+{\tt\footnotesize pascal} & {\tt\footnotesize pascals} & {\tt\footnotesize Pa} & {\tt\footnotesize Pa} & pressure \\
+{\tt\footnotesize percent} & {\tt\footnotesize percent} & {\tt\footnotesize percent} & {\tt\footnotesize percent} & dimensionlessness \\
+{\tt\footnotesize perch} & {\tt\footnotesize perches} & {\tt\footnotesize perch} & {\tt\footnotesize perches} & length \\
+{\tt\footnotesize pica} & {\tt\footnotesize picas} & {\tt\footnotesize pica} & {\tt\footnotesize picas} & length \\
+{\tt\footnotesize pint\_UK} & {\tt\footnotesize pints\_UK} & {\tt\footnotesize pint\_UK} & {\tt\footnotesize pints\_UK} & volume (UK imperial) \\
+{\tt\footnotesize pint\_US} & {\tt\footnotesize pints\_US} & {\tt\footnotesize pint\_US} & {\tt\footnotesize pints\_US} & volume (US customary) \\
+{\tt\footnotesize planck\_charge} & {\tt\footnotesize planck\_charges} & {\tt\footnotesize Q\_planck} & {\tt\footnotesize Q\_planck} & charge \\
+{\tt\footnotesize planck\_current} & {\tt\footnotesize planck\_current} & {\tt\footnotesize I\_planck} & {\tt\footnotesize I\_planck} & current \\
+{\tt\footnotesize planck\_energy} & {\tt\footnotesize planck\_energy} & {\tt\footnotesize E\_planck} & {\tt\footnotesize E\_planck} & energy \\
+{\tt\footnotesize planck\_force} & {\tt\footnotesize planck\_force} & {\tt\footnotesize F\_planck} & {\tt\footnotesize F\_planck} & force \\
+{\tt\footnotesize planck\_impedence} & {\tt\footnotesize planck\_impedence} & {\tt\footnotesize Z\_planck} & {\tt\footnotesize Z\_planck} & resistance \\
+{\tt\footnotesize planck\_length} & {\tt\footnotesize planck\_lengths} & {\tt\footnotesize L\_planck} & {\tt\footnotesize L\_planck} & length \\
+{\tt\footnotesize planck\_mass} & {\tt\footnotesize planck\_masses} & {\tt\footnotesize M\_planck} & {\tt\footnotesize M\_planck} & mass \\
+{\tt\footnotesize planck\_momentum} & {\tt\footnotesize planck\_momentum} & {\tt\footnotesize p\_planck} & {\tt\footnotesize p\_planck} & momentum \\
+{\tt\footnotesize planck\_power} & {\tt\footnotesize planck\_power} & {\tt\footnotesize P\_planck} & {\tt\footnotesize P\_planck} & power \\
+{\tt\footnotesize planck\_temperature} & {\tt\footnotesize planck\_temperature} & {\tt\footnotesize Theta\_planck} & {\tt\footnotesize Theta\_planck} & temperature \\
+{\tt\footnotesize planck\_time} & {\tt\footnotesize planck\_times} & {\tt\footnotesize T\_planck} & {\tt\footnotesize T\_planck} & time \\
+{\tt\footnotesize planck\_voltage} & {\tt\footnotesize planck\_voltage} & {\tt\footnotesize V\_planck} & {\tt\footnotesize V\_planck} & potential \\
+{\tt\footnotesize point} & {\tt\footnotesize points} & {\tt\footnotesize pt} & {\tt\footnotesize pt} & length \\
+{\tt\footnotesize poise} & {\tt\footnotesize poises} & {\tt\footnotesize P} & {\tt\footnotesize P} & viscosity \\
+{\tt\footnotesize pole} & {\tt\footnotesize poles} & {\tt\footnotesize pole} & {\tt\footnotesize poles} & length \\
+{\tt\footnotesize pound} & {\tt\footnotesize pounds} & {\tt\footnotesize lb} & {\tt\footnotesize lbs} & mass \\
+{\tt\footnotesize pound\_force} & {\tt\footnotesize pounds\_force} & {\tt\footnotesize lbf} & {\tt\footnotesize lbf} & force \\
+{\tt\footnotesize pound\_per\_square\_inch} & {\tt\footnotesize pounds\_per\_square\_inch} & {\tt\footnotesize psi} & {\tt\footnotesize psi} & pressure \\
+{\tt\footnotesize quart\_UK} & {\tt\footnotesize quarts\_UK} & {\tt\footnotesize quart\_UK} & {\tt\footnotesize quarts\_UK} & volume (UK imperial) \\
+{\tt\footnotesize quart\_US} & {\tt\footnotesize quarts\_US} & {\tt\footnotesize quart\_US} & {\tt\footnotesize quarts\_US} & volume (US customary) \\
+{\tt\footnotesize radian} & {\tt\footnotesize radians} & {\tt\footnotesize rad} & {\tt\footnotesize rad} & angle \\
+{\tt\footnotesize rankin} & {\tt\footnotesize rankin} & {\tt\footnotesize R} & {\tt\footnotesize R} & temperature \\
+{\tt\footnotesize revolution} & {\tt\footnotesize revolutions} & {\tt\footnotesize rev} & {\tt\footnotesize rev} & angle \\
+{\tt\footnotesize rod} & {\tt\footnotesize rods} & {\tt\footnotesize rod} & {\tt\footnotesize rods} & length \\
+{\tt\footnotesize roman\_league} & {\tt\footnotesize roman\_leagues} & {\tt\footnotesize roman\_league} & {\tt\footnotesize roman\_leagues} & length \\
+{\tt\footnotesize roman\_mile} & {\tt\footnotesize roman\_miles} & {\tt\footnotesize roman\_mile} & {\tt\footnotesize roman\_miles} & length \\
+{\tt\footnotesize second} & {\tt\footnotesize seconds} & {\tt\footnotesize s} & {\tt\footnotesize s} & time \\
+\multicolumn{5}{|r|}{\footnotesize Also known as the {\tt sec} and the {\tt secs}.} \\
+{\tt\footnotesize shekel} & {\tt\footnotesize shekels} & {\tt\footnotesize shekel} & {\tt\footnotesize shekels} & mass \\
+{\tt\footnotesize short\_ton} & {\tt\footnotesize short\_tons} & {\tt\footnotesize short\_ton} & {\tt\footnotesize short\_tons} & mass (US customary) \\
+{\tt\footnotesize siemens} & {\tt\footnotesize siemens} & {\tt\footnotesize S} & {\tt\footnotesize S} & conductance \\
+{\tt\footnotesize sievert} & {\tt\footnotesize sieverts} & {\tt\footnotesize Sv} & {\tt\footnotesize Sv} & radiation\_dose \\
+{\tt\footnotesize slug} & {\tt\footnotesize slugs} & {\tt\footnotesize slug} & {\tt\footnotesize slugs} & mass \\
+{\tt\footnotesize sol} & {\tt\footnotesize sols} & {\tt\footnotesize sol} & {\tt\footnotesize sols} & time \\
+{\tt\footnotesize solar\_luminosity} & {\tt\footnotesize solar\_luminosities} & {\tt\footnotesize Lsun} & {\tt\footnotesize Lsun} & power \\
+\multicolumn{5}{|r|}{\footnotesize Also known as the {\tt Lsolar}.} \\
+{\tt\footnotesize solar\_mass} & {\tt\footnotesize solar\_masses} & {\tt\footnotesize Msun} & {\tt\footnotesize Msun} & mass \\
+\multicolumn{5}{|r|}{\footnotesize Also known as the {\tt Msolar}.} \\
+{\tt\footnotesize solar\_radius} & {\tt\footnotesize solar\_radii} & {\tt\footnotesize Rsun} & {\tt\footnotesize Rsun} & length \\
+\multicolumn{5}{|r|}{\footnotesize Also known as the {\tt Rsolar}.} \\
+{\tt\footnotesize square\_centimetre} & {\tt\footnotesize square\_centimetres} & {\tt\footnotesize sq\_cm} & {\tt\footnotesize sq\_cm} & area \\
+{\tt\footnotesize square\_degree} & {\tt\footnotesize square\_degrees} & {\tt\footnotesize sqdeg} & {\tt\footnotesize sqdeg} & solidangle \\
+{\tt\footnotesize square\_foot} & {\tt\footnotesize square\_feet} & {\tt\footnotesize sq\_ft} & {\tt\footnotesize sq\_ft} & area \\
+{\tt\footnotesize square\_inch} & {\tt\footnotesize square\_inches} & {\tt\footnotesize sq\_in} & {\tt\footnotesize sq\_in} & area \\
+{\tt\footnotesize square\_kilometre} & {\tt\footnotesize square\_kilometres} & {\tt\footnotesize sq\_km} & {\tt\footnotesize sq\_km} & area \\
+{\tt\footnotesize square\_metre} & {\tt\footnotesize square\_metres} & {\tt\footnotesize sq\_m} & {\tt\footnotesize sq\_m} & area \\
+{\tt\footnotesize square\_mile} & {\tt\footnotesize square\_miles} & {\tt\footnotesize sq\_mi} & {\tt\footnotesize sq\_mi} & area \\
+{\tt\footnotesize steradian} & {\tt\footnotesize steradians} & {\tt\footnotesize sterad} & {\tt\footnotesize sterad} & solidangle \\
+{\tt\footnotesize stone} & {\tt\footnotesize stone} & {\tt\footnotesize stone} & {\tt\footnotesize stone} & mass \\
+{\tt\footnotesize tablespoon} & {\tt\footnotesize tablespoons} & {\tt\footnotesize tablespoon} & {\tt\footnotesize tablespoons} & volume \\
+{\tt\footnotesize talent} & {\tt\footnotesize talents} & {\tt\footnotesize talent} & {\tt\footnotesize talents} & mass \\
+{\tt\footnotesize teaspoon} & {\tt\footnotesize teaspoons} & {\tt\footnotesize teaspoon} & {\tt\footnotesize teaspoons} & volume \\
+{\tt\footnotesize tesla} & {\tt\footnotesize tesla} & {\tt\footnotesize T} & {\tt\footnotesize T} & magnetic\_field \\
+{\tt\footnotesize therm} & {\tt\footnotesize therms} & {\tt\footnotesize therm} & {\tt\footnotesize therms} & energy \\
+{\tt\footnotesize tog} & {\tt\footnotesize togs} & {\tt\footnotesize tog} & {\tt\footnotesize togs} & thermal\_insulation \\
+{\tt\footnotesize tonne} & {\tt\footnotesize tonnes} & {\tt\footnotesize t} & {\tt\footnotesize t} & mass \\
+\multicolumn{5}{|r|}{\footnotesize Also known as the {\tt metric\_tonne} and the {\tt metric\_tonnes}.} \\
+{\tt\footnotesize troy\_ounce} & {\tt\footnotesize troy\_ounces} & {\tt\footnotesize oz\_troy} & {\tt\footnotesize oz\_troy} & mass \\
+{\tt\footnotesize volt} & {\tt\footnotesize volts} & {\tt\footnotesize V} & {\tt\footnotesize V} & potential \\
+{\tt\footnotesize watt} & {\tt\footnotesize watts} & {\tt\footnotesize W} & {\tt\footnotesize W} & power \\
+{\tt\footnotesize weber} & {\tt\footnotesize weber} & {\tt\footnotesize Wb} & {\tt\footnotesize Wb} & magnetic\_flux \\
+{\tt\footnotesize week} & {\tt\footnotesize weeks} & {\tt\footnotesize week} & {\tt\footnotesize weeks} & time \\
+{\tt\footnotesize yard} & {\tt\footnotesize yards} & {\tt\footnotesize yd} & {\tt\footnotesize yd} & length \\
+{\tt\footnotesize year} & {\tt\footnotesize years} & {\tt\footnotesize yr} & {\tt\footnotesize yr} & time \\
+\end{longtable}
+\end{center}
+\end{landscape}
+
+\noindent The following units of {\bf angle} are recognised:\newline
+\noindent the {\tt arcminute}, the {\tt arcsecond}, the {\tt degree}, the {\tt radian} and the {\tt revolution}.\vspace{5mm}
+
+\noindent The following units of {\bf area} are recognised:\newline
+\noindent the {\tt acre}, the {\tt are}, the {\tt barn}, the {\tt hectare}, the {\tt square\_\-centimetre}, the {\tt square\_\-foot}, the {\tt square\_\-inch}, the {\tt square\_\-kilometre}, the {\tt square\_\-metre} and the {\tt square\_\-mile}.\vspace{5mm}
+
+\noindent The following units of {\bf capacitance} are recognised:\newline
+\noindent the {\tt farad}.\vspace{5mm}
+
+\noindent The following units of {\bf catalytic activity} are recognised:\newline
+\noindent the {\tt katal}.\vspace{5mm}
+
+\noindent The following units of {\bf charge} are recognised:\newline
+\noindent the {\tt coulomb} and the {\tt planck\_\-charge}.\vspace{5mm}
+
+\noindent The following units of {\bf conductance} are recognised:\newline
+\noindent the {\tt mho} and the {\tt siemens}.\vspace{5mm}
+
+\noindent The following units of {\bf cost} are recognised:\newline
+\noindent the {\tt euro}.\vspace{5mm}
+
+\noindent The following units of {\bf current} are recognised:\newline
+\noindent the {\tt ampere} and the {\tt planck\_\-current}.\vspace{5mm}
+
+\noindent The following units of {\bf dimensionlessness} are recognised:\newline
+\noindent the {\tt parts\_\-per\_\-billion}, the {\tt parts\_\-per\_\-million} and the {\tt percent}.\vspace{5mm}
+
+\noindent The following units of {\bf energy} are recognised:\newline
+\noindent the {\tt British Thermal Unit}, the {\tt billion\_\-electronvolts}, the {\tt calorie}, the {\tt electronvolt}, the {\tt erg}, the {\tt joule}, the {\tt kilowatt\_\-hour}, the {\tt planck\_\-energy} and the {\tt therm}.\vspace{5mm}
+
+\noindent The following units of {\bf flux density} are recognised:\newline
+\noindent the {\tt jansky}.\vspace{5mm}
+
+\noindent The following units of {\bf force} are recognised:\newline
+\noindent the {\tt dyne}, the {\tt newton}, the {\tt planck\_\-force} and the {\tt pound\_\-force}.\vspace{5mm}
+
+\noindent The following units of {\bf frequency} are recognised:\newline
+\noindent the {\tt becquerel} and the {\tt hertz}.\vspace{5mm}
+
+\noindent The following units of {\bf inductance} are recognised:\newline
+\noindent the {\tt henry}.\vspace{5mm}
+
+\noindent The following units of {\bf information content} are recognised:\newline
+\noindent the {\tt bit}, the {\tt byte}, the {\tt gibibit}, the {\tt gibibyte}, the {\tt kibibit}, the {\tt kibibyte}, the {\tt mebibit} and the {\tt mebibyte}.\vspace{5mm}
+
+\noindent The following units of {\bf length} are recognised:\newline
+\noindent the {\tt angstrom}, the {\tt astronomical\_\-unit}, the {\tt cable}, the {\tt centimetre}, the {\tt chain}, the {\tt cubit}, the {\tt decimetre}, the {\tt earth\_\-radius}, the {\tt fathom}, the {\tt foot}, the {\tt furlong}, the {\tt inch}, the {\tt jupiter\_\-radius}, the {\tt light\_\-year}, the {\tt link}, the {\tt lunar\_\-distance}, the {\tt metre}, the {\tt mile}, the {\tt nautical\_\-mile}, the {\tt parsec}, the {\tt perch}, the {\tt pica}, the {\tt planck\_\-length}, the {\tt point}, the {\tt pole}, the {\tt rod}, the {\tt roman\_\-league}, the {\tt roman\_\-mile}, the {\tt solar\_\-radius} and the {\tt yard}.\vspace{5mm}
+
+\noindent The following units of {\bf lens power} are recognised:\newline
+\noindent the {\tt dioptre}.\vspace{5mm}
+
+\noindent The following units of {\bf light intensity} are recognised:\newline
+\noindent the {\tt candela} and the {\tt candlepower}.\vspace{5mm}
+
+\noindent The following units of {\bf magnetic field} are recognised:\newline
+\noindent the {\tt gauss} and the {\tt tesla}.\vspace{5mm}
+
+\noindent The following units of {\bf magnetic flux} are recognised:\newline
+\noindent the {\tt maxwell} and the {\tt weber}.\vspace{5mm}
+
+\noindent The following units of {\bf mass} are recognised:\newline
+\noindent the {\tt carat}, the {\tt drachm}, the {\tt earth\_\-mass}, the {\tt grain}, the {\tt gram}, the {\tt gramme}, the {\tt hundredweight\_\-UK}, the {\tt hundredweight\_\-US}, the {\tt jupiter\_\-mass}, the {\tt kilogram}, the {\tt long\_\-ton}, the {\tt mina}, the {\tt ounce}, the {\tt planck\_\-mass}, the {\tt pound}, the {\tt shekel}, the {\tt short\_\-ton}, the {\tt slug}, the {\tt solar\_\-mass}, the {\tt stone}, the {\tt talent}, the {\tt tonne} and the {\tt troy\_\-ounce}.\vspace{5mm}
+
+\noindent The following units of {\bf moles} are recognised:\newline
+\noindent the {\tt mole}.\vspace{5mm}
+
+\noindent The following units of {\bf momentum} are recognised:\newline
+\noindent the {\tt planck\_\-momentum}.\vspace{5mm}
+
+\noindent The following units of {\bf potential} are recognised:\newline
+\noindent the {\tt planck\_\-voltage} and the {\tt volt}.\vspace{5mm}
+
+\noindent The following units of {\bf power} are recognised:\newline
+\noindent the {\tt horsepower}, the {\tt lumen}, the {\tt lux}, the {\tt planck\_\-power}, the {\tt solar\_\-luminosity} and the {\tt watt}.\vspace{5mm}
+
+\noindent The following units of {\bf pressure} are recognised:\newline
+\noindent the {\tt atmosphere}, the {\tt bar}, the {\tt barye}, the {\tt inch\_\-of\_\-mercury}, the {\tt inch\_\-of\_\-water}, the {\tt pascal} and the {\tt pound\_\-per\_\-square\_\-inch}.\vspace{5mm}
+
+\noindent The following units of {\bf radiation dose} are recognised:\newline
+\noindent the {\tt gray} and the {\tt sievert}.\vspace{5mm}
+
+\noindent The following units of {\bf resistance} are recognised:\newline
+\noindent the {\tt ohm} and the {\tt planck\_\-impedence}.\vspace{5mm}
+
+\noindent The following units of {\bf solidangle} are recognised:\newline
+\noindent the {\tt square\_\-degree} and the {\tt steradian}.\vspace{5mm}
+
+\noindent The following units of {\bf temperature} are recognised:\newline
+\noindent the {\tt degree\_\-celsius}, the {\tt degree\_\-fahrenheit}, the {\tt kelvin}, the {\tt planck\_\-temperature} and the {\tt rankin}.\vspace{5mm}
+
+\noindent The following units of {\bf thermal insulation} are recognised:\newline
+\noindent the {\tt clo} and the {\tt tog}.\vspace{5mm}
+
+\noindent The following units of {\bf time} are recognised:\newline
+\noindent the {\tt day}, the {\tt hour}, the {\tt minute}, the {\tt planck\_\-time}, the {\tt second}, the {\tt sol}, the {\tt week} and the {\tt year}.\vspace{5mm}
+
+\noindent The following units of {\bf velocity} are recognised:\newline
+\noindent the {\tt knot} and the {\tt mile\_\-per\_\-hour}.\vspace{5mm}
+
+\noindent The following units of {\bf viscosity} are recognised:\newline
+\noindent the {\tt poise}.\vspace{5mm}
+
+\noindent The following units of {\bf volume} are recognised:\newline
+\noindent the {\tt bath}, the {\tt bushel\_\-UK}, the {\tt bushel\_\-US}, the {\tt cubic\_\-centimetre}, the {\tt cubic\_\-foot}, the {\tt cubic\_\-inch}, the {\tt cubic\_\-metre}, the {\tt cup\_\-US}, the {\tt firkin\_\-UK\_\-ale}, the {\tt firkin\_\-wine}, the {\tt fluid\_\-ounce\_\-UK}, the {\tt fluid\_\-ounce\_\-US}, the {\tt gallon\_\-UK}, the {\tt gallon\_\-US}, the {\tt homer}, the {\tt kilderkin\_\-UK\_\-ale}, the {\tt litre}, the {\tt pint\_\-UK}, the {\tt pint\_\-US}, the {\tt quart\_\-UK}, the {\tt quart\_\-US}, the {\tt tablespoon} and the {\tt teaspoon}.\vspace{5mm}
+
+\noindent The following units of {\bf wavenumber} are recognised:\newline
+\noindent the {\tt kayser}.\vspace{5mm}

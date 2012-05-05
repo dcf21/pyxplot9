@@ -1,0 +1,424 @@
+% FIT_MATHS.TEX
+%
+% The documentation in this file is part of PyXPlot
+% <http://www.pyxplot.org.uk>
+%
+% Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+%               2008-2011 Ross Church
+%
+% $Id$
+%
+% PyXPlot is free software; you can redistribute it and/or modify it under the
+% terms of the GNU General Public License as published by the Free Software
+% Foundation; either version 2 of the License, or (at your option) any later
+% version.
+%
+% You should have received a copy of the GNU General Public License along with
+% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+% ----------------------------------------------------------------------------
+
+% LaTeX source for the PyXPlot Users' Guide
+
+\chapter{The {\tt fit} Command: Mathematical Details}
+\chaptermark{Details of the {\tt fit} command}
+\label{ch:fit_maths}
+
+In this section, the mathematical details of the workings of the \indcmdt{fit}
+are described. This may be of interest in diagnosing its limitations, and also
+in understanding the various quantities that it outputs after a fit is found.
+This discussion must necessarily be a rather brief treatment of a large
+subject; for a fuller account, the reader is referred to D.S.\ Sivia's {\it
+Data Analysis: A Bayesian Tutorial}.
+
+\section{Notation}
+\label{sec:bayes_notation}
+
+I shall assume that we have some function $f()$, which takes $n_\mathrm{x}$
+parameters, $x_0$...$x_{n_\mathrm{x}-1}$, the set of which may collectively be
+written as the vector $\mathbf{x}$. We are supplied a datafile, containing a
+number $n_\mathrm{d}$ of datapoints, each consisting of a set of values for
+each of the $n_\mathrm{x}$ parameters, and one for the value which we are
+seeking to make $f(\mathbf{x})$ match. I shall call of parameter values for the
+$i$th datapoint $\mathbf{x}_i$, and the corresponding value which we are trying
+to match $f_i$. The \datafile\ may contain error estimates for the values $f_i$,
+which I shall denote $\sigma_i$. If these are not supplied, then I shall
+consider these quantities to be unknown, and equal to some constant
+$\sigma_\mathrm{data}$.
+
+Finally, I assume that there are $n_\mathrm{u}$ coefficients within the
+function $f()$ that we are able to vary, corresponding to those variable names
+listed after the {\tt via} statement in the {\tt fit} command. I shall
+call these coefficients $u_0$...$u_{n_\mathrm{u}-1}$, and refer to them
+collectively as $\mathbf{u}$.
+
+I model the values $f_i$ in the supplied \datafile\ as being noisy
+Gaussian-distributed observations of the true function $f()$, and within this
+framework, seek to find that vector of values $\mathbf{u}$ which is most
+probable, given these observations. The probability of any given $\mathbf{u}$
+is written
+$\mathrm{P}\left( \mathbf{u} | \left\{ \mathbf{x}_i, f_i, \sigma_i \right\} \right)$.
+
+\section{The Probability Density Function}
+\label{sec:bayes_pdf}
+
+Bayes' Theorem states that:
+
+\begin{equation}
+\mathrm{P}\left( \mathbf{u} | \left\{ \mathbf{x}_i, f_i, \sigma_i \right\} \right) =
+\frac{
+\mathrm{P}\left( \left\{f_i \right\} | \mathbf{u}, \left\{ \mathbf{x}_i, \sigma_i \right\} \right)
+\mathrm{P}\left( \mathbf{u} | \left\{ \mathbf{x}_i, \sigma_i \right\} \right)
+}{
+\mathrm{P}\left( \left\{f_i \right\} | \left\{ \mathbf{x}_i, \sigma_i \right\} \right)
+}
+\end{equation}
+
+Since we are only seeking to maximise the quantity on the left, and the
+denominator, termed the Bayesian \textit{evidence}, is independent of
+$\mathbf{u}$, we can neglect it and replace the equality sign with a
+proportionality sign.  Furthermore, if we assume a uniform prior, that is, we
+assume that we have no prior knowledge to bias us towards certain more favoured
+values of $\mathbf{u}$, then $\mathrm{P}\left( \mathbf{u} \right)$ is also a
+constant which can be neglected. We conclude that maximising $\mathrm{P}\left(
+\mathbf{u} | \left\{ \mathbf{x}_i, f_i, \sigma_i \right\} \right)$ is
+equivalent to maximising $\mathrm{P}\left( \left\{f_i \right\} | \mathbf{u},
+\left\{ \mathbf{x}_i, \sigma_i \right\} \right)$.
+
+Since we are assuming $f_i$ to be Gaussian-distributed observations of the true
+function $f()$, this latter probability can be written as a product of
+$n_\mathrm{d}$ Gaussian distributions:
+
+\begin{equation}
+\mathrm{P}\left( \left\{f_i \right\} | \mathbf{u}, \left\{ \mathbf{x}_i, \sigma_i \right\} \right)
+=
+\prod_{i=0}^{n_\mathrm{d}-1} \frac{1}{\sigma_i\sqrt{2\pi}} \exp \left(
+\frac{
+-\left[f_i - f_\mathbf{u}(\mathbf{x}_i)\right]^2
+}{
+2 \sigma_i^2
+} \right)
+\end{equation}
+
+The product in this equation can be converted into a more computationally
+workable sum by taking the logarithm of both sides. Since logarithms are
+monotonically increasing functions, maximising a probability is equivalent to
+maximising its logarithm. We may write the logarithm $L$ of $\mathrm{P}\left(
+\mathbf{u} | \left\{ \mathbf{x}_i, f_i, \sigma_i \right\} \right)$ as:
+
+\begin{equation}
+L = \sum_{i=0}^{n_\mathrm{d}-1}
+\left( \frac{
+-\left[f_i - f_\mathbf{u}(\mathbf{x}_i)\right]^2
+}{
+2 \sigma_i^2
+} \right) + k
+\end{equation}
+
+\noindent where $k$ is some constant which does not affect the maximisation
+process. It is this quantity, the familiar sum-of-square-residuals, that we
+numerically maximise to find our best-fitting set of parameters, which I shall
+refer to from here on as $\mathbf{u}^0$.
+
+\section{Estimating the Error in $\mathbf{u}^0$}
+
+To estimate the error in the best-fitting parameter values that we find, we
+assume $\mathrm{P}\left( \mathbf{u} | \left\{ \mathbf{x}_i, f_i, \sigma_i
+\right\} \right)$ to be approximated by an $n_\mathrm{u}$-dimensional Gaussian
+distribution around $\mathbf{u}^0$. Taking a Taylor expansion of
+$L(\mathbf{u})$ about $\mathbf{u}^0$, we can write:
+
+\begin{eqnarray}
+L(\mathbf{u}) & = & L(\mathbf{u}^0) +
+    \underbrace{
+      \sum_{i=0}^{n_\mathrm{u}-1} \left( u_i - u^0_i \right)
+      \left.\frac{\partial L}{\partial u_i}\right|_{\mathbf{u}^0}
+    }_{\textrm{Zero at $\mathbf{u}^0$ by definition}} + \label{eqa:L_taylor_expand}\\
+& & \sum_{i=0}^{n_\mathrm{u}-1} \sum_{j=0}^{n_\mathrm{u}-1} \frac{\left( u_i - u^0_i \right) \left( u_j - u^0_j \right)}{2}
+    \left.\frac{\partial^2 L}{\partial u_i \partial u_j}\right|_{\mathbf{u}^0} +
+    \mathcal{O}\left( \mathbf{u} - \mathbf{u}^0\right)^3 \nonumber
+\end{eqnarray}
+
+Since the logarithm of a Gaussian distribution is a parabola, the quadratic
+terms in the above expansion encode the Gaussian component of the probability
+distribution $\mathrm{P}\left( \mathbf{u} | \left\{ \mathbf{x}_i, f_i, \sigma_i
+\right\} \right)$ about $\mathbf{u}^0$.\footnote{The use of this is called
+\textit{Gauss' Method}. Higher order terms in the expansion represent any
+non-Gaussianity in the probability distribution, which we neglect. See MacKay,
+D.J.C., \textit{Information Theory, Inference and Learning Algorithms}, CUP
+(2003).} We may write the sum of these terms, which we denote $Q$, in matrix
+form:
+
+\begin{equation}
+Q = \frac{1}{2} \left(\mathbf{u} - \mathbf{u}^0\right)^\mathbf{T} \mathbf{A} \left(\mathbf{u} - \mathbf{u}^0\right)
+\label{eqn:Q_vector}
+\end{equation}
+
+\noindent where the superscript $^\mathbf{T}$ represents the transpose of the
+vector displacement from $\mathbf{u}^0$, and $\mathbf{A}$ is the Hessian matrix
+of $L$, given by:
+
+\begin{equation}
+A_{ij} = \nabla\nabla L = \left.\frac{\partial^2 L}{\partial u_i \partial u_j}\right|_{\mathbf{u}^0}
+\end{equation}
+\index{Hessian matrix}
+
+This is the Hessian matrix which is output by the {\tt fit} command. In
+general, an $n_\mathrm{u}$-dimensional Gaussian distribution such as that given
+by Equation~(\ref{eqa:L_taylor_expand}) yields elliptical contours of
+equi-probability in parameter space, whose principal axes need not be aligned
+with our chosen coordinate axes -- the variables $u_0 ... u_{n_u-1}$. The
+eigenvectors $\mathbf{e}_i$ of $\mathbf{A}$ are the principal axes of these
+ellipses, and the corresponding eigenvalues $\lambda_i$ equal $1/\sigma_i^2$,
+where $\sigma_i$ is the standard deviation of the probability density function
+along the direction of these axes.
+
+This can be visualised by imagining that we diagonalise $\mathbf{A}$, and
+expand Equation~(\ref{eqn:Q_vector}) in our diagonal basis. The resulting
+expression for $L$ is a sum of square terms; the cross terms vanish in this
+basis by definition. The equations of the equi-probability contours become the
+equations of ellipses:
+
+\begin{equation}
+Q = \frac{1}{2} \sum_{i=0}^{n_\mathrm{u}-1} A_{ii} \left(u_i - u^0_i\right)^2 = k
+\end{equation}
+
+\noindent where $k$ is some constant. By comparison with the equation for the
+logarithm of a Gaussian distribution, we can associate $A_{ii}$ with
+$-1/\sigma_i^2$ in our eigenvector basis.
+
+The problem of evaluating the standard deviations of our variables $u_i$ is
+more complicated, however, as we are attempting to evaluate the width of these
+elliptical equi-probability contours in directions which are, in general, not
+aligned with their principal axes. To achieve this, we first convert our
+Hessian matrix into a covariance matrix.
+
+\section{The Covariance Matrix}
+\index{covariance matrix}
+
+The terms of the covariance matrix $V_{ij}$ are defined by:
+
+\begin{equation}
+V_{ij} = \left< \left(u_i - u^0_i\right) \left(u_j - u^0_j\right) \right>
+\label{eqn:def_covar}
+\end{equation}
+
+\noindent Its leading diagonal terms may be recognised as equalling the
+variances of each of our $n_\mathrm{u}$ variables; its cross terms measure the
+correlation between the variables. If a component $V_{ij} > 0$, it implies that
+higher estimates of the coefficient $u_i$ make higher estimates of $u_j$ more
+favourable also; if $V_{ij} < 0$, the converse is true.
+
+It is a standard statistical result that $\mathbf{V} = (-\mathbf{A})^{-1}$. In
+the remainder of this section we prove this; readers who are willing to accept
+this may skip onto Section~\ref{sec:correlation_matrix}.
+
+Using $\Delta u_i$ to denote $\left(u_i - u^0_i\right)$, we may proceed by
+rewriting Equation~(\ref{eqn:def_covar}) as:
+
+\begin{eqnarray}
+V_{ij} & = & \idotsint_{u_i=-\infty}^{\infty}
+\Delta u_i \Delta u_j
+\mathrm{P}\left(
+\mathbf{u} | \left\{ \mathbf{x}_i, f_i, \sigma_i \right\} \right)
+\,\mathrm{d}^{n_\mathrm{u}}\mathbf{u} \\
+ & = & \frac{
+\idotsint_{u_i=-\infty}^{\infty} \Delta u_i \Delta u_j \exp(-Q) \,\mathrm{d}^{n_\mathrm{u}}\mathbf{u}
+}{
+\idotsint_{u_i=-\infty}^{\infty} \exp(-Q) \,\mathrm{d}^{n_\mathrm{u}}\mathbf{u}
+}
+\nonumber
+\end{eqnarray}
+
+The normalisation factor in the denominator of this expression, which we denote
+as $Z$, the \textit{partition function}, may be evaluated by
+$n_\mathrm{u}$-dimensional Gaussian integration, and is a standard result:
+
+\begin{eqnarray}
+Z & = & \idotsint_{u_i=-\infty}^{\infty} \exp\left(\frac{1}{2} \Delta \mathbf{u}^\mathbf{T} \mathbf{A} \Delta \mathbf{u} \right) \,\mathrm{d}^{n_\mathrm{u}}\mathbf{u} \\
+& = & \frac{(2\pi)^{n_\mathrm{u}/2}}{\mathrm{Det}(\mathbf{-A})} \nonumber
+\end{eqnarray}
+
+Differentiating $\log_e(Z)$ with respect of any given component of the Hessian
+matrix $A_{ij}$ yields:
+
+\begin{equation}
+-2 \frac{\partial}{\partial A_{ij}} \left[ \log_e(Z) \right] = \frac{1}{Z}
+\idotsint_{u_i=-\infty}^{\infty} \Delta u_i \Delta u_j \exp(-Q) \,\mathrm{d}^{n_\mathrm{u}}\mathbf{u}
+\end{equation}
+
+\noindent which we may identify as equalling $V_{ij}$:
+
+\begin{eqnarray}
+\label{eqa:v_zrelate}
+V_{ij} & = & -2 \frac{\partial}{\partial A_{ij}} \left[ \log_e(Z) \right] \\
+& = & -2 \frac{\partial}{\partial A_{ij}} \left[ \log_e((2\pi)^{n_\mathrm{u}/2}) - \log_e(\mathrm{Det}(\mathbf{-A})) \right] \nonumber \\
+& = & 2 \frac{\partial}{\partial A_{ij}} \left[ \log_e(\mathrm{Det}(\mathbf{-A})) \right] \nonumber
+\end{eqnarray}
+
+\noindent This expression may be simplified by recalling that the determinant
+of a matrix is equal to the scalar product of any of its rows with its
+cofactors, yielding the result:
+
+\begin{equation}
+\frac{\partial}{\partial A_{ij}} \left[\mathrm{Det}(\mathbf{-A})\right] = -a_{ij}
+\end{equation}
+
+\noindent where $a_{ij}$ is the cofactor of $A_{ij}$. Substituting this into
+Equation~(\ref{eqa:v_zrelate}) yields:
+
+\begin{equation}
+V_{ij} = \frac{-a_{ij}}{\mathrm{Det}(\mathbf{-A})}
+\end{equation}
+
+Recalling that the adjoint $\mathbf{A}^\dagger$ of the Hessian matrix is the
+matrix of cofactors of its transpose, and that $\mathbf{A}$ is symmetric, we
+may write:
+
+\begin{equation}
+V_{ij} = \frac{-\mathbf{A}^\dagger}{\mathrm{Det}(\mathbf{-A})} \equiv (-\mathbf{A})^{-1}
+\end{equation}
+
+\noindent which proves the result stated earlier.
+
+\section{The Correlation Matrix}
+\label{sec:correlation_matrix}
+\index{correlation matrix}
+
+Having evaluated the covariance matrix, we may straightforwardly find the
+standard deviations in each of our variables, by taking the square roots of the
+terms along its leading diagonal. For datafiles where the user does not specify
+the standard deviations $\sigma_i$ in each value $f_i$, the task is not quite
+complete, as the Hessian matrix depends critically upon these uncertainties,
+even if they are assumed the same for all of our $f_i$. This point is returned
+to in Section~\ref{sec:finding_sigmai}.
+
+The correlation matrix $\mathbf{C}$, whose terms are given by:
+
+\begin{equation}
+C_{ij} = \frac{V_{ij}}{\sigma_i\sigma_j}
+\end{equation}
+
+\noindent may be considered a more user-friendly version of the covariance
+matrix for inspecting the correlation between parameters. The leading diagonal
+terms are all clearly equal unity by construction. The cross terms lie in the
+range $-1 \leq C_{ij} \leq 1$, the upper limit of this range representing
+perfect correlation between parameters, and the lower limit perfect
+anti-correlation.
+
+\section{Finding $\sigma_i$}
+\label{sec:finding_sigmai}
+
+Throughout the preceding sections, the uncertainties in the supplied target
+values $f_i$ have been denoted $\sigma_i$ (see
+Section~\ref{sec:bayes_notation}).  The user has the option of supplying these
+in the source datafile, in which case the provisions of the previous sections
+are now complete; both best-estimate parameter values and their uncertainties
+can be calculated. The user may also, however, leave the uncertainties in $f_i$
+unstated, in which case, as described in Section~\ref{sec:bayes_notation}, we
+assume all of the data values to have a common uncertainty
+$\sigma_\mathrm{data}$, which is an unknown.
+
+In this case, where $\sigma_i = \sigma_\mathrm{data} \,\forall\, i$, the best
+fitting parameter values are independent of $\sigma_\mathrm{data}$, but the
+same is not true of the uncertainties in these values, as the terms of the
+Hessian matrix do depend upon $\sigma_\mathrm{data}$. We must therefore
+undertake a further calculation to find the most probable value of
+$\sigma_\mathrm{data}$, given the data. This is achieved by maximising
+$\mathrm{P}\left( \sigma_\mathrm{data} | \left\{ \mathbf{x}_i, f_i \right\}
+\right)$. Returning once again to Bayes' Theorem, we can write:
+
+\begin{equation}
+\mathrm{P}\left( \sigma_\mathrm{data} | \left\{ \mathbf{x}_i, f_i \right\} \right)
+= \frac{
+\mathrm{P}\left( \left\{ f_i \right\} | \sigma_\mathrm{data}, \left\{ \mathbf{x}_i \right\} \right)
+\mathrm{P}\left( \sigma_\mathrm{data} | \left\{ \mathbf{x}_i \right\} \right)
+}{
+\mathrm{P}\left( \left\{ f_i \right\} | \left\{ \mathbf{x}_i \right\} \right)
+}
+\end{equation}
+
+As before, we neglect the denominator, which has no effect upon the
+maximisation problem, and assume a uniform prior $\mathrm{P}\left(
+\sigma_\mathrm{data} | \left\{ \mathbf{x}_i \right\} \right)$. This reduces the
+problem to the maximisation of $\mathrm{P}\left( \left\{ f_i \right\} |
+\sigma_\mathrm{data}, \left\{ \mathbf{x}_i \right\} \right)$, which we may
+write as a marginalised probability distribution over $\mathbf{u}$:
+
+\begin{eqnarray}
+\label{eqa:p_f_given_sigma}
+\mathrm{P}\left( \left\{ f_i \right\} | \sigma_\mathrm{data}, \left\{ \mathbf{x}_i \right\} \right) =
+\idotsint_{-\infty}^{\infty}
+&
+\mathrm{P}\left( \left\{ f_i \right\} | \sigma_\mathrm{data}, \left\{ \mathbf{x}_i \right\}, \mathbf{u} \right)
+\times & \\ &
+\mathrm{P}\left( \mathbf{u} | \sigma_\mathrm{data}, \left\{ \mathbf{x}_i \right\} \right)
+\,\mathrm{d}^{n_\mathrm{u}}\mathbf{u}
+& \nonumber
+\end{eqnarray}
+
+Assuming a uniform prior for $\mathbf{u}$, we may neglect the latter term in
+the integral, but even with this assumption, the integral is not generally
+tractable, as $\mathrm{P}\left( \left\{ f_i \right\} | \sigma_\mathrm{data},
+\left\{ \mathbf{x}_i \right\}, \left\{ \mathbf{u}_i \right\} \right)$ may well
+be multimodal in form. However, if we neglect such possibilities, and assume
+this probability distribution to be approximate a Gaussian \textit{globally},
+we can make use of the standard result for an $n_\mathrm{u}$-dimensional Gaussian integral:
+
+\begin{equation}
+\idotsint_{-\infty}^{\infty}
+\exp \left(
+\frac{1}{2}\mathbf{u}^\mathbf{T} \mathbf{A} \mathbf{u}
+\right) \,\mathrm{d}^{n_\mathrm{u}}\mathbf{u}
+=
+\frac{
+(2\pi)^{n_\mathrm{u}/2}
+}{
+\sqrt{\mathrm{Det}\left(-\mathbf{A}\right)}
+}
+\end{equation}
+
+\noindent We may thus approximate Equation~(\ref{eqa:p_f_given_sigma}) as:
+
+\begin{eqnarray}
+\mathrm{P}\left( \left\{ f_i \right\} | \sigma_\mathrm{data}, \left\{ \mathbf{x}_i \right\} \right)
+& \approx &
+\mathrm{P}\left( \left\{ f_i \right\} | \sigma_\mathrm{data}, \left\{ \mathbf{x}_i \right\}, \mathbf{u}^0 \right)
+\times \\
+& &
+\mathrm{P}\left( \mathbf{u}^0 | \sigma_\mathrm{data}, \left\{ \mathbf{x}_i, f_i \right\} \right)
+\frac{
+(2\pi)^{n_\mathrm{u}/2}
+}{
+\sqrt{\mathrm{Det}\left(-\mathbf{A}\right)}
+}
+\nonumber
+\end{eqnarray}
+
+As in Section~\ref{sec:bayes_pdf}, it is numerically easier to maximise this
+quantity via its logarithm, which we denote $L_2$, and can write as:
+
+\begin{eqnarray}
+L_2 & = &
+\sum_{i=0}^{n_\mathrm{d}-1}
+\left(
+\frac{
+-\left[f_i - f_{\mathbf{u}^0}(\mathbf{x}_i)\right]^2
+}{
+2\sigma_\mathrm{data}^2
+}
+- \log_e \left(2\pi\sqrt{\sigma_\mathrm{data}} \right)
+\right) +
+\\ & & \nonumber
+\log_e \left(
+\frac{
+(2\pi)^{n_\mathrm{u}/2}
+}{
+\sqrt{\mathrm{Det}\left(-\mathbf{A}\right)}
+}
+\right)
+\end{eqnarray}
+
+This quantity is maximised numerically, a process simplified by the fact that
+$\mathbf{u}^0$ is independent of $\sigma_\mathrm{data}$.

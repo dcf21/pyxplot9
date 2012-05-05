@@ -1,0 +1,56 @@
+# EX_MULTIAXES.PPL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_multiaxes"
+load "examples/fig_init.ppl"
+
+# Main body of figure script
+set numeric display latex
+set unit angle nodimensionless
+set log x y
+set key bottom right
+set ylabel "Flux density"   ; set unit preferred W/Hz/m**2/sterad
+set x1label "Wavelength"
+set x2label "Frequency"     ; set unit of frequency Hz
+set x3label "Photon Energy" ; set unit of energy eV
+set axis x2 linked x1 using phy_c/x
+set axis x3 linked x2 using phy_h*x
+set xtics unit(0.1*um),10
+set x2tics 1e12*unit(Hz),10
+set x3tics 0.01*unit(eV),10
+set xrange [80*unit(nm):unit(mm)]
+set yrange [1e-20*unit(W/Hz/m**2/sterad):]
+
+bb(wlen,T) = Bv(phy_c/wlen,T)
+
+plot bb(x,  30) title "$T=  30$\,K", \
+     bb(x, 100) title "$T= 100$\,K", \
+     bb(x, 300) title "$T= 300$\,K", \
+     bb(x,1000) title "$T=1000$\,K", \
+     bb(x,3000) title "$T=3000$\,K"
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

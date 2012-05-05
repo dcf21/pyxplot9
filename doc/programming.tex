@@ -1,0 +1,967 @@
+% PROGRAMMING.TEX
+%
+% The documentation in this file is part of PyXPlot
+% <http://www.pyxplot.org.uk>
+%
+% Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+%               2008-2011 Ross Church
+%               2010-2011 Zoltan Voros
+%
+% $Id$
+%
+% PyXPlot is free software; you can redistribute it and/or modify it under the
+% terms of the GNU General Public License as published by the Free Software
+% Foundation; either version 2 of the License, or (at your option) any later
+% version.
+%
+% You should have received a copy of the GNU General Public License along with
+% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+% ----------------------------------------------------------------------------
+
+% LaTeX source for the PyXPlot Users' Guide
+
+\chapter{Programming and Flow Control}
+
+In this chapter we describe the facilities which PyXPlot has for automating
+repetitive tasks. We begin by introducing string variables, which can be useful
+for auto-generating titles and labels for graphs which are being produced in
+batch jobs. We then discuss the loop constructs which make it possible to run
+such batch jobs, producing similar plots of many different \datafile s or
+performing calculations in an iterative fashion. Finally, we turn to PyXPlot's
+interaction with the shell and filing system in which it operates, introducing
+a simple framework for automatically re-executing PyXPlot scripts whenever they
+change, allowing plots to be automatically regenerated whenever the scripts
+used to produce them are modified.
+
+\section{String Variables}
+\label{sec:stringvars}
+\index{variables!string}
+
+Variables may hold not only numerical quantities, but also strings of text.  In
+the course of this chapter, we will see several examples where string variables
+are used either to generate automatic labels for graphs plotted in batch jobs,
+or to read strings of text from columns of \datafile s. String variables can be
+assigned in a analogous manner to numeric variables, and can subsequently be
+used anywhere where a quoted string could have been used, as in the example:
+\begin{verbatim}
+plotname = "Insert title here"
+set title plotname
+\end{verbatim}
+
+\subsection{The String Substitution Operator}
+\label{sec:stringsubop}
+
+Most string manipulations are performed using the string substitution operator,
+{\tt \%}\index{\% operator@{\tt \%} operator}. This operator should be
+preceded by a format string, such as {\tt x=\%f}, in which tokens such as {\tt
+\%f} mark places where numbers and strings should be substituted. The
+substitution operator is followed by a bracketed list of the quantities which
+should be substituted in place of these tokens in the format string. This
+behaviour is similar to that of the Python programming language's \%
+operator\footnote{Unlike in Python, the brackets are obligatory; {\tt '\%d'\%2}
+is {\it not} valid in PyXPlot, and should be written as {\tt '\%d'\%(2)}.} and
+of the {\tt printf} statement in C.  For example, to concatenate the two
+strings contained in the variables {\tt a} and {\tt b} into a single string
+variable {\tt c}, one would issue the command:\index{string
+operators!concatenation}
+\begin{verbatim}
+c = "%s%s"%(a,b)
+\end{verbatim}
+
+One application of this operator might be to label plots with the title of the
+\datafile\ being plotted, as in the following example:
+\begin{verbatim}
+filename="data_file.dat"
+title="A plot of the data in {\tt %s}."%(filename)
+set title title
+plot filename
+\end{verbatim}
+
+The syntax of the substitution tokens placed in the format string is similar to
+that used by many other languages and is as follows. All substitution tokens
+begin with a {\tt \%} character, after which there may be placed, in order:
+
+\begin{enumerate}
+\item An optional minus sign, to specify that the substituted item should be left-justified.
+\item An optional integer specifying the minimum character width of the substituted item, or a {\tt *} (see below).
+\item An optional decimal point/period ({\tt .}) separator.
+\item An optional integer, or a {\tt *} (see below), specifying either (a) the maximum number of characters to be printed from a string, or (b) the number of decimal places of a floating-point number to be displayed, or (c) the minimum number of digits of an integer to be displayed, padded to the left with zeros.
+\item A conversion character.
+\end{enumerate}
+
+\noindent The conversion character is a single character which specifies what
+kind of substitution should take place. Its possible values are listed in
+Table~\ref{tab:conversion_chars}. Note that where numerical quantities with
+physical units are provided, the physical units are not displayed unless the
+{\tt \%s} token is used. Although it is not an error to pass a quantity with
+physical units to, for example, the {\tt \%f} substitution token, it is good
+practice to divide the quantity by a suitable unit first to make it
+dimensionless, to be certain of the unit in which it will be displayed.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|>{\columncolor{LightGrey}}l>{\columncolor{LightGrey}}p{9cm}|}
+\hline
+{\bf Character} & {\bf Substitutes} \\
+\hline
+{\tt d}, {\tt i}   & An integer value. \\
+{\tt e}, {\tt E}   & A floating-point value in scientific notation using either the character {\tt e} or {\tt E} to indicate exponentiation. \\
+{\tt f}            & A floating-point value without the use of scientific notation. \\
+{\tt g}, {\tt G}   & A floating-point value, either using scientific notation, if the exponent is greater than the precision or less than $-4$, otherwise without the use of scientific notation. \\
+{\tt o}            & An integer value in octal (base~8). \\
+{\tt s}, {\tt S}, {\tt c} & A string, if a string is provided, or a numerical quantity, with units, if such is provided. \\
+{\tt x}, {\tt X}   & An integer value in hexadecimal (base~16). \\
+{\tt \%}           & A literal {\tt \%} sign. \\
+\hline
+\end{tabular}
+\end{center}
+\caption{The conversion characters recognised by the string substitution operator, {\tt \%}.}
+\label{tab:conversion_chars}
+\end{table}
+
+Where the character {\tt *} is specified for either the character width or the
+precision of the substitution token, an integer is read from the list of items
+to be substituted, as happens in C's {\tt printf} command:
+
+\vspace{3mm}
+\noindent{\tt pyxplot> {\bf print "\%.*f"\%(3,pi)}}\newline
+\noindent{\tt 3.142}\newline
+\noindent{\tt pyxplot> {\bf print "\%.*f"\%(6,pi)}}\newline
+\noindent{\tt 3.141593}
+\vspace{3mm}
+
+\subsection{Regular Expressions}
+
+String variables can be modified using the search-and-replace string
+operator\index{string operators!search and replace}\footnote{Programmers with
+experience of {\tt perl} will recognise this syntax.}, =$\sim$\index{=$\sim$
+operator}, which takes a regular expression with a syntax similar to that
+expected by the shell command {\tt sed}\index{sed shell command@{\tt sed} shell
+command} and applies it to the relevant string variable.\footnote{Regular
+expression syntax is a massive subject, and is beyond the scope of this manual.
+The official GNU documentation for the {\tt sed} command is heavy reading, but
+there are many more accessible tutorials on the web.}\index{regular
+expressions} In the following example, the first instance of the letter {\tt s} in
+the string variable {\tt twister} is replaced with the letters {\tt th}:
+
+\vspace{3mm}
+\noindent{\tt pyxplot> {\bf twister="seven silver soda syphons"}}\newline
+\noindent{\tt pyxplot> {\bf twister =$\sim$ s/s/th/}}\newline
+\noindent{\tt pyxplot> {\bf print twister}}\newline
+\noindent{\tt theven silver soda syphons}
+\vspace{3mm}
+
+Note that only the {\tt s} (substitute) command of {\tt sed} is implemented in
+PyXPlot. Any character can be used in place of the {\tt /} characters in the
+above example, for example:
+
+\begin{verbatim}
+twister =~ s's'th'
+\end{verbatim}
+
+\noindent Flags can be passed, as in {\tt sed} or {\tt perl}, to modify the
+precise behaviour of the regular expression. In the following example the {\tt
+g} flag is used to perform a global search-and-replace of all instances of the
+letter {\tt s} with the letters {\tt th}:
+
+\vspace{3mm}
+\noindent{\tt pyxplot> {\bf twister="seven silver soda syphons"}}\newline
+\noindent{\tt pyxplot> {\bf twister =$\sim$ s/s/th/g}}\newline
+\noindent{\tt pyxplot> {\bf print twister}}\newline
+\noindent{\tt theven thilver thoda thyphonth}
+\vspace{3mm}
+
+\noindent Table~\ref{tab:re_flags} lists all of the regular expression flags
+recognised by the =$\sim$ operator.
+
+\begin{table}
+{\footnotesize
+\begin{tabular}{|>{\columncolor{LightGrey}}p{5mm}>{\columncolor{LightGrey}}p{10.5cm}|}
+\hline
+{\tt g} & Replace {\it all} matches of the pattern; by default, only the first match is replaced. \\
+{\tt i} & Perform case-insensitive matching, such that expressions like {\tt [A-Z]} will match lowercase letters, too. \\
+{\tt l} & Make {\tt $\backslash$w}, {\tt $\backslash$W}, {\tt $\backslash$b}, {\tt $\backslash$B}, {\tt $\backslash$s} and {\tt $\backslash$S} dependent on the current locale. \\
+{\tt m} & When specified, the pattern character {\tt \^{}} matches the beginning of the string and the beginning of each line immediately following each newline. The pattern character {\tt \$} matches at the end of the string and the end of each line immediately preceding each newline. By default, {\tt \^{}} matches only the beginning of the string, and {\tt \$} only the end of the string and immediately before the newline, if present, at the end of the string. \\
+{\tt s} & Make the {\tt .} special character match any character at all, including a newline; without this flag, {\tt .} will match anything except a newline. \\
+{\tt u} & Make {\tt $\backslash$w}, {\tt $\backslash$W}, {\tt $\backslash$b}, {\tt $\backslash$B}, {\tt $\backslash$s} and {\tt $\backslash$S} dependent on the Unicode character properties database. \\
+{\tt x} & This flag allows the user to write regular expressions that look nicer. Whitespace within the pattern is ignored, except when in a character class or preceded by an un-escaped backslash. When a line contains a {\tt \#}, neither in a character class nor preceded by an un-escaped backslash, all characters from the left-most such {\tt \#} through to the end of the line are ignored. \\
+\hline
+\end{tabular}}
+\caption{A list of the flags accepted by the =$\sim$ operator. Most are rarely used, but the {\tt g} flag is very useful.}
+\label{tab:re_flags}
+\end{table}
+
+\subsection{String Manipulation Functions}
+
+The following functions are provided for performing simple manipulations upon
+strings:
+
+\noindent
+\begin{itemize}
+\item {\tt strcmp(s1,s2)}\indfun{strcmp($s1,s2$)} returns zero if the strings {\tt s1} and {\tt s2} are the same, one if {\tt s1} should be placed after {\tt s2} in alphabetical sequence, minus one if {\tt s1} should be placed before {\tt s2} in alphabetical sequence.
+\item {\tt strlen(s)}\indfun{strlen($s$)} returns the integer length of the string variable {\tt s}. An error is returned if {\tt s} is not a string variable.
+\item {\tt strlower(s)}\indfun{strlower($s$)} returns a version of the string {\tt s} in which all uppercase alphabetical characters are converted to lowercase characters.
+\item {\tt strrange(s,i,j)}\indfun{strrange($s,i,j$)} returns a slice of the string $s$, containing only the $i$th through until the $j$th characters of the string. If either $i$ or $j$ are negative, they are counted from the end of the string; for example, $-1$ refers to the last character of the string.
+\item {\tt strupper(s)}\indfun{strupper($s$)} returns a version of the string {\tt s} in which all lowercase alphabetical characters are converted to uppercase characters.
+\end{itemize}
+
+\noindent
+The following simple examples demonstrate the use of these functions:
+
+\vspace{3mm}
+\noindent{\tt pyxplot> {\bf x="It was the best of times, it was the worst of times"}}\newline
+\noindent{\tt pyxplot> {\bf print strlen(x)}}\newline
+\noindent{\tt 51}\newline
+\noindent{\tt pyxplot> {\bf print strrange(x,0,24)}}\newline
+\noindent{\tt It was the best of times}\newline
+\noindent{\tt pyxplot> {\bf print strrange(x,-25,0)}}\newline
+\noindent{\tt it was the worst of times}\newline
+\noindent{\tt pyxplot> {\bf print strupper(x)}}\newline
+\noindent{\tt IT WAS THE BEST OF TIMES, IT WAS THE WORST OF TIMES}
+\vspace{3mm}
+
+\section{Conditionals}
+
+The {\tt if} statement\indcmd{if} can be used to conditionally execute a series
+of commands only when a certain criterion is satisfied. In its simplest form,
+its syntax is
+
+\begin{verbatim}
+if <expression> {
+  ....
+ }
+\end{verbatim}
+
+\noindent where the expression can take the form of, for example, {\tt x<0} or
+{\tt y==1}. Note that the operator {\tt ==} is used to test the equality of two
+algebraic expressions; the operator {\tt =} is only used to assign values to
+variables and functions. A full list of the operators available can be found in
+Table~\ref{tab:operators_table}. As in many other programming languages,
+algebraic expressions are deemed to be true if they evaluate to any non-zero
+value, and false if they exactly equal zero. Thus, the following two examples
+are entirely legal syntax, and the first {\tt print} statement will execute,
+but the second will not:
+
+\begin{verbatim}
+if 2*3 {
+  print "2*3 is True"
+ }
+
+if 2-2 {
+  print "2-2 is False"
+ }
+\end{verbatim}
+
+\noindent The variables {\tt True} and {\tt False} are predefined constants,
+which evaluate to~1 and~0 respectively, making the following syntax legal:
+
+\begin{verbatim}
+if False {
+  print "Never gets here"
+ }
+\end{verbatim}
+
+As in C, the block of commands which are to be conditionally executed is
+enclosed in braces (i.e.\ {\tt \{~\}}).  There are, however, some rules about
+the arrangement of whitespace.  The block of commands must begin on a new line
+after the {\tt if} statement. The closing brace must be on a line by itself at
+the end of the block. Alternatively, semi-colons may, as always, be used in the
+place of new lines. The opening brace may be placed either on the same line as
+the {\tt if} statement, or on the following line:
+
+\begin{verbatim}
+if (x==0)
+ {
+  print "x is zero"
+ }
+
+if (x==0) { ; print "x is zero" ; }
+\end{verbatim}
+
+After such an {\tt if} clause, it is possible to string together further
+conditions in {\tt else if} clauses, perhaps with a final {\tt else} clause, as
+in the example:
+
+\begin{verbatim}
+if (x==0)
+ {
+  print "x is zero"
+ } else if (x>0) {
+  print "x is positive"
+ } else {
+  print "x is negative"
+ }
+\end{verbatim}
+
+Here, as previously, the first script block is executed if the first
+conditional, {\tt x==0}, is true. If this script block is not executed, the
+second conditional, {\tt x>0}, is then tested. If this is true, then the second
+script block is executed.  The final script block, following the {\tt else}, is
+executed if none of the preceding conditionals have been true. Any number of
+{\tt else if} statements can be chained one after another, and a final {\tt
+else} statement can always be optionally supplied. The {\tt else} and {\tt else
+if} statements must always be placed on the same line as the closing brace of
+the preceding script block.
+
+The precise way in which a string of {\tt else if} statements are arranged in a
+PyXPlot script is a matter of taste: the following is a more compact but
+equivalent version of the example given above:
+
+\begin{verbatim}
+if      (x==0) { ; print "x is zero"     ; } \
+else if (x> 0) { ; print "x is positive" ; } \
+else           { ; print "x is negative" ; }
+\end{verbatim}
+
+\section{For Loops}
+
+For loops may be used to execute a series of commands multiple times. PyXPlot's
+\indcmdt{for} has the syntax:
+
+\begin{verbatim}
+for <variable> = <start> to <end> {step <step>} {loopname <name>}
+ {
+  ....
+ }
+\end{verbatim}
+
+\noindent The first time that the script block is executed, the variable named
+at the start of the {\tt for} statement has the value given for {\tt start}.
+Upon each iteration of the loop, this is incremented by amount {\tt step}. The
+loop finishes when the value exceeds {\tt end}. If {\tt step} is negative, then
+{\tt end} is required to be less than or equal to {\tt start}. A step size of
+zero is considered to be an error.  The iterator variable can have any physical
+dimensions, so long as {\tt start}, {\tt end} and {\tt step} all have the same
+dimensions, but the iterator variable must always be a real number. If no step
+size is given then a step size of unity is assumed.  As an example, the
+following script would print the numbers 0, 2, 4, 6 and 8:
+
+\begin{verbatim}
+for x = 0 to 10 step 2
+ {
+  print x
+ }
+\end{verbatim}
+
+\noindent The same rules concerning the placement of brace characters apply to
+the \indcmdt{for} as to the {\tt if} command.
+
+The optional {\tt loopname} which can be specified in the {\tt for} statement
+is used in conjunction with the {\tt break} and {\tt continue} statements which
+will be introduced in Section~\ref{sec:breakcontinue}.
+
+\section{Foreach Loops}
+\indcmd{foreach}
+\index{wildcards}
+
+Foreach loops may be used to run a script block once for each item in a list.
+The list may either take the form of an explicit bracketed comma-separated list
+of items, or the form of one or more filename wildcards, as in the following
+examples:
+
+\begin{verbatim}
+foreach x in (-1,pi,10)
+ {
+  print x
+ }
+
+foreach x in "*.dat"
+ {
+  print x
+ }
+\end{verbatim}
+
+The first of these loops would iterate three times, with the variable {\tt x}
+holding the values $-1$, $\pi$ and $10$ in turn. The second of these loops
+would search for any \datafile s in the user's current directory with filenames
+ending in {\tt .dat} and iterate for each of them. As previously, the wildcard
+character {\tt *} matches any string of characters, and the character {\tt ?}
+matches any single character. Thus, {\tt foo?.dat} would match {\tt foo1.dat}
+and {fooX.dat}, but not {\tt foo.dat} or {\tt foo10.dat}. The effect of the
+{\tt print} statement in this particular example would be rather similar to
+typing:
+
+\begin{verbatim}
+!ls *.dat
+\end{verbatim}
+
+The quotes around each supplied search string are compulsory if any of the
+characters in the search string are alphanumeric, but optional otherwise. Since
+both of the wildcard characters {\tt *} and {\tt ?} are non-alphanumeric, the
+quotes are compulsory in most useful cases.  An error is returned if there are
+no files in the present directory which match the supplied wildcard. The
+following example would produce plots of all of the \datafile s in the current
+directory with filenames {\tt foo\_*.dat} or {\tt bar\_*.dat} as {\tt eps}
+files with matching filenames:
+
+\begin{verbatim}
+set terminal eps
+foreach x in "foo_*.dat" "bar_*.dat"
+ {
+  outfilename =  x
+  outfilename =~ s/dat/eps/
+  set output outfilename
+  plot x using 1:2
+ }
+\end{verbatim}
+
+\section{Foreach Datum Loops}
+\label{sec:foreach_datum}
+
+Foreach datum loops are similar to foreach loops in that they run a script
+block once for each item in a list.  In this case, however, the list in
+question is the list of \datapoint s in a file. The syntax of the
+\indcmdt{foreach datum} is similar to that of the commands met in the previous
+chapter for acting upon \datafile s: the standard modifiers {\tt every}, {\tt
+index}, {\tt select} and {\tt using} can be used to select which columns of the
+\datafile, and which subset of the datapoints, should be used:
+
+\begin{verbatim}
+foreach datum i,j,name in "data.dat" using 1:2:"%s"%($3)
+ {
+  ...
+ }
+\end{verbatim}
+
+The \indcmdt{foreach datum} is followed by a comma-separated list of the
+variable(s) which are to be read from the \datafile\ on each iteration of the
+loop. The {\tt using} modifier specifies the columns or rows of data which are
+to be used to set the values of each variable. In this example, the third
+variable, {\tt name}, is set using a quoted string, indicating that it will be
+set to equal whatever string of text is found in the third column of the
+\datafile.
+
+\example{ex:meansd}{Calculating the Mean and Standard Deviation of Data}{
+The following PyXPlot script calculates the mean and standard deviation of a
+set of \datapoint s using the \indcmdt{foreach datum}:
+\nlscf
+\noindent{\tt N\_data = 0}\newline
+\noindent{\tt sum\_x  = 0}\newline
+\noindent{\tt sum\_x2 = 0}\newline
+\\
+\noindent{\tt foreach datum x in '--'}\newline
+\noindent{\tt \phantom{x}\{}\newline
+\noindent{\tt \phantom{xx}N\_data = N\_data + 1}\newline
+\noindent{\tt \phantom{xx}sum\_x  = sum\_x  + x}\newline
+\noindent{\tt \phantom{xx}sum\_x2 = sum\_x2 + x**2}\newline
+\noindent{\tt \phantom{x}\}}\newline
+\noindent{\tt 1.3}\newline
+\noindent{\tt 1.2}\newline
+\noindent{\tt 1.5}\newline
+\noindent{\tt 1.1}\newline
+\noindent{\tt 1.3}\newline
+\noindent{\tt END}\newline
+\\
+\noindent{\tt mean = sum\_x / N\_data}\newline
+\noindent{\tt SD   = sqrt(sum\_x2 / N\_data - mean**2)}\newline
+\\
+\noindent{\tt print "Mean = \%s"\%(mean)}\newline
+\noindent{\tt print "SD   = \%s"\%(SD)}
+\nlscf
+\noindent For the data supplied, a mean of $1.28$ and a standard deviation of
+$0.133$ are returned.
+}
+
+\section{While and Do Loops}
+
+The \indcmdt{while} may be used to continue running a script block until some
+stopping criterion is met. Two types of while loop are supported:
+
+\begin{verbatim}
+while <criterion> {loopname <name>}
+ {
+  ....
+ }
+
+do {loopname <name>}
+ {
+  ....
+ } while <criterion>
+\end{verbatim}
+\indcmd{do}
+
+In the former case, the enclosed script block is executed repeatedly, and the
+algebraic expression supplied to the \indcmdt{while} is tested immediately
+before each repetition. If it tests false, then the loop finishes.  The latter
+case is very similar, except that the supplied algebraic expression is tested
+immediately {\it after} each repetition. Thus, the former example may never
+actually execute the supplied script block if the looping criterion tests false
+upon the first iteration, but the latter example is always guaranteed to run
+its script block at least once.
+
+The following example would continue looping indefinitely until stopped by the
+user, since the value {\tt 1} is considered to be true:
+
+\begin{verbatim}
+while (1)
+ {
+  print "Hello, world!"
+ }
+\end{verbatim}
+
+\section{The {\tt break} and {\tt continue} statements}
+\label{sec:breakcontinue}
+\indcmd{break}
+\indcmd{continue}
+
+The {\tt break} and {\tt continue} statements may be placed within loop
+structures to interrupt their iteration. The {\tt break} statement terminates
+execution of the smallest loop currently being executed, and PyXPlot resumes
+execution at the next statement after the closing brace which marks the end of
+that loop structure. The {\tt continue} statement terminates execution of the
+{\it current iteration} of the smallest loop currently being executed, and
+execution proceeds with the next iteration of that loop, as demonstrated by the
+following pair of examples:
+
+\vspace{3mm}
+\noindent{\tt pyxplot>~{\bf for i=0 to 4 \{}}\newline
+\noindent{\tt for... >~~{\bf if (i==2) \{ ; break; \}}}\newline
+\noindent{\tt for... >~~{\bf print i}}\newline
+\noindent{\tt for... >~{\bf \}}}\newline
+\noindent{\tt 0}\newline
+\noindent{\tt 1}\newline
+\noindent{\tt pyxplot>~{\bf for i=0 to 4 \{}}\newline
+\noindent{\tt for... >~~{\bf if (i==2) \{ ; continue ; \}}}\newline
+\noindent{\tt for... >~~{\bf print i}}\newline
+\noindent{\tt for... >~{\bf \}}}\newline
+\noindent{\tt 0}\newline
+\noindent{\tt 1}\newline
+\noindent{\tt 3}
+\vspace{3mm}
+
+Note that if several loops are nested, the {\tt break} and {\tt continue}
+statements only act upon the innermost loop. If either statement is encountered
+outside of a loop structure, an error results. Optionally, the {\tt for}, {\tt
+foreach}, {\tt do} and {\tt while} commands may be supplied with a name for the
+loop, prefixed by the word {\tt loopname}, as in the examples:
+
+\begin{verbatim}
+for i=0 to 4 loopname iloop
+...
+foreach i in "*.dat" loopname DatafileLoop
+...
+\end{verbatim}
+
+\noindent When loops are given such names, the {\tt break} and {\tt continue}
+statements may be followed by the name of the loop to be broken out of,
+allowing the user to act upon loops other than the innermost one.
+
+\section{Conditional Functions}
+\indfun{conditionalN($a,b,c$)}
+\indfun{conditionalS($a,b,c$)}
+
+The pre-defined functions {\tt conditionalN()} and {\tt conditionalS()} provide
+a compact means of inserting conditional expressions into numerical and string
+expressions respectively.  Each takes three arguments, the first of which is a
+truth criterion to be tested. If the criterion is true, then the function's
+second argument is returned as its output. Otherwise, the function's third
+argument is returned. This is similar to the behaviour of C's ternary {\tt ?:}
+operator.  The {\tt conditionalN()} function should be passed two numerical
+expressions to select between, whilst the {\tt conditionalS()} function should
+be passed two string expressions, as the following examples demonstrate:
+
+\vspace{2mm}
+{\footnotesize
+\noindent{\tt pyxplot> {\bf f(x) = conditionalN(x$>$0,x,0)}}\newline
+\noindent{\tt pyxplot> {\bf print "\%s \%s \%s \%s \%s"\%(f(-2),f(-1),f(0),f(1),f(2))}}\newline
+\noindent{\tt 0 0 0 1 2}\newline
+\noindent{\tt pyxplot> {\bf x = 2}}\newline
+\noindent{\tt pyxplot> {\bf print "x is \%s"\%(conditionalS(x$>$0,"positive","negative"))}}\newline
+\noindent{\tt x is positive}\newline
+}
+
+\section{Subroutines}
+\indcmd{subroutine}
+\label{sec:subroutines}
+
+Subroutines are similar to mathematical functions (see
+Section~\ref{sec:functions}), and once defined, can be used anywhere in
+algebraic expressions, just as functions can be.  However, instead of being
+defined by a single algebraic expression, whenever a subroutine is evaluated, a
+block of PyXPlot commands of arbitrary length is executed. This gives much
+greater flexibility for implementing complex algorithms. Subroutines are
+defined using the following syntax:
+\begin{verbatim}
+subroutine <name>(<variable1>,...)
+ {
+  ...
+  return <value>
+ }
+\end{verbatim}
+Where {\tt name} is the name of the subroutine, {\tt variable1} is an argument
+taken by the subroutine, and the value passed to the {\tt return} statement is
+the value returned to the caller. Once the {\tt return} statement is reached,
+execution of the subroutine is terminated. The following two examples would
+produce entirely equivalent results:
+\begin{verbatim}
+f(x,y) = x*sin(y)
+
+subroutine f(x,y)
+ {
+  return x*sin(y)
+ }
+\end{verbatim}
+In either case, the function/subroutine could be evaluated by typing:
+\begin{verbatim}
+print f(1,pi/2)
+\end{verbatim}
+If a subroutine ends without any value being returned using the {\tt return}
+statement, then a value of zero is returned.
+
+Subroutines may serve one of two purposes. In many cases they are used to
+implement complicated mathematical functions for which no simple algebraic
+expression may be given. Secondly, they may be used to repetitively execute a
+set of commands whenever they are required. In the latter case, the subroutine
+may not have a return value, but may merely be used as a mechanism for
+encapsulating a block of commands.  In this case, the \indcmdt{call} may be
+used to execute a subroutine, discarding any return value which it may produce,
+as in the example:
+
+\vspace{3mm}
+\noindent{\tt pyxplot>~{\bf subroutine f(x,y)}}\newline
+\noindent{\tt subrtne>~~{\bf \{}}\newline
+\noindent{\tt subrtne>~~~{\bf print "\%s - \%s = \%s"\%(x,y,x-y)}}\newline
+\noindent{\tt subrtne>~~{\bf \}}}
+\vspace{3mm}\newline
+\noindent{\tt pyxplot> {\bf call f(2,1)}}\newline
+\noindent{\tt 2 - 1 = 1}\newline
+\noindent{\tt pyxplot> {\bf call f(5*unit(inch), 10*unit(mm))}}\newline
+127 mm - 10 mm = 117 mm
+\vspace{3mm}
+
+\example{ex:newton}{An image of a Newton fractal}{
+Newton fractals are formed by iterating the equation
+\begin{displaymath}
+z_{n+1} = z_n - \frac{f(z_n)}{f^\prime(z_n)},
+\end{displaymath}
+subject to the starting condition that $z_0=c$, where $c$ is any complex number
+$c$ and $f(z)$ is any mathematical function. This series is the Newton-Raphson
+method for numerically finding solutions to the equation $f(z)=0$, and with
+time usually converges towards one such solution for well-behaved functions.
+The complex number $c$ represents the initial guess at the position of the
+solution being sought. The Newton fractal is formed by asking which solution
+the iteration converges upon, as a function of the position of the initial
+guess $c$ in the complex plane. In the case of the cubic polynomial
+$f(z)=z^3-1$, which has three solutions, a map might be generated with points
+coloured red, green or blue to represent convergence towards the three roots.
+\nlnp
+If $c$ is close to one of the roots, then convergence towards that particular
+root is guaranteed, but further afield the map develops a fractal structure. In
+this example, we define a PyXPlot subroutine to produce such a map as a
+function of $c=x+iy$, and then plot the resulting map using the {\tt colourmap}
+plot style (see Section~\ref{sec:colourmaps}).  To make the fractal prettier --
+it contains, after all, only three colours as strictly defined -- we vary the
+brightness of each point depending upon how many iterations are required before
+the series ventures within a distance of $|z_n-r_i|<10^{-2}$ of any of the
+roots $r_i$.
+
+\nlscf
+\noindent{\tt set numerics complex}\newline
+\noindent{\tt set unit angle nodimensionless}\newline
+\\
+\noindent{\tt Root1 = exp(i*unit(  0*deg))}\newline
+\noindent{\tt Root2 = exp(i*unit(120*deg))}\newline
+\noindent{\tt Root3 = exp(i*unit(240*deg))}\newline
+\\
+\noindent{\tt Tolerance = 1e-2}\newline
+\\
+\noindent{\tt subroutine NewtonFractal(x,y)}\newline
+\noindent{\tt \phantom{x}\{}\newline
+\noindent{\tt \phantom{xx}z = x+i*y;}\newline
+\noindent{\tt \phantom{xx}iter = 0}\newline
+\noindent{\tt \phantom{xx}while (1)}\newline
+\noindent{\tt \phantom{xxx}\{}\newline
+\noindent{\tt \phantom{xxxx}z = z - (z**3-1)/(3*z**2)}\newline
+\noindent{\tt \phantom{xxxx}if abs(z-Root1)$<$Tolerance \{ ; return 1 ; \}}\newline
+\noindent{\tt \phantom{xxxx}if abs(z-Root2)$<$Tolerance \{ ; return 2 ; \}}\newline
+\noindent{\tt \phantom{xxxx}if abs(z-Root3)$<$Tolerance \{ ; return 3 ; \}}\newline
+\noindent{\tt \phantom{xxxx}iter = iter + 1}\newline
+\noindent{\tt \phantom{xxx}\}}\newline
+\noindent{\tt \phantom{x}\}}\newline
+\\
+\noindent{\tt \# Plot Newton fractal}\newline
+\noindent{\tt set size square}\newline
+\noindent{\tt set key below}\newline
+\noindent{\tt set xrange [-1.5:1.5]}\newline
+\noindent{\tt set yrange [-1.5:1.5]}\newline
+\noindent{\tt set sample grid 250x250}\newline
+\noindent{\tt set colmap hsb(c1*0.667):(0.8+0.2*c2):(1.0-0.8*c2)}\newline
+\noindent{\tt set log c2}\newline
+\noindent{\tt plot NewtonFractal(x,y):iter+2 with colourmap}
+\nlscf
+\begin{center}
+\includegraphics[width=8cm]{examples/eps/ex_newton}
+\end{center}
+}
+
+\example{ex:pendulum}{The dynamics of the simple pendulum}{
+The equation of motion for a pendulum bob may be derived from the rotational
+analogue to Newton's Second Law, $G=I\ddot\theta$ where $G$ is torque, $I$ is
+moment of inertia and $\theta$ is the displacement of the pendulum bob from the
+vertical. For a pendulum of length $l$, with a bob of mass $m$, this
+equation becomes $-mgl\sin\theta=ml^2\ddot\theta$. In the small-angle
+approximation, such that $\sin\theta\approx\theta$, it reduces to
+the equation for simple harmonic motion, with the solution
+\\ \noindent
+\begin{equation}
+\theta_\mathrm{approx}=\omega\sin\left(\sqrt{\frac{g}{l}}t\right).
+\label{eq:pendulum_approx}
+\end{equation}
+\nlnp
+A more exact solution requires integration of the second-order differential
+equation of motion including the $\sin\theta$ term. This integral cannot be
+done analytically, but the solution can be written in the form
+\\ \noindent
+\begin{equation}
+\theta_\mathrm{exact}(t) = 2\sin^{-1}\left[ k\,\mathrm{sn}\left(\sqrt{\frac{g}{l}}t,k\right)\right].
+\label{eq:pendulum_exact}
+\end{equation}
+\\ \noindent
+where $\mathrm{sn}(u,m)$ is a Jacobi elliptic function and
+$k=\sin\left(\omega/2\right)$.  The Jacobi elliptic function cannot be
+analytically computed, but can be numerically approximated using the {\tt
+jacobi\_\-sn(u,m)} function in PyXPlot.
+\nlnp
+Below, we produce a plot of Equations~(\ref{eq:pendulum_approx}) and
+(\ref{eq:pendulum_exact}).  The horizontal axis is demarked in units of the
+dimensionless period of the pendulum to eliminate $g$ and $l$, and a swing
+amplitude of $\pm30^\circ$ is assumed:
+\nlscf
+{\footnotesize
+\noindent{\tt theta\_approx(a,t) = a * sin(2*pi*t)}\newline
+\noindent{\tt theta\_exact (a,t) = 2*asin(sin(a/2)*jacobi\_sn(2*pi*t,sin(a/2)))}\newline
+}\\{\footnotesize
+\noindent{\tt set unit of angle degrees}\newline
+\noindent{\tt set key below}\newline
+\noindent{\tt set xlabel 'Time / \$$\backslash$sqrt\{g/l\}\$'}\newline
+\noindent{\tt set ylabel '\$$\backslash$theta\$'}\newline
+\noindent{\tt omega = unit(30*deg)}\newline
+\noindent{\tt plot [0:4] theta\_approx(omega,x) title 'Approximate solution', $\backslash$}\newline
+\noindent{\tt \phantom{xxxxxxxxxxx}theta\_exact (omega,x) title 'Exact solution'}
+}
+\nlscf
+\centerline{\includegraphics[width=9cm]{examples/eps/ex_pendulum}}
+\nlnp
+As is apparent, at this amplitude, the exact solution begins to deviate
+noticeably from the small-angle solution within 2--3 swings of the pendulum. We
+now seek to quantify more precisely how long the two solutions take to diverge
+by defining a subroutine to compute how long $T$ it takes before the two
+solutions to deviate by some amount $\psi$. We then plot these times as a
+function of amplitude $\omega$ for three deviation thresholds. Because this
+subroutine takes a significant amount of time to run, we only compute~40
+samples for each value of $\psi$:
+\nlscf
+{\footnotesize
+\noindent{\tt subroutine PendulumDivergenceTime(omega, psi)}\newline
+\noindent{\tt \phantom{x}\{}\newline
+\noindent{\tt \phantom{xx}for t=0 to 20 step 0.05}\newline
+\noindent{\tt \phantom{xxx}\{}\newline
+\noindent{\tt \phantom{xxxx}approx = theta\_approx(omega,t)}\newline
+\noindent{\tt \phantom{xxxx}exact  = theta\_exact (omega,t)}\newline
+\noindent{\tt \phantom{xxxx}if (abs(approx-exact)$>$psi) \{ ;break; \}}\newline
+\noindent{\tt \phantom{xxx}\}}\newline
+\noindent{\tt \phantom{xx}return t}\newline
+\noindent{\tt \phantom{x}\}}
+}\\{\footnotesize
+\noindent{\tt set xlabel 'Amplitude of swing'}\newline
+\noindent{\tt set ylabel 'Time / \$$\backslash$sqrt\{g/l\}\$ taken to diverge'}\newline
+\noindent{\tt set samples 40}\newline
+\noindent{\tt plot [unit(5*deg):unit(30*deg)][0:19] $\backslash$}\newline
+\noindent{\tt \phantom{xx}PendulumDivergenceTime(x,unit(20*deg)) title "\$20\^{}$\backslash$circ\$ deviation", $\backslash$}\newline
+\noindent{\tt \phantom{xx}PendulumDivergenceTime(x,unit(10*deg)) title "\$10\^{}$\backslash$circ\$ deviation", $\backslash$}\newline
+\noindent{\tt \phantom{xx}PendulumDivergenceTime(x,unit( 5*deg)) title "\$ 5\^{}$\backslash$circ\$ deviation"}
+}
+\nlscf
+\centerline{\includegraphics[width=9cm]{examples/eps/ex_pendulum2}}
+}
+
+\section{Macros}
+\index{macros}
+\index{@ operator@{\tt @} operator}
+
+The $@$ operator can be used for literal substitution of the content of a
+string variable into the command line.  The name of the string variable follows
+the $@$ sign, and its content is expanded to the command line, as in this
+example
+\begin{verbatim}
+mac = "with lines lw 2 lt 1"
+plot sin(x) @mac
+\end{verbatim}
+which is equivalent to 
+\begin{verbatim}
+plot sin(x) with lines lw 2 lt 1
+\end{verbatim}
+
+The macro, being a string, can contain any characters, but as with other
+variable names, the name of the macro can contain only alphanumeric characters
+and the underscore sign. This also means that any operator, with the exception
+of the {\tt and} and {\tt or} operators, can signify the end of the macro name,
+without the need for a trailing white space. Therefore, in the example
+\begin{verbatim}
+foo = "50"
+print @foo*3
+\end{verbatim}
+the end result is 150; {\tt 50*3} is passed to the command line interpreter.
+
+One application of macros may be to supply arbitrary algebraic expressions for
+later evaluation.
+
+\example{ex:macro}{Using a macro to calculate the mean of a dataset}{
+In this example, we create a subroutine which calculates the mean value of an
+arbitrary function of the columns in a \datafile. The subroutine takes two
+arguments: the name of the \datafile and a string containing the function to be
+averaged.
+\nlscf
+\noindent{\tt subroutine mean(filename, func)}\newline
+\noindent{\tt \phantom{x}\{}\newline
+\noindent{\tt \phantom{xx}N\_data = 0}\newline
+\noindent{\tt \phantom{xx}sum\_x  = 0}\newline
+\\
+\noindent{\tt \phantom{xx}foreach datum x in filename using $@$func}\newline
+\noindent{\tt \phantom{xxx}\{}\newline
+\noindent{\tt \phantom{xxxx}N\_data = N\_data + 1}\newline
+\noindent{\tt \phantom{xxxx}sum\_x = sum\_x + x}\newline
+\noindent{\tt \phantom{xxx}\}}\newline
+\noindent{\tt \phantom{xxx}if(N\_data > 0) \{ ; return sum\_x / N\_data ; \} }\newline
+\noindent{\tt \phantom{x}\}}\newline
+\nlscf
+This subroutine can be called from the command line as in the example
+\newline\\ 
+\noindent{\tt print mean('data.dat', "sin(\$1)*exp(\$2)")} 
+\newline\\
+where it returns the mean of the product of the sine of the first column, and
+the exponential of the second column.
+} 
+
+\section{The \indcmdt{exec}}
+
+The \indcmdt{exec} can be used to execute PyXPlot commands contained within
+string variables. For example:
+
+\begin{verbatim}
+terminal="eps"
+exec "set terminal %s"%(terminal)
+\end{verbatim}
+
+\noindent It can also be used to write obfuscated PyXPlot scripts, and its use
+should be minimised wherever possible.
+
+\section{Assertions}
+\index{assertions}
+
+The \indcmdt{assert} can be used to assert that a logical expression, such as
+{\tt x>0}, is true. An error is reported if the expression is false, and
+optionally a string can be supplied to provide a more informative error message
+to the user:
+
+\begin{verbatim}
+assert x>0
+assert y<0 "y must be less than zero."
+\end{verbatim}
+
+The \indcmdt{assert} can also be used to test the version number of PyXPlot. It
+is possible to test either that the version is newer than or equal to a
+specific version, using the {\tt $>$=} operator, or that it is older than a
+specific version, using the {\tt $<$} operator, as demonstrated in the
+following examples:
+
+\begin{verbatim}
+assert version >= 0.8.2
+assert version <  0.8  "This script is designed for PyXPlot 0.7"
+\end{verbatim}
+
+
+\section{Shell Commands}
+
+Shell commands\index{shell commands!executing} may be executed directly from
+within PyXPlot by prefixing them with an \indcmdts{!} character. The
+remainder of the line is sent directly to the shell, for example:
+
+\begin{verbatim}
+!ls -l
+\end{verbatim}
+
+\noindent Semi-colons cannot be used to place further PyXPlot commands after a
+shell command on the same line.
+
+\begin{dontdo}
+!ls -l ; set key top left
+\end{dontdo}
+
+It is also possible to substitute the output of a shell command into a PyXPlot
+command. To do this, the shell command should be enclosed in back-quotes (`),
+as in the following example:\index{backquote character}\index{shell
+commands!substituting}
+
+\begin{verbatim}
+a=`ls -l *.ppl | wc -l`
+print "The current directory contains %d PyXPlot scripts."%(a)
+\end{verbatim}
+
+It should be noted that back-quotes can only be used outside quotes. For
+example,
+
+\begin{dontdo}
+set xlabel '`ls`'
+\end{dontdo}
+
+\noindent will not work. The best way to do this would be:
+
+\begin{dodo}
+set xlabel `echo "'" ; ls ; echo "'"`
+\end{dodo}
+
+Note that it is not possible to change the current working directory by sending
+the {\tt cd} command to a shell, as this command would only change the working
+directory of the shell in which the single command is executed:
+
+\begin{dontdo}
+!cd ..
+\end{dontdo}
+
+\noindent PyXPlot has its own \indcmdt{cd} for this purpose, as well as its own
+\indcmdt{pwd}:
+
+\begin{dodo}
+cd ..
+\end{dodo}
+
+\section{Script Watching: pyxplot\_watch}
+
+PyXPlot includes a simple tool for watching command script files and executing
+them whenever they are modified. This may be useful when developing a command
+script, if one wants to make small modifications to it and see the results in a
+semi-live fashion. This tool is invoked by calling the {\tt
+pyxplot\_watch}\index{pyxplot\_watch}\index{watching scripts} command from a
+shell prompt. The command-line syntax of {\tt pyxplot\_watch} is similar to
+that of PyXPlot itself, for example:
+
+\begin{verbatim}
+pyxplot_watch script.ppl
+\end{verbatim}
+
+\noindent would set {\tt pyxplot\_watch} to watch the command script file
+{\tt script.ppl}. One difference, however, is that if multiple script files are
+specified on the command line, they are watched and executed independently,
+\textit{not} sequentially, as PyXPlot itself would do. Wildcard characters can
+also be used to set {\tt pyxplot\_watch} to watch multiple
+files.\footnote{Note that {\tt pyxplot\_watch *.script} and
+{\tt pyxplot\_watch $\backslash$*.script} will behave differently in most
+UNIX shells.  In the first case, the wildcard is expanded by your shell, and a
+list of files passed to {\tt pyxplot\_watch}. Any files matching the
+wildcard, created after running {\tt pyxplot\_watch}, will not be picked up.
+In the latter case, the wildcard is expanded by {\tt pyxplot\_watch} itself,
+which {\it will} pick up any newly created files.}
+
+This is especially useful when combined with \ghostview's\index{Ghostview}
+watch facility. For example, suppose that a script {\tt foo.ppl} produces
+PostScript output {\tt foo.ps}. The following two commands could be used to
+give a live view of the result of executing this script:
+
+\begin{verbatim}
+gv --watch foo.ps &
+pyxplot_watch foo.ppl
+\end{verbatim}
+

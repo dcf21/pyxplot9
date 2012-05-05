@@ -1,0 +1,66 @@
+# EX_ELLISPE.PPL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_ellipse"
+load "examples/fig_init.ppl"
+
+# Main body of figure script
+set multiplot ; set nodisplay
+
+a   = 6.0              # Semi-major axis
+b   = 4.0              # Semi-minor axis
+e   = sqrt(1-(b/a)**2) # Eccentricity
+slr = a*(1-e**2)       # Length of semi-latus rectum
+fd  = a*e              # Distance of focus from centre
+
+# Draw ellipse
+ellipse centre 0,0 SemiMajor a SemiMinor b with lw 3
+
+# Draw points at centre and focus
+set texthalign centre ; set textvalign top
+set fontsize 1.5
+point at 0,0 label "Centre" with pointsize 2 plw 2
+point at -fd,0 label "Focus" with pointsize 2 plw 2
+
+# Draw arrows and dotted lines on ellipse
+arrow from 0,0 to 0,b with twohead lw 2 lt 3   # Semi-minor axis
+arrow from 0,0 to a,0 with twohead lw 2 lt 3   # Semi-major axis
+arrow from -fd,0 to -fd,slr with tw lw 2 lt 3  # SLR
+arrow from 0,0 to -fd,0 with twohead lw 2 lt 3 # Focus <-> Centre
+
+# Label ellipse
+set texthalign centre ; set textvalign centre
+text '$ae$' at -fd/2,-0.3
+text '$a$' at a/2,+0.3
+text '$b$' at 0.3,b/2
+set texthalign left ; set textvalign centre
+text '$L=a(1-e^2)$' at  0.2-fd,slr/2
+
+# Display diagram
+set display ; refresh
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

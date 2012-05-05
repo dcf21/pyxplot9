@@ -1,0 +1,66 @@
+# EX_NEWTON.PPL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_newton"
+load "examples/fig_init.ppl"
+
+# Main body of figure script
+set numerics complex
+set unit angle nodimensionless
+
+Root1 = exp(i*unit(  0*deg))
+Root2 = exp(i*unit(120*deg))
+Root3 = exp(i*unit(240*deg))
+
+Tolerance = 1e-2
+
+subroutine NewtonFractal(x,y)
+ {
+  z = x+i*y;
+  iter = 0
+  while (1)
+   {
+    z = z - (z**3-1)/(3*z**2)
+    if abs(z-Root1)<Tolerance { ; return 1 ; }
+    if abs(z-Root2)<Tolerance { ; return 2 ; }
+    if abs(z-Root3)<Tolerance { ; return 3 ; }
+    iter = iter + 1
+   }
+ }
+
+# Plot Newton fractal
+set size square
+set key below
+set xrange [-1.5:1.5]
+set yrange [-1.5:1.5]
+set sample grid 250x250
+set colmap hsb(c1*0.667):(0.8+0.2*c2):(1.0-0.8*c2)
+set nocolkey
+set log c2
+plot NewtonFractal(x,y):iter+2 with colourmap
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

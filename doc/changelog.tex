@@ -1,0 +1,239 @@
+% CHANGELOG.TEX
+%
+% The documentation in this file is part of PyXPlot
+% <http://www.pyxplot.org.uk>
+%
+% Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+%               2008-2011 Ross Church
+%
+% $Id$
+%
+% PyXPlot is free software; you can redistribute it and/or modify it under the
+% terms of the GNU General Public License as published by the Free Software
+% Foundation; either version 2 of the License, or (at your option) any later
+% version.
+%
+% You should have received a copy of the GNU General Public License along with
+% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+% ----------------------------------------------------------------------------
+
+% LaTeX source for the PyXPlot Users' Guide
+
+\chapter{ChangeLog}
+\index{ChangeLog}
+
+\subsection*{xxxx xxx xx: PyXPlot 0.8.5}
+
+\subsection*{2011 Jan 7: PyXPlot 0.8.4}
+
+\subsubsection*{Summary:}
+
+This is a minor bugfix release.
+
+\subsubsection*{Details:}
+
+\begin{itemize}
+\item Two-dimensional parametric grid plotting implemented.
+\item Bugfix to the dots plot style; filled triangles replaces with filled circles.
+\item Bugfix to linewidths used when drawing line icons on graph legends.
+\item Bugfix to Makefile to ensure libraries link correctly under Red Hat and SUSE.
+\item Code cleanup to ensure correct compilation with {\tt -O2} optimisation.
+\end{itemize}
+
+\subsection*{2010 Sep 15: PyXPlot 0.8.3}
+
+\subsubsection*{Summary:}
+
+This is a minor bugfix release.
+
+\subsubsection*{Details:}
+
+\begin{itemize}
+\item @ macro expansion operator implemented.
+\item assert command implemented.
+\item for command behaviour changed such that {\tt for i=1 to 10} includes a final iteration with {\tt i}=10.
+\item Point types rearranged into a more logical order.
+\item Improved support for newer Windows bitmap images.
+\item Bugfix to the {\tt set unit preferred} command.
+\item Binary not operator bugfixed.
+\item Bugfix to handling of comma-separated horizontal datafiles.
+\item Mathematical function {\tt finite()} added.
+\end{itemize}
+
+\subsection*{2010 Aug 4: PyXPlot 0.8.2}
+
+\subsubsection*{Summary:}
+
+This release introduces three-dimensional plotting, as well as the ability to plot two-dimensional maps of functions as either colour maps, contour plots, or as three-dimensional surfaces. A large number of bugs have also been fixed.
+
+\subsubsection*{Details:}
+
+\begin{itemize}
+\item 3D plotting implemented.
+\item New plot styles colourmap, contourmap and surface added.
+\item Interpolation of 2D datagrids and bitmap images implemented.
+\item Stepwise interpolation mode added.
+\item Dependency on libkpathsea relaxed to make installation under MacOS easier; linking to the library is still strongly recommended on systems where it is readily available.
+\item Mathematical functions {\tt frac-tal\_\-julia()}, {\tt frac\-tal\_\-man\-del\-brot()} and {\tt prime()} added.
+\item Many bug fixes, especially to the ticking of axes.
+\end{itemize}
+
+\subsection*{2010 Jun 1: PyXPlot 0.8.1}
+
+\subsubsection*{Summary:}
+
+This release has no major new features, but fixes several significant bugs in version 0.8.0.
+
+\subsubsection*{Details:}
+
+\begin{itemize}
+\item Mathematical functions {\tt time\_\-from\-unix()}, {\tt time\_\-unix()}, {\tt zernike()} and {\tt zernikeR()} added.
+\item Bug fix to the ticking of linked axes.
+\item Bug fix to the ticking of axes with blank axis tick labels.
+\item Makefile and configure script improved for portability.
+\end{itemize}
+
+\subsection*{2010 May 19: PyXPlot 0.8.0}
+
+\subsubsection*{Summary:}
+
+This release is a major update, for which PyXPlot's original python code has
+been completely rewritten in C with the addition of many new features. Because
+of the scale of this update, there is some minor syntax incompatibility with
+previous versions where features have undergone particularly heavy change. The
+most apparent change is the increase in speed and efficiency resultant from the
+use of a compiled language: especially when handling large \datafile s, PyXPlot
+0.8.0 can run more than an order-of-magnitude faster than previous versions.
+
+\subsubsection*{Details:}
+
+\begin{itemize}
+\item The handling of large \datafile s has been streamlined to require around an order-of-magnitude less time and memory.
+\item PyXPlot's mathematical environment has been extended to handle complex numbers and quantities with physical units.
+\item The range of mathematical functions built into PyXPlot has been massively extended.
+\item The {\tt solve} command has been added to allow the solution of systems of equations.
+\item The {\tt maximise} and {\tt minimise} commands have been added to allow searches for local extrema of functions.
+\item An {\tt fft} command has been added for performing Fourier transforms on data.
+\item New plot styles -- {\tt filledregion} and {\tt yerrorshaded} -- have been added for plotting filled error regions.
+\item The configuration of linked axes has been entirely redesigned.
+\item Parametric function plotting has been implemented.
+\item Colours can now be specified by RGB, HSB or CMYK components, as well as by name.
+\item Several commands, e.g. {\tt box}, {\tt circle}, {\tt ellipse}, etc., have been added to allow vector graphics to be produced in PyXPlot's multiplot environment.
+\item The {\tt jpeg} command has been generalised to allow the incorporation of not only {\tt jpeg} images, but also {\tt bmp}, {\tt gif} and {\tt png} images, onto multiplot canvases. The command has been renamed {\tt image} in recognition of its wider applicability. Image transparency is now supported in {\tt gif} and {\tt png} images.
+\item The {\tt spline} command, now renamed the {\tt interpolate} command, has been extended up provide many types of interpolation between datapoints.
+\item A wide range of conditional and flow control structures have been added to PyXPlot's command language -- these are the {\tt do}, {\tt for}, {\tt foreach}, {\tt if} and {\tt while} commands and the {\tt cond\-ition\-alS} and {\tt con\-dition\-alN} mathematical functions.
+\item Input filters have been introduced as a mechanism by which datafiles in arbitrary formats can be read.
+\item PyXPlot's commandline interface now supports tab completion.
+\item The {\tt show} command has been reworked to produce pastable output.
+\item Many minor bugs have been fixed.
+\end{itemize}
+
+\subsection*{2009 Nov 17: PyXPlot 0.7.1}
+
+\subsubsection*{Summary:}
+
+This release has no major new features, but fixes several serious bugs in version 0.7.0.
+
+\subsubsection*{Details:}
+
+\begin{itemize}
+\item The {\tt exec} command did not work in PyXPlot 0.7.0; this issue has been resolved.
+\item The {\tt xyerrorrange} plot style did not work in PyXPlot 0.7.0; this issue has been resolved.
+\item PyXPlot 0.7.0 produces large numbers of python deprecation error messages when run under python 2.6; the code has been updated to remove references to deprecated python functions.
+\end{itemize}
+
+\subsubsection*{Details -- Change of System Requirements:}
+
+\begin{itemize}
+\item In order to fix some of the bugs listed above, it has been necessary to
+fix bugs in the PyX graphics library as well as those in PyXPlot. As a result,
+and to ensure that these bugfixes reach users as quickly as possible, we have
+opted to ship our own modified version of PyX 0.10, called dcfPyX with PyXPlot.
+\end{itemize}
+
+\subsection*{2008 Oct 14: PyXPlot 0.7.0}
+
+\subsubsection*{Summary:}
+
+Third PyXPlot beta-release. The code has undergone significant streamlining,
+and now runs approximately twice as fast as version 0.6.3 when handling large
+datafiles. Memory usage has also been radically reduced. Two new data
+processing commands have been introduced. The {\tt tabulate} command can be
+used to produce textual datafiles, allowing the user to read data in from
+files, apply some analysis, and then write the processed data back to file. The
+{\tt histogram} command can be used to estimate the frequency densities of sets
+of data points, either by binning them into a bar chart, or by fitting a
+functional form to their frequency density.
+
+\subsubsection*{Details -- New and Extended Commands:}
+
+\begin{itemize}
+\item {\tt tabulate}
+\item {\tt histogram}
+\item {\tt set label} and {\tt text} commands extended to allow a colour to be
+specified.
+\end{itemize}
+
+\subsubsection*{Details -- API changes}
+
+\begin{itemize}
+\item {\tt diff\_dx()} and {\tt int\_dx()} functions -- the function to be
+differentiated or integrated must now be placed in quotation marks.
+\end{itemize}
+
+\subsubsection*{Details -- Change of System Requirements:}
+
+\begin{itemize}
+\item Requirement of PyX version 0.9 has been updated to PyX version 0.10. Note that new versions of the PyX graphics library are not generally backwardly compatible.
+\end{itemize}
+
+\subsection*{2007 Feb 26: PyXPlot 0.6.3}
+
+\subsubsection*{Summary:}
+
+Second PyXPlot beta-release. The most significant change is the introduction of
+a new command-line parser, with greatly improved handling of complex
+expressions and much more meaningful syntax error messages. Multi-platform
+compatibility has also been massively improved, and dependencies loosened.  A
+small number of new commands have been added; most notable among them are the
+{\tt jpeg} and {\tt eps} commands, which embed images in multiplots.
+
+\subsubsection*{Details -- New and Extended Commands:}
+
+\begin{itemize}
+\item {\tt jpeg}
+\item {\tt eps}
+\item {\tt set xtics} and {\tt set mxtics}
+\item {\tt text} and {\tt set label} commands extended to allow text rotation.
+\item {\tt set log} command extended to allow the use of logarithms with bases other than 10.
+\item {\tt set preamble}
+\item {\tt set term enlarge | noenlarge}
+\item {\tt set term pdf}
+\item {\tt set term x11\_persist}
+\end{itemize}
+
+\subsubsection*{Details -- Eased System Requirements:}
+
+\begin{itemize}
+\item Requirement on Python 2.4 minimum eased to version 2.3 minimum.
+\item Requirements on scipy and readline eased; PyXPlot will now work in reduced form when they are absent, though they are still strongly recommended.
+\item dvips and Ghostscript are no longer required.
+\end{itemize}
+
+\subsubsection*{Details -- Removed Commands:}
+
+Due to a general refinement of PyXPlot's API, some of the less sensible pieces
+of syntax from Version~0.5 are no longer supported. The author apologises for
+any inconvenience caused.
+
+\begin{itemize}
+\item The {\tt delete\_arrow}, {\tt delete\_text}, {\tt move\_text}, {\tt undelete\_arrow} and {\tt undelete\_text} commands have been removed from the PyXPlot API. The {\tt move}, {\tt delete} and {\tt undelete} commands should now be used to act upon all types of multiplot objects.
+\item The {\tt set terminal} command no longer accepts the {\tt enhanced} and {\tt noenhanced} modifiers. The {\tt postscript} and {\tt eps} terminals should be used instead.
+\item The {\tt select} modifier, used after the {\tt plot}, {\tt replot}, {\tt fit} and {\tt spline} command can now only be used once; to specify multiple {\tt select} criteria, use the {\tt and} logical operator.
+\end{itemize}
+
+\subsection*{2006 Sep 09: PyXPlot 0.5.8}
+
+First beta-release.

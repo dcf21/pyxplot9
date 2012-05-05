@@ -1,0 +1,168 @@
+% MAIN.TEX
+%
+% The documentation in this file is part of PyXPlot
+% <http://www.pyxplot.org.uk>
+%
+% Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+%               2008-2011 Ross Church
+%
+% $Id$
+%
+% PyXPlot is free software; you can redistribute it and/or modify it under the
+% terms of the GNU General Public License as published by the Free Software
+% Foundation; either version 2 of the License, or (at your option) any later
+% version.
+%
+% You should have received a copy of the GNU General Public License along with
+% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+% ----------------------------------------------------------------------------
+
+% LaTeX source for the PyXPlot Users' Guide
+
+\makeindex
+\input{definitions}
+
+% Make box and example float environments
+\definecolor{LightGrey}{gray}{0.9}
+\usepackage[bf]{caption}
+\usepackage{float}
+\floatstyle{plain}
+
+% Make box float environment
+\newfloat{boxout2}{thp}{lob}
+\floatname{boxout2}{Box}
+
+\newcommand{\boxout}[3]{
+\begin{boxout2}
+\begin{tabular}{|>{\columncolor{LightGrey}}l|}
+\hline
+\begin{minipage}{\textwidth}
+\vspace{2.5mm}
+#3
+\vspace{2.5mm}
+\end{minipage} \\
+\hline
+\end{tabular}
+\caption{#1}
+\label{#2}
+\end{boxout2}
+}
+
+% Make example float environment
+\newfloat{exampletag}{thp}{loe}
+\floatname{exampletag}{Example}
+
+\newcommand{\example}[3]{
+%\afterpage{
+\upshape\mdseries\rm
+\begin{exampletag}[H]\caption[#2]{#2.}\label{#1}\end{exampletag}
+\vspace{-5mm}
+\begin{longtable}{|>{\columncolor{LightGrey}}p{\textwidth}|}
+\hline \endfoot
+\hline \endhead
+#3
+\end{longtable}%\newpage
+%}
+}
+
+\newcommand{\nlnp} {\\\hspace{8mm}}
+\newcommand{\nlscf}{\vspace{3mm}\\\noindent}
+\newcommand{\nlfcf}{\vspace{3mm}\\\hspace{8mm}}
+
+\begin{document}
+
+\begin{titlepage}
+\normalsize
+\vspace*{0.5cm}
+\begin{center}
+{\Huge \bf PyXPlot Users' Guide}\\
+\end{center}
+\vspace*{0.5cm}
+\begin{center}
+{\LARGE \bf A Scientific Scripting Language, \\ \vspace{2mm} Graph Plotting and \\ \vspace{2mm} Vector Graphics Suite. \\}
+\end{center}
+\vspace*{0.5cm}
+\begin{center}
+{\Large Version \version \\}
+\end{center}
+\vspace*{0.0cm}
+\begin{center}
+\includegraphics[width=10cm]{examples/eps/ex_cover}
+\end{center}
+\vspace*{0.2cm}
+\begin{center}
+{\large
+Lead Developer: Dominic Ford \\
+\vspace{1mm}
+Lead Tester: Ross Church \\ 
+\vspace{2mm}
+Email: \noindent {\tt coders@pyxplot.org.uk} \\
+}
+\end{center}
+\vspace*{0.5cm}
+\begin{center}
+{\Large \reldate \\}
+\end{center}
+\end{titlepage}
+
+\pagenumbering{roman}
+
+\makeatletter
+\renewcommand\l@chapter[2]{%
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{-\@highpenalty}%
+    \vskip 1.0em \@plus\p@
+    \setlength\@tempdima{2em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode \bfseries
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      #1\nobreak\hfil \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+      \penalty\@highpenalty
+    \endgroup
+  \fi}
+\renewcommand\l@section{\@dottedtocline{1}{2.0em}{3.0em}}
+\renewcommand\l@subsection{\@dottedtocline{2}{5.0em}{4.0em}}
+\makeatother
+\tableofcontents
+
+\listoffigures
+\listof{exampletag}{List of Examples}
+
+\newpage
+\pagenumbering{arabic}
+
+\part{Introduction to PyXPlot}
+\include{introduction}
+\include{installation}
+\include{first_steps}
+\include{calculations}
+\include{data}
+\include{programming}
+\part{Plotting and Vector Graphics}
+\include{plotting}
+\include{terminals}
+\include{vector_graphics}
+\part{Reference Manual}
+\include{reference}
+\include{functions}
+\include{constants}
+\include{units}
+\include{papersizes}
+\include{colours}
+\include{linestyles}
+\include{configuration}
+\part{Appendices}
+\appendix
+\include{other_apps}
+\include{gnuplot_diffs}
+\include{fit_maths}
+\include{changelog}
+
+\printindex
+\end{document}
+

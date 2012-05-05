@@ -1,0 +1,303 @@
+% OTHER_APPS.TEX
+%
+% The documentation in this file is part of PyXPlot
+% <http://www.pyxplot.org.uk>
+%
+% Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+%               2008-2011 Ross Church
+%
+% $Id$
+%
+% PyXPlot is free software; you can redistribute it and/or modify it under the
+% terms of the GNU General Public License as published by the Free Software
+% Foundation; either version 2 of the License, or (at your option) any later
+% version.
+%
+% You should have received a copy of the GNU General Public License along with
+% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+% ----------------------------------------------------------------------------
+
+% LaTeX source for the PyXPlot Users' Guide
+
+\chapter{Other Applications of PyXPlot}
+
+In this chapter we present a short cookbook describing a few common yet
+miscellaneous tasks for which PyXPlot may prove useful.
+
+\section{Conversion of JPEG Images to PostScript}
+\index{jpeg images}
+
+The need to convert bitmap images -- for example, those in jpeg format -- into
+PostScript representations is commonly encountered by users of the \LaTeX\
+typesetting system, since \LaTeX's {\tt includegraphics} command can only
+incorporate Encapsulated PostScript (EPS) images into documents.  A small
+number of graphics packages provide facilities for making such conversions,
+including ImageMagick\index{ImageMagick}'s {\tt convert} command, but these
+almost invariable produce excessively large PostScript files on account of
+their failure to use PostScript's native facilities for image compression.
+PyXPlot's \indcmdt{image} can in many cases perform much more efficient
+conversion:
+
+\begin{verbatim}
+set output image.eps
+image 'image.jpg' width 10
+\end{verbatim}
+
+\section{Inserting Equations in Powerpoint Presentations}
+\index{Microsoft Powerpoint}\index{presentations}
+
+The two tools most commonly used for presenting talks\index{presentations} --
+Microsoft {\it Powerpoint}\index{Microsoft Powerpoint} and
+OpenOffice\index{OpenOffice} {\it Impress} -- have limited facilities for importing
+text rendered in \LaTeX\ into slides. {\it Powerpoint} does
+include its own {\it Equation Editor}, but its output is considerably less
+professional than that produced by \LaTeX.  This can prove a frustration for
+anyone who works in a field with notation which makes use of non-standard
+characters, but especially for those who work in mathematical and
+equation-centric disciplines.
+
+It is possible to import graphic images into {\it Powerpoint}, but it cannot
+read images in PostScript format, the format in which \LaTeX\ usually produces
+its output.  PyXPlot's {\tt gif} and {\tt png} terminals provide a fix for this
+problem, as the following example demonstrates:
+
+\begin{verbatim}
+set term transparent noantialias gif
+set term dpi 300
+set output 'equation.gif'
+set multiplot
+
+# Render the Planck blackbody formula in LaTeX
+set textcolour yellow
+text '$B_\nu = \frac{8\pi h}{c^3} \
+\frac{\nu^3}{\exp \left( h\nu / kT \right) -1 }$' at 0,0
+text 'The Planck Blackbody Formula:' at 0 , 0.75
+\end{verbatim}
+
+The result is a {\tt gif} image of the desired equation, with yellow text on a
+transparent background. This can readily be imported into {\it Powerpoint} and
+re-scaled to the desired size.
+
+\section{Delivering Talks in PyXPlot}
+
+Going one step further, PyXPlot can be used as a stand-alone tool for designing
+slides for talks; it has several advantages over other presentation tools.  All
+of the text which is placed on slides is rendered neatly in \LaTeX.  Images can
+be placed on slides using the \indcmdts{jpeg} and \indcmdts{eps} commands, and
+placed at any arbitrary coordinate position on the slide.  In comparison with
+programs such as Microsoft {\it Powerpoint}\index{Microsoft Powerpoint} and
+OpenOffice\index{OpenOffice} {\it Impress}, the text looks much neater,
+especially if equations or unusual characters are required. In comparison with
+\TeX-based programs such as Foil\TeX, it is much easier to incorporate images
+around text to create colourful slides which will keep an audience attentive.
+
+As an additional advantage, graphs can be plotted within the scripts describing
+each slide, directly from \datafile s in your local filesystem. If you receive
+new data shortly before giving a talk, it is a simple matter to re-run the
+PyXPlot scripts and your slides will automatically pick up the new \datafile s.
+
+Below, we outline our recipe for designing slides in PyXPlot. There are many
+steps, but they do not take much time; many simply involve pasting text into
+various files. Readers of the printed version of the manual may find it easier
+to copy these files from the HTML version of this manual on the PyXPlot
+website.
+
+\subsection{Setting up Infrastructure}
+
+First, a bit of infrastructure needs to be set up. Note that once this has been
+done for one talk, the infrastructure can be copied directly from a previous
+talk.
+
+\begin{enumerate}
+\item Make a new directory in which to put your talk:
+\begin{verbatim}
+mkdir my_talk
+cd my_talk
+\end{verbatim}
+\item Make a directory into which you will put the PyXPlot scripts for your
+individual slides:
+\begin{verbatim}
+mkdir scripts
+\end{verbatim}
+\item Make a directory into which you will put any graphic images which you
+want to put into your talk to make it look pretty:
+\begin{verbatim}
+mkdir images
+\end{verbatim}
+\item Make a directory into which PyXPlot will put graphic images of your
+slides:
+\begin{verbatim}
+mkdir slides
+\end{verbatim}
+\item Design a background for your slides. Open a paint program such as the
+{\tt gimp}, create a new image which measures $1024\times768$\,pixels, and fill
+it with colour. My preference tends to be for a blue colour gradient, running
+from bright blue at the top to dark blue at the bottom, but you may be more
+inventive than me. You may wish to add institutional and/or project logos in
+the corners. Alternatively, you can download a ready-made background image from
+the PyXPlot website: \url{http://foo}. You should store this image as {\tt
+images/background.jpg}.
+\item We need a simple PyXPlot script to set up a slide template. Paste the
+following text into the file {\tt scripts/slide\_init}; there's a bit of black
+magic in the {\tt arrow} commands in this script which it isn't necessary to
+understand at this stage:\label{stp:presentation_magic}
+\begin{verbatim}
+scale  = 1.25        ; inch = 2.54 # cm
+width  = 10.24*scale ; height =  7.68*scale
+x = width/100.0      ; y = height/100.0
+set term gif ; set dpi (1024.0/width) * inch
+set multiplot ; set nodisplay
+set texthalign centre ; set textvalign centre
+set textcolour yellow
+jpeg "images/background.jpg" width width
+arrow -x* 25,-y* 25 to -x* 25, y*125 with nohead
+arrow -x* 25, y*125 to  x*125, y*125 with nohead
+arrow  x*125, y*125 to  x*125,-y* 25 with nohead
+arrow  x*125,-y* 25 to -x* 25,-y* 25 with nohead
+\end{verbatim}
+\item We also need a simple PyXPlot script to round off each slide. Paste the
+following text into the file {\tt scripts/slide\_finish}:
+\begin{verbatim}
+set display ; refresh
+\end{verbatim}
+\item Paste the following text into the file {\tt compile}. This is a simple
+shell script which instructs {\tt pyxplot\_watch} to compile your slides using
+PyXPlot every time you edit any of the them:
+\begin{verbatim}
+#!/bin/bash
+pyxplot_watch --verbose scripts/0\*
+\end{verbatim}
+\item Paste the following text into the file {\tt make\_slides}. This is a
+simple shell script which crops your slides to measure exactly
+$1024\times768$\,pixels, cropping any text boxes which may go off the side of
+them. It links up with the black magic of Step~\ref{stp:presentation_magic}:
+\begin{verbatim}
+#!/bin/bash
+mkdir -p slides_cropped
+for all in slides/*.gif ; do
+convert $all -crop 1024x768+261+198 `echo $all | \
+sed 's@slides@slides_cropped@' | sed 's@gif@jpg@'`
+done
+\end{verbatim}
+\item Make the scripts {\tt compile} and {\tt make\_slides} executable:
+\begin{verbatim}
+chmod 755 compile make_slides
+\end{verbatim}
+\end{enumerate}
+
+\subsection{Writing A Short Example Talk}
+
+The infrastructure is now completely set up, and you are ready to start
+designing slides. We will now design an example talk with three slides.
+
+\begin{enumerate}
+\item Run the script {\tt compile} and leave it running in the background.
+PyXPlot will then re-run the scripts describing your slides whenever you edit
+them.
+\item As an example, we will now make a title slide. Paste the following script
+into the file {\tt scripts/0001}:
+\begin{verbatim}
+set output 'slides/0001.gif'
+load 'scripts/slide_init'
+
+text '\parbox[t]{10cm}{\center \LARGE \bf \
+  A Tutorial in the use of PyXPlot \\ \
+  to present Talks \
+} ' at x*50, y*75
+text '\Large \bf Prof A.N.\ Other' at x*50, y*45
+text '\parbox[t]{9cm}{\center \
+  Director, \\ \
+  Atlantis Island University \
+} ' at x*50, y*38
+text 'Annual Lecture, 1st January 2010' at x*50, y*22
+
+load 'scripts/slide_finish'
+\end{verbatim}
+Note that the variables {\tt x} and {\tt y} are defined to be 1~per cent of the
+width and height of your slides respectively, such that the bottom-left of each
+slide is at $(0,0)$ and the top-right of each slide is at $({\tt 100*x},{\tt
+100*y})$.
+\item Next we will make a second slide with a series of bullet points. Paste
+the following script into the file {\tt scripts/0002}:
+\begin{verbatim}
+set output 'slides/0002.gif'
+load 'scripts/slide_init'
+
+text '\Large \textbf{Talk Overview}' at x*50, y*92
+text "\parbox[t]{9cm}{\begin{itemize} \
+ \item Setting up the Infrastructure. \
+ \item Writing a Short Example Talk. \
+ \item Delivering your Talk. \
+ \item Conclusion. \
+ \end{itemize} \
+} " at x*50 , y*60
+
+set textcol cyan
+text '{\bf With thanks to my collaborator, \
+           Prof Y.E.\ Tanother.}' at x*50,y*15
+
+load 'scripts/slide_finish'
+\end{verbatim}
+\item Finally, we will make a third slide with a graph on it. Paste the
+following script into the file {\tt scripts/0003}:
+\begin{verbatim}
+set output 'slides/0003.gif'
+load 'scripts/slide_init'
+
+text '\Large \bf The Results of Our Model' at x*50, y*92
+set axescolour yellow ; set nogrid
+set origin x*17.5, y*20 ; set width x*70
+set xrange [0.01:0.7]
+set xlabel '$x$'
+set yrange [0.01:0.7]
+set ylabel '$f(x)$'
+set palette Red, Green, Orange, Purple
+
+set key top left
+plot x t 'Model 1', exp(x)-1 t 'Model 2', \
+     log(x+1) t 'Model 3', sin(x) t 'Model 4'
+
+load 'scripts/slide_finish'
+\end{verbatim}
+\item To view your slides, run the script {\tt make\_slides}. Afterwards, you
+will find your slides as a series of $1024\times768$\,pixel jpeg images in the
+directory {\tt slides\_cropped}.  If you have the {\it Quick Image
+Viewer}\index{Quick Image Viewer} ({\tt qiv}) installed, then you can view them
+as follows:
+\begin{verbatim}
+qiv slides_cropped/*
+\end{verbatim}
+If you're in a hurry, you can skip the step of running the script {\tt
+make\_slides} and view your slides as images in the {\tt slides} directory, but
+note that the slides in here may not be properly cropped. This approach is
+generally preferable when viewing your slides in a semi-live fashion as you are
+editing them.
+\item If you'd like to make the text on your slides larger or smaller, you can
+do so by varying the {\tt scale} parameter in the file {\tt
+scripts/slide\_init}.
+\end{enumerate}
+
+%The three slides which we have designed can been seen in
+%Figures~\ref{fig:presentation_slide1}, \ref{fig:presentation_slide2} and
+%\ref{fig:presentation_slide3}.
+
+\subsection{Delivering your Talk}
+
+There are two straightforward ways in which you can give your talk. The
+quickest way is simply to use the {\it Quick Image Viewer}\index{Quick Image
+Viewer} ({\tt qiv}):
+\begin{verbatim}
+qiv slides_cropped/*
+\end{verbatim}
+Press the left mouse button to move forward through your talk, and the right
+mouse button to go back a slide.
+
+This method does lack some of the niceties of Microsoft {\it Powerpoint} -- for
+example, the ability to jump to any arbitrary slide number, compatibility with
+wireless remote controls to advance your slides, and the ability to use
+animated slide transitions. It may be preferably, therefore, to paste the jpeg
+images of your slides into a {\it Powerpoint} or OpenOffice {\it Impress}
+presentation before you give your talk.
+

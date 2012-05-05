@@ -1,0 +1,50 @@
+# EX_BARCHART1.DAT
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This data produces a figure for the PyXPlot Users' Guide
+
+# The following is 25 samples from the poissonPDF(x,18) function.
+         0    1.522998e-08
+         1    2.741396e-07
+         2    2.467257e-06
+         3    1.480354e-05
+         4    6.661593e-05
+         5    2.398174e-04
+         6    7.194521e-04
+         7    1.850020e-03
+         8    4.162544e-03
+         9    8.325088e-03
+        10    1.498516e-02
+        11    2.452117e-02
+        12    3.678175e-02
+        13    5.092858e-02
+        14    6.547960e-02
+        15    7.857552e-02
+        16    8.839747e-02
+        17    9.359732e-02
+        18    9.359732e-02
+        19    8.867114e-02
+        20    7.980403e-02
+        21    6.840345e-02
+        22    5.596646e-02
+        23    4.379984e-02
+        24    3.284988e-02
+

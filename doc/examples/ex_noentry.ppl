@@ -1,0 +1,49 @@
+# EX_NOENTRY.PPL
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2011 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_noentry"
+load "examples/fig_init.ppl"
+
+# Main body of figure script
+set multiplot ; set nodisplay
+
+w = 10 # Width of sign / cm
+
+# Make no-entry sign
+circle at 0,0 radius w with col null fillcol red 
+box from -(0.8*w),-(0.2*w) to (0.8*w),(0.2*w) \
+    with col null fillcol white
+
+# Put a warning beneath the sign
+set fontsize 3
+set texthalign centre ; set textvalign centre
+text "\bf Keep Out! Code Monkey at work!" at 0,-1.2*w
+
+# Display sign
+set display ; refresh
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+
