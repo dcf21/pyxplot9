@@ -3,7 +3,7 @@
 # The code in this file is part of PyXPlot
 # <http://www.pyxplot.org.uk>
 #
-# Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
+# Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
 #
 # $Id$
 #
@@ -20,7 +20,7 @@
 
 # Makefile for PyXPlot documentation directory
 
-PYXPLOT = ../bin/pyxplot
+PYXPLOT = ../../pyxplot8/bin/pyxplot
 EXAMPLEDIR = examples
 EPSDIR = $(EXAMPLEDIR)/eps
 EPSFILES = $(EPSDIR)/ex_3d_helix.eps $(EPSDIR)/ex_apachelog.eps $(EPSDIR)/ex_axisatzero.eps $(EPSDIR)/ex_axislabs.eps $(EPSDIR)/ex_axistics.eps $(EPSDIR)/ex_axistics2.eps $(EPSDIR)/ex_axisunits.eps $(EPSDIR)/ex_barchart1.eps $(EPSDIR)/ex_barchart2.eps $(EPSDIR)/ex_branch_cuts.eps $(EPSDIR)/ex_cmbrtemp.eps $(EPSDIR)/ex_col_vs_mono.eps $(EPSDIR)/ex_contourmap.eps $(EPSDIR)/ex_cover.eps $(EPSDIR)/ex_datagrid.eps $(EPSDIR)/ex_eqnsolve.eps $(EPSDIR)/ex_ellipse.eps $(EPSDIR)/ex_euclid_I_47.eps $(EPSDIR)/ex_fft.eps $(EPSDIR)/ex_fitting.eps $(EPSDIR)/ex_funcsplice.eps $(EPSDIR)/ex_funcsplice2.eps $(EPSDIR)/ex_gallery.eps $(EPSDIR)/ex_hlines.eps $(EPSDIR)/ex_hrdiagram.eps $(EPSDIR)/ex_integration.eps $(EPSDIR)/ex_interpolation.eps $(EPSDIR)/ex_intro_bessel.eps $(EPSDIR)/ex_intro_func.eps $(EPSDIR)/ex_intro_func_splice.eps $(EPSDIR)/ex_intro_legendre.eps $(EPSDIR)/ex_intro_sine.eps $(EPSDIR)/ex_lenses.eps $(EPSDIR)/ex_linestyles.eps $(EPSDIR)/ex_lowerlimit.eps $(EPSDIR)/ex_mandelbrot.eps $(EPSDIR)/ex_map.eps $(EPSDIR)/ex_multiaxes.eps $(EPSDIR)/ex_quadrupole.eps $(EPSDIR)/ex_nanotubes.eps $(EPSDIR)/ex_newton.eps $(EPSDIR)/ex_noentry.eps $(EPSDIR)/ex_notice.eps $(EPSDIR)/ex_pendulum.eps $(EPSDIR)/ex_pi_estimation.eps $(EPSDIR)/ex_piechart.eps $(EPSDIR)/ex_set_terminal.eps $(EPSDIR)/ex_spirograph.eps $(EPSDIR)/ex_surface_log.eps $(EPSDIR)/ex_surface_polynomial.eps $(EPSDIR)/ex_surface_sinc.eps $(EPSDIR)/ex_tempscale.eps $(EPSDIR)/ex_text1.eps $(EPSDIR)/ex_text2.eps $(EPSDIR)/ex_torus.eps $(EPSDIR)/ex_triangle.eps $(EPSDIR)/ex_trajectories.eps $(EPSDIR)/ex_trefoil.eps $(EPSDIR)/ex_vortex.eps $(EPSDIR)/ex_windowfuncs.eps $(EPSDIR)/ex_zeta_arg.eps

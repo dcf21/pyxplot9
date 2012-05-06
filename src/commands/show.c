@@ -555,16 +555,16 @@ static int ppl_directive_show2(ppl_context *c, char *word, char *itemSet, int in
     for (j=0; j<PALETTE_LENGTH; j++) // Check whether the palette has been changed from its default setting
      {
       if ((c->set->palette_current[j] == -1) && (c->set->palette_default[j] == -1)) break;
-      if ((c->set->palette_current[j] == c->set->palette_default[j])&&(c->set->paletteS_current[j] == c->set->paletteS_default[j])&&(c->set->palette1_current[j] == c->set->palette1_default[j])&&(c->set->palette2_current[j] == c->set->palette2_default[j])&&(c->set->palette3_current[j] == c->set->palette3_default[j])&&(c->set->palette4_current[j] == c->set->palette4_default[j])) continue;
+      if ((c->set->palette_current[j] == c->set->palette_default[j])&&((c->set->palette_current[j]>0)||((c->set->paletteS_current[j] == c->set->paletteS_default[j])&&(c->set->palette1_current[j] == c->set->palette1_default[j])&&(c->set->palette2_current[j] == c->set->palette2_default[j])&&(c->set->palette3_current[j] == c->set->palette3_default[j])&&(c->set->palette4_current[j] == c->set->palette4_default[j])))) continue;
       l=1; break;
      }
     for (j=k=0; c->set->palette_current[j]>=0; j++)
      {
       if (j>0) { sprintf(buf+k, ", "); k+=strlen(buf+k); }
       if (c->set->palette_current[j]>0) sprintf(buf+k, "%s", *(char **)ppl_fetchSettingName(&c->errcontext, c->set->palette_current[j], SW_COLOR_INT, SW_COLOR_STR , sizeof(char *)));
-      else if (c->set->paletteS_current[j]==SW_COLSPACE_RGB ) sprintf(buf, "rgb(%s,%s,%s)"    , S_RGB(c->set->palette1_current[j],0), S_RGB(c->set->palette2_current[j],1), S_RGB(c->set->palette3_current[j],2));
-      else if (c->set->paletteS_current[j]==SW_COLSPACE_HSB ) sprintf(buf, "hsb(%s,%s,%s)"    , S_RGB(c->set->palette1_current[j],0), S_RGB(c->set->palette2_current[j],1), S_RGB(c->set->palette3_current[j],2));
-      else if (c->set->paletteS_current[j]==SW_COLSPACE_CMYK) sprintf(buf, "cmyk(%s,%s,%s,%s)", S_RGB(c->set->palette1_current[j],0), S_RGB(c->set->palette2_current[j],1), S_RGB(c->set->palette3_current[j],2), S_RGB(c->set->palette4_current[j],3));
+      else if (c->set->paletteS_current[j]==SW_COLSPACE_RGB ) sprintf(buf+k, "rgb(%s,%s,%s)"    , S_RGB(c->set->palette1_current[j],0), S_RGB(c->set->palette2_current[j],1), S_RGB(c->set->palette3_current[j],2));
+      else if (c->set->paletteS_current[j]==SW_COLSPACE_HSB ) sprintf(buf+k, "hsb(%s,%s,%s)"    , S_RGB(c->set->palette1_current[j],0), S_RGB(c->set->palette2_current[j],1), S_RGB(c->set->palette3_current[j],2));
+      else if (c->set->paletteS_current[j]==SW_COLSPACE_CMYK) sprintf(buf+k, "cmyk(%s,%s,%s,%s)", S_RGB(c->set->palette1_current[j],0), S_RGB(c->set->palette2_current[j],1), S_RGB(c->set->palette3_current[j],2), S_RGB(c->set->palette4_current[j],3));
       k+=strlen(buf+k);
      }
     ppl_directive_show3(c, out+i, itemSet, 0, interactive, "palette", buf, !l, "The sequence of colors used to plot datasets on color graphs");

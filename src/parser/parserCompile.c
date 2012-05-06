@@ -548,17 +548,22 @@ finished_looking_for_tabcomp:
              {
               char nambuff[64];
               int id, i;
-              for (i=0; ((i<63)&&(line[*linepos+i]>' ')); i++) nambuff[i] = line[*linepos+i];
+              for (i=0; ((i<63)&&(isalnum(line[*linepos+i]))); i++) nambuff[i] = line[*linepos+i];
               nambuff[i] = '\0';
               id = ppl_fetchSettingByName(&c->errcontext, nambuff, SW_COLOR_INT, SW_COLOR_STR);
               if (id > 0)
                {
                 pplObj val;
                 val.refCount=1;
-                pplObjColor(&val,0,SW_COLSPACE_CMYK,SW_COLOR_CMYK_C[id],SW_COLOR_CMYK_M[id],SW_COLOR_CMYK_Y[id],SW_COLOR_CMYK_K[id]);
+                explen=i;
+                if ((s==NULL)||(!writeOut)) break;
+                pplObjColor(&val,0,SW_COLSPACE_CMYK,*(double *)ppl_fetchSettingName(&c->errcontext, id, SW_COLOR_INT, (void *)SW_COLOR_CMYK_C, sizeof(double)),
+                                                    *(double *)ppl_fetchSettingName(&c->errcontext, id, SW_COLOR_INT, (void *)SW_COLOR_CMYK_M, sizeof(double)),
+                                                    *(double *)ppl_fetchSettingName(&c->errcontext, id, SW_COLOR_INT, (void *)SW_COLOR_CMYK_Y, sizeof(double)),
+                                                    *(double *)ppl_fetchSettingName(&c->errcontext, id, SW_COLOR_INT, (void *)SW_COLOR_CMYK_K, sizeof(double))
+                           );
                 val.exponent[2]=id;
                 ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
-                explen=i;
                 break;
                }
               // If supplied string did not match a named colour, treat it as an expression

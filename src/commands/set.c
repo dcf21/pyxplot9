@@ -1024,6 +1024,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
       else if (j==2) { a = &za[i]; ad = &c->set->ZAxesDefault[i]; }
       else           { a = &xa[i]; ad = &c->set->XAxesDefault[i]; }
 
+      a->enabled = 1;
       if (a->format != NULL) { pplExpr_free((pplExpr *)a->format); a->format=NULL; }
       a->TickLabelRotation = ad->TickLabelRotation;
       a->TickLabelRotate   = ad->TickLabelRotate;
@@ -1039,7 +1040,9 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
       if      (j==1) a = &ya[i];
       else if (j==2) a = &za[i];
       else           a = &xa[i];
-      a->label[0] = '\0';
+      a->enabled=1;
+      if (a->label!=NULL) free(a->label);
+      a->label=NULL;
      }
    }
   else if (strcmp_set && (strcmp(setoption,"numerics")==0)) /* set numerics */
@@ -1111,7 +1114,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     strncpy(c->set->term_current.output, c->set->term_default.output, FNAME_LENGTH-1);
     c->set->term_current.output[FNAME_LENGTH-1]='\0';
    }
-  else if (strcmp_unset && (strcmp(setoption,"palette")==0)) /* set palette */
+  else if (strcmp_set && (strcmp(setoption,"palette")==0)) /* set palette */
    {
     if (command[PARSE_set_palette_palette].objType==PPLOBJ_NUM)
      {
@@ -1124,6 +1127,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
         if (pos<=0) break;
         if (count>=PALETTE_LENGTH-1) { ppl_warning(&c->errcontext, ERR_GENERAL, "The 'set palette' command has been passed a palette which is too long; truncating it."); break; }
         co = &command[pos+PARSE_set_palette_color_palette];
+        c->set->palette_current[count] = -1;
         ppl_colorFromObj(c,co,&c->set->palette_current[count],&c->set->paletteS_current[count],NULL,&c->set->palette1_current[count],&c->set->palette2_current[count],&c->set->palette3_current[count],&c->set->palette4_current[count],&d1,&d2);
         count++;
        }
@@ -1147,6 +1151,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
         unsigned char d1,d2;
         pplObj *o = ppl_listGetItem(l,i);
         if (i>=PALETTE_LENGTH-1) { ppl_warning(&c->errcontext, ERR_GENERAL, "The 'set palette' command has been passed a palette which is too long; truncating it."); break; }
+        c->set->palette_current[i] = -1;
         ppl_colorFromObj(c,o,&c->set->palette_current[i],&c->set->paletteS_current[i],NULL,&c->set->palette1_current[i],&c->set->palette2_current[i],&c->set->palette3_current[i],&c->set->palette4_current[i],&d1,&d2);
        }
       c->set->palette_current[i] = -1;
@@ -1841,6 +1846,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
 
       if (strcmp_set)
        {
+        a->enabled = 1;
         if (command[PARSE_set_xformat_format_string].objType == PPLOBJ_EXP)
          { 
           if (a->format != NULL) pplExpr_free((pplExpr *)a->format);
@@ -1880,10 +1886,14 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
 
       if (strcmp_set)
        {
+        a->enabled = 1;
         if (command[PARSE_set_xlabel_label_text].objType == PPLOBJ_STR)
          {
-          snprintf(a->label, FNAME_LENGTH, "%s", (char *)command[PARSE_set_xlabel_label_text].auxil);
-          a->label[FNAME_LENGTH-1]='\0';
+          char *in = (char *)command[PARSE_set_xlabel_label_text].auxil;
+          char *l  = (char *)malloc(strlen(in)+1);
+          if (l!=NULL) strcpy(l,in);
+          if (a->label!=NULL) free(a->label);
+          a->label=l;
          }
         if (command[PARSE_set_xlabel_rotation].objType == PPLOBJ_NUM)
          {
@@ -1894,7 +1904,11 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
        }
       else
        {
-        strcpy(a->label, c->set->axis_default.label);
+        char *in = c->set->axis_default.label;
+        char *l  = (in==NULL) ? NULL : (char *)malloc(strlen(in)+1);
+        if (l!=NULL) strcpy(l,in);
+        if (a->label!=NULL) free(a->label);
+        a->label=l;
         a->LabelRotate = c->set->axis_default.LabelRotate;
        }
      }
