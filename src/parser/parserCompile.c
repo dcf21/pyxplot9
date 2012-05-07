@@ -548,7 +548,7 @@ finished_looking_for_tabcomp:
              {
               char nambuff[64];
               int id, i;
-              for (i=0; ((i<63)&&(isalnum(line[*linepos+i]))); i++) nambuff[i] = line[*linepos+i];
+              for (i=0; ((i<63)&&((isalnum(line[*linepos+i]))||(line[*linepos+i]=='('))); i++) nambuff[i] = line[*linepos+i];
               nambuff[i] = '\0';
               id = ppl_fetchSettingByName(&c->errcontext, nambuff, SW_COLOR_INT, SW_COLOR_STR);
               if (id > 0)

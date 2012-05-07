@@ -24,7 +24,7 @@
 
 #include "userspace/context.h"
 
-void ppl_texify_string(char *in, char *out, int outlen);
+void ppl_texify_string(char *in, char *out, int inlen, int outlen);
 void ppl_texify_generic(ppl_context *c, char *in, int *end, char *out, int outlen);
 
 #endif

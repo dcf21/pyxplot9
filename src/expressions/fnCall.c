@@ -40,6 +40,7 @@
 #include "expressions/expEvalCalculus.h"
 #include "expressions/fnCall.h"
 #include "expressions/traceback_fns.h"
+#include "settings/colors.h"
 #include "settings/settingTypes.h"
 #include "stringTools/asciidouble.h"
 #include "userspace/context.h"
@@ -118,7 +119,15 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
         goto cleanup;
       case PPLOBJ_COL:
         if      (nArgs==0) { pplObjColor(out,0,SW_COLSPACE_RGB,0,0,0,0); }
-        else if (nArgs==1) { if (args[0].objType==PPLOBJ_COL) pplObjColor(out,0,round(args[0].exponent[0]),args[0].exponent[8],args[0].exponent[9],args[0].exponent[10],args[0].exponent[11]);
+        else if (nArgs==1) { if ((args[0].objType==PPLOBJ_COL)||(args[0].objType==PPLOBJ_NUM))
+                              {
+                               unsigned char d1,d2;
+                               int i1,i2;
+                               pplObjColor(out,0,SW_COLSPACE_RGB,0,0,0,0);
+                               ppl_colorFromObj(context,&args[0],&i1,&i2,NULL,&out->exponent[8],&out->exponent[9],&out->exponent[10],&out->exponent[11],&d1,&d2);
+                               out->exponent[2]=i1;
+                               out->exponent[0]=i2;
+                              }
                              else { sprintf(context->errStat.errBuff,"The first argument to the color object constructor should be a color; an object of type <%s> was supplied.",pplObjTypeNames[args[0].objType]); TBADD(ERR_TYPE); }
                            }
         else               { sprintf(context->errStat.errBuff,"The color object constructor takes zero or one arguments; %d supplied.",nArgs); TBADD(ERR_TYPE); }

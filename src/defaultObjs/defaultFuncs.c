@@ -1434,7 +1434,7 @@ void pplfunc_texifyText  (ppl_context *c, pplObj *in, int nArgs, int *status, in
   if (in[0].objType!=PPLOBJ_STR) { sprintf(errText,"The %s requires a single string argument; supplied argument had type <%s>.",FunctionDescription,pplObjTypeNames[in[0].objType]); *errType=ERR_TYPE; *status=1; return; }
   outstr = (char *)malloc(LSTR_LENGTH);
   if (outstr==NULL) { sprintf(errText,"Out of memory."); *errType=ERR_MEMORY; *status=1; return; }
-  ppl_texify_string(instr, outstr, LSTR_LENGTH);
+  ppl_texify_string(instr, outstr, -1, LSTR_LENGTH);
   pplObjStr(&OUTPUT,0,1,outstr);
   return;
  }

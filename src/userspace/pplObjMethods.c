@@ -442,7 +442,7 @@ void pplmethod_dateToYear(ppl_context *c, pplObj *in, int nArgs, int *status, in
 
 // Color methods
 
-void pplmethod_colToRGB(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplmethod_colCompRGB(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   pplObj *a = in[-1].self_this;
   double r,g,b;
@@ -457,7 +457,7 @@ void pplmethod_colToRGB(ppl_context *c, pplObj *in, int nArgs, int *status, int 
   gsl_vector_set(v,2,b);
  }
 
-void pplmethod_colToCMYK(ppl_context *dummy, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplmethod_colCompCMYK(ppl_context *dummy, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   pplObj *a = in[-1].self_this;
   double c,m,y,k;
@@ -473,7 +473,7 @@ void pplmethod_colToCMYK(ppl_context *dummy, pplObj *in, int nArgs, int *status,
   gsl_vector_set(v,2,k);
  }
 
-void pplmethod_colToHSB(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+void pplmethod_colCompHSB(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   pplObj *a = in[-1].self_this;
   double h,s,b;
@@ -486,6 +486,36 @@ void pplmethod_colToHSB(ppl_context *c, pplObj *in, int nArgs, int *status, int 
   gsl_vector_set(v,0,h);
   gsl_vector_set(v,1,s);
   gsl_vector_set(v,2,b);
+ }
+
+void pplmethod_colToRGB(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *a = in[-1].self_this;
+  double r,g,b;
+  if      (round(a->exponent[0])==SW_COLSPACE_RGB ) { r=a->exponent[8]; g=a->exponent[9]; b=a->exponent[10]; }
+  else if (round(a->exponent[0])==SW_COLSPACE_CMYK) pplcol_CMYKtoRGB(a->exponent[8],a->exponent[9],a->exponent[10],a->exponent[11],&r,&g,&b);
+  else                                              pplcol_HSBtoRGB(a->exponent[8],a->exponent[9],a->exponent[10],&r,&g,&b);
+  pplObjColor(&OUTPUT,0,SW_COLSPACE_RGB,r,g,b,0);
+ }
+
+void pplmethod_colToCMYK(ppl_context *dummy, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *a = in[-1].self_this;
+  double c,m,y,k;
+  if      (round(a->exponent[0])==SW_COLSPACE_RGB ) pplcol_RGBtoCMYK(a->exponent[8],a->exponent[9],a->exponent[10],&c,&m,&y,&k);
+  else if (round(a->exponent[0])==SW_COLSPACE_CMYK) { c=a->exponent[8]; m=a->exponent[9]; y=a->exponent[10]; k=a->exponent[11]; }
+  else                                              pplcol_HSBtoCMYK(a->exponent[8],a->exponent[9],a->exponent[10],&c,&m,&y,&k);
+  pplObjColor(&OUTPUT,0,SW_COLSPACE_CMYK,c,m,y,k);
+ }
+
+void pplmethod_colToHSB(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *a = in[-1].self_this;
+  double h,s,b;
+  if      (round(a->exponent[0])==SW_COLSPACE_RGB ) pplcol_RGBtoHSB (a->exponent[8],a->exponent[9],a->exponent[10],&h,&s,&b);
+  else if (round(a->exponent[0])==SW_COLSPACE_CMYK) pplcol_CMYKtoHSB(a->exponent[8],a->exponent[9],a->exponent[10],a->exponent[11],&h,&s,&b);
+  else                                              { h=a->exponent[8]; s=a->exponent[9]; b=a->exponent[10]; }
+  pplObjColor(&OUTPUT,0,SW_COLSPACE_HSB,h,s,b,0);
  }
 
 // Vector methods
@@ -1276,9 +1306,12 @@ void pplObjMethodsInit(ppl_context *c)
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_DATE],"toYear",0,0,1,1,1,1,(void *)pplmethod_dateToYear, "toYear()", "\\mathrm{toYear}@<@>", "toYear() returns the year in which a date object falls in the current calendar");
 
   // Color methods
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"toCMYK",0,0,1,1,1,1,(void *)pplmethod_colToCMYK, "toCMYK()", "\\mathrm{toCMYK}@<@>", "toCMYK() returns a vector CMYK representation of a color");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"toHSB",0,0,1,1,1,1,(void *)pplmethod_colToHSB, "toHSB()", "\\mathrm{toHSB}@<@>", "toHSB() returns a vector HSB representation of a color");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"toRGB",0,0,1,1,1,1,(void *)pplmethod_colToRGB, "toRGB()", "\\mathrm{toRGB}@<@>", "toRGB() returns a vector RGB representation of a color");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"componentsCMYK",0,0,1,1,1,1,(void *)pplmethod_colCompCMYK, "componentsCMYK()", "\\mathrm{componentsCMYK}@<@>", "componentsCMYK() returns a vector CMYK representation of a color");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"componentsHSB",0,0,1,1,1,1,(void *)pplmethod_colCompHSB, "componentsHSB()", "\\mathrm{componentsHSB}@<@>", "componentsHSB() returns a vector HSB representation of a color");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"componentsRGB",0,0,1,1,1,1,(void *)pplmethod_colCompRGB, "componentsRGB()", "\\mathrm{componentsRGB}@<@>", "componentsRGB() returns a vector RGB representation of a color");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"toCMYK",0,0,1,1,1,1,(void *)pplmethod_colToCMYK, "toCMYK()", "\\mathrm{toCMYK}@<@>", "toCMYK() returns a CMYK representation of a color");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"toHSB",0,0,1,1,1,1,(void *)pplmethod_colToHSB, "toHSB()", "\\mathrm{toHSB}@<@>", "toHSB() returns an HSB representation of a color");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"toRGB",0,0,1,1,1,1,(void *)pplmethod_colToRGB, "toRGB()", "\\mathrm{toRGB}@<@>", "toRGB() returns an RGB representation of a color");
 
   // Vector methods
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"append",1,1,1,1,1,0,(void *)pplmethod_vectorAppend, "append(x)", "\\mathrm{append}@<@0@>", "append(x) appends the object x to a vector");

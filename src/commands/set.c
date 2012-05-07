@@ -95,6 +95,103 @@ static void tics_cp(pplset_tics *o, pplset_tics *i)
    }
  }
 
+#define SET_NOTICKS(T) \
+ { \
+  tics_rm(&(T)); \
+  T.tickList=(double *)malloc(sizeof(double)); \
+  T.tickStrs=(char  **)malloc(sizeof(char *)); \
+  T.tickStrs[0]=NULL; \
+ }
+
+#define SET_TICKS(T,TO,U,US,amLog) \
+ { \
+  const int gotAuto  = ((ptab[PARSE_INDEX_autofreq  ]>0) && (command[ptab[PARSE_INDEX_autofreq  ]].objType==PPLOBJ_STR)); \
+  const int gotRange = ((ptab[PARSE_INDEX_start     ]>0) && (command[ptab[PARSE_INDEX_start     ]].objType==PPLOBJ_NUM)); \
+  const int gotList  = ((ptab[PARSE_INDEX_got_list  ]>0) && (command[ptab[PARSE_INDEX_got_list  ]].objType==PPLOBJ_STR)); \
+  if ((ptab[PARSE_INDEX_dir]>0) && (command[ptab[PARSE_INDEX_dir]].objType==PPLOBJ_STR)) \
+   { \
+    (T).tickDir = ppl_fetchSettingByName(&c->errcontext, (char *)command[ptab[PARSE_INDEX_dir]].auxil, SW_TICDIR_INT, SW_TICDIR_STR); \
+   } \
+  if (gotAuto || gotRange || gotList) tics_rm(&(T)); \
+  if (gotRange) \
+   { \
+    int     gotStart = ((ptab[PARSE_INDEX_start     ]>0) && (command[ptab[PARSE_INDEX_start     ]].objType==PPLOBJ_NUM)); \
+    int     gotIncr  = ((ptab[PARSE_INDEX_increment ]>0) && (command[ptab[PARSE_INDEX_increment ]].objType==PPLOBJ_NUM)); \
+    int     gotEnd   = ((ptab[PARSE_INDEX_end       ]>0) && (command[ptab[PARSE_INDEX_end       ]].objType==PPLOBJ_NUM)); \
+    pplObj *objstart = &command[ptab[PARSE_INDEX_start     ]]; \
+    pplObj *objincr  = &command[ptab[PARSE_INDEX_increment ]]; \
+    pplObj *objend   = &command[ptab[PARSE_INDEX_end       ]]; \
+    double     start = objstart->real; \
+    double     incr  = objincr ->real; \
+    double     end   = objend  ->real; \
+    if (!gotIncr) { objincr=objstart; incr=start; gotIncr=1; gotStart=0; } /* if only one number given, it is increment */ \
+ \
+    if((gotStart && gotIncr && !amLog) && (!ppl_unitsDimEqual(objstart,objincr))) { sprintf(c->errcontext.tempErrStr, "Start value for axis ticks has conflicting units with step size. Units of the start value are <%s>; units of the step size are <%s>.", ppl_printUnit(c, objstart, NULL, NULL, 0, 1, 0), ppl_printUnit(c, objincr, NULL, NULL, 1, 1, 0)); ppl_error(&c->errcontext, ERR_UNIT, -1, -1, NULL); return; } \
+    if((gotStart && gotEnd           ) && (!ppl_unitsDimEqual(objstart,objend ))) { sprintf(c->errcontext.tempErrStr, "Start value for axis ticks has conflicting units with end value. Units of the start value are <%s>; units of the end value are <%s>.", ppl_printUnit(c, objstart, NULL, NULL, 0, 1, 0), ppl_printUnit(c, objend, NULL, NULL, 1, 1, 0)); ppl_error(&c->errcontext, ERR_UNIT, -1, -1, NULL); return; } \
+    if (amLog    && (!objincr->dimensionless)) { sprintf(c->errcontext.tempErrStr, "Invalid step size for axis ticks. On a log axis, step size should be a dimensionless multiplier; supplied step size has units of <%s>.", ppl_printUnit(c, objincr, NULL, NULL, 0, 1, 0)); ppl_error(&c->errcontext, ERR_UNIT, -1, -1, NULL); return; } \
+    if (gotStart && (!gsl_finite(start))) { sprintf(c->errcontext.tempErrStr, "Invalid starting value for axis ticks. Value supplied is not finite."); ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); return; } \
+    if (gotIncr  && (!gsl_finite(incr ))) { sprintf(c->errcontext.tempErrStr, "Invalid step size for axis ticks. Value supplied is not finite."); ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); return; } \
+    if (gotEnd   && (!gsl_finite(end  ))) { sprintf(c->errcontext.tempErrStr, "Invalid end value for axis ticks. Value supplied is not finite."); ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); return; } \
+    if ((!amLog)||(gotStart)) \
+     { \
+      pplObj *o = amLog ? objstart : objincr; \
+      if ((US)&&(!ppl_unitsDimEqual(o,&(U)))) { sprintf(c->errcontext.tempErrStr, "Tick positions supplied to the '%s' command have units of <%s>, which conflicts with the axis range which has units of <%s>.", cmd, ppl_printUnit(c, o, NULL, NULL, 0, 1, 0), ppl_printUnit(c, &(U), NULL, NULL, 1, 1, 0)); ppl_error(&c->errcontext, ERR_UNIT, -1, -1, NULL); return; } \
+      if (!ppl_unitsDimEqual(o,&(U))) { tics_rm(&(TO)); U=*o; } \
+     } \
+ \
+    if (((T).tickMinSet  = gotStart)) (T).tickMin  = start; \
+    if (((T).tickStepSet = gotIncr )) (T).tickStep = incr; \
+    if (((T).tickMaxSet  = gotEnd  )) (T).tickMax  = end; \
+   } \
+  else if (gotList) \
+   { \
+    int       pos = ptab[PARSE_INDEX_0tick_list]; \
+    const int x   = ptab[PARSE_INDEX_x]; \
+    const int lab = ptab[PARSE_INDEX_label]; \
+    int       i=0; \
+    pplObj   *first=NULL; \
+ \
+    while (command[pos].objType==PPLOBJ_NUM) \
+     { \
+      pplObj *ox; \
+      pos = (int)round(command[pos].real); \
+      if (pos<=0) break; \
+      ox = &command[pos+x]; \
+      if (ox->objType != PPLOBJ_NUM) { sprintf(c->errcontext.tempErrStr, "Ticks can only be set at numeric values; supplied value is of type <%s>.", pplObjTypeNames[ox->objType]); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); return; } \
+      if (!gsl_finite(ox->real)) { sprintf(c->errcontext.tempErrStr, "Ticks can only be set at finite numeric values; supplied value is not finite."); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); return; } \
+      if (ox->flagComplex) { sprintf(c->errcontext.tempErrStr, "Ticks can only be set at real numeric values; supplied value is complex."); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); return; } \
+      if (i==0) \
+       { \
+        first=ox; \
+        if ((US)&&(!ppl_unitsDimEqual(first,&(U)))) { sprintf(c->errcontext.tempErrStr, "Tick positions supplied to the '%s' command have units of <%s>, which conflicts with the axis range which has units of <%s>.", cmd, ppl_printUnit(c, first, NULL, NULL, 0, 1, 0), ppl_printUnit(c, &(U), NULL, NULL, 1, 1, 0)); ppl_error(&c->errcontext, ERR_UNIT, -1, -1, NULL); return; } \
+        if (!ppl_unitsDimEqual(first,&(U))) { tics_rm(&(TO)); U=*first; } \
+       } \
+      else if (!ppl_unitsDimEqual(first,ox)) { sprintf(c->errcontext.tempErrStr, "Tick positions supplied to the '%s' command must all have the same physical units; supplied list has multiple units, including <%s> and <%s>.", cmd, ppl_printUnit(c, first, NULL, NULL, 0, 1, 0), ppl_printUnit(c, ox, NULL, NULL, 1, 1, 0)); ppl_error(&c->errcontext, ERR_UNIT, -1, -1, NULL); return; } \
+      i++; \
+     } \
+    (T).tickList = (double *)malloc((i+1)*sizeof(double)); \
+    (T).tickStrs = (char  **)malloc((i+1)*sizeof(char *)); \
+    pos = ptab[PARSE_INDEX_0tick_list]; \
+    i=0; \
+    while (command[pos].objType==PPLOBJ_NUM) \
+     { \
+      pplObj *ox, *ol; \
+      char   *label; \
+      pos = (int)round(command[pos].real); \
+      if (pos<=0) break; \
+      ox = &command[pos+x]; \
+      ol = &command[pos+lab]; \
+      (T).tickList[i] = ox->real; \
+      label = (ol->objType==PPLOBJ_STR) ? ((char *)ol->auxil) : ("\xFF"); \
+      (T).tickStrs[i] = (char *)malloc(strlen(label)+1); \
+      if ((T).tickStrs[i] == NULL) { sprintf(c->errcontext.tempErrStr, "Out of memory."); ppl_error(&c->errcontext, ERR_MEMORY, -1, -1, NULL); return; } \
+      strcpy((T).tickStrs[i], label); \
+      i++; \
+     } \
+    (T).tickStrs[i] = NULL; \
+   } \
+ }
+
 void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int interactive)
  {
   pplset_graph     *sg;
@@ -426,6 +523,20 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    {
     strcpy(sg->c1label, c->set->graph_default.c1label);
     sg->c1LabelRotate = c->set->graph_default.c1LabelRotate;
+   }
+  else if (strcmp_set && (strcmp(setoption,"c1tics")==0)) /* set c1tics */
+   {
+    int        m    = (command[PARSE_set_c1tics_minor].objType==PPLOBJ_STR);
+    const int *ptab = PARSE_TABLE_set_c1tics_;
+    char      *cmd  = m ? "mc1tics" : "c1tics";
+    if (!m) { SET_TICKS( sg->ticsC  , sg->ticsCM , sg->unitC , ((sg->Cminauto[0]!=SW_BOOL_TRUE)||(sg->Cmaxauto[0]!=SW_BOOL_TRUE)) , (sg->Clog[0]==SW_BOOL_TRUE) ); }
+    else    { SET_TICKS( sg->ticsCM , sg->ticsC  , sg->unitC , ((sg->Cminauto[0]!=SW_BOOL_TRUE)||(sg->Cmaxauto[0]!=SW_BOOL_TRUE)) , (sg->Clog[0]==SW_BOOL_TRUE) ); }
+   }
+  else if (strcmp_unset && (strcmp(setoption,"c1tics")==0)) /* unset c1tics */
+   {
+    int m = (command[PARSE_unset_c1tics_minor].objType==PPLOBJ_STR);
+    if (!m) { tics_rm(&sg->ticsC ); if (ppl_unitsDimEqual(&sg->unitC , &c->set->graph_default.unitC)) tics_cp(&sg->ticsC ,&c->set->graph_default.ticsC ); }
+              tics_rm(&sg->ticsCM); if (ppl_unitsDimEqual(&sg->unitC , &c->set->graph_default.unitC)) tics_cp(&sg->ticsCM,&c->set->graph_default.ticsCM);
    }
   else if (strcmp_set && (strcmp(setoption,"calendar")==0)) /* set calendar */
    {
@@ -937,8 +1048,8 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
   else if (strcmp_set && (strcmp(setoption,"noc1tics")==0)) /* set noc1tics */
    {
     int m = (command[PARSE_set_notics_minor].objType==PPLOBJ_STR);
-    if (!m) tics_rm(&sg->ticsC);
-    tics_rm(&sg->ticsCM);
+    if (!m) { SET_NOTICKS(sg->ticsC); }
+    SET_NOTICKS(sg->ticsCM);
    }
   else if (strcmp_set && (strcmp(setoption,"noclip")==0)) /* set noclip */
    {
@@ -996,17 +1107,17 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
       int j = (int)round(command[PARSE_set_notics_axis].exponent[0]);
       if ( !((xa==NULL)||(ya==NULL)||(za==NULL)) )
        {
-        if      (j==1) { pplset_axis *a = &ya[i]; if (!m) tics_rm(&a->tics); tics_rm(&a->ticsM); }
-        else if (j==2) { pplset_axis *a = &za[i]; if (!m) tics_rm(&a->tics); tics_rm(&a->ticsM); }
-        else           { pplset_axis *a = &xa[i]; if (!m) tics_rm(&a->tics); tics_rm(&a->ticsM); }
+        if      (j==1) { pplset_axis *a = &ya[i]; if (!m) { SET_NOTICKS(a->tics); } SET_NOTICKS(a->ticsM); }
+        else if (j==2) { pplset_axis *a = &za[i]; if (!m) { SET_NOTICKS(a->tics); } SET_NOTICKS(a->ticsM); }
+        else           { pplset_axis *a = &xa[i]; if (!m) { SET_NOTICKS(a->tics); } SET_NOTICKS(a->ticsM); }
        }
      }
     else
      {
       int i;
-      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &xa[i]; if (a->enabled) { if (!m) tics_rm(&a->tics); tics_rm(&a->ticsM); } }
-      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &ya[i]; if (a->enabled) { if (!m) tics_rm(&a->tics); tics_rm(&a->ticsM); } }
-      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &za[i]; if (a->enabled) { if (!m) tics_rm(&a->tics); tics_rm(&a->ticsM); } }
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &xa[i]; if (a->enabled) { if (!m) { SET_NOTICKS(a->tics); } SET_NOTICKS(a->ticsM); } }
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &ya[i]; if (a->enabled) { if (!m) { SET_NOTICKS(a->tics); } SET_NOTICKS(a->ticsM); } }
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &za[i]; if (a->enabled) { if (!m) { SET_NOTICKS(a->tics); } SET_NOTICKS(a->ticsM); } }
      }
    }
   else if (strcmp_set && (strcmp(setoption,"notitle")==0)) /* set notitle */
@@ -1469,49 +1580,72 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    }
   else if (strcmp_set && (strcmp(setoption,"tics")==0)) /* set tics */
    {
+    int        m    = (command[PARSE_set_tics_minor].objType==PPLOBJ_STR);
+    const int *ptab = PARSE_TABLE_set_tics_;
 
-#define SET_TICKS(T) \
-
-    int m = (command[PARSE_set_tics_minor].objType==PPLOBJ_STR);
     if (command[PARSE_unset_tics_axis].objType==PPLOBJ_NUM)
      {
-      int i = (int)round(command[PARSE_unset_tics_axis].real);
-      int j = (int)round(command[PARSE_unset_tics_axis].exponent[0]);
+      int  i   = (int)round(command[PARSE_unset_tics_axis].real);
+      int  j   = (int)round(command[PARSE_unset_tics_axis].exponent[0]);
+      char cmd[16];
+      sprintf(cmd, "%s%c%d", m?"m":"", 'x'+j, i);
       if ( !((xa==NULL)||(ya==NULL)||(za==NULL)) )
        {
-        if      (j==1) { pplset_axis *a=&ya[i]; if (!m) { tics_rm(&a->tics); SET_TICKS(&a->tics); } else { tics_rm(&a->ticsM); SET_TICKS(&a->ticsM); } }
-        else if (j==2) { pplset_axis *a=&za[i]; if (!m) { tics_rm(&a->tics); SET_TICKS(&a->tics); } else { tics_rm(&a->ticsM); SET_TICKS(&a->ticsM); } }
-        else           { pplset_axis *a=&xa[i]; if (!m) { tics_rm(&a->tics); SET_TICKS(&a->tics); } else { tics_rm(&a->ticsM); SET_TICKS(&a->ticsM); } }
+        pplset_axis *a;
+        if      (j==1) a=&ya[i];
+        else if (j==2) a=&za[i];
+        else           a=&xa[i];
+        if (!m) { tics_rm(&a->tics ); SET_TICKS(a->tics ,a->ticsM,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
+        else    { tics_rm(&a->ticsM); SET_TICKS(a->ticsM,a->tics ,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); } 
        }
      }
     else
      {
       int i;
-      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &xa[i]; if (a->enabled) { if (!m) { tics_rm(&a->tics); SET_TICKS(&a->tics); } else { tics_rm(&a->ticsM); SET_TICKS(&a->ticsM); } } }
-      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &ya[i]; if (a->enabled) { if (!m) { tics_rm(&a->tics); SET_TICKS(&a->tics); } else { tics_rm(&a->ticsM); SET_TICKS(&a->ticsM); } } }
-      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &za[i]; if (a->enabled) { if (!m) { tics_rm(&a->tics); SET_TICKS(&a->tics); } else { tics_rm(&a->ticsM); SET_TICKS(&a->ticsM); } } }
+      char *cmd = m ? "mtics" : "tics";
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &xa[i]; if (a->enabled)
+       {
+        if (!m) { tics_rm(&a->tics ); SET_TICKS(a->tics ,a->ticsM,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
+        else    { tics_rm(&a->ticsM); SET_TICKS(a->ticsM,a->tics ,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
+       }}
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &ya[i]; if (a->enabled)
+       {
+        if (!m) { tics_rm(&a->tics ); SET_TICKS(a->tics ,a->ticsM,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
+        else    { tics_rm(&a->ticsM); SET_TICKS(a->ticsM,a->tics ,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
+       }}
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &za[i]; if (a->enabled)
+       {
+        if (!m) { tics_rm(&a->tics ); SET_TICKS(a->tics ,a->ticsM,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
+        else    { tics_rm(&a->ticsM); SET_TICKS(a->ticsM,a->tics ,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
+       }}
      }
    }
   else if (strcmp_unset && (strcmp(setoption,"tics")==0)) /* unset tics */
    {
     int m = (command[PARSE_unset_tics_minor].objType==PPLOBJ_STR);
+
+#define IDE if (ppl_unitsDimEqual(&a->unit , &ad->unit))
+
     if (command[PARSE_unset_tics_axis].objType==PPLOBJ_NUM)
      {
       int i = (int)round(command[PARSE_unset_tics_axis].real);
       int j = (int)round(command[PARSE_unset_tics_axis].exponent[0]);
       if ( !((xa==NULL)||(ya==NULL)||(za==NULL)) )
        {
-        if      (j==1) { pplset_axis *a=&ya[i], *ad=&c->set->YAxesDefault[i]; if (!m) { tics_rm(&a->tics); tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); tics_cp(&a->ticsM,&ad->ticsM); }
-        else if (j==2) { pplset_axis *a=&za[i], *ad=&c->set->ZAxesDefault[i]; if (!m) { tics_rm(&a->tics); tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); tics_cp(&a->ticsM,&ad->ticsM); }
-        else           { pplset_axis *a=&xa[i], *ad=&c->set->XAxesDefault[i]; if (!m) { tics_rm(&a->tics); tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); tics_cp(&a->ticsM,&ad->ticsM); }
+        if      (j==1) { pplset_axis *a=&ya[i], *ad=&c->set->YAxesDefault[i]; if (!m) { tics_rm(&a->tics); IDE tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); IDE tics_cp(&a->ticsM,&ad->ticsM); }
+        else if (j==2) { pplset_axis *a=&za[i], *ad=&c->set->ZAxesDefault[i]; if (!m) { tics_rm(&a->tics); IDE tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); IDE tics_cp(&a->ticsM,&ad->ticsM); }
+        else           { pplset_axis *a=&xa[i], *ad=&c->set->XAxesDefault[i]; if (!m) { tics_rm(&a->tics); IDE tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); IDE tics_cp(&a->ticsM,&ad->ticsM); }
        }
      }
     else
      {
       int i;
-      for (i=0; i<MAX_AXES; i++) { pplset_axis *a=&xa[i], *ad=&c->set->XAxesDefault[i]; if (a->enabled) { if (!m) { tics_rm(&a->tics); tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); tics_cp(&a->ticsM,&ad->ticsM); } }
-      for (i=0; i<MAX_AXES; i++) { pplset_axis *a=&ya[i], *ad=&c->set->YAxesDefault[i]; if (a->enabled) { if (!m) { tics_rm(&a->tics); tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); tics_cp(&a->ticsM,&ad->ticsM); } }
-      for (i=0; i<MAX_AXES; i++) { pplset_axis *a=&za[i], *ad=&c->set->ZAxesDefault[i]; if (a->enabled) { if (!m) { tics_rm(&a->tics); tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); tics_cp(&a->ticsM,&ad->ticsM); } }
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a=&xa[i], *ad=&c->set->XAxesDefault[i]; if (a->enabled)
+         { if (!m) { tics_rm(&a->tics); IDE tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); IDE tics_cp(&a->ticsM,&ad->ticsM); } }
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a=&ya[i], *ad=&c->set->YAxesDefault[i]; if (a->enabled)
+         { if (!m) { tics_rm(&a->tics); IDE tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); IDE tics_cp(&a->ticsM,&ad->ticsM); } }
+      for (i=0; i<MAX_AXES; i++) { pplset_axis *a=&za[i], *ad=&c->set->ZAxesDefault[i]; if (a->enabled)
+         { if (!m) { tics_rm(&a->tics); IDE tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); IDE tics_cp(&a->ticsM,&ad->ticsM); } }
      }
    }
   else if (strcmp_set && (strcmp(setoption,"title")==0)) /* set title */
@@ -1777,7 +1911,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
       if (!gsl_finite(d)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The viewing angles supplied to the 'set view' command were not finite."); return; }
       sg->XYview.real = d;
      }
-    if (command[PARSE_set_view_yz_angle].objType==PPLOBJ_NUM) 
+    if (command[PARSE_set_view_yz_angle].objType==PPLOBJ_NUM)
      {
       double d=command[PARSE_set_view_yz_angle].real;
       if (!gsl_finite(d)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The viewing angles supplied to the 'set view' command were not finite."); return; }
@@ -1848,7 +1982,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
        {
         a->enabled = 1;
         if (command[PARSE_set_xformat_format_string].objType == PPLOBJ_EXP)
-         { 
+         {
           if (a->format != NULL) pplExpr_free((pplExpr *)a->format);
           a->format = (void *)pplExpr_cpy((pplExpr *)command[PARSE_set_xformat_format_string].auxil);
          }
@@ -1858,7 +1992,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
           a->TickLabelRotate   = ad->TickLabelRotate;
          }
         if (command[PARSE_set_xformat_rotation].objType == PPLOBJ_NUM)
-         { 
+         {
           double r = command[PARSE_set_xformat_rotation].real;
           if (!gsl_finite(r)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The rotation angle supplied to the 'set format' command was not finite."); return; }
           a->TickLabelRotate = r; // TickLabelRotation will already have been set by "rotate" keyword mapping to "orient"

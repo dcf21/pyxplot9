@@ -130,23 +130,29 @@ void pplaxis_copyMTics(ppl_context *context, pplset_axis *out, const pplset_axis
 unsigned char pplaxis_cmpTics(ppl_context *context, const pplset_tics *ta, const pplset_tics *tb, const pplObj *ua, const pplObj *ub, const int la, const int lb)
  {
   int i,j;
-  if (la != lb) return 0;
+  if ((ta->tickList==NULL)&&(tb->tickList==NULL)&&(!ta->tickMinSet)&&(!tb->tickMinSet)&&(!ta->tickStepSet)&&(!tb->tickStepSet)&&(!ta->tickMaxSet)&&(!tb->tickMaxSet)) return 1;
   if (!ppl_unitsDimEqual(ua,ub)) return 0;
-  if (ta->tickMinSet!=tb->tickMinSet) return 0;
-  if (ta->tickMaxSet!=tb->tickMaxSet) return 0;
-  if (ta->tickStepSet!=tb->tickStepSet) return 0;
-  if (ta->tickMinSet && (ta->tickMin!=tb->tickMin)) return 0;
-  if (ta->tickMaxSet && (ta->tickMax!=tb->tickMax)) return 0;
-  if (ta->tickStepSet && (ta->tickStep!=tb->tickStep)) return 0;
-  if ((ta->tickList==NULL)&&(tb->tickList==NULL)) return 1;
-  if ((ta->tickList==NULL)||(tb->tickList==NULL)) return 0;
-  for (i=0; ta->tickStrs[i]!=NULL; i++);
-  for (j=0; tb->tickStrs[j]!=NULL; j++);
-  if (i!=j) return 0; // tick lists have different lengths
-  for (j=0; j<i; j++)
+  if ((ta->tickList==NULL)!=(tb->tickList==NULL)) return 0;
+  if (ta->tickList==NULL)
    {
-    if (ta->tickList[j] != tb->tickList[j]) return 0;
-    if (strcmp(ta->tickStrs[j], tb->tickStrs[j])!=0) return 0;
+    if (la!=lb) return 0;
+    if (ta->tickMinSet!=tb->tickMinSet) return 0;
+    if (ta->tickMaxSet!=tb->tickMaxSet) return 0;
+    if (ta->tickStepSet!=tb->tickStepSet) return 0;
+    if (ta->tickMinSet && (ta->tickMin!=tb->tickMin)) return 0;
+    if (ta->tickMaxSet && (ta->tickMax!=tb->tickMax)) return 0;
+    if (ta->tickStepSet && (ta->tickStep!=tb->tickStep)) return 0;
+   }
+  else
+   {
+    for (i=0; ta->tickStrs[i]!=NULL; i++);
+    for (j=0; tb->tickStrs[j]!=NULL; j++);
+    if (i!=j) return 0; // tick lists have different lengths
+    for (j=0; j<i; j++)
+     {
+      if (ta->tickList[j] != tb->tickList[j]) return 0;
+      if (strcmp(ta->tickStrs[j], tb->tickStrs[j])!=0) return 0;
+     }
    }
   return 1;
  }

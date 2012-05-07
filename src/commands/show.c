@@ -107,10 +107,10 @@ if (interactive!=0) /* On interactive sessions, highlight those settings which h
            for (n=0; T.tickStrs[n]!=NULL; n++) \
             { \
              strcpy(buf+m, (n==0)?"":", "); m += strlen(buf+m); \
-             if (T.tickStrs[n][0]!='\xFF') { ppl_strEscapify(T.tickStrs[n], buf+m); m += strlen(buf+m); } \
-             U.real = T.tickList[n]; \
-             sprintf(buf+m, " %s", ppl_unitsNumericDisplay(c,&(U),0,0,0)); \
+             sprintf(buf+m, "%s", ppl_unitsNumericDisplay(c,&(U),0,0,0)); \
              m += strlen(buf+m); \
+             if (T.tickStrs[n][0]!='\xFF') { buf[m++]=' '; buf[m]='\0'; ppl_strEscapify(T.tickStrs[n], buf+m); m += strlen(buf+m); } \
+             U.real = T.tickList[n]; \
             } \
            sprintf(buf+m, ")"); \
           } \
@@ -282,7 +282,7 @@ static int ppl_directive_show2(ppl_context *c, char *word, char *itemSet, int in
     if (sg->c1formatset) sprintf(buf, "%s ", c1format_current->ascii);
     else                 buf[0]='\0';
     m = strlen(buf);
-    sprintf(buf+m, "%s", *(char **)ppl_fetchSettingName(&c->errcontext, sg->c1TickLabelRotation, SW_TICLABDIR_INT, SW_TICLABDIR_STR , sizeof(char *))); m += strlen(buf+m);     
+    sprintf(buf+m, "%s", *(char **)ppl_fetchSettingName(&c->errcontext, sg->c1TickLabelRotation, SW_TICLABDIR_INT, SW_TICLABDIR_STR , sizeof(char *))); m += strlen(buf+m);
     if (sg->c1TickLabelRotation == SW_TICLABDIR_ROT)
      {
       pplObj valobj; valobj.refCount=1;
@@ -311,6 +311,22 @@ static int ppl_directive_show2(ppl_context *c, char *word, char *itemSet, int in
                     "Textual label for the c1 axis");
     i += strlen(out+i) ; p=1;
    }
+{
+int showMinor = 0;
+  if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "c1tics",1)>=0))
+   {
+    sprintf(temp1, "c1tics");
+    SHOW_TICKS(sg->ticsC , c->set->graph_default.ticsC , sg->unitC, c->set->graph_default.unitC, sg->Clog[0], c->set->graph_default.Clog[0], 'c', 1);
+    i += strlen(out+i) ; p=1;
+    showMinor=1; // If we've shown major tics, also show minor ticks too.
+   }
+  if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "mc1tics",1)>=0) || showMinor)
+   {
+    sprintf(temp1, "mc1tics");
+    SHOW_TICKS(sg->ticsCM, c->set->graph_default.ticsCM, sg->unitC, c->set->graph_default.unitC, sg->Clog[0], c->set->graph_default.Clog[0], 'c', 1);
+    i += strlen(out+i) ; p=1;
+   }
+}
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "calendarin",1)>=0))
    {
     sprintf(buf, "%s", *(char **)ppl_fetchSettingName(&c->errcontext, c->set->term_current.CalendarIn, SW_CALENDAR_INT, SW_CALENDAR_STR , sizeof(char *)));
@@ -1261,13 +1277,9 @@ void ppl_directive_show(ppl_context *c, parserLine *pl, parserOutput *in, int in
    {
     canvas_itemlist *canvas_items = c->canvas_items;
     canvas_item *ptr = canvas_items->first;
-    int i, editNo = (int)round(stk[PARSE_show_editno].real);
+    int editNo = (int)round(stk[PARSE_show_editno].real);
     if ((editNo<1) || (editNo>MULTIPLOT_MAXINDEX) || (canvas_items == NULL)) { sprintf(c->errcontext.tempErrStr, "No multiplot item with index %d.", editNo); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return; }
-    for (i=1; i<editNo; i++)
-     {
-      if (ptr==NULL) break;
-      ptr=ptr->next;
-     }
+    while ((ptr!=NULL)&&(ptr->id!=editNo)) ptr=ptr->next;
     if (ptr == NULL) { sprintf(c->errcontext.tempErrStr, "No multiplot item with index %d.", editNo); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return; }
 
     sg = &(ptr->settings);
