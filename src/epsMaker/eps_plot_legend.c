@@ -113,13 +113,13 @@ void GraphLegend_YieldUpText(EPSComm *x)
         k=0;
         if (pd->parametric) { sprintf(cptr+k, "parametric"); k+=strlen(cptr+k); }
         if (pd->TRangeSet)  { sprintf(cptr+k, " [%s:%s]", ppl_unitsNumericDisplay(x->c,&pd->Tmin,0,SW_DISPLAY_L,0), ppl_unitsNumericDisplay(x->c,&pd->Tmax,1,SW_DISPLAY_L,0)); k+=strlen(cptr+k); }
-        if (!pd->function) { cptr[k++]=' '; ppl_strEscapify(pd->filename, buffer); inlen=strlen(buffer); ppl_texify_generic(x->c, buffer, &inlen, cptr+k, LSTR_LENGTH-k); k+=strlen(cptr+k); } // Filename of datafile we are plotting
+        if (!pd->function) { cptr[k++]=' '; ppl_strEscapify(pd->filename, buffer); inlen=strlen(buffer); ppl_texify_generic(x->c, buffer, -1, &inlen, cptr+k, LSTR_LENGTH-k, NULL, NULL); k+=strlen(cptr+k); } // Filename of datafile we are plotting
         else
          for (j=0; j<pd->NFunctions; j++) // Print out the list of functions which we are plotting
           {
            cptr[k++]=(j!=0)?':':' ';
            inlen=strlen(pd->functions[j]->ascii);
-           ppl_texify_generic(x->c, pd->functions[j]->ascii, &inlen, cptr+k, LSTR_LENGTH-k);
+           ppl_texify_generic(x->c, pd->functions[j]->ascii, -1, &inlen, cptr+k, LSTR_LENGTH-k, NULL, NULL);
            k+=strlen(cptr+k);
           }
         if (pd->ContinuitySet) // Print continuous / discontinuous flag
@@ -141,8 +141,8 @@ void GraphLegend_YieldUpText(EPSComm *x)
         if (pd->EverySet>4) { sprintf(cptr+k, ":$%d$", pd->EveryList[4]); k+=strlen(cptr+k); }
         if (pd->EverySet>5) { sprintf(cptr+k, ":$%d$", pd->EveryList[5]); k+=strlen(cptr+k); }
         if (pd->IndexSet) { sprintf(cptr+k, " index $%d$", pd->index); k+=strlen(cptr+k); } // Print index to use
-        if (pd->label!=NULL) { sprintf(cptr+k, " label "); k+=strlen(cptr+k); inlen=strlen(pd->label->ascii); ppl_texify_generic(x->c, pd->label->ascii, &inlen, cptr+k, LSTR_LENGTH-k); k+=strlen(cptr+k); } // Print label string
-        if (pd->SelectCriterion!=NULL) { strcpy(cptr+k, " select "); k+=strlen(cptr+k); inlen=strlen(pd->SelectCriterion->ascii); ppl_texify_generic(x->c, pd->SelectCriterion->ascii, &inlen, cptr+k, LSTR_LENGTH-k); k+=strlen(cptr+k); } // Print select criterion
+        if (pd->label!=NULL) { sprintf(cptr+k, " label "); k+=strlen(cptr+k); inlen=strlen(pd->label->ascii); ppl_texify_generic(x->c, pd->label->ascii, -1, &inlen, cptr+k, LSTR_LENGTH-k, NULL, NULL); k+=strlen(cptr+k); } // Print label string
+        if (pd->SelectCriterion!=NULL) { strcpy(cptr+k, " select "); k+=strlen(cptr+k); inlen=strlen(pd->SelectCriterion->ascii); ppl_texify_generic(x->c, pd->SelectCriterion->ascii, -1, &inlen, cptr+k, LSTR_LENGTH-k, NULL, NULL); k+=strlen(cptr+k); } // Print select criterion
         if ((pd->NUsing>0)||(pd->UsingRowCols!=DATAFILE_COL))
          {
           sprintf(cptr+k, " using %s", (pd->UsingRowCols==DATAFILE_COL)?"":"rows"); k+=strlen(cptr+k); // Print using list
@@ -150,7 +150,7 @@ void GraphLegend_YieldUpText(EPSComm *x)
            {
             cptr[k++]=(j!=0)?':':' ';
             inlen=strlen(pd->UsingList[j]->ascii);
-            ppl_texify_generic(x->c, pd->UsingList[j]->ascii, &inlen, cptr+k, LSTR_LENGTH-k);
+            ppl_texify_generic(x->c, pd->UsingList[j]->ascii, -1, &inlen, cptr+k, LSTR_LENGTH-k, NULL, NULL);
             k+=strlen(cptr+k);
            }
          }

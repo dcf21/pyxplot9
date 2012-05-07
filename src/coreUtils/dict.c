@@ -72,11 +72,12 @@ int ppl_dictFree(dict *in)
   return 0;
  }
 
-int ppl_dictHash(const char *str, int hashSize)
+int ppl_dictHash(const char *str, const int strLen, const int hashSize)
  {
   unsigned int hash = 5381;
-  int c;
-  while ((c = *str++)) hash = ((hash << 5) + hash) + c;
+  int c, i=0;
+  if (strLen<0) while (               (c = *str++) ) hash = ((hash << 5) + hash) + c;
+  else          while ((i++<strLen)&&((c = *str++))) hash = ((hash << 5) + hash) + c;
   return hash % hashSize;
  }
 
@@ -119,7 +120,7 @@ int ppl_dictAppend(dict *in, const char *key, void *item)
     if (ptr  == NULL) in->last  = ptrnew; else ptr ->prev = ptrnew;
     in->length++;
 
-    hash = ppl_dictHash(key, in->hashSize);
+    hash = ppl_dictHash(key, -1, in->hashSize);
     in->hashTable[hash] = ptrnew;
    }
   return 0;
@@ -163,7 +164,7 @@ int ppl_dictAppendCpy(dict *in, const char *key, void *item, int size)
     if (ptr  == NULL) in->last  = ptrnew; else ptr ->prev = ptrnew;
     in->length++;
 
-    hash = ppl_dictHash(key, in->hashSize);
+    hash = ppl_dictHash(key, -1, in->hashSize);
     in->hashTable[hash] = ptrnew;
    }
   return 0;
@@ -171,7 +172,7 @@ int ppl_dictAppendCpy(dict *in, const char *key, void *item, int size)
 
 void *ppl_dictLookup(dict *in, const char *key)
  {
-  int hash = ppl_dictHash(key, in->hashSize);
+  int hash = ppl_dictHash(key, -1, in->hashSize);
   return ppl_dictLookupHash(in, key, hash);
  }
 
@@ -200,10 +201,10 @@ void *ppl_dictLookupHash(dict *in, const char *key, int hash)
   return NULL;
  }
 
-void ppl_dictLookupWithWildcard(dict *in, dict *in_w, char *key, char *SubsString, int SubsMaxLen, dictItem **ptrout)
+void ppl_dictLookupWithWildcard(dict *in, char *key, char *SubsString, int SubsMaxLen, dictItem **ptrout)
  {
-  int hash, k, l;
-  char tmp;
+  int       hash, i, k, keylen;
+  char     *magicFns[] = { "diff_d", "int_d" , NULL };
   dictItem *ptr;
 
   SubsString[0]='\0';
@@ -211,43 +212,45 @@ void ppl_dictLookupWithWildcard(dict *in, dict *in_w, char *key, char *SubsStrin
 
   // Check hash table
   for (k=0; (isalnum(key[k]) || (key[k]=='_')); k++);
-  tmp=key[k];
-  key[k]='\0';
-  hash = ppl_dictHash(key, in->hashSize);
-  key[k]=tmp;
+  keylen=k;
+  hash = ppl_dictHash(key, keylen, in->hashSize);
   ptr  = in->hashTable[hash];
   if (ptr!=NULL)
    {
-    for (k=0; ((ptr->key[k]>' ')&&(ptr->key[k]!='?')&&(ptr->key[k]==key[k])); k++);
-    if (!((ptr->key[k]>' ') || (isalnum(key[k])) || (key[k]=='_')) ) { *ptrout = ptr;  return; }
+    for (k=0; ((ptr->key[k]>' ')&&(ptr->key[k]==key[k])); k++);
+    if ((ptr->key[k]=='\0')&&(!(isalnum(key[k])||(key[k]=='_')))) { *ptrout=ptr; return; }
 
     // Hash table clash; need to exhaustively search dictionary
     ptr = in->first;
     while (ptr != NULL)
      {
-      for (k=0; ((ptr->key[k]>' ')&&(ptr->key[k]!='?')&&(ptr->key[k]==key[k])); k++);
-      if (!((ptr->key[k]>' ') || (isalnum(key[k])) || (key[k]=='_')) ) { *ptrout = ptr;  return; }
+      for (k=0; ((ptr->key[k]>' ')&&(ptr->key[k]==key[k])); k++);
+      if ((ptr->key[k]=='\0')&&(!(isalnum(key[k])||(key[k]=='_')))) { *ptrout=ptr; return; }
       ptr = ptr->next;
      }
    }
 
-  // Need to start exhaustive search of dictionary of "int_d?"-like wildcards
-  for (ptr=in_w->first; ptr!=NULL; ptr=ptr->next)
+  // Need to search "int_d?"-like wildcards
+  for (i=0; magicFns[i]!=NULL; i++)
    {
-    for (k=0; ((ptr->key[k]>' ')&&(ptr->key[k]!='?')&&(ptr->key[k]==key[k])); k++);
-    if (ptr->key[k]=='?') // dictionary key ends with a ?, e.g. "int_d?"
+    for (k=0; ((magicFns[i][k]>' ')&&(magicFns[i][k]==key[k])); k++);
+    if (magicFns[i][k]=='\0') // each magic function name can be followed by a variable name
      {
-      for (l=0; ((isalnum(key[k+l]) || (key[k+l]=='_')) && (l<SubsMaxLen)); l++) SubsString[l]=key[k+l];
+      int l=0;
+      if (isalpha(key[k+l])) // first character of dummy variable name must be a letter
+       {
+        for (l=0; ((isalnum(key[k+l]) || (key[k+l]=='_')) && (l<SubsMaxLen)); l++) SubsString[l]=key[k+l];
+       }
       if (l==SubsMaxLen) continue; // Dummy variable name was too long
       if (l==0) continue; // Dummy variable was too short
       SubsString[l]='\0';
-      *ptrout = ptr;
-      return;
-     } else { // Otherwise, we have to match function name exactly
-      if ((ptr->key[k]>' ') || (isalnum(key[k])) || (key[k]=='_')) continue; // Nope...
-      *ptrout = ptr;
-      SubsString[0]='\0';
-      return;
+      ptr = in->first;
+      while (ptr != NULL)
+       {
+        for (k=0; ((ptr->key[k]>' ')&&(ptr->key[k]==magicFns[i][k])); k++);
+        if ((magicFns[i][k]=='\0')&&(ptr->key[k]=='\0')) { *ptrout=ptr; return; }
+        ptr = ptr->next;
+       }
      }
    }
   SubsString[0]='\0';
@@ -262,7 +265,7 @@ int ppl_dictContains(dict *in, const char *key)
   if (in==NULL) return 0;
 
   // Check hash table
-  hash = ppl_dictHash(key, in->hashSize);
+  hash = ppl_dictHash(key, -1, in->hashSize);
   ptr  = in->hashTable[hash];
   if (ptr==NULL) return 0;
   if (strcmp(ptr->key, key)==0) return 1;
@@ -285,7 +288,7 @@ int ppl_dictRemoveKey(dict *in, const char *key)
   if (in==NULL) return 1;
 
   // Check hash table
-  hash = ppl_dictHash(key, in->hashSize);
+  hash = ppl_dictHash(key, -1, in->hashSize);
   ptr  = in->hashTable[hash];
   if (ptr==NULL) return 1;
   if (strcmp(ptr->key, key)==0) { _ppl_dictRemoveEngine(in, ptr); return 0; }
@@ -323,7 +326,7 @@ void _ppl_dictRemoveEngine(dict *in, dictItem *ptr)
   if (ptr==NULL) return;
 
   // Remove hash table entry
-  hash = ppl_dictHash(ptr->key,in->hashSize);
+  hash = ppl_dictHash(ptr->key, -1, in->hashSize);
   if (in->hashTable[hash]==ptr) in->hashTable[hash]=NULL;
 
   if (in->useMalloc) { free(ptr->data); free(ptr->key); }

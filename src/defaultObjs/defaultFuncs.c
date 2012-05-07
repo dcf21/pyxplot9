@@ -1419,7 +1419,7 @@ void pplfunc_texify      (ppl_context *c, pplObj *in, int nArgs, int *status, in
   if (in[0].objType!=PPLOBJ_STR) { sprintf(errText,"The %s requires a single string argument; supplied argument had type <%s>.",FunctionDescription,pplObjTypeNames[in[0].objType]); *errType=ERR_TYPE; *status=1; return; }
   outstr = (char *)malloc(LSTR_LENGTH);
   if (outstr==NULL) { sprintf(errText,"Out of memory."); *errType=ERR_MEMORY; *status=1; return; }
-  ppl_texify_generic(c, instr, &inlen, outstr, LSTR_LENGTH);
+  ppl_texify_generic(c, instr, -1, &inlen, outstr, LSTR_LENGTH, NULL, NULL);
   pplObjStr(&OUTPUT,0,1,outstr);
   if (inlen < strlen(instr)) { sprintf(errText,"Unexpected trailing matter at the end of texified expression (character position %d).",inlen); *errType=ERR_SYNTAX; *status=1; return; }
   return;

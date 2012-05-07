@@ -447,34 +447,58 @@ void ppl_strWordWrap(const char *in, char *out, int width)
 
 void ppl_strBracketMatch(const char *in, char open, char close, int *CommaPositions, int *Nargs, int *ClosingBracketPos, int MaxCommaPoses)
  {
-  int  BracketLevel = 0;
-  int  inpos        = 0;
-  int  commapos     = 0;
-  char QuoteType    = '\0';
+  int  BracketLevel[3] = {0,0,0};
+  char bopen       [4] = "([{";
+  char bclose      [4] = ")]}";
+  int  inpos           = 0;
+  int  commapos        = 0;
+  char QuoteType       = '\0';
+  int  idx             = (open=='{') ? 2 : ((open=='[') ? 1 : 0);
+  int  done            = 0;
+  int  btype;
 
-  for ( ; in[inpos] != '\0'; inpos++)
+  for ( ; in[inpos]!='\0'; inpos++)
    {
     if (QuoteType != '\0') // Do not pay attention to brackets inside quoted strings
      {
       if ((in[inpos]==QuoteType) && (in[inpos-1]!='\\')) QuoteType='\0';
       continue;
      }
-    else if ((in[inpos]=='\'') || (in[inpos]=='\"')) QuoteType     = in[inpos]; // Entering a quoted string
-    else if  (in[inpos]==open)  // Entering a nested level of brackets
+    else if ((in[inpos]=='\'') || (in[inpos]=='\"')) QuoteType = in[inpos]; // Entering a quoted string
+
+    for (btype=0; btype<3; btype++)
      {
-      BracketLevel += 1;
-      if (BracketLevel == 1)
-       if ((CommaPositions != NULL) && ((MaxCommaPoses < 0) || (commapos < MaxCommaPoses))) *(CommaPositions+(commapos++)) = inpos; // Put ( on comma list
+      if  (in[inpos]==bopen[btype])  // Entering a nested level of brackets
+       {
+        BracketLevel[btype]++;
+        if (    (idx==btype)
+             && (BracketLevel[btype]==1)
+             && (BracketLevel[(btype+1)%3]==0)
+             && (BracketLevel[(btype+2)%3]==0)
+             && (CommaPositions != NULL)
+             && ((MaxCommaPoses < 0) || (commapos < MaxCommaPoses))
+           ) *(CommaPositions+(commapos++)) = inpos; // Put ( on comma list
+       }
+      else if  (in[inpos]==bclose[btype])  // Leaving a nested level of brackets
+       {
+        BracketLevel[btype]--;
+        if (    (idx==btype)
+             && (BracketLevel[btype]==0)
+             && (BracketLevel[(btype+1)%3]==0)
+             && (BracketLevel[(btype+2)%3]==0)
+           ) { done=1; break; }
+       }
      }
-    else if  (in[inpos]==close)  // Leaving a nested level of brackets
-     {
-      BracketLevel -= 1;
-      if (BracketLevel == 0) break;
-     }
-    else if ((in[inpos]==',') && (BracketLevel==1)) // Found a new comma-separated item
+
+    if (    (in[inpos]==',')
+         && (BracketLevel[idx]==1)
+         && (BracketLevel[(idx+1)%3]==0)
+         && (BracketLevel[(idx+2)%3]==0)
+       ) // Found a new comma-separated item
      {
       if ((CommaPositions != NULL) && ((MaxCommaPoses < 0) || (commapos < MaxCommaPoses))) *(CommaPositions+(commapos++)) = inpos; // Put , on comma list
      }
+    if (done) break;
    }
 
   if (in[inpos] == '\0')

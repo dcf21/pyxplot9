@@ -127,7 +127,6 @@ void pplObjFuncDestroy(pplFunc *f)
   if (f->max        !=NULL) free(f->max);
   if (f->minActive  !=NULL) free(f->minActive);
   if (f->maxActive  !=NULL) free(f->maxActive);
-  if (f->LaTeX      !=NULL) free(f->LaTeX);
   free(f);
   return;
  }

@@ -51,14 +51,14 @@ typedef struct dictS
 typedef dictItem dictIterator;
 
 dict         *ppl_dictInit         (int HashSize, int useMalloc);
-int           ppl_dictHash         (const char *str, int HashSize);
+int           ppl_dictHash         (const char *str, const int strLen, const int HashSize);
 int           ppl_dictFree         (dict *in);
 int           ppl_dictLen          (dict *in);
 int           ppl_dictAppend       (dict *in, const char *key, void *item);
 int           ppl_dictAppendCpy    (dict *in, const char *key, void *item, int size);
 void         *ppl_dictLookup       (dict *in, const char *key);
 void         *ppl_dictLookupHash   (dict *in, const char *key, int hash);
-void          ppl_dictLookupWithWildcard(dict *in, dict *in_w, char *key, char *SubsString, int SubsMaxLen, dictItem **ptrout);
+void          ppl_dictLookupWithWildcard(dict *in, char *key, char *SubsString, int SubsMaxLen, dictItem **ptrout);
 int           ppl_dictContains     (dict *in, const char *key);
 int           ppl_dictRemoveKey    (dict *in, const char *key);
 int           ppl_dictRemove       (dict *in, void *item);
