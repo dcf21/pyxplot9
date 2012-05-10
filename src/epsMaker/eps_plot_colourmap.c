@@ -168,7 +168,7 @@ void eps_plot_colourmap_YieldText(EPSComm *x, dataTable *data, pplset_graph *sg,
   pd->C1Axis.min = pd->C1Axis.MinFinal = pd->C1Axis.HardMin = CMin;
   pd->C1Axis.max = pd->C1Axis.MaxFinal = pd->C1Axis.HardMax = CMax;
   pd->C1Axis.DataUnitSet = pd->C1Axis.HardUnitSet = 1;
-  pd->C1Axis.DataUnit = pd->C1Axis.HardUnit = pd->C1Axis.unit = data->FirstEntries[2];
+  pd->C1Axis.DataUnit = pd->C1Axis.HardUnit = pd->C1Axis.unit = data->firstEntries[2];
   pd->C1Axis.AxisValueTurnings = 0;
   pd->C1Axis.AxisLinearInterpolation = NULL;
   pd->C1Axis.CrossedAtZero = 0;
@@ -204,7 +204,7 @@ void eps_plot_colourmap_YieldText(EPSComm *x, dataTable *data, pplset_graph *sg,
     pd->CRangeDisplay = 1;
     pd->CMinFinal     = CMin;
     pd->CMaxFinal     = CMax;
-    pd->CRangeUnit    = data->FirstEntries[2];
+    pd->CRangeUnit    = data->firstEntries[2];
    }
 
   return;
@@ -230,7 +230,7 @@ int  eps_plot_colourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int
   if ((data==NULL) || (data->Nrows<1)) return 0; // No data present
   Ncol_real = data->Ncolumns_real;
   Ncol_obj  = data->Ncolumns_obj;
-  if (eps_plot_WithWordsCheckUsingItemsDimLess(x->c, &pd->ww_final, data->FirstEntries, Ncol_real, Ncol_obj, &NcolsData)) return 1;
+  if (eps_plot_WithWordsCheckUsingItemsDimLess(x->c, &pd->ww_final, data->firstEntries, Ncol_real, Ncol_obj, &NcolsData)) return 1;
   if (!ThreeDim) { scale_x=width; scale_y=height; scale_z=1.0;    }
   else           { scale_x=width; scale_y=height; scale_z=zdepth; }
   blk = data->first;
@@ -299,7 +299,7 @@ int  eps_plot_colourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int
    {
     char v[3]={'c','1'+i,'\0'};
     ppl_contextGetVarPointer(x->c, v, CVar+i, CDummy+i);
-    if ((i<NcolsData-2)&&(sg->Crenorm[i]==SW_BOOL_FALSE)) { *CVar[i] = data->FirstEntries[i+2]; CVar[i]->flagComplex=0; CVar[i]->imag=0.0; }
+    if ((i<NcolsData-2)&&(sg->Crenorm[i]==SW_BOOL_FALSE)) { *CVar[i] = data->firstEntries[i+2]; CVar[i]->flagComplex=0; CVar[i]->imag=0.0; }
     else pplObjNum(CVar[i],0,0,0); // c1...c4 are dimensionless numbers in range 0-1, regardless of units of input data
    }
 
@@ -663,7 +663,7 @@ int  eps_plot_colourmap_DrawScales(EPSComm *x, double origin_x, double origin_y,
 
       // Get pointer to variable c1 in the user's variable space
       ppl_contextGetVarPointer(x->c, v, &CVar, &CDummy);
-      if (sg->Crenorm[0]==SW_BOOL_FALSE) { *CVar = data->FirstEntries[2]; CVar->flagComplex=0; CVar->imag=0.0; }
+      if (sg->Crenorm[0]==SW_BOOL_FALSE) { *CVar = data->firstEntries[2]; CVar->flagComplex=0; CVar->imag=0.0; }
       else pplObjNum(CVar,0,0,0); // c1...c4 are dimensionless numbers in range 0-1, regardless of units of input data
 
       // Populate bitmap data array

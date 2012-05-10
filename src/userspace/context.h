@@ -34,6 +34,27 @@
 
 #include "pplConstants.h"
 
+typedef struct dollarStatus
+ {
+  char   **columns_str;
+  pplObj  *columns_val;
+  int      Ncols;
+  char    *filename;
+  long     file_linenumber;
+  long    *file_linenumbers;
+  long     linenumber_count;
+  long     block_count;
+  long     index_number;
+  int      usingRowCol;
+  char    *usingExpr; // Used for error reporting only
+  char   **colHeads;
+  int      NcolHeads;
+  pplObj  *colUnits;
+  int      NcolUnits;
+  char     warntxt[LSTR_LENGTH];
+  char     lastFilename[FNAME_LENGTH];
+ } dollarStatus;
+
 typedef struct ppl_context_struc
  {
 
@@ -57,6 +78,9 @@ typedef struct ppl_context_struc
 
   // traceback
   errStatus errStat;
+
+  // dollar operator status
+  dollarStatus dollarStat;
 
   // Buffers for parsing and evaluating expressions
   unsigned char tokenBuff[ALGEBRA_MAXLEN];

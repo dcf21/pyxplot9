@@ -39,22 +39,23 @@
 #define DATAFILE_DATABLOCK_BYTES 524288
 
 #include "coreUtils/list.h"
+#include "userspace/context.h"
 #include "userspace/pplObj.h"
 
 // rawDataTabls structure, used for storing raw text from datafiles prior to rotation when "with rows" is used
 
 typedef struct rawDataBlock {
   char               **text;      // Array of BlockLength x [string data from datafile]
-  long int            *FileLine;  // For each string above... store the line number in the data file that it came from
-  long int             BlockLength;
-  long int             BlockPosition; // Where have we filled up to?
+  long int            *fileLine;  // For each string above... store the line number in the data file that it came from
+  long int             blockLength;
+  long int             blockPosition; // Where have we filled up to?
   struct rawDataBlock *next;
   struct rawDataBlock *prev;
  } rawDataBlock;
 
 typedef struct rawDataTable {
   long int             Nrows;
-  int                  MemoryContext;
+  int                  memContext;
   struct rawDataBlock *first;
   struct rawDataBlock *current;
  } rawDataTable;
@@ -66,11 +67,11 @@ typedef struct dataBlock {
   double           *data_real;     // Array of Ncolumns x array of length BlockLength
   pplObj           *data_obj;
   char            **text;          // Array of BlockLength x string labels for datapoints
-  long int         *FileLine_real; // For each double above... store the line number in the data file that it came from
-  long int         *FileLine_obj;
+  long int         *fileLine_real; // For each double above... store the line number in the data file that it came from
+  long int         *fileLine_obj;
   unsigned char    *split;         // Array of length BlockLength; TRUE if we should break data before this next datapoint
-  long int          BlockLength;
-  long int          BlockPosition; // Where have we filled up to?
+  long int          blockLength;
+  long int          blockPosition; // Where have we filled up to?
   struct dataBlock *next;
   struct dataBlock *prev;
  } dataBlock;
@@ -79,24 +80,27 @@ typedef struct dataTable {
   int               Ncolumns_real;
   int               Ncolumns_obj;
   long int          Nrows;
-  int               MemoryContext;
-  pplObj           *FirstEntries; // Array of size Ncolumns; store units for data in each column here
+  int               memContext;
+  pplObj           *firstEntries; // Array of size Ncolumns; store units for data in each column here
   struct dataBlock *first;
   struct dataBlock *current;
  } dataTable;
 
 // Functions in ppl_datafile.c
 
-dataTable *ppldata_NewDataTable(const int Ncolumns_real, const int Ncolumns_obj, const int MemoryContext, const int Length);
+dataBlock    *ppldata_NewDataBlock       (const int Ncolumns_real, const int Ncolumns_obj, const int memContext, const int length);
+dataTable    *ppldata_NewDataTable       (const int Ncolumns_real, const int Ncolumns_obj, const int memContext, const int length);
+rawDataBlock *ppldata_NewRawDataBlock    (const int memContext);
+rawDataTable *ppldata_NewRawDataTable    (const int memContext);
+int           ppldata_DataTable_AddRow   (dataTable *i);
+int           ppldata_RawDataTable_AddRow(rawDataTable *i);
+void          ppldata_DataTable_List     (ppl_context *c, dataTable *i);
+FILE         *ppldata_LaunchCoProcess    (ppl_context *c, char *filename, char *errout);
+void          ppldata_UsingConvert       (ppl_context *c, pplExpr *input, char **columns_str, pplObj *columns_val, int Ncols, char *filename, long file_linenumber, long *file_linenumbers, long linenumber_count, long block_count, long index_number, int usingRowCol, char **colHeads, int NcolHeads, pplObj *colUnits, int NcolUnits, int *status, char *errtext, int iterDepth);
+void          ppldata_ApplyUsingList     (ppl_context *c, dataTable *out, pplExpr **usingExprs, pplExpr *labelExpr, pplExpr *selectExpr, int continuity, int *discontinuity, char **columns_str, pplObj *columns_val, int Ncols, char *filename, long file_linenumber, long *file_linenumbers, long linenumber_count, long block_count, long index_number, int usingRowCol, char **colHeads, int NcolHeads, pplObj *colUnits, int NcolUnits, int *status, char *errtext, int *errCount, int iterDepth);
+void          ppldata_RotateRawData      (ppl_context *c, rawDataTable **in, dataTable *out, pplExpr **usingExprs, pplExpr *labelExpr, pplExpr *selectExpr, int continuity, char *filename, long block_count, long index_number, char **colHeads, int NcolHeads, pplObj *colUnits, int NcolUnits, int *status, char *errtext, int *errCount, int iterDepth);
+dataTable    *ppldata_sort(ppl_context *c, dataTable *in, int sortCol, int ignoreContinuity);
 
-void __inline__ ppldata_UsingConvert_FetchColumnByNumber(double ColumnNo, pplObj *output, const int NumericOut, const unsigned char MallocOut, int *status, char *errtext);
-void __inline__ ppldata_UsingConvert_FetchColumnByName(char *ColumnName, pplObj *output, const int NumericOut, const unsigned char MallocOut, int *status, char *errtext);
-
-void ppldata_read(dataTable **output, int *status, char *errout, char *filename, int index, int UsingRowCol, list *UsingList, unsigned char AutoUsingList, list *EveryList, char *LabelStr, int Ncolumns_real, int Ncolumns_obj, char *SelectCriterion, int continuity, char *SortBy, int SortByContinuity, unsigned char persistent, int *ErrCounter);
-
-void ppldata_FromFunctions(double *OrdinateRaster, unsigned char FlagParametric, int RasterLen, pplObj *RasterUnits, double *OrdinateYRaster, int RasterYLen, pplObj *RasterYUnits, dataTable **output, int *status, char *errout, char **fnlist, int fnlist_len, list *UsingList, unsigned char AutoUsingList, char *LabelStr, int Ncolumns_real, int Ncolumns_obj, char *SelectCriterion, int continuity, char *SortBy, int SortByContinuity, int *ErrCounter);
-
-dataTable *ppldata_tabSort(dataTable *in, int SortColumn, int IgnoreContinuity);
 
 #endif
 

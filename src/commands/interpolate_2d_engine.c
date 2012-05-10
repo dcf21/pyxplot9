@@ -123,11 +123,11 @@ void ppl_interp2d_grid(ppl_context *c, dataTable **output, const pplset_graph *s
   if (*output == NULL) return; // Memory fail
 
   InSize = in->Nrows;
-  (*output)->FirstEntries = in->FirstEntries;
-  p2 = (*output)->current->BlockPosition = (*output)->Nrows = imax*jmax;
+  (*output)->firstEntries = in->firstEntries;
+  p2 = (*output)->current->blockPosition = (*output)->Nrows = imax*jmax;
   for (pc=0; pc<p2; pc++) (*output)->current->split        [pc] = 0;
   for (pc=0; pc<p2; pc++) (*output)->current->text         [pc] = NULL;
-  for (pc=0; pc<p2; pc++) (*output)->current->FileLine_real[pc] = 0;
+  for (pc=0; pc<p2; pc++) (*output)->current->fileLine_real[pc] = 0;
 
   // Extract data into a temporary array
   tempContext = ppl_memAlloc_DescendIntoNewContext();
@@ -142,7 +142,7 @@ void ppl_interp2d_grid(ppl_context *c, dataTable **output, const pplset_graph *s
   blk = in->first;
   while (blk != NULL)
    {
-    for (ct=0; ct<k; ct++) for (j=0; j<blk->BlockPosition; j++) *(d[ct]++) = blk->data_real[ct + k*j];
+    for (ct=0; ct<k; ct++) for (j=0; j<blk->blockPosition; j++) *(d[ct]++) = blk->data_real[ct + k*j];
     blk=blk->next;
    }
 

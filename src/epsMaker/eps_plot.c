@@ -105,13 +105,13 @@ int eps_plot_AddUsingItemsForWithWords(ppl_context *c, withWords *ww, int *NExpe
  }
 
   // Now cycle through all with_words which can be item-specific
-  if (ww->EXPlinetype       != NULL) ADD_FAKE_USING_ITEM(ww->EXPlinetype      );
-  if (ww->EXPlinewidth      != NULL) ADD_FAKE_USING_ITEM(ww->EXPlinewidth     );
-  if (ww->EXPpointlinewidth != NULL) ADD_FAKE_USING_ITEM(ww->EXPpointlinewidth);
-  if (ww->EXPpointsize      != NULL) ADD_FAKE_USING_ITEM(ww->EXPpointsize     );
-  if (ww->EXPpointtype      != NULL) ADD_FAKE_USING_ITEM(ww->EXPpointtype     );
-  if (ww->EXPcolor          != NULL) ADD_FAKE_USING_ITEM(ww->EXPcolor         );
-  if (ww->EXPfillcolor      != NULL) ADD_FAKE_USING_ITEM(ww->EXPfillcolor     );
+  if (ww->EXPlinetype       != NULL)   ADD_FAKE_USING_ITEM(ww->EXPlinetype      );
+  if (ww->EXPlinewidth      != NULL)   ADD_FAKE_USING_ITEM(ww->EXPlinewidth     );
+  if (ww->EXPpointlinewidth != NULL)   ADD_FAKE_USING_ITEM(ww->EXPpointlinewidth);
+  if (ww->EXPpointsize      != NULL)   ADD_FAKE_USING_ITEM(ww->EXPpointsize     );
+  if (ww->EXPpointtype      != NULL)   ADD_FAKE_USING_ITEM(ww->EXPpointtype     );
+  if (ww->EXPcolor          != NULL) { ADD_FAKE_USING_ITEM(ww->EXPcolor         ); (*NObjs)++; }
+  if (ww->EXPfillcolor      != NULL) { ADD_FAKE_USING_ITEM(ww->EXPfillcolor     ); (*NObjs)++; }
 
   return 0;
  }

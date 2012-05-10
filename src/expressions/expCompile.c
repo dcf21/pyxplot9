@@ -886,14 +886,15 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
     while (optimised);
    }
 
+  // ppl_reversePolishPrint(context, *outExpr);
   return;
  }
 
 // Debugging routine to produce a textual representation of reverse Polish bytecode
 
-void ppl_reversePolishPrint(ppl_context *context, pplExpr *expIn, char *out)
+void ppl_reversePolishPrint(ppl_context *context, pplExpr *expIn)
  {
-  int   i=0, j=0;
+  int   j=0;
   char  op[32],optype[32],arg[1024];
   void *in = expIn->bytecode;
 
@@ -1076,7 +1077,6 @@ void ppl_reversePolishPrint(ppl_context *context, pplExpr *expIn, char *out)
     if (o==0) break;
     j = pos+len;
    }
-  out[i]='\0'; // null terminate string
   return;
  }
 

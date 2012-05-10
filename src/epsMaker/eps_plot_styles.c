@@ -199,7 +199,7 @@ int eps_plot_styles_NDataColumns(EPSComm *x, int style, unsigned char ThreeDim)
 }
 
 // UpdateUsage... get physical unit of row X from data table
-#define UURU(X) data->FirstEntries[X]
+#define UURU(X) data->firstEntries[X]
 
 // UpdateUsage... assert that axis X should be dimensionally compatible with unit Y
 #define UUAU(XYZ,XYZN,X,Y) \
@@ -266,7 +266,7 @@ int eps_plot_styles_UpdateUsage(EPSComm *x, dataTable *data, int style, unsigned
   i=0;
   while (blk != NULL)
    {
-    for (j=0; j<blk->BlockPosition; j++)
+    for (j=0; j<blk->blockPosition; j++)
      {
       UUC_RESET;
       if      (style == SW_STYLE_POINTS         ) { UUC(a1, UUR(0)); UUC(a2, UUR(1)); if (ThreeDim) UUC(a3, UUR(2));
@@ -452,7 +452,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
 
   Ncolumns = data->Ncolumns_real;
   Ncol_obj = data->Ncolumns_obj;
-  if (eps_plot_WithWordsCheckUsingItemsDimLess(x->c, &pd->ww_final, data->FirstEntries, Ncolumns, Ncol_obj, NULL)) return 1;
+  if (eps_plot_WithWordsCheckUsingItemsDimLess(x->c, &pd->ww_final, data->firstEntries, Ncolumns, Ncol_obj, NULL)) return 1;
 
   if (!ThreeDim) { scale_x=width; scale_y=height; scale_z=1.0;    }
   else           { scale_x=width; scale_y=height; scale_z=zdepth; }
@@ -472,7 +472,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
 
     while (blk != NULL)
      {
-      for (j=0; j<blk->BlockPosition; j++)
+      for (j=0; j<blk->blockPosition; j++)
        {
         // Work out style information for next point
         eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj);
@@ -496,7 +496,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
     blk = data->first;
     while (blk != NULL)
      {
-      for (j=0; j<blk->BlockPosition; j++)
+      for (j=0; j<blk->blockPosition; j++)
        {
         double final_pointsize=0.0;
         eps_plot_GetPosition(&xpos, &ypos, &depth, &xap, &yap, &zap, NULL, NULL, NULL, ThreeDim, UUR(xn), UUR(yn), ThreeDim ? UUR(zn) : 0.0, a[xn], a[yn], a[zn], xrn, yrn, zrn, sg, origin_x, origin_y, scale_x, scale_y, scale_z, 0);
@@ -562,7 +562,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
 
     while (blk != NULL)
      {
-      for (j=0; j<blk->BlockPosition; j++)
+      for (j=0; j<blk->blockPosition; j++)
        {
         // Work out style information for next point
         eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj);
@@ -643,7 +643,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
      {
       while (blk != NULL)
        {
-        for (j=0; j<blk->BlockPosition; j++)
+        for (j=0; j<blk->blockPosition; j++)
          {
           // Work out style information for next point
           eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj);
@@ -689,7 +689,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
 
     while (blk != NULL)
      {
-      for (j=0; j<blk->BlockPosition; j++)
+      for (j=0; j<blk->blockPosition; j++)
        {
         // Work out style information for next point
         eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj);
@@ -834,7 +834,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
       unsigned char logaxis = (a[xn]->LogFinal==SW_BOOL_TRUE);
       while (blk != NULL)
        {
-        for (j=0; j<blk->BlockPosition; j++)
+        for (j=0; j<blk->blockPosition; j++)
          {
           if (blk->split[j]) { FINISH_ROW_OF_BOXES; }
           ptAx=ptBx;            ptAset=ptBset;
@@ -881,7 +881,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
 
     while (blk != NULL)
      {
-      for (j=0; j<blk->BlockPosition; j++)
+      for (j=0; j<blk->blockPosition; j++)
        {
         // Work out style information for next point
         eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj);
@@ -949,7 +949,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
 
     while (blk != NULL)
      {
-      for (j=0; j<blk->BlockPosition; j++)
+      for (j=0; j<blk->blockPosition; j++)
        {
         // Work out style information for next point
         eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj);
@@ -974,7 +974,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
     // First add all of the points along the tops of the error bars, moving from left to right
     while (blk != NULL)
      {
-      for (j=0; j<blk->BlockPosition; j++) FilledRegion_Point(x, fr, UUR(xn), UUR(yn));
+      for (j=0; j<blk->blockPosition; j++) FilledRegion_Point(x, fr, UUR(xn), UUR(yn));
       blk=blk->next;
       BlkNo++;
      }
@@ -984,7 +984,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
      {
       blk = data->first;
       for (j=0; j<BlkNo; j++) blk=blk->next;
-      for (j=blk->BlockPosition-1; j>=0; j--)
+      for (j=blk->blockPosition-1; j>=0; j--)
        {
         // Work out style information for next point
         eps_plot_WithWordsFromUsingItems(x->c, &pd->ww_final, &blk->data_real[Ncolumns*j], &blk->data_obj[Ncol_obj*j], Ncolumns, Ncol_obj);
@@ -1014,7 +1014,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
    if ((xap<0)||(xap>1)||(yap<0)||(yap>1)||(zap<0)||(zap>1)) continue; \
    if ( (!gsl_finite(XO))||(!gsl_finite(YO))||(!gsl_finite(ZO)) ) continue;
 
-    if (blk->BlockPosition != ((long)XSize) * YSize)
+    if (blk->blockPosition != ((long)XSize) * YSize)
      {
       ppl_error(&x->c->errcontext, ERR_INTERNAL,-1,-1,"Surface plot yielded data grid of the wrong size.");
      }

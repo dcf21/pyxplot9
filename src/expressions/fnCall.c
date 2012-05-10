@@ -79,7 +79,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
   out->refCount = 1;
   out->self_this = called.self_this;
 
-  // Attempt to call a module to general a class instance?
+  // Attempt to call a module to generate a class instance?
   if ((t == PPLOBJ_MOD) || (t == PPLOBJ_USER))
    {
     if (nArgs!=0) { sprintf(context->errStat.errBuff,"Instantiation takes zero arguments; %d supplied.",nArgs); TBADD(ERR_TYPE); goto cleanup; }

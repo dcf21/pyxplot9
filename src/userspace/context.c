@@ -28,6 +28,7 @@
 #include "coreUtils/dict.h"
 #include "coreUtils/memAlloc.h"
 
+#include "expressions/dollarOp.h"
 #include "expressions/traceback_fns.h"
 
 #include "settings/settings_fns.h"
@@ -56,6 +57,8 @@ ppl_context *ppl_contextInit()
   strcpy(out->errcontext.error_source,"main     ");
   ppl_memAlloc_MemoryInit(&out->errcontext, &ppl_error, &ppl_log);
   pplset_makedefault(out);
+  ppl_dollarOp_deconfig(out);
+  out->dollarStat.lastFilename[0]='\0';
 
   out->errStat.status = out->errStat.tracebackDepth = 0; ppl_tbClear(out);
 

@@ -145,7 +145,7 @@ void eps_plot_contourmap_YieldText(EPSComm *x, dataTable *data, pplset_graph *sg
    }
 
   // Work out units in which contours will be labelled
-  pd->CRangeUnit             = data->FirstEntries[2];
+  pd->CRangeUnit             = data->firstEntries[2];
   pd->CRangeUnit.flagComplex = 0;
   pd->CRangeUnit.imag        = 0.0;
   pd->CRangeUnit.real        = CLog ?  (CMin * sqrt(CMax/CMin))
@@ -360,7 +360,7 @@ int  eps_plot_contourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, in
   if ((data==NULL) || (data->Nrows<1)) return 0; // No data present
   // Ncol_real = data->Ncolumns_real;
   // Ncol_obj  = data->Ncolumns_obj;
-  // if (eps_plot_WithWordsCheckUsingItemsDimLess(&pd->ww_final, data->FirstEntries, Ncol_real, NULL, Ncol_obj)) return 1;
+  // if (eps_plot_WithWordsCheckUsingItemsDimLess(&pd->ww_final, data->firstEntries, Ncol_real, NULL, Ncol_obj)) return 1;
   if (!ThreeDim) { scale_x=width; scale_y=height; scale_z=1.0;    }
   else           { scale_x=width; scale_y=height; scale_z=zdepth; }
   blk = data->first;
@@ -429,9 +429,9 @@ int  eps_plot_contourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, in
    }
 
   // Check that variable c1 has appropriate units
-  if ( ((!CMinAuto)||(!CMaxAuto)) && (!ppl_unitsDimEqual(&data->FirstEntries[2] , (sg->Cminauto[0]==SW_BOOL_TRUE)?(&sg->Cmax[0]):(&sg->Cmin[0]))) )
+  if ( ((!CMinAuto)||(!CMaxAuto)) && (!ppl_unitsDimEqual(&data->firstEntries[2] , (sg->Cminauto[0]==SW_BOOL_TRUE)?(&sg->Cmax[0]):(&sg->Cmin[0]))) )
    {
-    sprintf(x->c->errcontext.tempErrStr, "Column 3 of data supplied to the colormap plot style has conflicting units with those set in the 'set crange' command. The former has units of <%s> whilst the latter has units of <%s>.", ppl_printUnit(x->c,&data->FirstEntries[2], NULL, NULL, 0, 1, 0), ppl_printUnit(x->c,(sg->Cminauto[0]==SW_BOOL_TRUE)?(&sg->Cmax[0]):(&sg->Cmin[0]), NULL, NULL, 1, 1, 0));
+    sprintf(x->c->errcontext.tempErrStr, "Column 3 of data supplied to the colormap plot style has conflicting units with those set in the 'set crange' command. The former has units of <%s> whilst the latter has units of <%s>.", ppl_printUnit(x->c,&data->firstEntries[2], NULL, NULL, 0, 1, 0), ppl_printUnit(x->c,(sg->Cminauto[0]==SW_BOOL_TRUE)?(&sg->Cmax[0]):(&sg->Cmin[0]), NULL, NULL, 1, 1, 0));
     ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL);
     return 1;
    }

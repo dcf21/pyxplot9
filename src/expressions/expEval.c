@@ -31,6 +31,7 @@
 #include "coreUtils/dict.h"
 #include "coreUtils/errorReport.h"
 #include "coreUtils/list.h"
+#include "expressions/dollarOp.h"
 #include "expressions/expEval.h"
 #include "expressions/expEvalCalculus.h"
 #include "expressions/expEvalOps.h"
@@ -49,6 +50,7 @@
 #include "userspace/unitsArithmetic.h"
 #include "userspace/unitsDisp.h"
 
+#include "datafile.h"
 #include "pplConstants.h"
 
 #define TBADD(et) ppl_tbAdd(context,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,et,charpos,inExpr->ascii,"")
@@ -789,6 +791,35 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
         for (i=0; i<Nsubs+1; i++) { STACK_POP; }
         memcpy(&context->stack[context->stackPtr] , stk , sizeof(pplObj));
         context->stackPtr++;
+        break;
+       }
+      case 15: // dollar operator
+       {
+        int t;
+        if (context->stackPtr < 1) { sprintf(context->errStat.errBuff,"Too few items on stack for dollar operator."); TBADD(ERR_INTERNAL); goto cleanup_on_error; }
+        t = context->stack[context->stackPtr-1].objType;
+        if (t==PPLOBJ_NUM)
+         {
+          double num = context->stack[context->stackPtr-1].real;
+          int    n;
+          if ((num<-4)||(num>MAX_DATACOLS)||(!gsl_finite(num))) { sprintf(context->errStat.errBuff,"The $ column reference operator was passed an illegal column number; must be in range -3 to %d.",MAX_DATACOLS); TBADD(ERR_RANGE); goto cleanup_on_error; }
+          n = (int)round(num);
+          ppl_dollarOp_fetchColByNum(context, inExpr, charpos, n);
+          if (context->errStat.status) goto cast_fail;
+         }
+        else if (t==PPLOBJ_STR)
+         {
+          char *name = (char *)context->stack[context->stackPtr-1].auxil;
+          int   malloced = context->stack[context->stackPtr-1].auxilMalloced;
+          ppl_dollarOp_fetchColByName(context, inExpr, charpos, name);
+          if (malloced) free(name);
+         }
+        else
+         {
+          sprintf(context->errStat.errBuff,"The $ column reference operator can only act on column numbers and (string) names. Object supplied was of type <%s>,",pplObjTypeNames[t]);
+          TBADD(ERR_TYPE);
+          goto cleanup_on_error;
+         }
         break;
        }
       case 17: // branch if false
