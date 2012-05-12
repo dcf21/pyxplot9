@@ -31,6 +31,7 @@ void ppl_expCompile        (ppl_context *context, int srcLineN, long srcId, char
 void ppl_reversePolishPrint(ppl_context *context, pplExpr *expIn);
 void pplExpr_free          (pplExpr *inExpr);
 pplExpr *pplExpr_cpy       (pplExpr *i);
+pplExpr *pplExpr_tmpcpy    (pplExpr *i);
 
 #endif
 

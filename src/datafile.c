@@ -34,9 +34,11 @@
 #include "coreUtils/memAlloc.h"
 
 #include "expressions/dollarOp.h"
+#include "expressions/expCompile_fns.h"
 #include "expressions/expEval.h"
 #include "expressions/traceback_fns.h"
 
+#include "parser/cmdList.h"
 #include "parser/parser.h"
 
 #include "stringTools/asciidouble.h"
@@ -566,5 +568,147 @@ dataTable *ppldata_sort(ppl_context *c, dataTable *in, int sortCol, int ignoreCo
    }
   free(sorter);
   return output;
+ }
+
+void ppldata_fromFile(ppl_context *c, dataTable **out, char *filename, pplExpr **usingExprs, int autoUsingExprs, int Ncols, pplExpr *labelExpr, pplExpr *selectExpr, pplExpr *sortBy, int usingRowCol, long *everyList, int continuity, int persistent, int *status, char *errtext, int *errCount, int iterDepth)
+ {
+  return;
+ }
+
+void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fnlist_len, double *rasterX, int rasterXlen, int parameteric, pplObj *unitX, double *rasterY, int rasterYlen, pplObj *unitY, pplExpr **usingExprs, int autoUsingExprs, int Ncols, pplExpr *labelExpr, pplExpr *selectExpr, pplExpr *sortBy, int continuity, int *status, char *errtext, int *errCount, int iterDepth)
+ {
+  return; 
+ }
+
+void ppldata_fromVectors(ppl_context *c, dataTable **out, pplObj **objList, int objListLen, pplExpr **usingExprs, int autoUsingExprs, int Ncols, pplExpr *labelExpr, pplExpr *selectExpr, pplExpr *sortBy, int continuity, int *status, char *errtext, int *errCount, int iterDepth)
+ {
+  return;
+ }
+
+void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutput *in, const int *ptab, int Ncols, int persistent, int *status, char *errtext, int *errCount, int iterDepth)
+ {
+  pplObj   *stk = in->stk;
+  pplExpr  *usingExprs[USING_ITEMS_MAX], *selectExpr=NULL, *labelExpr=NULL, *sortBy=NULL;
+  long      everyList[6]={1,1,-1,-1,-1,-1};
+  int       Nusing=0, autoUsingList=0, continuity=DATAFILE_CONTINUOUS, usingRowCol=DATAFILE_COL;
+
+  *status = 0;
+  *out    = NULL;
+
+  // Read select criterion
+  {
+   const int pos = ptab[PARSE_INDEX_select_criterion];
+   if ((pos>0)&&(stk[pos].objType==PPLOBJ_EXP)) selectExpr = (pplExpr *)stk[pos].auxil;
+  }
+
+  // Read sort criterion
+  {
+   const int pos = ptab[PARSE_INDEX_sort_expression];
+   if ((pos>0)&&(stk[pos].objType==PPLOBJ_EXP)) sortBy = (pplExpr *)stk[pos].auxil;
+  }
+
+  // Read select / sort continuity
+  {
+   const int pos1 = ptab[PARSE_INDEX_continuous];
+   const int pos2 = ptab[PARSE_INDEX_discontinuous];
+   if ((pos1>0)&&(stk[pos1].objType==PPLOBJ_STR)) continuity=DATAFILE_CONTINUOUS;
+   if ((pos2>0)&&(stk[pos2].objType==PPLOBJ_STR)) continuity=DATAFILE_DISCONTINUOUS;
+  }
+
+  // Read label expression
+  {
+   const int pos = ptab[PARSE_INDEX_label];
+   if (pos>0) labelExpr = (pplExpr *)stk[pos].auxil;
+  }
+
+  // Read every item list
+  {
+   int       Nevery = 0;
+   int       pos    = ptab[PARSE_INDEX_every_list];
+   const int o      = PARSE_INDEX_every_item;
+   if (pos>0)
+    while (stk[pos].objType == PPLOBJ_NUM)
+     {
+      long x;
+      pos = (int)round(stk[pos].real);
+      if (pos<=0) break;
+      if (Nevery>=6) { ppl_warning(&c->errcontext, ERR_SYNTAX, "More than six numbers supplied to the every modifier -- trailing entries ignored."); break; }
+      x = (long)round(stk[pos+o].real);
+      if (x>everyList[Nevery]) everyList[Nevery]=x;
+      Nevery++;
+     }
+  }
+
+  // Read using rows or columns
+  {
+   const int pos1 = ptab[PARSE_INDEX_use_columns];
+   const int pos2 = ptab[PARSE_INDEX_use_rows];
+   if ((pos1>0)&&(stk[pos1].objType==PPLOBJ_STR)) usingRowCol=DATAFILE_COL;
+   if ((pos2>0)&&(stk[pos2].objType==PPLOBJ_STR)) usingRowCol=DATAFILE_ROW;
+  }
+
+  // Read list of using items into an array
+  {
+   int       hadNonNullUsingItem = 0;
+   int       pos = ptab[PARSE_INDEX_using_list];
+   const int o   = PARSE_INDEX_using_item;
+
+   if (pos>0)
+    while (stk[pos].objType == PPLOBJ_NUM)
+     {
+      pos = (int)round(stk[pos].real);
+      if (pos<=0) break;
+      if (Nusing>=USING_ITEMS_MAX) { *status=1; sprintf(errtext, "Too many using items; maximum of %d are allowed.", USING_ITEMS_MAX); return; }
+      if (stk[pos+o].objType == PPLOBJ_EXP) { usingExprs[Nusing] = (pplExpr *)stk[pos+o].auxil; hadNonNullUsingItem = 1; }
+      else                                    usingExprs[Nusing] = NULL;
+      Nusing++;
+     }
+   if ((!hadNonNullUsingItem) && (Nusing==1)) Nusing=0;
+   if (Nusing==0)
+    {
+     int i;
+     autoUsingList=1;
+     for (i=0; i<Ncols; i++)
+      {
+       int      end=0,ep=0,es=0;
+       char     ascii[10];
+       pplExpr *exptmp=NULL;
+       sprintf(ascii, "%d", i+1);
+       ppl_expCompile(c,pl->srcLineN,pl->srcId,pl->srcFname,ascii,&end,0,0,0,&exptmp,&ep,&es,errtext);
+       if (es || c->errStat.status) { ppl_tbClear(c); *status=1; sprintf(errtext, "Out of memory."); return; }
+       usingExprs[i] = pplExpr_tmpcpy(exptmp);
+       pplExpr_free(exptmp);
+       if (usingExprs[i]==NULL) { *status=1; sprintf(errtext, "Out of memory."); return; }
+      }
+    }
+  }
+
+  // Test for expression list or filename
+  {
+   const int pos1 = ptab[PARSE_INDEX_expression_list];
+   const int pos2 = ptab[PARSE_INDEX_filename];
+   if ((pos1>0)&&(stk[pos1].objType==PPLOBJ_NUM))
+    {
+     int pos=pos1;
+     int Nexprs=0;
+     while (stk[pos].objType == PPLOBJ_NUM)
+      {
+       pos = (int)round(stk[pos].real);
+       if (pos<=0) break;
+       Nexprs++;
+      }
+    }
+   else if ((pos2>0)&&(stk[pos2].objType==PPLOBJ_STR))
+    {
+     char *filename = (char *)stk[pos2].auxil;
+     ppldata_fromFile(c, out, filename, usingExprs, autoUsingList, Ncols, labelExpr, selectExpr, sortBy, usingRowCol, everyList, continuity, persistent, status, errtext, errCount, iterDepth);
+    }
+   else
+    {
+     *status=1; sprintf(errtext, "Could not find any expressions to evaluate."); return;
+    }
+  }
+
+  return;
  }
 

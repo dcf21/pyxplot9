@@ -26,6 +26,7 @@
 #include <ctype.h>
 
 #include "coreUtils/errorReport.h"
+#include "coreUtils/memAlloc.h"
 #include "stringTools/asciidouble.h"
 #include "userspace/context.h"
 #include "expressions/expCompile_fns.h"
@@ -1102,6 +1103,20 @@ pplExpr *pplExpr_cpy(pplExpr *i)
   if (i->ascii   !=NULL) { if ((o->ascii   =malloc(strlen(i->ascii   )+1))==NULL) return NULL; strcpy(o->ascii   , i->ascii   ); }
   if (i->srcFname!=NULL) { if ((o->srcFname=malloc(strlen(i->srcFname)+1))==NULL) return NULL; strcpy(o->srcFname, i->srcFname); }
   if (i->bytecode!=NULL) { if ((o->bytecode=malloc(i->bcLen             ))==NULL) return NULL; memcpy(o->bytecode, i->bytecode, i->bcLen); }
+  return o;
+ }
+
+pplExpr *pplExpr_tmpcpy(pplExpr *i)
+ {
+  pplExpr *o;
+  if (i==NULL) return NULL;
+  o = (pplExpr *)ppl_memAlloc(sizeof(pplExpr));
+  if (o==NULL) return NULL;
+  memcpy(o, i, sizeof(pplExpr));
+  o->refCount = 1;
+  if (i->ascii   !=NULL) { if ((o->ascii   =ppl_memAlloc(strlen(i->ascii   )+1))==NULL) return NULL; strcpy(o->ascii   , i->ascii   ); }
+  if (i->srcFname!=NULL) { if ((o->srcFname=ppl_memAlloc(strlen(i->srcFname)+1))==NULL) return NULL; strcpy(o->srcFname, i->srcFname); }
+  if (i->bytecode!=NULL) { if ((o->bytecode=ppl_memAlloc(i->bcLen             ))==NULL) return NULL; memcpy(o->bytecode, i->bytecode, i->bcLen); }
   return o;
  }
 
