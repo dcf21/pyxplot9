@@ -108,7 +108,7 @@ static int ppl_tab_dataGridDisplay(ppl_context *c, FILE *output, dataTable *data
         {
          val = blk->data_real[k + Ncolumns*i] * multiplier[k];
          if ((fabs(val)>1000) || (!ppl_dblEqual(val,floor(val+0.5)))) allInts [k]=0;
-         if ((fabs(val)>1000) || (fabs(val)<0.0999999999999)              ) allSmall[k]=0; // Columns containing only numbers in this range are fprintfed using %f, rather than %e
+         if ((fabs(val)>1000) || (fabs(val)<0.0099999999999)        ) allSmall[k]=0; // Columns containing only numbers in this range are fprintfed using %f, rather than %e
         }
      }
     blk=blk->next;
@@ -136,9 +136,9 @@ static int ppl_tab_dataGridDisplay(ppl_context *c, FILE *output, dataTable *data
           for (k=0; k<Ncolumns; k++)
            {
             val = blk->data_real[k + Ncolumns*i] * multiplier[k];
-            if      (allInts [k]) fprintf(output, "%10d ", (int)val);
-            else if (allSmall[k]) fprintf(output, "%11f ",      val);
-            else                  fprintf(output, "%15e ",      val);
+            if      (allInts [k]) fprintf(output, "%10d "   , (int)val);
+            else if (allSmall[k]) fprintf(output, "%17.10f ",      val);
+            else                  fprintf(output, "%17.8e " ,      val);
            }
          } else { // The user has supplied a format string, which we now substitute column values into
           for(pos=l=0; format[pos]!='\0'; pos++)
@@ -172,9 +172,9 @@ static int ppl_tab_dataGridDisplay(ppl_context *c, FILE *output, dataTable *data
              else if (format[k]=='s') // %s -- print quantity in our best-fit format style
               {
                if (l>Ncolumns)         sprintf(c->errcontext.tempErrStr,"nan");
-               else if (allInts [l-1]) sprintf(c->errcontext.tempErrStr, "%10d ", (int)val);
-               else if (allSmall[l-1]) sprintf(c->errcontext.tempErrStr, "%11f ",      val);
-               else                    sprintf(c->errcontext.tempErrStr, "%15e ",      val);
+               if      (allInts [l-1]) sprintf(c->errcontext.tempErrStr, "%10d "   , (int)val);
+               else if (allSmall[l-1]) sprintf(c->errcontext.tempErrStr, "%17.10f ",      val);
+               else                    sprintf(c->errcontext.tempErrStr, "%17.8e " ,      val);
                fprintf(output, format+pos, c->errcontext.tempErrStr);
                pos = k;
               }

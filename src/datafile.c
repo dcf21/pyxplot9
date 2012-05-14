@@ -603,6 +603,24 @@ static char *ppldata_fetchFromSpool(parserLine **dataSpool)
   return out;
  }
 
+static int ppldata_autoUsingList(ppl_context *c, pplExpr **usingExprs, int Ncols, char *errtext)
+ {
+  int i;
+  for (i=0; i<Ncols; i++)
+   {
+    int      end=0,ep=0,es=0;
+    char     ascii[10];
+    pplExpr *exptmp=NULL;
+    sprintf(ascii, "%d", i+1);
+    ppl_expCompile(c,0,0,"",ascii,&end,0,0,0,&exptmp,&ep,&es,errtext);
+    if (es || c->errStat.status) { ppl_tbClear(c); sprintf(errtext, "Out of memory."); if (DEBUG) ppl_log(&c->errcontext, errtext); return 1; }
+    usingExprs[i] = pplExpr_tmpcpy(exptmp);
+    pplExpr_free(exptmp);
+    if (usingExprs[i]==NULL) { sprintf(errtext, "Out of memory."); if (DEBUG) ppl_log(&c->errcontext, errtext); return 1; }
+   }
+  return 0;
+ }
+
 void ppldata_fromFile(ppl_context *c, dataTable **out, char *filename, int wildcardMatchNumber, char *filenameOut, parserLine *dataSpool, int indexNo, pplExpr **usingExprs, int autoUsingExprs, int Ncols, int NusingObjs, pplExpr *labelExpr, pplExpr *selectExpr, pplExpr *sortBy, int usingRowCol, long *everyList, int continuity, int persistent, int *status, char *errtext, int *errCount, int iterDepth)
  {
   int          readFromCommandLine=0, discontinuity=0, hadwhitespace, hadcomma, oneColumnInput=1;
@@ -636,6 +654,12 @@ void ppldata_fromFile(ppl_context *c, dataTable **out, char *filename, int wildc
 
   // Init
   if (DEBUG) { sprintf(c->errcontext.tempErrStr, "Opening datafile '%s'.", filename); ppl_log(&c->errcontext,NULL); }
+  if (Ncols <  0)
+   {
+    // If number of columns unspecified, assume two
+    autoUsingExprs=1;
+    if ((*status=ppldata_autoUsingList(c, usingExprs, Ncols=2, errtext))) return;
+   }
   if (Ncols != 2) oneColumnInput=0; // Only have special handling for one-column datafiles when looking for two columns
 
   // If sortBy is not null, add it to using list
@@ -935,6 +959,12 @@ void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fn
   // Init
   if (DEBUG) { sprintf(c->errcontext.tempErrStr, "Evaluated supplied set of functions."); ppl_log(&c->errcontext,NULL); }
   if (fnlist_len>USING_ITEMS_MAX) { sprintf(errtext, "Too many functions supplied. A maximum of %d are allowed.", USING_ITEMS_MAX); *status=1; if (DEBUG) ppl_log(&c->errcontext,errtext); return; }
+  if (Ncols<0)
+   {
+    // If number of columns unspecified, assume two
+    autoUsingExprs=1;
+    if ((*status=ppldata_autoUsingList(c, usingExprs, Ncols=fnlist_len+(!parametric)+((!parametric)&&sampleGrid), errtext))) return;
+   }
   for (a=0; a<USING_ITEMS_MAX+2; a++) colData[a].refCount=1;
 
   // If sortBy is not null, add it to using list
@@ -1049,6 +1079,12 @@ void ppldata_fromVectors(ppl_context *c, dataTable **out, pplObj *objList, int o
   // Init
   if (DEBUG) { sprintf(c->errcontext.tempErrStr, "Evaluated supplied set of functions."); ppl_log(&c->errcontext,NULL); }
   if (objListLen>USING_ITEMS_MAX) { sprintf(errtext, "Too many functions supplied. A maximum of %d are allowed.", USING_ITEMS_MAX); *status=1; if (DEBUG) ppl_log(&c->errcontext,errtext); return; }
+  if (Ncols<0)
+   {
+    // If number of columns unspecified, assume two
+    autoUsingExprs=1;
+    if ((*status=ppldata_autoUsingList(c, usingExprs, Ncols=objListLen, errtext))) return;
+   }
   for (i=0; i<objListLen; i++) v[i] = ((pplVector *)objList[0].auxil)->v;
   for (i=0; i<objListLen; i++) ppl_unitsDimCpy(colData+i+1, objList+i);
 
@@ -1346,23 +1382,10 @@ void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutp
       Nusing++;
      }
    if ((!hadNonNullUsingItem) && (Nusing==1)) Nusing=0; // If we've only had one using item, and it was blank, this is a parser abberation
-   if (Nusing==0) // If no using items were specified, generate an auto-generated list
+   if ((Nusing==0)&&(Ncols>=0)) // If no using items were specified, generate an auto-generated list
     {
-     int i;
      autoUsingList=1;
-     if (Ncols<1) Ncols=2; // If number of columns is specified as -1, any number of columns will do. If using isn't specified, assume that means two...
-     for (i=0; i<Ncols; i++)
-      {
-       int      end=0,ep=0,es=0;
-       char     ascii[10];
-       pplExpr *exptmp=NULL;
-       sprintf(ascii, "%d", i+1);
-       ppl_expCompile(c,pl->srcLineN,pl->srcId,pl->srcFname,ascii,&end,0,0,0,&exptmp,&ep,&es,errtext);
-       if (es || c->errStat.status) { ppl_tbClear(c); *status=1; sprintf(errtext, "Out of memory."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
-       usingExprs[i] = pplExpr_tmpcpy(exptmp);
-       pplExpr_free(exptmp);
-       if (usingExprs[i]==NULL) { *status=1; sprintf(errtext, "Out of memory."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
-      }
+     if (ppldata_autoUsingList(c, usingExprs, Ncols, errtext)) return;
      Nusing=Ncols;
     }
    else if ((Nusing==1)&&(Ncols==2)) // Need two columns; one supplied
@@ -1396,8 +1419,8 @@ void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutp
    }
 
   // Check that number of using items matches number required
-  if (Ncols<1) Ncols=Nusing; // If number of columns is specified as -1, any number of columns will do
-  if (Nusing != Ncols)
+  if ((Ncols<1)&&(Nusing>0)) Ncols=Nusing; // If number of columns is specified as -1, any number of columns will do
+  if ((Ncols>=0)&&(Nusing != Ncols))
    {
     *status=1;
     sprintf(errtext, "The supplied using ... clause contains the wrong number of items. We need %d columns of data, but %d have been supplied.", Ncols, Nusing);
