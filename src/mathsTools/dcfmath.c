@@ -72,7 +72,7 @@ int ppl_sgn(double x)
   return 1;
  }
 
-void ppl_linearRaster(double *out, double min, double max, int Nsteps)
+void ppl_linRaster(double *out, double min, double max, int Nsteps)
  {
   int i;
   if (Nsteps < 2) Nsteps = 2; // Avoid division by zero

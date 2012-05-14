@@ -659,6 +659,7 @@ item_cleanup:
               case 's': sprintf(s->expectingList+s->eLPos, "an alphabetical word%s", varname); break;
               case 'S': sprintf(s->expectingList+s->eLPos, "a word%s", varname); break;
               case 'u': sprintf(s->expectingList+s->eLPos, "a physical quantity%s", varname); break;
+              case 'v': sprintf(s->expectingList+s->eLPos, "a variable name%s", varname); break;
              }
            }
           l = strlen(s->expectingList+s->eLPos);

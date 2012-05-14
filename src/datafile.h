@@ -39,6 +39,7 @@
 #define DATAFILE_DATABLOCK_BYTES 524288
 
 #include "coreUtils/list.h"
+#include "parser/parser.h"
 #include "userspace/context.h"
 #include "userspace/pplObj.h"
 
@@ -95,12 +96,16 @@ rawDataTable *ppldata_NewRawDataTable    (const int memContext);
 int           ppldata_DataTable_AddRow   (dataTable *i);
 int           ppldata_RawDataTable_AddRow(rawDataTable *i);
 void          ppldata_DataTable_List     (ppl_context *c, dataTable *i);
-FILE         *ppldata_LaunchCoProcess    (ppl_context *c, char *filename, char *errout);
+FILE         *ppldata_LaunchCoProcess    (ppl_context *c, char *filename, int wildcardMatchNumber, char *filenameOut, char *errout);
 void          ppldata_UsingConvert       (ppl_context *c, pplExpr *input, char **columns_str, pplObj *columns_val, int Ncols, char *filename, long file_linenumber, long *file_linenumbers, long linenumber_count, long block_count, long index_number, int usingRowCol, char **colHeads, int NcolHeads, pplObj *colUnits, int NcolUnits, int *status, char *errtext, int iterDepth);
 void          ppldata_ApplyUsingList     (ppl_context *c, dataTable *out, pplExpr **usingExprs, pplExpr *labelExpr, pplExpr *selectExpr, int continuity, int *discontinuity, char **columns_str, pplObj *columns_val, int Ncols, char *filename, long file_linenumber, long *file_linenumbers, long linenumber_count, long block_count, long index_number, int usingRowCol, char **colHeads, int NcolHeads, pplObj *colUnits, int NcolUnits, int *status, char *errtext, int *errCount, int iterDepth);
 void          ppldata_RotateRawData      (ppl_context *c, rawDataTable **in, dataTable *out, pplExpr **usingExprs, pplExpr *labelExpr, pplExpr *selectExpr, int continuity, char *filename, long block_count, long index_number, char **colHeads, int NcolHeads, pplObj *colUnits, int NcolUnits, int *status, char *errtext, int *errCount, int iterDepth);
 dataTable    *ppldata_sort(ppl_context *c, dataTable *in, int sortCol, int ignoreContinuity);
 
+void          ppldata_fromFile           (ppl_context *c, dataTable **out, char *filename, int wildcardMatchNumber, char *filenameOut, parserLine *dataSpool, int indexNo, pplExpr **usingExprs, int autoUsingExprs, int Ncols, int NusingObjs, pplExpr *labelExpr, pplExpr *selectExpr, pplExpr *sortBy, int usingRowCol, long *everyList, int continuity, int persistent, int *status, char *errtext, int *errCount, int iterDepth);
+void          ppldata_fromFuncs          (ppl_context *c, dataTable **out, pplExpr **fnlist, int fnlist_len, double *rasterX, int rasterXlen, int parametric, pplObj *unitX, double *rasterY, int rasterYlen, pplObj *unitY, pplExpr **usingExprs, int autoUsingExprs, int Ncols, int NusingObjs, pplExpr *labelExpr, pplExpr *selectExpr, pplExpr *sortBy, int continuity, int *status, char *errtext, int *errCount, int iterDepth);
+void          ppldata_fromVectors        (ppl_context *c, dataTable **out, pplObj *objList, int objListLen, pplExpr **usingExprs, int autoUsingExprs, int Ncols, int NusingObjs, pplExpr *labelExpr, pplExpr *selectExpr, pplExpr *sortBy, int continuity, int *status, char *errtext, int *errCount, int iterDepth);
+void          ppldata_fromCmd            (ppl_context *c, dataTable **out, parserLine *pl, parserOutput *in, int wildcardMatchNumber, char *filenameOut, const int *ptab, const int stkbase, int Ncols, int NusingObjs, double *min, int *minSet, double *max, int *maxSet, pplObj *unitRange, int persistent, int *status, char *errtext, int *errCount, int iterDepth);
 
 #endif
 

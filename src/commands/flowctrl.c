@@ -58,6 +58,7 @@
 #include "userspace/unitsArithmetic.h"
 #include "userspace/unitsDisp.h"
 
+#include "datafile.h"
 #include "pplConstants.h"
 
 #define TBADD(et,cont) ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,0,pl->linetxt,cont)
@@ -375,6 +376,162 @@ cleanup:
 
 void ppl_directive_fordata(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
+  pplObj      *stk     = in->stk;
+  parserLine  *plc     = (parserLine *)stk[PARSE_foreachdatum_code].auxil;
+  int          Nvars   = 0, i, status=0, errCount=5;
+  char        *varname[USING_ITEMS_MAX];
+  int          pos     = PARSE_foreachdatum_variables;
+  char        *name    = (char *)stk[PARSE_foreachdatum_loopname].auxil;
+  int          named   = (stk[PARSE_foreachdatum_loopname].objType == PPLOBJ_STR);
+  int          shellBreakableOld = c->shellBreakable;
+  pplObj      *varObj[USING_ITEMS_MAX], vartmp[USING_ITEMS_MAX];
+  pplObj       unit  [USING_ITEMS_MAX];
+  int          minSet[USING_ITEMS_MAX], maxSet[USING_ITEMS_MAX];
+  double       min   [USING_ITEMS_MAX], max   [USING_ITEMS_MAX];
+  dataTable   *data=NULL;
+  dataBlock   *blk =NULL;
+
+  if (named) c->shellLoopName[iterDepth] = name;
+  else       c->shellLoopName[iterDepth] = NULL;
+  c->shellBreakable = 1;
+
+  // Read variable names
+  while (stk[pos].objType == PPLOBJ_NUM)
+   {
+    pos = (int)round(stk[pos].real);
+    if (pos<=0) break;
+    if (Nvars>=USING_ITEMS_MAX)
+     {
+      sprintf(c->errStat.errBuff,"Too many variable names; a maximum of %d may be specified.",USING_ITEMS_MAX);
+      TBADD2(ERR_SYNTAX,in->stkCharPos[pos+PARSE_foreachdatum_variable_variables]);
+      goto cleanup;
+     }
+    varname[Nvars] = (char *)stk[pos+PARSE_foreachdatum_variable_variables].auxil;
+    Nvars++;
+   }
+
+  // Fetch ordinate ranges
+  {
+   int i,pos=PARSE_foreachdatum_0range_list,nr=0;
+   const int o1 = PARSE_foreachdatum_min_0range_list;
+   const int o2 = PARSE_foreachdatum_max_0range_list;
+   for (i=0; i<Nvars; i++) minSet[i]=0;
+   for (i=0; i<Nvars; i++) maxSet[i]=0;
+   while (stk[pos].objType == PPLOBJ_NUM)
+    {
+     pos = (int)round(stk[pos].real);
+     if (pos<=0) break;
+     if (nr>=Nvars)
+      {
+       sprintf(c->errStat.errBuff,"Too many ranges specified; there are only %d loop variables.", Nvars);
+       TBADD2(ERR_SYNTAX,0);
+       goto cleanup;
+      }
+     if ((stk[pos+o1].objType==PPLOBJ_NUM)||(stk[pos+o1].objType==PPLOBJ_DATE)||(stk[pos+o1].objType==PPLOBJ_BOOL))
+      {
+       unit[nr]=stk[pos+o1];
+       min[nr]=unit[nr].real;
+       minSet[nr]=1;
+      }
+     if ((stk[pos+o2].objType==PPLOBJ_NUM)||(stk[pos+o2].objType==PPLOBJ_DATE)||(stk[pos+o2].objType==PPLOBJ_BOOL))
+      {
+       if ((minSet[nr])&&(unit[nr].objType!=stk[pos+o2].objType))
+        {
+         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d (%s) have conflicting types of <%s> and <%s>.", i+1, varname[i], pplObjTypeNames[unit[nr].objType], pplObjTypeNames[stk[pos+o2].objType]);
+         TBADD2(ERR_TYPE,in->stkCharPos[pos+PARSE_foreachdatum_min_0range_list]);
+         goto cleanup;
+        }
+       if ((minSet[nr])&&(!ppl_unitsDimEqual(&unit[nr],&stk[pos+o2])))
+        {
+         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d (%s) have conflicting physical units of <%s> and <%s>.", i+1, varname[i], ppl_printUnit(c,&unit[nr],NULL,NULL,0,0,0), ppl_printUnit(c,&stk[pos+o2],NULL,NULL,1,0,0));
+         TBADD2(ERR_UNIT,in->stkCharPos[pos+PARSE_foreachdatum_min_0range_list]);
+         goto cleanup;
+        }
+       unit[nr]=stk[pos+o2];
+       max[nr]=unit[nr].real;
+       maxSet[nr]=1;
+      }
+     nr++;
+    }
+  }
+
+  // Fetch data
+  ppldata_fromCmd(c, &data, pl, in, 0, NULL, PARSE_TABLE_foreachdatum_, 0, Nvars, Nvars, min, minSet, max, maxSet, unit, 0, &status, c->errcontext.tempErrStr, &errCount, iterDepth);
+  if (status) { ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); goto cleanup; }
+
+  // Fetch variable pointers
+  for (i=0; i<Nvars; i++) ppl_contextGetVarPointer(c, varname[i], &varObj[i], &vartmp[i]);
+
+  // Loop over data table
+  blk = data->first;
+  while ((blk!=NULL) && !FOREACH_STOP)
+   {
+    int j;
+    for (j=0; ((j<blk->blockPosition) && !FOREACH_STOP); j++)
+     {
+      int k,inRange=1;
+      for (k=0; ((k<Nvars)&&inRange); k++)
+       {
+        pplObj   *obj     = &blk->data_obj[k+j*Nvars];
+        const int numeric = obj->objType==unit[k].objType;
+        int       om;
+
+        // Check units of ranges
+        if ((minSet[k]||maxSet[k])&&inRange)
+         {
+          if (!numeric)
+           {
+            if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(c->errcontext.tempErrStr,"Minimum and maximum limits are specified for variable %d (%s), but it computes to a non-numeric quantity of type <%s>.", k+1, varname[k], pplObjTypeNames[obj->objType]); ppl_warning(&c->errcontext,ERR_TYPE,NULL); }
+            inRange=0;
+           }
+          else if (!ppl_unitsDimEqual(&unit[k],obj))
+           {
+            if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(c->errcontext.tempErrStr,"The minimum and maximum limits specified in the 'foreach datum ...' command for variable %d (%s) have conflicting physical dimensions with the data returned from the data file. The limits have units of <%s>, whilst the data have units of <%s>.", k+1, varname[k], ppl_printUnit(c,&unit[k],NULL,NULL,0,0,0), ppl_printUnit(c,obj,NULL,NULL,1,0,0)); ppl_warning(&c->errcontext,ERR_UNIT,NULL); }
+            inRange=0;
+           }
+          if (minSet[k]&&(obj->real<min[k])) inRange=0;
+          if (maxSet[k]&&(obj->real>max[k])) inRange=0;
+         }
+        om=varObj[k]->amMalloced;
+        varObj[k]->amMalloced=0;
+        ppl_garbageObject(varObj[k]);
+        pplObjCpy(varObj[k],obj,0,0,1);
+        varObj[k]->amMalloced=om;
+       }
+      if (inRange)
+       {
+        const int stkLevelOld=c->stackPtr;
+        ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
+        if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"foreach datum statement"); return; }
+        while (c->stackPtr>stkLevelOld) { STACK_POP; }
+        if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; continue; }
+        if ((c->shellBroken)||(c->shellContinued)||(c->shellReturned)||(c->shellExiting)) break;
+       }
+     }
+    blk=blk->next;
+    if (status) break;
+   }
+
+  // Restore variable pointers
+  for (i=0; i<Nvars; i++) ppl_contextRestoreVarPointer(c, varname[i], &vartmp[i]);
+
+  // Free data tables
+  blk = data->first;
+  while (blk != NULL)
+   {
+    int j;
+    for (j=0; j<blk->blockPosition; j++)
+     {
+      int k;
+      for (k=0; k<Nvars; k++) ppl_garbageObject(&blk->data_obj[k+j*Nvars]);
+     }
+    blk=blk->next;
+   }
+
+cleanup:
+  if ((c->shellBroken)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellBroken=0; c->shellBreakLevel=0; }
+  c->shellLoopName[iterDepth] = NULL;
+  c->shellBreakable = shellBreakableOld;
   return;
  }
 

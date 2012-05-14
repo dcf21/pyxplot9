@@ -30,11 +30,12 @@
 #include "commands/fft.h"
 #include "commands/flowctrl.h"
 #include "commands/funcset.h"
+#include "commands/help.h"
 #include "commands/histogram.h"
 #include "commands/interpolate.h"
 #include "commands/set.h"
 #include "commands/show.h"
-#include "commands/help.h"
+#include "commands/tabulate.h"
 
 #include "coreUtils/errorReport.h"
 #include "coreUtils/memAlloc.h"
@@ -225,6 +226,8 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     ppl_directive_subrt(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "swap")==0)
     ppl_directive_swap(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "tabulate")==0)
+    ppl_directive_tabulate(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "text")==0)
     ppl_directive_text(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "undelete")==0)
