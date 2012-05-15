@@ -223,13 +223,13 @@ unset@3:directive { item@1 %d:editno } < keycolumns@4:set_option | keycols@4:set
 unset@3:directive { item@1 %d:editno } label@2:set_option = [ %d:label_id ]:0label_list,
 unset@3:directive { item@1 %d:editno } < data@3:dataset_type style@3:set_option = | function@4:dataset_type style@3:set_option = | < nostyle@4:set_option:style | style@2:set_option:style > = < data@1:dataset_type | function@1:dataset_type | [ %d:id ]:0style_ids, > >
 unset@3:directive { item@1 %d:editno } < linewidth@5:set_option | lw@2:set_option:linewidth > =
-unset@3:directive { item@1 %d:editno } logscale@1:set_option = { [ < %a:axis | t@n:tlog | u@n:ulog | v@n:vlog | c1@n:c1log | c2@n:c2log | c3@n:c3log | c4@n:c4log > ]:0axes }
+unset@3:directive { item@1 %d:editno } < logscale@2:set_option | linearscale@5:set_option:logscale > = { [ < %a:axis | t@n:tlog | u@n:ulog | v@n:vlog | c1@n:c1log | c2@n:c2log | c3@n:c3log | c4@n:c4log > ]:0axes }
 unset@3:directive                      multiplot@1:set_option =
 unset@3:directive { item@1 %d:editno } noarrow@3:set_option:arrow = [ %d:arrow_id ]:0arrow_list,
 unset@3:directive { item@1 %d:editno } noaxis@4:set_option:axis = [ %a:axis ]:axes
 unset@3:directive { item@1 %d:editno } nobackup@3:set_option:backup =
 unset@3:directive { item@1 %d:editno } noclip@4:set_option:clip =
-unset@3:directive { item@1 %d:editno } < nocolkey@4:set_option | nocolourkey@4:set_option:nocolkey | nocolorkey@4:set_option:nocolkey > =
+unset@3:directive { item@1 %d:editno } < nocolkey@4:set_option:colkey | nocolourkey@4:set_option:colkey | nocolorkey@4:set_option:colkey > =
 unset@3:directive { item@1 %d:editno } nodisplay@3:set_option:display =
 unset@3:directive { item@1 %d:editno } nogrid@3:set_option:grid =
 unset@3:directive { item@1 %d:editno } nokey@3:set_option:key =

@@ -210,29 +210,46 @@ FILE *ppldata_LaunchCoProcess(ppl_context *c, char *filename, int wildcardMatchN
 
   // glob filename
    {
+    int       i, done=0, C;
     wordexp_t wordExp;
     glob_t    globData;
     char     *fName = filename;
     if (wildcardMatchNumber<0) wildcardMatchNumber=0;
+    C = wildcardMatchNumber;
     if ((wordexp(fName, &wordExp, 0) != 0) || (wordExp.we_wordc <= 0)) { sprintf(errtext, "Could not open file '%s'.", fName); if (DEBUG) ppl_log(&c->errcontext, errtext); return NULL; };
-    if ((glob(wordExp.we_wordv[0], 0, NULL, &globData) != 0) || (globData.gl_pathc <= wildcardMatchNumber))
+    for (i=0; i<wordExp.we_wordc; i++)
      {
-      if (wildcardMatchNumber==0) printf(errtext, "Could not open file '%s'.", fName);
-      else                        printf(errtext, "glob produced %d hits.", globData.gl_pathc);
+      if ((glob(wordExp.we_wordv[i], 0, NULL, &globData) != 0) || ((i==0)&&(globData.gl_pathc==0)))
+       {
+        if (wildcardMatchNumber==0) sprintf(errtext, "Could not open file '%s'.", fName);
+        else                        sprintf(errtext, "glob produced zero hits.");
+        if (DEBUG) ppl_log(&c->errcontext, errtext);
+        return NULL;
+       }
+      if (C>=globData.gl_pathc) { C-=globData.gl_pathc; globfree(&globData); continue; }
+      filename = (char *)ppl_memAlloc(strlen(globData.gl_pathv[C])+1);
+      if (filename==NULL) { sprintf(errtext, "Out of memory."); globfree(&globData); wordfree(&wordExp); return NULL; }
+      strcpy(filename, globData.gl_pathv[C]);
+      globfree(&globData);
+      done=1;
+      break;
+     }
+    wordfree(&wordExp);
+    if (!done)
+     {
+      if (wildcardMatchNumber==0) sprintf(errtext, "Could not open file '%s'.", fName);
+      else                        sprintf(errtext, "glob produced too few hits.");
       if (DEBUG) ppl_log(&c->errcontext, errtext);
       return NULL;
      }
-    wordfree(&wordExp);
-    snprintf(filename, FNAME_LENGTH, "%s", globData.gl_pathv[wildcardMatchNumber]);
-    filename[FNAME_LENGTH-1]='\0';
     if (filenameOut!=NULL) { strncpy(filenameOut, filename, FNAME_LENGTH); filenameOut[FNAME_LENGTH-1]='\0'; }
-    globfree(&globData);
    }
 
   // Check whether we have a specified coprocessor to work on this filetype
   dictIter = ppl_dictIterateInit(c->set->filters);
   while (dictIter != NULL)
    {
+    char *dkey=NULL;
     if (ppl_strWildcardTest(filename, dictIter->key))
      {
       filter = (char *)((pplObj *)dictIter->data)->auxil;
@@ -253,7 +270,7 @@ FILE *ppldata_LaunchCoProcess(ppl_context *c, char *filename, int wildcardMatchN
       if ((infile = fdopen(i, "r")) == NULL) { sprintf(errtext,"Could not open connection to input filter '%s'.",argList[0]); if (DEBUG) ppl_log(&c->errcontext, errtext); return NULL; };
       return infile;
      }
-    ppl_dictIterate(&dictIter, NULL);
+    ppl_dictIterate(&dictIter, &dkey);
    }
 
   // If not, then we just open the file and return a file-handle to it
@@ -301,14 +318,15 @@ void ppldata_UsingConvert(ppl_context *c, pplExpr *input, char **columns_str, pp
    }
   if ((c->errStat.status) || (c->dollarStat.warntxt[0]!='\0'))
    {
-    int   errp = c->errStat.errPosExpr;
+    int   errp = c->errStat.errPosExpr, prefix=0;
     char *errt = NULL;
     if (errp<0) errp=0;
-    if      (c->dollarStat.warntxt[0]!='\0') errt=c->dollarStat.warntxt;
-    else if (c->errStat.errMsgExpr[0]!='\0') errt=c->errStat.errMsgExpr;
-    else if (c->errStat.errMsgCmd [0]!='\0') errt=c->errStat.errMsgCmd;
-    else                                     errt="Fail occured.";
-    sprintf(errtext, "%s:%ld: Could not evaluate expression <%s>. The error, encountered at character position %d, was: '%s'", filename, file_linenumber, input->ascii, errp, errt);
+    if      (c->dollarStat.warntxt[0]!='\0') { errt=c->dollarStat.warntxt; prefix=0; }
+    else if (c->errStat.errMsgExpr[0]!='\0')   errt=c->errStat.errMsgExpr;
+    else if (c->errStat.errMsgCmd [0]!='\0')   errt=c->errStat.errMsgCmd;
+    else                                       errt="Fail occured.";
+    if (prefix) sprintf(errtext, "%s:%ld: Could not evaluate expression <%s>. The error, encountered at character position %d, was: '%s'", filename, file_linenumber, input->ascii, errp, errt);
+    else        strcpy(errtext, errt);
     ppl_tbClear(c);
     *status=1;
    }
@@ -680,7 +698,7 @@ void ppldata_fromFile(ppl_context *c, dataTable **out, char *filename, int wildc
   else if (strcmp(filename, "--")==0)
    {
     if (wildcardMatchNumber>0) { *status=1; return; }
-    readFromCommandLine=0;
+    readFromCommandLine=1;
     if (DEBUG) ppl_log(&c->errcontext,"Reading from commandline.");
    }
   else
@@ -920,7 +938,7 @@ void ppldata_fromFile(ppl_context *c, dataTable **out, char *filename, int wildc
        }
 
       ppldata_ApplyUsingList(c, *out, usingExprs, labelExpr, selectExpr, continuity, &discontinuity, colData, NULL, itemsOnLine, filename, file_linenumber, NULL, linenumber_count, block_count, index_number, DATAFILE_COL, columnHeadings, NcolumnHeadings, columnUnits, NcolumnUnits, status, errtext, errCount, iterDepth);
-      if (*status) { FCLOSE_FI; return; }
+      if (*status) { *status=0; /* It was just a warning... */ }
      }
     linenumber_count++;
     linenumber_stepcnt = ((linenumber_stepcnt-1) % linestep);
@@ -1456,7 +1474,7 @@ void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutp
       }
 
      first = ppl_expEval(c, exprList[0], &i, 0, iterDepth);
-     if ((!c->errStat.status) && (first->objType==PPLOBJ_STR) && (Nexprs==1) && (rasterY!=NULL)) // If we have a single expression that evaluates to a string, it's a filename
+     if ((!c->errStat.status) && (first->objType==PPLOBJ_STR) && (Nexprs==1) && (rasterY==NULL)) // If we have a single expression that evaluates to a string, it's a filename
       {
        long file_linenumber=pl->srcLineN; int tmp=0, *discontinuity=&tmp; char *filename=pl->srcFname, *tmp2=NULL, **labOut=&tmp2; // Dummy stuff needed for STACK_CLEAN
        char *datafile = (char *)first->auxil;

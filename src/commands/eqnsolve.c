@@ -278,8 +278,8 @@ static void multiMinIterate(MMComm *commlink, parserLine *pl)
       int i = commlink->warnExprId;
       int j = commlink->warnExprNo;
       strcpy(c->errStat.errBuff, commlink->warntext);
-      if (j==1) ppl_tbAdd(c,commlink->expr1[i]->srcLineN,commlink->expr1[i]->srcId,commlink->expr1[i]->srcFname,1,ERR_UNIT,commlink->expr1pos[i] + commlink->warnPos,commlink->inLine,"");
-      else      ppl_tbAdd(c,commlink->expr2[i]->srcLineN,commlink->expr2[i]->srcId,commlink->expr2[i]->srcFname,1,ERR_UNIT,commlink->expr2pos[i] + commlink->warnPos,commlink->inLine,"");
+      if (j==1) ppl_tbAdd(c,commlink->expr1[i]->srcLineN,commlink->expr1[i]->srcId,commlink->expr1[i]->srcFname,1,ERR_NUMERIC,commlink->expr1pos[i] + commlink->warnPos,commlink->inLine,"");
+      else      ppl_tbAdd(c,commlink->expr2[i]->srcLineN,commlink->expr2[i]->srcId,commlink->expr2[i]->srcFname,1,ERR_NUMERIC,commlink->expr2pos[i] + commlink->warnPos,commlink->inLine,"");
       return;
      }
 
@@ -349,6 +349,9 @@ static void minOrMax(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     pos = &stk[ (int)round(pos->real) ];
     varName = (char *)(pos + PARSE_minimise_fit_variable_fit_variables)->auxil;
     ppl_contextGetVarPointer(c, varName, &commlink.fitvar[commlink.Nfitvars], &dummyTemp);
+    if (dummyTemp.objType==PPLOBJ_NUM) ppl_unitsDimCpy(commlink.fitvar[commlink.Nfitvars], &dummyTemp);
+    dummyTemp.amMalloced=0;
+    ppl_garbageObject(&dummyTemp);
     commlink.fitvarname[ commlink.Nfitvars ] = varName;
     commlink.Nfitvars += 1;
     if (commlink.Nfitvars >= EQNSOLVE_MAXDIMS)
@@ -403,6 +406,9 @@ void ppl_directive_solve(ppl_context *c, parserLine *pl, parserOutput *in, int i
     pos = (int)round(stk[pos].real);
     varName = (char *)stk[pos+PARSE_solve_fit_variable_fit_variables].auxil;
     ppl_contextGetVarPointer(c, varName, &commlink.fitvar[commlink.Nfitvars], &dummyTemp);
+    if (dummyTemp.objType==PPLOBJ_NUM) ppl_unitsDimCpy(commlink.fitvar[commlink.Nfitvars], &dummyTemp);
+    dummyTemp.amMalloced=0;
+    ppl_garbageObject(&dummyTemp);
     commlink.fitvarname[ commlink.Nfitvars ] = varName;
     commlink.Nfitvars += 1;
     if (commlink.Nfitvars >= EQNSOLVE_MAXDIMS)
@@ -419,8 +425,10 @@ void ppl_directive_solve(ppl_context *c, parserLine *pl, parserOutput *in, int i
   while ((stk[pos].objType == PPLOBJ_NUM) && (stk[pos].real > 0))
    {
     pos = (int)round(stk[pos].real);
-    commlink.expr1[commlink.Nexprs] = (pplExpr *)stk[pos+PARSE_solve_left_expression_expressions].auxil;
-    commlink.expr2[commlink.Nexprs] = (pplExpr *)stk[pos+PARSE_solve_right_expression_expressions].auxil;
+    commlink.expr1   [commlink.Nexprs] = (pplExpr *)stk[pos+PARSE_solve_left_expression_expressions].auxil;
+    commlink.expr1pos[commlink.Nexprs] = in->stkCharPos[pos+PARSE_solve_left_expression_expressions];
+    commlink.expr2   [commlink.Nexprs] = (pplExpr *)stk[pos+PARSE_solve_right_expression_expressions].auxil;
+    commlink.expr2pos[commlink.Nexprs] = in->stkCharPos[pos+PARSE_solve_right_expression_expressions];
     commlink.Nexprs += 1;
     if (commlink.Nexprs >= EQNSOLVE_MAXDIMS)
      {

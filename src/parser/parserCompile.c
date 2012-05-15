@@ -234,6 +234,12 @@ repLoopCleanup:
        {
         int first = (s->blockDepth != blockDepth+1);
 
+        // first line -- must be at end of command line which includes '--'
+        if (first)
+         {
+          if (line[*linepos]!='\0') { status=0; goto cleanup; }
+         }
+
         // Make parserLine structure to hold this line of text
         parserLine *output=NULL;
         ppl_parserLineInit(&output, srcLineN, srcId, srcFname, line);
@@ -593,25 +599,14 @@ finished_looking_for_tabcomp:
               else
                {
                 int j, isInline=1;
+                pplObj val;
+                val.refCount=1;
                 if (!(strcmp(node->varName,"expression")==0)) isInline=0;
                 if (isInline && (strncmp(line+*linepos,"\"--\"",4)!=0) && (strncmp(line+*linepos,"'--'",4)!=0) ) isInline=0;
                 for (j=4; j<explen; j++) if (line[*linepos+j]>' ') isInline=0;
-                if (isInline)
-                 {
-                  pplObj val;
-                  val.refCount=1;
-                  pplObjStr(&val,0,0,"--");
-                  pplExpr_free(expr);
-                  ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
-                  s->NinlineDatafiles++;
-                 }
-                else
-                 {
-                  pplObj val;
-                  val.refCount=1;
-                  pplObjExpression(&val,0,(void *)expr);
-                  ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
-                 }
+                if (isInline) s->NinlineDatafiles++;
+                pplObjExpression(&val,0,(void *)expr);
+                ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
                }
              } // default
            } // switch

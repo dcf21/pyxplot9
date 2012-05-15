@@ -2097,7 +2097,8 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    }
   else
    {
-    ppl_error(&c->errcontext, ERR_INTERNAL, -1, -1, "PyXPlot's set command could not find handler for this set command.");
+    sprintf(c->errcontext.tempErrStr, "PyXPlot's set command could not find handler for the set option <%s>.", setoption);
+    ppl_error(&c->errcontext, ERR_INTERNAL, -1, -1, NULL);
    }
 
   return;

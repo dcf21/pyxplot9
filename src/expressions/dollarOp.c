@@ -117,9 +117,9 @@ void ppl_dollarOp_fetchColByNum(ppl_context *c, pplExpr *inExpr, int inExprCharP
    {
     sprintf(c->dollarStat.warntxt,"%s:%ld: In the expression <%s>, the requested %s number %d does not exist %son line %ld.",
               c->dollarStat.filename, c->dollarStat.file_linenumber, c->dollarStat.usingExpr,
-             (c->dollarStat.usingRowCol==DATAFILE_COL)?"row":"column", colNum,
+             (c->dollarStat.usingRowCol==DATAFILE_COL)?"column":"row", colNum,
              (c->dollarStat.usingRowCol==DATAFILE_COL)?"":"in the block commencing ", c->dollarStat.file_linenumber);
-    sprintf(c->errStat.errBuff,"No column with number %d.",colNum);
+    sprintf(c->errStat.errBuff,"No %s with number %d.", (c->dollarStat.usingRowCol==DATAFILE_COL)?"column":"row", colNum);
     TBADD(ERR_RANGE);
     return;
    }
@@ -133,17 +133,17 @@ void ppl_dollarOp_fetchColByNum(ppl_context *c, pplExpr *inExpr, int inExprCharP
    {
     char *s = c->dollarStat.columns_str[colNum-1];
     int j=-1;
-    if ( (!ppl_validFloat(s,&j)) || (j<=0) || ((s[j]>' ')&&(s[j]!=',')) )
+    if ( (!ppl_validFloat(s,&j)) || (j<=1) || ((s[j]!='\0')&&(s[j]!=',')&&(s[j-1]>' ')) )
      {
       const long ln = (c->dollarStat.file_linenumbers==NULL) ? c->dollarStat.file_linenumber : c->dollarStat.file_linenumbers[colNum-1];
       sprintf(c->dollarStat.warntxt,"%s:%ld: In the expression <%s>, the requested %s number %d does not contain numeric data.",
                 c->dollarStat.filename, ln, c->dollarStat.usingExpr,
-               (c->dollarStat.usingRowCol==DATAFILE_COL)?"row":"column", colNum);
-      sprintf(c->errStat.errBuff,"Column number %d does not contain numeric data.",colNum);
-      TBADD(ERR_RANGE);
+               (c->dollarStat.usingRowCol==DATAFILE_COL)?"column":"row", colNum);
+      sprintf(c->errStat.errBuff,"%s number %d does not contain numeric data.", (c->dollarStat.usingRowCol==DATAFILE_COL)?"Column":"Row", colNum);
+      TBADD(ERR_NUMERIC);
       return;
      }
-    ppl_unitsDimCpy(out, &c->dollarStat.colUnits[colNum-1]);
+    if ((colNum>0)&&(colNum<=c->dollarStat.NcolUnits)) ppl_unitsDimCpy(out, &c->dollarStat.colUnits[colNum-1]);
     out->real = ppl_getFloat(s,&j);
    }
   return;
@@ -160,9 +160,9 @@ void ppl_dollarOp_fetchColByName(ppl_context *c, pplExpr *inExpr, int inExprChar
     }
   sprintf(c->dollarStat.warntxt,"%s:%ld: In the expression <%s>, the requested %s named '%s' does not exist %son line %ld.",
               c->dollarStat.filename, c->dollarStat.file_linenumber, c->dollarStat.usingExpr,
-             (c->dollarStat.usingRowCol==DATAFILE_COL)?"row":"column", colName,
+             (c->dollarStat.usingRowCol==DATAFILE_COL)?"column":"row", colName,
              (c->dollarStat.usingRowCol==DATAFILE_COL)?"":"in the block commencing ", c->dollarStat.file_linenumber);
-  sprintf(c->errStat.errBuff,"No column with name '%s'.",colName);
+  sprintf(c->errStat.errBuff,"No %s with name '%s'.", (c->dollarStat.usingRowCol==DATAFILE_COL)?"column":"row", colName);
   TBADD(ERR_DICTKEY);
   return;
  }

@@ -107,6 +107,7 @@ static int ppl_tab_dataGridDisplay(ppl_context *c, FILE *output, dataTable *data
        for (k=0; k<Ncolumns; k++)
         {
          val = blk->data_real[k + Ncolumns*i] * multiplier[k];
+         if (!gsl_finite(val)                                       ) allInts [k]=0; // don't try to represent NANs as integers!
          if ((fabs(val)>1000) || (!ppl_dblEqual(val,floor(val+0.5)))) allInts [k]=0;
          if ((fabs(val)>1000) || (fabs(val)<0.0099999999999)        ) allSmall[k]=0; // Columns containing only numbers in this range are fprintfed using %f, rather than %e
         }
@@ -141,47 +142,54 @@ static int ppl_tab_dataGridDisplay(ppl_context *c, FILE *output, dataTable *data
             else                  fprintf(output, "%17.8e " ,      val);
            }
          } else { // The user has supplied a format string, which we now substitute column values into
-          for(pos=l=0; format[pos]!='\0'; pos++)
-           if (format[pos]!='%') fprintf(output, "%c", format[pos]); // Just copy text of format string until we hit a % character
-           else
-            {
-             k=pos+1; // k looks ahead to see experimentally if syntax is right
-             if (format[k]=='%') { fprintf(output, "%%"); continue; }
-             if ((format[k]=='+')||(format[k]=='-')||(format[k]==' ')||(format[k]=='#')) k++; // optional flag can be <+- #>
-             while ((format[k]>='0') && (format[k]<='9')) k++; // length can be some digits
-             if (format[k]=='.') // precision starts with a . and is followed by more digits
-              {
-               k++; while ((format[k]>='0') && (format[k]<='9')) k++; // length can be some digits
-              }
-             // We do not allow user to specify optional length flag, which could potentially be <hlL>
-             if (l>=Ncolumns) val = GSL_NAN;
-             else             val = blk->data_real[l + Ncolumns*i] * multiplier[l]; // Set val to equal data from data table that we're about to print.
-             l++;
-             if (format[k]!='\0') { tmpchr = format[k+1]; format[k+1] = '\0'; } // NULL terminate format token before passing it to fprintf
-             if      (format[k]=='d') // %d -- print quantity as an integer, but take care to avoid overflows
-              {
-               if ((!gsl_finite(val))||(val>INT_MAX-1)||(val<INT_MIN+1)) fprintf(output, "nan");
-               else                                                      fprintf(output, format+pos, (int)floor(val));
-               pos = k;
-              }
-             else if ((format[k]=='e') || (format[k]=='f')) // %f or %e -- print quantity as floating point number
-              {
-               fprintf(output, format+pos, val);
-               pos = k;
-              }
-             else if (format[k]=='s') // %s -- print quantity in our best-fit format style
-              {
-               if (l>Ncolumns)         sprintf(c->errcontext.tempErrStr,"nan");
-               if      (allInts [l-1]) sprintf(c->errcontext.tempErrStr, "%10d "   , (int)val);
-               else if (allSmall[l-1]) sprintf(c->errcontext.tempErrStr, "%17.10f ",      val);
-               else                    sprintf(c->errcontext.tempErrStr, "%17.8e " ,      val);
-               fprintf(output, format+pos, c->errcontext.tempErrStr);
-               pos = k;
-              }
-             else
-              { fprintf(output, "%c", format[pos]); l--; } // l-- because this wasn't a valid format token, so we didn't print any data in the end
-             if (format[k]!='\0') format[k+1] = tmpchr; // Remove temporary NULL termination at the end of the format token
-            }
+          for (pos=l=0; ; pos++)
+           {
+            if (format[pos]=='\0')
+             {
+              if ((l>0)&&(l<Ncolumns)) pos=0;
+              else                     break;
+             }
+            if (format[pos]!='%') fprintf(output, "%c", format[pos]); // Just copy text of format string until we hit a % character
+            else
+             {
+              k=pos+1; // k looks ahead to see experimentally if syntax is right
+              if (format[k]=='%') { fprintf(output, "%%"); pos++; continue; }
+              if ((format[k]=='+')||(format[k]=='-')||(format[k]==' ')||(format[k]=='#')) k++; // optional flag can be <+- #>
+              while ((format[k]>='0') && (format[k]<='9')) k++; // length can be some digits
+              if (format[k]=='.') // precision starts with a . and is followed by more digits
+               {
+                k++; while ((format[k]>='0') && (format[k]<='9')) k++; // length can be some digits
+               }
+              // We do not allow user to specify optional length flag, which could potentially be <hlL>
+              if (l>=Ncolumns) val = GSL_NAN;
+              else             val = blk->data_real[l + Ncolumns*i] * multiplier[l]; // Set val to equal data from data table that we're about to print.
+              l++;
+              if (format[k]!='\0') { tmpchr = format[k+1]; format[k+1] = '\0'; } // NULL terminate format token before passing it to fprintf
+              if      (format[k]=='d') // %d -- print quantity as an integer, but take care to avoid overflows
+               {
+                if ((!gsl_finite(val))||(val>INT_MAX-1)||(val<INT_MIN+1)) fprintf(output, "nan");
+                else                                                      fprintf(output, format+pos, (int)floor(val));
+                pos = k;
+               }
+              else if ((format[k]=='e') || (format[k]=='f')) // %f or %e -- print quantity as floating point number
+               {
+                fprintf(output, format+pos, val);
+                pos = k;
+               }
+              else if (format[k]=='s') // %s -- print quantity in our best-fit format style
+               {
+                if      (l>=Ncolumns)   sprintf(c->errcontext.tempErrStr, "nan");
+                else if (allInts [l-1]) sprintf(c->errcontext.tempErrStr, "%10d "   , (int)val);
+                else if (allSmall[l-1]) sprintf(c->errcontext.tempErrStr, "%17.10f ",      val);
+                else                    sprintf(c->errcontext.tempErrStr, "%17.8e " ,      val);
+                fprintf(output, format+pos, c->errcontext.tempErrStr);
+                pos = k;
+               }
+              else
+               { fprintf(output, "%c", format[pos]); l--; } // l-- because this wasn't a valid format token, so we didn't print any data in the end
+              if (format[k]!='\0') format[k+1] = tmpchr; // Remove temporary NULL termination at the end of the format token
+             }
+           }
          }
         fprintf(output, "\n");
        }
