@@ -366,6 +366,7 @@ static void minOrMax(ppl_context *c, parserLine *pl, parserOutput *in, int inter
   commlink.isFirst[0] = 1;
   commlink.warnPos    =-1;
   commlink.GoneNaN    = 0;
+  commlink.WorstScore = WORSTSCORE_INIT;
   pplObjNum(&commlink.first[0],0,0,0);
 
   multiMinIterate(&commlink, pl);
