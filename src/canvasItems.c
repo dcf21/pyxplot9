@@ -1056,6 +1056,7 @@ int ppl_directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int 
   // Add the exact parameterisation which we have been given to canvas item, so that "list" command prints it out in the form originally supplied
   ptr->x1set = ptr->xcset = ptr->xfset = ptr->aset = ptr->bset = ptr->eccset = ptr->slrset = 0;
   ptr->x1 = ptr->y1 = ptr->x2 = ptr->y2 = ptr->xc = ptr->yc = ptr->xf = ptr->yf = ptr->ecc = ptr->slr = 0.0;
+  ptr->arcset = 0;
   if       (gotX1 )         { ptr->x1set = 1; ptr->x1 = x1; ptr->y1 = y1; ptr->x2 = x2; ptr->y2 = y2; }
   else if (gotXc || !gotXf) { ptr->xcset = 1; ptr->xc = xc; ptr->yc = yc; }
   if (gotXf ) { ptr->xfset = 1; ptr->xf = xf; ptr->yf = yf; }
