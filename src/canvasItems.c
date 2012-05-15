@@ -1339,9 +1339,10 @@ int ppl_directive_image(ppl_context *c, parserLine *pl, parserOutput *in, int in
   if (gotWidth ) { ptr->xpos2    = width ; ptr->xpos2set = 1; } else { ptr->xpos2    = 0.0; ptr->xpos2set = 0; }
   if (gotHeight) { ptr->ypos2    = height; ptr->ypos2set = 1; } else { ptr->ypos2    = 0.0; ptr->ypos2set = 0; }
   ptr->text     = text;
-  if (smooth   ) { ptr->smooth   = 1; }                               else { ptr->smooth   = 0; }
-  if (noTrans  ) { ptr->NoTransparency = 1; } else { ptr->NoTransparency = 0; }
+  if (smooth   ) { ptr->smooth   = 1; }                         else { ptr->smooth   = 0; }
+  if (noTrans  ) { ptr->NoTransparency = 1; }                   else { ptr->NoTransparency = 0; }
   if (cTrans   ) { ptr->CustomTransparency = 1; ptr->TransColR = transR; ptr->TransColG = transG; ptr->TransColB = transB; }
+  else           { ptr->CustomTransparency = 0; }
 
   // Redisplay the canvas as required
   if (c->set->term_current.display == SW_ONOFF_ON)
