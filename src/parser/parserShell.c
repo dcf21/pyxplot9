@@ -131,7 +131,7 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
   else if (strcmp(d, "eps")==0)
     ppl_directive_eps(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "exec")==0)
-    ppl_directive_load(c,pl,in,interactive,iterDepth);
+    ppl_directive_exec(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "for")==0)
     ppl_directive_for(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "foreach")==0)
