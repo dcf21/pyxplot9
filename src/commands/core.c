@@ -250,21 +250,34 @@ void ppl_directive_history(ppl_context *c, parserLine *pl, parserOutput *in)
 
 void ppl_directive_load(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
+  int     i   = 0;
+  int     j   = 0;
   pplObj *stk = in->stk;
   char   *fn  = (char *)stk[PARSE_load_filename].auxil;
   wordexp_t     wordExp;
   glob_t        globData;
 
   if ((wordexp(fn, &wordExp, 0) != 0) || (wordExp.we_wordc <= 0)) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Could not access file '%s'.", fn); TBADD(ERR_FILE,in->stkCharPos[PARSE_load_filename]); return; }
-  if ((glob(wordExp.we_wordv[0], 0, NULL, &globData) != 0) || (globData.gl_pathc <= 0)) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Could not access file '%s'.", fn); TBADD(ERR_FILE,in->stkCharPos[PARSE_load_filename]); wordfree(&wordExp); return; }
-  wordfree(&wordExp);
-  ppl_processScript(c, globData.gl_pathv[0], iterDepth+1);
-  if (c->errStat.status)
+  for (j=0; j<wordExp.we_wordc; j++)
    {
-    strcpy(c->errStat.errBuff, "");
-    ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,ERR_GENERAL,0,pl->linetxt,"executed script");
+    if ((glob(wordExp.we_wordv[j], 0, NULL, &globData) != 0) || (globData.gl_pathc <= 0))
+     {
+      if (wordExp.we_wordc==1) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Could not access file '%s'.", fn); TBADD(ERR_FILE,in->stkCharPos[PARSE_load_filename]); wordfree(&wordExp); return; }
+      else                     { continue; }
+     }
+    for (i=0; i<globData.gl_pathc; i++)
+     {
+      ppl_processScript(c, globData.gl_pathv[i], iterDepth+1);
+      if (c->errStat.status)
+       {
+        strcpy(c->errStat.errBuff, "");
+        ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,ERR_GENERAL,0,pl->linetxt,"executed script");
+        break;
+       }
+     }
+    globfree(&globData);
    }
-  globfree(&globData);
+  wordfree(&wordExp);
   return;
  }
 
