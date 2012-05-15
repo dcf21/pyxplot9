@@ -1035,6 +1035,7 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
      {
       if (s->waitingForBrace) { sprintf(c->errStat.errBuff,"Cannot process a macro on the same line as the opening brace of a loop."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,0,line,""); ppl_parserStatReInit(s); return 1; }
       parserLine *output=NULL;
+      if ((s->stk[blockDepth][0]==NULL)&&(blockDepth==0)) ppl_parserStatReInit(s);
       ppl_parserLineInit(&output, srcLineN, srcId, srcFname, line);
       if (output==NULL) { sprintf(c->errStat.errBuff,"Out of memory."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_MEMORY,0,line,""); ppl_parserStatReInit(s); return 1; }
       output->stackLen       = 0;
