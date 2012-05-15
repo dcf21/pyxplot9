@@ -130,9 +130,9 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, char *dirName, int intera
       parserLine   *pl = NULL;
       ppl_parserStatInit(&ps,&pl);
       if (ps==NULL) { strcpy(eB,"Out of memory."); TBADD(ERR_MEMORY,0); return; }
-      stat = ppl_parserCompile(c, ps, in->srcLineN, in->srcId, in->srcFname, in->linetxt, 1, iterDepth+1);
+      stat = ppl_parserCompile(c, ps, in->srcLineN, in->srcId, in->srcFname, in->linetxt, 1, 0);
       if (stat || c->errStat.status) break;
-      ppl_parserExecute(c, pl, dirName, interactive, iterDepth+1);
+      ppl_parserExecute(c, pl, dirName, interactive, 0);
       ppl_parserStatFree(&ps);
       in = in->next;
       continue;

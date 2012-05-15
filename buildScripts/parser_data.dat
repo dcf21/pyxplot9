@@ -54,10 +54,10 @@
 
 { < let@3 > = } [ %v:varname ]:varnames. < =~@n:directive:var_set = s@n %r:regex | =@n:directive:var_set = { %o:value } >
 [ %v:function_name ]:function_names. (@n [ %v:argument_name ]:0argument_list, )@n [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n ]:0range_list =@n:directive:func_set = { %E:definition }
-arc@3:directive = { item@1 %d:editno } { at@1 } %p:centre radius@1 %u:r from@1 %A:angle1 to@1 %A:angle2 { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < fillcolour@1 | fillcolor@1 | fc@2 > %c:fillcolor ) }
+arc@3:directive = { item@1 %d:editno } { at@1 } %p:centre radius@1 %D:r from@1 %A:angle1 to@1 %A:angle2 { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < fillcolour@1 | fillcolor@1 | fc@2 > %c:fillcolor ) }
 < line@2:directive | arrow@2:directive > = { item@1 %d:editno } { from@1 } %p:p1 to@1 %p:p2 { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < nohead@2:arrow_style | head@2:arrow_style | twohead@2:arrow_style:twoway | twoway@2:arrow_style > ) }
 assert@2:directive = < version@4 < >=@n:gtreq | <@n:lt > < %S:version | %q:version > | %b:expr > { %q:message }
-< box@2:directive | rectangle@2:directive:box > = { item@1 %d:editno } < from@1 %p:p1 to@1 %p:p2 { rotate@1 %A:rotation } | at@1 %p:p3 ( width@1 %D:width ~ height@1 %D:height ~ rotate@1 %A:rotation ) > { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < fillcolour@1 | fillcolor@1 | fc@2 > %c:fillcolor ) }
+< box@2:directive | rectangle@2:directive:box > = { item@1 %d:editno } < from@1 %p:p1 to@1 %p:p2 { rotate@1 %A:rotation } | at@1 %p:p1 ( width@1 %D:width ~ height@1 %D:height ~ rotate@1 %A:rotation ) > { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < fillcolour@1 | fillcolor@1 | fc@2 > %c:fillcolor ) }
 break@2:directive = { %v:loopname }
 call@2:directive = %o:object
 cd@2:directive = [ < %S:directory | %q:directory > ]:path

@@ -53,7 +53,7 @@ list *ppl_strSplit(char *in)
     if (end>start)
      {
       word = ppl_strSlice(in, text_buffer, start, end);
-      ppl_listAppendCpy(out, word, strlen(word));
+      ppl_listAppendCpy(out, word, strlen(word)+1);
      }
    }
   free(text_buffer);

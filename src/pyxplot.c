@@ -189,7 +189,7 @@ int main(int argc, char **argv)
   pplcsp_init(context);
 
   // Set program name within kpathsea
-  ppl_kpse_wrap_init(&context->errcontext);
+  ppl_kpse_wrap_init(context);
 
   // Set up SIGINT handler
   if (sigsetjmp(ppl_sigjmpToMain, 1) == 0)

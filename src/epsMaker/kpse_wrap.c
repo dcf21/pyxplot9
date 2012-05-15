@@ -28,7 +28,9 @@
 #include <string.h>
 
 #include "coreUtils/errorReport.h"
+#include "epsMaker/kpse_wrap.h"
 #include "stringTools/strConstants.h"
+#include "userspace/context.h"
 
 #ifdef HAVE_KPATHSEA
 #include <kpathsea/kpathsea.h>
@@ -47,7 +49,7 @@ char          *ppl_kpse_PathList     [3][MAX_PATHS];
 unsigned char  ppl_kpse_PathRecursive[3][MAX_PATHS];
 #endif
 
-void ppl_kpse_wrap_init(pplerr_context *ec)
+void ppl_kpse_wrap_init(ppl_context *c)
  {
   #ifdef HAVE_KPATHSEA
   kpse_set_program_name("dvips", "dvips");
@@ -57,6 +59,7 @@ void ppl_kpse_wrap_init(pplerr_context *ec)
   struct timespec waitperiod; // A time.h timespec specifier for a wait of zero seconds
   fd_set          readable;
   sigset_t        sigs;
+  pplerr_context *ec=&c->errcontext;
 
   sigemptyset(&sigs);
   sigaddset(&sigs,SIGCHLD);
@@ -69,7 +72,7 @@ void ppl_kpse_wrap_init(pplerr_context *ec)
 
   for (j=0; j<3; j++)
    {
-    pplcsp_forkKpseWhich(FileTypes[j] , &fstdout);
+    pplcsp_forkKpseWhich(c, FileTypes[j] , &fstdout);
 
     // Wait for kpsewhich process's stdout to become readable. Get bored if this takes more than a second.
     TrialNumber = 1;

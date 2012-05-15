@@ -1095,7 +1095,6 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
   shellSubstErr:
           if (key!=NULL) free(key);
           if (fail) break;
-          i--;
          }
 
         // Second, substitute for macros
