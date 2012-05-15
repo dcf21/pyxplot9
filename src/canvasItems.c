@@ -923,7 +923,7 @@ int ppl_directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int 
   arcfrom = stk[PARSE_ellipse_arcfrom   ].real; gotarc  = (stk[PARSE_ellipse_arcfrom      ].objType==PPLOBJ_NUM);
   arcto   = stk[PARSE_ellipse_arcto     ].real;
 
-  // Check that input parameters have the right units, and convert dimensionless lengths into cm
+  // Count number of input parameters that have been supplied, to make sure we have a suitable set
   if (gotAng) { r++; } else { ang=0.0; }
   if (gotXc ) { p++; }
   if (gotXf ) { p++; }
@@ -936,9 +936,9 @@ int ppl_directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int 
   if (gotLr ) { e++; }
 
   // Major axis length is a drop-in replacement for the semi-major axis length
-  if (gotA2) { a   = a2/2; }
-  if (gotB2) { b   = b2/2; }
-  if (gotLr) { slr = lr/2; }
+  if (gotA2) { a   = a2/2; gotA  =1; }
+  if (gotB2) { b   = b2/2; gotB  =1; }
+  if (gotLr) { slr = lr/2; gotSlr=1; }
 
   // Check that we have been supplied an appropriate set of inputs
   if ( (!gotX1) && (((p==2)&&((e!=1)||(r!=0))) || ((p<2)&&(e!=2))) )
