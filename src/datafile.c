@@ -445,6 +445,7 @@ void ppldata_ApplyUsingList(ppl_context *c, dataTable *out, pplExpr **usingExprs
       oo->refCount = 1;
       pplObjCpy(oo,stkObj,0,0,1);
      }
+    STACK_CLEAN;
    }
 
   out->current->split[out->current->blockPosition] = *discontinuity;

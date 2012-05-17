@@ -28,6 +28,7 @@
 #include "commands/core.h"
 #include "commands/eqnsolve.h"
 #include "commands/fft.h"
+#include "commands/fit.h"
 #include "commands/flowctrl.h"
 #include "commands/funcset.h"
 #include "commands/help.h"
@@ -132,6 +133,8 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     ppl_directive_eps(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "exec")==0)
     ppl_directive_exec(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "fit")==0)
+    ppl_directive_fit(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "for")==0)
     ppl_directive_for(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "foreach")==0)
