@@ -60,10 +60,20 @@ int ppl_inputInit(ppl_context *context)
   return (context->inputLineBuffer!=NULL);
  }
 
+static char *atPrompt=NULL;
+
+void ppl_interactiveSigInt(int signo)
+ {
+  fprintf(stdout,"\n");
+  if (atPrompt!=NULL) fprintf(stdout,"%s",atPrompt);
+  cancellationFlag = 1;
+  return;
+ }
+
 void ppl_interactiveSession(ppl_context *context)
  {
   int           linenumber = 1;
-  sigset_t      sigs;
+  void        (*sigint_old)(int) = NULL;
   parserLine   *pl = NULL;
   parserStatus *ps = NULL;
 
@@ -75,64 +85,64 @@ void ppl_interactiveSession(ppl_context *context)
   if ((isatty(STDIN_FILENO) == 1) && (context->errcontext.session_default.splash == SW_ONOFF_ON)) ppl_report(&context->errcontext,ppltxt_welcome);
 
   context->shellExiting = 0;
+  sigint_old = signal(SIGINT, ppl_interactiveSigInt); // Set up SIGINT handler
   while ((!context->shellExiting)&&(!context->shellBroken)&&(!context->shellContinued)&&(!context->shellReturned))
    {
-    // Set up SIGINT handler
-    if (sigsetjmp(ppl_sigjmpToInteractive, 1) == 0)
+    pplcsp_checkForGvOutput(context);
+    atPrompt = NULL;
+    cancellationFlag = 0;
+    if (isatty(STDIN_FILENO) == 1)
      {
-      ppl_sigjmpFromSigInt = &ppl_sigjmpToInteractive;
-
-      pplcsp_checkForGvOutput(context);
-      cancellationFlag = 0;
-      if (isatty(STDIN_FILENO) == 1)
-       {
-        ppl_error_setstreaminfo(&context->errcontext,-1, "");
+      ppl_error_setstreaminfo(&context->errcontext,-1, "");
 #ifdef HAVE_READLINE
-         {
-          int len;
-          char *line_ptr, prompt[32];
-          if (context->inputLineAddBuffer!=NULL) { strcpy(prompt,".......> "); }
-          else                                   { snprintf(prompt,16,"%s.......",ps->prompt); strcpy(prompt+7, "> "); }
-          line_ptr = readline(prompt);
-          if (line_ptr==NULL) break;
-          add_history(line_ptr);
-          context->historyNLinesWritten++;
-          len = strlen(line_ptr)+1;
-          if (len > context->inputLineBufferLen) { context->inputLineBuffer = (char *)realloc(context->inputLineBuffer, len); context->inputLineBufferLen=len; }
-          if (context->inputLineBuffer == NULL) break;
-          strcpy(context->inputLineBuffer, line_ptr);
-          free(line_ptr);
-         }
-#else
-        printf("%s",prompt);
-        if (fgets(context->inputLineBuffer,LSTR_LENGTH-1,stdin)==NULL) break;
-        context->inputLineBuffer[LSTR_LENGTH-1]='\0';
-#endif
-       }
-      else
        {
-        ppl_error_setstreaminfo(&context->errcontext, linenumber, "piped input");
-        if ((feof(stdin)) || (ferror(stdin))) break;
-        ppl_file_readline(stdin, context->inputLineBuffer, LSTR_LENGTH-1);
-        context->inputLineBuffer[LSTR_LENGTH-1]='\0';
-        linenumber++;
+        int len;
+        char *line_ptr, prompt[32];
+        if (context->inputLineAddBuffer!=NULL) { strcpy(prompt,".......> "); }
+        else                                   { snprintf(prompt,16,"%s.......",ps->prompt); strcpy(prompt+7, "> "); }
+        atPrompt = prompt;
+        line_ptr = readline(prompt);
+        atPrompt = NULL;
+        if (line_ptr==NULL) break;
+        add_history(line_ptr);
+        context->historyNLinesWritten++;
+        len = strlen(line_ptr)+1;
+        if (len > context->inputLineBufferLen) { context->inputLineBuffer = (char *)realloc(context->inputLineBuffer, len); context->inputLineBufferLen=len; }
+        if (context->inputLineBuffer == NULL) break;
+        strcpy(context->inputLineBuffer, line_ptr);
+        free(line_ptr);
        }
-      ppl_processLine(context, ps, context->inputLineBuffer, isatty(STDIN_FILENO), 0);
-      ppl_error_setstreaminfo(&context->errcontext, -1, "");
-      pplcsp_killAllHelpers(context);
-     } else {
-      sigemptyset(&sigs); // SIGINT longjmps return here
-      sigaddset(&sigs,SIGCHLD);
-      sigprocmask(SIG_UNBLOCK, &sigs, NULL);
-      fprintf(stdout,"\n");
-      if (context->inputLineAddBuffer != NULL) { free(context->inputLineAddBuffer); context->inputLineAddBuffer=NULL; }
-      if (chdir(context->errcontext.session_default.cwd) < 0) { ppl_fatal(&context->errcontext, __FILE__,__LINE__,"chdir into cwd failed."); } // chdir out of temporary directory
+#else
+       {
+        char prompt[32];
+        if (context->inputLineAddBuffer!=NULL) { strcpy(prompt,".......> "); }
+        else                                   { snprintf(prompt,16,"%s.......",ps->prompt); strcpy(prompt+7, "> "); }
+        printf("%s",prompt);
+        atPrompt = prompt;
+        if (fgets(context->inputLineBuffer,LSTR_LENGTH-1,stdin)==NULL) { atPrompt = NULL; break; }
+        atPrompt = NULL;
+        context->inputLineBuffer[LSTR_LENGTH-1]='\0';
+       }
+#endif
      }
+    else
+     {
+      ppl_error_setstreaminfo(&context->errcontext, linenumber, "piped input");
+      if ((feof(stdin)) || (ferror(stdin))) break;
+      ppl_file_readline(stdin, context->inputLineBuffer, LSTR_LENGTH-1);
+      context->inputLineBuffer[LSTR_LENGTH-1]='\0';
+      linenumber++;
+     }
+    atPrompt = NULL;
+    cancellationFlag = 0;
+    ppl_processLine(context, ps, context->inputLineBuffer, isatty(STDIN_FILENO), 0);
+    ppl_error_setstreaminfo(&context->errcontext, -1, "");
+    pplcsp_killAllHelpers(context);
    }
 
-  ppl_sigjmpFromSigInt = &ppl_sigjmpToMain; // SIGINT now drops back through to main().
   if (context->inputLineAddBuffer != NULL) { free(context->inputLineAddBuffer); context->inputLineAddBuffer=NULL; }
   context->shellExiting = 0;
+  signal(SIGINT, sigint_old); // Restore old SIGINT handler
   if (isatty(STDIN_FILENO) == 1)
    {
     if (context->errcontext.session_default.splash == SW_ONOFF_ON) ppl_report(&context->errcontext,"\nGoodbye. Have a nice day.");

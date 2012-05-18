@@ -33,7 +33,6 @@
 #include "stringTools/asciidouble.h"
 #include "stringTools/strConstants.h"
 
-#include "coreUtils/list.h"
 #include "coreUtils/memAlloc.h"
 #include "coreUtils/errorReport.h"
 
@@ -54,9 +53,11 @@ static ppl_context *static_context;
 
 // Flags used to keep track of all of the open GhostView processes
 
-static list *GhostViews;                    // A list of X11_multiwindow and X11_singlewindow sessions which we kill on PyXPlot exit
-static list *GhostView_Persists;            // A list of X11_persist sessions for which we leave our temporary directory until they quit
-static list *HelperPIDs;                    // A list of helper processes forked by the main PyXPlot process
+#define PTABLE_LISTLEN 4096
+
+static int  *GhostViews;                    // A list of X11_multiwindow and X11_singlewindow sessions which we kill on PyXPlot exit
+static int  *GhostView_Persists;            // A list of X11_persist sessions for which we leave our temporary directory until they quit
+static int  *HelperPIDs;                    // A list of helper processes forked by the main PyXPlot process
 static int   GhostView_pid = 0;             // pid of any running gv process launched under X11_singlewindow
 static int   PyXPlotRunning = 1;            // Flag which we drop in the CSP when the main process stops running
 
@@ -64,14 +65,19 @@ static int   PyXPlotRunning = 1;            // Flag which we drop in the CSP whe
 
 void  pplcsp_init(ppl_context *context)
  {
-  int pid, fail;
+  int pid, fail, i;
   struct stat statinfo;
 
   // Create empty lists for storing lists of GhostView processes
-  GhostViews         = ppl_listInit(1);
-  GhostView_Persists = ppl_listInit(1);
-  HelperPIDs         = ppl_listInit(1);
+  GhostViews         = (int *)malloc(PTABLE_LISTLEN*sizeof(int));
+  GhostView_Persists = (int *)malloc(PTABLE_LISTLEN*sizeof(int));
+  HelperPIDs         = (int *)malloc(PTABLE_LISTLEN*sizeof(int));
   static_context     = context;
+
+  if ((GhostViews==NULL)||(GhostView_Persists==NULL)||(HelperPIDs==NULL)) ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Out of memory.");
+  for (i=0; i<PTABLE_LISTLEN; i++) GhostViews        [i]=0;
+  for (i=0; i<PTABLE_LISTLEN; i++) GhostView_Persists[i]=0;
+  for (i=0; i<PTABLE_LISTLEN; i++) HelperPIDs        [i]=0;
 
   // The string "signal 15" we filter out of GhostView's output
   sprintf(SIGTERM_NAME, "signal %d", SIGTERM);
@@ -170,49 +176,54 @@ void pplcsp_sendCommand(ppl_context *context, char *cmd)
 
 void  pplcsp_main(ppl_context *context)
  {
-  struct timespec waitperiod, waitedperiod;
+  int gotPersists=1;
 
-  while ((PyXPlotRunning==1) || (ppl_listLen(GhostView_Persists)>0))
+  while (gotPersists)
    {
+    struct timespec waitperiod, waitedperiod;
     waitperiod.tv_sec  = 0;
-    waitperiod.tv_nsec = 100000000;
+    waitperiod.tv_nsec = PyXPlotRunning ? 100000000 : 1000000000; // After pyxplot has quit, reduce polling rate to once a second. Why not?
     nanosleep(&waitperiod,&waitedperiod); // Wake up every 100ms
     pplcsp_checkForNewCommands(context); // Check for orders from PyXPlot
-    if ((PyXPlotRunning==1) && (getppid()==1)) // We've been orphaned and adopted by init
+    if (PyXPlotRunning && (getppid()==1)) // We've been orphaned and adopted by init
      {
       PyXPlotRunning=0;
       if (DEBUG) ppl_log(&context->errcontext,"CSP has detected that it has been orphaned.");
      }
+    gotPersists=0;
+    if (PyXPlotRunning)   gotPersists=1;
+    else                { int i; for (i=0; i<PTABLE_LISTLEN; i++) if (GhostView_Persists[i]!=0) { gotPersists=1; break; } }
    }
   return;
  }
 
 void pplcsp_checkForChildExits(int signo)
  {
-  listIterator *iter;
-  int          *gv_pid;
+  int           i;
+  char          errtext[FNAME_LENGTH];
   ppl_context  *context = static_context;
 
-  iter = ppl_listIterateInit(GhostViews);
-  while (iter != NULL)
+  for (i=0; i<PTABLE_LISTLEN; i++)
    {
-    gv_pid = (int *)ppl_listIterate(&iter);
-    if (waitpid(*gv_pid,NULL,WNOHANG) != 0)
+    const int gv_pid = GhostViews[i];
+    if (gv_pid==0) continue;
+    if (waitpid(gv_pid,NULL,WNOHANG) != 0)
      {
-      if (DEBUG) { sprintf(context->errcontext.tempErrStr, "A ghostview process with pid %d has terminated.", *gv_pid); ppl_log(&context->errcontext,NULL); }
-      ppl_listRemove(GhostViews, (void *)gv_pid); // Stabat mater dolorosa
-      if (GhostView_pid == *gv_pid) GhostView_pid = 0;
+      if (DEBUG) { sprintf(errtext, "A ghostview process with pid %d has terminated.", gv_pid); ppl_log(&context->errcontext,errtext); }
+      GhostViews[i]=0; // Stabat mater dolorosa
+      if (GhostView_pid == gv_pid) GhostView_pid = 0;
      }
    }
-  iter = ppl_listIterateInit(GhostView_Persists);
-  while (iter != NULL)
+
+  for (i=0; i<PTABLE_LISTLEN; i++)
    {
-    gv_pid = (int *)ppl_listIterate(&iter);
-    if (waitpid(*gv_pid,NULL,WNOHANG) != 0)
+    const int gv_pid = GhostView_Persists[i];
+    if (gv_pid==0) continue;
+    if (waitpid(gv_pid,NULL,WNOHANG) != 0)
      {
-      if (DEBUG) { sprintf(context->errcontext.tempErrStr, "A persistent ghostview process with pid %d has terminated.", *gv_pid); ppl_log(&context->errcontext,NULL); }
-      ppl_listRemove(GhostView_Persists, (void *)gv_pid); // Stabat mater dolorosa
-      if (GhostView_pid == *gv_pid) GhostView_pid = 0;
+      if (DEBUG) { sprintf(errtext, "A persistent ghostview process with pid %d has terminated.", gv_pid); ppl_log(&context->errcontext,errtext); }
+      GhostView_Persists[i]=0; // Stabat mater dolorosa
+      if (GhostView_pid == gv_pid) GhostView_pid = 0;
      }
    }
   return;
@@ -304,7 +315,7 @@ void pplcsp_processCommand(ppl_context *context, char *in)
   return;
  }
 
-int pplcsp_forkNewGv(ppl_context *context, char *fname, list *gv_list)
+int pplcsp_forkNewGv(ppl_context *context, char *fname, int *gv_list)
  {
 
 #define MAX_CMDARGS 64
@@ -349,7 +360,8 @@ int pplcsp_forkNewGv(ppl_context *context, char *fname, list *gv_list)
   else if ( pid        != 0)
    {
     // Parent process (i.e. the CSP)
-    ppl_listAppendCpy(gv_list, (void*)&pid, sizeof(int));
+    int i;
+    for (i=0; i<PTABLE_LISTLEN; i++) if (gv_list[i]==0) { gv_list[i]=pid; break; }
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
     return pid;
    }
@@ -377,15 +389,14 @@ int pplcsp_forkNewGv(ppl_context *context, char *fname, list *gv_list)
 
 void pplcsp_killAllGvs(ppl_context *context)
  {
-  listIterator *iter;
-  int          *gv_pid;
+  int i;
   if (DEBUG) ppl_log(&context->errcontext,"Killing all ghostview processes.");
-  iter = ppl_listIterateInit(GhostViews);
-  while (iter != NULL)
+  for (i=0; i<PTABLE_LISTLEN; i++)
    {
-    gv_pid = (int *)ppl_listIterate(&iter);
-    kill(*gv_pid, SIGTERM); // Dulce et decorum est pro patria mori
-    if (GhostView_pid == *gv_pid) GhostView_pid = 0;
+    const int gv_pid = GhostViews[i];
+    if (gv_pid==0) continue;
+    kill(gv_pid, SIGTERM); // Dulce et decorum est pro patria mori
+    if (GhostView_pid == gv_pid) GhostView_pid = 0;
    }
   return;
  }
@@ -409,19 +420,18 @@ void pplcsp_killLatestSinglewindow(ppl_context *context)
 
 void pplcsp_checkForHelperExits(int signo)
  {
-  listIterator *iter;
-  int          *pid;
-  char          text[256];
+  int           i;
+  char          errtext[256];
   ppl_context  *context = static_context;
 
-  iter = ppl_listIterateInit(HelperPIDs);
-  while (iter != NULL)
+  for (i=0; i<PTABLE_LISTLEN; i++)
    {
-    pid = (int *)ppl_listIterate(&iter);
-    if (waitpid(*pid,NULL,WNOHANG) != 0)
+    const int pid = HelperPIDs[i];
+    if (pid==0) continue;
+    if (waitpid(pid,NULL,WNOHANG) != 0)
      {
-      if (DEBUG) { sprintf(text, "A helper process with pid %d has terminated.", *pid); ppl_log(&context->errcontext,text); }
-      ppl_listRemove(HelperPIDs, (void *)pid); // Stabat mater dolorosa
+      if (DEBUG) { sprintf(errtext, "A helper process with pid %d has terminated.", pid); ppl_log(&context->errcontext,errtext); }
+      HelperPIDs[i]=0; // Stabat mater dolorosa
      }
    }
   return;
@@ -429,18 +439,17 @@ void pplcsp_checkForHelperExits(int signo)
 
 void pplcsp_killAllHelpers(ppl_context *context)
  {
-  listIterator *iter;
-  int          *pid;
+  int      i;
   sigset_t sigs;
 
   sigemptyset(&sigs);
   sigaddset(&sigs,SIGCHLD);
   sigprocmask(SIG_BLOCK, &sigs, NULL);
-  iter = ppl_listIterateInit(HelperPIDs);
-  while (iter != NULL)
+  for (i=0; i<PTABLE_LISTLEN; i++)
    {
-    pid = (int *)ppl_listIterate(&iter);
-    kill(*pid, SIGTERM); // Dulce et decorum est pro patria mori
+    const int pid = HelperPIDs[i];
+    if (pid==0) continue;
+    kill(pid, SIGTERM); // Dulce et decorum est pro patria mori
    }
   sigprocmask(SIG_UNBLOCK, &sigs, NULL);
   return;
@@ -450,7 +459,7 @@ void pplcsp_killAllHelpers(ppl_context *context)
 void pplcsp_forkSed(ppl_context *context, char *cmd, int *fstdin, int *fstdout)
  {
   int fd0[2], fd1[2];
-  int pid;
+  int i,pid;
   sigset_t sigs;
 
   sigemptyset(&sigs);
@@ -466,7 +475,7 @@ void pplcsp_forkSed(ppl_context *context, char *cmd, int *fstdin, int *fstdout)
     // Parent process
     close(fd0[0]); *fstdin  = fd0[1];
     close(fd1[1]); *fstdout = fd1[0];
-    ppl_listAppendCpy(HelperPIDs, (void*)&pid, sizeof(int));
+    for (i=0; i<PTABLE_LISTLEN; i++) if (HelperPIDs[i]==0) { HelperPIDs[i]=pid; break; }
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
     return;
    }
@@ -506,7 +515,7 @@ void pplcsp_forkSed(ppl_context *context, char *cmd, int *fstdin, int *fstdout)
 void pplcsp_forkLaTeX(ppl_context *context, char *filename, int *PidOut, int *fstdin, int *fstdout)
  {
   int fd0[2], fd1[2];
-  int pid;
+  int i,pid;
   sigset_t sigs;
 
   sigemptyset(&sigs);
@@ -523,7 +532,7 @@ void pplcsp_forkLaTeX(ppl_context *context, char *filename, int *PidOut, int *fs
     close(fd0[0]); *fstdin  = fd0[1];
     close(fd1[1]); *fstdout = fd1[0];
     *PidOut = pid;
-    ppl_listAppendCpy(HelperPIDs, (void*)&pid, sizeof(int));
+    for (i=0; i<PTABLE_LISTLEN; i++) if (HelperPIDs[i]==0) { HelperPIDs[i]=pid; break; }
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
     return;
    }
@@ -562,7 +571,7 @@ void pplcsp_forkLaTeX(ppl_context *context, char *filename, int *PidOut, int *fs
 void pplcsp_forkInputFilter(ppl_context *context, char **cmd, int *fstdout)
  {
   int fd0[2];
-  int pid;
+  int i,pid;
   sigset_t sigs;
 
   sigemptyset(&sigs);
@@ -577,7 +586,7 @@ void pplcsp_forkInputFilter(ppl_context *context, char **cmd, int *fstdout)
    {
     // Parent process
     close(fd0[1]); *fstdout = fd0[0];
-    ppl_listAppendCpy(HelperPIDs, (void*)&pid, sizeof(int));
+    for (i=0; i<PTABLE_LISTLEN; i++) if (HelperPIDs[i]==0) { HelperPIDs[i]=pid; break; }
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
     return;
    }
@@ -614,7 +623,7 @@ void pplcsp_forkKpseWhich(ppl_context *context, const char *ftype, int *fstdout)
  {
   char CmdLineOpt[128];
   int fd0[2];
-  int pid;
+  int i,pid;
   sigset_t sigs;
 
   sigemptyset(&sigs);
@@ -629,7 +638,7 @@ void pplcsp_forkKpseWhich(ppl_context *context, const char *ftype, int *fstdout)
    {
     // Parent process
     close(fd0[1]); *fstdout = fd0[0];
-    ppl_listAppendCpy(HelperPIDs, (void*)&pid, sizeof(int));
+    for (i=0; i<PTABLE_LISTLEN; i++) if (HelperPIDs[i]==0) { HelperPIDs[i]=pid; break; }
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
     return;
    }

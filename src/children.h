@@ -22,7 +22,6 @@
 #ifndef _CHILDREN_H
 #define _CHILDREN_H 1
 
-#include "coreUtils/list.h"
 #include "userspace/context.h"
 
 // Functions to be called from main PyXPlot process
@@ -37,7 +36,7 @@ void  pplcsp_main                  (ppl_context *context);
 void  pplcsp_checkForChildExits    (int signo);
 void  pplcsp_checkForNewCommands   (ppl_context *context);
 void  pplcsp_processCommand        (ppl_context *context, char *in);
-int   pplcsp_forkNewGv             (ppl_context *context, char *fname, list *gv_list);
+int   pplcsp_forkNewGv             (ppl_context *context, char *fname, int *gv_list);
 void  pplcsp_killAllGvs            (ppl_context *context);
 void  pplcsp_killLatestSinglewindow(ppl_context *context);
 

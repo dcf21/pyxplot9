@@ -152,7 +152,7 @@ static void ppl_listRemoveEngine(list *in, listItem *ptr)
     ptr->data     = ptrnext->data;
     ptr->prev     = ptrnext->prev;
     if (in->first == ptrnext) in->first = ptr;
-    else ptr->prev->next = ptr;
+    else ptrnext->prev->next = ptr;
     if (in->useMalloc) free(ptrnext);
    }
   else // We are the only item in the list

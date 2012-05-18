@@ -25,8 +25,6 @@
 #ifndef _PYXPLOT_C
 #include <setjmp.h>
 extern sigjmp_buf  ppl_sigjmpToMain;
-extern sigjmp_buf  ppl_sigjmpToInteractive;
-extern sigjmp_buf  ppl_sigjmpToDirective;
 extern sigjmp_buf *ppl_sigjmpFromSigInt;
 #endif
 void               ppl_sigIntHandle(int signo);

@@ -467,7 +467,7 @@ void ppldata_RotateRawData(ppl_context *c, rawDataTable **in, dataTable *out, pp
   for (i=0; i<MAX_DATACOLS; i++) hadspace[i] = 1;
   for (i=0; i<MAX_DATACOLS; i++) hadcomma[i] = 0;
 
-  while (1)
+  while (!cancellationFlag)
    {
     int           gotData=0, Ncols=0;
     rawDataBlock *blk = (*in)->first;
@@ -726,6 +726,7 @@ void ppldata_fromFile(ppl_context *c, dataTable **out, char *filename, int wildc
   // Read input file, line by line
   while (readFromCommandLine || ( (!ferror(filtered_input)) && (!feof(filtered_input)) ))
    {
+    if (cancellationFlag) break;
     if (!readFromCommandLine) ppl_file_readline(filtered_input, linebuffer, LSTR_LENGTH);
     else                      lineptr = ppldata_fetchFromSpool(&dataSpool);
 
@@ -984,7 +985,7 @@ void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fn
     autoUsingExprs=1;
     if ((*status=ppldata_autoUsingList(c, usingExprs, Ncols=fnlist_len+(!parametric)+((!parametric)&&sampleGrid), errtext))) return;
    }
-  for (a=0; a<USING_ITEMS_MAX+2; a++) colData[a].refCount=1;
+  for (a=0; a<USING_ITEMS_MAX+2; a++) { colData[a].refCount=1; colData[a].objType=PPLOBJ_ZOM; }
 
   // If sortBy is not null, add it to using list
   if (sortBy != NULL) 
@@ -1021,6 +1022,7 @@ void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fn
    long p=0;
    for (i2=0; i2<i2len; i2++,discontinuity2=1) for (i=0; i<ilen; i++, p++)
    {
+    if (cancellationFlag) goto CANCEL;
     ordinateVar[0]->real = rasterX[i];
     if (sampleGrid) ordinateVar[1]->real = rasterY[i2];
     if (sampleGrid) sprintf(buffer, "%c=%s; %c=%s", (parametric?'u':'x'), ppl_unitsNumericDisplay(c,ordinateVar[0],0,0,0), (parametric?'v':'y'), ppl_unitsNumericDisplay(c,ordinateVar[1],1,0,0));
@@ -1073,6 +1075,7 @@ void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fn
    }
   }
 
+CANCEL:
   // Reset the variable x (and maybe y or t) to its old value
                             ppl_contextRestoreVarPointer(c, parametric?(sampleGrid?"u":"t"):"x", &dummyTemp[0]);
   if (ordinateVar[1]!=NULL) ppl_contextRestoreVarPointer(c, parametric?(           "v"    ):"y", &dummyTemp[1]);
@@ -1124,6 +1127,7 @@ void ppldata_fromVectors(ppl_context *c, dataTable **out, pplObj *objList, int o
   for (i=0; i<vlen; i++)
    {
     char *buffer="vector data";
+    if (cancellationFlag) break;
     pplObjNum(colData+0,0,i,0);
     for (j=0; j<objListLen; j++) colData[j+1].real = gsl_vector_get(v[j],i);
     ppldata_ApplyUsingList(c, *out, usingExprs, labelExpr, selectExpr, continuity, &discontinuity, NULL, colData, objListLen+1, buffer, 0, NULL, i, 0, 0, DATAFILE_COL, NULL, 0, NULL, 0, status, errtext, errCount, iterDepth);

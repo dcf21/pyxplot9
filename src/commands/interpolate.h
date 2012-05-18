@@ -27,7 +27,18 @@
 #include "userspace/pplObj.h"
 #include "userspace/pplObjFunc.h"
 
-void ppl_directive_interpolate(ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
+#define INTERP_AKIMA    23001
+#define INTERP_LINEAR   23002
+#define INTERP_LOGLIN   23003
+#define INTERP_POLYN    23004
+#define INTERP_SPLINE   23005
+#define INTERP_STEPWISE 23006
+#define INTERP_2D       23007
+#define INTERP_BMPR     23008
+#define INTERP_BMPG     23009
+#define INTERP_BMPB     23010
+
+void ppl_directive_interpolate(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth, int mode);
 void ppl_spline_evaluate      (ppl_context *c, char *FuncName, splineDescriptor *desc, pplObj *in, pplObj *out, int *status, char *errout);
 void ppl_interp2d_evaluate    (ppl_context *c, const char *FuncName, splineDescriptor *desc, const pplObj *in1, const pplObj *in2, const unsigned char bmp, pplObj *out, int *status, char *errout);
 

@@ -66,8 +66,6 @@
 // SIGINT Handling information
 
 sigjmp_buf ppl_sigjmpToMain;
-sigjmp_buf ppl_sigjmpToInteractive;
-sigjmp_buf ppl_sigjmpToDirective;
 sigjmp_buf *ppl_sigjmpFromSigInt = NULL;
 
 int main(int argc, char **argv)

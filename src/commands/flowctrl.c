@@ -172,7 +172,7 @@ void ppl_directive_do(ppl_context *c, parserLine *pl, parserOutput *in, int inte
     criterion = (val->real != 0);
     while (c->stackPtr>stkLevelOld) { STACK_POP; }
    }
-  while (criterion);
+  while (criterion && !cancellationFlag);
 
 cleanup:
   if ((c->shellBroken)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellBroken=0; c->shellBreakLevel=0; }
@@ -224,7 +224,7 @@ void ppl_directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if (!ppl_unitsDimEqual(beginVal , stepVal)) { sprintf(c->errStat.errBuff,"The start value and step size of this for loop are dimensionally incompatible: the start value has dimensions of <%s> but the step size has dimensions of <%s>.",ppl_printUnit(c,beginVal,NULL,NULL,0,1,0),ppl_printUnit(c,stepVal,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERIC,in->stkCharPos[PARSE_for_start_value]); goto cleanup; }
     if ( (stepVal->real==0) || ((stepVal->real > 0) != forwards) ) { strcpy(c->errStat.errBuff,"The number of iterations in this for loop is infinite."); TBADD2(ERR_NUMERIC,in->stkCharPos[PARSE_for_start_value]); goto cleanup; }
 
-    for (iter=beginVal->real; (forwards ? (iter<=endVal->real) : (iter>=endVal->real)); iter+=stepVal->real)
+    for (iter=beginVal->real; (forwards ? (iter<=endVal->real) : (iter>=endVal->real)) && !cancellationFlag ; iter+=stepVal->real)
      {
       pplObj *varObj, vartmp;
       ppl_contextGetVarPointer(c, varname, &varObj, &vartmp);
@@ -258,7 +258,7 @@ void ppl_directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int int
         CAST_TO_BOOL(val);
         criterion = (val->real != 0);
         while (c->stackPtr>stkLevelOld) { STACK_POP; }
-        if (!criterion) break;
+        if (!criterion || cancellationFlag) break;
        }
       ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
       if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"for loop"); goto cleanup; }
@@ -297,7 +297,7 @@ void ppl_directive_foreach(ppl_context *c, parserLine *pl, parserOutput *in, int
   else       c->shellLoopName[iterDepth] = NULL;
   c->shellBreakable = 1;
 
-#define FOREACH_STOP ( c->errStat.status || c->shellBroken || c->shellContinued || c->shellReturned || c->shellExiting )
+#define FOREACH_STOP ( c->errStat.status || c->shellBroken || c->shellContinued || c->shellReturned || c->shellExiting || cancellationFlag )
 
   if (iter->objType == PPLOBJ_STR) // Iterate over string: treat this as a filename to glob
    {
@@ -328,7 +328,7 @@ void ppl_directive_foreach(ppl_context *c, parserLine *pl, parserOutput *in, int
     gsl_vector *vin = ((pplVector *)iter->auxil)->v;
     const int   vinl = vin->size;
     int         i;
-    for (i=0; i<vinl; i++)
+    for (i=0; i<vinl && !cancellationFlag ; i++)
      {
       pplObj *varObj, vartmp;
       ppl_contextGetVarPointer(c, varname, &varObj, &vartmp);
@@ -347,7 +347,7 @@ void ppl_directive_foreach(ppl_context *c, parserLine *pl, parserOutput *in, int
     list         *lin = (list *)iter->auxil;
     listIterator *li  = ppl_listIterateInit(lin);
     pplObj       *obj;
-    while ((obj=(pplObj*)ppl_listIterate(&li))!=NULL)
+    while (((obj=(pplObj*)ppl_listIterate(&li))!=NULL) && !cancellationFlag)
      {
       pplObj *varObj, vartmp;
       ppl_contextGetVarPointer(c, varname, &varObj, &vartmp);
@@ -457,7 +457,7 @@ void ppl_directive_fordata(ppl_context *c, parserLine *pl, parserOutput *in, int
 
   // Fetch data
   ppldata_fromCmd(c, &data, pl, in, 0, NULL, PARSE_TABLE_foreachdatum_, 0, Nvars, Nvars, min, minSet, max, maxSet, unit, 0, &status, c->errcontext.tempErrStr, &errCount, iterDepth);
-  if (status) { ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); goto cleanup; }
+  if (status || cancellationFlag) { ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); goto cleanup; }
 
   // Fetch variable pointers
   for (i=0; i<Nvars; i++) ppl_contextGetVarPointer(c, varname[i], &varObj[i], &vartmp[i]);
@@ -698,7 +698,7 @@ void ppl_directive_while(ppl_context *c, parserLine *pl, parserOutput *in, int i
   else       c->shellLoopName[iterDepth] = NULL;
   c->shellBreakable = 1;
 
-  while (1)
+  while (!cancellationFlag)
    {
     int lastOpAssign, dollarAllowed=1;
     pplObj *val;

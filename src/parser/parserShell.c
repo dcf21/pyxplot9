@@ -81,6 +81,7 @@
 
 void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
+  int contextNew;
   pplObj *stk = in->stk;
   char *d = (char *)stk[PARSE_arc_directive].auxil;
 
@@ -100,11 +101,16 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
   // If directive is not a string, something has gone wrong
   if (stk[PARSE_arc_directive].objType != PPLOBJ_STR) { ppl_error(&c->errcontext, ERR_INTERNAL, -1, -1, "directive type not a string"); return; }
 
+  // Descend into a new memory context
+  contextNew = ppl_memAlloc_DescendIntoNewContext();
+
   // Directive is a string
   if      (strcmp(d, "var_set")==0)
     ppl_directive_varset(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "func_set")==0)
     ppl_directive_funcset(c,pl,in,interactive);
+  else if (strcmp(d, "akima")==0)
+    ppl_directive_interpolate(c,pl,in,interactive,iterDepth,INTERP_AKIMA);
   else if ((strcmp(d, "arrow")==0)||(strcmp(d,"line")==0))
     ppl_directive_arrow(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "assert")==0)
@@ -151,22 +157,40 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     ppl_directive_if(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "image")==0)
     ppl_directive_image(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "interpolate2d")==0)
+   {
+    int type = INTERP_2D;
+    char *tempstr = (char *)stk[PARSE_interpolate2d_bmp].auxil;
+    if (stk[PARSE_interpolate2d_bmp].objType==PPLOBJ_STR)
+     switch (tempstr[4])
+      {
+       case 'r': type = INTERP_BMPR; break;
+       case 'g': type = INTERP_BMPG; break;
+       case 'b': type = INTERP_BMPB; break;
+      }
+    ppl_directive_interpolate(c,pl,in,interactive,iterDepth,type);
+   }
+  else if (strcmp(d, "linear")==0)
+    ppl_directive_interpolate(c,pl,in,interactive,iterDepth,INTERP_LINEAR);
   else if (strcmp(d, "list")==0)
     ppl_directive_list(c,pl,in,interactive);
   else if (strcmp(d, "load")==0)
     ppl_directive_load(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "local")==0)
     ppl_directive_local(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "loglinear")==0)
+    ppl_directive_interpolate(c,pl,in,interactive,iterDepth,INTERP_LOGLIN);
   else if (strcmp(d, "maximise")==0)
     ppl_directive_maximise(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "minimise")==0)
     ppl_directive_minimise(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "move")==0)
     ppl_directive_move(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "polynomial")==0)
+    ppl_directive_interpolate(c,pl,in,interactive,iterDepth,INTERP_POLYN);
   else if (strcmp(d, "pling")==0)
    {
     if (system((char *)stk[PARSE_pling_cmd].auxil)) { if (DEBUG) ppl_log(&c->errcontext, "Pling command received non-zero return value."); }
-    return;
    }
   else if (strcmp(d, "point")==0)
     ppl_directive_point(c,pl,in,interactive,iterDepth);
@@ -221,6 +245,10 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     ppl_directive_show(c,pl,in,interactive);
   else if (strcmp(d, "solve")==0)
     ppl_directive_solve(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "spline")==0)
+    ppl_directive_interpolate(c,pl,in,interactive,iterDepth,INTERP_SPLINE);
+  else if (strcmp(d, "stepwise")==0)
+    ppl_directive_interpolate(c,pl,in,interactive,iterDepth,INTERP_STEPWISE);
   else if (strcmp(d, "set")==0)
     ppl_directive_set(c,pl,in,interactive);
   else if (strcmp(d, "set_error")==0)
@@ -248,6 +276,9 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     snprintf(c->errStat.errBuff, LSTR_LENGTH, "Unimplemented command: %s", d);
     TBADD(ERR_INTERNAL,0);
    }
+
+  // Ascend out of memory context
+  ppl_memAlloc_AscendOutOfContext(contextNew);
 
   return;
  }
