@@ -139,6 +139,8 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     ppl_directive_eps(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "exec")==0)
     ppl_directive_exec(c,pl,in,interactive,iterDepth);
+  else if ( (strcmp(d, "fft")==0) || (strcmp(d, "ifft")==0) )
+    ppl_directive_fft(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "fit")==0)
     ppl_directive_fit(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "for")==0)
@@ -151,6 +153,8 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     ppl_directive_global(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "help")==0)
     ppl_directive_help(c,pl,in,interactive);
+  else if (strcmp(d, "histogram")==0)
+    ppl_directive_histogram(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "history")==0)
     ppl_directive_history(c,pl,in);
   else if (strcmp(d, "if")==0)

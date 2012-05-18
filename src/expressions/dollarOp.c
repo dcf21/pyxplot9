@@ -133,7 +133,7 @@ void ppl_dollarOp_fetchColByNum(ppl_context *c, pplExpr *inExpr, int inExprCharP
    {
     char *s = c->dollarStat.columns_str[colNum-1];
     int j=-1;
-    if ( (!ppl_validFloat(s,&j)) || (j<=1) || ((s[j]!='\0')&&(s[j]!=',')&&(s[j-1]>' ')) )
+    if ( (!ppl_validFloat(s,&j)) || (j<1) || ((s[j]!='\0')&&(s[j]!=',')&&(s[j-1]>' ')) )
      {
       const long ln = (c->dollarStat.file_linenumbers==NULL) ? c->dollarStat.file_linenumber : c->dollarStat.file_linenumbers[colNum-1];
       sprintf(c->dollarStat.warntxt,"%s:%ld: In the expression <%s>, the requested %s number %d does not contain numeric data.",

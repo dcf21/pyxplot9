@@ -27,7 +27,7 @@
 #include "userspace/pplObj.h"
 #include "userspace/pplObjFunc.h"
 
-void ppl_directive_histogram(ppl_context *c, parserLine *pl, parserOutput *in, int interactive);
+void ppl_directive_histogram(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 void ppl_histogram_evaluate (ppl_context *c, char *FuncName, histogramDescriptor *desc, pplObj *in, pplObj *out, int *status, char *errout);
 
 #endif

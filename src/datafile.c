@@ -985,7 +985,7 @@ void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fn
     autoUsingExprs=1;
     if ((*status=ppldata_autoUsingList(c, usingExprs, Ncols=fnlist_len+(!parametric)+((!parametric)&&sampleGrid), errtext))) return;
    }
-  for (a=0; a<USING_ITEMS_MAX+2; a++) { colData[a].refCount=1; colData[a].objType=PPLOBJ_ZOM; }
+  for (a=0; a<USING_ITEMS_MAX+2; a++) { colData[a].refCount=1; colData[a].objType=PPLOBJ_ZOM; colData[a].amMalloced=0; }
 
   // If sortBy is not null, add it to using list
   if (sortBy != NULL) 
