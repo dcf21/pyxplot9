@@ -60,6 +60,7 @@ typedef struct canvas_plotdesc {
  int                     NFunctions, axis1xyz, axis2xyz, axis3xyz, axis1, axis2, axis3, EveryList[6], index, continuity, UsingRowCols, NUsing;
  withWords               ww;
  char                   *filename, *title;
+ pplObj                 *vectors;
  pplExpr               **functions, *label, *SelectCriterion, **UsingList;
  pplObj                  Tmin, Tmax, Vmin, Vmax;
  struct canvas_plotdesc *next;
@@ -133,7 +134,7 @@ int ppl_directive_point   (ppl_context *c, parserLine *pl, parserOutput *in, int
 int ppl_directive_polygon (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 int ppl_directive_text    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
 int ppl_directive_image   (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
-int ppl_directive_plot    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth);
+int ppl_directive_plot    (ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth, int replot);
 
 #endif
 

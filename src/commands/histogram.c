@@ -127,7 +127,7 @@ void ppl_directive_histogram(ppl_context *c, parserLine *pl, parserOutput *in, i
    {
     const int NcolRequired=1;
     int status=0, j;
-    ppldata_fromCmd(c, &data, pl, in, 0, filenameOut, PARSE_TABLE_histogram_, 0, NcolRequired, 0, min, minSet, max, maxSet, unit, 0, &status, c->errcontext.tempErrStr, &errCount, iterDepth);
+    ppldata_fromCmd(c, &data, pl, in, 0, filenameOut, PARSE_TABLE_histogram_, 0, NcolRequired, 0, min, minSet, max, maxSet, unit, 0, &status, c->errStat.errBuff, &errCount, iterDepth);
 
     // Exit on error
     if ((status)||(data==NULL))
@@ -221,6 +221,7 @@ void ppl_directive_histogram(ppl_context *c, parserLine *pl, parserOutput *in, i
     output->bins  = (double *)malloc(binListLen*sizeof(double));
     if (output->bins == NULL) { sprintf(c->errStat.errBuff, "Out of memory."); TBADD2(ERR_MEMORY,0); free(output); free(output->filename); return; }
     j=0;
+    pos=PARSE_histogram_bin_list;
     while (stk[pos].objType == PPLOBJ_NUM)
      {
       pplObj *val;

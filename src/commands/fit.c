@@ -484,7 +484,7 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
   contextDataTab = ppl_memAlloc_DescendIntoNewContext();
 
   // Read data from file
-  ppldata_fromCmd(c, &data, pl, in, 0, NULL, PARSE_TABLE_fit_, 0, NExpect, 0, min, minSet, max, maxSet, unit, 0, &status, c->errcontext.tempErrStr, &errCount, iterDepth);
+  ppldata_fromCmd(c, &data, pl, in, 0, NULL, PARSE_TABLE_fit_, 0, NExpect, 0, min, minSet, max, maxSet, unit, 0, &status, c->errStat.errBuff, &errCount, iterDepth);
 
   // Exit on error
   if ((status)||(data==NULL))

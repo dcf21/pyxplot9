@@ -172,7 +172,7 @@ void ppl_directive_interpolate(ppl_context *c, parserLine *pl, parserOutput *in,
   if (bmp<0)
    {
     int status=0;
-    ppldata_fromCmd(c, &data, pl, in, 0, filenameOut, PARSE_TABLE_interpolate2d_, 0, NcolRequired, 0, min, minSet, max, maxSet, unit, 0, &status, c->errcontext.tempErrStr, &errCount, iterDepth);
+    ppldata_fromCmd(c, &data, pl, in, 0, filenameOut, PARSE_TABLE_interpolate2d_, 0, NcolRequired, 0, min, minSet, max, maxSet, unit, 0, &status, c->errStat.errBuff, &errCount, iterDepth);
 
     // Exit on error
     if ((status)||(data==NULL))

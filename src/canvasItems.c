@@ -44,7 +44,9 @@
 #include "parser/cmdList.h"
 #include "parser/parser.h"
 #include "userspace/context.h"
+#include "userspace/garbageCollector.h"
 #include "userspace/pplObj.h"
+#include "userspace/pplObjPrint.h"
 
 #define TBADD(et,msg,pos) { strcpy(c->errStat.errBuff, msg); ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,pos,pl->linetxt,""); }
 
@@ -83,8 +85,9 @@ static void canvas_item_delete(ppl_context *c, canvas_item *ptr)
   while (pd != NULL)
    {
     pd2 = pd->next;
-    for (i=0; i<pd->NFunctions; i++) pplExpr_free(pd->functions[i]);
-    for (i=0; i<pd->NUsing    ; i++) pplExpr_free(pd->UsingList[i]);
+    if (pd->functions       != NULL) for (i=0; i<pd->NFunctions; i++) pplExpr_free     ( pd->functions[i]);
+    if (pd->UsingList       != NULL) for (i=0; i<pd->NUsing    ; i++) pplExpr_free     ( pd->UsingList[i]);
+    if (pd->vectors         != NULL) for (i=0; i<pd->NFunctions; i++) ppl_garbageObject(&pd->vectors  [i]);
     if (pd->filename        != NULL) free(pd->filename);
     if (pd->functions       != NULL) free(pd->functions);
     if (pd->label           != NULL) pplExpr_free(pd->label);
@@ -386,7 +389,22 @@ char *ppl_canvas_item_textify(ppl_context *c, canvas_item *ptr, char *output)
     pd = ptr->plotitems;
     if (pd!=NULL)
      {
-      if (!pd->function) { output[i++]=' '; ppl_strEscapify(pd->filename, output+i); i+=strlen(output+i); } // Filename of datafile we are plotting
+      if (!pd->function)
+       {
+        if (pd->filename != NULL)
+         {
+          output[i++]=' '; ppl_strEscapify(pd->filename, output+i); i+=strlen(output+i); // Filename of datafile we are plotting
+         }
+        else if (pd->vectors != NULL)
+         {
+          for (j=0; j<pd->NFunctions; j++) // Print out the list of functions which we are plotting
+           {
+            output[i++]=(j!=0)?':':' ';
+            pplObjPrint(c,&pd->vectors[j],NULL,output+i,ppl_min(250,LSTR_LENGTH-i),0,0);
+            i+=strlen(output+i);
+           }
+         }
+       }
       else
        for (j=0; j<pd->NFunctions; j++) // Print out the list of functions which we are plotting
         {
@@ -455,7 +473,22 @@ char *ppl_canvas_item_textify(ppl_context *c, canvas_item *ptr, char *output)
       if (pd->parametric) { sprintf(output+i, " parametric"); i+=strlen(output+i); }
       if (pd->TRangeSet)  { sprintf(output+i, " [%s:%s]", ppl_unitsNumericDisplay(c,&pd->Tmin,0,0,0), ppl_unitsNumericDisplay(c,&pd->Tmax,1,0,0)); i+=strlen(output+i); }
       if (pd->VRangeSet)  { sprintf(output+i, " [%s:%s]", ppl_unitsNumericDisplay(c,&pd->Vmin,0,0,0), ppl_unitsNumericDisplay(c,&pd->Vmax,1,0,0)); i+=strlen(output+i); }
-      if (!pd->function) { output[i++]=' '; ppl_strEscapify(pd->filename, output+i); i+=strlen(output+i); } // Filename of datafile we are plotting
+      if (!pd->function)
+       { 
+        if (pd->filename != NULL)
+         {
+          output[i++]=' '; ppl_strEscapify(pd->filename, output+i); i+=strlen(output+i); // Filename of datafile we are plotting
+         }
+        else if (pd->vectors != NULL)
+         {
+          for (j=0; j<pd->NFunctions; j++) // Print out the list of functions which we are plotting
+           {
+            output[i++]=(j!=0)?':':' ';
+            pplObjPrint(c,&pd->vectors[j],NULL,output+i,ppl_min(250,LSTR_LENGTH-i),0,0);
+            i+=strlen(output+i);
+           }
+         }
+       }
       else
        for (j=0; j<pd->NFunctions; j++) // Print out the list of functions which we are plotting
         {
@@ -607,7 +640,7 @@ int ppl_directive_delete(ppl_context *c, parserLine *pl, parserOutput *in, int i
    }
 
   // Redisplay the canvas as required
-  if (c->set->term_current.display == SW_ONOFF_ON)
+  if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
@@ -639,7 +672,7 @@ int ppl_directive_undelete(ppl_context *c, parserLine *pl, parserOutput *in, int
    }
 
   // Redisplay the canvas as required
-  if (c->set->term_current.display == SW_ONOFF_ON)
+  if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
@@ -709,7 +742,7 @@ int ppl_directive_move(ppl_context *c, parserLine *pl, parserOutput *in, int int
    }
 
   // Redisplay the canvas as required
-  if (c->set->term_current.display == SW_ONOFF_ON)
+  if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
@@ -752,7 +785,7 @@ int ppl_directive_swap(ppl_context *c, parserLine *pl, parserOutput *in, int int
   (*ptr2)->next = temp;
 
   // Redisplay the canvas as required
-  if (c->set->term_current.display == SW_ONOFF_ON)
+  if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
@@ -792,7 +825,7 @@ int ppl_directive_arrow(ppl_context *c, parserLine *pl, parserOutput *in, int in
   else            ptr->ArrowType = (strcmp(tempstr2,"arrow")==0) ? SW_ARROWTYPE_HEAD : SW_ARROWTYPE_NOHEAD;
 
   // Redisplay the canvas as required
-  if (c->set->term_current.display == SW_ONOFF_ON)
+  if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
@@ -844,7 +877,7 @@ int ppl_directive_box(ppl_context *c, parserLine *pl, parserOutput *in, int inte
   ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_box_, &ptr->with_data);
 
   // Redisplay the canvas as required
-  if (c->set->term_current.display == SW_ONOFF_ON)
+  if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
@@ -883,7 +916,7 @@ int ppl_directive_circle(ppl_context *c, parserLine *pl, parserOutput *in, int i
   ppl_withWordsFromDict(c, in, pl, amArc?PARSE_TABLE_arc_:PARSE_TABLE_circle_, &ptr->with_data);
 
   // Redisplay the canvas as required
-  if (c->set->term_current.display == SW_ONOFF_ON)
+  if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
@@ -1070,7 +1103,7 @@ int ppl_directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int 
   ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_ellipse_, &ptr->with_data);
 
   // Redisplay the canvas as required
-  if (c->set->term_current.display == SW_ONOFF_ON)
+  if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
@@ -1115,7 +1148,7 @@ int ppl_directive_eps(ppl_context *c, parserLine *pl, parserOutput *in, int inte
   ptr->calcbbox = calcbbox;
 
   // Redisplay the canvas as required
-  if (c->set->term_current.display == SW_ONOFF_ON)
+  if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
@@ -1156,7 +1189,7 @@ int ppl_directive_point(ppl_context *c, parserLine *pl, parserOutput *in, int in
   else { ptr->text = NULL; }
 
   // Redisplay the canvas as required
-  if (c->set->term_current.display == SW_ONOFF_ON)
+  if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
@@ -1244,7 +1277,7 @@ fail:
   ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_polygon_, &ptr->with_data);
 
   // Redisplay the canvas as required
-  if (c->set->term_current.display == SW_ONOFF_ON)
+  if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
@@ -1292,7 +1325,7 @@ int ppl_directive_text(ppl_context *c, parserLine *pl, parserOutput *in, int int
   ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_text_, &ptr->with_data);
 
   // Redisplay the canvas as required
-  if (c->set->term_current.display == SW_ONOFF_ON)
+  if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
@@ -1345,7 +1378,47 @@ int ppl_directive_image(ppl_context *c, parserLine *pl, parserOutput *in, int in
   else           { ptr->CustomTransparency = 0; }
 
   // Redisplay the canvas as required
-  if (c->set->term_current.display == SW_ONOFF_ON)
+  if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
+   {
+    unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
+    ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "EPS image has been removed from multiplot, because it generated an error."); return 1; }
+   }
+  return 0;
+ }
+
+// Implementation of the piechart command
+int ppl_directive_piechart(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
+ {
+  pplObj       *stk = in->stk;
+  canvas_item  *ptr;
+  int           id;
+
+  // Add this box to the linked list which decribes the canvas
+  if (canvas_itemlist_add(c,stk,CANVAS_PIE,&ptr,&id,0)) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); return 1; }
+
+  // Redisplay the canvas as required
+  if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
+   {
+    unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
+    ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "EPS image has been removed from multiplot, because it generated an error."); return 1; }
+   }
+  return 0;
+ }
+
+// Implementation of the plot command
+int ppl_directive_plot(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth, int replot)
+ {
+  pplObj       *stk = in->stk;
+  canvas_item  *ptr;
+  int           id;
+
+  // Add this box to the linked list which decribes the canvas
+  if (canvas_itemlist_add(c,stk,CANVAS_PLOT,&ptr,&id,0)) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); return 1; }
+
+  // Redisplay the canvas as required
+  if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);

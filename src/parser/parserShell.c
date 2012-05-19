@@ -190,16 +190,20 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     ppl_directive_minimise(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "move")==0)
     ppl_directive_move(c,pl,in,interactive,iterDepth);
-  else if (strcmp(d, "polynomial")==0)
-    ppl_directive_interpolate(c,pl,in,interactive,iterDepth,INTERP_POLYN);
+  else if (strcmp(d, "piechart")==0)
+    ppl_directive_piechart(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "pling")==0)
    {
     if (system((char *)stk[PARSE_pling_cmd].auxil)) { if (DEBUG) ppl_log(&c->errcontext, "Pling command received non-zero return value."); }
    }
+  else if (strcmp(d, "plot")==0)
+    ppl_directive_plot(c,pl,in,interactive,iterDepth,0);
   else if (strcmp(d, "point")==0)
     ppl_directive_point(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "polygon")==0)
     ppl_directive_polygon(c,pl,in,interactive,iterDepth);
+  else if (strcmp(d, "polynomial")==0)
+    ppl_directive_interpolate(c,pl,in,interactive,iterDepth,INTERP_POLYN);
   else if (strcmp(d, "print")==0)
     ppl_directive_print(c,pl,in);
   else if (strcmp(d, "pwd")==0)
@@ -214,6 +218,8 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
       ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
      }
    }
+  else if (strcmp(d, "replot")==0)
+    ppl_directive_plot(c,pl,in,interactive,iterDepth,1);
   else if (strcmp(d, "reset")==0)
    {
     int i;

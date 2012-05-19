@@ -218,7 +218,7 @@ void ppl_directive_fft(ppl_context *c, parserLine *pl, parserOutput *in, int int
    {
     const int NcolRequired=Ndims+2;
     int status=0, j;
-    ppldata_fromCmd(c, &data, pl, in, 0, filenameOut, PARSE_TABLE_ifft_, 0, NcolRequired, 0, min, minSet, max, maxSet, unit, 0, &status, c->errcontext.tempErrStr, &errCount, iterDepth);
+    ppldata_fromCmd(c, &data, pl, in, 0, filenameOut, PARSE_TABLE_ifft_, 0, NcolRequired, 0, min, minSet, max, maxSet, unit, 0, &status, c->errStat.errBuff, &errCount, iterDepth);
 
     // Exit on error
     if ((status)||(data==NULL))

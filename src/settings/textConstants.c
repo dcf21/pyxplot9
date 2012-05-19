@@ -61,10 +61,8 @@ A brief introduction to PyXPlot can be obtained by typing 'man pyxplot'; the\n\
 full Users' Guide can be found in the file:\n\
 %s%spyxplot.pdf\n\
 \n\
-For the latest information on PyXPlot development, see the project website:\n\
-<http://www.pyxplot.org.uk>\n\
-\n\
-Please report bugs to <coders@pyxplot.org.uk>\n", ppltxt_version, ppl_strUnderline(ppltxt_version, ppltxt_version_underline), DOCDIR, PATHLINK);
+Extensive documentation is also available at <http://www.pyxplot.org.uk>, which\n\
+also provides contact information for bug reports.\n", ppltxt_version, ppl_strUnderline(ppltxt_version, ppltxt_version_underline), DOCDIR, PATHLINK);
 
 sprintf(ppltxt_welcome, "\n\
  ____       __  ______  _       _      PYXPLOT\n\
@@ -78,8 +76,7 @@ THIS DEVELOPMENT VERSION OF PYXPLOT IS FEATURE INCOMPLETE, HIGHLY UNSTABLE, AND\
 LARGELY UNDOCUMENTED. IF DIDN'T ALREADY KNOW THAT, YOU SHOULD PROBABLY BE USING\n\
 PYXPLOT 0.8.X.\n\
 \n\
-Send comments, bug reports, feature requests and coffee supplies to:\n\
-<coders@pyxplot.org.uk>\n\
+For documentation and more information, see <http://www.pyxplot.org.uk>.\n\
 ", VERSION, DATE);
 
 sprintf(ppltxt_invalid, "\n\
