@@ -567,6 +567,8 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
   dataComm.sigmaData    = 1.0;
   dataComm.scratchPad   = (char *)ppl_memAlloc_incontext(LSTR_LENGTH, contextLocalVec);
   dataComm.errtext      = (char *)ppl_memAlloc_incontext(LSTR_LENGTH, contextLocalVec); // functionName was already set above
+  if ((dataComm.scratchPad==NULL)||(dataComm.errtext==NULL)) { sprintf(c->errStat.errBuff, "Out of memory."); TBADD2(ERR_MEMORY,0); return; }
+  dataComm.errtext[0]   = '\0';
 
   // Set up a minimiser
   status = FitMinimiseIterate(&dataComm, &ResidualMinimiserSlave, 0);

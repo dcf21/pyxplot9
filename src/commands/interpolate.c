@@ -432,6 +432,7 @@ void ppl_directive_interpolate(ppl_context *c, parserLine *pl, parserOutput *in,
   funcPtr->maxArgs         = NcolRequired-1;
   funcPtr->notNan          = 1;
   funcPtr->realOnly        = 1;
+  funcPtr->numOnly         = 1;
   funcPtr->dimlessOnly     = 0;
   funcPtr->functionPtr     = (void *)desc;
   funcPtr->argList         = NULL;

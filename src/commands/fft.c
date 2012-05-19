@@ -437,6 +437,7 @@ void ppl_directive_fft(ppl_context *c, parserLine *pl, parserOutput *in, int int
   funcPtr->minArgs         = Ndims;
   funcPtr->maxArgs         = Ndims;
   funcPtr->notNan          = 1;
+  funcPtr->numOnly         = 1;
   funcPtr->realOnly        = 0;
   funcPtr->dimlessOnly     = 0;
   funcPtr->functionPtr     = (void *)output;
