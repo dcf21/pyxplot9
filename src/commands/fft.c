@@ -315,6 +315,7 @@ void ppl_directive_fft(ppl_context *c, parserLine *pl, parserOutput *in, int int
       if (pos<=0) break;
       if (fnlen!=0) scratchpad[fnlen++]='.';
       sprintf(scratchpad+fnlen,"%s",(char *)stk[pos+PARSE_ifft_fnname_fnnames].auxil);
+      fnlen+=strlen(scratchpad+fnlen);
      }
     scratchpad[fnlen++]='(';
 

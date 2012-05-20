@@ -1254,9 +1254,9 @@ char *ppl_parseAutocomplete(const char *dummy, int status)
       int         match=0, linepos=0;
       parserNode *item;
 
-      if (cmdIter == NULL) // Once we've finished cycling through commands that start with punctuation, cycle through ones that start with first letter
+      if (cmdIter == NULL) // Once we've finished cycling through each list, move onto the next one
        {
-        if (cln==26) break;
+        if (cln==27) break;
         cmdIter = ppl_listIterateInit(pplParserCmdList[cln++]);
         if (cmdIter==NULL) continue;
        }
