@@ -85,6 +85,7 @@ void ppl_directive_interpolate(ppl_context *c, parserLine *pl, parserOutput *in,
   int            NxRequired, NcolRequired, bmp=-1;
   char          *splineTypeName;
   char           filenameOut[FNAME_LENGTH]="";
+  parserLine    *spool=NULL, **dataSpool = &spool;
   pplObj         unit  [USING_ITEMS_MAX];
   int            minSet[USING_ITEMS_MAX], maxSet[USING_ITEMS_MAX];
   double         min   [USING_ITEMS_MAX], max   [USING_ITEMS_MAX];
@@ -120,13 +121,13 @@ void ppl_directive_interpolate(ppl_context *c, parserLine *pl, parserOutput *in,
       {
        if ((minSet[nr])&&(unit[nr].objType!=stk[pos+o2].objType))
         {
-         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d have conflicting types of <%s> and <%s>.", i+1, pplObjTypeNames[unit[nr].objType], pplObjTypeNames[stk[pos+o2].objType]);
+         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d have conflicting types of <%s> and <%s>.", nr+1, pplObjTypeNames[unit[nr].objType], pplObjTypeNames[stk[pos+o2].objType]);
          TBADD2(ERR_TYPE,in->stkCharPos[pos+PARSE_interpolate2d_min_0range_list]);
          return;
         }
        if ((minSet[nr])&&(!ppl_unitsDimEqual(&unit[nr],&stk[pos+o2])))
         {
-         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d have conflicting physical units of <%s> and <%s>.", i+1, ppl_printUnit(c,&unit[nr],NULL,NULL,0,0,0), ppl_printUnit(c,&stk[pos+o2],NULL,NULL,1,0,0));
+         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d have conflicting physical units of <%s> and <%s>.", nr+1, ppl_printUnit(c,&unit[nr],NULL,NULL,0,0,0), ppl_printUnit(c,&stk[pos+o2],NULL,NULL,1,0,0));
          TBADD2(ERR_UNIT,in->stkCharPos[pos+PARSE_interpolate2d_min_0range_list]);
          return;
         }
@@ -172,7 +173,7 @@ void ppl_directive_interpolate(ppl_context *c, parserLine *pl, parserOutput *in,
   if (bmp<0)
    {
     int status=0;
-    ppldata_fromCmd(c, &data, pl, in, 0, filenameOut, PARSE_TABLE_interpolate2d_, 0, NcolRequired, 0, min, minSet, max, maxSet, unit, 0, &status, c->errStat.errBuff, &errCount, iterDepth);
+    ppldata_fromCmd(c, &data, pl, in, 0, filenameOut, dataSpool, PARSE_TABLE_interpolate2d_, 0, NcolRequired, 0, min, minSet, max, maxSet, unit, 0, &status, c->errStat.errBuff, &errCount, iterDepth);
 
     // Exit on error
     if ((status)||(data==NULL))

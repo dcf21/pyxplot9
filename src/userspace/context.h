@@ -69,6 +69,7 @@ typedef struct ppl_context_struc
   pplObj    shellReturnVal;
   long int  historyNLinesWritten;
   int       termtypeSetInConfigfile;
+  int       replotFocus;
 
   // CSP status
   char      pplcsp_ghostView_fname[FNAME_LENGTH];

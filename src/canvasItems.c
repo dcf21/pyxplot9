@@ -24,6 +24,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <glob.h>
+#include <wordexp.h>
 
 #include "canvasItems.h"
 #include "datafile.h"
@@ -32,6 +34,7 @@
 #include "coreUtils/memAlloc.h"
 #include "epsMaker/canvasDraw.h"
 #include "expressions/expCompile_fns.h"
+#include "expressions/expEval.h"
 #include "expressions/traceback_fns.h"
 #include "mathsTools/dcfmath.h"
 #include "settings/arrows_fns.h"
@@ -46,7 +49,10 @@
 #include "userspace/context.h"
 #include "userspace/garbageCollector.h"
 #include "userspace/pplObj.h"
+#include "userspace/pplObj_fns.h"
 #include "userspace/pplObjPrint.h"
+#include "userspace/unitsArithmetic.h"
+#include "userspace/unitsDisp.h"
 
 #define TBADD(et,msg,pos) { strcpy(c->errStat.errBuff, msg); ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,pos,pl->linetxt,""); }
 
@@ -227,6 +233,7 @@ int ppl_directive_clear(ppl_context *c, parserLine *pl, parserOutput *in, int in
    }
   free(canvas_items);
   c->canvas_items = NULL;
+  c->replotFocus  = -1;
   return 0;
  }
 
@@ -816,7 +823,7 @@ int ppl_directive_arrow(ppl_context *c, parserLine *pl, parserOutput *in, int in
   ptr->ypos2 = y2 - y1;
 
   // Read in colour and linewidth information, if available
-  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_arrow_, &ptr->with_data);
+  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_arrow_, 0, &ptr->with_data);
 
   // Work out whether this arrow is in the 'head', 'nohead' or 'twoway' style
   tempstr  = (char *)stk[PARSE_arrow_arrow_style].auxil; gotTempstr  = (stk[PARSE_arrow_arrow_style].objType == PPLOBJ_STR);
@@ -874,7 +881,7 @@ int ppl_directive_box(ppl_context *c, parserLine *pl, parserOutput *in, int inte
   else        { ptr->rotation = 0.0; }
 
   // Read in colour and linewidth information, if available
-  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_box_, &ptr->with_data);
+  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_box_, 0, &ptr->with_data);
 
   // Redisplay the canvas as required
   if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
@@ -913,7 +920,7 @@ int ppl_directive_circle(ppl_context *c, parserLine *pl, parserOutput *in, int i
   else       { ptr->xfset = 0; } // circle command
 
   // Read in colour and linewidth information, if available
-  ppl_withWordsFromDict(c, in, pl, amArc?PARSE_TABLE_arc_:PARSE_TABLE_circle_, &ptr->with_data);
+  ppl_withWordsFromDict(c, in, pl, amArc?PARSE_TABLE_arc_:PARSE_TABLE_circle_, 0, &ptr->with_data);
 
   // Redisplay the canvas as required
   if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
@@ -1100,7 +1107,7 @@ int ppl_directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int 
   if (gotarc) { ptr->arcset= 1; ptr->arcfrom=arcfrom; ptr->arcto=arcto; }
 
   // Read in colour and linewidth information, if available
-  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_ellipse_, &ptr->with_data);
+  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_ellipse_, 0, &ptr->with_data);
 
   // Redisplay the canvas as required
   if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
@@ -1175,7 +1182,7 @@ int ppl_directive_point(ppl_context *c, parserLine *pl, parserOutput *in, int in
   ptr->ypos  = y;
 
   // Read in colour and linewidth information, if available
-  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_point_, &ptr->with_data);
+  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_point_, 0, &ptr->with_data);
 
   // See whether this point is labelled
   if (stk[PARSE_point_label].objType==PPLOBJ_STR)
@@ -1274,14 +1281,14 @@ fail:
   ptr->polygonPoints  = ptList;
 
   // Read in colour and linewidth information, if available
-  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_polygon_, &ptr->with_data);
+  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_polygon_, 0, &ptr->with_data);
 
   // Redisplay the canvas as required
   if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
-    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Arrow has been removed from multiplot, because it generated an error."); return 1; }
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Polygon has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }
@@ -1322,7 +1329,7 @@ int ppl_directive_text(ppl_context *c, parserLine *pl, parserOutput *in, int int
   ptr->text = text;
 
   // Read in colour information, if available
-  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_text_, &ptr->with_data);
+  ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_text_, 0, &ptr->with_data);
 
   // Redisplay the canvas as required
   if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
@@ -1382,8 +1389,312 @@ int ppl_directive_image(ppl_context *c, parserLine *pl, parserOutput *in, int in
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
-    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "EPS image has been removed from multiplot, because it generated an error."); return 1; }
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Bitmap image has been removed from multiplot, because it generated an error."); return 1; }
    }
+  return 0;
+ }
+
+#define TBADDP         ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,ERR_NUMERIC,0,pl->linetxt,"")
+
+#define STACK_POPP \
+   { \
+    c->stackPtr--; \
+    ppl_garbageObject(&c->stack[c->stackPtr]); \
+    if (c->stack[c->stackPtr].refCount != 0) { strcpy(c->errcontext.tempErrStr,"Stack forward reference detected."); ppl_error(&c->errcontext,ERR_STACKED,-1,-1,NULL); free(new); return 1; } \
+   }
+
+#define STACK_CLEANP   while (c->stackPtr>stkLevelOld) { STACK_POPP; }
+
+static int ppl_getPlotFname(ppl_context *c, char *in, int wildcardMatchNumber, canvas_plotdesc *out)
+ {
+  int       i, C;
+  wordexp_t wordExp;
+  glob_t    globData;
+  out->function=0;
+  out->NFunctions=-1;
+  out->functions=NULL;
+  out->vectors=NULL;
+  if (wildcardMatchNumber<0) wildcardMatchNumber=0;
+  C = wildcardMatchNumber;
+  if ((wordexp(in, &wordExp, 0) != 0) || (wordExp.we_wordc <= 0)) { sprintf(c->errcontext.tempErrStr, "Could not open file '%s'.", in); ppl_error(&c->errcontext,ERR_FILE,-1,-1,NULL); return 1; }
+  for (i=0; i<wordExp.we_wordc; i++)
+   {
+    if ((glob(wordExp.we_wordv[i], 0, NULL, &globData) != 0) || ((i==0)&&(globData.gl_pathc==0)))
+     {
+      if (wildcardMatchNumber==0) { sprintf(c->errcontext.tempErrStr, "Could not open file '%s'.", in); ppl_error(&c->errcontext,ERR_FILE,-1,-1,NULL); }
+      return 1;
+     }
+    if (C>=globData.gl_pathc) { C-=globData.gl_pathc; globfree(&globData); continue; }
+    out->filename = (char *)malloc(strlen(globData.gl_pathv[C])+1);
+    if (out->filename==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); return 1; }
+    strcpy(out->filename, globData.gl_pathv[C]);
+    globfree(&globData);
+    wordfree(&wordExp);
+    return 0;
+   }
+  wordfree(&wordExp);
+  if (wildcardMatchNumber==0) { sprintf(c->errcontext.tempErrStr, "Could not open file '%s'.", in); ppl_error(&c->errcontext,ERR_FILE,-1,-1,NULL); }
+  return 1;
+ }
+
+static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, canvas_plotdesc **out, const int *ptab, int stkbase, int wildcardMatchNumber, int iterDepth, parserLine **dataSpool)
+ {
+  pplObj           *stk         = in->stk;
+  canvas_plotdesc **plotItemPtr = out;
+  canvas_plotdesc  *new         = NULL;
+  while (*plotItemPtr != NULL) plotItemPtr=&(*plotItemPtr)->next; // Find end of list of plot items
+
+  // Malloc a structure to hold this plot item
+  new=(canvas_plotdesc *)malloc(sizeof(canvas_plotdesc));
+  if (new == NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); return 1; }
+  memset((void *)new, 0, sizeof(canvas_plotdesc));
+  new->filename=NULL;
+  new->PersistentDataTable=NULL;
+
+  // Test for expression list or filename
+  {
+   const int pos1 = ptab[PARSE_INDEX_expression_list] + stkbase;
+   const int pos2 = ptab[PARSE_INDEX_filename] + stkbase;
+   if ((pos1>0)&&(stk[pos1].objType==PPLOBJ_NUM)) // we have been passed a list of expressions
+    {
+     const int stkLevelOld = c->stackPtr;
+     int       pos = pos1;
+     int       Nexprs=0, i;
+     pplExpr **exprList;
+     pplObj   *first;
+     while (stk[pos].objType == PPLOBJ_NUM) // count number of expressions
+      {
+       pos = (int)round(stk[pos].real);
+       if (pos<=0) break;
+       Nexprs++;
+      }
+     if (Nexprs < 1) { ppl_error(&c->errcontext, ERR_SYNTAX, -1, -1, "Fewer than one expression was supplied to evaluate."); free(new); return 1; }
+     exprList = (pplExpr **)ppl_memAlloc(Nexprs*sizeof(pplExpr *));
+     if (exprList==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); free(new); return 1; }
+     for (i=0, pos=pos1; stk[pos].objType==PPLOBJ_NUM; i++)
+      {
+       pos = (int)round(stk[pos].real);
+       if (pos<=0) break;
+       exprList[i] = (pplExpr *)stk[pos+ptab[PARSE_INDEX_expression]].auxil;
+      }
+
+     first = ppl_expEval(c, exprList[0], &i, 0, iterDepth);
+     if ((!c->errStat.status) && (first->objType==PPLOBJ_STR) && (Nexprs==1)) // If we have a single expression that evaluates to a string, it's a filename
+      {
+       char *datafile = (char *)first->auxil;
+       int   status   = ppl_getPlotFname(c, datafile, wildcardMatchNumber, new);
+       STACK_CLEANP;
+       if (status) return 1;
+      }
+     else if ((!c->errStat.status) && (first->objType==PPLOBJ_VEC))
+      {
+       const int   stkLevelOld = c->stackPtr;
+       pplObj     *vecs;
+       gsl_vector *v = ((pplVector *)first->auxil)->v;
+       const int   l = v->size;
+       int         j;
+       vecs = (pplObj *)ppl_memAlloc(Nexprs*sizeof(pplObj));
+       if (vecs==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); free(new); return 1; }
+       for (i=0; i<Nexprs; i++)
+        {
+         int l2;
+         pplObj *obj = ppl_expEval(c, exprList[i], &j, 0, iterDepth);
+         if (c->errStat.status) { sprintf(c->errStat.errBuff,"Could not evaluate vector expressions."); TBADDP; ppl_tbWrite(c); ppl_tbClear(c); for (j=0; j<i; j++) ppl_garbageObject(vecs+j); STACK_CLEANP; free(new); return 1; }
+         if (obj->objType==PPLOBJ_VEC) { sprintf(c->errcontext.tempErrStr,"Vector data supplied to other columns, but columns %d evaluated to an object of type <%s>.", i+1, pplObjTypeNames[obj->objType]); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); for (j=0; j<i; j++) ppl_garbageObject(vecs+j); STACK_CLEANP; free(new); return 1; }
+         l2 = ((pplVector *)first->auxil)->v->size;
+         if (l!=l2) { sprintf(c->errcontext.tempErrStr,"Data supplied as a list of vectors, but they have varying lengths, including %d (vector %d) and %d (vector %d).", l, 1, l2, i+1); ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, NULL); for (j=0; j<i; j++) ppl_garbageObject(vecs+j); STACK_CLEANP; free(new); return 1; }
+         pplObjCpy(vecs+i,obj,0,0,1);
+         STACK_CLEANP;
+        }
+       if (wildcardMatchNumber<=0)
+        {
+         new->function   = 0;
+         new->NFunctions = Nexprs;
+         new->vectors    = (pplObj *)malloc(Nexprs*sizeof(pplObj));
+         new->functions  = NULL;
+         if (new->vectors==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); for (i=0; i<Nexprs; i++) ppl_garbageObject(vecs+i); free(new); return 1; }
+         memcpy(new->vectors, vecs, Nexprs*sizeof(pplObj));
+        }
+       else
+        {
+         for (i=0; i<Nexprs; i++) ppl_garbageObject(vecs+i); free(new); return 1;
+        }
+      }
+     else
+      {
+       if (wildcardMatchNumber<=0)
+        {
+         new->function   = 1;
+         new->NFunctions = Nexprs;
+         new->functions  = (pplExpr **)malloc(Nexprs*sizeof(pplExpr *));
+         new->vectors    = NULL;
+         if (new->functions==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); free(new); return 1; }
+         for (i=0; i<Nexprs; i++) new->functions[i] = pplExpr_cpy(exprList[i]);
+        }
+       else
+        {
+         free(new); return 1;
+        }
+      }
+    }
+   else if ((pos2>0)&&(stk[pos2].objType==PPLOBJ_STR)) // we have been passed a filename
+    {
+     char *filename = (char *)stk[pos2].auxil;
+     int   status   = ppl_getPlotFname(c, filename, wildcardMatchNumber, new);
+     if (status) return 1; 
+    }
+   else
+    {
+     sprintf(c->errcontext.tempErrStr, "Could not find any expressions to evaluate.");
+     ppl_error(&c->errcontext, ERR_INTERNAL, -1, -1, NULL);
+     free(new);
+     return 1;
+    }
+  }
+
+  // Read axes
+  new->axis1set = new->axis2set = new->axis3set = 0;
+  new->axis1    = new->axis2    = new->axis3    = 1;
+  new->axis1xyz = 0;
+  new->axis2xyz = 1;
+  new->axis3xyz = 2;
+
+  if (ptab[PARSE_INDEX_axis_1]>0)
+  {
+   int got1 = (stk[stkbase+ptab[PARSE_INDEX_axis_1]].objType==PPLOBJ_NUM);
+   int xyz1 = got1?((int)round(stk[stkbase+ptab[PARSE_INDEX_axis_1]].exponent[0])):-1;
+   int n1   = got1?((int)round(stk[stkbase+ptab[PARSE_INDEX_axis_1]].real       )):-1;
+   int got2 = (stk[stkbase+ptab[PARSE_INDEX_axis_2]].objType==PPLOBJ_NUM);
+   int xyz2 = got2?((int)round(stk[stkbase+ptab[PARSE_INDEX_axis_2]].exponent[0])):-1;
+   int n2   = got2?((int)round(stk[stkbase+ptab[PARSE_INDEX_axis_2]].real       )):-1;
+   int got3 = (stk[stkbase+ptab[PARSE_INDEX_axis_3]].objType==PPLOBJ_NUM);
+   int xyz3 = got3?((int)round(stk[stkbase+ptab[PARSE_INDEX_axis_3]].exponent[0])):-1;
+   int n3   = got3?((int)round(stk[stkbase+ptab[PARSE_INDEX_axis_3]].real       )):-1;
+   if (got1) { new->axis1set = 1; new->axis1xyz = xyz1; new->axis1 = n1; }
+   if (got2) { new->axis2set = 1; new->axis2xyz = xyz2; new->axis2 = n2; }
+   if (got3) { new->axis3set = 1; new->axis3xyz = xyz3; new->axis3 = n3; }
+  }
+
+  // Read using fields
+  {
+   int       Nusing=0, i=0;
+   int       hadNonNullUsingItem = 0;
+   int       pos = ptab[PARSE_INDEX_using_list] + stkbase;
+   const int o   = ptab[PARSE_INDEX_using_item];
+
+   if (o>0)
+    {
+     while (stk[pos].objType == PPLOBJ_NUM)
+      {
+       pos = (int)round(stk[pos].real);
+       if (pos<=0) break;
+       if (Nusing>=USING_ITEMS_MAX) { sprintf(c->errcontext.tempErrStr, "Too many using items; maximum of %d are allowed.", USING_ITEMS_MAX); ppl_error(&c->errcontext,ERR_SYNTAX,-1,-1,NULL); free(new); return 1; }
+      if (stk[pos+o].objType == PPLOBJ_EXP) hadNonNullUsingItem = 1;
+      Nusing++;
+     }
+    if ((!hadNonNullUsingItem) && (Nusing==1)) Nusing=0; // If we've only had one using item, and it was blank, this is a parser abberation
+    new->NUsing = Nusing;
+    if (Nusing<1)
+     { new->UsingList = NULL; }
+    else
+     {
+      new->UsingList = (pplExpr **)malloc(Nusing * sizeof(pplExpr *));
+      if (new->UsingList==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); free(new); return 1; }
+      pos = ptab[PARSE_INDEX_using_list] + stkbase;
+      while (stk[pos].objType == PPLOBJ_NUM)
+       {
+        pos = (int)round(stk[pos].real);
+        if (pos<=0) break;
+        if (stk[pos+o].objType == PPLOBJ_EXP) new->UsingList[i] = pplExpr_cpy((pplExpr *)stk[pos+o].auxil);
+        else                                  new->UsingList[i] = NULL;
+        i++;
+       }
+     }
+   }
+  }
+
+  // Read data label
+  new->label = NULL;
+  if (ptab[PARSE_INDEX_label]>0)
+  {
+   pplObj *o = &stk[stkbase+ptab[PARSE_INDEX_label]];
+   if (o->objType!=PPLOBJ_EXP) { new->label = NULL; }
+   else                        { new->label = pplExpr_cpy((pplExpr *)o->auxil); }
+  }
+
+  // Read continuous flag
+  new->ContinuitySet = 0;
+  new->continuity    = DATAFILE_CONTINUOUS;
+  if (ptab[PARSE_INDEX_continuous]>0)
+   {
+    if (stk[stkbase+ptab[PARSE_INDEX_continuous   ]].objType==PPLOBJ_STR) { new->ContinuitySet = 1; new->continuity = DATAFILE_CONTINUOUS;    }
+    if (stk[stkbase+ptab[PARSE_INDEX_discontinuous]].objType==PPLOBJ_STR) { new->ContinuitySet = 1; new->continuity = DATAFILE_DISCONTINUOUS; }
+   }
+
+  // Read title/notitle setting
+  new->NoTitleSet = new->TitleSet = 0; new->title = NULL;
+  if (ptab[stkbase+PARSE_INDEX_title]>0)
+   {
+    pplObj *o1 = &stk[stkbase+ptab[PARSE_INDEX_notitle]];
+    pplObj *o2 = &stk[stkbase+ptab[PARSE_INDEX_title]];
+    if      (o1->objType==PPLOBJ_STR) { new->NoTitleSet = 1; new->TitleSet = 0; new->title = NULL; }
+    else if (o2->objType==PPLOBJ_STR)
+     {
+      new->NoTitleSet = 0;
+      new->title      = (char *)malloc(strlen((char *)o2->auxil)+1);
+      new->TitleSet   = (new->title!=NULL);
+      if (new->TitleSet) strcpy(new->title, (char *)o2->auxil);
+     }
+   }
+
+  // Read index field
+  {
+   const int p1 = ptab[PARSE_INDEX_index];
+   const int p2 = ptab[PARSE_INDEX_use_rows];
+   const int p3 = ptab[PARSE_INDEX_use_columns];
+   if ((p1>0)&&(stk[stkbase+p1].objType==PPLOBJ_NUM)) { new->IndexSet=1; new->index=(int)round(stk[stkbase+p1].real); }
+   else                                               { new->IndexSet=0; new->index=-1; }
+   if      ((p2>0)&&(stk[stkbase+p2].objType==PPLOBJ_NUM)) { new->UsingRowCols = DATAFILE_ROW; }
+   else if ((p3>0)&&(stk[stkbase+p3].objType==PPLOBJ_NUM)) { new->UsingRowCols = DATAFILE_COL; }
+   else                                                    { new->UsingRowCols = DATAFILE_COL; }
+  }
+
+  // Read every fields
+  new->EverySet = 0;
+  new->EveryList[0] = new->EveryList[1] = 1;
+  new->EveryList[2] = new->EveryList[3] = new->EveryList[4] = new->EveryList[5] = -1;
+  if (ptab[PARSE_INDEX_every_list]>0)
+   {
+    int       Nevery = 0;
+    int       pos    = ptab[PARSE_INDEX_every_list] + stkbase;
+    const int o      = ptab[PARSE_INDEX_every_item];
+    while (stk[pos].objType == PPLOBJ_NUM)
+     {
+      long x;
+      pos = (int)round(stk[pos].real);
+      if (pos<=0) break;
+      if (Nevery>=6) { ppl_warning(&c->errcontext, ERR_SYNTAX, "More than six numbers supplied to the every modifier -- trailing entries ignored."); break; }
+      x = (long)round(stk[pos+o].real);
+      if (x>new->EveryList[Nevery]) new->EveryList[Nevery]=x;
+      new->EverySet = ++Nevery;
+     }
+   }
+
+  // Read select criterion
+  {
+   const int p = ptab[PARSE_INDEX_select_criterion];
+   if ((p>0)&&(stk[stkbase+p].objType==PPLOBJ_EXP)) new->SelectCriterion = pplExpr_cpy((pplExpr *)stk[stkbase+p].auxil);
+   else                                             new->SelectCriterion = NULL;
+  }
+
+  // Read withWords
+  ppl_withWordsFromDict(c, in, pl, ptab, stkbase, &new->ww);
+
+  // Read data from pipe
+
+
+  // Store plot item
+  *plotItemPtr=new;
   return 0;
  }
 
@@ -1391,18 +1702,42 @@ int ppl_directive_image(ppl_context *c, parserLine *pl, parserOutput *in, int in
 int ppl_directive_piechart(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj       *stk = in->stk;
+  parserLine   *spool=NULL, **dataSpool = &spool;
   canvas_item  *ptr;
-  int           id;
+  int           id, status;
 
-  // Add this box to the linked list which decribes the canvas
+  // Add this piechart to the linked list which decribes the canvas
   if (canvas_itemlist_add(c,stk,CANVAS_PIE,&ptr,&id,0)) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); return 1; }
+
+  // Copy settings
+  ptr->settings = c->set->graph_current;
+  ppl_withWordsCpy(c, &ptr->settings.dataStyle, &c->set->graph_current.dataStyle);
+  ppl_withWordsCpy(c, &ptr->settings.funcStyle, &c->set->graph_current.funcStyle);
+
+  // Look up format string
+  if (stk[PARSE_piechart_format_string].objType==PPLOBJ_STR)
+   {
+    char *i = (char *)stk[PARSE_piechart_format_string].auxil;
+    ptr->text = (char *)malloc(strlen(i)+1);
+    strcpy(ptr->text, i);
+   } else { ptr->text=NULL; }
+
+  // Look up label position
+  if (stk[PARSE_piechart_piekeypos].objType==PPLOBJ_STR)
+   {
+    char *i = (char *)stk[PARSE_piechart_piekeypos].auxil;
+    ptr->ArrowType = ppl_fetchSettingByName(&c->errcontext, i, SW_PIEKEYPOS_INT, SW_PIEKEYPOS_STR);
+   } else { ptr->ArrowType = SW_PIEKEYPOS_AUTO; }
+
+  status = ppl_getPlotData(c, pl, in, &ptr->plotitems, PARSE_TABLE_piechart_, 0, 0, iterDepth, dataSpool);
+  if (status) { canvas_delete(c, id); return 1; }
 
   // Redisplay the canvas as required
   if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
-    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "EPS image has been removed from multiplot, because it generated an error."); return 1; }
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Piechart has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }
@@ -1410,19 +1745,185 @@ int ppl_directive_piechart(ppl_context *c, parserLine *pl, parserOutput *in, int
 // Implementation of the plot command
 int ppl_directive_plot(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth, int replot)
  {
-  pplObj       *stk = in->stk;
-  canvas_item  *ptr;
-  int           id;
+  pplObj          *stk = in->stk;
+  canvas_item     *ptr = NULL;
+  canvas_itemlist *canvas_items = c->canvas_items;
+  int              id;
 
-  // Add this box to the linked list which decribes the canvas
-  if (canvas_itemlist_add(c,stk,CANVAS_PLOT,&ptr,&id,0)) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); return 1; }
+  // If replotting, find a plot item to append plot items onto
+  if (replot)
+   {
+    int gotEditNo = (stk[PARSE_replot_editno].objType == PPLOBJ_NUM);
+    int editNo    = gotEditNo ? ((int)round(stk[PARSE_replot_editno].real)) : c->replotFocus;
+    if (canvas_items!=NULL)
+     {
+      ptr = canvas_items->first;
+      while ((ptr!=NULL)&&(ptr->id!=editNo)) ptr=ptr->next;
+     }
+    if (ptr == NULL) { sprintf(c->errcontext.tempErrStr, "No plot found to replot."); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return 1; }
+    id = editNo;
+   }
+  else
+   {
+    // Add this plot to the linked list which decribes the canvas
+    if (canvas_itemlist_add(c,stk,CANVAS_PLOT,&ptr,&id,0)) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); return 1; }
+   }
+  c->replotFocus = id;
+
+  // Copy graph settings and axes to this plot structure. Do this every time that the replot command is called
+  ppl_withWordsDestroy(c,&ptr->settings.dataStyle); // First free the old set of settings which we'd stored
+  ppl_withWordsDestroy(c,&ptr->settings.funcStyle);
+  if (ptr->XAxes != NULL) { int i; for (i=0; i<MAX_AXES; i++) pplaxis_destroy( c , &(ptr->XAxes[i]) ); free(ptr->XAxes); }
+  if (ptr->YAxes != NULL) { int i; for (i=0; i<MAX_AXES; i++) pplaxis_destroy( c , &(ptr->YAxes[i]) ); free(ptr->YAxes); }
+  if (ptr->ZAxes != NULL) { int i; for (i=0; i<MAX_AXES; i++) pplaxis_destroy( c , &(ptr->ZAxes[i]) ); free(ptr->ZAxes); }
+  pplarrow_list_destroy(c, &ptr->arrow_list);
+  ppllabel_list_destroy(c, &ptr->label_list);
+  ptr->settings = c->set->graph_current;
+  ppl_withWordsCpy(c, &ptr->settings.dataStyle , &c->set->graph_current.dataStyle);
+  ppl_withWordsCpy(c, &ptr->settings.funcStyle , &c->set->graph_current.funcStyle);
+  ptr->XAxes = (pplset_axis *)malloc(MAX_AXES * sizeof(pplset_axis));
+  ptr->YAxes = (pplset_axis *)malloc(MAX_AXES * sizeof(pplset_axis));
+  ptr->ZAxes = (pplset_axis *)malloc(MAX_AXES * sizeof(pplset_axis));
+  if ((ptr->XAxes==NULL)||(ptr->YAxes==NULL)||(ptr->ZAxes==NULL))
+   {
+    ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory");
+    if (ptr->XAxes!=NULL) { free(ptr->XAxes); ptr->XAxes = NULL; }
+    if (ptr->YAxes!=NULL) { free(ptr->YAxes); ptr->YAxes = NULL; }
+    if (ptr->ZAxes!=NULL) { free(ptr->ZAxes); ptr->ZAxes = NULL; }
+   }
+  else
+   {
+    int i;
+    for (i=0; i<MAX_AXES; i++) pplaxis_copy(c, &(ptr->XAxes[i]), &(c->set->XAxes[i]));
+    for (i=0; i<MAX_AXES; i++) pplaxis_copy(c, &(ptr->YAxes[i]), &(c->set->YAxes[i]));
+    for (i=0; i<MAX_AXES; i++) pplaxis_copy(c, &(ptr->ZAxes[i]), &(c->set->ZAxes[i]));
+   }
+  pplarrow_list_copy(c, &ptr->arrow_list , &c->set->pplarrow_list);
+  ppllabel_list_copy(c, &ptr->label_list , &c->set->ppllabel_list);
+
+  // Check whether 3d or 2d plot
+  if (!replot)
+   {
+    ptr->ThreeDim = (stk[PARSE_replot_threedim].objType==PPLOBJ_STR); // Set 3d flag
+   }
+
+  // Read data range
+  {
+   int       nr = 0;
+   int       pos= PARSE_replot_0range_list;
+   const int o1 = PARSE_replot_min_0range_list;
+   const int o2 = PARSE_replot_max_0range_list;
+   const int o3 = PARSE_replot_minauto_0range_list;
+   const int o4 = PARSE_replot_maxauto_0range_list;
+   canvas_plotrange **rangePtr = &ptr->plotranges;
+   while (stk[pos].objType == PPLOBJ_NUM)
+    {
+     pos = (int)round(stk[pos].real);
+     if (pos<=0) break;
+     if (nr>=USING_ITEMS_MAX)
+      {
+       sprintf(c->errStat.errBuff,"Too many ranges specified; a maximum of %d are allowed.", USING_ITEMS_MAX);
+       TBADD2(ERR_SYNTAX,0); canvas_delete(c, id);
+       return 1;
+      }
+     if (*rangePtr == NULL)
+      {
+       *rangePtr=(canvas_plotrange *)malloc(sizeof(canvas_plotrange));
+       if (*rangePtr == NULL) { ppl_error(&c->errcontext,ERR_MEMORY,-1,-1,"Out of memory."); canvas_delete(c, id); return 1; }
+       pplObjNum(&(*rangePtr)->unit,0,0,0);
+       (*rangePtr)->min=(*rangePtr)->max=0.0;
+       (*rangePtr)->MinSet=(*rangePtr)->MaxSet=(*rangePtr)->AutoMinSet=(*rangePtr)->AutoMaxSet=0;
+       (*rangePtr)->next=NULL;
+      }
+     {
+      pplObj *min     = &stk[pos+o1];  int gotMin = (min->objType==PPLOBJ_NUM)||(min->objType==PPLOBJ_DATE)||(min->objType==PPLOBJ_BOOL);
+      pplObj *max     = &stk[pos+o2];  int gotMax = (max->objType==PPLOBJ_NUM)||(max->objType==PPLOBJ_DATE)||(max->objType==PPLOBJ_BOOL);
+      int     minAuto = (stk[pos+o3].objType==PPLOBJ_STR);
+      int     maxAuto = (stk[pos+o4].objType==PPLOBJ_STR);
+      if ( gotMin && gotMax && (min->objType != max->objType) )
+        { sprintf(c->errStat.errBuff,"Minimum and maximum limits specified in range %d have conflicting types of <%s> and <%s>.", nr+1, pplObjTypeNames[min->objType], pplObjTypeNames[max->objType]); TBADD2(ERR_TYPE,in->stkCharPos[pos+PARSE_replot_min_0range_list]); canvas_delete(c, id); return 1; }
+      if ( gotMin && gotMax && !ppl_unitsDimEqual(min, max) )
+        { sprintf(c->errStat.errBuff,"Minimum and maximum limits specified in range %d have conflicting units of <%s> and <%s>.", nr+1, ppl_printUnit(c,min,NULL,NULL,0,0,0), ppl_printUnit(c,max,NULL,NULL,0,0,0)); TBADD2(ERR_UNIT,in->stkCharPos[pos+PARSE_replot_min_0range_list]); canvas_delete(c, id); return 1; }
+
+      if ( gotMin && (!gotMax) && (!maxAuto) && ((*rangePtr)->MaxSet) && (min->objType != (*rangePtr)->unit.objType))
+        { sprintf(c->errStat.errBuff,"Minimum and maximum limits specified in range %d have conflicting types of <%s> and <%s>.", nr+1, pplObjTypeNames[min->objType], pplObjTypeNames[(*rangePtr)->unit.objType]); TBADD2(ERR_TYPE,in->stkCharPos[pos+PARSE_replot_min_0range_list]); canvas_delete(c, id); return 1; }
+      if ( gotMin && (!gotMax) && (!maxAuto) && ((*rangePtr)->MaxSet) && (!ppl_unitsDimEqual(min,&(*rangePtr)->unit)))
+        { sprintf(c->errStat.errBuff,"Minimum and maximum limits specified in range %d have conflicting units of <%s> and <%s>.", nr+1, ppl_printUnit(c,min,NULL,NULL,0,0,0), ppl_printUnit(c,&(*rangePtr)->unit,NULL,NULL,0,0,0)); TBADD2(ERR_UNIT,in->stkCharPos[pos+PARSE_replot_min_0range_list]); canvas_delete(c, id); return 1; }
+
+      if ( gotMax && (!gotMin) && (!minAuto) && ((*rangePtr)->MinSet) && (max->objType != (*rangePtr)->unit.objType))
+        { sprintf(c->errStat.errBuff,"Minimum and maximum limits specified in range %d have conflicting types of <%s> and <%s>.", nr+1, pplObjTypeNames[(*rangePtr)->unit.objType], pplObjTypeNames[max->objType]); TBADD2(ERR_TYPE,in->stkCharPos[pos+PARSE_replot_min_0range_list]); canvas_delete(c, id); return 1; }
+      if ( gotMax && (!gotMin) && (!minAuto) && ((*rangePtr)->MinSet) && (!ppl_unitsDimEqual(max,&(*rangePtr)->unit)))
+        { sprintf(c->errStat.errBuff,"Minimum and maximum limits specified in range %d have conflicting units of <%s> and <%s>.", nr+1, ppl_printUnit(c,&(*rangePtr)->unit,NULL,NULL,0,0,0), ppl_printUnit(c,max,NULL,NULL,0,0,0)); TBADD2(ERR_UNIT,in->stkCharPos[pos+PARSE_replot_min_0range_list]); canvas_delete(c, id); return 1; }
+
+      if (minAuto) { (*rangePtr)->AutoMinSet=1; (*rangePtr)->MinSet=0; (*rangePtr)->min=0.0; }
+      if (maxAuto) { (*rangePtr)->AutoMaxSet=1; (*rangePtr)->MaxSet=0; (*rangePtr)->max=0.0; }
+      if (gotMin ) { (*rangePtr)->AutoMinSet=0; (*rangePtr)->MinSet=1; (*rangePtr)->min=min->real; (*rangePtr)->unit=*min; (*rangePtr)->unit.real=1.0; }
+      if (gotMax ) { (*rangePtr)->AutoMaxSet=0; (*rangePtr)->MaxSet=1; (*rangePtr)->max=max->real; (*rangePtr)->unit=*max; (*rangePtr)->unit.real=1.0; }
+     }
+     rangePtr = &(*rangePtr)->next;
+     nr++;
+    }
+  }
+
+  // Read list of plotted items
+  {
+   parserLine *spool=NULL, **dataSpool = &spool;
+   int pos = PARSE_replot_0plot_list;
+   while (stk[pos].objType == PPLOBJ_NUM)
+    {
+     int w;
+     pos = (int)round(stk[pos].real);
+     if (pos<=0) break;
+
+     // Check that axes are correctly specified
+     {
+      int got1 = (stk[pos+PARSE_replot_axis_1_0plot_list].objType==PPLOBJ_NUM);
+      int xyz1 = got1?((int)round(stk[pos+PARSE_replot_axis_1_0plot_list].exponent[0])):-1;
+      //int n1 = got1?((int)round(stk[pos+PARSE_replot_axis_1_0plot_list].real       )):-1;
+      int got2 = (stk[pos+PARSE_replot_axis_2_0plot_list].objType==PPLOBJ_NUM);
+      int xyz2 = got2?((int)round(stk[pos+PARSE_replot_axis_2_0plot_list].exponent[0])):-1;
+      //int n2 = got2?((int)round(stk[pos+PARSE_replot_axis_2_0plot_list].real       )):-1;
+      int got3 = (stk[pos+PARSE_replot_axis_3_0plot_list].objType==PPLOBJ_NUM);
+      int xyz3 = got3?((int)round(stk[pos+PARSE_replot_axis_3_0plot_list].exponent[0])):-1;
+      //int n3 = got3?((int)round(stk[pos+PARSE_replot_axis_3_0plot_list].real       )):-1;
+      if (got1 || got2 || got3)
+       {
+        c->errcontext.tempErrStr[0]='\0';
+        if ((!ptr->ThreeDim) && (!(got1 && got2 && !got3)))
+          sprintf(c->errcontext.tempErrStr, "The axes clause in the plot command must contain two perpendicular axes to produce a two-dimensional plot.");
+        else if (ptr->ThreeDim && (!(got1 && got2 && got3)))
+          sprintf(c->errcontext.tempErrStr, "The axes clause in the plot command must contain three perpendicular axes to produce a three-dimensional plot.");
+        else if (  ((!ptr->ThreeDim) && ( ((xyz1!=0)&&(xyz2!=0)) || ((xyz1!=1)&&(xyz2!=1)) )) ||
+                   (( ptr->ThreeDim) && ( (xyz1==xyz2) || (xyz2==xyz3) )) )
+          sprintf(c->errcontext.tempErrStr, "The axes clause in the plot command may not list multiple parallel axes.");
+        if (c->errcontext.tempErrStr[0]!='\0')
+         {
+          ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, NULL);
+          canvas_delete(c, id);
+          return 1;
+         }
+       }
+     }
+
+     // Loop over wildcard matches
+     for (w=0 ; ; w++)
+      {
+       int status = ppl_getPlotData(c, pl, in, &ptr->plotitems, PARSE_TABLE_replot_, pos, w, iterDepth, dataSpool);
+       if (status)
+        {
+         if (w==0) { canvas_delete(c, id); return 1; }
+         else      { break; }
+        }
+      }
+    }
+  }
 
   // Redisplay the canvas as required
   if ((c->set->term_current.display == SW_ONOFF_ON)&&(!cancellationFlag))
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
-    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "EPS image has been removed from multiplot, because it generated an error."); return 1; }
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Plot has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }

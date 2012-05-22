@@ -339,8 +339,6 @@ void ppldata_UsingConvert(ppl_context *c, pplExpr *input, char **columns_str, pp
 #define COUNTERR_END   if (*errCount==0) { sprintf(c->errcontext.tempErrStr, "%s:%ld: Too many errors: no more errors will be shown.",filename,file_linenumber); \
                        ppl_warning(&c->errcontext,ERR_STACKED,NULL); } }
 
-#define TBADD(et)      ppl_tbAdd(c,ex->srcLineN,ex->srcId,ex->srcFname,0,et,0,ex->ascii,"")
-
 #define STACK_POP \
    { \
     c->stackPtr--; \
@@ -640,7 +638,7 @@ static int ppldata_autoUsingList(ppl_context *c, pplExpr **usingExprs, int Ncols
   return 0;
  }
 
-void ppldata_fromFile(ppl_context *c, dataTable **out, char *filename, int wildcardMatchNumber, char *filenameOut, parserLine *dataSpool, int indexNo, pplExpr **usingExprs, int autoUsingExprs, int Ncols, int NusingObjs, pplExpr *labelExpr, pplExpr *selectExpr, pplExpr *sortBy, int usingRowCol, long *everyList, int continuity, int persistent, int *status, char *errtext, int *errCount, int iterDepth)
+void ppldata_fromFile(ppl_context *c, dataTable **out, char *filename, int wildcardMatchNumber, char *filenameOut, parserLine **dataSpool, int indexNo, pplExpr **usingExprs, int autoUsingExprs, int Ncols, int NusingObjs, pplExpr *labelExpr, pplExpr *selectExpr, pplExpr *sortBy, int usingRowCol, long *everyList, int continuity, int persistent, int *status, char *errtext, int *errCount, int iterDepth)
  {
   int          readFromCommandLine=0, discontinuity=0, hadwhitespace, hadcomma, oneColumnInput=1;
   int          contextOutput, contextRough, contextRaw;
@@ -728,7 +726,7 @@ void ppldata_fromFile(ppl_context *c, dataTable **out, char *filename, int wildc
    {
     if (cancellationFlag) break;
     if (!readFromCommandLine) ppl_file_readline(filtered_input, linebuffer, LSTR_LENGTH);
-    else                      lineptr = ppldata_fetchFromSpool(&dataSpool);
+    else                      lineptr = ppldata_fetchFromSpool(dataSpool);
 
     if (readFromCommandLine && (lineptr==NULL                                     )) break; // End of file reached
     if (readFromCommandLine && (strcmp(ppl_strStrip(lineptr, linebuffer),"END")==0)) break;
@@ -1144,11 +1142,10 @@ void ppldata_fromVectors(ppl_context *c, dataTable **out, pplObj *objList, int o
   return;
  }
 
-void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutput *in, int wildcardMatchNumber, char *filenameOut, const int *ptab, const int stkbase, int Ncols, int NusingObjs, double *min, int *minSet, double *max, int *maxSet, pplObj *unitRange, int persistent, int *status, char *errtext, int *errCount, int iterDepth)
+void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutput *in, int wildcardMatchNumber, char *filenameOut, parserLine **dataSpool, const int *ptab, const int stkbase, int Ncols, int NusingObjs, double *min, int *minSet, double *max, int *maxSet, pplObj *unitRange, int persistent, int *status, char *errtext, int *errCount, int iterDepth)
  {
   pplObj     *stk  = in->stk;
   pplObj     *stko = stk + stkbase;
-  parserLine *dataSpool=NULL;
   pplExpr    *usingExprs[USING_ITEMS_MAX], *selectExpr=NULL, *labelExpr=NULL, *sortBy=NULL;
   long        everyList[6]={1,1,-1,-1,-1,-1};
   int         Nusing=0, autoUsingList=0, continuity=DATAFILE_CONTINUOUS, usingRowCol=DATAFILE_COL, indexNo=-1;
@@ -1323,11 +1320,12 @@ void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutp
    if ((pos>0)&&(stko[pos].objType==PPLOBJ_NUM)) indexNo = (int)round(stko[pos].real);
   }
 
-  // Read data spool
-  {
-   const int pos = ptab[PARSE_INDEX_data];
-   if ((pos>0)&&(stk[pos].objType==PPLOBJ_BYT)) dataSpool = (parserLine *)stk[pos].auxil;
-  }
+  // Read data spool (on first pass only)
+  if ((dataSpool!=NULL)&&(*dataSpool==NULL))
+   {
+    const int pos = ptab[PARSE_INDEX_data];
+    if ((pos>0)&&(stk[pos].objType==PPLOBJ_BYT)) *dataSpool = (parserLine *)stk[pos].auxil;
+   }
 
   // Read select criterion
   {
@@ -1360,7 +1358,7 @@ void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutp
    int       Nevery = 0;
    int       pos    = ptab[PARSE_INDEX_every_list] + stkbase;
    const int o      = ptab[PARSE_INDEX_every_item];
-   if (pos>0)
+   if (o>0)
     while (stk[pos].objType == PPLOBJ_NUM)
      {
       long x;
@@ -1394,7 +1392,7 @@ void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutp
    int       pos = ptab[PARSE_INDEX_using_list] + stkbase;
    const int o   = ptab[PARSE_INDEX_using_item];
 
-   if (pos>0)
+   if (o>0)
     while (stk[pos].objType == PPLOBJ_NUM)
      {
       pos = (int)round(stk[pos].real);

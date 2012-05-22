@@ -96,7 +96,7 @@ void pplarrow_add(ppl_context *context, pplarrow_object **inlist, parserOutput *
   else                                                            out->pplarrow_style = ppl_fetchSettingByName(&context->errcontext, tempstr, SW_ARROWTYPE_INT, SW_ARROWTYPE_STR);
 
   // Check what style keywords have been specified in the 'with' clause
-  ppl_withWordsFromDict(context, in, pl, ptab, &out->style);
+  ppl_withWordsFromDict(context, in, pl, ptab, 0, &out->style);
 
   out->system_x0 = system_x0; out->system_y0 = system_y0; out->system_z0 = system_z0;
   out->system_x1 = system_x1; out->system_y1 = system_y1; out->system_z1 = system_z1;

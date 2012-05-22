@@ -25,7 +25,7 @@
 #include "parser/parser.h"
 #include "userspace/context.h"
 
-int ppl_colorFromDict  (ppl_context *c, parserOutput *in, parserLine *pl, const int *ptab,
+int ppl_colorFromDict  (ppl_context *c, parserOutput *in, parserLine *pl, const int *ptab, int stkbase,
                         int fillColor, int *outcol, int *outcolspace, pplExpr **EXPoutcol,
                         double *outcol1, double *outcol2, double *outcol3, double *outcol4,
                         unsigned char *USEcol, unsigned char *USEcol1234);

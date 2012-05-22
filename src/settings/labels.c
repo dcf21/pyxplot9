@@ -120,7 +120,7 @@ void ppllabel_add(ppl_context *context, ppllabel_object **inlist, parserOutput *
     out->fontsize = f;
    }
 
-  ppl_withWordsFromDict(context, in, pl, ptab, &out->style);
+  ppl_withWordsFromDict(context, in, pl, ptab, 0, &out->style);
   out->text  = label;
   out->system_x = system_x; out->system_y = system_y; out->system_z = system_z;
   pplarrow_add_get_axis(PARSE_INDEX_x_axis, out->axis_x);

@@ -390,6 +390,7 @@ void ppl_directive_fordata(ppl_context *c, parserLine *pl, parserOutput *in, int
   double       min   [USING_ITEMS_MAX], max   [USING_ITEMS_MAX];
   dataTable   *data=NULL;
   dataBlock   *blk =NULL;
+  parserLine  *spool=NULL, **dataSpool = &spool;
 
   if (named) c->shellLoopName[iterDepth] = name;
   else       c->shellLoopName[iterDepth] = NULL;
@@ -437,13 +438,13 @@ void ppl_directive_fordata(ppl_context *c, parserLine *pl, parserOutput *in, int
       {
        if ((minSet[nr])&&(unit[nr].objType!=stk[pos+o2].objType))
         {
-         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d (%s) have conflicting types of <%s> and <%s>.", i+1, varname[i], pplObjTypeNames[unit[nr].objType], pplObjTypeNames[stk[pos+o2].objType]);
+         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d (%s) have conflicting types of <%s> and <%s>.", nr+1, varname[nr], pplObjTypeNames[unit[nr].objType], pplObjTypeNames[stk[pos+o2].objType]);
          TBADD2(ERR_TYPE,in->stkCharPos[pos+PARSE_foreachdatum_min_0range_list]);
          goto cleanup;
         }
        if ((minSet[nr])&&(!ppl_unitsDimEqual(&unit[nr],&stk[pos+o2])))
         {
-         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d (%s) have conflicting physical units of <%s> and <%s>.", i+1, varname[i], ppl_printUnit(c,&unit[nr],NULL,NULL,0,0,0), ppl_printUnit(c,&stk[pos+o2],NULL,NULL,1,0,0));
+         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d (%s) have conflicting physical units of <%s> and <%s>.", nr+1, varname[nr], ppl_printUnit(c,&unit[nr],NULL,NULL,0,0,0), ppl_printUnit(c,&stk[pos+o2],NULL,NULL,1,0,0));
          TBADD2(ERR_UNIT,in->stkCharPos[pos+PARSE_foreachdatum_min_0range_list]);
          goto cleanup;
         }
@@ -456,7 +457,7 @@ void ppl_directive_fordata(ppl_context *c, parserLine *pl, parserOutput *in, int
   }
 
   // Fetch data
-  ppldata_fromCmd(c, &data, pl, in, 0, NULL, PARSE_TABLE_foreachdatum_, 0, Nvars, Nvars, min, minSet, max, maxSet, unit, 0, &status, c->errcontext.tempErrStr, &errCount, iterDepth);
+  ppldata_fromCmd(c, &data, pl, in, 0, NULL, dataSpool, PARSE_TABLE_foreachdatum_, 0, Nvars, Nvars, min, minSet, max, maxSet, unit, 0, &status, c->errcontext.tempErrStr, &errCount, iterDepth);
   if (status || cancellationFlag) { ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); goto cleanup; }
 
   // Fetch variable pointers

@@ -355,6 +355,7 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
   pplObj      firstVals[USING_ITEMS_MAX], *varObj[USING_ITEMS_MAX];
   dataTable  *data;
   dataBlock  *blk;
+  parserLine *spool=NULL, **dataSpool = &spool;
   double     *localDataTable, val;
   gsl_vector *bestFitParamVals;
   gsl_matrix *hessian, *hessian_lu, *hessian_inv;
@@ -461,13 +462,13 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
       {
        if ((minSet[nr])&&(unit[nr].objType!=stk[pos+o2].objType))
         {
-         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d have conflicting types of <%s> and <%s>.", i+1, pplObjTypeNames[unit[nr].objType], pplObjTypeNames[stk[pos+o2].objType]);
+         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d have conflicting types of <%s> and <%s>.", nr+1, pplObjTypeNames[unit[nr].objType], pplObjTypeNames[stk[pos+o2].objType]);
          TBADD2(ERR_TYPE,in->stkCharPos[pos+PARSE_fit_min_0range_list]);
          return;
         }
        if ((minSet[nr])&&(!ppl_unitsDimEqual(&unit[nr],&stk[pos+o2])))
         {
-         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d have conflicting physical units of <%s> and <%s>.", i+1, ppl_printUnit(c,&unit[nr],NULL,NULL,0,0,0), ppl_printUnit(c,&stk[pos+o2],NULL,NULL,1,0,0));
+         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d have conflicting physical units of <%s> and <%s>.", nr+1, ppl_printUnit(c,&unit[nr],NULL,NULL,0,0,0), ppl_printUnit(c,&stk[pos+o2],NULL,NULL,1,0,0));
          TBADD2(ERR_UNIT,in->stkCharPos[pos+PARSE_fit_min_0range_list]);
          return;
         }
@@ -484,7 +485,7 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
   contextDataTab = ppl_memAlloc_DescendIntoNewContext();
 
   // Read data from file
-  ppldata_fromCmd(c, &data, pl, in, 0, NULL, PARSE_TABLE_fit_, 0, NExpect, 0, min, minSet, max, maxSet, unit, 0, &status, c->errStat.errBuff, &errCount, iterDepth);
+  ppldata_fromCmd(c, &data, pl, in, 0, NULL, dataSpool, PARSE_TABLE_fit_, 0, NExpect, 0, min, minSet, max, maxSet, unit, 0, &status, c->errStat.errBuff, &errCount, iterDepth);
 
   // Exit on error
   if ((status)||(data==NULL))

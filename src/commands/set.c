@@ -1452,7 +1452,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     char      *type     = (char *)command[PARSE_set_style_numbered_dataset_type].auxil;
     withWords *outstyle = (type[0]=='d') ? &sg->dataStyle : &sg->funcStyle;
     withWords  ww_tmp, ww_tmp2;
-    ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_set_style_numbered_, &ww_tmp); // this is correct!
+    ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_set_style_numbered_, 0, &ww_tmp); // this is correct!
     ppl_withWordsMerge   (c, &ww_tmp2, &ww_tmp, outstyle, NULL, NULL, NULL, 0);
     ppl_withWordsDestroy (c, &ww_tmp);
     *outstyle = ww_tmp2;
@@ -1466,7 +1466,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if ((nd<0)||(nd>=MAX_PLOTSTYLES)) { sprintf(c->errcontext.tempErrStr, "plot style numbers must be in the range 0-%d", MAX_PLOTSTYLES-1); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return; }
     n = (int)floor(nd);
     outstyle = &(c->set->plot_styles[n]);
-    ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_set_style_numbered_, &ww_tmp);
+    ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_set_style_numbered_, 0, &ww_tmp);
     ppl_withWordsMerge   (c, &ww_tmp2, &ww_tmp, outstyle, NULL, NULL, NULL, 0);
     ppl_withWordsDestroy (c, &ww_tmp);
     ppl_withWordsDestroy (c, outstyle);

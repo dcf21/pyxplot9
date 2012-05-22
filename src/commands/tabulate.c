@@ -205,15 +205,16 @@ static int ppl_tab_dataGridDisplay(ppl_context *c, FILE *output, dataTable *data
 
 void ppl_directive_tabulate(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
-  wordexp_t  wordExp;
-  int        pos;
-  pplObj    *stk=in->stk;
-  FILE      *output=NULL;
-  long       j;
-  char      *filename, filenameTemp[FNAME_LENGTH];;
-  pplObj     unit  [USING_ITEMS_MAX];
-  int        minSet[USING_ITEMS_MAX], maxSet[USING_ITEMS_MAX];
-  double     min   [USING_ITEMS_MAX], max   [USING_ITEMS_MAX];
+  wordexp_t   wordExp;
+  int         pos;
+  pplObj     *stk=in->stk;
+  FILE       *output=NULL;
+  long        j;
+  char       *filename, filenameTemp[FNAME_LENGTH];
+  parserLine *spool=NULL, **dataSpool = &spool;
+  pplObj      unit  [USING_ITEMS_MAX];
+  int         minSet[USING_ITEMS_MAX], maxSet[USING_ITEMS_MAX];
+  double      min   [USING_ITEMS_MAX], max   [USING_ITEMS_MAX];
 
   // Read data range
   {
@@ -242,13 +243,13 @@ void ppl_directive_tabulate(ppl_context *c, parserLine *pl, parserOutput *in, in
       {
        if ((minSet[nr])&&(unit[nr].objType!=stk[pos+o2].objType))
         {
-         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d have conflicting types of <%s> and <%s>.", i+1, pplObjTypeNames[unit[nr].objType], pplObjTypeNames[stk[pos+o2].objType]);
+         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d have conflicting types of <%s> and <%s>.", nr+1, pplObjTypeNames[unit[nr].objType], pplObjTypeNames[stk[pos+o2].objType]);
          TBADD2(ERR_TYPE,in->stkCharPos[pos+PARSE_tabulate_min_0range_list]);
          return;
         }
        if ((minSet[nr])&&(!ppl_unitsDimEqual(&unit[nr],&stk[pos+o2])))
         {
-         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d have conflicting physical units of <%s> and <%s>.", i+1, ppl_printUnit(c,&unit[nr],NULL,NULL,0,0,0), ppl_printUnit(c,&stk[pos+o2],NULL,NULL,1,0,0));
+         sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d have conflicting physical units of <%s> and <%s>.", nr+1, ppl_printUnit(c,&unit[nr],NULL,NULL,0,0,0), ppl_printUnit(c,&stk[pos+o2],NULL,NULL,1,0,0));
          TBADD2(ERR_UNIT,in->stkCharPos[pos+PARSE_tabulate_min_0range_list]);
          return;
         }
@@ -302,7 +303,7 @@ void ppl_directive_tabulate(ppl_context *c, parserLine *pl, parserOutput *in, in
       int status        = 0;
 
       // Fetch data
-      ppldata_fromCmd(c, &data, pl, in, w, datafname, PARSE_TABLE_tabulate_, pos, -1, 0, min, minSet, max, maxSet, unit, 0, &status, c->errcontext.tempErrStr, &errCount, iterDepth);
+      ppldata_fromCmd(c, &data, pl, in, w, datafname, dataSpool, PARSE_TABLE_tabulate_, pos, -1, 0, min, minSet, max, maxSet, unit, 0, &status, c->errcontext.tempErrStr, &errCount, iterDepth);
 
       // Print data
       if ((status)||(data==NULL))

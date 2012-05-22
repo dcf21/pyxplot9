@@ -59,9 +59,9 @@ void ppl_withWordsZero(ppl_context *context, withWords *a)
   return;
  }
 
-void ppl_withWordsFromDict(ppl_context *context, parserOutput *in, parserLine *pl, const int *ptab, withWords *out)
+void ppl_withWordsFromDict(ppl_context *context, parserOutput *in, parserLine *pl, const int *ptab, int stkbase, withWords *out)
  {
-  pplObj  *stk = in->stk;
+  pplObj  *stk = in->stk + stkbase;
   int      tempint, i, pos, got;
   double   tempdbl;
   char    *tempstr;
@@ -69,8 +69,8 @@ void ppl_withWordsFromDict(ppl_context *context, parserOutput *in, parserLine *p
   ppl_withWordsZero(context, out);
 
   // read color names
-  ppl_colorFromDict(context, in, pl, ptab, 0, &out->color, &out->Col1234Space, &out->EXPcolor, &out->color1, &out->color2, &out->color3, &out->color4, &out->USEcolor, &out->USEcolor1234);
-  ppl_colorFromDict(context, in, pl, ptab, 1, &out->fillcolor, &out->FillCol1234Space, &out->EXPfillcolor, &out->fillcolor1, &out->fillcolor2, &out->fillcolor3, &out->fillcolor4, &out->USEfillcolor, &out->USEfillcolor1234);
+  ppl_colorFromDict(context, in, pl, ptab, stkbase, 0, &out->color, &out->Col1234Space, &out->EXPcolor, &out->color1, &out->color2, &out->color3, &out->color4, &out->USEcolor, &out->USEcolor1234);
+  ppl_colorFromDict(context, in, pl, ptab, stkbase, 1, &out->fillcolor, &out->FillCol1234Space, &out->EXPfillcolor, &out->fillcolor1, &out->fillcolor2, &out->fillcolor3, &out->fillcolor4, &out->USEfillcolor, &out->USEfillcolor1234);
 
   // Other settings
   pos     = ptab[PARSE_INDEX_linetype      ];  got = (pos>=0) && (stk[pos].objType==PPLOBJ_NUM);
