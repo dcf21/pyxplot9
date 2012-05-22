@@ -57,7 +57,8 @@ typedef struct canvas_plotrange {
 
 typedef struct canvas_plotdesc {
  unsigned char           function, parametric, TRangeSet, VRangeSet, axis1set, axis2set, axis3set, ContinuitySet, IndexSet, EverySet, TitleSet, NoTitleSet;
- int                     NFunctions, axis1xyz, axis2xyz, axis3xyz, axis1, axis2, axis3, EveryList[6], index, continuity, UsingRowCols, NUsing;
+ int                     NFunctions, axis1xyz, axis2xyz, axis3xyz, axis1, axis2, axis3, index, continuity, UsingRowCols, NUsing;
+ long                    EveryList[6];
  withWords               ww;
  char                   *filename, *title;
  pplObj                 *vectors;

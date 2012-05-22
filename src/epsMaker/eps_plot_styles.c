@@ -102,7 +102,7 @@ void eps_withwords_default_counterinc(EPSComm *x, int *Ccounter, int *LTcounter,
  }
 
 // Return the number of columns of data which are required to plot in any given plot style
-int eps_plot_styles_NDataColumns(EPSComm *x, int style, unsigned char ThreeDim)
+int eps_plot_styles_NDataColumns(pplerr_context *ec, int style, unsigned char ThreeDim)
  {
   if      (style == SW_STYLE_POINTS         ) return 2 + (ThreeDim!=0);
   else if (style == SW_STYLE_LINES          ) return 2 + (ThreeDim!=0);
@@ -140,7 +140,7 @@ int eps_plot_styles_NDataColumns(EPSComm *x, int style, unsigned char ThreeDim)
   else if (style == SW_STYLE_COLORMAP      ) return 3;
   else if (style == SW_STYLE_CONTOURMAP     ) return 3;
 
-  ppl_fatal(&x->c->errcontext,__FILE__,__LINE__,"Unrecognised style type passed to eps_plot_styles_NDataColumns()");
+  ppl_fatal(ec,__FILE__,__LINE__,"Unrecognised style type passed to eps_plot_styles_NDataColumns()");
   return -1;
  }
 

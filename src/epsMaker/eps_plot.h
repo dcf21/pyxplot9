@@ -23,13 +23,14 @@
 #define _PPL_EPS_PLOT_H 1
 
 #include "coreUtils/list.h"
+#include "expressions/expCompile.h"
 #include "settings/settings.h"
 #include "epsMaker/eps_comm.h"
 #include "userspace/pplObj.h"
 
-int eps_plot_AddUsingItemsForWithWords(ppl_context *c, withWords *ww, int *NExpect, unsigned char *AutoUsingList, list *UsingList, int *NObjs);
+int  eps_plot_AddUsingItemsForWithWords(ppl_context *c, withWords *ww, int *NExpect, unsigned char *autoUsingList, pplExpr ***usingList, int *Nusing, int *NObjs, char *errtext);
 void eps_plot_WithWordsFromUsingItems(ppl_context *c, withWords *ww, double *DataRow, pplObj *ObjRow, int Ncolumns_real, int Ncolumns_obj);
-int  eps_plot_WithWordsCheckUsingItemsDimLess(ppl_context *c, withWords *ww, pplObj *FirstValues, int Ncolumns_real, int Ncolumns_obj, int *NDataCols);
+int  eps_plot_WithWordsCheckUsingItemsDimLess(ppl_context *c, withWords *ww, pplObj *firstValues, int Ncolumns_real, int Ncolumns_obj, int *NDataCols);
 
 void eps_plot_ReadAccessibleData(EPSComm *x);
 void eps_plot_SampleFunctions(EPSComm *x);

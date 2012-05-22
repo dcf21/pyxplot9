@@ -33,6 +33,8 @@
 #include "coreUtils/dict.h"
 #include "coreUtils/memAlloc.h"
 #include "epsMaker/canvasDraw.h"
+#include "epsMaker/eps_plot.h"
+#include "epsMaker/eps_plot_styles.h"
 #include "expressions/expCompile_fns.h"
 #include "expressions/expEval.h"
 #include "expressions/traceback_fns.h"
@@ -419,12 +421,12 @@ char *ppl_canvas_item_textify(ppl_context *c, canvas_item *ptr, char *output)
          ppl_strStrip(pd->functions[j]->ascii , output+i);
          i+=strlen(output+i);
         }
-      if (pd->EverySet>0) { sprintf(output+i, " every %d", pd->EveryList[0]); i+=strlen(output+i); } // Print out 'every' clause of plot command
-      if (pd->EverySet>1) { sprintf(output+i, ":%d", pd->EveryList[1]); i+=strlen(output+i); }
-      if (pd->EverySet>2) { sprintf(output+i, ":%d", pd->EveryList[2]); i+=strlen(output+i); }
-      if (pd->EverySet>3) { sprintf(output+i, ":%d", pd->EveryList[3]); i+=strlen(output+i); }
-      if (pd->EverySet>4) { sprintf(output+i, ":%d", pd->EveryList[4]); i+=strlen(output+i); }
-      if (pd->EverySet>5) { sprintf(output+i, ":%d", pd->EveryList[5]); i+=strlen(output+i); }
+      if (pd->EverySet>0) { sprintf(output+i, " every %ld", pd->EveryList[0]); i+=strlen(output+i); } // Print out 'every' clause of plot command
+      if (pd->EverySet>1) { sprintf(output+i, ":%ld", pd->EveryList[1]); i+=strlen(output+i); }
+      if (pd->EverySet>2) { sprintf(output+i, ":%ld", pd->EveryList[2]); i+=strlen(output+i); }
+      if (pd->EverySet>3) { sprintf(output+i, ":%ld", pd->EveryList[3]); i+=strlen(output+i); }
+      if (pd->EverySet>4) { sprintf(output+i, ":%ld", pd->EveryList[4]); i+=strlen(output+i); }
+      if (pd->EverySet>5) { sprintf(output+i, ":%ld", pd->EveryList[5]); i+=strlen(output+i); }
       if (ptr->text==NULL) { sprintf(output+i, " format auto"); i+=strlen(output+i); }
       else                 { sprintf(output+i, " format %s", ptr->text); i+=strlen(output+i); }
       if (pd->IndexSet) { sprintf(output+i, " index %d", pd->index); i+=strlen(output+i); } // Print index to use
@@ -510,12 +512,12 @@ char *ppl_canvas_item_textify(ppl_context *c, canvas_item *ptr, char *output)
         if (pd->axis2set) { sprintf(output+i, "%c%d", "xyzc"[pd->axis2xyz], pd->axis2); i+=strlen(output+i); }
         if (pd->axis3set) { sprintf(output+i, "%c%d", "xyzc"[pd->axis3xyz], pd->axis3); i+=strlen(output+i); }
        }
-      if (pd->EverySet>0) { sprintf(output+i, " every %d", pd->EveryList[0]); i+=strlen(output+i); } // Print out 'every' clause of plot command
-      if (pd->EverySet>1) { sprintf(output+i, ":%d", pd->EveryList[1]); i+=strlen(output+i); }
-      if (pd->EverySet>2) { sprintf(output+i, ":%d", pd->EveryList[2]); i+=strlen(output+i); }
-      if (pd->EverySet>3) { sprintf(output+i, ":%d", pd->EveryList[3]); i+=strlen(output+i); }
-      if (pd->EverySet>4) { sprintf(output+i, ":%d", pd->EveryList[4]); i+=strlen(output+i); }
-      if (pd->EverySet>5) { sprintf(output+i, ":%d", pd->EveryList[5]); i+=strlen(output+i); }
+      if (pd->EverySet>0) { sprintf(output+i, " every %ld", pd->EveryList[0]); i+=strlen(output+i); } // Print out 'every' clause of plot command
+      if (pd->EverySet>1) { sprintf(output+i, ":%ld", pd->EveryList[1]); i+=strlen(output+i); }
+      if (pd->EverySet>2) { sprintf(output+i, ":%ld", pd->EveryList[2]); i+=strlen(output+i); }
+      if (pd->EverySet>3) { sprintf(output+i, ":%ld", pd->EveryList[3]); i+=strlen(output+i); }
+      if (pd->EverySet>4) { sprintf(output+i, ":%ld", pd->EveryList[4]); i+=strlen(output+i); }
+      if (pd->EverySet>5) { sprintf(output+i, ":%ld", pd->EveryList[5]); i+=strlen(output+i); }
       if (pd->IndexSet) { sprintf(output+i, " index %d", pd->index); i+=strlen(output+i); } // Print index to use
       if (pd->label!=NULL) { sprintf(output+i, " label %s", pd->label->ascii); i+=strlen(output+i); } // Print label string
       if (pd->SelectCriterion!=NULL) { sprintf(output+i, " select %s", pd->SelectCriterion->ascii); i+=strlen(output+i); } // Print select criterion
@@ -1416,6 +1418,12 @@ static int ppl_getPlotFname(ppl_context *c, char *in, int wildcardMatchNumber, c
   out->vectors=NULL;
   if (wildcardMatchNumber<0) wildcardMatchNumber=0;
   C = wildcardMatchNumber;
+  if ((strcmp(in,"-")==0)||(strcmp(in,"--")==0)) // special filenames match once only
+   {
+    if (wildcardMatchNumber>0) return 1;
+    strcpy(out->filename, in);
+    return 0;
+   }
   if ((wordexp(in, &wordExp, 0) != 0) || (wordExp.we_wordc <= 0)) { sprintf(c->errcontext.tempErrStr, "Could not open file '%s'.", in); ppl_error(&c->errcontext,ERR_FILE,-1,-1,NULL); return 1; }
   for (i=0; i<wordExp.we_wordc; i++)
    {
@@ -1437,10 +1445,10 @@ static int ppl_getPlotFname(ppl_context *c, char *in, int wildcardMatchNumber, c
   return 1;
  }
 
-static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, canvas_plotdesc **out, const int *ptab, int stkbase, int wildcardMatchNumber, int iterDepth, parserLine **dataSpool)
+static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, canvas_item *ci, const int *ptab, int stkbase, int wildcardMatchNumber, int iterDepth, parserLine **dataSpool, int NExpectIn)
  {
   pplObj           *stk         = in->stk;
-  canvas_plotdesc **plotItemPtr = out;
+  canvas_plotdesc **plotItemPtr = &ci->plotitems;
   canvas_plotdesc  *new         = NULL;
   while (*plotItemPtr != NULL) plotItemPtr=&(*plotItemPtr)->next; // Find end of list of plot items
 
@@ -1598,7 +1606,7 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
      { new->UsingList = NULL; }
     else
      {
-      new->UsingList = (pplExpr **)malloc(Nusing * sizeof(pplExpr *));
+      new->UsingList = (pplExpr **)malloc((Nusing+8) * sizeof(pplExpr *)); // we may add some more using items later; leave room for eight
       if (new->UsingList==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); free(new); return 1; }
       pos = ptab[PARSE_INDEX_using_list] + stkbase;
       while (stk[pos].objType == PPLOBJ_NUM)
@@ -1690,7 +1698,33 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
   // Read withWords
   ppl_withWordsFromDict(c, in, pl, ptab, stkbase, &new->ww);
 
-  // Read data from pipe
+  // If reading data from pipe, read and store it now
+  if ((new->filename!=NULL) && ((strcmp(new->filename,"-")==0) || (strcmp(new->filename,"--")==0)))
+   {
+    int              status=0, errCount=DATAFILE_NERRS, nObjs=0;
+    unsigned char    autoUsingList=0;
+    const int        linespoints = new->ww.USElinespoints ? new->ww.linespoints :
+                                  (ci->settings.dataStyle.USElinespoints ? ci->settings.dataStyle.linespoints : SW_STYLE_POINTS);
+    int              NExpect = (NExpectIn>0) ? NExpectIn : eps_plot_styles_NDataColumns(&c->errcontext, linespoints, ci->ThreeDim);
+    char            *errbuff = (char *)malloc(LSTR_LENGTH);
+
+    if (errbuff==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); free(new); return 1; }
+
+    new->ww.linespoints    = linespoints; // Fix plot style, so that number of expected columns doesn't later change with DataStyle
+    new->ww.USElinespoints = 1;
+
+    // Color maps can take 3,4,5 or 6 columns of data
+    if (linespoints==SW_STYLE_COLORMAP)
+     {
+      int listlen = new->NUsing;
+      if ((listlen>=3)&&(listlen<=6)) NExpect=listlen;
+     }
+
+    if (eps_plot_AddUsingItemsForWithWords(c, &new->ww_final, &NExpect, &autoUsingList, &new->UsingList, &new->NUsing, &nObjs, errbuff)) { free(new); ppl_error(&c->errcontext,ERR_GENERAL, -1, -1, errbuff); return 1; } // Add extra using items for, e.g. "linewidth $3".
+    if (NExpect != new->NUsing) { sprintf(c->errcontext.tempErrStr, "The supplied using ... clause contains the wrong number of items. We need %d columns of data, but %d have been supplied.", NExpect, new->NUsing); ppl_error(&c->errcontext,ERR_SYNTAX,-1,-1,NULL); return 1; }
+    ppldata_fromFile(c, &new->PersistentDataTable, new->filename, 0, NULL, dataSpool, new->index, new->UsingList, autoUsingList, NExpect, nObjs, new->label, new->SelectCriterion, NULL, new->UsingRowCols, new->EveryList, new->continuity, 1, &status, errbuff, &errCount, iterDepth);
+    free(errbuff);
+   }
 
 
   // Store plot item
@@ -1729,7 +1763,7 @@ int ppl_directive_piechart(ppl_context *c, parserLine *pl, parserOutput *in, int
     ptr->ArrowType = ppl_fetchSettingByName(&c->errcontext, i, SW_PIEKEYPOS_INT, SW_PIEKEYPOS_STR);
    } else { ptr->ArrowType = SW_PIEKEYPOS_AUTO; }
 
-  status = ppl_getPlotData(c, pl, in, &ptr->plotitems, PARSE_TABLE_piechart_, 0, 0, iterDepth, dataSpool);
+  status = ppl_getPlotData(c, pl, in, ptr, PARSE_TABLE_piechart_, 0, 0, iterDepth, dataSpool, 1);
   if (status) { canvas_delete(c, id); return 1; }
 
   // Redisplay the canvas as required
@@ -1908,7 +1942,7 @@ int ppl_directive_plot(ppl_context *c, parserLine *pl, parserOutput *in, int int
      // Loop over wildcard matches
      for (w=0 ; ; w++)
       {
-       int status = ppl_getPlotData(c, pl, in, &ptr->plotitems, PARSE_TABLE_replot_, pos, w, iterDepth, dataSpool);
+       int status = ppl_getPlotData(c, pl, in, ptr, PARSE_TABLE_replot_, pos, w, iterDepth, dataSpool, -1);
        if (status)
         {
          if (w==0) { canvas_delete(c, id); return 1; }

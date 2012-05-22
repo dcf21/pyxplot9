@@ -218,6 +218,15 @@ static void expEval_stringSubs(ppl_context *context, pplExpr *inExpr, int charpo
    }
   out[outP]='\0';
 
+  // Throw an error if too many arguments were supplied
+  if (argP<0)
+   {
+    free(out);
+    sprintf(context->errStat.errBuff, "Too many arguments supplied to string substitution operator; %d supplied when %d were needed.", Nsubs, Nsubs+argP);
+    TBADD(ERR_RANGE);
+    return;
+   }
+
   // Return output string
   pplObjStr(obj, 0, 1, out);
   context->stackPtr++;

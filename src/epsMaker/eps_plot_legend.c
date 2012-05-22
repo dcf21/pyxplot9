@@ -134,12 +134,12 @@ void GraphLegend_YieldUpText(EPSComm *x)
           if (pd->axis2set) { sprintf(cptr+k, "$%c%d$", "xyzc"[pd->axis2xyz], pd->axis2); k+=strlen(cptr+k); }
           if (pd->axis3set) { sprintf(cptr+k, "$%c%d$", "xyzc"[pd->axis3xyz], pd->axis3); k+=strlen(cptr+k); }
          }
-        if (pd->EverySet>0) { sprintf(cptr+k, " every $%d$", pd->EveryList[0]); k+=strlen(cptr+k); } // Print out 'every' clause of plot command
-        if (pd->EverySet>1) { sprintf(cptr+k, ":$%d$", pd->EveryList[1]); k+=strlen(cptr+k); }
-        if (pd->EverySet>2) { sprintf(cptr+k, ":$%d$", pd->EveryList[2]); k+=strlen(cptr+k); }
-        if (pd->EverySet>3) { sprintf(cptr+k, ":$%d$", pd->EveryList[3]); k+=strlen(cptr+k); }
-        if (pd->EverySet>4) { sprintf(cptr+k, ":$%d$", pd->EveryList[4]); k+=strlen(cptr+k); }
-        if (pd->EverySet>5) { sprintf(cptr+k, ":$%d$", pd->EveryList[5]); k+=strlen(cptr+k); }
+        if (pd->EverySet>0) { sprintf(cptr+k, " every $%ld$", pd->EveryList[0]); k+=strlen(cptr+k); } // Print out 'every' clause of plot command
+        if (pd->EverySet>1) { sprintf(cptr+k, ":$%ld$", pd->EveryList[1]); k+=strlen(cptr+k); }
+        if (pd->EverySet>2) { sprintf(cptr+k, ":$%ld$", pd->EveryList[2]); k+=strlen(cptr+k); }
+        if (pd->EverySet>3) { sprintf(cptr+k, ":$%ld$", pd->EveryList[3]); k+=strlen(cptr+k); }
+        if (pd->EverySet>4) { sprintf(cptr+k, ":$%ld$", pd->EveryList[4]); k+=strlen(cptr+k); }
+        if (pd->EverySet>5) { sprintf(cptr+k, ":$%ld$", pd->EveryList[5]); k+=strlen(cptr+k); }
         if (pd->IndexSet) { sprintf(cptr+k, " index $%d$", pd->index); k+=strlen(cptr+k); } // Print index to use
         if (pd->label!=NULL) { sprintf(cptr+k, " label "); k+=strlen(cptr+k); inlen=strlen(pd->label->ascii); ppl_texify_generic(x->c, pd->label->ascii, -1, &inlen, cptr+k, LSTR_LENGTH-k, NULL, NULL); k+=strlen(cptr+k); } // Print label string
         if (pd->SelectCriterion!=NULL) { strcpy(cptr+k, " select "); k+=strlen(cptr+k); inlen=strlen(pd->SelectCriterion->ascii); ppl_texify_generic(x->c, pd->SelectCriterion->ascii, -1, &inlen, cptr+k, LSTR_LENGTH-k, NULL, NULL); k+=strlen(cptr+k); } // Print select criterion

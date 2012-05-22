@@ -620,7 +620,7 @@ static char *ppldata_fetchFromSpool(parserLine **dataSpool)
   return out;
  }
 
-static int ppldata_autoUsingList(ppl_context *c, pplExpr **usingExprs, int Ncols, char *errtext)
+int ppldata_autoUsingList(ppl_context *c, pplExpr **usingExprs, int Ncols, char *errtext)
  {
   int i;
   for (i=0; i<Ncols; i++)
