@@ -98,6 +98,7 @@ static void canvas_item_delete(ppl_context *c, canvas_item *ptr)
     if (pd->vectors         != NULL) for (i=0; i<pd->NFunctions; i++) ppl_garbageObject(&pd->vectors  [i]);
     if (pd->filename        != NULL) free(pd->filename);
     if (pd->functions       != NULL) free(pd->functions);
+    if (pd->vectors         != NULL) free(pd->vectors);
     if (pd->label           != NULL) pplExpr_free(pd->label);
     if (pd->SelectCriterion != NULL) pplExpr_free(pd->SelectCriterion);
     if (pd->title           != NULL) free(pd->title);
@@ -1421,6 +1422,8 @@ static int ppl_getPlotFname(ppl_context *c, char *in, int wildcardMatchNumber, c
   if ((strcmp(in,"-")==0)||(strcmp(in,"--")==0)) // special filenames match once only
    {
     if (wildcardMatchNumber>0) return 1;
+    out->filename = (char *)malloc(4);
+    if (out->filename==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory."); return 1; }
     strcpy(out->filename, in);
     return 0;
    }
@@ -1702,6 +1705,8 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
   if ((new->filename!=NULL) && ((strcmp(new->filename,"-")==0) || (strcmp(new->filename,"--")==0)))
    {
     int              status=0, errCount=DATAFILE_NERRS, nObjs=0;
+    pplExpr        **UsingList = new->UsingList;
+    int              NUsing = new->NUsing;
     unsigned char    autoUsingList=0;
     const int        linespoints = new->ww.USElinespoints ? new->ww.linespoints :
                                   (ci->settings.dataStyle.USElinespoints ? ci->settings.dataStyle.linespoints : SW_STYLE_POINTS);
@@ -1716,13 +1721,13 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
     // Color maps can take 3,4,5 or 6 columns of data
     if (linespoints==SW_STYLE_COLORMAP)
      {
-      int listlen = new->NUsing;
+      int listlen = NUsing;
       if ((listlen>=3)&&(listlen<=6)) NExpect=listlen;
      }
 
-    if (eps_plot_AddUsingItemsForWithWords(c, &new->ww_final, &NExpect, &autoUsingList, &new->UsingList, &new->NUsing, &nObjs, errbuff)) { free(new); ppl_error(&c->errcontext,ERR_GENERAL, -1, -1, errbuff); return 1; } // Add extra using items for, e.g. "linewidth $3".
-    if (NExpect != new->NUsing) { sprintf(c->errcontext.tempErrStr, "The supplied using ... clause contains the wrong number of items. We need %d columns of data, but %d have been supplied.", NExpect, new->NUsing); ppl_error(&c->errcontext,ERR_SYNTAX,-1,-1,NULL); return 1; }
-    ppldata_fromFile(c, &new->PersistentDataTable, new->filename, 0, NULL, dataSpool, new->index, new->UsingList, autoUsingList, NExpect, nObjs, new->label, new->SelectCriterion, NULL, new->UsingRowCols, new->EveryList, new->continuity, 1, &status, errbuff, &errCount, iterDepth);
+    if (eps_plot_AddUsingItemsForWithWords(c, &new->ww_final, &NExpect, &autoUsingList, &UsingList, &NUsing, &nObjs, errbuff)) { free(new); ppl_error(&c->errcontext,ERR_GENERAL, -1, -1, errbuff); return 1; } // Add extra using items for, e.g. "linewidth $3".
+    if (NExpect != NUsing) { sprintf(c->errcontext.tempErrStr, "The supplied using ... clause contains the wrong number of items. We need %d columns of data, but %d have been supplied.", NExpect, NUsing); ppl_error(&c->errcontext,ERR_SYNTAX,-1,-1,NULL); return 1; }
+    ppldata_fromFile(c, &new->PersistentDataTable, new->filename, 0, NULL, dataSpool, new->index, UsingList, autoUsingList, NExpect, nObjs, new->label, new->SelectCriterion, NULL, new->UsingRowCols, new->EveryList, new->continuity, 1, &status, errbuff, &errCount, iterDepth);
     free(errbuff);
    }
 
@@ -1749,12 +1754,8 @@ int ppl_directive_piechart(ppl_context *c, parserLine *pl, parserOutput *in, int
   ppl_withWordsCpy(c, &ptr->settings.funcStyle, &c->set->graph_current.funcStyle);
 
   // Look up format string
-  if (stk[PARSE_piechart_format_string].objType==PPLOBJ_STR)
-   {
-    char *i = (char *)stk[PARSE_piechart_format_string].auxil;
-    ptr->text = (char *)malloc(strlen(i)+1);
-    strcpy(ptr->text, i);
-   } else { ptr->text=NULL; }
+  if (stk[PARSE_piechart_format_string].objType==PPLOBJ_EXP) ptr->format = pplExpr_cpy((pplExpr *)stk[PARSE_piechart_format_string].auxil);
+  else                                                       ptr->format = NULL;
 
   // Look up label position
   if (stk[PARSE_piechart_piekeypos].objType==PPLOBJ_STR)
@@ -1763,6 +1764,14 @@ int ppl_directive_piechart(ppl_context *c, parserLine *pl, parserOutput *in, int
     ptr->ArrowType = ppl_fetchSettingByName(&c->errcontext, i, SW_PIEKEYPOS_INT, SW_PIEKEYPOS_STR);
    } else { ptr->ArrowType = SW_PIEKEYPOS_AUTO; }
 
+  // Look up data spool
+  if (stk[PARSE_piechart_data].objType==PPLOBJ_BYT)
+   {
+    spool = (parserLine *)stk[PARSE_piechart_data].auxil;
+    if (spool!=NULL) spool = spool->next; // first line is command line
+   }
+
+  // Fetch options in common with the plot command
   status = ppl_getPlotData(c, pl, in, ptr, PARSE_TABLE_piechart_, 0, 0, iterDepth, dataSpool, 1);
   if (status) { canvas_delete(c, id); return 1; }
 
@@ -1779,8 +1788,9 @@ int ppl_directive_piechart(ppl_context *c, parserLine *pl, parserOutput *in, int
 // Implementation of the plot command
 int ppl_directive_plot(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth, int replot)
  {
-  pplObj          *stk = in->stk;
-  canvas_item     *ptr = NULL;
+  pplObj          *stk   = in->stk;
+  canvas_item     *ptr   = NULL;
+  parserLine      *spool = NULL, **dataSpool = &spool;
   canvas_itemlist *canvas_items = c->canvas_items;
   int              id;
 
@@ -1899,9 +1909,15 @@ int ppl_directive_plot(ppl_context *c, parserLine *pl, parserOutput *in, int int
     }
   }
 
+  // Look up data spool
+  if (stk[PARSE_replot_data].objType==PPLOBJ_BYT)
+   {
+    spool = (parserLine *)stk[PARSE_piechart_data].auxil;
+    if (spool!=NULL) spool = spool->next; // first line is command line
+   }
+
   // Read list of plotted items
   {
-   parserLine *spool=NULL, **dataSpool = &spool;
    int pos = PARSE_replot_0plot_list;
    while (stk[pos].objType == PPLOBJ_NUM)
     {

@@ -92,7 +92,6 @@ static void TriSwap(double *a, double *b)
 void GraphLegend_YieldUpText(EPSComm *x)
  {
   canvas_plotdesc *pd;
-  CanvasTextItem  *i;
   char *cptr, *buffer;
   int j, k, inlen;
 

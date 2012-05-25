@@ -87,6 +87,7 @@ typedef struct canvas_item {
  int                 id, type, ArrowType, TransColR, TransColG, TransColB;
  double              xpos, ypos, xpos2, ypos2, rotation;
  char               *text;
+ pplExpr            *format;
  unsigned char       deleted, xpos2set, ypos2set, clip, calcbbox, smooth, NoTransparency, CustomTransparency;
  withWords           with_data;
  pplset_graph        settings;

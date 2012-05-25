@@ -43,6 +43,7 @@
 #define YIELD_TEXTITEM(X) \
   if ((X != NULL) && (X[0]!='\0')) \
    { \
+    CanvasTextItem *i; \
     i = (CanvasTextItem *)ppl_memAlloc(sizeof(CanvasTextItem)); \
     if (i==NULL) { ppl_error(&x->c->errcontext, ERR_MEMORY, -1, -1, "Out of memory"); *(x->status) = 1; return; } \
     i->text              = X; \
@@ -50,6 +51,14 @@
     ppl_listAppend(x->TextItems, i); \
     x->NTextItems++; \
    }
+
+#define YIELD_TEXTITEM_CPY(X) \
+ { \
+  char *out = (char *)ppl_memAlloc(strlen(X)+1); \
+  if (out==NULL) { ppl_error(&x->c->errcontext, ERR_MEMORY, -1, -1, "Out of memory"); *(x->status) = 1; return; } \
+  strcpy(out, (X)); \
+  YIELD_TEXTITEM(out); \
+ }
 
 void GraphLegend_YieldUpText(EPSComm *x);
 void GraphLegend_Render(EPSComm *x, double width, double height, double zdepth);

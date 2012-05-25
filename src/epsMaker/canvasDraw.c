@@ -48,10 +48,11 @@
 #include "epsMaker/eps_ellipse.h"
 #include "epsMaker/eps_eps.h"
 #include "epsMaker/eps_image.h"
-#include "epsMaker/eps_point.h"
-#include "epsMaker/eps_polygon.h"
+#include "epsMaker/eps_piechart.h"
 #include "epsMaker/eps_plot.h"
 #include "epsMaker/eps_plot_threedimbuff.h"
+#include "epsMaker/eps_point.h"
+#include "epsMaker/eps_polygon.h"
 #include "epsMaker/eps_text.h"
 #include "epsMaker/eps_comm.h"
 #include "epsMaker/eps_core.h"
@@ -136,7 +137,7 @@ static void(*CircHandlers[] )(EPSComm *) = {NULL                       , NULL   
 static void(*EllpsHandlers[])(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , eps_ellps_RenderEPS, NULL};
 static void(*EPSHandlers[]  )(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , eps_eps_RenderEPS  , NULL};
 static void(*ImageHandlers[])(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , eps_image_RenderEPS, NULL};
-static void(*PieHandlers[]  )(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , NULL               , NULL};
+static void(*PieHandlers[]  )(EPSComm *) = {eps_pie_ReadAccessibleData , NULL                    , NULL                     , eps_pie_YieldUpText , NULL                , eps_pie_RenderEPS  , NULL};
 static void(*PlotHandlers[] )(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , NULL               , NULL};
 static void(*PointHandlers[])(EPSComm *) = {NULL                       , NULL                    , NULL                     , eps_point_YieldUpText,NULL                , eps_point_RenderEPS, NULL};
 static void(*PolygHandlers[])(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , eps_polygon_RenderEPS,NULL};

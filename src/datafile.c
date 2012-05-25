@@ -348,7 +348,7 @@ void ppldata_UsingConvert(ppl_context *c, pplExpr *input, char **columns_str, pp
 
 #define STACK_CLEAN    while (c->stackPtr>stkLevelOld) { STACK_POP; }
 
-#define FAIL { COUNTERR_BEGIN; ppl_warning(&c->errcontext, ERR_STACKED, errtext); COUNTERR_END; *status = 1; *discontinuity = 1; if ((*labOut)!=NULL) free(*labOut); *labOut=NULL; if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
+#define FAIL { COUNTERR_BEGIN; ppl_warning(&c->errcontext, ERR_STACKED, errtext); COUNTERR_END; *status = 1; *discontinuity = 1; if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
 
 void ppldata_ApplyUsingList(ppl_context *c, dataTable *out, pplExpr **usingExprs, pplExpr *labelExpr, pplExpr *selectExpr, int continuity, int *discontinuity, char **columns_str, pplObj *columns_val, int Ncols, char *filename, long file_linenumber, long *file_linenumbers, long linenumber_count, long block_count, long index_number, int usingRowCol, char **colHeads, int NcolHeads, pplObj *colUnits, int NcolUnits, int *status, char *errtext, int *errCount, int iterDepth)
  {
@@ -1030,7 +1030,7 @@ void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fn
     if ((!parametric) && sampleGrid) colData[2] = *ordinateVar[1];
     for (j=0; j<fnlist_len; j++)
      {
-      long       file_linenumber=0; char *filename=buffer, *tmp2=NULL, **labOut=&tmp2; // Dummy stuff needed for STACK_CLEAN
+      long       file_linenumber=0; char *filename=buffer; // Dummy stuff needed for STACK_CLEAN
       const int  stkLevelOld = c->stackPtr;
       pplObj    *ob;
       ob = ppl_expEval(c, fnlist[j], &k, 0, iterDepth);
@@ -1041,7 +1041,7 @@ void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fn
         if (errp<0) errp=0;
         if      (c->errStat.errMsgExpr[0]!='\0') errt=c->errStat.errMsgExpr;
         else if (c->errStat.errMsgCmd [0]!='\0') errt=c->errStat.errMsgCmd;
-        else                                     errt="Fail occured.";
+        else                                     errt="Fail occurred.";
         COUNTERR_BEGIN;
         sprintf(c->errcontext.tempErrStr, "%s: Could not evaluate expression <%s>. The error, encountered at character position %d, was: '%s'", buffer, fnlist[j]->ascii, errp, errt);
         ppl_error(&c->errcontext,ERR_NUMERIC,-1,-1,NULL);
@@ -1479,7 +1479,7 @@ void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutp
      first = ppl_expEval(c, exprList[0], &i, 0, iterDepth);
      if ((!c->errStat.status) && (first->objType==PPLOBJ_STR) && (Nexprs==1) && (rasterY==NULL)) // If we have a single expression that evaluates to a string, it's a filename
       {
-       long file_linenumber=pl->srcLineN; int tmp=0, *discontinuity=&tmp; char *filename=pl->srcFname, *tmp2=NULL, **labOut=&tmp2; // Dummy stuff needed for STACK_CLEAN
+       long file_linenumber=pl->srcLineN; int tmp=0, *discontinuity=&tmp; char *filename=pl->srcFname; // Dummy stuff needed for STACK_CLEAN
        char *datafile = (char *)first->auxil;
        ppldata_fromFile(c, out, datafile, wildcardMatchNumber, filenameOut, dataSpool, indexNo, usingExprs, autoUsingList, Ncols, NusingObjs, labelExpr, selectExpr, sortBy, usingRowCol, everyList, continuity, persistent, status, errtext, errCount, iterDepth);
        STACK_CLEAN;
@@ -1495,7 +1495,7 @@ void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutp
        if (vecs==NULL) { *status=1; sprintf(errtext, "Out of memory."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
        for (i=0; i<Nexprs; i++)
         {
-         long file_linenumber=pl->srcLineN; int tmp=0, *discontinuity=&tmp; char *filename=pl->srcFname, *tmp2=NULL, **labOut=&tmp2; // Dummy stuff needed for STACK_CLEAN
+         long file_linenumber=pl->srcLineN; int tmp=0, *discontinuity=&tmp; char *filename=pl->srcFname; // Dummy stuff needed for STACK_CLEAN
          int l2;
          pplObj *obj = ppl_expEval(c, exprList[i], &j, 0, iterDepth);
          if (c->errStat.status) { *status=1; sprintf(errtext, "Could not evaluate vector expressions."); for (j=0; j<i; j++) ppl_garbageObject(vecs+j); STACK_CLEAN; if (DEBUG) ppl_log(&c->errcontext, errtext); return; }

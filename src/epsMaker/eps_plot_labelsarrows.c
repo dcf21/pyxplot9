@@ -49,8 +49,6 @@
 void eps_plot_labelsarrows_YieldUpText(EPSComm *x)
  {
   ppllabel_object *li;
-  CanvasTextItem  *i;
-
   for (li=x->current->label_list; li!=NULL; li=li->next) { YIELD_TEXTITEM(li->text); }
   return;
  }

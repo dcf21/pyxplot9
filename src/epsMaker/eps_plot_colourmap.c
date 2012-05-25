@@ -193,10 +193,9 @@ void eps_plot_colourmap_YieldText(EPSComm *x, dataTable *data, pplset_graph *sg,
   if (pd->C1Axis.TickListStrings!=NULL)
    for (l=0; pd->C1Axis.TickListStrings[l]!=NULL; l++)
     {
-     CanvasTextItem *i;
      YIELD_TEXTITEM(pd->C1Axis.TickListStrings[l]);
     }
-  { CanvasTextItem *i; YIELD_TEXTITEM(pd->C1Axis.FinalAxisLabel); }
+  YIELD_TEXTITEM(pd->C1Axis.FinalAxisLabel);
 
   // If we have three columns of data, consider drawing a color scale bar
   if ((Ncol==3)&&(sg->ColKey==SW_ONOFF_ON))

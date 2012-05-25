@@ -178,17 +178,14 @@ void eps_plot_contourmap_YieldText(EPSComm *x, dataTable *data, pplset_graph *sg
                               ((sg->ContoursListLen>=0) && (k<sg->ContoursListLen))  );
        k++)
    {
-    char *text;
-    CanvasTextItem *i;
-    pplObj          v = pd->CRangeUnit;
+    pplObj  v = pd->CRangeUnit;
 
     if (sg->ContoursListLen< 0) v.real = CLog?(CMin*pow(CMax/CMin,(k+0.5*CMinAuto)/(sg->ContoursN-0.5*((!CMinAuto)+(!CMaxAuto)))))
                                              :(CMin+(CMax-CMin)*(k+0.5*CMinAuto)/(sg->ContoursN-0.5*((!CMinAuto)+(!CMaxAuto))));
     else                        v.real = sg->ContoursList[k];
 
     sprintf(UnitString,"%s",ppl_unitsNumericDisplay(x->c,&v,0,SW_DISPLAY_L,0));
-    text = ppl_memAlloc(strlen(UnitString)+1);
-    if (text!=NULL) { strcpy(text, UnitString); YIELD_TEXTITEM(text); }
+    YIELD_TEXTITEM_CPY(UnitString);
    }
 
   // Store range of values for which contours will be drawn
