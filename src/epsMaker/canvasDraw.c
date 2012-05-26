@@ -138,7 +138,7 @@ static void(*EllpsHandlers[])(EPSComm *) = {NULL                       , NULL   
 static void(*EPSHandlers[]  )(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , eps_eps_RenderEPS  , NULL};
 static void(*ImageHandlers[])(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , eps_image_RenderEPS, NULL};
 static void(*PieHandlers[]  )(EPSComm *) = {eps_pie_ReadAccessibleData , NULL                    , NULL                     , eps_pie_YieldUpText , NULL                , eps_pie_RenderEPS  , NULL};
-static void(*PlotHandlers[] )(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , NULL               , NULL};
+static void(*PlotHandlers[] )(EPSComm *) = {eps_plot_ReadAccessibleData, eps_plot_SampleFunctions, eps_plot_DecideAxisRanges, eps_plot_YieldUpText, NULL                , eps_plot_RenderEPS , NULL};
 static void(*PointHandlers[])(EPSComm *) = {NULL                       , NULL                    , NULL                     , eps_point_YieldUpText,NULL                , eps_point_RenderEPS, NULL};
 static void(*PolygHandlers[])(EPSComm *) = {NULL                       , NULL                    , NULL                     , NULL                , NULL                , eps_polygon_RenderEPS,NULL};
 static void(*TextHandlers[] )(EPSComm *) = {NULL                       , NULL                    , NULL                     , eps_text_YieldUpText, NULL                , eps_text_RenderEPS , NULL};
@@ -452,7 +452,7 @@ void canvas_CallLaTeX(EPSComm *x)
 
   // Make string buffer
   str_buffer = (char *)ppl_memAlloc(LSTR_LENGTH);
-  if (str_buffer==NULL) { ppl_error(&x->c->errcontext, ERR_MEMORY,-1,-1,"Out of memory."); return; }
+  if (str_buffer==NULL) { ppl_error(&x->c->errcontext, ERR_MEMORY,-1,-1,"Out of memory (y)."); return; }
 
   // Start writing LaTeX document
   sprintf(filename, "%s.tex", x->TeXFilename);

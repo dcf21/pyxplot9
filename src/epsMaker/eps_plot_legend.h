@@ -45,7 +45,7 @@
    { \
     CanvasTextItem *i; \
     i = (CanvasTextItem *)ppl_memAlloc(sizeof(CanvasTextItem)); \
-    if (i==NULL) { ppl_error(&x->c->errcontext, ERR_MEMORY, -1, -1, "Out of memory"); *(x->status) = 1; return; } \
+    if (i==NULL) { ppl_error(&x->c->errcontext, ERR_MEMORY, -1, -1, "Out of memory (q)."); *(x->status) = 1; return; } \
     i->text              = X; \
     i->CanvasMultiplotID = x->current->id; \
     ppl_listAppend(x->TextItems, i); \
@@ -55,7 +55,7 @@
 #define YIELD_TEXTITEM_CPY(X) \
  { \
   char *out = (char *)ppl_memAlloc(strlen(X)+1); \
-  if (out==NULL) { ppl_error(&x->c->errcontext, ERR_MEMORY, -1, -1, "Out of memory"); *(x->status) = 1; return; } \
+  if (out==NULL) { ppl_error(&x->c->errcontext, ERR_MEMORY, -1, -1, "Out of memory (r)."); *(x->status) = 1; return; } \
   strcpy(out, (X)); \
   YIELD_TEXTITEM(out); \
  }

@@ -364,7 +364,7 @@ int  eps_plot_contourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, in
 
   clist   = (ContourDesc *)ppl_memAlloc(MAX_CONTOUR_PATHS * sizeof(ContourDesc));
   errtext = ppl_memAlloc(LSTR_LENGTH);
-  if ((clist==NULL)||(errtext==NULL)) { ppl_error(&x->c->errcontext,ERR_MEMORY,-1,-1,"Out of memory."); return 1; }
+  if ((clist==NULL)||(errtext==NULL)) { ppl_error(&x->c->errcontext,ERR_MEMORY,-1,-1,"Out of memory (p)."); return 1; }
 
   // Work out orientation of contourmap
   if (!ThreeDim)

@@ -72,10 +72,6 @@ sprintf(ppltxt_welcome, "\n\
 |_|    \\__, /_/\\_\\_|   |_|\\___/ \\__|   Copyright (C) 2006-2012 Dominic Ford\n\
        |___/                                         2008-2012 Ross Church\n\
 \n\
-THIS DEVELOPMENT VERSION OF PYXPLOT IS FEATURE INCOMPLETE, HIGHLY UNSTABLE, AND\n\
-LARGELY UNDOCUMENTED. IF DIDN'T ALREADY KNOW THAT, YOU SHOULD PROBABLY BE USING\n\
-PYXPLOT 0.8.X.\n\
-\n\
 For documentation and more information, see <http://www.pyxplot.org.uk>.\n\
 ", VERSION, DATE);
 

@@ -228,7 +228,7 @@ FILE *ppldata_LaunchCoProcess(ppl_context *c, char *filename, int wildcardMatchN
        }
       if (C>=globData.gl_pathc) { C-=globData.gl_pathc; globfree(&globData); continue; }
       filename = (char *)ppl_memAlloc(strlen(globData.gl_pathv[C])+1);
-      if (filename==NULL) { sprintf(errtext, "Out of memory."); globfree(&globData); wordfree(&wordExp); return NULL; }
+      if (filename==NULL) { sprintf(errtext, "Out of memory (00)."); globfree(&globData); wordfree(&wordExp); return NULL; }
       strcpy(filename, globData.gl_pathv[C]);
       globfree(&globData);
       done=1;
@@ -256,7 +256,7 @@ FILE *ppldata_LaunchCoProcess(ppl_context *c, char *filename, int wildcardMatchN
       if (DEBUG) { sprintf(c->errcontext.tempErrStr, "Using input filter '%s'.", filter); ppl_log(&c->errcontext, NULL); }
       filterArgs = (char  *)ppl_memAlloc(strlen(filter)+1);
       argList    = (char **)ppl_memAlloc((strlen(filter)/2+1)*sizeof(char *));
-      if ((filterArgs==NULL)||(argList==NULL)) { sprintf(errtext,"Out of memory."); if (DEBUG) ppl_log(&c->errcontext, errtext); return NULL; };
+      if ((filterArgs==NULL)||(argList==NULL)) { sprintf(errtext,"Out of memory (01)."); if (DEBUG) ppl_log(&c->errcontext, errtext); return NULL; };
       strcpy(filterArgs, filter);
       for (i=j=k=0; filterArgs[i]!='\0'; i++)
        {
@@ -630,10 +630,10 @@ int ppldata_autoUsingList(ppl_context *c, pplExpr **usingExprs, int Ncols, char 
     pplExpr *exptmp=NULL;
     sprintf(ascii, "%d", i+1);
     ppl_expCompile(c,0,0,"",ascii,&end,0,0,0,&exptmp,&ep,&es,errtext);
-    if (es || c->errStat.status) { ppl_tbClear(c); sprintf(errtext, "Out of memory."); if (DEBUG) ppl_log(&c->errcontext, errtext); return 1; }
+    if (es || c->errStat.status) { ppl_tbClear(c); sprintf(errtext, "Out of memory (03)."); if (DEBUG) ppl_log(&c->errcontext, errtext); return 1; }
     usingExprs[i] = pplExpr_tmpcpy(exptmp);
     pplExpr_free(exptmp);
-    if (usingExprs[i]==NULL) { sprintf(errtext, "Out of memory."); if (DEBUG) ppl_log(&c->errcontext, errtext); return 1; }
+    if (usingExprs[i]==NULL) { sprintf(errtext, "Out of memory (04)."); if (DEBUG) ppl_log(&c->errcontext, errtext); return 1; }
    }
   return 0;
  }
@@ -774,7 +774,7 @@ void ppldata_fromFile(ppl_context *c, dataTable **out, char *filename, int wildc
         cptr            = (char  *)ppl_memAlloc_incontext(j-i+1                     , contextRough); strcpy(cptr, linebuffer+i);
         columnHeadings  = (char **)ppl_memAlloc_incontext(itemsOnLine*sizeof(char *), contextRough);
         NcolumnHeadings = itemsOnLine;
-        if ((cptr==NULL)||(columnHeadings==NULL)) { strcpy(errtext, "Out of memory."); *status=1; if (DEBUG) ppl_log(&c->errcontext,errtext); FCLOSE_FI; return; }
+        if ((cptr==NULL)||(columnHeadings==NULL)) { strcpy(errtext, "Out of memory (05)."); *status=1; if (DEBUG) ppl_log(&c->errcontext,errtext); FCLOSE_FI; return; }
         itemsOnLine = 0; hadwhitespace = 1;
         for (j=0; cptr[j]!='\0'; j++)
          {
@@ -801,7 +801,7 @@ void ppldata_fromFile(ppl_context *c, dataTable **out, char *filename, int wildc
         cptr            = (char  *)ppl_memAlloc_incontext(j-i+1                     , contextRough); strcpy(cptr, linebuffer+i);
         rowHeadings     = (char **)ppl_memAlloc_incontext(itemsOnLine*sizeof(char *), contextRough);
         NrowHeadings    = itemsOnLine;
-        if ((cptr==NULL)||(rowHeadings==NULL)) { strcpy(errtext, "Out of memory."); *status=1; if (DEBUG) ppl_log(&c->errcontext,errtext); FCLOSE_FI; return; }
+        if ((cptr==NULL)||(rowHeadings==NULL)) { strcpy(errtext, "Out of memory (06)."); *status=1; if (DEBUG) ppl_log(&c->errcontext,errtext); FCLOSE_FI; return; }
         itemsOnLine = 0; hadwhitespace = 1;
         for (j=0; cptr[j]!='\0'; j++)
          {
@@ -828,7 +828,7 @@ void ppldata_fromFile(ppl_context *c, dataTable **out, char *filename, int wildc
         cptr         = (char   *)ppl_memAlloc_incontext(j-i+2                     , contextRough); strncpy(cptr, linebuffer+i, j-i+2);
         columnUnits  = (pplObj *)ppl_memAlloc_incontext(itemsOnLine*sizeof(pplObj), contextRough);
         NcolumnUnits = itemsOnLine;
-        if ((cptr==NULL)||(columnUnits==NULL)) { strcpy(errtext, "Out of memory."); *status=1; if (DEBUG) ppl_log(&c->errcontext,errtext); FCLOSE_FI; return; }
+        if ((cptr==NULL)||(columnUnits==NULL)) { strcpy(errtext, "Out of memory (07)."); *status=1; if (DEBUG) ppl_log(&c->errcontext,errtext); FCLOSE_FI; return; }
         itemsOnLine = 0; hadwhitespace = 1;
         for (k=0; cptr[k]!='\0'; k++)
          {
@@ -868,7 +868,7 @@ void ppldata_fromFile(ppl_context *c, dataTable **out, char *filename, int wildc
         cptr         = (char   *)ppl_memAlloc_incontext(j-i+2                     , contextRough); strncpy(cptr, linebuffer+i, j-i+2);
         rowUnits     = (pplObj *)ppl_memAlloc_incontext(itemsOnLine*sizeof(pplObj), contextRough);
         NrowUnits    = itemsOnLine;
-        if ((cptr==NULL)||(rowUnits==NULL)) { strcpy(errtext, "Out of memory."); *status=1; if (DEBUG) ppl_log(&c->errcontext,errtext); FCLOSE_FI; return; }
+        if ((cptr==NULL)||(rowUnits==NULL)) { strcpy(errtext, "Out of memory (08)."); *status=1; if (DEBUG) ppl_log(&c->errcontext,errtext); FCLOSE_FI; return; }
         itemsOnLine = 0; hadwhitespace = 1;
         for (k=0; cptr[k]!='\0'; k++)
          {
@@ -998,20 +998,6 @@ void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fn
   *out = ppldata_NewDataTable(Ncols-NusingObjs, NusingObjs, contextOutput, sampleGrid ? (rasterXlen*rasterYlen) : rasterXlen);
   if (*out == NULL) { strcpy(errtext, "Out of memory whilst trying to allocate data table to read data from file."); *status=1; if (DEBUG) ppl_log(&c->errcontext,errtext); return; }
 
-  // Get a pointer to the value of the variable 'x' in the user's variable space
-  ordinateVar[1] = NULL;
-  for (a=0; a<=sampleGrid; a++)
-   {
-    char *v,*v2; pplObj **ru;
-    if (!a) { v="x"; v2=sampleGrid?"u":"t"; ru=&unitX; }
-    else    { v="y"; v2="v";                ru=&unitY; }
-
-    ppl_contextGetVarPointer(c, parametric?v2:v, &ordinateVar[a], &dummyTemp[a]);
-    *(ordinateVar[a]) = **ru;
-    (ordinateVar[a])->imag        = 0.0;
-    (ordinateVar[a])->flagComplex = 0;
-   }
-
   // Loop over ordinate values
   {
    int i,i2;
@@ -1021,8 +1007,29 @@ void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fn
    for (i2=0; i2<i2len; i2++,discontinuity2=1) for (i=0; i<ilen; i++, p++)
    {
     if (cancellationFlag) goto CANCEL;
-    ordinateVar[0]->real = rasterX[i];
-    if (sampleGrid) ordinateVar[1]->real = rasterY[i2];
+
+    // Get a pointer to the value of the variable 'x' in the user's variable space
+    ordinateVar[1] = NULL;
+    for (a=0; a<=sampleGrid; a++)
+     {
+      int   am,rc;
+      char *v,*v2; pplObj **ru;
+      if (!a) { v="x"; v2=sampleGrid?"u":"t"; ru=&unitX; }
+      else    { v="y"; v2="v";                ru=&unitY; }
+      ppl_contextGetVarPointer(c, parametric?v2:v, &ordinateVar[a], &dummyTemp[a]);
+      am = ordinateVar[a]->amMalloced;
+      rc = ordinateVar[a]->refCount;
+      ordinateVar[a]->amMalloced = 0;
+      ppl_garbageObject(ordinateVar[a]);
+      *(ordinateVar[a]) = **ru;
+      ordinateVar[a]->amMalloced  = am;
+      ordinateVar[a]->refCount    = rc;
+      ordinateVar[a]->imag        = 0.0;
+      ordinateVar[a]->flagComplex = 0;
+     }
+
+    pplObjNum(ordinateVar[0],0,rasterX[i],0);
+    if (sampleGrid) pplObjNum(ordinateVar[1],0,rasterY[i2],0);
     if (sampleGrid) sprintf(buffer, "%c=%s; %c=%s", (parametric?'u':'x'), ppl_unitsNumericDisplay(c,ordinateVar[0],0,0,0), (parametric?'v':'y'), ppl_unitsNumericDisplay(c,ordinateVar[1],1,0,0));
     else            sprintf(buffer, "%c=%s", (parametric?'t':'x'), ppl_unitsNumericDisplay(c,ordinateVar[0],0,0,0));
     pplObjNum(colData+0,0,p,0);
@@ -1046,6 +1053,7 @@ void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fn
         sprintf(c->errcontext.tempErrStr, "%s: Could not evaluate expression <%s>. The error, encountered at character position %d, was: '%s'", buffer, fnlist[j]->ascii, errp, errt);
         ppl_error(&c->errcontext,ERR_NUMERIC,-1,-1,NULL);
         COUNTERR_END;
+        STACK_CLEAN;
         ppl_tbClear(c);
         *status=1;
         break;
@@ -1070,14 +1078,14 @@ void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fn
      }
     for (j=0; j<fnlist_len; j++) ppl_garbageObject(&colData[j+offset]);
     *status=0;
+
+    // Reset the variable x (and maybe y or t) to its old value
+                              ppl_contextRestoreVarPointer(c, parametric?(sampleGrid?"u":"t"):"x", &dummyTemp[0]);
+    if (ordinateVar[1]!=NULL) ppl_contextRestoreVarPointer(c, parametric?(           "v"    ):"y", &dummyTemp[1]);
    }
   }
 
 CANCEL:
-  // Reset the variable x (and maybe y or t) to its old value
-                            ppl_contextRestoreVarPointer(c, parametric?(sampleGrid?"u":"t"):"x", &dummyTemp[0]);
-  if (ordinateVar[1]!=NULL) ppl_contextRestoreVarPointer(c, parametric?(           "v"    ):"y", &dummyTemp[1]);
-
   // If data is to be sorted, sort it now
   if ((!sampleGrid) && (sortBy!=NULL))
    {
@@ -1301,14 +1309,14 @@ void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutp
   unitX = rasterXunits; unitX.refCount=1;
   unitY = rasterYunits; unitY.refCount=1;
   rasterX = (double *)ppl_memAlloc(rasterXlen*sizeof(double));
-  if (rasterX==NULL) { *status=1; sprintf(errtext, "Out of memory."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
+  if (rasterX==NULL) { *status=1; sprintf(errtext, "Out of memory (09)."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
   if (!rasterXlog) ppl_linRaster(rasterX, rasterXmin, rasterXmax, rasterXlen);
   else             ppl_logRaster(rasterX, rasterXmin, rasterXmax, rasterXlen);
 
   if (sampleGrid)
    {
     rasterY = (double *)ppl_memAlloc(rasterYlen*sizeof(double));
-    if (rasterY==NULL) { *status=1; sprintf(errtext, "Out of memory."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
+    if (rasterY==NULL) { *status=1; sprintf(errtext, "Out of memory (10)."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
     if (!rasterYlog) ppl_linRaster(rasterY, rasterYmin, rasterYmax, rasterYlen);
     else             ppl_logRaster(rasterY, rasterYmin, rasterYmax, rasterYlen);
    }
@@ -1417,10 +1425,10 @@ void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutp
      usingExprs[1] = usingExprs[0];
      sprintf(ascii, "%d", 0);
      ppl_expCompile(c,pl->srcLineN,pl->srcId,pl->srcFname,ascii,&end,0,0,0,&exptmp,&ep,&es,errtext);
-     if (es || c->errStat.status) { ppl_tbClear(c); *status=1; sprintf(errtext, "Out of memory."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
+     if (es || c->errStat.status) { ppl_tbClear(c); *status=1; sprintf(errtext, "Out of memory (11)."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
      usingExprs[0] = pplExpr_tmpcpy(exptmp);
      pplExpr_free(exptmp);
-     if (usingExprs[0]==NULL) { *status=1; sprintf(errtext, "Out of memory."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
+     if (usingExprs[0]==NULL) { *status=1; sprintf(errtext, "Out of memory (12)."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
      Nusing=2;
     }
   }
@@ -1468,7 +1476,7 @@ void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutp
       }
      if (Nexprs < 1) { *status=1; sprintf(errtext, "Fewer than one expression was supplied to evaluate."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
      exprList = (pplExpr **)ppl_memAlloc(Nexprs*sizeof(pplExpr *));
-     if (exprList==NULL) { *status=1; sprintf(errtext, "Out of memory."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
+     if (exprList==NULL) { *status=1; sprintf(errtext, "Out of memory (13)."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
      for (i=0, pos=pos1; stk[pos].objType==PPLOBJ_NUM; i++)
       {
        pos = (int)round(stk[pos].real);
@@ -1492,7 +1500,7 @@ void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutp
        const int   l = v->size;
        int         j;
        vecs = (pplObj *)ppl_memAlloc(Nexprs*sizeof(pplObj));
-       if (vecs==NULL) { *status=1; sprintf(errtext, "Out of memory."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
+       if (vecs==NULL) { *status=1; sprintf(errtext, "Out of memory (14)."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
        for (i=0; i<Nexprs; i++)
         {
          long file_linenumber=pl->srcLineN; int tmp=0, *discontinuity=&tmp; char *filename=pl->srcFname; // Dummy stuff needed for STACK_CLEAN
@@ -1510,12 +1518,14 @@ void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutp
       }
      else
       {
+       long file_linenumber=pl->srcLineN; int tmp=0, *discontinuity=&tmp; char *filename=pl->srcFname; // Dummy stuff needed for STACK_CLEAN
        double *rX = rasterX;
        double *rY = rasterY;
        int     rXl= rasterXlen;
        int     rYl= rasterYlen;
        pplObj *uX = &unitX;
        pplObj *uY = &unitY;
+       STACK_CLEAN;
        ppl_tbClear(c);
 
        // See if this set of functions want a special raster

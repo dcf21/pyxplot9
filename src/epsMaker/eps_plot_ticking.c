@@ -191,7 +191,7 @@ void eps_plot_ticking(EPSComm *x, pplset_axis *axis, int AxisUnitStyle, pplset_a
       i = 1024;
       if (axis->label != NULL) i+=strlen(axis->label);
       axis->FinalAxisLabel = (char *)ppl_memAlloc(i);
-      if (axis->FinalAxisLabel==NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1, "Out of memory"); return; }
+      if (axis->FinalAxisLabel==NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1, "Out of memory (u)."); return; }
       if      (AxisUnitStyle == SW_AXISUNITSTY_BRACKET) sprintf(axis->FinalAxisLabel, "%s ($%s$)", (axis->label != NULL)?axis->label:"", UnitString);
       else if (AxisUnitStyle == SW_AXISUNITSTY_RATIO)   sprintf(axis->FinalAxisLabel, "%s / $%s$", (axis->label != NULL)?axis->label:"", UnitString);
       else                                              sprintf(axis->FinalAxisLabel, "%s [$%s$]", (axis->label != NULL)?axis->label:"", UnitString);
@@ -215,7 +215,7 @@ void eps_plot_ticking(EPSComm *x, pplset_axis *axis, int AxisUnitStyle, pplset_a
         for (N=0; TickStrs[N]!=NULL; N++); // Find length of list of ticks
         *TickListPositions = (double  *)ppl_memAlloc((N+1) * (axis->AxisValueTurnings+1) * sizeof(double));
         *TickListStrings   = (char   **)ppl_memAlloc((N+1) * (axis->AxisValueTurnings+1) * sizeof(char *));
-        if ((*TickListPositions==NULL) || (*TickListStrings==NULL)) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1, "Out of memory"); *TickListPositions = NULL; *TickListStrings = NULL; return; }
+        if ((*TickListPositions==NULL) || (*TickListStrings==NULL)) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1, "Out of memory (v)."); *TickListPositions = NULL; *TickListStrings = NULL; return; }
         for (i=j=0; i<N; i++)
          for (xrn=0; xrn<=axis->AxisValueTurnings; xrn++)
           {
@@ -235,7 +235,7 @@ void eps_plot_ticking(EPSComm *x, pplset_axis *axis, int AxisUnitStyle, pplset_a
         unsigned char inverted=0;
         *TickListPositions = (double  *)ppl_memAlloc(102 * (axis->AxisValueTurnings+1) * sizeof(double));
         *TickListStrings   = (char   **)ppl_memAlloc(102 * (axis->AxisValueTurnings+1) * sizeof(char *));
-        if ((*TickListPositions==NULL) || (*TickListStrings==NULL)) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1, "Out of memory"); *TickListPositions = NULL; *TickListStrings = NULL; return; }
+        if ((*TickListPositions==NULL) || (*TickListStrings==NULL)) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1, "Out of memory (w)."); *TickListPositions = NULL; *TickListStrings = NULL; return; }
         TStep= TickStep;
         if (TStep<0) { TStep=-TStep; inverted=1; }
         if (axis->LogFinal == SW_BOOL_TRUE) { if (TStep<1) { TStep=1/TStep; inverted=1; } else inverted=0; }
@@ -297,7 +297,7 @@ void eps_plot_ticking(EPSComm *x, pplset_axis *axis, int AxisUnitStyle, pplset_a
             if      (MajMin==0)            (*TickListStrings)[j] = "";
             else if (axis->format == NULL) TickLabelAutoGen(x, &(*TickListStrings)[j], tmp * UnitMultiplier, axis->tics.logBase, OutContext);
             else                           TickLabelFromFormat(x, &(*TickListStrings)[j], axis->format, tmp, &axis->DataUnit, axis->xyz, OutContext);
-            if ((*TickListStrings)[j]==NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1, "Out of memory"); *TickListPositions = NULL; *TickListStrings = NULL; return; }
+            if ((*TickListStrings)[j]==NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1, "Out of memory (x)."); *TickListPositions = NULL; *TickListStrings = NULL; return; }
             j++;
            }
          }

@@ -235,7 +235,7 @@ int  eps_plot_colourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int
   blk = data->first;
 
   errtext = ppl_memAlloc(LSTR_LENGTH);
-  if (errtext==NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY,-1,-1,"Out of memory."); return 1; }
+  if (errtext==NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY,-1,-1,"Out of memory (k)."); return 1; }
 
   // Work out orientation of colormap
   if (!ThreeDim)
@@ -291,7 +291,7 @@ int  eps_plot_colourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int
   img.data_len = 3*XSize*YSize;
   img.data     = ppl_memAlloc(3*XSize*YSize);
   img.TargetCompression = BMP_ENCODING_FLATE;
-  if (img.data==NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1,"Out of memory."); return 1; }
+  if (img.data==NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1,"Out of memory (l)."); return 1; }
 
   // Get pointer to variable c in the user's variable space
   for (i=0; i<4; i++)
@@ -499,7 +499,7 @@ write_rgb: \
     case BMP_ENCODING_FLATE: \
      zlen   = img.data_len*1.01+12; /* Nasty guess at size of buffer needed. */ \
      imagez = (unsigned char *)ppl_memAlloc(zlen); \
-     if (imagez == NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1,"Out of memory."); img.TargetCompression = BMP_ENCODING_NULL; break; } \
+     if (imagez == NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1,"Out of memory (m)."); img.TargetCompression = BMP_ENCODING_NULL; break; } \
      if (DEBUG) { ppl_log(&x->c->errcontext,"Calling zlib to compress image data."); } \
      j = compress2(imagez,&zlen,img.data,img.data_len,9); /* Call zlib to do deflation */ \
  \
@@ -568,7 +568,7 @@ int  eps_plot_colourmap_DrawScales(EPSComm *x, double origin_x, double origin_y,
   withWords        ww;
 
   errtext = ppl_memAlloc(LSTR_LENGTH);
-  if (errtext==NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY,-1,-1,"Out of memory."); return 1; }
+  if (errtext==NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY,-1,-1,"Out of memory (n)."); return 1; }
 
   // Set color for painting axes
   ppl_withWordsZero(x->c, &ww);
@@ -653,7 +653,7 @@ int  eps_plot_colourmap_DrawScales(EPSComm *x, double origin_x, double origin_y,
       img.data_len = 3*XSize*YSize;
       img.data     = ppl_memAlloc(3*XSize*YSize);
       img.TargetCompression = BMP_ENCODING_FLATE;
-      if (img.data==NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1,"Out of memory."); goto POST_BITMAP; }
+      if (img.data==NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1,"Out of memory (o)."); goto POST_BITMAP; }
 
       // Set CMin, CMax
       CMin = pd->CMinFinal;
