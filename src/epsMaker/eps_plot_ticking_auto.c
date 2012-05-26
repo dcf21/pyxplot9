@@ -37,12 +37,16 @@
 
 #include "coreUtils/errorReport.h"
 #include "coreUtils/memAlloc.h"
+#include "expressions/expCompile_fns.h"
+#include "expressions/expEval.h"
+#include "expressions/traceback_fns.h"
 #include "mathsTools/dcfmath.h"
 #include "stringTools/asciidouble.h"
 #include "settings/settings.h"
 #include "settings/settingTypes.h"
 #include "userspace/context.h"
 #include "userspace/contextVarDef.h"
+#include "userspace/garbageCollector.h"
 #include "userspace/pplObj_fns.h"
 #include "userspace/unitsDisp.h"
 
@@ -58,6 +62,15 @@
 #define MAX_FACTORS 32 /* Maximum number of factors of LogBase which we consider */
 #define FACTOR_MULTIPLY 2.0 /* Factorise LogBase**2, so that 0.00,0.25,0.50,0.75,1.00 is a valid factorisation */
 #define NOT_THROW 9999 /* Value we put in DivOfThrow when a tick isn't dividing throw (to get sorting right) */
+
+#define STACK_POP \
+   { \
+    c->stackPtr--; \
+    ppl_garbageObject(&c->stack[c->stackPtr]); \
+    if (c->stack[c->stackPtr].refCount != 0) { ppl_warning(&c->errcontext,ERR_STACKED,"Stack forward reference detected."); } \
+   }
+
+#define STACK_CLEAN    while (c->stackPtr>stkLevelOld) { STACK_POP; }
 
 // Structure used for storing information about a substitution argument in 'set format'
 typedef struct ArgumentInfo {
@@ -260,11 +273,11 @@ static void AddTickScheme(const PotentialTick *PotTickList, const int NPotTicks,
  }
 
 // Take a list of accepted ticks and convert these into a final TickList to associate with axis
-static int AutoTickListFinalise(EPSComm *X, pplset_axis *axis, const double UnitMultiplier, unsigned char *AutoTicks, pplObj *VarVal, const int NIntervals, char *format, const int start, const int *CommaPositions, const ArgumentInfo *args, const PotentialTick *PotTickList, const int NPotTicks, const ArgLeagueTableEntry *TickOrder, const unsigned char *TicksAccepted, int OutContext)
+static int AutoTickListFinalise(EPSComm *X, pplset_axis *axis, const double UnitMultiplier, unsigned char *AutoTicks, pplObj *VarVal, const int NIntervals, char *format, const int start, pplExpr **formatExp, const ArgumentInfo *args, const PotentialTick *PotTickList, const int NPotTicks, const ArgLeagueTableEntry *TickOrder, const unsigned char *TicksAccepted, int OutContext)
  {
-  int    i, jMAJ, jMIN, k, l, Nmajor=0, Nminor=0;
-  double axispos, x, x1, x2;
-  pplObj DummyVal;
+  ppl_context *c = X->c;
+  int          i, jMAJ, jMIN, Nmajor=0, Nminor=0;
+  double       axispos, x, x1, x2;
 
   // Count number of accepted ticks
   for (i=0; i<NPotTicks; i++)
@@ -315,22 +328,28 @@ static int AutoTickListFinalise(EPSComm *X, pplset_axis *axis, const double Unit
 
      while (count_steps<200)
       {
+       const int stkLevelOld = c->stackPtr;
+       int       lOp;
+       double    x = GSL_NAN;
+       pplObj   *o = ppl_expEval(c, formatExp[i], &lOp, 1, X->iterDepth+1);
+
        axispos_mid = (axispos_min+axispos_max)/2;
        VarVal->real = eps_plot_axis_InvGetPosition(axispos_mid, axis) * UnitMultiplier;
 
-       k=l=-1;
        if (arg->StringArg) // Evaluate argument at midpoint of the interval we know it to be in
         {
-         //ppl_GetQuotedString(format+start+CommaPositions[tick->ArgNo]+1, X->c->errcontext.tempErrStr, 0, &k, 0, &l, X->c->errcontext.tempErrStr, 1);
-         if (l>=0) X->c->errcontext.tempErrStr[0]='\0';
-         DiscreteMoveMin = (strcmp(X->c->errcontext.tempErrStr, arg->StringValues[tick->IntervalNum-1])==0);
+         char *DummyStr;
+         if ((o==NULL) || c->errStat.status || (o->objType!=PPLOBJ_STR)) { ppl_tbClear(c); DummyStr=""; }
+         else { DummyStr = (char *)o->auxil; }
+         DiscreteMoveMin = (strcmp(DummyStr, arg->StringValues[tick->IntervalNum-1])==0);
         }
        else
         {
-         //ppl_EvaluateAlgebra(format+start+CommaPositions[tick->ArgNo]+1, &DummyVal, 0, &k, 0, &l, X->c->errcontext.tempErrStr, 1);
-         if (l>=0) DummyVal.real = GSL_NAN;
-         DiscreteMoveMin = (DummyVal.real == arg->NumericValues[tick->IntervalNum-1]);
+         if ((o==NULL) || c->errStat.status || ((o->objType!=PPLOBJ_NUM) && (o->objType!=PPLOBJ_DATE) && (o->objType!=PPLOBJ_BOOL))) { ppl_tbClear(c); x=GSL_NAN; }
+         else { x=o->real; }
+         DiscreteMoveMin = (x == arg->NumericValues[tick->IntervalNum-1]);
         }
+       STACK_CLEAN;
 
        // Decide whether to pick left half of interval or right half
        if (!arg->ContinuousArg)
@@ -340,8 +359,8 @@ static int AutoTickListFinalise(EPSComm *X, pplset_axis *axis, const double Unit
         }
        else
         {
-         if (SlopePositive ^ (DummyVal.real >= tick->TargetValue)) axispos_min = axispos_mid;
-         else                                                      axispos_max = axispos_mid;
+         if (SlopePositive ^ (x >= tick->TargetValue)) axispos_min = axispos_mid;
+         else                                          axispos_max = axispos_mid;
         }
        if (axispos_max == axispos_min) break;
        count_steps++;
@@ -382,11 +401,13 @@ FAIL:
 // Main entry point for automatic ticking of axes
 void eps_plot_ticking_auto(EPSComm *x, pplset_axis *axis, double UnitMultiplier, unsigned char *AutoTicks, pplset_axis *linkedto)
  {
-  int    i, j, k, l, start, NArgs, OutContext, ContextRough=-1, CommaPositions[MAX_ARGS+2], NFactorsLogBase, LogBase;
-  int    FactorsLogBase[MAX_FACTORS];
-  int    N_STEPS;
-  char  *format, VarName[2]="\0\0", FormatTemp[32], QuoteType, *DummyStr;
-  pplObj CentralValue, *VarVal=NULL, DummyTemp, DummyVal;
+  ppl_context  *c = x->c;
+  int           i, j, k, start, NArgs, OutContext, ContextRough=-1, CommaPositions[MAX_ARGS+2], NFactorsLogBase, LogBase;
+  int           FactorsLogBase[MAX_FACTORS];
+  int           N_STEPS;
+  char         *format, VarName[2]="\0\0", FormatTemp[32], QuoteType, *DummyStr;
+  pplObj        CentralValue, *VarVal=NULL, DummyTemp;
+  pplExpr     **formatExp=NULL;
   ArgumentInfo *args;
   ArgLeagueTableEntry *ArgLeagueTable, *TickOrder;
   PotentialTick *PotTickList;
@@ -430,24 +451,37 @@ void eps_plot_ticking_auto(EPSComm *x, pplset_axis *axis, double UnitMultiplier,
   ArgLeagueTable = (ArgLeagueTableEntry *)ppl_memAlloc(NArgs * sizeof(ArgLeagueTableEntry));
   if (ArgLeagueTable==NULL) goto FAIL;
 
+  // Compile argument expressions
+  formatExp = (pplExpr **)ppl_memAlloc(NArgs * sizeof(pplExpr *));
+  if (formatExp==NULL) goto FAIL;
+  for (i=0; i<NArgs; i++) formatExp[i]=NULL;
+  for (i=0; i<NArgs; i++)
+   {
+    int end=0,ep=0,es=0;
+    ppl_expCompile(c,0,0,"",format+start+CommaPositions[i]+1,&end,0,0,0,&formatExp[i],&ep,&es,c->errcontext.tempErrStr);
+    if (es || c->errStat.status) { ppl_tbClear(c); goto FAIL; }
+   }
+
   // Look up variable x/y/z in user space and get pointer to its value
   ppl_contextGetVarPointer(x->c, VarName, &VarVal, &DummyTemp);
 
   // Identify string versus numeric arguments
   CentralValue = axis->DataUnit;
+  CentralValue.refCount = VarVal->refCount;
+  CentralValue.amMalloced = VarVal->amMalloced;
   CentralValue.flagComplex = 0;
   CentralValue.imag = 0.0;
   CentralValue.real = eps_plot_axis_InvGetPosition(0.5, axis);
   *VarVal = CentralValue;
   for (i=0; i<NArgs; i++)
    {
-    j=k=-1;
-    //ppl_EvaluateAlgebra(format+start+CommaPositions[i]+1, &DummyVal, 0, &k, 0, &j, x->c->errcontext.tempErrStr, 1);
-    if (j<0) { args[i].StringArg=0; continue; }
-    j=k=-1;
-    //ppl_GetQuotedString(format+start+CommaPositions[i]+1,  DummyStr, 0, &k, 0, &j, x->c->errcontext.tempErrStr, 1);
-    if (j<0) { args[i].StringArg=1; continue; }
-    goto FAIL;
+    const int stkLevelOld = c->stackPtr;
+    int       lOp;
+    pplObj   *o = ppl_expEval(c, formatExp[i], &lOp, 1, x->iterDepth+1);
+    if ((o==NULL) || c->errStat.status) { STACK_CLEAN; ppl_tbClear(c); goto FAIL; }
+    if     ((o->objType==PPLOBJ_NUM)||(o->objType==PPLOBJ_DATE)||(o->objType==PPLOBJ_BOOL)) { args[i].StringArg=0; STACK_CLEAN; continue; }
+    else if (o->objType==PPLOBJ_STR) { args[i].StringArg=1; STACK_CLEAN; continue; }
+    else                             { STACK_CLEAN; ppl_tbClear(c); goto FAIL; } // Not a number or a string
    }
 
   // Sample arguments at equally-spaced intervals along axis
@@ -471,24 +505,33 @@ void eps_plot_ticking_auto(EPSComm *x, pplset_axis *axis, double UnitMultiplier,
     VarVal->real = eps_plot_axis_InvGetPosition(j/(N_STEPS-1.0), axis) * UnitMultiplier;
     for (i=0; i<NArgs; i++)
      {
-      k=l=-1;
+      const int stkLevelOld = c->stackPtr;
+      int       lOp;
+      pplObj   *o = ppl_expEval(c, formatExp[i], &lOp, 1, x->iterDepth+1);
+
       if (args[i].StringArg)
        {
-        //ppl_GetQuotedString(format+start+CommaPositions[i]+1,  DummyStr, 0, &k, 0, &l, x->c->errcontext.tempErrStr, 1);
-        if (l>=0)   args[i].StringValues[j]="";
-        else      { args[i].StringValues[j]=(char *)ppl_memAlloc(strlen(DummyStr)+1); if (args[i].StringValues[j]==NULL) goto FAIL; strcpy(args[i].StringValues[j], DummyStr); }
+        char *DummyStr;
+        if ((o==NULL) || c->errStat.status || (o->objType!=PPLOBJ_STR)) { ppl_tbClear(c); DummyStr=""; }
+        else { DummyStr = (char *)o->auxil; }
+        args[i].StringValues[j]=(char *)ppl_memAlloc(strlen(DummyStr)+1);
+        if (args[i].StringValues[j]==NULL) { STACK_CLEAN; goto FAIL; }
+        strcpy(args[i].StringValues[j], DummyStr);
         if ((j>0) && (strcmp(args[i].StringValues[j],args[i].StringValues[j-1])!=0)) args[i].NValueChanges++;
        }
       else
        {
-        pplObjNum(&DummyVal,0,0,0);
-        //ppl_EvaluateAlgebra(format+start+CommaPositions[i]+1, &DummyVal, 0, &k, 0, &l, x->c->errcontext.tempErrStr, 1);
-        if (l>=0) DummyVal.real = GSL_NAN;
-        args[i].NumericValues[j] = DummyVal.real;
-        if ((j>0) && (args[i].NumericValues[j]!=args[i].NumericValues[j-1])) args[i].NValueChanges++;
-        if ((gsl_finite(DummyVal.real)) && ((!args[i].MinValueSet) || (DummyVal.real < args[i].MinValue))) { args[i].MinValue = DummyVal.real; args[i].MinValueSet=1; }
-        if ((gsl_finite(DummyVal.real)) && ((!args[i].MaxValueSet) || (DummyVal.real > args[i].MaxValue))) { args[i].MaxValue = DummyVal.real; args[i].MaxValueSet=1; }
+        int    err;
+        double x;
+        if ((o==NULL) || c->errStat.status || ((o->objType!=PPLOBJ_NUM) && (o->objType!=PPLOBJ_DATE) && (o->objType!=PPLOBJ_BOOL))) { ppl_tbClear(c); x=GSL_NAN; }
+        else { x=o->real; }
+        err = !gsl_finite(x);
+        args[i].NumericValues[j] = x;
+        if ((!err) && (x!=args[i].NumericValues[j-1])) args[i].NValueChanges++;
+        if ((!err) && ((!args[i].MinValueSet) || (x < args[i].MinValue))) { args[i].MinValue = x; args[i].MinValueSet=1; }
+        if ((!err) && ((!args[i].MaxValueSet) || (x > args[i].MaxValue))) { args[i].MaxValue = x; args[i].MaxValueSet=1; }
        }
+      STACK_CLEAN;
      }
    }
   for (i=0; i<NArgs; i++)
@@ -916,7 +959,7 @@ void eps_plot_ticking_auto(EPSComm *x, pplset_axis *axis, double UnitMultiplier,
     }
 
   // Finalise list of ticks
-  AutoTickListFinalise(x, axis, UnitMultiplier, AutoTicks, VarVal, N_STEPS, format, start, CommaPositions, args, PotTickList, NPotTicks, TickOrder, TicksAccepted, OutContext);
+  AutoTickListFinalise(x, axis, UnitMultiplier, AutoTicks, VarVal, N_STEPS, format, start, formatExp, args, PotTickList, NPotTicks, TickOrder, TicksAccepted, OutContext);
   goto CLEANUP;
 
 FAIL:
@@ -929,6 +972,9 @@ FAIL:
   else                eps_plot_ticking_auto2(x, axis, UnitMultiplier, AutoTicks, linkedto);
 
 CLEANUP:
+  // Delete compiled expressions
+  if (formatExp!=NULL) for (i=0; i<NArgs; i++) if (formatExp[i]!=NULL) pplExpr_free(formatExp[i]);
+
   // Restore original value of x (or y/z)
   if (VarVal!=NULL) ppl_contextRestoreVarPointer(x->c, VarName, &DummyTemp);
 
