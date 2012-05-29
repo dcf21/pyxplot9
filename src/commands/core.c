@@ -24,10 +24,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include <wordexp.h>
 #include <glob.h>
 #include <math.h>
 #include <unistd.h>
+#include <sys/select.h>
+#include <sys/wait.h>
 
 #ifdef HAVE_READLINE
 #include <readline/history.h>
@@ -62,8 +65,9 @@
 #include "userspace/pplObj_fns.h"
 #include "userspace/pplObjPrint.h"
 
-#include "pplConstants.h"
+#include "children.h"
 #include "input.h"
+#include "pplConstants.h"
 
 #define TBADD(et,pos) ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,pos,pl->linetxt,"")
 
@@ -400,21 +404,91 @@ void ppl_directive_unseterror(ppl_context *c, parserLine *pl, parserOutput *in, 
 void ppl_directive_varset(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
   pplObj *stk = in->stk;
-  int     om, rc;
   pplObj *val = &stk[PARSE_var_set_value];
+  pplObj *rgx = &stk[PARSE_var_set_regex];
   pplObj *obj=NULL;
 
   ppl_contextVarHierLookup(c, pl->srcLineN, pl->srcId, pl->srcFname, pl->linetxt, stk, in->stkCharPos, &obj, PARSE_var_set_varnames, PARSE_var_set_varname_varnames);
   if ((c->errStat.status) || (obj==NULL)) return;
   if (obj->objType==PPLOBJ_GLOB) { sprintf(c->errStat.errBuff,"Variable declared global in global namespace."); TBADD(ERR_NAMESPACE,0); return; }
 
-  om = obj->amMalloced;
-  rc = obj->refCount;
-  obj->amMalloced = 0;
-  obj->refCount = 1;
-  ppl_garbageObject(obj);
-  pplObjCpy(obj, val, 0, om, 1);
-  obj->refCount = rc;
+  if (rgx->objType!=PPLOBJ_STR) // variable assignment. not regular expression
+   {
+    int om = obj->amMalloced;
+    int rc = obj->refCount;
+    obj->amMalloced = 0;
+    obj->refCount = 1;
+    ppl_garbageObject(obj);
+    pplObjCpy(obj, val, 0, om, 1);
+    obj->refCount = rc;
+   }
+  else // regular expression
+   {
+    int        i, fstdin, fstdout, trialNumber;
+    sigset_t   sigs;
+    fd_set     readable;
+    int        rel;
+    char      *re    = NULL, *outstr=NULL;
+    char      *in    = (char *)rgx->auxil;
+    char      *instr = (char *)obj->auxil;
+
+    // Check that input is a string
+    if (obj->objType!=PPLOBJ_STR)
+     {
+      ppl_error(&c->errcontext,ERR_TYPE,-1,-1,"The regular expression operator can only act on variables which already have string values.");
+      return;
+     }
+
+    // Append 's' to the beginning of the regular expression
+    rel = (strlen(in)+8)*8;
+    re  = (char *)malloc(rel);
+    if (re==NULL) { ppl_error(&c->errcontext,ERR_MEMORY,-1,-1,"Out of memory."); return; }
+    sprintf(re, "s%s", in);
+
+    // Block sigchild
+    sigemptyset(&sigs);
+    sigaddset(&sigs,SIGCHLD);
+
+    // Fork a child sed process with the regular expression on the command line, and send variable contents to it
+    pplcsp_forkSed(c, re, &fstdin, &fstdout);
+    if (write(fstdin, instr, strlen(instr)) != strlen(instr)) ppl_fatal(&c->errcontext,__FILE__,__LINE__,"Could not write to pipe to sed");
+    close(fstdin);
+
+    // Wait for sed process's stdout to become readable. Get bored if this takes more than a second.
+    trialNumber = 1;
+    while (1)
+     {
+      struct timespec waitperiod; // A time.h timespec specifier for a wait of zero seconds
+      waitperiod.tv_sec  = 1; waitperiod.tv_nsec = 0;
+      FD_ZERO(&readable); FD_SET(fstdout, &readable);
+      if (pselect(fstdout+1, &readable, NULL, NULL, &waitperiod, NULL) == -1)
+       {
+        if ((errno==EINTR) && (trialNumber<3)) { trialNumber++; continue; }
+        ppl_error(&c->errcontext, ERR_INTERNAL, -1, -1, "Failure of the pselect() function whilst waiting for sed to return data.");
+        sigprocmask(SIG_UNBLOCK, &sigs, NULL);
+        free(re);
+        return;
+       }
+      break;
+     }
+    if (!FD_ISSET(fstdout , &readable)) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Got bored waiting for sed to return data."); sigprocmask(SIG_UNBLOCK, &sigs, NULL); free(re); return; }
+
+    // Read data back from sed process
+    if ((i = read(fstdout, re, rel)) < 0) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Could not read from pipe to sed."); sigprocmask(SIG_UNBLOCK, &sigs, NULL); free(re); return; }
+    re[i] = '\0';
+    close(fstdout);
+    sigprocmask(SIG_UNBLOCK, &sigs, NULL);
+
+    // Copy string into string variable
+    outstr = (char *)malloc(i+1);
+    if (outstr==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1, "Out of memory."); free(re); return; }
+    strcpy(outstr,re);
+    free(re);
+    if (obj->auxilMalloced) free(obj->auxil);
+    obj->auxil = outstr;
+    obj->auxilLen = i+1;
+    obj->auxilMalloced = 1;
+   }
   return;
  }
 
