@@ -57,9 +57,9 @@ Gx = Ax + AB*cos(CBA+90*unit(deg))
 Gy = Ay + AB*sin(CBA+90*unit(deg))
 
 # Construct diagram
-box from Dx,Dy to Cx,Cy with fillcol grey80
-box at Ax,Ay width AC height AC rot CBA-90*unit(deg) with fillcol grey80
-box at Bx,By width AB height AB rot CBA with fillcol grey80
+box from Dx,Dy to Cx,Cy with fillcol grey50
+box at Ax,Ay width AC height AC rot CBA-90*unit(deg) with fillcol grey50
+box at Bx,By width AB height AB rot CBA with fillcol grey50
 line from Bx,By to Kx,Ky
 line from Fx,Fy to Cx,Cy
 line from Ax,Ay to Dx,Dy

@@ -29,7 +29,7 @@ load "examples/fig_init.ppl"
 # Main body of figure script
 set nokey
 set size 8 square
-plot 3d x**3/20+y**2 with surface col black fillc blue, \
+plot 3d x**3/20+y**2 with surface col black fillc red, \
         x**3/20+y**2 with contours col black
 
 # Call common cleanup script
