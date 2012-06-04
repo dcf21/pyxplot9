@@ -32,6 +32,8 @@
 #include "stringTools/asciidouble.h"
 #include "stringTools/strConstants.h"
 
+int cancellationFlag=0;
+
 int main(int argc, char **argv)
  {
   char  help_string[LSTR_LENGTH], version_string[FNAME_LENGTH], version_string_underline[FNAME_LENGTH], warntext[FNAME_LENGTH];
@@ -74,7 +76,7 @@ full Users' Guide can be found in the file:\n\
 For the latest information on PyXPlot development, see the project website:\n\
 <http://www.pyxplot.org.uk>\n\n", VERSION, ppl_strUnderline(version_string, version_string_underline), warntext, DOCDIR, PATHLINK);
 
-  // Scan commandline options for any switches
+  // Scan command-line options for any switches
   HaveFilename=0;
   for (i=1; i<argc; i++)
    {
@@ -96,7 +98,7 @@ For the latest information on PyXPlot development, see the project website:\n\
      }
     else
     {
-     fprintf(stderr, "\nReceived switch '%s' which was not recognised.\nType 'pyxplot_fitshelper -help' for a list of available commandline options.\n\n", argv[i]);
+     fprintf(stderr, "\nReceived switch '%s' which was not recognised.\nType 'pyxplot_fitshelper -help' for a list of available command-line options.\n\n", argv[i]);
      return 1;
     }
    }
@@ -104,12 +106,12 @@ For the latest information on PyXPlot development, see the project website:\n\
   // Check that we have been provided with exactly one filename on the command line
   if (HaveFilename < 1)
    {
-    fprintf(stderr, "\npyxplot_fitshelper should be provided with a filename on the command line to\nact upon. Type 'pyxplot_fitshelper -help' for a list of available commandline\noptions.\n\n");
+    fprintf(stderr, "\npyxplot_fitshelper should be provided with a filename on the command line to\nact upon. Type 'pyxplot_fitshelper -help' for a list of available command-line\noptions.\n\n");
     return 1;
    }
   else if (HaveFilename > 1)
    {
-    fprintf(stderr, "\npyxplot_fitshelper should be provided with only one filename on the command\nline to act upon. Multiple filenames appear to have been supplied. Type\n'pyxplot_fitshelper -help' for a list of available commandline options.\n\n");
+    fprintf(stderr, "\npyxplot_fitshelper should be provided with only one filename on the command\nline to act upon. Multiple filenames appear to have been supplied. Type\n'pyxplot_fitshelper -help' for a list of available command-line options.\n\n");
     return 1;
    }
 

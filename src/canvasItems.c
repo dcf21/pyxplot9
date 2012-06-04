@@ -825,7 +825,7 @@ int ppl_directive_arrow(ppl_context *c, parserLine *pl, parserOutput *in, int in
   ptr->xpos2 = x2 - x1;
   ptr->ypos2 = y2 - y1;
 
-  // Read in colour and linewidth information, if available
+  // Read in color and linewidth information, if available
   ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_arrow_, 0, &ptr->with_data);
 
   // Work out whether this arrow is in the 'head', 'nohead' or 'twoway' style
@@ -850,13 +850,15 @@ int ppl_directive_box(ppl_context *c, parserLine *pl, parserOutput *in, int inte
   pplObj           *stk = in->stk;
   canvas_item      *ptr;
   int               id, gotx2, gotWidth, gotHeight, gotAng;
-  double            x1, x2, y1, y2, ang, width, height;
+  double            x1, x2, x3, y1, y2, y3, ang, width, height;
 
   // Look up the positions of the two corners of the box
   x1    = stk[PARSE_box_p1        ].real;
   y1    = stk[PARSE_box_p1      +1].real;
   x2    = stk[PARSE_box_p2        ].real; gotx2     = (stk[PARSE_box_p2        ].objType==PPLOBJ_NUM);
   y2    = stk[PARSE_box_p2      +1].real;
+  x3    = stk[PARSE_box_p3        ].real;
+  y3    = stk[PARSE_box_p3      +1].real;
   ang   = stk[PARSE_box_rotation  ].real; gotAng    = (stk[PARSE_box_rotation  ].objType==PPLOBJ_NUM);
   width = stk[PARSE_box_width     ].real; gotWidth  = (stk[PARSE_box_width     ].objType==PPLOBJ_NUM);
   height= stk[PARSE_box_height    ].real; gotHeight = (stk[PARSE_box_height    ].objType==PPLOBJ_NUM);
@@ -866,12 +868,12 @@ int ppl_directive_box(ppl_context *c, parserLine *pl, parserOutput *in, int inte
 
   // Add this box to the linked list which decribes the canvas
   if (canvas_itemlist_add(c,stk,CANVAS_BOX,&ptr,&id,0)) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory (C)."); return 1; }
-  ptr->xpos  = x1;
-  ptr->ypos  = y1;
+  ptr->xpos  = gotx2 ? x1 : x3;
+  ptr->ypos  = gotx2 ? y1 : y3;
   if (gotx2) // Box is specified by two corners
    {
-    ptr->xpos2 = x2 - x1;
-    ptr->ypos2 = y2 - y1;
+    ptr->xpos2 = x2 - ptr->xpos;
+    ptr->ypos2 = y2 - ptr->ypos;
     ptr->xpos2set = 0; // Rotation should be about CENTRE of box
    }
   else // Box is specified with width and height
@@ -883,7 +885,7 @@ int ppl_directive_box(ppl_context *c, parserLine *pl, parserOutput *in, int inte
   if (gotAng) { ptr->rotation = ang; } // Rotation angle is zero if not specified
   else        { ptr->rotation = 0.0; }
 
-  // Read in colour and linewidth information, if available
+  // Read in color and linewidth information, if available
   ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_box_, 0, &ptr->with_data);
 
   // Redisplay the canvas as required
@@ -922,7 +924,7 @@ int ppl_directive_circle(ppl_context *c, parserLine *pl, parserOutput *in, int i
   if (gota1) { ptr->xfset = 1; ptr->xf = a1; ptr->yf = a2; } // arc command
   else       { ptr->xfset = 0; } // circle command
 
-  // Read in colour and linewidth information, if available
+  // Read in color and linewidth information, if available
   ppl_withWordsFromDict(c, in, pl, amArc?PARSE_TABLE_arc_:PARSE_TABLE_circle_, 0, &ptr->with_data);
 
   // Redisplay the canvas as required
@@ -1109,7 +1111,7 @@ int ppl_directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int 
   if (gotSlr) { ptr->slrset= 1; ptr->slr= slr; }
   if (gotarc) { ptr->arcset= 1; ptr->arcfrom=arcfrom; ptr->arcto=arcto; }
 
-  // Read in colour and linewidth information, if available
+  // Read in color and linewidth information, if available
   ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_ellipse_, 0, &ptr->with_data);
 
   // Redisplay the canvas as required
@@ -1184,7 +1186,7 @@ int ppl_directive_point(ppl_context *c, parserLine *pl, parserOutput *in, int in
   ptr->xpos  = x;
   ptr->ypos  = y;
 
-  // Read in colour and linewidth information, if available
+  // Read in color and linewidth information, if available
   ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_point_, 0, &ptr->with_data);
 
   // See whether this point is labelled
@@ -1283,7 +1285,7 @@ fail:
   ptr->NpolygonPoints = Npts;
   ptr->polygonPoints  = ptList;
 
-  // Read in colour and linewidth information, if available
+  // Read in color and linewidth information, if available
   ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_polygon_, 0, &ptr->with_data);
 
   // Redisplay the canvas as required
@@ -1331,7 +1333,7 @@ int ppl_directive_text(ppl_context *c, parserLine *pl, parserOutput *in, int int
   if (gotAng) { ptr->rotation = ang; } else { ptr->rotation  = 0.0;                                }
   ptr->text = text;
 
-  // Read in colour information, if available
+  // Read in color information, if available
   ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_text_, 0, &ptr->with_data);
 
   // Redisplay the canvas as required
@@ -1646,7 +1648,7 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
 
   // Read title/notitle setting
   new->NoTitleSet = new->TitleSet = 0; new->title = NULL;
-  if (ptab[stkbase+PARSE_INDEX_title]>0)
+  if (ptab[PARSE_INDEX_title]>0)
    {
     pplObj *o1 = &stk[stkbase+ptab[PARSE_INDEX_notitle]];
     pplObj *o2 = &stk[stkbase+ptab[PARSE_INDEX_title]];

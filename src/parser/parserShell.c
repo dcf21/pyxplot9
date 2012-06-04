@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 
 #include "commands/core.h"
 #include "commands/eqnsolve.h"
@@ -194,7 +195,21 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     ppl_directive_piechart(c,pl,in,interactive,iterDepth);
   else if (strcmp(d, "pling")==0)
    {
-    if (system((char *)stk[PARSE_pling_cmd].auxil)) { if (DEBUG) ppl_log(&c->errcontext, "Pling command received non-zero return value."); }
+    int status = system((char *)stk[PARSE_pling_cmd].auxil);
+    if (WIFEXITED(status))
+     {
+      int ec = WEXITSTATUS(status);
+      if (ec) { if (DEBUG) ppl_log(&c->errcontext, "Pling command received non-zero return value."); }
+      if (ec) { sprintf(c->errcontext.tempErrStr, "Shell returned exit code %d.", ec); ppl_warning(&c->errcontext, ERR_GENERAL, NULL); }
+     }
+    else if (WIFSIGNALED(status))
+     {
+      sprintf(c->errcontext.tempErrStr, "Shell terminated by signal %d.", WTERMSIG(status)); ppl_warning(&c->errcontext, ERR_GENERAL, NULL);
+     }
+    else
+     {
+      sprintf(c->errcontext.tempErrStr, "Shell terminated because fail happened."); ppl_warning(&c->errcontext, ERR_GENERAL, NULL);
+     }
    }
   else if (strcmp(d, "plot")==0)
     ppl_directive_plot(c,pl,in,interactive,iterDepth,0);

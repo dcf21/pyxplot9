@@ -26,6 +26,7 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
+#include <sys/wait.h>
 
 #ifdef HAVE_READLINE
 #include <readline/readline.h>
@@ -572,7 +573,7 @@ finished_looking_for_tabcomp:
                 ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
                 break;
                }
-              // If supplied string did not match a named colour, treat it as an expression
+              // If supplied string did not match a named color, treat it as an expression
              }
             default:
              {
@@ -1087,7 +1088,21 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
            }
           status = pclose(substPipe);
           if (fail) goto shellSubstErr;
-          if (status!=0) { sprintf(c->errStat.errBuff, "Command failure during ` ` substitution."); fail=1; goto shellSubstErr; }
+
+          if (WIFEXITED(status))
+           {
+            int ec = WEXITSTATUS(status);
+            if (ec) { sprintf(c->errStat.errBuff, "Command failure during ` ` substitution (exit code %d).", ec); fail=1; goto shellSubstErr; }
+           }
+          else if (WIFSIGNALED(status))
+           {
+            sprintf(c->errStat.errBuff, "Command failure during ` ` substitution (terminated by signal %d).", WTERMSIG(status)); fail=1; goto shellSubstErr;
+           }
+          else
+           {
+            sprintf(c->errStat.errBuff, "Command failure during ` ` substitution (fail happened)."); fail=1; goto shellSubstErr;
+           }
+
   shellSubstErr:
           if (key!=NULL) free(key);
           if (fail) break;
@@ -1140,6 +1155,8 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
   if (s->stk[blockDepth][0] != NULL)
    {
     int match=0, linepos=0;
+    s->eLPos = s->eLlinePos = 0;
+    s->expectingList[0] = '\0';
     parse_descend(c, s, 1, srcLineN, srcId, srcFname, line, &linepos, NULL, NULL, -1, NULL, 0, blockDepth, &match);
     if (c->errStat.status) { if (outbuff!=NULL) free(outbuff); ppl_parserStatReInit(s); return 1; }
     return 0;

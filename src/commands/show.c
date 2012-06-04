@@ -1125,7 +1125,7 @@ int showMinor = 0;
 
 
   // Show variables
-  if ((ppl_strAutocomplete(word, "variables", 1)>=0) || (ppl_strAutocomplete(word, "vars", 1)>=0))
+  if ((ppl_strAutocomplete(word, "variables", 1)>=0) || (ppl_strAutocomplete(word, "vars", 1)>=0) || (ppl_strAutocomplete(word, "uservariables", 1)>=0) || (ppl_strAutocomplete(word, "uservars", 1)>=0))
    {
     int l;
     for (l=c->ns_ptr ; l>=0 ; l=(l>1)?1:l-1)
@@ -1133,6 +1133,7 @@ int showMinor = 0;
       char         *key;
       pplObj       *item;
       dictIterator *di = ppl_dictIterateInit( c->namespaces[l] );
+      if ((word[0]=='u')&&(l<1)) break; // Don't show default variables as user variables
       SHOW_HIGHLIGHT(1);
       if      (l >1) sprintf(out+i, "\n# Local variables:\n\n");
       else if (l==1) sprintf(out+i, "\n# Global variables:\n\n");

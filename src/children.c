@@ -280,7 +280,7 @@ void pplcsp_processCommand(ppl_context *context, char *in)
    }
   else if (in[0]=='0')                                // gv_singlewindow
    {
-    // Pick out filename of eps file to display, which is last commandline argument
+    // Pick out filename of eps file to display, which is last command-line argument
     int state=0,i; char *filename=in+1;
     for (i=1; in[i]!='\0'; i++)
       if ( ((in[i]>' ')||(in[i]<'\0')) || ((i>1)&&(in[i-1]=='\\')) )
@@ -324,7 +324,7 @@ int pplcsp_forkNewGv(ppl_context *context, char *fname, int *gv_list)
   char *Args[MAX_CMDARGS], ViewerApp[FNAME_LENGTH];
   sigset_t sigs;
 
-  // Split up commandline into words
+  // Split up command line into words
   for (i=0; fname[i]!='\0'; i++)
    {
     if ( ((fname[i]>' ')||(fname[i]<'\0')) || ((i>1)&&(fname[i-1]=='\\')) )
@@ -342,7 +342,7 @@ int pplcsp_forkNewGv(ppl_context *context, char *fname, int *gv_list)
      {
       FILE *f = fdopen(PipeCSP2MAIN[1], "w");
       if (f==NULL) return 0;
-      fprintf(f, "Command for launching postscript viewer contains too many commandline switches.\n");
+      fprintf(f, "Command for launching postscript viewer contains too many command-line switches.\n");
       fclose(f);
       return 0;
      }

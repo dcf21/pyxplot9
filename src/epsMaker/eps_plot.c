@@ -378,11 +378,15 @@ void eps_plot_ReadAccessibleData(EPSComm *x)
   // Malloc pointers to data tables where data to be plotted will be stored
   if (Ndatasets>0)
    {
+    int i;
     x->current->plotdata      = (dataTable **)ppl_memAlloc(Ndatasets * sizeof(dataTable *));
     x->current->DatasetTextID = (int *)ppl_memAlloc(Ndatasets * sizeof(int));
-    if (x->current->plotdata == NULL) { ppl_error(&c->errcontext,ERR_MEMORY, -1, -1,"Out of memory (d)."); *(x->status) = 1; return; }
+    if ( (x->current->plotdata==NULL) || (x->current->DatasetTextID==NULL) ) { ppl_error(&c->errcontext,ERR_MEMORY, -1, -1,"Out of memory (d)."); *(x->status) = 1; return; }
+    for (i=0; i<Ndatasets; i++) x->current->plotdata     [i] = NULL;
+    for (i=0; i<Ndatasets; i++) x->current->DatasetTextID[i] = 0;
    } else {
-    x->current->plotdata = NULL;
+    x->current->plotdata      = NULL;
+    x->current->DatasetTextID = NULL;
    }
 
   // Make raster on which to evaluate parametric functions

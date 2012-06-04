@@ -210,19 +210,19 @@ void ppl_directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int int
   if (BASICstyle)
    {
     double iter;
-    int forwards = endVal->real > beginVal->real;
+    int forwards = stepGot ? (stepVal->real>0) : (endVal->real > beginVal->real);
 
     if (!stepGot) // If no step is specified, make it equal to one SI unit
      {
       memcpy(&stepTmp, beginVal, sizeof(pplObj));
       stepTmp.refCount=1;
       stepTmp.amMalloced=0;
-      stepTmp.real=1.0;
+      stepTmp.real=forwards?1:-1;
       stepVal = &stepTmp;
      }
     if (!ppl_unitsDimEqual(beginVal , endVal )) { sprintf(c->errStat.errBuff,"The start and end values of this for loop are dimensionally incompatible: the start value has dimensions of <%s> but the end value has dimensions of <%s>.",ppl_printUnit(c,beginVal,NULL,NULL,0,1,0),ppl_printUnit(c,endVal,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERIC,in->stkCharPos[PARSE_for_final_value]); goto cleanup; }
     if (!ppl_unitsDimEqual(beginVal , stepVal)) { sprintf(c->errStat.errBuff,"The start value and step size of this for loop are dimensionally incompatible: the start value has dimensions of <%s> but the step size has dimensions of <%s>.",ppl_printUnit(c,beginVal,NULL,NULL,0,1,0),ppl_printUnit(c,stepVal,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERIC,in->stkCharPos[PARSE_for_start_value]); goto cleanup; }
-    if ( (stepVal->real==0) || ((stepVal->real > 0) != forwards) ) { strcpy(c->errStat.errBuff,"The number of iterations in this for loop is infinite."); TBADD2(ERR_NUMERIC,in->stkCharPos[PARSE_for_start_value]); goto cleanup; }
+    if ( (stepVal->real==0) || ((endVal->real!=beginVal->real)&&((stepVal->real > 0) != forwards)) ) { strcpy(c->errStat.errBuff,"The number of iterations in this for loop is infinite."); TBADD2(ERR_NUMERIC,in->stkCharPos[PARSE_for_start_value]); goto cleanup; }
 
     for (iter=beginVal->real; (forwards ? (iter<=endVal->real) : (iter>=endVal->real)) && !cancellationFlag ; iter+=stepVal->real)
      {
@@ -328,7 +328,7 @@ void ppl_directive_foreach(ppl_context *c, parserLine *pl, parserOutput *in, int
     gsl_vector *vin = ((pplVector *)iter->auxil)->v;
     const int   vinl = vin->size;
     int         i;
-    for (i=0; i<vinl && !cancellationFlag ; i++)
+    for (i=0; i<vinl && !FOREACH_STOP ; i++)
      {
       pplObj *varObj, vartmp;
       ppl_contextGetVarPointer(c, varname, &varObj, &vartmp);
@@ -347,7 +347,7 @@ void ppl_directive_foreach(ppl_context *c, parserLine *pl, parserOutput *in, int
     list         *lin = (list *)iter->auxil;
     listIterator *li  = ppl_listIterateInit(lin);
     pplObj       *obj;
-    while (((obj=(pplObj*)ppl_listIterate(&li))!=NULL) && !cancellationFlag)
+    while (((obj=(pplObj*)ppl_listIterate(&li))!=NULL) && !FOREACH_STOP)
      {
       pplObj *varObj, vartmp;
       ppl_contextGetVarPointer(c, varname, &varObj, &vartmp);
@@ -671,7 +671,7 @@ void ppl_directive_subrt(ppl_context *c, parserLine *pl, parserOutput *in, int i
   ppl_garbageObject(tmpObj);
   pplObjFunc(tmpObj,om,1,f);
   tmpObj->refCount  =rc;
-  __sync_add_and_fetch(&plsub->refCount,1);
+  if (plsub!=NULL) __sync_add_and_fetch(&plsub->refCount,1);
   return;
 
 fail:

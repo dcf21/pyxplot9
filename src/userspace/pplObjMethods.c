@@ -261,11 +261,45 @@ void pplmethod_strisalnum(ppl_context *c, pplObj *in, int nArgs, int *status, in
   pplObjBool(&OUTPUT,0,out);
  }
 
+void pplmethod_strAppend(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *t = in[-1].self_this;
+  char *instr = (char *)t->auxil, *astr;
+  int   alen;
+  if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The append() method requires a single string argument."); return; }
+  if ((t==NULL)||(t->self_lval==NULL)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The append() method can only be called on a string lvalue."); return; }
+  if ((t->immutable)||(t->self_lval->immutable)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The append() method cannot act on immutable strings."); return; }
+  t = t->self_lval;
+  astr = (char *)in[0].auxil;
+  alen = strlen(astr);
+  if (in[0].auxilMalloced)
+   {
+    int ilen   = t->auxilLen - 1;
+    int newlen = t->auxilLen + alen;
+    instr = (char *)realloc(t->auxil, newlen);
+    if (instr==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    t->auxilLen = newlen;
+    strcpy(instr+ilen, astr);
+   }
+  else
+   {
+    int   ilen   = strlen(instr);
+    int   newlen = ilen + alen + 1;
+    char *ns     = (char *)malloc(newlen);
+    if (ns==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+    t->auxilLen = newlen;
+    sprintf(ns, "%s%s", instr, astr);
+    instr = ns;
+   }
+  t->auxil = (void *)instr;
+  pplObjCpy(&OUTPUT,t,0,0,1);
+ }
+
 void pplmethod_strBeginsWith(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   pplObj *t = in[-1].self_this;
   char *instr = (char *)t->auxil, *cmpstr;
-  if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The beginswith() method requires a single string argument."); return; }
+  if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The beginsWith() method requires a single string argument."); return; }
   cmpstr = (char *)in[0].auxil;
   pplObjBool(&OUTPUT,0,strncmp(instr,cmpstr,strlen(cmpstr))==0);
  }
@@ -275,7 +309,7 @@ void pplmethod_strEndsWith(ppl_context *c, pplObj *in, int nArgs, int *status, i
   pplObj *t = in[-1].self_this;
   char   *instr = (char *)t->auxil, *cmpstr;
   int     il, cl;
-  if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The beginswith() method requires a single string argument."); return; }
+  if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The endsWith() method requires a single string argument."); return; }
   cmpstr = (char *)in[0].auxil;
   il     = strlen(instr);
   cl     = strlen(cmpstr);
@@ -704,16 +738,20 @@ void pplmethod_vectorNorm(ppl_context *c, pplObj *in, int nArgs, int *status, in
 
 void pplmethod_vectorReverse(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  gsl_vector *v = ((pplVector *)in[-1].self_this->auxil)->v;
+  pplObj *st = in[-1].self_this;
+  gsl_vector *v = ((pplVector *)st->auxil)->v;
   long i,j;
   long n = v->size;
+  pplObjCpy(&OUTPUT,st,0,0,1);
   if (v->size<2) return;
   for ( i=0 , j=n-1 ; i<j ; i++ , j-- ) { double tmp = gsl_vector_get(v,i); gsl_vector_set(v,i,gsl_vector_get(v,j)); gsl_vector_set(v,j,tmp); }
  }
 
 void pplmethod_vectorSort(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  gsl_vector *v = ((pplVector *)in[-1].self_this->auxil)->v;
+  pplObj *st = in[-1].self_this;
+  gsl_vector *v = ((pplVector *)st->auxil)->v;
+  pplObjCpy(&OUTPUT,st,0,0,1);
   if (v->size<2) return;
   qsort((void *)v->data , v->size , sizeof(double)*v->stride , ppl_dblSort);
  }
@@ -853,6 +891,7 @@ void pplmethod_listReverse(ppl_context *c, pplObj *in, int nArgs, int *status, i
   listItem *l1    = l->first;
   listItem *l2    = l->last;
   long      n     = l->length;
+  pplObjCpy(&OUTPUT,st,0,0,1);
   if (n<2) return;
 
   for (i=0; i<n/2; i++)
@@ -860,7 +899,6 @@ void pplmethod_listReverse(ppl_context *c, pplObj *in, int nArgs, int *status, i
     void *tmp = l1->data; l1->data=l2->data; l2->data=tmp;
     l1=l1->next; l2=l2->prev;
    }
-  pplObjCpy(&OUTPUT,st,0,0,1);
  }
 
 void pplmethod_listSort(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -871,6 +909,7 @@ void pplmethod_listSort(ppl_context *c, pplObj *in, int nArgs, int *status, int 
   long     n  = l->length;
   pplObj **items;
   listIterator *li = ppl_listIterateInit(l);
+  pplObjCpy(&OUTPUT,st,0,0,1);
   if (n<2) return;
   items = (pplObj **)malloc(n * sizeof(pplObj *));
   if (items==NULL) { *status=1; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); return; }
@@ -879,7 +918,6 @@ void pplmethod_listSort(ppl_context *c, pplObj *in, int nArgs, int *status, int 
   li = ppl_listIterateInit(l);
   i=0; while (li!=NULL) { li->data=(void*)items[i++]; ppl_listIterate(&li); }
   free(items);
-  pplObjCpy(&OUTPUT,st,0,0,1);
  }
 
 // Dictionary methods
@@ -1219,7 +1257,7 @@ void pplmethod_fileReadlines(ppl_context *c, pplObj *in, int nArgs, int *status,
 
 void pplmethod_fileSetpos(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  char FunctionDescription[] = "setpos(x)";
+  char FunctionDescription[] = "setPos(x)";
   int i;
   long int fp = (long int)in[0].real;
   pplFile *f = (pplFile *)in[-1].self_this->auxil;
@@ -1278,8 +1316,9 @@ void pplObjMethodsInit(ppl_context *c)
    }
 
   // String methods
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"beginswith",1,1,0,0,0,0,(void *)&pplmethod_strBeginsWith, "beginswith(x)", "\\mathrm{beginswith}@<@1@>", "beginswith(x) returns a boolean indicating whether a string begins with the substring x");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"endswith"  ,1,1,0,0,0,0,(void *)&pplmethod_strEndsWith  , "endswith(x)", "\\mathrm{endswith}@<@1@>", "endswith(x) returns a boolean indicating whether a string ends with the substring x");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"append"    ,1,1,0,0,0,0,(void *)&pplmethod_strAppend    , "append(x)", "\\mathrm{append}@<@1@>", "append(x) appends the string x to the end of a string");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"beginsWith",1,1,0,0,0,0,(void *)&pplmethod_strBeginsWith, "beginsWith(x)", "\\mathrm{beginsWith}@<@1@>", "beginsWith(x) returns a boolean indicating whether a string begins with the substring x");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"endsWith"  ,1,1,0,0,0,0,(void *)&pplmethod_strEndsWith  , "endsWith(x)", "\\mathrm{endsWith}@<@1@>", "endsWith(x) returns a boolean indicating whether a string ends with the substring x");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"find"      ,1,1,0,0,0,0,(void *)&pplmethod_strFind      , "find(x)", "\\mathrm{find}@<@1@>", "find(x) returns the position of the first occurance of x in a string");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"findAll"   ,1,1,0,0,0,0,(void *)&pplmethod_strFindAll   , "findAll(x)", "\\mathrm{findAll}@<@1@>", "findAll(x) returns a list of the positions where the substring x occurs in a string");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"isalnum"   ,0,0,1,1,1,1,(void *)&pplmethod_strisalnum   , "isalnum()", "\\mathrm{isalnum}@<@>", "isalnum() returns a boolean indicating whether all of the characters of a string are alphanumeric");
@@ -1330,7 +1369,7 @@ void pplObjMethodsInit(ppl_context *c)
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"len",0,0,1,1,1,1,(void *)pplmethod_listLen, "len()", "\\mathrm{len}@<@>", "len() returns the length of a list");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"max",0,0,1,1,1,1,(void *)pplmethod_listMax, "max()", "\\mathrm{max}@<@>", "max() returns the highest-valued item in a list");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"min",0,0,1,1,1,1,(void *)pplmethod_listMin, "min()", "\\mathrm{min}@<@>", "min() returns the lowest-valued item in a list");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"pop",0,1,1,1,1,1,(void *)pplmethod_listPop, "pop()", "\\mathrm{pop}@<@0@>", "pop(n) removes the nth item from a list and returns it. If n is not specified, the last list item is popped.");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"pop",0,1,1,1,1,1,(void *)pplmethod_listPop, "pop()", "\\mathrm{pop}@<@0@>", "pop(n) removes the nth item from a list and returns it. If n is not specified, the last list item is popped");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"reverse",0,0,1,1,1,1,(void *)pplmethod_listReverse, "reverse()", "\\mathrm{reverse}@<@>", "reverse() reverses the order of the members of a list");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"sort",0,0,1,1,1,1,(void *)pplmethod_listSort, "sort()", "\\mathrm{sort}@<@>", "sort() sorts the members of a list");
 
@@ -1363,12 +1402,12 @@ void pplObjMethodsInit(ppl_context *c)
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"close",0,0,1,1,1,1,(void *)pplmethod_fileClose,"close()", "\\mathrm{close}@<@>", "close() closes a file handle");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"eof",0,0,1,1,1,1,(void *)pplmethod_fileEof,"eof()", "\\mathrm{eof}@<@>", "eof() returns a boolean flag to indicate whether the end of a file has been reached");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"flush",0,0,1,1,1,1,(void *)pplmethod_fileFlush,"flush()", "\\mathrm{flush}@<@>", "flush() flushes any buffered data which has not yet physically been written to a file");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"getpos",0,0,1,1,1,1,(void *)pplmethod_fileGetpos,"getpos()", "\\mathrm{getpos}@<@>", "getpos() returns a file handle's current position in a file");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"getPos",0,0,1,1,1,1,(void *)pplmethod_fileGetpos,"getPos()", "\\mathrm{getPos}@<@>", "getPos() returns a file handle's current position in a file");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"isOpen",0,0,1,1,1,1,(void *)pplmethod_fileIsOpen,"isOpen()", "\\mathrm{isOpen}@<@>", "isOpen() returns a boolean flag indicating whether a file is open");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"read",0,0,1,1,1,1,(void *)pplmethod_fileRead,"read()", "\\mathrm{read}@<@>", "read() returns the contents of a file as a string");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"readline",0,0,1,1,1,1,(void *)pplmethod_fileReadline,"readline()", "\\mathrm{readline}@<@>", "readline() returns a single line of a file as a string");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"readlines",0,0,1,1,1,1,(void *)pplmethod_fileReadlines,"readlines()", "\\mathrm{readlines}@<@>", "readlines() returns the lines of a file as a list of strings");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"setpos",1,1,1,1,1,1,(void *)pplmethod_fileSetpos,"setpos(x)", "\\mathrm{setpos}@<@>", "setpos(x) sets a file handle's current position in a file");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"setPos",1,1,1,1,1,1,(void *)pplmethod_fileSetpos,"setPos(x)", "\\mathrm{setPos}@<@>", "setPos(x) sets a file handle's current position in a file");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"write",1,1,0,0,0,0,(void *)pplmethod_fileWrite,"write(x)", "\\mathrm{write}@<@0@>", "write(x) writes the string x to a file");
 
   // Exception methods

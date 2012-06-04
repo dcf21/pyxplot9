@@ -2072,10 +2072,10 @@ PyXPlot to deal with file types that are not in the plaintext format which it
 ordinarily expects.  Firstly the pattern used to recognise the filenames of the
 \datafile s to which the filter should apply to must be specified; the standard
 wildcard characters {\tt *} and {\tt ?} may be used.  Then a filter program
-should be specified, along with any necessary commandline options which should
+should be specified, along with any necessary command-line switches which should
 be passed to it.  This program should take the name of the file to be filtered
-as the final option on its command line, immediately following any commandline
-options specified above.  It should output a suitable PyXPlot \datafile on its
+as the final option on its command line, immediately following any command-line
+switches specified above.  It should output a suitable PyXPlot \datafile on its
 standard output stream for PyXPlot to read.  For example, to filter all files
 that end in {\tt .foo} through the a program called {\tt defoo} using the {\tt
 --text} option one would type:

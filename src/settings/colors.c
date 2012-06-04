@@ -168,7 +168,7 @@ int ppl_colorFromObj   (ppl_context *c, const pplObj *col, int *outcol, int *out
       if (USEcol1234!=NULL) *USEcol1234  = (*outcol==0);
       return 0;
      }
-    case PPLOBJ_EXP: // colour expressed as an expression via %C
+    case PPLOBJ_EXP: // color expressed as an expression via %C
      {
       if (EXPoutcol == NULL)
        {

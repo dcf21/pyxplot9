@@ -60,12 +60,13 @@ int ppl_inputInit(ppl_context *context)
   return (context->inputLineBuffer!=NULL);
  }
 
-static char *atPrompt=NULL;
+sigjmp_buf sigint_destination;
+int        sigint_longjmp=0;
 
 void ppl_interactiveSigInt(int signo)
  {
+  if (sigint_longjmp) siglongjmp(sigint_destination, 1);
   fprintf(stdout,"\n");
-  if (atPrompt!=NULL) fprintf(stdout,"%s",atPrompt);
   cancellationFlag = 1;
   return;
  }
@@ -89,7 +90,6 @@ void ppl_interactiveSession(ppl_context *context)
   while ((!context->shellExiting)&&(!context->shellBroken)&&(!context->shellContinued)&&(!context->shellReturned))
    {
     pplcsp_checkForGvOutput(context);
-    atPrompt = NULL;
     cancellationFlag = 0;
     if (isatty(STDIN_FILENO) == 1)
      {
@@ -100,9 +100,11 @@ void ppl_interactiveSession(ppl_context *context)
         char *line_ptr, prompt[32];
         if (context->inputLineAddBuffer!=NULL) { strcpy(prompt,".......> "); }
         else                                   { snprintf(prompt,16,"%s.......",ps->prompt); strcpy(prompt+7, "> "); }
-        atPrompt = prompt;
+
+        if (sigsetjmp(sigint_destination,1)!=0) { printf("\n"); }
+        sigint_longjmp=1;
         line_ptr = readline(prompt);
-        atPrompt = NULL;
+        sigint_longjmp=0;
         if (line_ptr==NULL) break;
         add_history(line_ptr);
         context->historyNLinesWritten++;
@@ -115,12 +117,13 @@ void ppl_interactiveSession(ppl_context *context)
 #else
        {
         char prompt[32];
+        if (sigsetjmp(sigint_destination,1)!=0) { printf("\n"); }
+        sigint_longjmp=1;
         if (context->inputLineAddBuffer!=NULL) { strcpy(prompt,".......> "); }
         else                                   { snprintf(prompt,16,"%s.......",ps->prompt); strcpy(prompt+7, "> "); }
         printf("%s",prompt);
-        atPrompt = prompt;
-        if (fgets(context->inputLineBuffer,LSTR_LENGTH-1,stdin)==NULL) { atPrompt = NULL; break; }
-        atPrompt = NULL;
+        if (fgets(context->inputLineBuffer,LSTR_LENGTH-1,stdin)==NULL) { break; }
+        sigint_longjmp=0;
         context->inputLineBuffer[LSTR_LENGTH-1]='\0';
        }
 #endif
@@ -133,9 +136,9 @@ void ppl_interactiveSession(ppl_context *context)
       context->inputLineBuffer[LSTR_LENGTH-1]='\0';
       linenumber++;
      }
-    atPrompt = NULL;
+    if ((!cancellationFlag)&&(!context->shellExiting)&&(!context->shellBroken)&&(!context->shellContinued)&&(!context->shellReturned))
+      { ppl_processLine(context, ps, context->inputLineBuffer, isatty(STDIN_FILENO), 0); }
     cancellationFlag = 0;
-    ppl_processLine(context, ps, context->inputLineBuffer, isatty(STDIN_FILENO), 0);
     ppl_error_setstreaminfo(&context->errcontext, -1, "");
     pplcsp_killAllHelpers(context);
    }

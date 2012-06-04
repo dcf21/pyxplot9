@@ -698,7 +698,7 @@ void ppldata_fromFile(ppl_context *c, dataTable **out, char *filename, int wildc
    {
     if (wildcardMatchNumber>0) { *status=1; return; }
     readFromCommandLine=1;
-    if (DEBUG) ppl_log(&c->errcontext,"Reading from commandline.");
+    if (DEBUG) ppl_log(&c->errcontext,"Reading from command line.");
    }
   else
    {

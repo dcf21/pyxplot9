@@ -452,7 +452,7 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char lval, unsigned char out
     case PPLOBJ_BYT:
      {
       parserLine *item = (parserLine *)out->auxil;
-      __sync_add_and_fetch(&item->refCount,1);
+      if (item!=NULL) __sync_add_and_fetch(&item->refCount,1);
       break;
      }
     case PPLOBJ_USER:

@@ -243,8 +243,8 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
         else if (MARKUP_MATCH("+"  )) { NEWSTATE(1,0x26, 3); }
         else if (MARKUP_MATCH("~"  )) { NEWSTATE(1,0xA7, 3); }
         else if (MARKUP_MATCH("!"  )) { NEWSTATE(1,0xA8, 3); }
-        else if (MARKUP_MATCH("not")) { NEWSTATE(3,0xA8, 3); }
-        else if (MARKUP_MATCH("NOT")) { NEWSTATE(3,0xA8, 3); }
+        else if (MARKUP_MATCH("not")&&(!isalpha(in[scanpos+3]))) { NEWSTATE(3,0xA8, 3); }
+        else if (MARKUP_MATCH("NOT")&&(!isalpha(in[scanpos+3]))) { NEWSTATE(3,0xA8, 3); }
        }
       else if (trialstate=='J') // a binary operator
        {
@@ -257,7 +257,11 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
         else if (MARKUP_MATCH("<>" )) { NEWSTATE(2,0x56,10); }
         else if (MARKUP_MATCH("!=" )) { NEWSTATE(2,0x56,10); }
         else if (MARKUP_MATCH("&&" )) { NEWSTATE(2,0x5A,14); }
+        else if (MARKUP_MATCH("and")&&(!isalpha(in[scanpos+3]))) { NEWSTATE(3,0x5A,14); }
+        else if (MARKUP_MATCH("AND")&&(!isalpha(in[scanpos+3]))) { NEWSTATE(3,0x5A,14); }
         else if (MARKUP_MATCH("||" )) { NEWSTATE(2,0x5B,15); }
+        else if (MARKUP_MATCH("or" )&&(!isalpha(in[scanpos+2]))) { NEWSTATE(2,0x5B,15); }
+        else if (MARKUP_MATCH("OR" )&&(!isalpha(in[scanpos+2]))) { NEWSTATE(2,0x5B,15); }
         else if (MARKUP_MATCH("*"  )) { NEWSTATE(1,0x4A, 5); }
         else if (MARKUP_MATCH("/"  )) { NEWSTATE(1,0x4B, 5); }
         else if (MARKUP_MATCH("%"  )) { NEWSTATE(1,0x4C, 5); }

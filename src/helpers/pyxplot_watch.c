@@ -37,6 +37,8 @@
 #include "settings/settingTypes.h"
 #include "userspace/context.h"
 
+int cancellationFlag=0;
+
 void RunPyXPlotOnFile(pplerr_context *context, char *fname)
  {
   char         LineBuffer[LSTR_LENGTH];
@@ -130,7 +132,7 @@ Send comments, bug reports, feature requests and coffee supplies to:\n\
 <coders@pyxplot.org.uk>\n\
 ", VERSION, DATE);
 
-  // Scan commandline options for any switches
+  // Scan command-line options for any switches
   HaveFilenames=0;
   for (i=1; i<argc; i++)
    {
@@ -172,9 +174,9 @@ Send comments, bug reports, feature requests and coffee supplies to:\n\
      }
     else
     {
-     sprintf(context->tempErrStr, "Received switch '%s' which was not recognised. Type 'pyxplot_watch -help' for a list of available commandline options.", argv[i]);
+     sprintf(context->tempErrStr, "Received switch '%s' which was not recognised. Type 'pyxplot_watch -help' for a list of available command-line options.", argv[i]);
      ppl_error(context,ERR_PREFORMED, -1, -1, NULL);
-     if (DEBUG) ppl_log(context,"Received unexpected commandline switch.");
+     if (DEBUG) ppl_log(context,"Received unexpected command-line switch.");
      ppl_memAlloc_FreeAll(0); ppl_memAlloc_MemoryStop();
      return 1;
     }
@@ -186,11 +188,11 @@ Send comments, bug reports, feature requests and coffee supplies to:\n\
   // Check that we have some filenames to watch
   if (!HaveFilenames)
    {
-    ppl_error(context,ERR_PREFORMED, -1, -1, "No filenames were supplied to watch. PyXPlot Watch's commandline syntax is:\n\npyxplot_watch [options] filename_list\n\nAs PyXPlot Watch has no work to do, it is exiting...");
+    ppl_error(context,ERR_PREFORMED, -1, -1, "No filenames were supplied to watch. PyXPlot Watch's command-line syntax is:\n\npyxplot_watch [options] filename_list\n\nAs PyXPlot Watch has no work to do, it is exiting...");
     exit(1);
    }
 
-  // Scan commandline options and glob all filenames
+  // Scan command-line options and glob all filenames
   while (1)
    {
     DoneWork = 0;

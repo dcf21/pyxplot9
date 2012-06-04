@@ -127,7 +127,7 @@ static char *EPS_PROLOG_TEXT = "\
 static char *PS_PROLOG_TEXT = "\
 ";
 
-// Standard commandline flags to pass to ghostscript
+// Standard command-line flags to pass to ghostscript
 static char *GHOSTSCRIPT_STANDARD_FLAGS = "-dQUIET -dSAFER -P- -dBATCH -dNOPAUSE -dEPSCrop";
 
 // Table of the functions we call for each phase of the canvas drawing process for different object types

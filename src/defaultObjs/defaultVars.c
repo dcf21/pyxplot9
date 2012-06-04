@@ -295,7 +295,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"ceil"          ,1,1,1,1,1,1,(void *)&pplfunc_ceil        , "ceil(x)", "\\mathrm{ceil}@<@1@>", "ceil(x) returns the smallest integer value greater than or equal to x");
     ppl_addSystemFunc(d,"chr"           ,1,1,1,1,1,1,(void *)&pplfunc_chr         , "chr(x)", "\\mathrm{chr}@<@1@>", "chr(x) returns the character with ASCII code x");
     ppl_addSystemFunc(d,"classOf"       ,1,1,0,0,0,0,(void *)&pplfunc_classOf     , "classOf(x)", "\\mathrm{classOf}@<@1@>", "classOf(x) returns the class prototype of the object x");
-    ppl_addSystemFunc(d,"cmyk"          ,4,4,1,1,1,1,(void *)&pplfunc_cmyk        , "cmyk(c,m,y,k)", "\\mathrm{cmyk}@<@1,@2,@3,@4@>", "cmyk(c,m,y,k) returns a colour with specified CMYK components in the range 0-1");
+    ppl_addSystemFunc(d,"cmyk"          ,4,4,1,1,1,1,(void *)&pplfunc_cmyk        , "cmyk(c,m,y,k)", "\\mathrm{cmyk}@<@1,@2,@3,@4@>", "cmyk(c,m,y,k) returns a color with specified CMYK components in the range 0-1");
     ppl_addSystemFunc(d,"conjugate"     ,1,1,1,1,0,0,(void *)&pplfunc_conjugate   , "conjugate(z)", "\\mathrm{conjugate}@<@1@>", "conjugate(z) returns the complex conjugate of z");
     ppl_addSystemFunc(d,"copy"          ,1,1,0,0,0,0,(void *)&pplfunc_copy        , "copy(x)", "\\mathrm{copy}@<@1@>", "copy(x) returns a copy of the data structure x. Nested data structures are not copied; see deepcopy(x) for this");
     ppl_addSystemFunc(d,"cos"           ,1,1,1,1,0,1,(void *)&pplfunc_cos         , "cos(z)", "\\mathrm{cos}@<@1@>", "cos(x) returns the cosine of x. If x is dimensionless, it is assumed to be measured in radians");
@@ -327,7 +327,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"gray"          ,1,1,1,1,1,1,(void *)&pplfunc_gray        , "gray(x)", "\\mathrm{gray}@<@1@>", "gray(x) returns a shade of gray with brightness x in the range 0-1");
     ppl_addSystemFunc(d,"grey"          ,1,1,1,1,1,1,(void *)&pplfunc_gray        , "grey(x)", "\\mathrm{grey}@<@1@>", "grey(x) returns a shade of grey with brightness x in the range 0-1");
     ppl_addSystemFunc(d,"heaviside"     ,1,1,1,1,1,0,(void *)&pplfunc_heaviside   , "heaviside(x)", "\\mathrm{heaviside}@<@1@>", "heaviside(x) returns the Heaviside function, defined to be one for x>=0 and zero otherwise");
-    ppl_addSystemFunc(d,"hsb"           ,3,3,1,1,1,1,(void *)&pplfunc_hsb         , "hsb(h,s,b)", "\\mathrm{hsb}@<@1,@2,@3@>", "hsb(h,s,b) returns a colour with specified hue, saturation and brightness in the range 0-1");
+    ppl_addSystemFunc(d,"hsb"           ,3,3,1,1,1,1,(void *)&pplfunc_hsb         , "hsb(h,s,b)", "\\mathrm{hsb}@<@1,@2,@3@>", "hsb(h,s,b) returns a color with specified hue, saturation and brightness in the range 0-1");
     ppl_addSystemFunc(d,"hyperg_0F1"    ,2,2,1,1,1,1,(void *)&pplfunc_hyperg_0F1  , "hyperg_0F1(c,x)", "\\mathrm{hyperg\\_}_0\\mathrm{F}_1}@<@1,@2@>", "hyperg_0F1(c,x) evaluates the hypergeometric function 0F1(c,x)");
     ppl_addSystemFunc(d,"hyperg_1F1"    ,3,3,1,1,1,1,(void *)&pplfunc_hyperg_1F1  , "hyperg_1F1(a,b,x)", "\\mathrm{hyperg\\_}_1\\mathrm{F}_1}@<@1,@2,@3@>", "hyperg_1F1(a,b,x) evaluates the confluent hypergeometric function 1F1(a,b,x)");
     ppl_addSystemFunc(d,"hyperg_2F0"    ,3,3,1,1,1,1,(void *)&pplfunc_hyperg_2F0  , "hyperg_2F0(a,b,x)", "\\mathrm{hyperg\\_}_2\\mathrm{F}_0}@<@1,@2,@3@>", "hyperg_2F0(a,b,x) evaluates the hypergeometric function 2F0(a,b,x)");
@@ -364,7 +364,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"raise"         ,2,2,0,0,0,0,(void *)&pplfunc_raise       , "raise(e,s)", "\\mathrm{raise@<@1,@2@>", "raise(e,s) raises the exception e, with error string s");
     ppl_addSystemFunc(d,"range"         ,1,3,1,1,1,0,(void *)&pplfunc_range       , "range([f],l,[s])", "\\mathrm{range@<@0@>", "range([f],l,[s]) returns a vector of uniformly-spaced numbers between f and l, with stepsize s");
     ppl_addSystemFunc(d,"Re"            ,1,1,1,1,0,0,(void *)&pplfunc_real        , "Re(z)", "\\mathrm{Re}@<@1@>", "Re(z) returns the magnitude of the real part of z");
-    ppl_addSystemFunc(d,"rgb"           ,3,3,1,1,1,1,(void *)&pplfunc_rgb         , "rgb(r,g,b)", "\\mathrm{rgb}@<@1,@2,@3@>", "rgb(r,g,b) returns a colour with specified RGB components in the range 0-1");
+    ppl_addSystemFunc(d,"rgb"           ,3,3,1,1,1,1,(void *)&pplfunc_rgb         , "rgb(r,g,b)", "\\mathrm{rgb}@<@1,@2,@3@>", "rgb(r,g,b) returns a color with specified RGB components in the range 0-1");
     ppl_addSystemFunc(d,"root"          ,2,2,1,1,0,1,(void *)&pplfunc_root        , "root(z,n)", "\\mathrm{root}@<@1,@2@>", "root(z,n) returns the nth root of z");
     ppl_addSystemFunc(d,"sec"           ,1,1,1,1,0,0,(void *)&pplfunc_sec         , "sec(z)", "\\mathrm{sec}@<@1@>", "sec(x) returns the secant of x. If x is dimensionless, it is assumed to be measured in radians");
     ppl_addSystemFunc(d,"sech"          ,1,1,1,1,0,0,(void *)&pplfunc_sech        , "sech(z)", "\\mathrm{sech}@<@1@>", "sech(x) returns the hyperbolic secant of x. x may either be a dimensionless number or may have units of angle");
@@ -430,7 +430,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     // Random module
     ppl_dictAppendCpy(d  , "random", pplObjModule(&m,1,1,1) , sizeof(v));
     d2 = (dict *)m.auxil;
-    ppl_addSystemFunc(d2,"random"        ,0,0,1,1,1,1,(void *)&pplfunc_frandom     , "random()", "\\mathrm{random}@<@>", "random(x) returns a random number between 0 and 1");
+    ppl_addSystemFunc(d2,"random"        ,0,0,1,1,1,1,(void *)&pplfunc_frandom     , "random()", "\\mathrm{random}@<@>", "random() returns a random number between 0 and 1");
     ppl_addSystemFunc(d2,"binomial"      ,2,2,1,1,1,1,(void *)&pplfunc_frandombin  , "binomial(p,n)", "\\mathrm{binomial}@<@1,@2@>", "binomial(p,n) returns a random sample from a binomial distribution with n independent trials and a success probability p");
     ppl_addSystemFunc(d2,"chisq"         ,1,1,1,1,1,1,(void *)&pplfunc_frandomcs   , "chisq(nu)", "\\mathrm{\\chi^2}@<@1@>", "chisq(nu) returns a random sample from a chi-squared distribution with nu degrees of freedom");
     ppl_addSystemFunc(d2,"gaussian"      ,1,1,1,1,1,0,(void *)&pplfunc_frandomg    , "gaussian(sigma)", "\\mathrm{gaussian}@<@1@>", "gaussian(sigma) returns a random sample from a Gaussian (normal) distribution of standard deviation sigma");

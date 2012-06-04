@@ -101,8 +101,8 @@ int main(int argc, char **argv)
   rl_attempted_completion_function = ppl_rl_completion;  // Tell the completer that we want a crack first.
 #endif
 
-  // Set up commandline parser; do this BEFORE reading config files, which may contain a [script] section which needs parsing
-  if (DEBUG) ppl_log(&context->errcontext,"Setting up commandline parser from RE++ definitions.");
+  // Set up command-line parser; do this BEFORE reading config files, which may contain a [script] section which needs parsing
+  if (DEBUG) ppl_log(&context->errcontext,"Setting up command-line parser from RE++ definitions.");
   ppl_parserInit(context);
 
   // Set default terminal
@@ -111,22 +111,11 @@ int main(int argc, char **argv)
   else if (strcmp(GGV_COMMAND      , "/bin/false")!=0) context->set->term_current.viewer = context->set->term_default.viewer = SW_VIEWER_GGV;
   else                                                 context->set->term_current.viewer = context->set->term_default.viewer = SW_VIEWER_NULL;
 
-  // Initialise settings and read configuration file; do this BEFORE processing command line arguments which take precedence
+  // Initialise settings and read configuration file; do this BEFORE processing command-line arguments which take precedence
   if (DEBUG) ppl_log(&context->errcontext,"Reading configuration file.");
   ppl_readconfig(context);
 
-  // Revert default terminal to postscript if we can't access display
-  if ( (context->termtypeSetInConfigfile == 0) && ((context->willBeInteractive==0) ||
-                                                (EnvDisplay==NULL) ||
-                                                (EnvDisplay[0]=='\0') ||
-                                                (context->set->term_default.viewer == SW_VIEWER_NULL) ||
-                                                (isatty(STDIN_FILENO) != 1)))
-   {
-    if (DEBUG) ppl_log(&context->errcontext,"Detected that we are running a non-interactive session; defaulting to the EPS terminal.");
-    context->set->term_current.TermType = context->set->term_default.TermType = SW_TERMTYPE_EPS;
-   }
-
-  // Scan commandline options for any switches
+  // Scan command-line options for any switches
   for (i=1; i<argc; i++)
    {
     if (strlen(argv[i])==0) continue;
@@ -168,12 +157,31 @@ int main(int argc, char **argv)
      }
     else
     {
-     sprintf(context->errcontext.tempErrStr, "Received switch '%s' which was not recognised. Type 'pyxplot -help' for a list of available commandline options.", argv[i]);
+     sprintf(context->errcontext.tempErrStr, "Received switch '%s' which was not recognised. Type 'pyxplot -help' for a list of available command-line options.", argv[i]);
      ppl_error(&context->errcontext,ERR_PREFORMED, -1, -1, NULL);
-     if (DEBUG) ppl_log(&context->errcontext,"Received unexpected commandline switch.");
+     if (DEBUG) ppl_log(&context->errcontext,"Received unexpected command-line switch.");
      ppl_memAlloc_FreeAll(0); ppl_memAlloc_MemoryStop();
      return 1;
     }
+   }
+
+  // Revert default terminal to postscript if we can't access display
+  if (!context->termtypeSetInConfigfile)
+   {
+    if      ( (EnvDisplay==NULL) ||
+              (EnvDisplay[0]=='\0') ||
+              (context->set->term_default.viewer == SW_VIEWER_NULL) ||
+              (isatty(STDIN_FILENO) != 1)
+            )
+     {
+      if (DEBUG) ppl_log(&context->errcontext,"Detected that we are running a non-interactive session; defaulting to the EPS terminal.");
+      context->set->term_current.TermType = context->set->term_default.TermType = SW_TERMTYPE_EPS;
+     }
+    else if (!context->willBeInteractive)
+     {
+      if (DEBUG) ppl_log(&context->errcontext,"Detected that we are running a non-interactive session; defaulting to the X11_persist terminal.");
+      context->set->term_current.TermType = context->set->term_default.TermType = SW_TERMTYPE_X11P;
+     }
    }
 
   // Decide upon a path for a temporary directory for us to live in
@@ -217,7 +225,7 @@ int main(int argc, char **argv)
     stifle_history(1000);
 #endif
 
-    // Scan commandline and process all script files we have been given
+    // Scan command line and process all script files we have been given
     for (i=1; i<argc; i++)
      {
       if (strlen(argv[i])==0) continue;

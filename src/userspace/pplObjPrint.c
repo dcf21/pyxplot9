@@ -69,7 +69,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
        int year, month, day, hour, minute;
        double second;
        ppl_fromUnixTime(c, o->real, &year, &month, &day, &hour, &minute, &second, &status, c->errcontext.tempErrStr);
-       sprintf(out,"time.fromCalendar(%d,%d,%d,%d,%d,%.4f)",year,month,day,hour,minute,second);
+       snprintf(out,outlen,"time.fromCalendar(%d,%d,%d,%d,%d,%.4f)",year,month,day,hour,minute,second);
       }
      else
       {
@@ -84,7 +84,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
       if      (ct == SW_COLSPACE_CMYK) { strncpy(out+i, "cmyk(", outlen-i); n=4; }
       else if (ct == SW_COLSPACE_RGB)  { strncpy(out+i, "rgb(" , outlen-i); n=3; }
       else if (ct == SW_COLSPACE_HSB)  { strncpy(out+i, "hsb(" , outlen-i); n=3; }
-      else                             { ppl_warning(&c->errcontext, ERR_INTERNAL, "Unknown colour space in pplObjPrint."); strncpy(out+i, "ERR(", outlen-i); n=0; }
+      else                             { ppl_warning(&c->errcontext, ERR_INTERNAL, "Unknown color space in pplObjPrint."); strncpy(out+i, "ERR(", outlen-i); n=0; }
       i+=strlen(out+i);
       if (n>=1) {               strcpy(out+i,ppl_numericDisplay(o->exponent[ 8], c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L))); i+=strlen(out+i); }
       if (n>=2) { out[i++]=','; strcpy(out+i,ppl_numericDisplay(o->exponent[ 9], c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L))); i+=strlen(out+i); }
@@ -102,18 +102,19 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
       out[i++]='{';
       while ((item = (pplObj *)ppl_dictIterate(&iter, &key))!=NULL)
        {
+        if ((item->objType==PPLOBJ_GLOB) || (item->objType==PPLOBJ_ZOM)) continue; // Hide globals and zombies
         if (!first) { out[i++]=','; if (prevMod) { out[i++]='\n'; } out[i++]=' '; }
         ppl_strEscapify(key, out+i);
         i+=strlen(out+i);
         sprintf(out+i,":");
         i+=strlen(out+i);
-        pplObjPrint(c, item, NULL, out+i, outlen-i, 1, 0);
+        pplObjPrint(c, item, NULL, out+i, outlen-i, 1, modIterDepth+1);
         i+=strlen(out+i);
-        if (i>outlen-100) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
+        if (i>outlen-100) { strncpy(out+i,", ...",outlen-i); i+=strlen(out+i); break; }
         first=0;
         prevMod = item->objType == PPLOBJ_MOD;
        }
-      strcpy(out+i,"}");
+      strncpy(out+i,"}",outlen-i);
       break;
      }
     case PPLOBJ_USER:
@@ -138,16 +139,16 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
           strcpy(out+i, key);
           i+=strlen(out+i);
           while (i<j+16) out[i++]=' ';
-          sprintf(out+i,": ");
+          snprintf(out+i,outlen-i,": ");
           i+=strlen(out+i);
           pplObjPrint(c, item, key, out+i, outlen-i, 1, modIterDepth+1);
           i+=strlen(out+i);
           out[i++]='\n';
-          if (i>outlen-100) { strcpy(out+i,"  ...\n"); i+=strlen(out+i); break; }
+          if (i>outlen-100) { strncpy(out+i,"  ...\n",outlen-i); i+=strlen(out+i); break; }
          }
-        out[i++]=' ';
-        for (k=0; k<modIterDepth; k++) { out[i++]=' '; out[i++]=' '; }
-        strcpy(out+i,"}");
+        if (i<outlen) out[i++]=' ';
+        for (k=0; ((k<modIterDepth)&&(i<outlen-2)); k++) { out[i++]=' '; out[i++]=' '; }
+        strncpy(out+i,"}",outlen-i);
        }
       break;
      }
@@ -379,7 +380,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
      }
     case PPLOBJ_BYT:
      {
-      strcpy(out, "<internal: commandline bytecode>");
+      strcpy(out, "<internal: command-line bytecode>");
       break;
      }
     default:

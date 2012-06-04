@@ -26,6 +26,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "settings/settings.h"
+
 #include <gsl/gsl_math.h>
 
 /* ppl_getFloat(): This gets a float from a string */
@@ -229,7 +231,10 @@ void ppl_file_readline(FILE *file, char *output, int MaxLength)
  int i=0;
 
  while (((int)c != '\n') && (!feof(file)) && (!ferror(file)))
+  {
+   if (cancellationFlag) break;
    if ((fscanf(file,"%c",&c)>=0) && ((c>31)||(c==9)) && (i<MaxLength-2)) { i++; *(outputscan++) = c; } // ASCII 9 is a tab
+  }
   *(outputscan++) = '\0';
 }
 

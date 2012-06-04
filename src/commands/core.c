@@ -262,14 +262,14 @@ void ppl_directive_load(ppl_context *c, parserLine *pl, parserOutput *in, int in
   glob_t        globData;
 
   if ((wordexp(fn, &wordExp, 0) != 0) || (wordExp.we_wordc <= 0)) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Could not access file '%s'.", fn); TBADD(ERR_FILE,in->stkCharPos[PARSE_load_filename]); return; }
-  for (j=0; j<wordExp.we_wordc; j++)
+  for (j=0; (j<wordExp.we_wordc)&&(!cancellationFlag); j++)
    {
     if ((glob(wordExp.we_wordv[j], 0, NULL, &globData) != 0) || (globData.gl_pathc <= 0))
      {
       if (wordExp.we_wordc==1) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Could not access file '%s'.", fn); TBADD(ERR_FILE,in->stkCharPos[PARSE_load_filename]); wordfree(&wordExp); return; }
       else                     { continue; }
      }
-    for (i=0; i<globData.gl_pathc; i++)
+    for (i=0; (i<globData.gl_pathc)&&(!cancellationFlag); i++)
      {
       ppl_processScript(c, globData.gl_pathv[i], iterDepth+1);
       if (c->errStat.status)
