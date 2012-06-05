@@ -162,7 +162,7 @@ void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out
   const int      dollarAllowed      = 1;
   int            errPos=-1, errType, tlen;
   char           errbuff[LSTR_LENGTH];
-  int           *stkpos, i, j, k;
+  int           *stkpos, i, j, k, lastOpMultDiv=0;
 
   int            mm=0, tr=0;
   int           *mathMode = (mm_in==NULL) ? &mm : mm_in;
@@ -219,7 +219,8 @@ void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out
      ei = ei+(1+q);
      ej = ej+(1+q)*3;
      if (tokenBuff[ej] != (unsigned char)('P'-'@')) continue; // we don't have closing bracket
-     while ((tokenBuff[ej] == (unsigned char)('P'-'@')) && (ej<tlen)) { ej+=3; ei++; } // ffw over function arguments
+     ei++; ej+=3;
+     while ((tokenBuff[ej] == (unsigned char)('P'-'@')) && (in[i]<=' ') && (in[i]>='\0') && (ej<tlen)) { ej+=3; ei++; } // ffw over function arguments
      memcpy(&c->stack[k], &val, sizeof(pplObj));
 
      // Clean up
@@ -290,13 +291,26 @@ void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out
   // Produce tex output
   for (i=j=k=0; j<tlen; )
    {
+    int  opMultDiv=0;
     char o = tokenBuff[j]+'@'; // Get tokenised markup state code
     ENTER_MATHMODE;
     if (stkpos[i]>=0)
      {
-      snprintf(out+k, outlen-k, "%s", ppl_unitsNumericDisplay(c, &c->stack[stkpos[i]], 0, SW_DISPLAY_L, 0)+1); // Chop off initial $
-      k+=strlen(out+k)-1; // Chop off final $
-      out[k]='\0';
+      double  real=0, imag=0;
+      pplObj *o = &c->stack[stkpos[i]];
+      char   *u = NULL;
+      if (lastOpMultDiv) u = ppl_printUnit(c, o, &real, &imag, 0, 1, SW_DISPLAY_L);
+      if ((real!=1) || (imag!=0))
+       {
+        snprintf(out+k, outlen-k, "%s", ppl_unitsNumericDisplay(c, o, 0, SW_DISPLAY_L, 0)+1); // Chop off initial $
+        k+=strlen(out+k)-1; // Chop off final $
+        out[k]='\0';
+       }
+      else
+       {
+        snprintf(out+k, outlen-k, "%s", u);
+        k+=strlen(out+k);
+       }
       while ((j<tlen)&&(stkpos[i]>=0)) { i++; j+=3; }
      }
     else if (o=='B') // Process a string literal
@@ -478,8 +492,8 @@ variableName:
       else if (MARKUP_MATCH("||" )) { snprintf(out+k, outlen-k, "\\,||\\,"); FFW_N(2); }
       else if (MARKUP_MATCH("or" )) { ENTER_TEXTRM; snprintf(out+k, outlen-k, " or "); FFW_N(2); }
       else if (MARKUP_MATCH("OR" )) { ENTER_TEXTRM; snprintf(out+k, outlen-k, " or "); FFW_N(2); }
-      else if (MARKUP_MATCH("*"  )) { snprintf(out+k, outlen-k, "\\times "); FFW_N(1); }
-      else if (MARKUP_MATCH("/"  )) { snprintf(out+k, outlen-k, "/"); FFW_N(1); }
+      else if (MARKUP_MATCH("*"  )) { snprintf(out+k, outlen-k, "\\times "); FFW_N(1); opMultDiv=1; }
+      else if (MARKUP_MATCH("/"  )) { snprintf(out+k, outlen-k, "/"); FFW_N(1); opMultDiv=1; }
       else if (MARKUP_MATCH("%"  )) { ENTER_TEXTRM; snprintf(out+k, outlen-k, "\\%%"); FFW_N(1); }
       else if (MARKUP_MATCH("+"  )) { snprintf(out+k, outlen-k, "+"); FFW_N(1); }
       else if (MARKUP_MATCH("-"  )) { snprintf(out+k, outlen-k, "-"); FFW_N(1); }
@@ -550,6 +564,7 @@ variableName:
      {
       FFW_TOKEN;
      }
+    lastOpMultDiv = opMultDiv;
    }
 
   if (inlen<0) { ENTER_PLAINTEXT; }

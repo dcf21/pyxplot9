@@ -288,7 +288,7 @@ LOOP_OVER_LINE
     status = ppl_ProcessStatement(context, ps, inputLineBuffer, interactive, iterDepth);
     if (status) break;
     inputLineBuffer = inputLineBuffer+i+1;
-    i=0;
+    i=-1;
    }
 LOOP_END
 
