@@ -218,7 +218,7 @@ int  eps_plot_colormap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int 
   int            YSize = pd->GridYSize;
   int            i, j, c, cmax, Ncol_real, Ncol_obj, NcolsData;
   long           p;
-  double         xo, yo, Lx, Ly, ThetaX, ThetaY, comp[4], CMin[4], CMax[4];
+  double         xo, yo, Lx, Ly, ThetaX, ThetaY, CMin[4], CMax[4];
   pplObj        *CVar[4], *C1Var, CDummy[4];
   uLongf         zlen; // Length of buffer passed to zlib
   unsigned char *imagez, CMinAuto[4], CMinSet[4], CMaxAuto[4], CMaxSet[4], CLog[4];
@@ -387,7 +387,8 @@ int  eps_plot_colormap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int 
 #define SET_RGB_COLOR \
      /* Check if mask criterion is satisfied */ \
      { \
-     int colspace; \
+     int       colspace; \
+     double    comp[4]={0,0,0,0}; \
      const int stkLevelOld = x->c->stackPtr; \
      if (sg->MaskExpr!=NULL) \
       { \
@@ -612,7 +613,7 @@ int  eps_plot_colormap_DrawScales(EPSComm *x, double origin_x, double origin_y, 
       double              XSize = 1024, YSize = 1; // Dimensions of bitmap image
       unsigned char       component_r, component_g, component_b, transparent[3] = {TRANS_R, TRANS_G, TRANS_B};
       char                v[3]="c1";
-      double              x1,y1,x2,y2  ,  x3,y3,x4,y4  ,  theta,dummy  ,  comp[4],CMin,CMax;
+      double              x1,y1,x2,y2  ,  x3,y3,x4,y4  ,  theta,dummy  ,  CMin,CMax;
       double              Lx, Ly, ThetaX, ThetaY;
       unsigned char       CLog;
       const double        MARGIN = EPS_COLORSCALE_MARGIN * M_TO_PS;
