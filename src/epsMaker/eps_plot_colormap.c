@@ -54,7 +54,7 @@
 #include "epsMaker/eps_plot.h"
 #include "epsMaker/eps_plot_axespaint.h"
 #include "epsMaker/eps_plot_canvas.h"
-#include "epsMaker/eps_plot_colourmap.h"
+#include "epsMaker/eps_plot_colormap.h"
 #include "epsMaker/eps_plot_legend.h"
 #include "epsMaker/eps_plot_ticking.h"
 #include "epsMaker/eps_settings.h"
@@ -72,7 +72,7 @@
   comp[3] = (comp[3] < 0.0) ? 0.0 : ((comp[3]>1.0) ? 1.0 : comp[3] );
 
 // Yield up text items which label color scale of a colormap
-void eps_plot_colourmap_YieldText(EPSComm *x, dataTable *data, pplset_graph *sg, canvas_plotdesc *pd)
+void eps_plot_colormap_YieldText(EPSComm *x, dataTable *data, pplset_graph *sg, canvas_plotdesc *pd)
  {
   dataBlock     *blk;
   int            XSize = pd->GridXSize;
@@ -210,7 +210,7 @@ void eps_plot_colourmap_YieldText(EPSComm *x, dataTable *data, pplset_graph *sg,
  }
 
 // Render a colormap to postscript
-int  eps_plot_colourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int xn, int yn, int zn, pplset_graph *sg, canvas_plotdesc *pd, int pdn, double origin_x, double origin_y, double width, double height, double zdepth)
+int  eps_plot_colormap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int xn, int yn, int zn, pplset_graph *sg, canvas_plotdesc *pd, int pdn, double origin_x, double origin_y, double width, double height, double zdepth)
  {
   double         scale_x, scale_y, scale_z;
   dataBlock     *blk;
@@ -368,7 +368,7 @@ int  eps_plot_colourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int
    if ( ((!CMinAuto[c])||(!CMaxAuto[c])) && (!ppl_unitsDimEqual(CVar[c] , (sg->Cminauto[c]==SW_BOOL_TRUE)?(&sg->Cmax[c]):(&sg->Cmin[c]))) )
     {
      sprintf(x->c->errcontext.tempErrStr, "Column %d of data supplied to the colormap plot style has conflicting units with those set in the 'set crange' command. The former has units of <%s> whilst the latter has units of <%s>.", c+3, ppl_printUnit(x->c,CVar[c], NULL, NULL, 0, 1, 0), ppl_printUnit(x->c,(sg->Cminauto[c]==SW_BOOL_TRUE)?(&sg->Cmax[c]):(&sg->Cmin[c]), NULL, NULL, 1, 1, 0));
-     ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL);
+     ppl_error(&x->c->errcontext,ERR_NUMERICAL,-1,-1,NULL);
      return 1;
     }
 
@@ -394,7 +394,7 @@ int  eps_plot_colourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int
        pplObj *v; \
        int lOP; \
        v = ppl_expEval(x->c, (pplExpr *)sg->MaskExpr, &lOP, 1, x->iterDepth+1); \
-       if (x->c->errStat.status) { sprintf(x->c->errcontext.tempErrStr, "Could not evaluate mask expression <%s>.", ((pplExpr *)sg->MaskExpr)->ascii); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); ppl_tbWrite(x->c); ppl_tbClear(x->c); return 1; } \
+       if (x->c->errStat.status) { sprintf(x->c->errcontext.tempErrStr, "Could not evaluate mask expression <%s>.", ((pplExpr *)sg->MaskExpr)->ascii); ppl_error(&x->c->errcontext,ERR_NUMERICAL,-1,-1,NULL); ppl_tbWrite(x->c); ppl_tbClear(x->c); return 1; } \
        if (v->real==0) { component_r = TRANS_R; component_g = TRANS_G; component_b = TRANS_B; goto write_rgb; } \
       } \
  \
@@ -410,9 +410,9 @@ int  eps_plot_colourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int
        int lOP, outcol; \
        unsigned char d1, d2; \
        v = ppl_expEval(x->c, (pplExpr *)sg->ColMapExpr, &lOP, 1, x->iterDepth+1); \
-       if (x->c->errStat.status) { sprintf(x->c->errcontext.tempErrStr, "Could not evaluate color expression <%s>.", ((pplExpr *)sg->MaskExpr)->ascii); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); ppl_tbWrite(x->c); ppl_tbClear(x->c); return 1; } \
+       if (x->c->errStat.status) { sprintf(x->c->errcontext.tempErrStr, "Could not evaluate color expression <%s>.", ((pplExpr *)sg->MaskExpr)->ascii); ppl_error(&x->c->errcontext,ERR_NUMERICAL,-1,-1,NULL); ppl_tbWrite(x->c); ppl_tbClear(x->c); return 1; } \
        lOP = ppl_colorFromObj(x->c, v, &outcol, &colspace, NULL, comp, comp+1, comp+2, comp+3, &d1, &d2); \
-       if (lOP) { ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); return 1; } \
+       if (lOP) { ppl_error(&x->c->errcontext,ERR_NUMERICAL,-1,-1,NULL); return 1; } \
        if (outcol!=0) \
         { \
          colspace = SW_COLSPACE_CMYK; \
@@ -557,7 +557,7 @@ write_rgb: \
   return 0;
  }
 
-int  eps_plot_colourmap_DrawScales(EPSComm *x, double origin_x, double origin_y, double width, double height, double zdepth)
+int  eps_plot_colormap_DrawScales(EPSComm *x, double origin_x, double origin_y, double width, double height, double zdepth)
  {
   int              i, j, k;
   long             p;

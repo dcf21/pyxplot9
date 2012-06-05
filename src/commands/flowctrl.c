@@ -162,12 +162,12 @@ void ppl_directive_do(ppl_context *c, parserLine *pl, parserOutput *in, int inte
     int lastOpAssign, dollarAllowed=1;
     pplObj *val;
     ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
-    if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"do loop"); goto cleanup; }
+    if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"do loop"); goto cleanup; }
     while (c->stackPtr>stkLevelOld) { STACK_POP; }
     if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; continue; }
     if ((c->shellBroken)||(c->shellContinued)||(c->shellReturned)||(c->shellExiting)) break;
     val = ppl_expEval(context, cond, &lastOpAssign, dollarAllowed, iterDepth+1);
-    if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"do loop stopping criterion"); goto cleanup; }
+    if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"do loop stopping criterion"); goto cleanup; }
     CAST_TO_BOOL(val);
     criterion = (val->real != 0);
     while (c->stackPtr>stkLevelOld) { STACK_POP; }
@@ -220,9 +220,9 @@ void ppl_directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int int
       stepTmp.real=forwards?1:-1;
       stepVal = &stepTmp;
      }
-    if (!ppl_unitsDimEqual(beginVal , endVal )) { sprintf(c->errStat.errBuff,"The start and end values of this for loop are dimensionally incompatible: the start value has dimensions of <%s> but the end value has dimensions of <%s>.",ppl_printUnit(c,beginVal,NULL,NULL,0,1,0),ppl_printUnit(c,endVal,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERIC,in->stkCharPos[PARSE_for_final_value]); goto cleanup; }
-    if (!ppl_unitsDimEqual(beginVal , stepVal)) { sprintf(c->errStat.errBuff,"The start value and step size of this for loop are dimensionally incompatible: the start value has dimensions of <%s> but the step size has dimensions of <%s>.",ppl_printUnit(c,beginVal,NULL,NULL,0,1,0),ppl_printUnit(c,stepVal,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERIC,in->stkCharPos[PARSE_for_start_value]); goto cleanup; }
-    if ( (stepVal->real==0) || ((endVal->real!=beginVal->real)&&((stepVal->real > 0) != forwards)) ) { strcpy(c->errStat.errBuff,"The number of iterations in this for loop is infinite."); TBADD2(ERR_NUMERIC,in->stkCharPos[PARSE_for_start_value]); goto cleanup; }
+    if (!ppl_unitsDimEqual(beginVal , endVal )) { sprintf(c->errStat.errBuff,"The start and end values of this for loop are dimensionally incompatible: the start value has dimensions of <%s> but the end value has dimensions of <%s>.",ppl_printUnit(c,beginVal,NULL,NULL,0,1,0),ppl_printUnit(c,endVal,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERICAL,in->stkCharPos[PARSE_for_final_value]); goto cleanup; }
+    if (!ppl_unitsDimEqual(beginVal , stepVal)) { sprintf(c->errStat.errBuff,"The start value and step size of this for loop are dimensionally incompatible: the start value has dimensions of <%s> but the step size has dimensions of <%s>.",ppl_printUnit(c,beginVal,NULL,NULL,0,1,0),ppl_printUnit(c,stepVal,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERICAL,in->stkCharPos[PARSE_for_start_value]); goto cleanup; }
+    if ( (stepVal->real==0) || ((endVal->real!=beginVal->real)&&((stepVal->real > 0) != forwards)) ) { strcpy(c->errStat.errBuff,"The number of iterations in this for loop is infinite."); TBADD2(ERR_NUMERICAL,in->stkCharPos[PARSE_for_start_value]); goto cleanup; }
 
     for (iter=beginVal->real; (forwards ? (iter<=endVal->real) : (iter>=endVal->real)) && !cancellationFlag ; iter+=stepVal->real)
      {
@@ -232,7 +232,7 @@ void ppl_directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int int
       ppl_unitsDimCpy(varObj, beginVal);
       ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
       ppl_contextRestoreVarPointer(c, varname, &vartmp);
-      if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"for loop"); goto cleanup; }
+      if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"for loop"); goto cleanup; }
       while (c->stackPtr>stkLevelOld) { STACK_POP; }
       if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; continue; }
       if ((c->shellBroken)||(c->shellContinued)||(c->shellReturned)||(c->shellExiting)) break;
@@ -244,7 +244,7 @@ void ppl_directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int int
      {
       int lastOpAssign, dollarAllowed=1;
       ppl_expEval(context, begin, &lastOpAssign, dollarAllowed, iterDepth+1);
-      if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"for loop initialisation expression"); goto cleanup; }
+      if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"for loop initialisation expression"); goto cleanup; }
       while (c->stackPtr>stkLevelOld) { STACK_POP; }
      }
     while (1)
@@ -254,14 +254,14 @@ void ppl_directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int int
         int lastOpAssign, dollarAllowed=1, criterion=1;
         pplObj *val;
         val = ppl_expEval(context, cond, &lastOpAssign, dollarAllowed, iterDepth+1);
-        if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"for loop stopping criterion"); goto cleanup; }
+        if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"for loop stopping criterion"); goto cleanup; }
         CAST_TO_BOOL(val);
         criterion = (val->real != 0);
         while (c->stackPtr>stkLevelOld) { STACK_POP; }
         if (!criterion || cancellationFlag) break;
        }
       ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
-      if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"for loop"); goto cleanup; }
+      if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"for loop"); goto cleanup; }
       while (c->stackPtr>stkLevelOld) { STACK_POP; }
       if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; continue; }
       if ((c->shellBroken)||(c->shellContinued)||(c->shellReturned)||(c->shellExiting)) break;
@@ -269,7 +269,7 @@ void ppl_directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int int
        {
         int lastOpAssign, dollarAllowed=1;
         ppl_expEval(context, end, &lastOpAssign, dollarAllowed, iterDepth+1);
-        if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"for loop stopping criterion"); goto cleanup; }
+        if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"for loop stopping criterion"); goto cleanup; }
         while (c->stackPtr>stkLevelOld) { STACK_POP; }
        }
      }
@@ -315,7 +315,7 @@ void ppl_directive_foreach(ppl_context *c, parserLine *pl, parserOutput *in, int
         pplObjStr(varObj, varObj->amMalloced, 0, g.gl_pathv[j]);
         ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
         ppl_contextRestoreVarPointer(c, varname, &vartmp);
-        if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"foreach loop"); }
+        if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"foreach loop"); }
         while (c->stackPtr>stkLevelOld) { STACK_POP; }
         if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; continue; }
        }
@@ -336,7 +336,7 @@ void ppl_directive_foreach(ppl_context *c, parserLine *pl, parserOutput *in, int
       ppl_unitsDimCpy(varObj, iter);
       ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
       ppl_contextRestoreVarPointer(c, varname, &vartmp);
-      if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"foreach loop"); }
+      if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"foreach loop"); }
       while (c->stackPtr>stkLevelOld) { STACK_POP; }
       if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; continue; }
       if ((c->shellBroken)||(c->shellContinued)||(c->shellReturned)||(c->shellExiting)) break;
@@ -354,7 +354,7 @@ void ppl_directive_foreach(ppl_context *c, parserLine *pl, parserOutput *in, int
       pplObjCpy(varObj, obj, 0, varObj->amMalloced, 1);
       ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
       ppl_contextRestoreVarPointer(c, varname, &vartmp);
-      if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"foreach loop"); }
+      if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"foreach loop"); }
       while (c->stackPtr>stkLevelOld) { STACK_POP; }
       if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; continue; }
       if ((c->shellBroken)||(c->shellContinued)||(c->shellReturned)||(c->shellExiting)) break;
@@ -458,7 +458,7 @@ void ppl_directive_fordata(ppl_context *c, parserLine *pl, parserOutput *in, int
 
   // Fetch data
   ppldata_fromCmd(c, &data, pl, in, 0, NULL, dataSpool, PARSE_TABLE_foreachdatum_, 0, Nvars, Nvars, min, minSet, max, maxSet, unit, 0, &status, c->errcontext.tempErrStr, &errCount, iterDepth);
-  if (status || cancellationFlag) { ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); goto cleanup; }
+  if (status || cancellationFlag) { ppl_error(&c->errcontext,ERR_GENERIC,-1,-1,NULL); goto cleanup; }
 
   // Fetch variable pointers
   for (i=0; i<Nvars; i++) ppl_contextGetVarPointer(c, varname[i], &varObj[i], &vartmp[i]);
@@ -503,7 +503,7 @@ void ppl_directive_fordata(ppl_context *c, parserLine *pl, parserOutput *in, int
        {
         const int stkLevelOld=c->stackPtr;
         ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
-        if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"foreach datum statement"); return; }
+        if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"foreach datum statement"); return; }
         while (c->stackPtr>stkLevelOld) { STACK_POP; }
         if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; continue; }
         if ((c->shellBroken)||(c->shellContinued)||(c->shellReturned)||(c->shellExiting)) break;
@@ -551,14 +551,14 @@ void ppl_directive_if(ppl_context *c, parserLine *pl, parserOutput *in, int inte
 
   // Test criterion
   val = ppl_expEval(context, cond, &lastOpAssign, dollarAllowed, iterDepth+1);
-  if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"if criterion"); return; }
+  if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"if criterion"); return; }
   CAST_TO_BOOL(val);
   criterion = (val->real != 0);
   while (c->stackPtr>stkLevelOld) { STACK_POP; }
   if (criterion)
    {
     ppl_parserExecute(c, pl_if, NULL, interactive, iterDepth+1);
-    if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"if statement"); return; }
+    if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"if statement"); return; }
     while (c->stackPtr>stkLevelOld) { STACK_POP; }
     return;
    }
@@ -575,14 +575,14 @@ void ppl_directive_if(ppl_context *c, parserLine *pl, parserOutput *in, int inte
     cond_elif = (pplExpr    *)stk[pos+PARSE_if_criterion_0elifs].auxil;
     if (pos<=0) break;
     val = ppl_expEval(context, cond_elif, &lastOpAssign, dollarAllowed, iterDepth+1);
-    if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"else if criterion"); return; }
+    if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"else if criterion"); return; }
     CAST_TO_BOOL(val);
     criterion = (val->real != 0);
     while (c->stackPtr>stkLevelOld) { STACK_POP; }
     if (criterion)
      {
       ppl_parserExecute(c, pl_elif, NULL, interactive, iterDepth+1);
-      if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"if statement"); return; }
+      if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"if statement"); return; }
       while (c->stackPtr>stkLevelOld) { STACK_POP; }
       return;
      }
@@ -592,7 +592,7 @@ void ppl_directive_if(ppl_context *c, parserLine *pl, parserOutput *in, int inte
   if (gotelse)
    {
     ppl_parserExecute(c, pl_else, NULL, interactive, iterDepth+1);
-    if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"if statement"); return; }
+    if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"if statement"); return; }
     while (c->stackPtr>stkLevelOld) { STACK_POP; }
     return;
    }
@@ -704,13 +704,13 @@ void ppl_directive_while(ppl_context *c, parserLine *pl, parserOutput *in, int i
     int lastOpAssign, dollarAllowed=1;
     pplObj *val;
     val = ppl_expEval(context, cond, &lastOpAssign, dollarAllowed, iterDepth+1);
-    if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"while loop stopping criterion"); goto cleanup; }
+    if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"while loop stopping criterion"); goto cleanup; }
     CAST_TO_BOOL(val);
     criterion = (val->real != 0);
     while (c->stackPtr>stkLevelOld) { STACK_POP; }
     if (!criterion) break;
     ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
-    if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"while loop"); goto cleanup; }
+    if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"while loop"); goto cleanup; }
     while (c->stackPtr>stkLevelOld) { STACK_POP; }
     if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; continue; }
     if ((c->shellBroken)||(c->shellContinued)||(c->shellReturned)||(c->shellExiting)) break;
@@ -748,7 +748,7 @@ void ppl_directive_with(ppl_context *c, parserLine *pl, parserOutput *in, int in
   if ((--d->refCount)<1) ppl_dictFree(d);
   c->ns_ptr--;
 
-  if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERAL,"with block"); return; }
+  if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"with block"); return; }
   while (c->stackPtr>stkLevelOld) { STACK_POP; }
   return;
  }

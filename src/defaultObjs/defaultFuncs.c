@@ -197,7 +197,7 @@ void pplfunc_airy_ai     (ppl_context *c, pplObj *in, int nArgs, int *status, in
   gsl_complex zi, z;
   GSL_SET_COMPLEX(&zi,in[0].real,in[0].imag);
   airy_ai(zi,&z,status,errText);
-  if (*status) { *errType = ERR_NUMERIC; return; }
+  if (*status) { *errType = ERR_NUMERICAL; return; }
   CLEANUP_GSLCOMPLEX;
   CHECK_OUTPUT_OKAY;
  }
@@ -208,7 +208,7 @@ void pplfunc_airy_ai_diff(ppl_context *c, pplObj *in, int nArgs, int *status, in
   gsl_complex zi,z;
   GSL_SET_COMPLEX(&zi,in[0].real,in[0].imag);
   airy_ai_diff(zi,&z,status,errText);
-  if (*status) { *errType = ERR_NUMERIC; return; }
+  if (*status) { *errType = ERR_NUMERICAL; return; }
   CLEANUP_GSLCOMPLEX;
   CHECK_OUTPUT_OKAY;
  }
@@ -219,7 +219,7 @@ void pplfunc_airy_bi     (ppl_context *c, pplObj *in, int nArgs, int *status, in
   gsl_complex zi,z;
   GSL_SET_COMPLEX(&zi,in[0].real,in[0].imag);
   airy_bi(zi,&z,status,errText);
-  if (*status) { *errType = ERR_NUMERIC; return; }
+  if (*status) { *errType = ERR_NUMERICAL; return; }
   CLEANUP_GSLCOMPLEX;
   CHECK_OUTPUT_OKAY;
  }
@@ -230,7 +230,7 @@ void pplfunc_airy_bi_diff(ppl_context *c, pplObj *in, int nArgs, int *status, in
   gsl_complex zi,z;
   GSL_SET_COMPLEX(&zi,in[0].real,in[0].imag);
   airy_bi_diff(zi,&z,status,errText);
-  if (*status) { *errType = ERR_NUMERIC; return; }
+  if (*status) { *errType = ERR_NUMERICAL; return; }
   CLEANUP_GSLCOMPLEX;
   CHECK_OUTPUT_OKAY;
  }
@@ -583,7 +583,7 @@ void pplfunc_eval        (ppl_context *c, pplObj *in, int nArgs, int *status, in
   if (explen<strlen(exp)) { strcpy(errText, "Unexpected trailing matter at the end of expression."); *status=1; *errType=ERR_SYNTAX; pplExpr_free(e); return; }
   output = ppl_expEval(c, e, &lastOpAssign, 1, 1);
   pplExpr_free(e);
-  if (c->errStat.status) { *status=1; *errType=ERR_GENERAL; strcpy(errText, "Error in evaluated expression"); return; }
+  if (c->errStat.status) { *status=1; *errType=ERR_GENERIC; strcpy(errText, "Error in evaluated expression"); return; }
   pplObjCpy(&OUTPUT,output,0,0,1);
   while (c->stackPtr>stkLevelOld)
    {
@@ -755,7 +755,7 @@ void pplfunc_imag        (ppl_context *c, pplObj *in, int nArgs, int *status, in
   char *FunctionDescription = "Im(z)";
   if (c->set->term_current.ComplexNumbers == SW_ONOFF_OFF)
    {
-    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errText=ERR_NUMERIC; sprintf(errText, "The function %s can only be used when complex arithmetic is enabled; type 'set numerics complex' first.", FunctionDescription); return; }
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status=1; *errText=ERR_NUMERICAL; sprintf(errText, "The function %s can only be used when complex arithmetic is enabled; type 'set numerics complex' first.", FunctionDescription); return; }
     else { NULL_OUTPUT; }
    }
   OUTPUT.real = in[0].imag;
@@ -879,7 +879,7 @@ void pplfunc_lrange       (ppl_context *c, pplObj *in, int nArgs, int *status, i
   else if (nArgs==2) { start=in[0].real; end=in[1].real; step=2; }
   else               { start=in[0].real; end=in[1].real; step=in[2].real; }
   n = ceil(log(end/start) / log(step));
-  if ((!gsl_finite(n))||(n>INT_MAX)) { *status=1; *errType=ERR_NUMERIC; strcpy(errText,"Invalid step size."); return; }
+  if ((!gsl_finite(n))||(n>INT_MAX)) { *status=1; *errType=ERR_NUMERICAL; strcpy(errText,"Invalid step size."); return; }
   if (n<0) n=0;
   if (pplObjVector(&OUTPUT,0,1,n)==NULL) { *status=1; *errType=ERR_MEMORY; strcpy(errText,"Out of memory."); return; }
   for (i=0; i<n; i++) gsl_vector_set(((pplVector *)OUTPUT.auxil)->v, i, start * pow(step,i));
@@ -1011,7 +1011,7 @@ void pplfunc_mod         (ppl_context *c, pplObj *in, int nArgs, int *status, in
   char *FunctionDescription = "mod(x,y)";
   if (in[0].real*ppl_machineEpsilon*10 > in[1].real)
    {
-    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_NUMERIC; sprintf(errText, "Loss of accuracy in the function %s; the remainder of this division is lost in floating-point rounding.", FunctionDescription); return; }
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_NUMERICAL; sprintf(errText, "Loss of accuracy in the function %s; the remainder of this division is lost in floating-point rounding.", FunctionDescription); return; }
     else { NULL_OUTPUT; }
    }
   OUTPUT.real = fmod(in[0].real , in[1].real);
@@ -1164,7 +1164,7 @@ void pplfunc_range       (ppl_context *c, pplObj *in, int nArgs, int *status, in
   else if (nArgs==2) { start=in[0].real; end=in[1].real; step=1; }
   else               { start=in[0].real; end=in[1].real; step=in[2].real; }
   n = ceil((end-start) / step);
-  if ((!gsl_finite(n))||(n>INT_MAX)) { *status=1; *errType=ERR_NUMERIC; strcpy(errText,"Invalid step size."); return; }
+  if ((!gsl_finite(n))||(n>INT_MAX)) { *status=1; *errType=ERR_NUMERICAL; strcpy(errText,"Invalid step size."); return; }
   if (n<0) n=0;
   if (pplObjVector(&OUTPUT,0,1,n)==NULL) { *status=1; *errType=ERR_MEMORY; strcpy(errText,"Out of memory."); return; }
   for (i=0; i<n; i++) gsl_vector_set(((pplVector *)OUTPUT.auxil)->v, i, start+i*step);

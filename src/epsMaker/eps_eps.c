@@ -70,7 +70,7 @@ void eps_eps_RenderEPS(EPSComm *x)
     if (inf==NULL) { sprintf(x->c->errcontext.tempErrStr, "Could not open EPS file '%s'.", filename); ppl_error(&x->c->errcontext, ERR_FILE, -1, -1, x->c->errcontext.tempErrStr); *(x->status) = 1; return; }
     eps_eps_ExtractBBox(x, inf, &bb_left, &bb_bottom, &bb_right, &bb_top, &GotBBox);
     fclose(inf);
-    if (!GotBBox) { sprintf(x->c->errcontext.tempErrStr, "Could not extract bounding box from EPS file '%s'. Will therefore process file in calcbbox mode, and attempt to determine its bounding box using ghostview.", filename); ppl_warning(&x->c->errcontext, ERR_GENERAL, x->c->errcontext.tempErrStr); }
+    if (!GotBBox) { sprintf(x->c->errcontext.tempErrStr, "Could not extract bounding box from EPS file '%s'. Will therefore process file in calcbbox mode, and attempt to determine its bounding box using ghostview.", filename); ppl_warning(&x->c->errcontext, ERR_GENERIC, x->c->errcontext.tempErrStr); }
    }
   if ((x->current->calcbbox) || (!GotBBox)) // Calculate bounding box for EPS file using ghostview
    {
@@ -82,7 +82,7 @@ void eps_eps_RenderEPS(EPSComm *x)
     if (inf==NULL) { sprintf(x->c->errcontext.tempErrStr, "Could not open temporary file '%s'.", tmpdata); ppl_error(&x->c->errcontext, ERR_FILE, -1, -1, x->c->errcontext.tempErrStr); *(x->status) = 1; return; }
     eps_eps_ExtractBBox(x, inf, &bb_left, &bb_bottom, &bb_right, &bb_top, &GotBBox);
     fclose(inf);
-    if (!GotBBox) { sprintf(x->c->errcontext.tempErrStr, "Could not calculate bounding box for EPS file '%s'.", filename); ppl_warning(&x->c->errcontext, ERR_GENERAL, x->c->errcontext.tempErrStr); }
+    if (!GotBBox) { sprintf(x->c->errcontext.tempErrStr, "Could not calculate bounding box for EPS file '%s'.", filename); ppl_warning(&x->c->errcontext, ERR_GENERIC, x->c->errcontext.tempErrStr); }
    }
 
   // Work out scaling factor to apply to EPS image

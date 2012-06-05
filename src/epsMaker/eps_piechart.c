@@ -123,7 +123,7 @@ void eps_pie_ReadAccessibleData(EPSComm *x)
     if (LabelExpr==NULL) { ppl_error(&c->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); *(x->status) = 1; return; }
    }
 
-  if (eps_plot_AddUsingItemsForWithWords(c, &pd->ww_final, &NExpect, &autoUsingList, &UsingList, &NUsing, &nObjs, c->errcontext.tempErrStr)) { ppl_error(&c->errcontext,ERR_GENERAL, -1, -1, NULL); *(x->status) = 1; return; } // Add extra using items for, e.g. "linewidth $3".
+  if (eps_plot_AddUsingItemsForWithWords(c, &pd->ww_final, &NExpect, &autoUsingList, &UsingList, &NUsing, &nObjs, c->errcontext.tempErrStr)) { ppl_error(&c->errcontext,ERR_GENERIC, -1, -1, NULL); *(x->status) = 1; return; } // Add extra using items for, e.g. "linewidth $3".
 
   if (pd->filename != NULL) // Read data from file
    {
@@ -149,7 +149,7 @@ void eps_pie_ReadAccessibleData(EPSComm *x)
                           uX, &rX, &rXl);
     ppldata_fromFuncs(c, x->current->plotdata, pd->functions, pd->NFunctions, rX, rXl, 1, uX, NULL, 0, NULL, UsingList, autoUsingList, NExpect, nObjs, LabelExpr, pd->SelectCriterion, NULL, pd->continuity, &status, c->errcontext.tempErrStr, &errCount, x->iterDepth+1);
    }
-  if (status) { ppl_error(&c->errcontext,ERR_GENERAL, -1, -1, NULL); x->current->plotdata[0]=NULL; }
+  if (status) { ppl_error(&c->errcontext,ERR_GENERIC, -1, -1, NULL); x->current->plotdata[0]=NULL; }
 
   // Work out sum of all pie segment sizes
   if (x->current->plotdata[0]==NULL) return;
@@ -161,7 +161,7 @@ void eps_pie_ReadAccessibleData(EPSComm *x)
     for (j=0; j<blk->blockPosition; j++) { acc += fabs(blk->data_real[0 + Ncolumns*j]); }
     blk=blk->next;
    }
-  if ((!gsl_finite(acc))||(acc<=0.0)) { sprintf(c->errcontext.tempErrStr, "Sum of sizes of all pie wedges is not a finite number."); ppl_error(&c->errcontext,ERR_GENERAL, -1, -1,NULL); x->current->plotdata[0]=NULL; acc=1; *(x->status) = 1; }
+  if ((!gsl_finite(acc))||(acc<=0.0)) { sprintf(c->errcontext.tempErrStr, "Sum of sizes of all pie wedges is not a finite number."); ppl_error(&c->errcontext,ERR_GENERIC, -1, -1,NULL); x->current->plotdata[0]=NULL; acc=1; *(x->status) = 1; }
   if (DEBUG) { sprintf(c->errcontext.tempErrStr, "Sum of sizes of all pie wedges = %e", acc); ppl_log(&c->errcontext,NULL); }
   pd->PieChart_total = acc;
   return;

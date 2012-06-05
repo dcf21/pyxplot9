@@ -455,7 +455,7 @@ void pplmethod_dateToStr(ppl_context *c, pplObj *in, int nArgs, int *status, int
   if (nArgs>0) format = (char *)in[0].auxil; // Format specified
   else         format = NULL;                // Format not specified
   ppl_dateString(c, out, t->real, format, status, errText);
-  if (*status) { *errType=ERR_NUMERIC; return; }
+  if (*status) { *errType=ERR_NUMERICAL; return; }
   pplObjStr(&OUTPUT,0,1,out);
  }
 
@@ -1003,11 +1003,11 @@ void pplmethod_matrixDet(ppl_context *c, pplObj *in, int nArgs, int *status, int
   int              s;
   gsl_matrix      *tmp = NULL;
   gsl_permutation *p   = NULL;
-  if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "The determinant is only defined for square matrices."); return; }
+  if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERICAL; strcpy(errText, "The determinant is only defined for square matrices."); return; }
   if ((tmp=gsl_matrix_alloc(n,n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   gsl_matrix_memcpy(tmp,m);
   if ((p = gsl_permutation_alloc(n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
-  if (gsl_linalg_LU_decomp(tmp,p,&s)!=0) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "LU decomposition failed whilst computing matrix determinant."); return; }
+  if (gsl_linalg_LU_decomp(tmp,p,&s)!=0) { *status=1; *errType=ERR_NUMERICAL; strcpy(errText, "LU decomposition failed whilst computing matrix determinant."); return; }
   d = gsl_linalg_LU_det(tmp,s);
   gsl_permutation_free(p);
   gsl_matrix_free(tmp);
@@ -1034,14 +1034,14 @@ void pplmethod_matrixEigenvalues(ppl_context *c, pplObj *in, int nArgs, int *sta
   gsl_vector *vo;
   int         n   = m->size1;
   gsl_eigen_symm_workspace *w;
-  if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Eigenvalues are only defined for square matrices."); return; }
-  for (i=0; i<m->size1; i++) for (j=0; j<i; j++) if (gsl_matrix_get(m,i,j) != gsl_matrix_get(m,j,i)) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Eigenvalues can only be computed for symmetric matrices; supplied matrix is not symmetric."); return; }
+  if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERICAL; strcpy(errText, "Eigenvalues are only defined for square matrices."); return; }
+  for (i=0; i<m->size1; i++) for (j=0; j<i; j++) if (gsl_matrix_get(m,i,j) != gsl_matrix_get(m,j,i)) { *status=1; *errType=ERR_NUMERICAL; strcpy(errText, "Eigenvalues can only be computed for symmetric matrices; supplied matrix is not symmetric."); return; }
   if ((w=gsl_eigen_symm_alloc(n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   if ((tmp=gsl_matrix_alloc(n,n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   gsl_matrix_memcpy(tmp,m);
   if (pplObjVector(&OUTPUT,0,1,n)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   vo = ((pplVector *)OUTPUT.auxil)->v;
-  if (gsl_eigen_symm(tmp, vo, w)!=0) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Numerical failure whilst trying to compute eigenvalues."); return; }
+  if (gsl_eigen_symm(tmp, vo, w)!=0) { *status=1; *errType=ERR_NUMERICAL; strcpy(errText, "Numerical failure whilst trying to compute eigenvalues."); return; }
   gsl_matrix_free(tmp);
   gsl_eigen_symm_free(w);
   ppl_unitsDimCpy(&OUTPUT, st);
@@ -1060,14 +1060,14 @@ void pplmethod_matrixEigenvectors(ppl_context *c, pplObj *in, int nArgs, int *st
   int         n    = m->size1;
   gsl_eigen_symmv_workspace *w;
   v.refCount=1;
-  if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Eigenvectors are only defined for square matrices."); return; }
-  for (i=0; i<m->size1; i++) for (j=0; j<i; j++) if (gsl_matrix_get(m,i,j) != gsl_matrix_get(m,j,i)) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Eigenvectors can only be computed for symmetric matrices; supplied matrix is not symmetric."); return; }
+  if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERICAL; strcpy(errText, "Eigenvectors are only defined for square matrices."); return; }
+  for (i=0; i<m->size1; i++) for (j=0; j<i; j++) if (gsl_matrix_get(m,i,j) != gsl_matrix_get(m,j,i)) { *status=1; *errType=ERR_NUMERICAL; strcpy(errText, "Eigenvectors can only be computed for symmetric matrices; supplied matrix is not symmetric."); return; }
   if ((w=gsl_eigen_symmv_alloc(n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   if ((tmp1=gsl_matrix_alloc(n,n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   if ((tmp2=gsl_matrix_alloc(n,n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   if ((vtmp=gsl_vector_alloc(n)  )==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   gsl_matrix_memcpy(tmp1,m);
-  if (gsl_eigen_symmv(tmp1, vtmp, tmp2, w)!=0) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Numerical failure whilst trying to compute eigenvectors."); return; }
+  if (gsl_eigen_symmv(tmp1, vtmp, tmp2, w)!=0) { *status=1; *errType=ERR_NUMERICAL; strcpy(errText, "Numerical failure whilst trying to compute eigenvectors."); return; }
   gsl_matrix_free(tmp1);
   gsl_eigen_symmv_free(w);
   if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
@@ -1091,14 +1091,14 @@ void pplmethod_matrixInv(ppl_context *c, pplObj *in, int nArgs, int *status, int
   gsl_matrix      *tmp = NULL;
   gsl_matrix      *mo  = NULL;
   gsl_permutation *p   = NULL;
-  if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "The inverse is only defined for square matrices."); return; }
+  if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERICAL; strcpy(errText, "The inverse is only defined for square matrices."); return; }
   if ((tmp=gsl_matrix_alloc(n,n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   gsl_matrix_memcpy(tmp,m);
   if ((p = gsl_permutation_alloc(n))==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
-  if (gsl_linalg_LU_decomp(tmp,p,&s)!=0) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "LU decomposition failed whilst computing matrix determinant."); return; }
+  if (gsl_linalg_LU_decomp(tmp,p,&s)!=0) { *status=1; *errType=ERR_NUMERICAL; strcpy(errText, "LU decomposition failed whilst computing matrix determinant."); return; }
   if (pplObjMatrix(&OUTPUT,0,1,n,n)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   mo = ((pplMatrix *)OUTPUT.auxil)->m;
-  if (gsl_linalg_LU_invert(tmp,p,mo)) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "Numerical failure while computing matrix inverse."); return; }
+  if (gsl_linalg_LU_invert(tmp,p,mo)) { *status=1; *errType=ERR_NUMERICAL; strcpy(errText, "Numerical failure while computing matrix inverse."); return; }
   gsl_permutation_free(p);
   gsl_matrix_free(tmp);
   ppl_unitsDimInverse(&OUTPUT,st);
@@ -1129,7 +1129,7 @@ void pplmethod_matrixTrans(ppl_context *c, pplObj *in, int nArgs, int *status, i
   gsl_matrix      *m = ((pplMatrix *)st->auxil)->m;
   int              n = m->size1, i, j;
   gsl_matrix      *vo = NULL;
-  if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERIC; strcpy(errText, "The transpose is only defined for square matrices."); return; }
+  if (m->size1 != m->size2) { *status=1; *errType=ERR_NUMERICAL; strcpy(errText, "The transpose is only defined for square matrices."); return; }
   if (pplObjMatrix(&OUTPUT,0,1,n,n)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   vo = ((pplMatrix *)OUTPUT.auxil)->m;
   for (i=0; i<m->size1; i++) for (j=0; j<m->size2; j++) gsl_matrix_set(vo,i,j,gsl_matrix_get(m,j,i));

@@ -178,7 +178,7 @@ void ppl_directive_interpolate(ppl_context *c, parserLine *pl, parserOutput *in,
     // Exit on error
     if ((status)||(data==NULL))
      {
-      TBADD2(ERR_GENERAL,0);
+      TBADD2(ERR_GENERIC,0);
       ppl_memAlloc_AscendOutOfContext(contextLocalVec);
       return;
      }
@@ -187,7 +187,7 @@ void ppl_directive_interpolate(ppl_context *c, parserLine *pl, parserOutput *in,
     for (j=0; j<NcolRequired; j++)
      if (minSet[j] || maxSet[j])
       {
-       if (!ppl_unitsDimEqual(&unit[j],data->firstEntries+j)) { sprintf(c->errStat.errBuff, "The minimum and maximum limits specified in range %ld in the fit command have conflicting physical dimensions with the data returned from the data file. The limits have units of <%s>, whilst the data have units of <%s>.", j+1, ppl_printUnit(c,unit+j,NULL,NULL,0,1,0), ppl_printUnit(c,data->firstEntries+j,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERIC,0); return; }
+       if (!ppl_unitsDimEqual(&unit[j],data->firstEntries+j)) { sprintf(c->errStat.errBuff, "The minimum and maximum limits specified in range %ld in the fit command have conflicting physical dimensions with the data returned from the data file. The limits have units of <%s>, whilst the data have units of <%s>.", j+1, ppl_printUnit(c,unit+j,NULL,NULL,0,1,0), ppl_printUnit(c,data->firstEntries+j,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERICAL,0); return; }
       }
 
     // Transfer data from multiple data tables into single vectors
@@ -210,7 +210,7 @@ void ppl_directive_interpolate(ppl_context *c, parserLine *pl, parserOutput *in,
      }
 
     // Check that we have at least minimum number of points to interpolate
-    if (i<NxRequired) { sprintf(c->errStat.errBuff,"%s interpolation is only possible on data sets with at least %d member%s.",splineTypeName,NxRequired,(NxRequired>1)?"s":""); TBADD2(ERR_NUMERIC,0); if (NcolRequired>=3) free(xdata); return; }
+    if (i<NxRequired) { sprintf(c->errStat.errBuff,"%s interpolation is only possible on data sets with at least %d member%s.",splineTypeName,NxRequired,(NxRequired>1)?"s":""); TBADD2(ERR_NUMERICAL,0); if (NcolRequired>=3) free(xdata); return; }
 
     // Fill out minimum and maximum of data
     for (jms=0; jms<NcolRequired; jms++)
@@ -238,7 +238,7 @@ void ppl_directive_interpolate(ppl_context *c, parserLine *pl, parserOutput *in,
 
     for (i=0; i<2; i++)
      if ( minSet[i] || maxSet[i] )
-      { sprintf(c->errStat.errBuff, "Ranges cannot be applied when interpolating bitmap data."); TBADD2(ERR_NUMERIC,0); return; }
+      { sprintf(c->errStat.errBuff, "Ranges cannot be applied when interpolating bitmap data."); TBADD2(ERR_NUMERICAL,0); return; }
 
     // Fetch filename of bitmap image
     if ( (stk[pos].objType!=PPLOBJ_NUM) ||
@@ -283,7 +283,7 @@ void ppl_directive_interpolate(ppl_context *c, parserLine *pl, parserOutput *in,
     if ((buff[0]!='B')&&(buff[1]!='M')) { sprintf(c->errStat.errBuff, "File '%s' does not appear to be a valid bitmap image.", filenameOut); TBADD2(ERR_FILE,0); fclose(infile); return; }
 
     ppl_bmp_bmpread(&c->errcontext, infile, &bmpdata);
-    if (bmpdata.data == NULL) { sprintf(c->errStat.errBuff, "Reading of bitmap image data failed"); TBADD2(ERR_GENERAL,0); return; }
+    if (bmpdata.data == NULL) { sprintf(c->errStat.errBuff, "Reading of bitmap image data failed"); TBADD2(ERR_GENERIC,0); return; }
 
     pplObjNum(&firstEntries[0],0,0,0); firstEntries[0].refCount=1;
     pplObjNum(&firstEntries[1],0,0,0); firstEntries[1].refCount=1;
@@ -360,11 +360,11 @@ void ppl_directive_interpolate(ppl_context *c, parserLine *pl, parserOutput *in,
       if ( (minSet[1]) && (ydata[j]<min[1]) )                   continue; // Ignore out-of-range datapoints
       if ( (maxSet[1]) && (ydata[j]>max[1]) )                   continue; // Ignore out-of-range datapoints
 
-      if ((j>0) && (xdata[j]==xdata[j-1])) { COUNTEDERR1; v=firstEntries[0]; v.real=xdata[j]; sprintf(c->errcontext.tempErrStr,"Repeat values for interpolation have been supplied at x=%s.",ppl_unitsNumericDisplay(c, &v, 0, 0, 0)); ppl_warning(&c->errcontext, ERR_GENERAL, NULL); COUNTEDERR2; continue; }
+      if ((j>0) && (xdata[j]==xdata[j-1])) { COUNTEDERR1; v=firstEntries[0]; v.real=xdata[j]; sprintf(c->errcontext.tempErrStr,"Repeat values for interpolation have been supplied at x=%s.",ppl_unitsNumericDisplay(c, &v, 0, 0, 0)); ppl_warning(&c->errcontext, ERR_GENERIC, NULL); COUNTEDERR2; continue; }
 
       if (mode == INTERP_LOGLIN)
        {
-        if ((xdata[j]<=0.0) || (ydata[j]<=0.0)) { COUNTEDERR1; v=firstEntries[0]; v.real=xdata[j]; sprintf(c->errcontext.tempErrStr,"Negative or zero values are not allowed in power-law interpolation; negative values supplied at x=%s will be ignored.",ppl_unitsNumericDisplay(c, &v, 0, 0, 0)); ppl_warning(&c->errcontext, ERR_NUMERIC, NULL); COUNTEDERR2; continue; }
+        if ((xdata[j]<=0.0) || (ydata[j]<=0.0)) { COUNTEDERR1; v=firstEntries[0]; v.real=xdata[j]; sprintf(c->errcontext.tempErrStr,"Negative or zero values are not allowed in power-law interpolation; negative values supplied at x=%s will be ignored.",ppl_unitsNumericDisplay(c, &v, 0, 0, 0)); ppl_warning(&c->errcontext, ERR_NUMERICAL, NULL); COUNTEDERR2; continue; }
         xdata[k]=log(xdata[j]);
         ydata[k]=log(ydata[j]);
         if ( (!gsl_finite(xdata[k])) || (!gsl_finite(ydata[k])) ) continue;
@@ -376,7 +376,7 @@ void ppl_directive_interpolate(ppl_context *c, parserLine *pl, parserOutput *in,
      }
 
     // Check that we have at least minimum number of points to interpolate
-    if (k<NxRequired) { sprintf(c->errStat.errBuff,"%s interpolation is only possible on data sets with members at at least %d distinct values of x.",splineTypeName,NxRequired); TBADD2(ERR_NUMERIC,0); if (NcolRequired>=3) free(xdata); return; }
+    if (k<NxRequired) { sprintf(c->errStat.errBuff,"%s interpolation is only possible on data sets with members at at least %d distinct values of x.",splineTypeName,NxRequired); TBADD2(ERR_NUMERICAL,0); if (NcolRequired>=3) free(xdata); return; }
 
     // Create GSL interpolation object
     if (splineType!=NULL)

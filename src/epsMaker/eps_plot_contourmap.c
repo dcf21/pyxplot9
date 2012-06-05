@@ -429,7 +429,7 @@ int  eps_plot_contourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, in
   if ( ((!CMinAuto)||(!CMaxAuto)) && (!ppl_unitsDimEqual(&data->firstEntries[2] , (sg->Cminauto[0]==SW_BOOL_TRUE)?(&sg->Cmax[0]):(&sg->Cmin[0]))) )
    {
     sprintf(x->c->errcontext.tempErrStr, "Column 3 of data supplied to the colormap plot style has conflicting units with those set in the 'set crange' command. The former has units of <%s> whilst the latter has units of <%s>.", ppl_printUnit(x->c,&data->firstEntries[2], NULL, NULL, 0, 1, 0), ppl_printUnit(x->c,(sg->Cminauto[0]==SW_BOOL_TRUE)?(&sg->Cmax[0]):(&sg->Cmin[0]), NULL, NULL, 1, 1, 0));
-    ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL);
+    ppl_error(&x->c->errcontext,ERR_NUMERICAL,-1,-1,NULL);
     return 1;
    }
 
@@ -661,10 +661,10 @@ GOT_CONTOURS:
 
           outval = ppl_expEval(x->c, expr[i], &lOP, 1, x->iterDepth+1);
 
-          if (errpos>=0) { sprintf(x->c->errcontext.tempErrStr, "Could not evaluate the style expression <%s>. The error, encountered at character position %d, was: '%s'", expr[i]->ascii, errpos, errtext); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); continue; }
-          if (!outval->dimensionless) { sprintf(x->c->errcontext.tempErrStr, "The style expression <%s> yielded a result which was not a dimensionless number.", expr[i]->ascii); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); continue; }
-          if (outval->flagComplex) { sprintf(x->c->errcontext.tempErrStr, "The style expression <%s> yielded a result which was a complex number.", expr[i]->ascii); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); continue; }
-          if (!gsl_finite(outval->real)) { sprintf(x->c->errcontext.tempErrStr, "The style expression <%s> yielded a result which was not a finite number.", expr[i]->ascii); ppl_error(&x->c->errcontext,ERR_NUMERIC,-1,-1,NULL); continue; }
+          if (errpos>=0) { sprintf(x->c->errcontext.tempErrStr, "Could not evaluate the style expression <%s>. The error, encountered at character position %d, was: '%s'", expr[i]->ascii, errpos, errtext); ppl_error(&x->c->errcontext,ERR_NUMERICAL,-1,-1,NULL); continue; }
+          if (!outval->dimensionless) { sprintf(x->c->errcontext.tempErrStr, "The style expression <%s> yielded a result which was not a dimensionless number.", expr[i]->ascii); ppl_error(&x->c->errcontext,ERR_NUMERICAL,-1,-1,NULL); continue; }
+          if (outval->flagComplex) { sprintf(x->c->errcontext.tempErrStr, "The style expression <%s> yielded a result which was a complex number.", expr[i]->ascii); ppl_error(&x->c->errcontext,ERR_NUMERICAL,-1,-1,NULL); continue; }
+          if (!gsl_finite(outval->real)) { sprintf(x->c->errcontext.tempErrStr, "The style expression <%s> yielded a result which was not a finite number.", expr[i]->ascii); ppl_error(&x->c->errcontext,ERR_NUMERICAL,-1,-1,NULL); continue; }
           dbl = outval->real;
 
           if (clip[i]) { if (dbl<0.0) dbl=0.0; if (dbl>1.0) dbl=1.0; }

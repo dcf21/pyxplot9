@@ -82,14 +82,14 @@ void eps_plot_ticking(EPSComm *x, pplset_axis *axis, int AxisUnitStyle, pplset_a
     else                        axis->MaxFinal = (axis->LogFinal == SW_BOOL_TRUE) ? 10.0 : 10.0;
 
     // Check that log axes do not venture too close to zero
-    if ((axis->LogFinal == SW_BOOL_TRUE) && (axis->MaxFinal <= 1e-200)) { axis->MaxFinal = logmin; sprintf(x->c->errcontext.tempErrStr, "Range for logarithmic axis %c%d set below zero; defaulting to 1e-10.", "xyzc"[axis->xyz], axis->axis_n); ppl_warning(&x->c->errcontext, ERR_NUMERIC, NULL); }
+    if ((axis->LogFinal == SW_BOOL_TRUE) && (axis->MaxFinal <= 1e-200)) { axis->MaxFinal = logmin; sprintf(x->c->errcontext.tempErrStr, "Range for logarithmic axis %c%d set below zero; defaulting to 1e-10.", "xyzc"[axis->xyz], axis->axis_n); ppl_warning(&x->c->errcontext, ERR_NUMERICAL, NULL); }
     if (!MinSet) axis->MinFinal = (axis->LogFinal == SW_BOOL_TRUE) ? (axis->MaxFinal / 100) : (axis->MaxFinal - 20);
-    if ((axis->LogFinal == SW_BOOL_TRUE) && (axis->MinFinal <= 1e-200)) { axis->MinFinal = logmin; sprintf(x->c->errcontext.tempErrStr, "Range for logarithmic axis %c%d set below zero; defaulting to 1e-10.", "xyzc"[axis->xyz], axis->axis_n); ppl_warning(&x->c->errcontext, ERR_NUMERIC, NULL); }
+    if ((axis->LogFinal == SW_BOOL_TRUE) && (axis->MinFinal <= 1e-200)) { axis->MinFinal = logmin; sprintf(x->c->errcontext.tempErrStr, "Range for logarithmic axis %c%d set below zero; defaulting to 1e-10.", "xyzc"[axis->xyz], axis->axis_n); ppl_warning(&x->c->errcontext, ERR_NUMERICAL, NULL); }
 
     // If there's no spread of data on the axis, make a spread up
     if ( (fabs(axis->MinFinal-axis->MaxFinal) <= fabs(1e-14*axis->MinFinal)) || (fabs(axis->MinFinal-axis->MaxFinal) <= fabs(1e-14*axis->MaxFinal)) )
      {
-      if (axis->HardMinSet && axis->HardMaxSet) { sprintf(x->c->errcontext.tempErrStr, "Specified minimum and maximum range limits for axis %c%d are equal; reverting to alternative limits.", "xyzc"[axis->xyz], axis->axis_n); ppl_warning(&x->c->errcontext, ERR_NUMERIC, NULL); }
+      if (axis->HardMinSet && axis->HardMaxSet) { sprintf(x->c->errcontext.tempErrStr, "Specified minimum and maximum range limits for axis %c%d are equal; reverting to alternative limits.", "xyzc"[axis->xyz], axis->axis_n); ppl_warning(&x->c->errcontext, ERR_NUMERICAL, NULL); }
       if (axis->LogFinal != SW_BOOL_TRUE)
        {
         double step = ppl_max(1.0,1e-3*fabs(axis->MinFinal));
@@ -175,7 +175,7 @@ void eps_plot_ticking(EPSComm *x, pplset_axis *axis, int AxisUnitStyle, pplset_a
     if ((!ppl_unitsDimEqual(&axis->unit,&axis->DataUnit)) && ((axis->tics.tickList!=NULL)||(((axis->log==SW_BOOL_TRUE)?(axis->tics.tickMinSet):(axis->tics.tickStepSet))!=0)||(axis->ticsM.tickList!=NULL)||(((axis->log==SW_BOOL_TRUE)?(axis->ticsM.tickMinSet):(axis->ticsM.tickStepSet))!=0)))
      {
       sprintf(x->c->errcontext.tempErrStr, "Cannot put any ticks on axis %c%d because their positions are specified in units of <%s> whilst the axis has units of <%s>.", "xyzc"[axis->xyz], axis->axis_n, ppl_printUnit(x->c,&axis->unit,NULL,NULL,0,1,0), ppl_printUnit(x->c,&axis->DataUnit,NULL,NULL,1,1,0));
-      ppl_error(&x->c->errcontext,ERR_GENERAL,-1,-1,NULL);
+      ppl_error(&x->c->errcontext,ERR_GENERIC,-1,-1,NULL);
       axis->TickListPositions = NULL; axis->TickListStrings = NULL;
       axis->TickListPositions = NULL; axis->TickListStrings = NULL;
       return;

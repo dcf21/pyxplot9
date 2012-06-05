@@ -112,7 +112,7 @@ void ppl_uaPow(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
     else
      {
       o->real = pow(a->real, exponent);
-      if ((!gsl_finite(o->real))&&(c->set->term_current.ExplicitErrors == SW_ONOFF_ON)) { sprintf(errText, "Exponentiation operator produced an overflow error or a complex number result. To enable complex arithmetic, type 'set numerics complex'."); *errType=ERR_NUMERIC; *status = 1; return; }
+      if ((!gsl_finite(o->real))&&(c->set->term_current.ExplicitErrors == SW_ONOFF_ON)) { sprintf(errText, "Exponentiation operator produced an overflow error or a complex number result. To enable complex arithmetic, type 'set numerics complex'."); *errType=ERR_NUMERICAL; *status = 1; return; }
      }
     o->imag = 0.0;
     o->flagComplex=0;
@@ -271,7 +271,7 @@ void ppl_uaDiv(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
     else if (fabs(breal) < 1e-200)
      {
       if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; }
-      else                                                      { sprintf(errText, "Division by zero error."); *errType=ERR_NUMERIC; *status = 1; return; }
+      else                                                      { sprintf(errText, "Division by zero error."); *errType=ERR_NUMERICAL; *status = 1; return; }
      }
     else
      {
@@ -287,7 +287,7 @@ void ppl_uaDiv(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
     else if ((mag = pow(breal,2)+pow(bimag,2)) < 1e-200)
      {
       if (c->set->term_current.ExplicitErrors == SW_ONOFF_OFF) { o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; }
-      else                                                      { sprintf(errText, "Division by zero error."); *errType=ERR_NUMERIC; *status = 1; return; }
+      else                                                      { sprintf(errText, "Division by zero error."); *errType=ERR_NUMERICAL; *status = 1; return; }
      }
     else
      {
@@ -417,7 +417,7 @@ void ppl_uaMod(ppl_context *c, const pplObj *a, const pplObj *b, pplObj *o, int 
    {
     if (c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) { o->real = GSL_NAN; o->imag = 0; o->flagComplex=0; return; }
     sprintf(errText, "Mod operator can only be applied to real operands; complex operands supplied.");
-    *errType=ERR_NUMERIC; *status = 1; return;
+    *errType=ERR_NUMERICAL; *status = 1; return;
    }
 
   if ((!gsl_finite(o->real))||(!gsl_finite(o->imag)))

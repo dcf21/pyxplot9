@@ -32,8 +32,11 @@
 #include "epsMaker/canvasDraw.h"
 #include "canvasItems.h"
 #include "coreUtils/errorReport.h"
+#include "mathsTools/dcfmath.h"
 #include "settings/epsColors.h"
 #include "settings/settingTypes.h"
+#include "stringTools/asciidouble.h"
+#include "userspace/pplObjPrint.h"
 #include "userspace/unitsDisp.h"
 #include "userspace/unitsArithmetic.h"
 
@@ -203,8 +206,8 @@ int eps_plot_styles_NDataColumns(pplerr_context *ec, int style, unsigned char Th
 
 // UpdateUsage... assert that axis X should be dimensionally compatible with unit Y
 #define UUAU(XYZ,XYZN,X,Y) \
- if ((X->HardUnitSet) && (!ppl_unitsDimEqual(&X->HardUnit , &(Y)))) { sprintf(x->c->errcontext.tempErrStr, "Axis %c%d on plot %d has data plotted against it with conflicting physical units of <%s> as compared to range of axis, which has units of <%s>.", "xyzc"[XYZ], XYZN, id,  ppl_printUnit(x->c,&(Y),NULL,NULL,0,1,0),  ppl_printUnit(x->c,&X->HardUnit,NULL,NULL,1,1,0)); ppl_error(&x->c->errcontext, ERR_GENERAL, -1, -1, NULL); return 1; } \
- if ((X->DataUnitSet) && (!ppl_unitsDimEqual(&X->DataUnit , &(Y)))) { sprintf(x->c->errcontext.tempErrStr, "Axis %c%d on plot %d has data plotted against it with conflicting physical units of <%s> and <%s>.", "xyzc"[XYZ], XYZN, id,  ppl_printUnit(x->c,&X->DataUnit,NULL,NULL,0,1,0),  ppl_printUnit(x->c,&(Y),NULL,NULL,1,1,0)); ppl_error(&x->c->errcontext, ERR_GENERAL, -1, -1, NULL); return 1; } \
+ if ((X->HardUnitSet) && (!ppl_unitsDimEqual(&X->HardUnit , &(Y)))) { sprintf(x->c->errcontext.tempErrStr, "Axis %c%d on plot %d has data plotted against it with conflicting physical units of <%s> as compared to range of axis, which has units of <%s>.", "xyzc"[XYZ], XYZN, id,  ppl_printUnit(x->c,&(Y),NULL,NULL,0,1,0),  ppl_printUnit(x->c,&X->HardUnit,NULL,NULL,1,1,0)); ppl_error(&x->c->errcontext, ERR_GENERIC, -1, -1, NULL); return 1; } \
+ if ((X->DataUnitSet) && (!ppl_unitsDimEqual(&X->DataUnit , &(Y)))) { sprintf(x->c->errcontext.tempErrStr, "Axis %c%d on plot %d has data plotted against it with conflicting physical units of <%s> and <%s>.", "xyzc"[XYZ], XYZN, id,  ppl_printUnit(x->c,&X->DataUnit,NULL,NULL,0,1,0),  ppl_printUnit(x->c,&(Y),NULL,NULL,1,1,0)); ppl_error(&x->c->errcontext, ERR_GENERIC, -1, -1, NULL); return 1; } \
  if (!X->DataUnitSet) \
   { \
    X->DataUnitSet = 1; \
@@ -448,7 +451,39 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
   pplset_axis    *a[3] = {a1,a2,a3};
   dataBlock      *blk;
 
-  if ((data==NULL) || (data->Nrows<1)) return 0; // No data present
+  if ((data==NULL) || (data->Nrows<1))
+   {
+    char *output = x->c->errcontext.tempErrStr;
+    int   i      = 0;
+    sprintf(output+i,"plotted item");
+    i+=strlen(output+i);
+    if (!pd->function)
+     {
+      if (pd->filename != NULL)
+       {
+        output[i++]=' '; ppl_strEscapify(pd->filename, output+i); i+=strlen(output+i); // Filename of datafile we are plotting
+       }
+      else if (pd->vectors != NULL)
+       {
+        for (j=0; j<pd->NFunctions; j++) // Print out the list of functions which we are plotting
+         {
+          output[i++]=(j!=0)?':':' ';
+          pplObjPrint(x->c,&pd->vectors[j],NULL,output+i,ppl_min(250,LSTR_LENGTH-i),0,0);
+          i+=strlen(output+i);
+         }
+       }
+     }
+    else
+     for (j=0; j<pd->NFunctions; j++) // Print out the list of functions which we are plotting
+      {
+       output[i++]=(j!=0)?':':' ';
+       ppl_strStrip(pd->functions[j]->ascii , output+i);
+       i+=strlen(output+i);
+      }
+    sprintf(output+i," produced no data.");
+    ppl_warning(&x->c->errcontext,ERR_NUMERICAL,NULL);
+    return 0; // No data present
+   }
 
   Ncolumns = data->Ncolumns_real;
   Ncol_obj = data->Ncolumns_obj;
@@ -638,7 +673,7 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
     ld = LineDraw_Init(x, a[xn], a[yn], a[zn], xrn, yrn, zrn, sg, ThreeDim, origin_x, origin_y, scale_x, scale_y, scale_z);
     last_colstr=NULL;
 
-    if (a[yn]->DataUnitSet && (!ppl_unitsDimEqual(&sg->BoxFrom, &a[yn]->DataUnit))) { sprintf(x->c->errcontext.tempErrStr, "Data with units of <%s> plotted with impulses when BoxFrom is set to a value with units of <%s>.", ppl_printUnit(x->c,&a[yn]->DataUnit,NULL,NULL,0,1,0),  ppl_printUnit(x->c,&sg->BoxFrom,NULL,NULL,1,1,0)); ppl_error(&x->c->errcontext, ERR_GENERAL, -1, -1, NULL); }
+    if (a[yn]->DataUnitSet && (!ppl_unitsDimEqual(&sg->BoxFrom, &a[yn]->DataUnit))) { sprintf(x->c->errcontext.tempErrStr, "Data with units of <%s> plotted with impulses when BoxFrom is set to a value with units of <%s>.", ppl_printUnit(x->c,&a[yn]->DataUnit,NULL,NULL,0,1,0),  ppl_printUnit(x->c,&sg->BoxFrom,NULL,NULL,1,1,0)); ppl_error(&x->c->errcontext, ERR_GENERIC, -1, -1, NULL); }
     else
      {
       while (blk != NULL)
@@ -827,8 +862,8 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
   LineDraw_PenUp(x, ld); \
  } \
 
-    if (a[yn]->DataUnitSet && (!ppl_unitsDimEqual(&sg->BoxFrom, &a[yn]->DataUnit))) { sprintf(x->c->errcontext.tempErrStr, "Data with units of <%s> plotted as boxes/steps when BoxFrom is set to a value with units of <%s>.", ppl_printUnit(x->c,&a[yn]->DataUnit,NULL,NULL,0,1,0),  ppl_printUnit(x->c,&sg->BoxFrom,NULL,NULL,1,1,0)); ppl_error(&x->c->errcontext, ERR_GENERAL, -1, -1, NULL); }
-    else if (a[xn]->DataUnitSet && (sg->BoxWidth.real>0.0) && (!ppl_unitsDimEqual(&sg->BoxWidth, &a[xn]->DataUnit))) { sprintf(x->c->errcontext.tempErrStr, "Data with ordinate units of <%s> plotted as boxes/steps when BoxWidth is set to a value with units of <%s>.", ppl_printUnit(x->c,&a[xn]->DataUnit,NULL,NULL,0,1,0),  ppl_printUnit(x->c,&sg->BoxWidth,NULL,NULL,1,1,0)); ppl_error(&x->c->errcontext, ERR_GENERAL, -1, -1, NULL); }
+    if (a[yn]->DataUnitSet && (!ppl_unitsDimEqual(&sg->BoxFrom, &a[yn]->DataUnit))) { sprintf(x->c->errcontext.tempErrStr, "Data with units of <%s> plotted as boxes/steps when BoxFrom is set to a value with units of <%s>.", ppl_printUnit(x->c,&a[yn]->DataUnit,NULL,NULL,0,1,0),  ppl_printUnit(x->c,&sg->BoxFrom,NULL,NULL,1,1,0)); ppl_error(&x->c->errcontext, ERR_GENERIC, -1, -1, NULL); }
+    else if (a[xn]->DataUnitSet && (sg->BoxWidth.real>0.0) && (!ppl_unitsDimEqual(&sg->BoxWidth, &a[xn]->DataUnit))) { sprintf(x->c->errcontext.tempErrStr, "Data with ordinate units of <%s> plotted as boxes/steps when BoxWidth is set to a value with units of <%s>.", ppl_printUnit(x->c,&a[xn]->DataUnit,NULL,NULL,0,1,0),  ppl_printUnit(x->c,&sg->BoxWidth,NULL,NULL,1,1,0)); ppl_error(&x->c->errcontext, ERR_GENERIC, -1, -1, NULL); }
     else
      {
       unsigned char logaxis = (a[xn]->LogFinal==SW_BOOL_TRUE);
@@ -1068,12 +1103,10 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
 // Produce an icon representing a dataset on the graph's legend
 void eps_plot_LegendIcon(EPSComm *x, int i, canvas_plotdesc *pd, double xpos, double ypos, double scale, pplset_axis *a1, pplset_axis *a2, pplset_axis *a3, int xn, int yn, int zn)
  {
-  int            style;
-  dataTable     *data;
-  pplset_axis   *a[3] = {a1,a2,a3};
+  int            style = pd->ww_final.linespoints;
+  dataTable     *data  = x->current->plotdata[i];
+  pplset_axis   *a[3]  = {a1,a2,a3};
 
-  data  = x->current->plotdata[i];
-  style = pd->ww_final.linespoints;
   if ((data==NULL) || (data->Nrows<1)) return; // No data present
 
   if ((style==SW_STYLE_LINES) || (style==SW_STYLE_LINESPOINTS) || (style==SW_STYLE_IMPULSES) || (style==SW_STYLE_BOXES) || (style==SW_STYLE_WBOXES) || (style==SW_STYLE_STEPS) || (style==SW_STYLE_FSTEPS) || (style==SW_STYLE_HISTEPS) || (style==SW_STYLE_SURFACE) || (style==SW_STYLE_CONTOURMAP))

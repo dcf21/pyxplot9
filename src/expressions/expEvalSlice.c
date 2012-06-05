@@ -82,9 +82,9 @@ void ppl_sliceItem (ppl_context *context, int getPtr, int *status, int *errType,
    }
 
   if (args->objType!=PPLOBJ_NUM) { *errType=ERR_TYPE; sprintf(errText,"Item numbers when slicing must be numerical values; supplied index has type <%s>.",pplObjTypeNames[args->objType]); goto fail; }
-  if (!args->dimensionless) { *errType=ERR_NUMERIC; sprintf(errText,"Item numbers when slicing must be dimensionless numbers; supplied index has units of <%s>.", ppl_printUnit(context, args, NULL, NULL, 0, 1, 0) ); goto fail; }
-  if (args->flagComplex) { *errType=ERR_NUMERIC; sprintf(errText,"Item numbers when slicing must be real numbers; supplied index is complex."); goto fail; }
-  if ( (!gsl_finite(args->real)) || (args->real<INT_MIN) || (args->real>INT_MAX) ) { *errType=ERR_NUMERIC; sprintf(errText,"Item numbers when slicing must be in the range %d to %d.", INT_MIN, INT_MAX); goto fail; }
+  if (!args->dimensionless) { *errType=ERR_NUMERICAL; sprintf(errText,"Item numbers when slicing must be dimensionless numbers; supplied index has units of <%s>.", ppl_printUnit(context, args, NULL, NULL, 0, 1, 0) ); goto fail; }
+  if (args->flagComplex) { *errType=ERR_NUMERICAL; sprintf(errText,"Item numbers when slicing must be real numbers; supplied index is complex."); goto fail; }
+  if ( (!gsl_finite(args->real)) || (args->real<INT_MIN) || (args->real>INT_MAX) ) { *errType=ERR_NUMERICAL; sprintf(errText,"Item numbers when slicing must be in the range %d to %d.", INT_MIN, INT_MAX); goto fail; }
 
   switch (t)
    {

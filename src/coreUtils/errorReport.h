@@ -25,9 +25,9 @@
 #define _PPL_ERROR_H 1
 
 #define ERR_INTERNAL  100
-#define ERR_GENERAL   101
+#define ERR_GENERIC   101
 #define ERR_SYNTAX    102
-#define ERR_NUMERIC   103
+#define ERR_NUMERICAL 103
 #define ERR_FILE      104
 #define ERR_MEMORY    105
 #define ERR_STACKED   106

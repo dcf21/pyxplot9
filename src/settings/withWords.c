@@ -191,7 +191,7 @@ void ppl_withWordsMerge(ppl_context *context, withWords *out, const withWords *a
 
   for (i=4; i>=0; i--)
    {
-    if (i>24) { ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, "Iteration depth exceeded whilst substituting plot styles. Infinite plot style loop suspected."); return; } // i can reach 24 when recursion happens
+    if (i>24) { ppl_error(&context->errcontext,ERR_GENERIC, -1, -1, "Iteration depth exceeded whilst substituting plot styles. Infinite plot style loop suspected."); return; } // i can reach 24 when recursion happens
     x = InputArray[i];
     if (x == NULL) continue;
     if ((x->USEstyle) && (!BlockStyleSubstitution[i])) // Substitute for numbered plot styles

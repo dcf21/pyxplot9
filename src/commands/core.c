@@ -183,7 +183,7 @@ void ppl_directive_exec(ppl_context *c, parserLine *pl, parserOutput *in, int in
   if (stat || c->errStat.status)
    {
     strcpy(c->errStat.errBuff, "");
-    ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,ERR_GENERAL,0,pl->linetxt,"executed statement");
+    ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,ERR_GENERIC,0,pl->linetxt,"executed statement");
    }
   ppl_parserStatFree(&ps2);
   return;
@@ -247,7 +247,7 @@ void ppl_directive_history(ppl_context *c, parserLine *pl, parserOutput *in)
   return;
 #else
   snprintf(c->errStat.errBuff, LSTR_LENGTH, "The 'history' command is not available as the GNU readline library was not linked to when PyXPlot was installed.");
-  TBADD(ERR_GENERAL,0);
+  TBADD(ERR_GENERIC,0);
   return;
 #endif
  }
@@ -275,7 +275,7 @@ void ppl_directive_load(ppl_context *c, parserLine *pl, parserOutput *in, int in
       if (c->errStat.status)
        {
         strcpy(c->errStat.errBuff, "");
-        ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,ERR_GENERAL,0,pl->linetxt,"executed script");
+        ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,ERR_GENERIC,0,pl->linetxt,"executed script");
         break;
        }
      }
@@ -362,7 +362,7 @@ void ppl_directive_save(ppl_context *c, parserLine *pl, parserOutput *in)
   return;
 #else
   snprintf(c->errStat.errBuff, LSTR_LENGTH, "The 'save' command is not available as the GNU readline library was not linked to when PyXPlot was installed.");
-  TBADD(ERR_GENERAL,0);
+  TBADD(ERR_GENERIC,0);
   return;
 #endif
  }
@@ -471,10 +471,10 @@ void ppl_directive_varset(ppl_context *c, parserLine *pl, parserOutput *in, int 
        }
       break;
      }
-    if (!FD_ISSET(fstdout , &readable)) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Got bored waiting for sed to return data."); sigprocmask(SIG_UNBLOCK, &sigs, NULL); free(re); return; }
+    if (!FD_ISSET(fstdout , &readable)) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Got bored waiting for sed to return data."); sigprocmask(SIG_UNBLOCK, &sigs, NULL); free(re); return; }
 
     // Read data back from sed process
-    if ((i = read(fstdout, re, rel)) < 0) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Could not read from pipe to sed."); sigprocmask(SIG_UNBLOCK, &sigs, NULL); free(re); return; }
+    if ((i = read(fstdout, re, rel)) < 0) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Could not read from pipe to sed."); sigprocmask(SIG_UNBLOCK, &sigs, NULL); free(re); return; }
     re[i] = '\0';
     close(fstdout);
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);

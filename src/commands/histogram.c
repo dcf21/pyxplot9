@@ -133,7 +133,7 @@ void ppl_directive_histogram(ppl_context *c, parserLine *pl, parserOutput *in, i
     // Exit on error
     if ((status)||(data==NULL))
      {
-      TBADD2(ERR_GENERAL,0);
+      TBADD2(ERR_GENERIC,0);
       ppl_memAlloc_AscendOutOfContext(contextLocalVec);
       return;
      }
@@ -142,14 +142,14 @@ void ppl_directive_histogram(ppl_context *c, parserLine *pl, parserOutput *in, i
     for (j=0; j<NcolRequired; j++)
      if (minSet[j] || maxSet[j])
       {
-       if (!ppl_unitsDimEqual(&unit[j],data->firstEntries+j)) { sprintf(c->errStat.errBuff, "The minimum and maximum limits specified in range %d in the fit command have conflicting physical dimensions with the data returned from the data file. The limits have units of <%s>, whilst the data have units of <%s>.", j+1, ppl_printUnit(c,unit+j,NULL,NULL,0,1,0), ppl_printUnit(c,data->firstEntries+j,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERIC,0); return; }
+       if (!ppl_unitsDimEqual(&unit[j],data->firstEntries+j)) { sprintf(c->errStat.errBuff, "The minimum and maximum limits specified in range %d in the fit command have conflicting physical dimensions with the data returned from the data file. The limits have units of <%s>, whilst the data have units of <%s>.", j+1, ppl_printUnit(c,unit+j,NULL,NULL,0,1,0), ppl_printUnit(c,data->firstEntries+j,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERICAL,0); return; }
       }
 
     // Check that we have at least three datapoints
     if (data->Nrows < 3)
      {
       sprintf(c->errStat.errBuff, "Histogram construction is only possible on data sets with members at at least three values of x.");
-      TBADD2(ERR_NUMERIC,0); return;
+      TBADD2(ERR_NUMERICAL,0); return;
      }
 
     firstEntry = data->firstEntries[0];
@@ -187,7 +187,7 @@ void ppl_directive_histogram(ppl_context *c, parserLine *pl, parserOutput *in, i
 
     if (logAxis)
      {
-      if (xdata[j]<=0.0) { COUNTEDERR1; v=firstEntry; v.real=xdata[j]; sprintf(c->errcontext.tempErrStr,"Negative or zero values are not allowed in the construction of histograms in log space; value of x=%s will be ignored.",ppl_unitsNumericDisplay(c,&v, 0, 0, 0)); ppl_warning(&c->errcontext,ERR_NUMERIC,NULL); COUNTEDERR2; continue; }
+      if (xdata[j]<=0.0) { COUNTEDERR1; v=firstEntry; v.real=xdata[j]; sprintf(c->errcontext.tempErrStr,"Negative or zero values are not allowed in the construction of histograms in log space; value of x=%s will be ignored.",ppl_unitsNumericDisplay(c,&v, 0, 0, 0)); ppl_warning(&c->errcontext,ERR_NUMERICAL,NULL); COUNTEDERR2; continue; }
       xdata[k]=log(xdata[j]); // If we're constructing histogram in log space, log data now
       if (!gsl_finite(xdata[k])) continue;
      } else {
@@ -197,7 +197,7 @@ void ppl_directive_histogram(ppl_context *c, parserLine *pl, parserOutput *in, i
    }
 
   // Check that we have at least three points to interpolate
-  if (k<3) { sprintf(c->errStat.errBuff, "Histogram construction is only possible on data sets with members at at least three values of x."); TBADD2(ERR_NUMERIC,0); return; }
+  if (k<3) { sprintf(c->errStat.errBuff, "Histogram construction is only possible on data sets with members at at least three values of x."); TBADD2(ERR_NUMERICAL,0); return; }
 
   // Make histogramDescriptor data structure
   output = (histogramDescriptor *)malloc(sizeof(histogramDescriptor));
@@ -229,7 +229,7 @@ void ppl_directive_histogram(ppl_context *c, parserLine *pl, parserOutput *in, i
       pos = (int)round(stk[pos].real);
       if (pos<=0) break;
       val = &stk[pos+PARSE_histogram_x_bin_list];
-      if (!ppl_unitsDimEqual(&firstEntry,val)) { sprintf(c->errcontext.tempErrStr, "The supplied bin boundary at x=%s has conflicting physical dimensions with the data supplied, which has units of <%s>. Ignoring this bin boundary.", ppl_printUnit(c,val,NULL,NULL,0,1,0), ppl_printUnit(c,&firstEntry,NULL,NULL,1,1,0)); ppl_warning(&c->errcontext,ERR_NUMERIC,NULL); }
+      if (!ppl_unitsDimEqual(&firstEntry,val)) { sprintf(c->errcontext.tempErrStr, "The supplied bin boundary at x=%s has conflicting physical dimensions with the data supplied, which has units of <%s>. Ignoring this bin boundary.", ppl_printUnit(c,val,NULL,NULL,0,1,0), ppl_printUnit(c,&firstEntry,NULL,NULL,1,1,0)); ppl_warning(&c->errcontext,ERR_NUMERICAL,NULL); }
       else { output->bins[j++] = val->real; }
      }
     binListLen = j; // some of the bins may have been rejected
@@ -267,17 +267,17 @@ void ppl_directive_histogram(ppl_context *c, parserLine *pl, parserOutput *in, i
     if (inbinOrigin->objType == PPLOBJ_NUM) { BinOrigin = inbinOrigin;                       BinOriginSet = 1;                                   }
     else                                    { BinOrigin = &(c->set->term_current.BinOrigin); BinOriginSet = !c->set->term_current.BinOriginAuto; }
 
-    if ((!logAxis) && (!ppl_unitsDimEqual(&firstEntry,BinWidth))) { sprintf(c->errStat.errBuff,"The bin width supplied to the histogram command has conflicting physical dimensions with the data supplied. The former has units of <%s>, whilst the latter has units of <%s>.", ppl_printUnit(c,BinWidth,NULL,NULL,0,1,0), ppl_printUnit(c,&firstEntry,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERIC,0); free(output); free(output->filename); return; }
-    if ((logAxis) && (BinWidth->dimensionless==0)) { sprintf(c->errStat.errBuff, "For logarithmically spaced bins, the multiplicative spacing between bins must be dimensionless. The supplied spacing has units of <%s>.", ppl_printUnit(c,BinWidth,NULL,NULL,0,1,0)); TBADD2(ERR_NUMERIC,0); free(output); free(output->filename); return; }
-    if ((BinOriginSet) && (!ppl_unitsDimEqual(&firstEntry,BinOrigin))) { sprintf(c->errStat.errBuff, "The bin origin supplied to the histogram command has conflicting physical dimensions with the data supplied. The former has units of <%s>, whilst the latter has units of <%s>.", ppl_printUnit(c,BinOrigin,NULL,NULL,0,1,0), ppl_printUnit(c,&firstEntry,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERIC,0); free(output); free(output->filename); return; }
-    if ((logAxis) && (BinWidth->real <= 1.0)) { sprintf(c->errStat.errBuff, "For logarithmically spaced bins, the multiplicative spacing between bins must be greater than 1.0. Value supplied was %s.", ppl_unitsNumericDisplay(c,BinWidth,0,0,0)); TBADD2(ERR_NUMERIC,0); free(output); free(output->filename); return; }
-    if (BinWidth->real <= 0.0) { sprintf(c->errStat.errBuff, "The bin width supplied to the histogram command must be greater than zero. Value supplied was %s.", ppl_unitsNumericDisplay(c,BinWidth,0,0,0)); TBADD2(ERR_NUMERIC,0); free(output); free(output->filename); return; }
-    if ((logAxis) && (BinOriginSet) && (BinOrigin->real <= 0.0)) { sprintf(c->errStat.errBuff, "For logarithmically spaced bins, the specified bin origin must be greater than zero. Value supplied was %s.", ppl_unitsNumericDisplay(c,BinOrigin,0,0,0)); TBADD2(ERR_NUMERIC,0); free(output); free(output->filename); return; }
-    if ((logAxis) && (minSet[0]) && (min[0] <= 0.0)) { unit[0].real=min[0]; sprintf(c->errStat.errBuff, "For logarithmically spaced bins, the specified minimum must be greater than zero. Value supplied was %s.", ppl_unitsNumericDisplay(c,&unit[0],0,0,0)); TBADD2(ERR_NUMERIC,0); free(output); free(output->filename); return; }
-    if ((logAxis) && (maxSet[0]) && (max[0] <= 0.0)) { unit[0].real=max[0]; sprintf(c->errStat.errBuff, "For logarithmically spaced bins, the specified maximum must be greater than zero. Value supplied was %s.", ppl_unitsNumericDisplay(c,&unit[0],0,0,0)); TBADD2(ERR_NUMERIC,0); free(output); free(output->filename); return; }
-    if ((minSet[0]||maxSet[0])&&(!ppl_unitsDimEqual(&firstEntry,&unit[0]))) { sprintf(c->errStat.errBuff, "The range supplied to the histogram command has conflicting physical dimensions with the data supplied. The former has units of <%s>, whilst the latter has units of <%s>.", ppl_printUnit(c,&unit[0],NULL,NULL,0,1,0), ppl_printUnit(c,&firstEntry,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERIC,0); free(output); free(output->filename); return; }
-    if (!gsl_finite(BinWidth->real)) { sprintf(c->errStat.errBuff, "The bin width specified to the histogram command is not a finite number."); TBADD2(ERR_NUMERIC,0); free(output); free(output->filename); return; }
-    if (BinOriginSet && !gsl_finite(BinOrigin->real)) { sprintf(c->errStat.errBuff, "The bin origin specified to the histogram command is not a finite number."); TBADD2(ERR_NUMERIC,0); free(output); free(output->filename); return; }
+    if ((!logAxis) && (!ppl_unitsDimEqual(&firstEntry,BinWidth))) { sprintf(c->errStat.errBuff,"The bin width supplied to the histogram command has conflicting physical dimensions with the data supplied. The former has units of <%s>, whilst the latter has units of <%s>.", ppl_printUnit(c,BinWidth,NULL,NULL,0,1,0), ppl_printUnit(c,&firstEntry,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERICAL,0); free(output); free(output->filename); return; }
+    if ((logAxis) && (BinWidth->dimensionless==0)) { sprintf(c->errStat.errBuff, "For logarithmically spaced bins, the multiplicative spacing between bins must be dimensionless. The supplied spacing has units of <%s>.", ppl_printUnit(c,BinWidth,NULL,NULL,0,1,0)); TBADD2(ERR_NUMERICAL,0); free(output); free(output->filename); return; }
+    if ((BinOriginSet) && (!ppl_unitsDimEqual(&firstEntry,BinOrigin))) { sprintf(c->errStat.errBuff, "The bin origin supplied to the histogram command has conflicting physical dimensions with the data supplied. The former has units of <%s>, whilst the latter has units of <%s>.", ppl_printUnit(c,BinOrigin,NULL,NULL,0,1,0), ppl_printUnit(c,&firstEntry,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERICAL,0); free(output); free(output->filename); return; }
+    if ((logAxis) && (BinWidth->real <= 1.0)) { sprintf(c->errStat.errBuff, "For logarithmically spaced bins, the multiplicative spacing between bins must be greater than 1.0. Value supplied was %s.", ppl_unitsNumericDisplay(c,BinWidth,0,0,0)); TBADD2(ERR_NUMERICAL,0); free(output); free(output->filename); return; }
+    if (BinWidth->real <= 0.0) { sprintf(c->errStat.errBuff, "The bin width supplied to the histogram command must be greater than zero. Value supplied was %s.", ppl_unitsNumericDisplay(c,BinWidth,0,0,0)); TBADD2(ERR_NUMERICAL,0); free(output); free(output->filename); return; }
+    if ((logAxis) && (BinOriginSet) && (BinOrigin->real <= 0.0)) { sprintf(c->errStat.errBuff, "For logarithmically spaced bins, the specified bin origin must be greater than zero. Value supplied was %s.", ppl_unitsNumericDisplay(c,BinOrigin,0,0,0)); TBADD2(ERR_NUMERICAL,0); free(output); free(output->filename); return; }
+    if ((logAxis) && (minSet[0]) && (min[0] <= 0.0)) { unit[0].real=min[0]; sprintf(c->errStat.errBuff, "For logarithmically spaced bins, the specified minimum must be greater than zero. Value supplied was %s.", ppl_unitsNumericDisplay(c,&unit[0],0,0,0)); TBADD2(ERR_NUMERICAL,0); free(output); free(output->filename); return; }
+    if ((logAxis) && (maxSet[0]) && (max[0] <= 0.0)) { unit[0].real=max[0]; sprintf(c->errStat.errBuff, "For logarithmically spaced bins, the specified maximum must be greater than zero. Value supplied was %s.", ppl_unitsNumericDisplay(c,&unit[0],0,0,0)); TBADD2(ERR_NUMERICAL,0); free(output); free(output->filename); return; }
+    if ((minSet[0]||maxSet[0])&&(!ppl_unitsDimEqual(&firstEntry,&unit[0]))) { sprintf(c->errStat.errBuff, "The range supplied to the histogram command has conflicting physical dimensions with the data supplied. The former has units of <%s>, whilst the latter has units of <%s>.", ppl_printUnit(c,&unit[0],NULL,NULL,0,1,0), ppl_printUnit(c,&firstEntry,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERICAL,0); free(output); free(output->filename); return; }
+    if (!gsl_finite(BinWidth->real)) { sprintf(c->errStat.errBuff, "The bin width specified to the histogram command is not a finite number."); TBADD2(ERR_NUMERICAL,0); free(output); free(output->filename); return; }
+    if (BinOriginSet && !gsl_finite(BinOrigin->real)) { sprintf(c->errStat.errBuff, "The bin origin specified to the histogram command is not a finite number."); TBADD2(ERR_NUMERICAL,0); free(output); free(output->filename); return; }
 
     if (logAxis) { if (BinOriginSet) BinOriginDbl = log(BinOrigin->real); BinWidthDbl = log(BinWidth->real); }
     else         { if (BinOriginSet) BinOriginDbl =     BinOrigin->real ; BinWidthDbl =     BinWidth->real ; }
@@ -291,7 +291,7 @@ void ppl_directive_histogram(ppl_context *c, parserLine *pl, parserOutput *in, i
     xbinmax = ceil ((xbinmax-BinOriginDbl)/BinWidthDbl)*BinWidthDbl + BinOriginDbl;
     if (DEBUG) { sprintf(c->errcontext.tempErrStr, "After application of BinOrigin, histogram command using range [%e:%e]",xbinmin,xbinmax); ppl_log(&c->errcontext,NULL); }
 
-    if (((xbinmax-xbinmin)/BinWidthDbl + 1.0001) > 1e7) { sprintf(c->errStat.errBuff, "The supplied value of BinWidth produces a binning scheme with more than 1e7 bins. This is probably not sensible."); TBADD2(ERR_GENERAL,0); return; }
+    if (((xbinmax-xbinmin)/BinWidthDbl + 1.0001) > 1e7) { sprintf(c->errStat.errBuff, "The supplied value of BinWidth produces a binning scheme with more than 1e7 bins. This is probably not sensible."); TBADD2(ERR_GENERIC,0); return; }
     output->Nbins = (long)((xbinmax-xbinmin)/BinWidthDbl + 1.0001);
     if (DEBUG) { sprintf(c->errcontext.tempErrStr, "Histogram command using %ld bins",output->Nbins); ppl_log(&c->errcontext,NULL); }
     output->bins = (double *)malloc(output->Nbins*sizeof(double));

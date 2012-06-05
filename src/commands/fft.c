@@ -187,7 +187,7 @@ void ppl_directive_fft(ppl_context *c, parserLine *pl, parserOutput *in, int int
   {
   double tempDbl = 1.0;
   for (i=0; i<Ndims; i++) tempDbl *= Nsteps[i];
-  if (tempDbl > 1e8) { sprintf(c->errStat.errBuff, "The total number of samples in the requested %d-dimensional FFT is in excess of 1e8; PyXPlot is not the right tool to do this FFT in.", Ndims); TBADD2(ERR_NUMERIC,0); return; }
+  if (tempDbl > 1e8) { sprintf(c->errStat.errBuff, "The total number of samples in the requested %d-dimensional FFT is in excess of 1e8; PyXPlot is not the right tool to do this FFT in.", Ndims); TBADD2(ERR_NUMERICAL,0); return; }
   Nsamples = (int)tempDbl;
   }
 
@@ -224,7 +224,7 @@ void ppl_directive_fft(ppl_context *c, parserLine *pl, parserOutput *in, int int
     // Exit on error
     if ((status)||(data==NULL))
      {
-      TBADD2(ERR_GENERAL,0);
+      TBADD2(ERR_GENERIC,0);
       ppl_memAlloc_AscendOutOfContext(contextLocalVec);
       return;
      }
@@ -233,20 +233,20 @@ void ppl_directive_fft(ppl_context *c, parserLine *pl, parserOutput *in, int int
     for (j=0; j<Ndims; j++)
      if (minSet[j] || maxSet[j])
       {
-       if (!ppl_unitsDimEqual(&unit[j],data->firstEntries+j)) { sprintf(c->errStat.errBuff, "The minimum and maximum limits specified in range %d in the fit command have conflicting physical dimensions with the data returned from the data file. The limits have units of <%s>, whilst the data have units of <%s>.", j+1, ppl_printUnit(c,unit+j,NULL,NULL,0,1,0), ppl_printUnit(c,data->firstEntries+j,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERIC,0); return; }
+       if (!ppl_unitsDimEqual(&unit[j],data->firstEntries+j)) { sprintf(c->errStat.errBuff, "The minimum and maximum limits specified in range %d in the fit command have conflicting physical dimensions with the data returned from the data file. The limits have units of <%s>, whilst the data have units of <%s>.", j+1, ppl_printUnit(c,unit+j,NULL,NULL,0,1,0), ppl_printUnit(c,data->firstEntries+j,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERICAL,0); return; }
       }
 
     // Read unit of f(x) in final two columns of data table (real and imaginary components of f(x)
     firstEntry = data->firstEntries[Ndims];
     firstEntry.real=1.0; firstEntry.imag=0.0; firstEntry.flagComplex=0;
-    if (!ppl_unitsDimEqual(&data->firstEntries[Ndims], &data->firstEntries[Ndims+1])) { sprintf(c->errStat.errBuff, "Data in columns %d and %d of the data table supplied to the fft command have conflicting units of <%s> and <%s> respectively. These represent the real and imaginary components of an input sample, and must have the same units.", Ndims+1, Ndims+2, ppl_printUnit(c,&data->firstEntries[Ndims],NULL,NULL,0,1,0), ppl_printUnit(c,&data->firstEntries[Ndims+1],NULL,NULL,1,1,0)); TBADD2(ERR_NUMERIC,0); return; }
+    if (!ppl_unitsDimEqual(&data->firstEntries[Ndims], &data->firstEntries[Ndims+1])) { sprintf(c->errStat.errBuff, "Data in columns %d and %d of the data table supplied to the fft command have conflicting units of <%s> and <%s> respectively. These represent the real and imaginary components of an input sample, and must have the same units.", Ndims+1, Ndims+2, ppl_printUnit(c,&data->firstEntries[Ndims],NULL,NULL,0,1,0), ppl_printUnit(c,&data->firstEntries[Ndims+1],NULL,NULL,1,1,0)); TBADD2(ERR_NUMERICAL,0); return; }
 
 
     // Check that we have at least two datapoints
     if (data->Nrows < 2)
      {
       sprintf(c->errStat.errBuff, "FFT construction is only possible on data sets with members at at least two values of x.");
-      TBADD2(ERR_NUMERIC,0); return;
+      TBADD2(ERR_NUMERICAL,0); return;
      }
 
     // Allocate workspace in which to do FFT
@@ -277,7 +277,7 @@ void ppl_directive_fft(ppl_context *c, parserLine *pl, parserOutput *in, int int
          for (l=0; l<Ndims; l++) { pplObj x=unit[l]; x.real=blk->data_real[l + (Ndims+2)*j]; sprintf(c->errStat.errBuff+m,"%s,",ppl_unitsNumericDisplay(c,&x,0,1,-1)); m+=strlen(c->errStat.errBuff+m); }
          m-=(Ndims>0);
          sprintf(c->errStat.errBuff+m, ")."); j=strlen(c->errStat.errBuff);
-         TBADD2(ERR_NUMERIC,0);
+         TBADD2(ERR_NUMERICAL,0);
          return;
         }
 
@@ -349,12 +349,12 @@ void ppl_directive_fft(ppl_context *c, parserLine *pl, parserOutput *in, int int
         strncpy(c->errStat.errBuff+j, scratchpad, fnlen); j+=fnlen;
         for (l=0; l<Ndims; l++) { pplObj x=unit[l]; x.real=pos[l]; sprintf(c->errStat.errBuff+j,"%s,",ppl_unitsNumericDisplay(c,&x,0,1,-1)); j+=strlen(c->errStat.errBuff+j); }
         sprintf(c->errStat.errBuff+j, ")");
-        TBADD2(ERR_NUMERIC,0);
+        TBADD2(ERR_NUMERICAL,0);
         STACK_CLEAN; return;
        }
 
       if (i==0) { firstEntry=*out; firstEntry.real=1.0; firstEntry.imag=0.0; firstEntry.flagComplex=0; }
-      else if (!ppl_unitsDimEqual(out, &firstEntry)) { sprintf(c->errStat.errBuff, "The supplied function to FFT does not produce values with consistent units; has produced values with units of <%s> and of <%s>.", ppl_printUnit(c,&firstEntry,NULL,NULL,0,1,0), ppl_printUnit(c,out,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERIC,0); STACK_CLEAN; return; }
+      else if (!ppl_unitsDimEqual(out, &firstEntry)) { sprintf(c->errStat.errBuff, "The supplied function to FFT does not produce values with consistent units; has produced values with units of <%s> and of <%s>.", ppl_printUnit(c,&firstEntry,NULL,NULL,0,1,0), ppl_printUnit(c,out,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERICAL,0); STACK_CLEAN; return; }
       (*WindowType)(out, Ndims, Npos, Nsteps); // Apply window function to data
       #ifdef HAVE_FFTW3
       datagrid[i][0] = out->real; datagrid[i][1] = out->imag;
@@ -484,7 +484,7 @@ void ppl_fft_evaluate(ppl_context *c, char *FuncName, FFTDescriptor *desc, pplOb
   *out = desc->outputUnit;
 
   // Issue user with a warning if complex arithmetic is not enabled
-  if (c->set->term_current.ComplexNumbers != SW_ONOFF_ON) ppl_warning(&c->errcontext, ERR_NUMERIC, "Attempt to evaluate a Fourier transform function whilst complex arithmetic is disabled. Fourier transforms are almost invariably complex and so this is unlikely to work.");
+  if (c->set->term_current.ComplexNumbers != SW_ONOFF_ON) ppl_warning(&c->errcontext, ERR_NUMERICAL, "Attempt to evaluate a Fourier transform function whilst complex arithmetic is disabled. Fourier transforms are almost invariably complex and so this is unlikely to work.");
 
   // Check dimensions of input arguments and ensure that they are all real
   for (i=0; i<desc->Ndims; i++)

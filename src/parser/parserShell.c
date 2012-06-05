@@ -200,15 +200,15 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
      {
       int ec = WEXITSTATUS(status);
       if (ec) { if (DEBUG) ppl_log(&c->errcontext, "Pling command received non-zero return value."); }
-      if (ec) { sprintf(c->errcontext.tempErrStr, "Shell returned exit code %d.", ec); ppl_warning(&c->errcontext, ERR_GENERAL, NULL); }
+      if (ec) { sprintf(c->errcontext.tempErrStr, "Shell returned exit code %d.", ec); ppl_warning(&c->errcontext, ERR_GENERIC, NULL); }
      }
     else if (WIFSIGNALED(status))
      {
-      sprintf(c->errcontext.tempErrStr, "Shell terminated by signal %d.", WTERMSIG(status)); ppl_warning(&c->errcontext, ERR_GENERAL, NULL);
+      sprintf(c->errcontext.tempErrStr, "Shell terminated by signal %d.", WTERMSIG(status)); ppl_warning(&c->errcontext, ERR_GENERIC, NULL);
      }
     else
      {
-      sprintf(c->errcontext.tempErrStr, "Shell terminated because fail happened."); ppl_warning(&c->errcontext, ERR_GENERAL, NULL);
+      sprintf(c->errcontext.tempErrStr, "Shell terminated because fail happened."); ppl_warning(&c->errcontext, ERR_GENERIC, NULL);
      }
    }
   else if (strcmp(d, "plot")==0)

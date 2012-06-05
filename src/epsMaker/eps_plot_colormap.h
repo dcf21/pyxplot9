@@ -1,4 +1,4 @@
-// eps_plot_colourmap.h
+// eps_plot_colormap.h
 //
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
@@ -19,14 +19,14 @@
 
 // ----------------------------------------------------------------------------
 
-#ifndef _PPL_EPS_PLOT_COLOURMAP_H
-#define _PPL_EPS_PLOT_COLOURMAP_H 1
+#ifndef _PPL_EPS_PLOT_COLORMAP_H
+#define _PPL_EPS_PLOT_COLORMAP_H 1
 
 #include "settings/settings.h"
 
-void eps_plot_colourmap_YieldText(EPSComm *x, dataTable *data, pplset_graph *sg, canvas_plotdesc *pd);
-int  eps_plot_colourmap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int xn, int yn, int zn, pplset_graph *sg, canvas_plotdesc *pd, int pdn, double origin_x, double origin_y, double width, double height, double zdepth);
-int  eps_plot_colourmap_DrawScales(EPSComm *x, double origin_x, double origin_y, double width, double height, double zdepth);
+void eps_plot_colormap_YieldText(EPSComm *x, dataTable *data, pplset_graph *sg, canvas_plotdesc *pd);
+int  eps_plot_colormap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int xn, int yn, int zn, pplset_graph *sg, canvas_plotdesc *pd, int pdn, double origin_x, double origin_y, double width, double height, double zdepth);
+int  eps_plot_colormap_DrawScales(EPSComm *x, double origin_x, double origin_y, double width, double height, double zdepth);
 
 #endif
 

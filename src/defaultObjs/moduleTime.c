@@ -104,7 +104,7 @@ void pplfunc_timeIntervalStr (ppl_context *c, pplObj *in, int nArgs, int *status
    {
     format = (char *)in[2].auxil;
     ppl_timeDiffStr(c, out, in[0].real, in[1].real, format, status, errText);
-    if (*status) { *errType=ERR_NUMERIC; return; }
+    if (*status) { *errType=ERR_NUMERICAL; return; }
    }
   else // Format not specified
    {
@@ -154,7 +154,7 @@ void pplfunc_timestring  (ppl_context *c, pplObj *in, int nArgs, int *status, in
   if (nArgs>1) format = (char *)in[1].auxil; // Format specified
   else         format = NULL;                // Format not specified
   ppl_dateString(c, out, in[0].real, format, status, errText);
-  if (*status) { *errType=ERR_NUMERIC; return; }
+  if (*status) { *errType=ERR_NUMERICAL; return; }
   pplObjStr(&OUTPUT,0,1,out);
  }
 

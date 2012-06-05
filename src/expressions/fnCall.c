@@ -159,7 +159,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
       case PPLOBJ_FUNC:
         sprintf(context->errStat.errBuff,"New function objects must be created with the syntax f(x)=... or subroutine f(x) { ... }."); TBADD(ERR_TYPE); goto cleanup;
       case PPLOBJ_EXC:
-        if (nArgs==1) { if      (args[0].objType==PPLOBJ_STR) { pplObjCpy(out,&args[0],0,0,1); pplObjException(out,0,1,(char*)out->auxil,ERR_GENERAL); }
+        if (nArgs==1) { if      (args[0].objType==PPLOBJ_STR) { pplObjCpy(out,&args[0],0,0,1); pplObjException(out,0,1,(char*)out->auxil,ERR_GENERIC); }
                         else if (args[0].objType==PPLOBJ_EXC) { pplObjCpy(out,&args[0],0,0,1); }
                         else { sprintf(context->errStat.errBuff,"The first argument to the exception object constructor should be a string; an object of type <%s> was supplied.",pplObjTypeNames[args[0].objType]); TBADD(ERR_TYPE); }
                       }
@@ -362,7 +362,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
                 pplObj *item = (pplObj *)ppl_listIterate(&li);
                 if (item->objType!=PPLOBJ_NUM) { sprintf(context->errStat.errBuff,"When initialising a matrix from a list of lists, the elements must all be numerical values; supplied element has type <%s>.", pplObjTypeNames[item->objType]); TBADD(ERR_RANGE); goto cleanup; }
                 if (!ppl_unitsDimEqual(out, item)) { sprintf(context->errStat.errBuff,"When initialising a matrix from a list of lists, all of the elements must have the same dimensions. Supplied elements have units of <%s> and <%s>.", ppl_printUnit(context, out, NULL, NULL, 0, 1, 0), ppl_printUnit(context, item, NULL, NULL, 1, 1, 0) ); TBADD(ERR_UNIT); goto cleanup; }
-                if (item->flagComplex) { sprintf(context->errStat.errBuff,"Matrices can only hold real numbers; supplied elements are complex."); TBADD(ERR_NUMERIC); goto cleanup; }
+                if (item->flagComplex) { sprintf(context->errStat.errBuff,"Matrices can only hold real numbers; supplied elements are complex."); TBADD(ERR_NUMERICAL); goto cleanup; }
                 gsl_matrix_set(m, j, i, item->real );
                }
              }
@@ -415,7 +415,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
                 pplObj *item2 = (pplObj *)ppl_listIterate(&li2);
                 if (item2->objType!=PPLOBJ_NUM) { sprintf(context->errStat.errBuff,"When initialising a matrix from a list of lists, the elements must all be numerical values; supplied element has type <%s>.", pplObjTypeNames[item2->objType]); TBADD(ERR_RANGE); goto cleanup; }
                 if (!ppl_unitsDimEqual(out, item2)) { sprintf(context->errStat.errBuff,"When initialising a matrix from a list of lists, all of the elements must have the same dimensions. Supplied elements have units of <%s> and <%s>.", ppl_printUnit(context, out, NULL, NULL, 0, 1, 0), ppl_printUnit(context, item2, NULL, NULL, 1, 1, 0) ); TBADD(ERR_UNIT); goto cleanup; }
-                if (item->flagComplex) { sprintf(context->errStat.errBuff,"Matrices can only hold real numbers; supplied elements are complex."); TBADD(ERR_NUMERIC); goto cleanup; }
+                if (item->flagComplex) { sprintf(context->errStat.errBuff,"Matrices can only hold real numbers; supplied elements are complex."); TBADD(ERR_NUMERICAL); goto cleanup; }
                 gsl_matrix_set(m, j, i, item2->real );
                }
              }
@@ -555,7 +555,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
                 if (args[k].objType != PPLOBJ_NUM)
                  {
                   sprintf(context->errStat.errBuff,"Argument %d supplied to this function is not numeric, but a numeric range is specified for this argument in the function's definition.",k+1);
-                  TBADD(ERR_NUMERIC);
+                  TBADD(ERR_NUMERICAL);
                   return;
                  }
                 else if (!ppl_unitsDimEqual(f->min+k , args+k))
@@ -567,7 +567,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
                 else if (args[k].flagComplex)
                  {
                   sprintf(context->errStat.errBuff,"Argument %d supplied to this function must be a real number: any arguments which have min/max ranges specified must be real.",k+1);
-                  TBADD(ERR_NUMERIC);
+                  TBADD(ERR_NUMERICAL);
                   return;
                  } else { checked[k]=1; }
                }
@@ -580,7 +580,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
                 if (args[k].objType != PPLOBJ_NUM)
                  {
                   sprintf(context->errStat.errBuff,"Argument %d supplied to this function is not numeric, but a numeric range is specified for this argument in the function's definition.",k+1);
-                  TBADD(ERR_NUMERIC);
+                  TBADD(ERR_NUMERICAL);
                   return;
                  } 
                 else if (!ppl_unitsDimEqual(f->max+k , args+k))
@@ -667,7 +667,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
            }
 
           // Add traceback information if error happened
-          if (context->errStat.status) { strcpy(context->errStat.errBuff,""); TBADD2(ERR_GENERAL,"called function"); }
+          if (context->errStat.status) { strcpy(context->errStat.errBuff,""); TBADD2(ERR_GENERIC,"called function"); }
 
           // Tidy up
           if (output!=NULL)
@@ -728,7 +728,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
         while (context->stackPtr>stkLevelOld) { STACK_POP; }
 
         // Add traceback information if error happened
-        if (context->errStat.status) { strcpy(context->errStat.errBuff,""); TBADD2(ERR_GENERAL,"called subroutine"); goto cleanup; }
+        if (context->errStat.status) { strcpy(context->errStat.errBuff,""); TBADD2(ERR_GENERIC,"called subroutine"); goto cleanup; }
 
         // Output return value
         if (context->shellReturned) pplObjCpy(out, &context->shellReturnVal, 0, 0, 1);
@@ -743,7 +743,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
         int stat=0;
         FFTDescriptor *f = (FFTDescriptor *)fn->functionPtr;
         ppl_fft_evaluate(context, "fft", f, args, out, &stat, context->errStat.errBuff);
-        if (stat) { TBADD(ERR_NUMERIC); goto cleanup; }
+        if (stat) { TBADD(ERR_NUMERICAL); goto cleanup; }
         break;
        }
       case PPL_FUNC_HISTOGRAM:
@@ -751,7 +751,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
         int stat=0;
         histogramDescriptor *h = (histogramDescriptor *)fn->functionPtr;
         ppl_histogram_evaluate(context, "histogram", h, args, out, &stat, context->errStat.errBuff);
-        if (stat) { TBADD(ERR_NUMERIC); goto cleanup; }
+        if (stat) { TBADD(ERR_NUMERICAL); goto cleanup; }
         break;
        }
       case PPL_FUNC_SPLINE:
@@ -759,7 +759,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
         int stat=0;
         splineDescriptor *s = (splineDescriptor *)fn->functionPtr;
         ppl_spline_evaluate(context, "interpolation", s, args, out, &stat, context->errStat.errBuff);
-        if (stat) { TBADD(ERR_NUMERIC); goto cleanup; }
+        if (stat) { TBADD(ERR_NUMERICAL); goto cleanup; }
         break;
        }
       case PPL_FUNC_INTERP2D: case PPL_FUNC_BMPDATA:
@@ -767,7 +767,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
         int stat=0;
         splineDescriptor *s = (splineDescriptor *)fn->functionPtr;
         ppl_interp2d_evaluate(context, "interpolation", s, args, args+1, fn->functionType==PPL_FUNC_BMPDATA, out, &stat, context->errStat.errBuff);
-        if (stat) { TBADD(ERR_NUMERIC); goto cleanup; }
+        if (stat) { TBADD(ERR_NUMERICAL); goto cleanup; }
         break;
        }
       default:

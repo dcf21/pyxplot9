@@ -129,9 +129,9 @@ static void tics_cp(pplset_tics *o, pplset_tics *i)
     if((gotStart && gotIncr && !amLog) && (!ppl_unitsDimEqual(objstart,objincr))) { sprintf(c->errcontext.tempErrStr, "Start value for axis ticks has conflicting units with step size. Units of the start value are <%s>; units of the step size are <%s>.", ppl_printUnit(c, objstart, NULL, NULL, 0, 1, 0), ppl_printUnit(c, objincr, NULL, NULL, 1, 1, 0)); ppl_error(&c->errcontext, ERR_UNIT, -1, -1, NULL); return; } \
     if((gotStart && gotEnd           ) && (!ppl_unitsDimEqual(objstart,objend ))) { sprintf(c->errcontext.tempErrStr, "Start value for axis ticks has conflicting units with end value. Units of the start value are <%s>; units of the end value are <%s>.", ppl_printUnit(c, objstart, NULL, NULL, 0, 1, 0), ppl_printUnit(c, objend, NULL, NULL, 1, 1, 0)); ppl_error(&c->errcontext, ERR_UNIT, -1, -1, NULL); return; } \
     if (amLog    && (!objincr->dimensionless)) { sprintf(c->errcontext.tempErrStr, "Invalid step size for axis ticks. On a log axis, step size should be a dimensionless multiplier; supplied step size has units of <%s>.", ppl_printUnit(c, objincr, NULL, NULL, 0, 1, 0)); ppl_error(&c->errcontext, ERR_UNIT, -1, -1, NULL); return; } \
-    if (gotStart && (!gsl_finite(start))) { sprintf(c->errcontext.tempErrStr, "Invalid starting value for axis ticks. Value supplied is not finite."); ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); return; } \
-    if (gotIncr  && (!gsl_finite(incr ))) { sprintf(c->errcontext.tempErrStr, "Invalid step size for axis ticks. Value supplied is not finite."); ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); return; } \
-    if (gotEnd   && (!gsl_finite(end  ))) { sprintf(c->errcontext.tempErrStr, "Invalid end value for axis ticks. Value supplied is not finite."); ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); return; } \
+    if (gotStart && (!gsl_finite(start))) { sprintf(c->errcontext.tempErrStr, "Invalid starting value for axis ticks. Value supplied is not finite."); ppl_error(&c->errcontext,ERR_GENERIC,-1,-1,NULL); return; } \
+    if (gotIncr  && (!gsl_finite(incr ))) { sprintf(c->errcontext.tempErrStr, "Invalid step size for axis ticks. Value supplied is not finite."); ppl_error(&c->errcontext,ERR_GENERIC,-1,-1,NULL); return; } \
+    if (gotEnd   && (!gsl_finite(end  ))) { sprintf(c->errcontext.tempErrStr, "Invalid end value for axis ticks. Value supplied is not finite."); ppl_error(&c->errcontext,ERR_GENERIC,-1,-1,NULL); return; } \
     if ((!amLog)||(gotStart)) \
      { \
       pplObj *o = amLog ? objstart : objincr; \
@@ -222,10 +222,10 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     int              editNo = (int)round(command[PARSE_arc_editno].real);
     canvas_item     *ptr;
 
-    if ((editNo < 1) || (editNo>MULTIPLOT_MAXINDEX) || (canvas_items == NULL)) {sprintf(c->errcontext.tempErrStr, "No multiplot item with index %d.", editNo); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return;}
+    if ((editNo < 1) || (editNo>MULTIPLOT_MAXINDEX) || (canvas_items == NULL)) {sprintf(c->errcontext.tempErrStr, "No multiplot item with index %d.", editNo); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, NULL); return;}
     ptr = canvas_items->first;
     while ((ptr!=NULL)&&(ptr->id!=editNo)) ptr=ptr->next;
-    if (ptr == NULL) { sprintf(c->errcontext.tempErrStr, "No multiplot item with index %d.", editNo); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return; }
+    if (ptr == NULL) { sprintf(c->errcontext.tempErrStr, "No multiplot item with index %d.", editNo); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, NULL); return; }
 
     sg = &(ptr->settings);
     al = &(ptr->arrow_list);
@@ -394,7 +394,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     int    gotbarsize = (command[PARSE_set_bar_bar_size      ].objType == PPLOBJ_NUM);
     int    gotlarge   = (command[PARSE_set_bar_bar_size_large].objType == PPLOBJ_STR);
     int    gotsmall   = (command[PARSE_set_bar_bar_size_small].objType == PPLOBJ_STR);
-    if (gotbarsize && !gsl_finite(barsize)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The value supplied to the 'set bar' command was not finite."); return; }
+    if (gotbarsize && !gsl_finite(barsize)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The value supplied to the 'set bar' command was not finite."); return; }
     if      (gotsmall  ) sg->bar = 0.0;
     else if (gotlarge  ) sg->bar = 1.0;
     else if (gotbarsize) sg->bar = barsize;
@@ -413,7 +413,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     else
      {
       double tempdbl = command[PARSE_set_binorigin_bin_origin].real;
-      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The value supplied to the 'set binorigin' command was not finite."); return; }
+      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The value supplied to the 'set binorigin' command was not finite."); return; }
       c->set->term_current.BinOriginAuto = 0;
       c->set->term_current.BinOrigin = command[PARSE_set_binorigin_bin_origin];
      }
@@ -432,8 +432,8 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     else
      {
       double tempdbl = command[PARSE_set_binwidth_bin_width].real;
-      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The value supplied to the 'set binwidth' command was not finite."); return; }
-      if (tempdbl<=0) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "Width of histogram bins must be greater than zero."); return; }
+      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The value supplied to the 'set binwidth' command was not finite."); return; }
+      if (tempdbl<=0) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "Width of histogram bins must be greater than zero."); return; }
       c->set->term_current.BinWidthAuto = 0;
       c->set->term_current.BinWidth = command[PARSE_set_binwidth_bin_width];
      }
@@ -452,7 +452,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     else
      {
       double tempdbl = command[PARSE_set_boxfrom_box_from].real;
-      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The value supplied to the 'set boxfrom' command was not finite."); return; }
+      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The value supplied to the 'set boxfrom' command was not finite."); return; }
       sg->BoxFromAuto = 0;
       sg->BoxFrom = command[PARSE_set_boxfrom_box_from];
      }
@@ -471,7 +471,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     else
      {
       double tempdbl = command[PARSE_set_boxwidth_box_width].real;
-      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The value supplied to the 'set boxwidth' command was not finite."); return; }
+      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The value supplied to the 'set boxwidth' command was not finite."); return; }
       sg->BoxWidthAuto = 0;
       sg->BoxWidth = command[PARSE_set_boxwidth_box_width];
      }
@@ -497,7 +497,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if (command[PARSE_set_c1format_rotation].objType == PPLOBJ_NUM)
      {
       double r = command[PARSE_set_c1format_rotation].real;
-      if (!gsl_finite(r)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The rotation angle supplied to the 'set c1format' command was not finite."); return; }
+      if (!gsl_finite(r)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The rotation angle supplied to the 'set c1format' command was not finite."); return; }
       sg->c1TickLabelRotate = r; // TickLabelRotation will already have been set by "rotate" keyword mapping to "orient"
      }
    }
@@ -519,7 +519,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if (command[PARSE_set_c1label_rotation].objType == PPLOBJ_NUM)
      {
       double r = command[PARSE_set_c1label_rotation].real;
-      if (!gsl_finite(r)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The rotation angle supplied to the 'set c1label' command was not finite."); return; }
+      if (!gsl_finite(r)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The rotation angle supplied to the 'set c1label' command was not finite."); return; }
       sg->c1LabelRotate = r;
      }
    }
@@ -615,8 +615,8 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if (command[PARSE_set_contours_contours].objType == PPLOBJ_NUM)
      {
       double n = command[PARSE_set_contours_contours].real;
-      if (n<2) { sprintf(c->errcontext.tempErrStr, "Contour plots must have at least two contours."); ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, NULL); return; }
-      if (n>MAX_CONTOURS) { sprintf(c->errcontext.tempErrStr, "Contour maps cannot be constucted with more than %d contours.", MAX_CONTOURS); ppl_error(&c->errcontext, ERR_GENERAL,-1,-1,NULL); return; }
+      if (n<2) { sprintf(c->errcontext.tempErrStr, "Contour plots must have at least two contours."); ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, NULL); return; }
+      if (n>MAX_CONTOURS) { sprintf(c->errcontext.tempErrStr, "Contour maps cannot be constucted with more than %d contours.", MAX_CONTOURS); ppl_error(&c->errcontext, ERR_GENERIC,-1,-1,NULL); return; }
       sg->ContoursN       = (int)round(n);
       sg->ContoursListLen = -1;
      }
@@ -675,9 +675,9 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if (command[PARSE_set_crange_norenormalise].objType == PPLOBJ_STR) sg->Crenorm [C] = SW_BOOL_FALSE;
     if ((!mina)&&(min->objType!=PPLOBJ_NUM)&&(sg->Cminauto[C]==SW_BOOL_FALSE)) min = &sg->Cmin[C];
     if ((!maxa)&&(max->objType!=PPLOBJ_NUM)&&(sg->Cmaxauto[C]==SW_BOOL_FALSE)) max = &sg->Cmax[C];
-    if ((min->objType==PPLOBJ_NUM)&&(!gsl_finite(min->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set crange' command had non-finite limits."); return; }
-    if ((max->objType==PPLOBJ_NUM)&&(!gsl_finite(max->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set crange' command had non-finite limits."); return; }
-    if ((min->objType==PPLOBJ_NUM)&&(max->objType==PPLOBJ_NUM)&&(!ppl_unitsDimEqual(min,max))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "Attempt to set crange with dimensionally incompatible minimum and maximum."); return; }
+    if ((min->objType==PPLOBJ_NUM)&&(!gsl_finite(min->real))) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The range supplied to the 'set crange' command had non-finite limits."); return; }
+    if ((max->objType==PPLOBJ_NUM)&&(!gsl_finite(max->real))) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The range supplied to the 'set crange' command had non-finite limits."); return; }
+    if ((min->objType==PPLOBJ_NUM)&&(max->objType==PPLOBJ_NUM)&&(!ppl_unitsDimEqual(min,max))) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "Attempt to set crange with dimensionally incompatible minimum and maximum."); return; }
     if (min->objType==PPLOBJ_NUM) { sg->Cmin[C] = *min; sg->Cminauto[C] = SW_BOOL_FALSE; }
     if (max->objType==PPLOBJ_NUM) { sg->Cmax[C] = *max; sg->Cmaxauto[C] = SW_BOOL_FALSE; }
     if (mina) sg->Cminauto[C] = SW_BOOL_TRUE;
@@ -736,15 +736,15 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    {
     char *tempstr   = (char *)command[PARSE_set_filter_filename].auxil;
     pplObj *tempobj = (pplObj *)ppl_dictLookup(c->set->filters,tempstr);
-    if (tempobj == NULL) { ppl_warning(&c->errcontext, ERR_GENERAL, "Attempt to unset a filter which did not exist."); return; }
+    if (tempobj == NULL) { ppl_warning(&c->errcontext, ERR_GENERIC, "Attempt to unset a filter which did not exist."); return; }
     ppl_garbageObject(tempobj);
     ppl_dictRemoveKey(c->set->filters,tempstr);
    }
   else if (strcmp_set && (strcmp(setoption,"fontsize")==0)) /* set fontsize */
    {
     double tempdbl = command[PARSE_set_fontsize_fontsize].real;
-    if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The value supplied to the 'set fontsize' command was not finite."); return; }
-    if (tempdbl <= 0.0) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Font sizes are not allowed to be less than or equal to zero."); return; }
+    if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The value supplied to the 'set fontsize' command was not finite."); return; }
+    if (tempdbl <= 0.0) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Font sizes are not allowed to be less than or equal to zero."); return; }
     sg->FontSize = tempdbl;
    }
   else if (strcmp_unset && (strcmp(setoption,"fontsize")==0)) /* unset fontsize */
@@ -817,13 +817,13 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if (command[PARSE_set_key_offset].objType==PPLOBJ_NUM) // Horizontal offset
      {
       double tempdbl = command[PARSE_set_key_offset].real;
-      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The horizontal offset supplied to the 'set key' command was not finite."); }
+      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The horizontal offset supplied to the 'set key' command was not finite."); }
       else                        sg->KeyXOff.real = tempdbl;
      }
     if (command[PARSE_set_key_offset+1].objType==PPLOBJ_NUM) // Vertical offset
      {
       double tempdbl = command[PARSE_set_key_offset+1].real;
-      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The vertical offset supplied to the 'set key' command was not finite."); }
+      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The vertical offset supplied to the 'set key' command was not finite."); }
       else                        sg->KeyYOff.real = tempdbl;
      }
 
@@ -895,8 +895,8 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if (command[PARSE_set_keycolumns_key_columns].objType==PPLOBJ_NUM)
      {
       double tempdbl = command[PARSE_set_keycolumns_key_columns].real;
-      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The value supplied to the 'set keycolumns' command was not finite."); return; }
-      if (tempdbl <= 0.0) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Number of key columns is not allowed to be less than or equal to zero."); return; }
+      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The value supplied to the 'set keycolumns' command was not finite."); return; }
+      if (tempdbl <= 0.0) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Number of key columns is not allowed to be less than or equal to zero."); return; }
       sg->KeyColumns = (int)round(tempdbl);
      }
     else
@@ -919,8 +919,8 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
   else if (strcmp_set && (strcmp(setoption,"linewidth")==0)) /* set linewidth */
    {
     double tempdbl = command[PARSE_set_linewidth_linewidth].real;
-    if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The value supplied to the 'set linewidth' command was not finite."); return; }
-    if (tempdbl <= 0.0) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Line widths are not allowed to be less than or equal to zero."); return; }
+    if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The value supplied to the 'set linewidth' command was not finite."); return; }
+    if (tempdbl <= 0.0) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Line widths are not allowed to be less than or equal to zero."); return; }
     sg->LineWidth = tempdbl;
    }
   else if (strcmp_unset && (strcmp(setoption,"linewidth")==0)) /* unset linewidth */
@@ -949,7 +949,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if (sl && (command[PARSE_set_logscale_base].objType==PPLOBJ_NUM))
      {
       b = (int)round(command[PARSE_set_logscale_base].real);
-      if ((b<2)||(b>1024)) { sprintf(c->errcontext.tempErrStr, "Attempt to use log axis with base %d. PyXPlot only supports bases in the range 2 - 1024. Defaulting to base 10.", b); ppl_warning(&c->errcontext, ERR_GENERAL, NULL); b=10; }
+      if ((b<2)||(b>1024)) { sprintf(c->errcontext.tempErrStr, "Attempt to use log axis with base %d. PyXPlot only supports bases in the range 2 - 1024. Defaulting to base 10.", b); ppl_warning(&c->errcontext, ERR_GENERIC, NULL); b=10; }
      }
 
     if (!setAll)
@@ -1174,8 +1174,8 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if (got)
      {
       int tempint = (int)round(command[PARSE_set_numerics_number_significant_figures].real);
-      if (tempint <  1) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Numbers cannot be displayed to fewer than one significant figure."); return; }
-      if (tempint > 30) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "It is not sensible to try to display numbers to more than 30 significant figures. Calculations in PyXPlot are only accurate to double precision."); return; }
+      if (tempint <  1) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Numbers cannot be displayed to fewer than one significant figure."); return; }
+      if (tempint > 30) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "It is not sensible to try to display numbers to more than 30 significant figures. Calculations in PyXPlot are only accurate to double precision."); return; }
       c->set->term_current.SignificantFigures = tempint;
      }
 
@@ -1240,7 +1240,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
         pplObj *co;
         pos = (int)round(command[pos].real);
         if (pos<=0) break;
-        if (count>=PALETTE_LENGTH-1) { ppl_warning(&c->errcontext, ERR_GENERAL, "The 'set palette' command has been passed a palette which is too long; truncating it."); break; }
+        if (count>=PALETTE_LENGTH-1) { ppl_warning(&c->errcontext, ERR_GENERIC, "The 'set palette' command has been passed a palette which is too long; truncating it."); break; }
         co = &command[pos+PARSE_set_palette_color_palette];
         c->set->palette_current[count] = -1;
         ppl_colorFromObj(c,co,&c->set->palette_current[count],&c->set->paletteS_current[count],NULL,&c->set->palette1_current[count],&c->set->palette2_current[count],&c->set->palette3_current[count],&c->set->palette4_current[count],&d1,&d2);
@@ -1265,7 +1265,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
        {
         unsigned char d1,d2;
         pplObj *o = ppl_listGetItem(l,i);
-        if (i>=PALETTE_LENGTH-1) { ppl_warning(&c->errcontext, ERR_GENERAL, "The 'set palette' command has been passed a palette which is too long; truncating it."); break; }
+        if (i>=PALETTE_LENGTH-1) { ppl_warning(&c->errcontext, ERR_GENERIC, "The 'set palette' command has been passed a palette which is too long; truncating it."); break; }
         c->set->palette_current[i] = -1;
         ppl_colorFromObj(c,o,&c->set->palette_current[i],&c->set->paletteS_current[i],NULL,&c->set->palette1_current[i],&c->set->palette2_current[i],&c->set->palette3_current[i],&c->set->palette4_current[i],&d1,&d2);
        }
@@ -1296,14 +1296,14 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
        }
       else
        {
-        sprintf(c->errcontext.tempErrStr, "Unrecognised paper size '%s'.", paperName); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return;
+        sprintf(c->errcontext.tempErrStr, "Unrecognised paper size '%s'.", paperName); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, NULL); return;
        }
      }
     else
      {
       double d1 = command[PARSE_set_papersize_size  ].real;
       double d2 = command[PARSE_set_papersize_size+1].real;
-      if ((!gsl_finite(d1))||(!gsl_finite(d2))) { sprintf(c->errcontext.tempErrStr, "The size coordinates supplied to the 'set papersize' command was not finite."); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return; }
+      if ((!gsl_finite(d1))||(!gsl_finite(d2))) { sprintf(c->errcontext.tempErrStr, "The size coordinates supplied to the 'set papersize' command was not finite."); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, NULL); return; }
       c->set->term_current.PaperWidth .real = d1;
       c->set->term_current.PaperHeight.real = d2;
       d1 *= 1000; // Function below takes size input in mm
@@ -1320,8 +1320,8 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
   else if (strcmp_set && (strcmp(setoption,"pointlinewidth")==0)) /* set pointlinewidth */
    {
     double tempdbl = command[PARSE_set_pointlinewidth_pointlinewidth].real;
-    if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The value supplied to the 'set pointlinewidth' command was not finite."); return; }
-    if (tempdbl <= 0.0) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Line widths are not allowed to be less than or equal to zero."); return; }
+    if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The value supplied to the 'set pointlinewidth' command was not finite."); return; }
+    if (tempdbl <= 0.0) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Line widths are not allowed to be less than or equal to zero."); return; }
     sg->PointLineWidth = tempdbl;
    }
   else if (strcmp_unset && (strcmp(setoption,"pointlinewidth")==0)) /* unset pointlinewidth */
@@ -1331,8 +1331,8 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
   else if (strcmp_set && (strcmp(setoption,"pointsize")==0)) /* set pointsize */
    {
     double tempdbl = command[PARSE_set_pointsize_pointsize].real;
-    if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The value supplied to the 'set pointsize' command was not finite."); return; }
-    if (tempdbl <= 0.0) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Point sizes are not allowed to be less than or equal to zero."); return; }
+    if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The value supplied to the 'set pointsize' command was not finite."); return; }
+    if (tempdbl <= 0.0) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Point sizes are not allowed to be less than or equal to zero."); return; }
     sg->PointSize = tempdbl;
    }
   else if (strcmp_unset && (strcmp(setoption,"pointsize")==0)) /* unset pointsize */
@@ -1355,20 +1355,20 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if (command[PARSE_set_samples_samples].objType==PPLOBJ_NUM)
      {
       int i = (int)round(command[PARSE_set_samples_samples].real);
-      if (i<2) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Graphs cannot be constucted based on fewer than two samples."); i=2; }
+      if (i<2) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Graphs cannot be constucted based on fewer than two samples."); i=2; }
       sg->samples = i;
      }
     if (command[PARSE_set_samples_samplesX].objType==PPLOBJ_NUM)
      {
       int i = (int)round(command[PARSE_set_samples_samplesX].real);
-      if (i<2) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Graphs cannot be constucted based on fewer than two samples."); i=2; }
+      if (i<2) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Graphs cannot be constucted based on fewer than two samples."); i=2; }
       sg->SamplesX = i;
       sg->SamplesXAuto = SW_BOOL_FALSE;
      }
     if (command[PARSE_set_samples_samplesY].objType==PPLOBJ_NUM)
      {
       int i = (int)round(command[PARSE_set_samples_samplesY].real);
-      if (i<2) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Graphs cannot be constucted based on fewer than two samples."); i=2; }
+      if (i<2) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Graphs cannot be constucted based on fewer than two samples."); i=2; }
       sg->SamplesY = i;
       sg->SamplesYAuto = SW_BOOL_FALSE;
      }
@@ -1392,7 +1392,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    {
     long li;
     double d = command[PARSE_set_seed_seed].real;
-    if (!gsl_finite(d)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The value supplied to the 'set seed' command was not finite."); return; }
+    if (!gsl_finite(d)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The value supplied to the 'set seed' command was not finite."); return; }
     if      (d < LONG_MIN) li = LONG_MIN;
     else if (d > LONG_MAX) li = LONG_MAX;
     else                   li = (long)d;
@@ -1408,34 +1408,34 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    {
     if (command[PARSE_set_size_width].objType==PPLOBJ_NUM)
      {
-      if (!gsl_finite(command[PARSE_set_size_width].real)) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "The width supplied to the 'set size' command was not finite."); return; }
+      if (!gsl_finite(command[PARSE_set_size_width].real)) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "The width supplied to the 'set size' command was not finite."); return; }
       sg->width=command[PARSE_set_size_width];
      }
     if (command[PARSE_set_size_height].objType==PPLOBJ_NUM)
      {
       double r = command[PARSE_set_size_height].real / sg->width.real;
-      if ((!gsl_finite(r)) || (fabs(r) < 1e-6) || (fabs(r) > 1e4)) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "The requested y/x aspect ratios for graphs must be in the range 1e-6 to 10000."); return; }
+      if ((!gsl_finite(r)) || (fabs(r) < 1e-6) || (fabs(r) > 1e4)) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "The requested y/x aspect ratios for graphs must be in the range 1e-6 to 10000."); return; }
       sg->aspect = r;
       sg->AutoAspect = SW_ONOFF_OFF;
      }
     if (command[PARSE_set_size_depth].objType==PPLOBJ_NUM)
      {
       double r = command[PARSE_set_size_depth].real / sg->width.real;
-      if ((!gsl_finite(r)) || (fabs(r) < 1e-6) || (fabs(r) > 1e4)) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "The requested z/x aspect ratios for graphs must be in the range 1e-6 to 10000."); return; }
+      if ((!gsl_finite(r)) || (fabs(r) < 1e-6) || (fabs(r) > 1e4)) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "The requested z/x aspect ratios for graphs must be in the range 1e-6 to 10000."); return; }
       sg->zaspect = r;
       sg->AutoZAspect = SW_ONOFF_OFF;
      }
     if (command[PARSE_set_size_ratio].objType==PPLOBJ_NUM)
      {
       double r = command[PARSE_set_size_ratio].real;
-      if ((!gsl_finite(r)) || (fabs(r) < 1e-6) || (fabs(r) > 1e4)) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "The requested y/x aspect ratios for graphs must be in the range 1e-6 to 10000."); return; }
+      if ((!gsl_finite(r)) || (fabs(r) < 1e-6) || (fabs(r) > 1e4)) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "The requested y/x aspect ratios for graphs must be in the range 1e-6 to 10000."); return; }
       sg->aspect = r;
       sg->AutoAspect = SW_ONOFF_OFF;
      }
     if (command[PARSE_set_size_zratio].objType==PPLOBJ_NUM)
      {
       double r = command[PARSE_set_size_zratio].real;
-      if ((!gsl_finite(r)) || (fabs(r) < 1e-6) || (fabs(r) > 1e4)) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "The requested z/x aspect ratios for graphs must be in the range 1e-6 to 10000."); return; }
+      if ((!gsl_finite(r)) || (fabs(r) < 1e-6) || (fabs(r) > 1e4)) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "The requested z/x aspect ratios for graphs must be in the range 1e-6 to 10000."); return; }
       sg->zaspect = r;
       sg->AutoZAspect = SW_ONOFF_OFF;
      }
@@ -1467,7 +1467,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     double     nd = command[PARSE_set_style_numbered_style_set_number].real;
     int        n;
     withWords *outstyle, ww_tmp, ww_tmp2;
-    if ((nd<0)||(nd>=MAX_PLOTSTYLES)) { sprintf(c->errcontext.tempErrStr, "plot style numbers must be in the range 0-%d", MAX_PLOTSTYLES-1); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return; }
+    if ((nd<0)||(nd>=MAX_PLOTSTYLES)) { sprintf(c->errcontext.tempErrStr, "plot style numbers must be in the range 0-%d", MAX_PLOTSTYLES-1); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, NULL); return; }
     n = (int)floor(nd);
     outstyle = &(c->set->plot_styles[n]);
     ppl_withWordsFromDict(c, in, pl, PARSE_TABLE_set_style_numbered_, 0, &ww_tmp);
@@ -1502,7 +1502,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
         pos = (int)round(command[pos].real);
         if (pos<=0) break;
         nd = command[pos+id_style_ids].real;
-        if ((nd<0)||(nd>=MAX_PLOTSTYLES)) { sprintf(c->errcontext.tempErrStr, "plot style numbers must be in the range 0-%d", MAX_PLOTSTYLES-1); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return; }
+        if ((nd<0)||(nd>=MAX_PLOTSTYLES)) { sprintf(c->errcontext.tempErrStr, "plot style numbers must be in the range 0-%d", MAX_PLOTSTYLES-1); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, NULL); return; }
         n = (int)floor(nd);
         outstyle = &(c->set->plot_styles[n]);
         instyle  = &(c->set->plot_styles_default[n]);
@@ -1530,8 +1530,8 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     got     = (command[PARSE_set_terminal_dpi].objType == PPLOBJ_NUM);
     if (got)
      {
-      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The DPI resolution supplied to the 'set terminal' command was not finite."); }
-      else if (tempdbl <= 2.0)  { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Output image resolutions below two dots per inch are not supported."); }
+      if (!gsl_finite(tempdbl)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The DPI resolution supplied to the 'set terminal' command was not finite."); }
+      else if (tempdbl <= 2.0)  { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Output image resolutions below two dots per inch are not supported."); }
       else                      { c->set->term_current.dpi = tempdbl; }
      }
 
@@ -1678,9 +1678,9 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
       pplObj *max  = &command[PARSE_set_trange_max];
       if ((min->objType!=PPLOBJ_NUM)) min = &sg->Tmin;
       if ((max->objType!=PPLOBJ_NUM)) max = &sg->Tmax;
-      if ((!gsl_finite(min->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set trange' command had non-finite limits."); return; }
-      if ((!gsl_finite(max->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set trange' command had non-finite limits."); return; }
-      if ((!ppl_unitsDimEqual(min,max))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "Attempt to set trange with dimensionally incompatible minimum and maximum."); return; }
+      if ((!gsl_finite(min->real))) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The range supplied to the 'set trange' command had non-finite limits."); return; }
+      if ((!gsl_finite(max->real))) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The range supplied to the 'set trange' command had non-finite limits."); return; }
+      if ((!ppl_unitsDimEqual(min,max))) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "Attempt to set trange with dimensionally incompatible minimum and maximum."); return; }
       sg->Tmin = *min;
       sg->Tmax = *max;
      }
@@ -1738,7 +1738,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
          if (i==0) { if (!got2) continue; tempstr=tempstr2; }
          else      { if (!got3) continue; tempstr=tempstr3; }
          ppl_newPreferredUnit(c, &pu, tempstr, 0, &errpos, buf);
-         if (errpos>=0) { ppl_error(&c->errcontext, ERR_NUMERIC,-1,-1,buf); continue; }
+         if (errpos>=0) { ppl_error(&c->errcontext, ERR_NUMERICAL,-1,-1,buf); continue; }
 
          // Remove any preferred unit which is dimensionally equal to new preferred unit
          listiter = ppl_listIterateInit(c->unit_PreferredUnits);
@@ -1815,16 +1815,16 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
          if (i!=2)
           {
            if ((c->unit_database[j].quantity!=NULL) && (c->unit_database[j].quantity[0]!='\0'))
-            { sprintf(c->errcontext.tempErrStr, "'%s' is not a unit of '%s', but of '%s'.", unit, quantity, c->unit_database[j].quantity); ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); }
+            { sprintf(c->errcontext.tempErrStr, "'%s' is not a unit of '%s', but of '%s'.", unit, quantity, c->unit_database[j].quantity); ppl_error(&c->errcontext,ERR_GENERIC,-1,-1,NULL); }
            else
-            { sprintf(c->errcontext.tempErrStr, "'%s' is not a unit of '%s'.", unit, quantity); ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); }
+            { sprintf(c->errcontext.tempErrStr, "'%s' is not a unit of '%s'.", unit, quantity); ppl_error(&c->errcontext,ERR_GENERIC,-1,-1,NULL); }
           }
          c->unit_database[j].userSel = 1;
          c->unit_database[j].userSelPrefix = multiplier;
          pp=1;
         }
-       if (i==0) { sprintf(c->errcontext.tempErrStr, "No such quantity as a '%s'.", quantity); ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); }
-       if (p==0) { sprintf(c->errcontext.tempErrStr, "No such unit as a '%s'.", unit); ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL); }
+       if (i==0) { sprintf(c->errcontext.tempErrStr, "No such quantity as a '%s'.", quantity); ppl_error(&c->errcontext,ERR_GENERIC,-1,-1,NULL); }
+       if (p==0) { sprintf(c->errcontext.tempErrStr, "No such unit as a '%s'.", unit); ppl_error(&c->errcontext,ERR_GENERIC,-1,-1,NULL); }
       }
     }
    }
@@ -1859,9 +1859,9 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
       pplObj *max  = &command[PARSE_set_urange_max];
       if ((min->objType!=PPLOBJ_NUM)) min = &sg->Umin;
       if ((max->objType!=PPLOBJ_NUM)) max = &sg->Umax;
-      if ((!gsl_finite(min->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set urange' command had non-finite limits."); return; }
-      if ((!gsl_finite(max->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set urange' command had non-finite limits."); return; }
-      if ((!ppl_unitsDimEqual(min,max))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "Attempt to set urange with dimensionally incompatible minimum and maximum."); return; }
+      if ((!gsl_finite(min->real))) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The range supplied to the 'set urange' command had non-finite limits."); return; }
+      if ((!gsl_finite(max->real))) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The range supplied to the 'set urange' command had non-finite limits."); return; }
+      if ((!ppl_unitsDimEqual(min,max))) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "Attempt to set urange with dimensionally incompatible minimum and maximum."); return; }
       sg->Umin = *min;
       sg->Umax = *max;
      }
@@ -1887,9 +1887,9 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
       pplObj *max  = &command[PARSE_set_vrange_max];
       if ((min->objType!=PPLOBJ_NUM)) min = &sg->Tmin;
       if ((max->objType!=PPLOBJ_NUM)) max = &sg->Tmax;
-      if ((!gsl_finite(min->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set vrange' command had non-finite limits."); return; }
-      if ((!gsl_finite(max->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set vrange' command had non-finite limits."); return; }
-      if ((!ppl_unitsDimEqual(min,max))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "Attempt to set vrange with dimensionally incompatible minimum and maximum."); return; }
+      if ((!gsl_finite(min->real))) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The range supplied to the 'set vrange' command had non-finite limits."); return; }
+      if ((!gsl_finite(max->real))) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The range supplied to the 'set vrange' command had non-finite limits."); return; }
+      if ((!ppl_unitsDimEqual(min,max))) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "Attempt to set vrange with dimensionally incompatible minimum and maximum."); return; }
       sg->Vmin = *min;
       sg->Vmax = *max;
      }
@@ -1912,13 +1912,13 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if (command[PARSE_set_view_xy_angle].objType==PPLOBJ_NUM)
      {
       double d=command[PARSE_set_view_xy_angle].real;
-      if (!gsl_finite(d)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The viewing angles supplied to the 'set view' command were not finite."); return; }
+      if (!gsl_finite(d)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The viewing angles supplied to the 'set view' command were not finite."); return; }
       sg->XYview.real = d;
      }
     if (command[PARSE_set_view_yz_angle].objType==PPLOBJ_NUM)
      {
       double d=command[PARSE_set_view_yz_angle].real;
-      if (!gsl_finite(d)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The viewing angles supplied to the 'set view' command were not finite."); return; }
+      if (!gsl_finite(d)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The viewing angles supplied to the 'set view' command were not finite."); return; }
       sg->YZview.real = d;
      }
     sg->XYview.real = fmod(sg->XYview.real , 2*M_PI);
@@ -1935,7 +1935,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    {
     if (command[PARSE_set_width_width].objType==PPLOBJ_NUM)
      {
-      if (!gsl_finite(command[PARSE_set_width_width].real)) { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "The width supplied to the 'set width' command was not finite."); return; }
+      if (!gsl_finite(command[PARSE_set_width_width].real)) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "The width supplied to the 'set width' command was not finite."); return; }
       sg->width=command[PARSE_set_width_width];
      }
    }
@@ -1998,7 +1998,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
         if (command[PARSE_set_xformat_rotation].objType == PPLOBJ_NUM)
          {
           double r = command[PARSE_set_xformat_rotation].real;
-          if (!gsl_finite(r)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The rotation angle supplied to the 'set format' command was not finite."); return; }
+          if (!gsl_finite(r)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The rotation angle supplied to the 'set format' command was not finite."); return; }
           a->TickLabelRotate = r; // TickLabelRotation will already have been set by "rotate" keyword mapping to "orient"
          }
        }
@@ -2036,7 +2036,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
         if (command[PARSE_set_xlabel_rotation].objType == PPLOBJ_NUM)
          {
           double r = command[PARSE_set_xlabel_rotation].real;
-          if (!gsl_finite(r)) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The rotation angle supplied to the set axis label command was not finite."); return; }
+          if (!gsl_finite(r)) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The rotation angle supplied to the set axis label command was not finite."); return; }
           a->LabelRotate = r;
          }
        }
@@ -2075,9 +2075,9 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
         if (command[PARSE_set_range_noreverse    ].objType == PPLOBJ_STR) a->RangeReversed = 0;
         if ((!mina)&&(min->objType!=PPLOBJ_NUM)&&(a->MinSet==SW_BOOL_TRUE)) { min=&d1; d1=a->unit; d1.real=a->min; }
         if ((!maxa)&&(max->objType!=PPLOBJ_NUM)&&(a->MaxSet==SW_BOOL_TRUE)) { max=&d2; d2=a->unit; d2.real=a->max; }
-        if ((min->objType==PPLOBJ_NUM)&&(!gsl_finite(min->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set range' command had non-finite limits."); return; }
-        if ((max->objType==PPLOBJ_NUM)&&(!gsl_finite(max->real))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "The range supplied to the 'set range' command had non-finite limits."); return; }
-        if ((min->objType==PPLOBJ_NUM)&&(max->objType==PPLOBJ_NUM)&&(!ppl_unitsDimEqual(min,max))) { ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, "Attempt to set range with dimensionally incompatible minimum and maximum."); return; }
+        if ((min->objType==PPLOBJ_NUM)&&(!gsl_finite(min->real))) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The range supplied to the 'set range' command had non-finite limits."); return; }
+        if ((max->objType==PPLOBJ_NUM)&&(!gsl_finite(max->real))) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "The range supplied to the 'set range' command had non-finite limits."); return; }
+        if ((min->objType==PPLOBJ_NUM)&&(max->objType==PPLOBJ_NUM)&&(!ppl_unitsDimEqual(min,max))) { ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, "Attempt to set range with dimensionally incompatible minimum and maximum."); return; }
         if (min->objType==PPLOBJ_NUM) { a->unit = *min; a->min = min->real; a->MinSet = SW_BOOL_TRUE; }
         if (max->objType==PPLOBJ_NUM) { a->unit = *max; a->max = max->real; a->MaxSet = SW_BOOL_TRUE; }
         if (mina) { a->MinSet = SW_BOOL_FALSE; a->min = ad->min; }

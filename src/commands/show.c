@@ -1279,9 +1279,9 @@ void ppl_directive_show(ppl_context *c, parserLine *pl, parserOutput *in, int in
     canvas_itemlist *canvas_items = c->canvas_items;
     canvas_item *ptr = canvas_items->first;
     int editNo = (int)round(stk[PARSE_show_editno].real);
-    if ((editNo<1) || (editNo>MULTIPLOT_MAXINDEX) || (canvas_items == NULL)) { sprintf(c->errcontext.tempErrStr, "No multiplot item with index %d.", editNo); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return; }
+    if ((editNo<1) || (editNo>MULTIPLOT_MAXINDEX) || (canvas_items == NULL)) { sprintf(c->errcontext.tempErrStr, "No multiplot item with index %d.", editNo); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, NULL); return; }
     while ((ptr!=NULL)&&(ptr->id!=editNo)) ptr=ptr->next;
-    if (ptr == NULL) { sprintf(c->errcontext.tempErrStr, "No multiplot item with index %d.", editNo); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return; }
+    if (ptr == NULL) { sprintf(c->errcontext.tempErrStr, "No multiplot item with index %d.", editNo); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, NULL); return; }
 
     sg = &(ptr->settings);
     al = &(ptr->arrow_list);

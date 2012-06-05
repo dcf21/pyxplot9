@@ -176,7 +176,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, char *dirName, int intera
           else
            {
             strcpy(c->errStat.errBuff,"");
-            TBADD(ERR_GENERAL,item->linePos);
+            TBADD(ERR_GENERIC,item->linePos);
             break; // On error, stop
            }
          }

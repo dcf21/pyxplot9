@@ -82,7 +82,7 @@ static int filecopy(EPSComm *x, const char *in, const char *out)
 // Run ghostscript to convert postscript output into bitmap graphics
 #define BITMAP_TERMINAL_CLEANUP(X, Y, CanInvert) \
     if (system(c->errcontext.tempErrStr) != 0) /* Run ghostscript */ \
-     { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Error encountered whilst using " X " to generate " Y " output"); } \
+     { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Error encountered whilst using " X " to generate " Y " output"); } \
     else \
      { \
       char *src = GSOutputTemp; \
@@ -90,7 +90,7 @@ static int filecopy(EPSComm *x, const char *in, const char *out)
        { \
         sprintf(c->errcontext.tempErrStr, "%s %s -negate %s", CONVERT_COMMAND, GSOutputTemp, GSOutputTemp2); \
         if (system(c->errcontext.tempErrStr) != 0) /* Run convert to negate image */ \
-         { ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Error encountered whilst using ImageMagick to generate negated " Y " output"); } \
+         { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Error encountered whilst using ImageMagick to generate negated " Y " output"); } \
         src = GSOutputTemp2; \
         remove(GSOutputTemp); \
        } \
@@ -172,7 +172,7 @@ void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops, int iterDe
   // Try to get lock
   if (__sync_add_and_fetch(&lock,1) > 1)
    {
-    ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Recursive call to the plot command detected.");
+    ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Recursive call to the plot command detected.");
     return;
    }
 
@@ -313,11 +313,11 @@ void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops, int iterDe
     EnvDisplay = getenv("DISPLAY"); // Check whether the environment variable DISPLAY is set
     if (c->set->term_current.viewer==SW_VIEWER_NULL)
      {
-      ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "An attempt is being made to use an X11 terminal for output, but the required package 'ghostview' could not be found when PyXPlot was installed. If you have recently install ghostview, please reconfigure and recompile PyXPlot.");
+      ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "An attempt is being made to use an X11 terminal for output, but the required package 'ghostview' could not be found when PyXPlot was installed. If you have recently install ghostview, please reconfigure and recompile PyXPlot.");
      }
     else if ((EnvDisplay==NULL) || (EnvDisplay[0]=='\0'))
      {
-      ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "An attempt is being made to use an X11 terminal for output, but your DISPLAY environment variable is not set; there is no accessible X11 display.");
+      ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "An attempt is being made to use an X11 terminal for output, but your DISPLAY environment variable is not set; there is no accessible X11 display.");
      }
     else
      {
@@ -326,7 +326,7 @@ void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops, int iterDe
         if (termtype!=SW_TERMTYPE_X11P)
          {
           sprintf(c->errcontext.tempErrStr, "An attempt is being made to use the %s terminal in a non-interactive PyXPlot session. This won't work, as the window will close as soon as PyXPlot exits. Reverting to the X11_persist terminal instead.", *(char **)ppl_fetchSettingName(&c->errcontext, termtype, SW_TERMTYPE_INT, (void *)SW_TERMTYPE_STR, sizeof(char *)));
-          ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL);
+          ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, NULL);
          }
         CSPCommand = 2;
        } else {
@@ -575,7 +575,7 @@ void canvas_CallLaTeX(EPSComm *x)
       if (SuspectTextItem==NULL) sprintf(x->c->errcontext.tempErrStr, "LaTeX error encountered in an unidentifiable canvas item.");
       else if (ExactHit)         sprintf(x->c->errcontext.tempErrStr, "LaTeX error encountered in text string in canvas item %d.", SuspectTextItem->CanvasMultiplotID);
       else                       sprintf(x->c->errcontext.tempErrStr, "LaTeX error encountered at the end of text string in canvas item %d.", SuspectTextItem->CanvasMultiplotID);
-      ppl_error(&x->c->errcontext, ERR_GENERAL, -1, -1,x->c->errcontext.tempErrStr);
+      ppl_error(&x->c->errcontext, ERR_GENERIC, -1, -1,x->c->errcontext.tempErrStr);
       sprintf(x->c->errcontext.tempErrStr, "Error was: %s", ErrMsg); // Output the actual error which LaTeX returned to us
       ppl_error(&x->c->errcontext, ERR_PREFORMED, -1, -1,x->c->errcontext.tempErrStr);
       if (SuspectTextItem!=NULL)
@@ -597,12 +597,12 @@ void canvas_CallLaTeX(EPSComm *x)
     else if ((ErrFilename[0]=='\0')&&(ErrMsg[0]=='\0')) // Case 2: Error encountered, but we didn't catch error message
      {
       sprintf(x->c->errcontext.tempErrStr, "Unidentified LaTeX error encountered.");
-      ppl_error(&x->c->errcontext, ERR_GENERAL, -1, -1,x->c->errcontext.tempErrStr);
+      ppl_error(&x->c->errcontext, ERR_GENERIC, -1, -1,x->c->errcontext.tempErrStr);
      }
     else // Case 3: Error in another file which the user seems to have imported
      {
       sprintf(x->c->errcontext.tempErrStr, "LaTeX error encountered in imported file <%s> on line %d.", ErrFilename, ErrLineNo);
-      ppl_error(&x->c->errcontext, ERR_GENERAL, -1, -1,x->c->errcontext.tempErrStr);
+      ppl_error(&x->c->errcontext, ERR_GENERIC, -1, -1,x->c->errcontext.tempErrStr);
       sprintf(x->c->errcontext.tempErrStr, "Error was: %s", ErrMsg);
       ppl_error(&x->c->errcontext, ERR_PREFORMED, -1, -1,x->c->errcontext.tempErrStr);
      }

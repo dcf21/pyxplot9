@@ -278,8 +278,8 @@ static void multiMinIterate(MMComm *commlink, parserLine *pl)
       int i = commlink->warnExprId;
       int j = commlink->warnExprNo;
       strcpy(c->errStat.errBuff, commlink->warntext);
-      if (j==1) ppl_tbAdd(c,commlink->expr1[i]->srcLineN,commlink->expr1[i]->srcId,commlink->expr1[i]->srcFname,1,ERR_NUMERIC,commlink->expr1pos[i] + commlink->warnPos,commlink->inLine,"");
-      else      ppl_tbAdd(c,commlink->expr2[i]->srcLineN,commlink->expr2[i]->srcId,commlink->expr2[i]->srcFname,1,ERR_NUMERIC,commlink->expr2pos[i] + commlink->warnPos,commlink->inLine,"");
+      if (j==1) ppl_tbAdd(c,commlink->expr1[i]->srcLineN,commlink->expr1[i]->srcId,commlink->expr1[i]->srcFname,1,ERR_NUMERICAL,commlink->expr1pos[i] + commlink->warnPos,commlink->inLine,"");
+      else      ppl_tbAdd(c,commlink->expr2[i]->srcLineN,commlink->expr2[i]->srcId,commlink->expr2[i]->srcFname,1,ERR_NUMERICAL,commlink->expr2pos[i] + commlink->warnPos,commlink->inLine,"");
       return;
      }
 
@@ -380,7 +380,7 @@ static void minOrMax(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     return;
    }
 
-  if (commlink.warnPos >= 0) ppl_warning(&c->errcontext, ERR_NUMERIC, commlink.warntext);
+  if (commlink.warnPos >= 0) ppl_warning(&c->errcontext, ERR_NUMERICAL, commlink.warntext);
   return;
  }
 
@@ -441,7 +441,7 @@ void ppl_directive_solve(ppl_context *c, parserLine *pl, parserOutput *in, int i
  if (commlink.Nexprs < 1)
   {
    sprintf(c->errStat.errBuff, "No equations supplied to solve.");
-   ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,ERR_NUMERIC,0,pl->linetxt,"");
+   ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,ERR_NUMERICAL,0,pl->linetxt,"");
    return;
   }
 
@@ -459,7 +459,7 @@ void ppl_directive_solve(ppl_context *c, parserLine *pl, parserOutput *in, int i
     return;
    }
 
-  if (commlink.warnPos >= 0) ppl_warning(&c->errcontext, ERR_NUMERIC, commlink.warntext);
+  if (commlink.warnPos >= 0) ppl_warning(&c->errcontext, ERR_NUMERICAL, commlink.warntext);
   return;
  }
 

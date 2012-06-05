@@ -145,7 +145,7 @@ void pplarrow_remove(ppl_context *context, pplarrow_object **inlist, parserOutpu
         free(obj);
        } else if (!quiet) {
         sprintf(context->errcontext.tempErrStr,"Arrow number %d is not defined", i);
-        ppl_warning(&context->errcontext, ERR_GENERAL, NULL);
+        ppl_warning(&context->errcontext, ERR_GENERIC, NULL);
        }
      }
    }

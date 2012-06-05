@@ -1028,8 +1028,8 @@ void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fn
       ordinateVar[a]->flagComplex = 0;
      }
 
-    pplObjNum(ordinateVar[0],0,rasterX[i],0);
-    if (sampleGrid) pplObjNum(ordinateVar[1],0,rasterY[i2],0);
+    ordinateVar[0]->real = rasterX[i];
+    if (sampleGrid) ordinateVar[1]->real = rasterY[i2];
     if (sampleGrid) sprintf(buffer, "%c=%s; %c=%s", (parametric?'u':'x'), ppl_unitsNumericDisplay(c,ordinateVar[0],0,0,0), (parametric?'v':'y'), ppl_unitsNumericDisplay(c,ordinateVar[1],1,0,0));
     else            sprintf(buffer, "%c=%s", (parametric?'t':'x'), ppl_unitsNumericDisplay(c,ordinateVar[0],0,0,0));
     pplObjNum(colData+0,0,p,0);
@@ -1051,7 +1051,7 @@ void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fn
         else                                     errt="Fail occurred.";
         COUNTERR_BEGIN;
         sprintf(c->errcontext.tempErrStr, "%s: Could not evaluate expression <%s>. The error, encountered at character position %d, was: '%s'", buffer, fnlist[j]->ascii, errp, errt);
-        ppl_error(&c->errcontext,ERR_NUMERIC,-1,-1,NULL);
+        ppl_error(&c->errcontext,ERR_NUMERICAL,-1,-1,NULL);
         COUNTERR_END;
         STACK_CLEAN;
         ppl_tbClear(c);
@@ -1253,8 +1253,8 @@ void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutp
     if (!ppl_unitsDimEqual(&stko[posv2],&rasterYunits)) { *status=1; sprintf(errtext, "Mismatched physical units between lower and upper limits of second parametric variable."); if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
    }
 
-  if (rasterXlog && ((rasterXmin<=0) || (rasterXmax<=0))) ppl_warning(&c->errcontext,ERR_NUMERIC,"Attempt to tabulate data using a logarithmic ordinate axis with negative or zero limits set. Reverting limits to finite positive values with well-defined logarithms.");
-  if (sampleGrid && rasterYlog && ((rasterYmin<=0) || (rasterYmax<=0))) ppl_warning(&c->errcontext,ERR_NUMERIC,"Attempt to tabulate data using a logarithmic ordinate axis with negative or zero limits set. Reverting limits to finite positive values with well-defined logarithms.");
+  if (rasterXlog && ((rasterXmin<=0) || (rasterXmax<=0))) ppl_warning(&c->errcontext,ERR_NUMERICAL,"Attempt to tabulate data using a logarithmic ordinate axis with negative or zero limits set. Reverting limits to finite positive values with well-defined logarithms.");
+  if (sampleGrid && rasterYlog && ((rasterYmin<=0) || (rasterYmax<=0))) ppl_warning(&c->errcontext,ERR_NUMERICAL,"Attempt to tabulate data using a logarithmic ordinate axis with negative or zero limits set. Reverting limits to finite positive values with well-defined logarithms.");
 
   // See if spacing has been specified
   if ((poss>0)&&(stko[poss].objType!=PPLOBJ_ZOM))

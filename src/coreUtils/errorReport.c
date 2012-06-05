@@ -71,20 +71,20 @@ void ppl_error(pplerr_context *context, int ErrType, int HighlightPos1, int High
     // Prepend error type
     switch (ErrType)
      {
-      case ERR_INTERNAL : snprintf(temp_stringB+i, BLEN-i, "Internal Error: ");  break;
+      case ERR_INTERNAL : snprintf(temp_stringB+i, BLEN-i, "Internal error: ");  break;
       case ERR_MEMORY   :
-      case ERR_GENERAL  : snprintf(temp_stringB+i, BLEN-i, "Error: ");           break;
-      case ERR_SYNTAX   : snprintf(temp_stringB+i, BLEN-i, "Syntax Error: ");    break;
-      case ERR_NUMERIC  : snprintf(temp_stringB+i, BLEN-i, "Numerical Error: "); break;
-      case ERR_FILE     : snprintf(temp_stringB+i, BLEN-i, "File Error: ");      break;
-      case ERR_RANGE    : snprintf(temp_stringB+i, BLEN-i, "Range Error: ");     break;
-      case ERR_UNIT     : snprintf(temp_stringB+i, BLEN-i, "Unit Error: ");      break;
-      case ERR_OVERFLOW : snprintf(temp_stringB+i, BLEN-i, "Overflow Error: ");  break;
-      case ERR_NAMESPACE: snprintf(temp_stringB+i, BLEN-i, "Namespace Error: "); break;
-      case ERR_TYPE     : snprintf(temp_stringB+i, BLEN-i, "Type Error: ");      break;
-      case ERR_INTERRUPT: snprintf(temp_stringB+i, BLEN-i, "Interrupt Error: "); break;
-      case ERR_DICTKEY  : snprintf(temp_stringB+i, BLEN-i, "Key Error: ");       break;
-      case ERR_ASSERT   : snprintf(temp_stringB+i, BLEN-i, "Assertion Error: "); break;
+      case ERR_GENERIC  : snprintf(temp_stringB+i, BLEN-i, "Error: ");           break;
+      case ERR_SYNTAX   : snprintf(temp_stringB+i, BLEN-i, "Syntax error: ");    break;
+      case ERR_NUMERICAL: snprintf(temp_stringB+i, BLEN-i, "Numerical error: "); break;
+      case ERR_FILE     : snprintf(temp_stringB+i, BLEN-i, "File error: ");      break;
+      case ERR_RANGE    : snprintf(temp_stringB+i, BLEN-i, "Range error: ");     break;
+      case ERR_UNIT     : snprintf(temp_stringB+i, BLEN-i, "Unit error: ");      break;
+      case ERR_OVERFLOW : snprintf(temp_stringB+i, BLEN-i, "Overflow error: ");  break;
+      case ERR_NAMESPACE: snprintf(temp_stringB+i, BLEN-i, "Namespace error: "); break;
+      case ERR_TYPE     : snprintf(temp_stringB+i, BLEN-i, "Type error: ");      break;
+      case ERR_INTERRUPT: snprintf(temp_stringB+i, BLEN-i, "Interrupt error: "); break;
+      case ERR_DICTKEY  : snprintf(temp_stringB+i, BLEN-i, "Key error: ");       break;
+      case ERR_ASSERT   : snprintf(temp_stringB+i, BLEN-i, "Assertion error: "); break;
      }
     i += strlen(temp_stringB+i);
    }
@@ -155,20 +155,20 @@ void ppl_warning(pplerr_context *context, int ErrType, char *msg)
     // Prepend error type
     switch (ErrType)
      {
-      case ERR_INTERNAL : snprintf(temp_stringB+i, BLEN-i, "Internal Warning: ");  break;
+      case ERR_INTERNAL : snprintf(temp_stringB+i, BLEN-i, "Internal warning: ");  break;
       case ERR_MEMORY   :
-      case ERR_GENERAL  : snprintf(temp_stringB+i, BLEN-i, "Warning: ");           break;
-      case ERR_SYNTAX   : snprintf(temp_stringB+i, BLEN-i, "Syntax Warning: ");    break;
-      case ERR_NUMERIC  : snprintf(temp_stringB+i, BLEN-i, "Numerical Warning: "); break;
-      case ERR_FILE     : snprintf(temp_stringB+i, BLEN-i, "File Warning: ");      break;
-      case ERR_RANGE    : snprintf(temp_stringB+i, BLEN-i, "Range Warning: ");     break;
-      case ERR_UNIT     : snprintf(temp_stringB+i, BLEN-i, "Unit Warning: ");      break;
-      case ERR_OVERFLOW : snprintf(temp_stringB+i, BLEN-i, "Overflow Warning: ");  break;
-      case ERR_NAMESPACE: snprintf(temp_stringB+i, BLEN-i, "Namespace Warning: "); break;
-      case ERR_TYPE     : snprintf(temp_stringB+i, BLEN-i, "Type Warning: ");      break;
-      case ERR_INTERRUPT: snprintf(temp_stringB+i, BLEN-i, "Interrupt Warning: "); break;
-      case ERR_DICTKEY  : snprintf(temp_stringB+i, BLEN-i, "Key Warning: ");       break;
-      case ERR_ASSERT   : snprintf(temp_stringB+i, BLEN-i, "Assertion Warning: "); break;
+      case ERR_GENERIC  : snprintf(temp_stringB+i, BLEN-i, "Warning: ");           break;
+      case ERR_SYNTAX   : snprintf(temp_stringB+i, BLEN-i, "Syntax warning: ");    break;
+      case ERR_NUMERICAL: snprintf(temp_stringB+i, BLEN-i, "Numerical warning: "); break;
+      case ERR_FILE     : snprintf(temp_stringB+i, BLEN-i, "File warning: ");      break;
+      case ERR_RANGE    : snprintf(temp_stringB+i, BLEN-i, "Range warning: ");     break;
+      case ERR_UNIT     : snprintf(temp_stringB+i, BLEN-i, "Unit warning: ");      break;
+      case ERR_OVERFLOW : snprintf(temp_stringB+i, BLEN-i, "Overflow warning: ");  break;
+      case ERR_NAMESPACE: snprintf(temp_stringB+i, BLEN-i, "Namespace warning: "); break;
+      case ERR_TYPE     : snprintf(temp_stringB+i, BLEN-i, "Type warning: ");      break;
+      case ERR_INTERRUPT: snprintf(temp_stringB+i, BLEN-i, "Interrupt warning: "); break;
+      case ERR_DICTKEY  : snprintf(temp_stringB+i, BLEN-i, "Key warning: ");       break;
+      case ERR_ASSERT   : snprintf(temp_stringB+i, BLEN-i, "Assertion warning: "); break;
      }
     i += strlen(temp_stringB+i);
    }

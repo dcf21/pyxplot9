@@ -646,7 +646,7 @@ int dviSpecialImplement(pplerr_context *ec, dviInterpreterState *interp)
    {
     // Unhandled special command (e.g. includegraphics)
     snprintf(errString, SSTR_LENGTH, "ignoring unhandled DVI special string %s", interp->spString);
-    ppl_warning(ec, ERR_GENERAL, errString);
+    ppl_warning(ec, ERR_GENERIC, errString);
    }
 
   // Clean up

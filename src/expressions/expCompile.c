@@ -74,7 +74,7 @@
 // N can be followed by .........JK.....QR..U.
 // O can be followed by ....E......L.........V
 // P can be followed by .........JK....PQR..U.
-// Q can be followed by .....F...JK....PQ.S.U.
+// Q can be followed by .....F...JK....PQRS.U.
 // R can be followed by ...................T..
 // S can be followed by .B..E.GHI..LMNO.......
 // T can be followed by .....F...JK....PQRS.U.
@@ -117,7 +117,7 @@
 
 void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed, int equalsAllowed, int allowCommaOperator, int collectCommas, int isDict, int outOffset, int *outlen, int *errPos, int *errType, char *errText)
  {
-  const char    *allowed[] = {"BEHILMNOG","CJKQRU","BDHILMNOG","JKQU","FJKQRU","JKU","SFJKPQRU","EG","BEHLMNOG","BEHILMNOG","BEHILMNOG","JKU","JKQRU","JKQRU","ELV","JKPQRU","SFJKPQU","T","BEHILMNOG","SFJKPQRU","","JKU"};
+  const char    *allowed[] = {"BEHILMNOG","CJKQRU","BDHILMNOG","JKQU","FJKQRU","JKU","SFJKPQRU","EG","BEHLMNOG","BEHILMNOG","BEHILMNOG","JKU","JKQRU","JKQRU","ELV","JKPQRU","SFJKPQRU","T","BEHILMNOG","SFJKPQRU","","JKU"};
   int            nCommaItems=1, nDictItems=0, tertiaryDepth=0;
   char           state='A', trialstate;
   int            scanpos=0, outpos=0, oldpos, trialpos;

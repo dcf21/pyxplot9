@@ -123,7 +123,7 @@ int dviGetTFM(pplerr_context *ec, dviFontDetails *font)
       if (err == DVIE_NOFONT)
        {
         snprintf(errStr, SSTR_LENGTH, "dviGetTfm: Cannot find pfa or pfb file for font %s", font->name);
-        ppl_error(ec, ERR_GENERAL, -1, -1, errStr);
+        ppl_error(ec, ERR_GENERIC, -1, -1, errStr);
        }
      }
     if (err != 0) return err;
@@ -172,7 +172,7 @@ int dviGetPfa(pplerr_context *ec, dviFontDetails *font, char *filename)
     if (fpin==NULL)
      {
       snprintf(errStr, SSTR_LENGTH, "dviGetTfm: Cannot open pfb file %s", PFBpath);
-      ppl_error(ec, ERR_GENERAL, -1, -1,errStr);
+      ppl_error(ec, ERR_GENERIC, -1, -1,errStr);
       return DVIE_ACCESS;
      }
 
@@ -185,7 +185,7 @@ int dviGetPfa(pplerr_context *ec, dviFontDetails *font, char *filename)
     if (fpout == NULL)
      {
       snprintf(errStr, SSTR_LENGTH, "dviGetTfm: Cannot write to pfa file %s", PFApath);
-      ppl_error(ec, ERR_GENERAL, -1, -1,errStr);
+      ppl_error(ec, ERR_GENERIC, -1, -1,errStr);
       fclose(fpin);
       return DVIE_ACCESS;
      }

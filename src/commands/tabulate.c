@@ -64,7 +64,7 @@ static int ppl_tab_dataGridDisplay(ppl_context *c, FILE *output, dataTable *data
   for (j=0; j<Ncolumns; j++)
    if (minSet[j]||maxSet[j])
     {
-     if (!ppl_unitsDimEqual(&unit[j],data->firstEntries+j)) { sprintf(c->errcontext.tempErrStr, "The minimum and maximum limits specified in range %d in the tabulate command have conflicting physical dimensions with the data returned from the data file. The limits have units of <%s>, whilst the data have units of <%s>.", j+1, ppl_printUnit(c,&unit[j],NULL,NULL,0,1,0), ppl_printUnit(c,data->firstEntries+j,NULL,NULL,1,1,0)); ppl_error(&c->errcontext,ERR_NUMERIC,-1,-1,NULL); return 1; }
+     if (!ppl_unitsDimEqual(&unit[j],data->firstEntries+j)) { sprintf(c->errcontext.tempErrStr, "The minimum and maximum limits specified in range %d in the tabulate command have conflicting physical dimensions with the data returned from the data file. The limits have units of <%s>, whilst the data have units of <%s>.", j+1, ppl_printUnit(c,&unit[j],NULL,NULL,0,1,0), ppl_printUnit(c,data->firstEntries+j,NULL,NULL,1,1,0)); ppl_error(&c->errcontext,ERR_NUMERICAL,-1,-1,NULL); return 1; }
     }
 
   // Output a column units line
@@ -308,7 +308,7 @@ void ppl_directive_tabulate(ppl_context *c, parserLine *pl, parserOutput *in, in
       // Print data
       if ((status)||(data==NULL))
        {
-        if (w==0) ppl_error(&c->errcontext,ERR_GENERAL,-1,-1,NULL);
+        if (w==0) ppl_error(&c->errcontext,ERR_GENERIC,-1,-1,NULL);
         ppl_memAlloc_AscendOutOfContext(contextLocal);
         break;
        }

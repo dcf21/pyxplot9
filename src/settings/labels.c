@@ -161,7 +161,7 @@ void ppllabel_remove(ppl_context *context, ppllabel_object **inlist, parserOutpu
         free(obj);
        } else if (!quiet) {
         sprintf(context->errcontext.tempErrStr,"Label number %d is not defined", i);
-        ppl_warning(&context->errcontext, ERR_GENERAL, NULL);
+        ppl_warning(&context->errcontext, ERR_GENERIC, NULL);
        }
      }
    }

@@ -122,7 +122,7 @@ void ppl_expIntegrate(ppl_context *c, pplExpr *inExpr, int inExprCharPos, char *
   if (min->flagComplex || max->flagComplex)
    {
     strcpy(c->errStat.errBuff, "The minimum and maximum limits of this integration operation must be real numbers; supplied values are complex.");
-    ppl_tbAdd(c,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,ERR_NUMERIC,inExprCharPos,inExpr->ascii,"int_d?() function");
+    ppl_tbAdd(c,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,ERR_NUMERICAL,inExprCharPos,inExpr->ascii,"int_d?() function");
     return;
    }
 
@@ -178,14 +178,14 @@ void ppl_expIntegrate(ppl_context *c, pplExpr *inExpr, int inExprCharPos, char *
 
     if ((!gsl_finite(out->real)) || (!gsl_finite(out->imag)) || ((out->flagComplex) && (c->set->term_current.ComplexNumbers == SW_ONOFF_OFF)))
      {
-      if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(c->errStat.errBuff, "Integral does not evaluate to a finite value."); ppl_tbAdd(c,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,ERR_NUMERIC,exprPos,inExpr->ascii,"int_d?() function"); return; }
+      if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(c->errStat.errBuff, "Integral does not evaluate to a finite value."); ppl_tbAdd(c,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,ERR_NUMERICAL,exprPos,inExpr->ascii,"int_d?() function"); return; }
       else { out->real = GSL_NAN; out->imag = 0; out->flagComplex=0; }
      }
    }
   else
    {
     strcpy(c->errStat.errBuff, "");
-    ppl_tbAdd(c,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,ERR_GENERAL,inExprCharPos,inExpr->ascii,"int_d?() function");
+    ppl_tbAdd(c,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,ERR_GENERIC,inExprCharPos,inExpr->ascii,"int_d?() function");
    }
   return;
  }
@@ -204,14 +204,14 @@ void ppl_expDifferentiate(ppl_context *c, pplExpr *inExpr, int inExprCharPos, ch
   if (!ppl_unitsDimEqual(point, step))
    {
     strcpy(c->errStat.errBuff, "The arguments x and step to this differentiation operation are not dimensionally compatible.");
-    ppl_tbAdd(c,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,ERR_NUMERIC,inExprCharPos,inExpr->ascii,"diff_d?() function");
+    ppl_tbAdd(c,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,ERR_NUMERICAL,inExprCharPos,inExpr->ascii,"diff_d?() function");
     return;
    }
 
   if (step->flagComplex)
    {
     strcpy(c->errStat.errBuff, "The argument 'step' to this differentiation operation must be a real number; supplied value is complex.");
-    ppl_tbAdd(c,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,ERR_NUMERIC,inExprCharPos,inExpr->ascii,"diff_d?() function");
+    ppl_tbAdd(c,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,ERR_NUMERICAL,inExprCharPos,inExpr->ascii,"diff_d?() function");
     return;
    }
 
@@ -254,7 +254,7 @@ void ppl_expDifferentiate(ppl_context *c, pplExpr *inExpr, int inExprCharPos, ch
     gsl_deriv_central(&fn, point->imag, step->real, &dRdI      , &dRdI_error);
 
     if ((!ppl_dblApprox(resultReal, dIdI, 2*(resultReal_error+dIdI_error))) || (!ppl_dblApprox(resultImag, -dRdI, 2*(resultImag_error+dRdI_error))))
-     { sprintf(c->errStat.errBuff, "The Cauchy-Riemann equations are not satisfied at this point in the complex plane. It does not therefore appear possible to perform complex differentiation. In the notation f(x+iy)=u+iv, the offending derivatives were: du/dx=%e, dv/dy=%e, du/dy=%e and dv/dx=%e.", resultReal, dIdI, dRdI, resultImag); ppl_tbAdd(c,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,ERR_NUMERIC,exprPos,inExpr->ascii,"diff_d?() function"); return; }
+     { sprintf(c->errStat.errBuff, "The Cauchy-Riemann equations are not satisfied at this point in the complex plane. It does not therefore appear possible to perform complex differentiation. In the notation f(x+iy)=u+iv, the offending derivatives were: du/dx=%e, dv/dy=%e, du/dy=%e and dv/dx=%e.", resultReal, dIdI, dRdI, resultImag); ppl_tbAdd(c,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,ERR_NUMERICAL,exprPos,inExpr->ascii,"diff_d?() function"); return; }
    }
 
   ppl_contextRestoreVarPointer(c, dummy, &dummyTemp); // Restore old value of the dummy variable we've been using
@@ -273,7 +273,7 @@ void ppl_expDifferentiate(ppl_context *c, pplExpr *inExpr, int inExprCharPos, ch
 
   if ((!gsl_finite(out->real)) || (!gsl_finite(out->imag)) || ((out->flagComplex) && (c->set->term_current.ComplexNumbers == SW_ONOFF_OFF)))
    {
-    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(c->errStat.errBuff, "Differentiated expression does not evaluate to a finite value."); ppl_tbAdd(c,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,ERR_NUMERIC,exprPos,inExpr->ascii,"diff_d?() function"); return; }
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(c->errStat.errBuff, "Differentiated expression does not evaluate to a finite value."); ppl_tbAdd(c,inExpr->srcLineN,inExpr->srcId,inExpr->srcFname,0,ERR_NUMERICAL,exprPos,inExpr->ascii,"diff_d?() function"); return; }
     else { out->real = GSL_NAN; out->imag = 0; out->flagComplex=0; }
    }
   return;

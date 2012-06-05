@@ -51,7 +51,7 @@
 #include "epsMaker/eps_core.h"
 #include "epsMaker/eps_plot_axespaint.h"
 #include "epsMaker/eps_plot_canvas.h"
-#include "epsMaker/eps_plot_colourmap.h"
+#include "epsMaker/eps_plot_colormap.h"
 #include "epsMaker/eps_plot_contourmap.h"
 #include "epsMaker/eps_plot_filledregion.h"
 #include "epsMaker/eps_plot_gridlines.h"
@@ -177,7 +177,7 @@ void eps_plot_WithWordsFromUsingItems(ppl_context *c, withWords *ww, double *Dat
  }
 
 #define WWCUID(X) \
- if (!firstValues[i].dimensionless) { sprintf(c->errcontext.tempErrStr, "The expression specified for the %s should have been dimensionless, but instead had units of <%s>. Cannot plot this dataset.", X, ppl_printUnit(c, firstValues+i, NULL, NULL, 0, 1, 0)); ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, NULL); return 1; } \
+ if (!firstValues[i].dimensionless) { sprintf(c->errcontext.tempErrStr, "The expression specified for the %s should have been dimensionless, but instead had units of <%s>. Cannot plot this dataset.", X, ppl_printUnit(c, firstValues+i, NULL, NULL, 0, 1, 0)); ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, NULL); return 1; } \
  i--; \
  if (i<0) i=0;
 
@@ -347,8 +347,8 @@ void eps_plot_ReadAccessibleData(EPSComm *x)
     axis   = &axissets[xyz][axis_n];
 
     // Check if we have partial range which conflicts with units of range of axis
-    if ((pr->MinSet && (!pr->MaxSet)) && axis->HardMaxSet && (!pr->AutoMaxSet) && (!ppl_unitsDimEqual(&axis->HardUnit, &pr->unit))) { sprintf(c->errcontext.tempErrStr, "The minimum limit specified for axis %c%d in the plot command has conflicting units with the maximum limit of that axis: the former has units of <%s> whilst the latter has units of <%s>.", "xyzc"[xyz], axis_n, ppl_printUnit(c,&pr->unit,NULL,NULL,0,1,0), ppl_printUnit(c,&axis->HardUnit,NULL,NULL,1,1,0)); ppl_error(&c->errcontext,ERR_NUMERIC, -1, -1, NULL); *(x->status) = 1; return; }
-    if (((!pr->MinSet) && pr->MaxSet) && axis->HardMinSet && (!pr->AutoMinSet) && (!ppl_unitsDimEqual(&axis->HardUnit, &pr->unit))) { sprintf(c->errcontext.tempErrStr, "The maximum limit specified for axis %c%d in the plot command has conflicting units with the minimum limit of that axis: the former has units of <%s> whilst the latter has units of <%s>.", "xyzc"[xyz], axis_n, ppl_printUnit(c,&pr->unit,NULL,NULL,0,1,0), ppl_printUnit(c,&axis->HardUnit,NULL,NULL,1,1,0)); ppl_error(&c->errcontext,ERR_NUMERIC, -1, -1, NULL); *(x->status) = 1; return; }
+    if ((pr->MinSet && (!pr->MaxSet)) && axis->HardMaxSet && (!pr->AutoMaxSet) && (!ppl_unitsDimEqual(&axis->HardUnit, &pr->unit))) { sprintf(c->errcontext.tempErrStr, "The minimum limit specified for axis %c%d in the plot command has conflicting units with the maximum limit of that axis: the former has units of <%s> whilst the latter has units of <%s>.", "xyzc"[xyz], axis_n, ppl_printUnit(c,&pr->unit,NULL,NULL,0,1,0), ppl_printUnit(c,&axis->HardUnit,NULL,NULL,1,1,0)); ppl_error(&c->errcontext,ERR_NUMERICAL, -1, -1, NULL); *(x->status) = 1; return; }
+    if (((!pr->MinSet) && pr->MaxSet) && axis->HardMinSet && (!pr->AutoMinSet) && (!ppl_unitsDimEqual(&axis->HardUnit, &pr->unit))) { sprintf(c->errcontext.tempErrStr, "The maximum limit specified for axis %c%d in the plot command has conflicting units with the minimum limit of that axis: the former has units of <%s> whilst the latter has units of <%s>.", "xyzc"[xyz], axis_n, ppl_printUnit(c,&pr->unit,NULL,NULL,0,1,0), ppl_printUnit(c,&axis->HardUnit,NULL,NULL,1,1,0)); ppl_error(&c->errcontext,ERR_NUMERICAL, -1, -1, NULL); *(x->status) = 1; return; }
 
     // Read information about axis range out of list of ranges supplied to the plot command, ready to pass to eps_plot_ticking
     if (pr->MinSet)     { axis->HardMinSet = 1; axis->HardMin = pr->min; }
@@ -453,20 +453,20 @@ void eps_plot_ReadAccessibleData(EPSComm *x)
        }
 
       if (eps_plot_AddUsingItemsForWithWords(c, &pd->ww_final, &NExpect, &autoUsingList, &UsingList, &NUsing, &nObjs, c->errcontext.tempErrStr))
-        { ppl_error(&c->errcontext,ERR_GENERAL, -1, -1, NULL); *(x->status) = 1; return; } // Add extra using items for, e.g. "linewidth $3".
+        { ppl_error(&c->errcontext,ERR_GENERIC, -1, -1, NULL); *(x->status) = 1; return; } // Add extra using items for, e.g. "linewidth $3".
 
       if (pd->function == 0) // Read data from file
        {
         if (pd->filename != NULL) // Read data from file
          {
           if (DEBUG) { sprintf(c->errcontext.tempErrStr, "Reading data from file '%s' for dataset %d in plot item %d", pd->filename, i+1, x->current->id); ppl_log(&c->errcontext,NULL); }
-          if (pd->PersistentDataTable==NULL) ppldata_fromFile(c, x->current->plotdata, pd->filename, 0, NULL, NULL, pd->index, UsingList, autoUsingList, NExpect, nObjs, pd->label, pd->SelectCriterion, NULL, pd->UsingRowCols, pd->EveryList, pd->continuity, 0, &status, c->errcontext.tempErrStr, &errCount, x->iterDepth+1);
-          else                               x->current->plotdata[0] = pd->PersistentDataTable;
+          if (pd->PersistentDataTable==NULL) ppldata_fromFile(c, x->current->plotdata+i, pd->filename, 0, NULL, NULL, pd->index, UsingList, autoUsingList, NExpect, nObjs, pd->label, pd->SelectCriterion, NULL, pd->UsingRowCols, pd->EveryList, pd->continuity, 0, &status, c->errcontext.tempErrStr, &errCount, x->iterDepth+1);
+          else                               x->current->plotdata[i] = pd->PersistentDataTable;
          }
         else if (pd->vectors != NULL)
          {
           if (DEBUG) { sprintf(c->errcontext.tempErrStr, "Reading data from vectors for dataset %d in plot item %d", i+1, x->current->id); ppl_log(&c->errcontext,NULL); }
-          ppldata_fromVectors(c, x->current->plotdata, pd->vectors, pd->NFunctions, UsingList, autoUsingList, NExpect, nObjs, pd->label, pd->SelectCriterion, NULL, pd->continuity, &status, c->errcontext.tempErrStr, &errCount, x->iterDepth+1);
+          ppldata_fromVectors(c, x->current->plotdata+i, pd->vectors, pd->NFunctions, UsingList, autoUsingList, NExpect, nObjs, pd->label, pd->SelectCriterion, NULL, pd->continuity, &status, c->errcontext.tempErrStr, &errCount, x->iterDepth+1);
          }
        }
       else
@@ -534,11 +534,11 @@ void eps_plot_ReadAccessibleData(EPSComm *x)
          }
 
         if (DEBUG) { sprintf(c->errcontext.tempErrStr, "Reading data from parametric functions for dataset %d in plot item %d", i+1, x->current->id); ppl_log(&c->errcontext,NULL); }
-        ppldata_fromFuncs(c, x->current->plotdata, pd->functions, pd->NFunctions, special_raster, Nsamples, 1, raster_unit, special_raster2, Nsamples2, raster2_unit, UsingList, autoUsingList, NExpect, nObjs, pd->label, pd->SelectCriterion, NULL, pd->continuity, &status, c->errcontext.tempErrStr, &errCount, x->iterDepth+1);
+        ppldata_fromFuncs(c, x->current->plotdata+i, pd->functions, pd->NFunctions, special_raster, Nsamples, 1, raster_unit, special_raster2, Nsamples2, raster2_unit, UsingList, autoUsingList, NExpect, nObjs, pd->label, pd->SelectCriterion, NULL, pd->continuity, &status, c->errcontext.tempErrStr, &errCount, x->iterDepth+1);
         pd->GridXSize = Nsamples;
         pd->GridYSize = Nsamples2;
        }
-      if (status) { ppl_error(&c->errcontext,ERR_GENERAL, -1, -1, errbuffer); x->current->plotdata[i]=NULL; }
+      if (status) { ppl_error(&c->errcontext,ERR_GENERIC, -1, -1, errbuffer); x->current->plotdata[i]=NULL; }
       else
        {
         // Update axes to reflect usage
@@ -618,7 +618,7 @@ void eps_plot_SampleFunctions(EPSComm *x)
         else if ((pd->function)&&(pd->NFunctions>=1)&&(pd->NFunctions<=4)) NExpect=pd->NFunctions+2;
        }
 
-      if (eps_plot_AddUsingItemsForWithWords(c, &pd->ww_final, &NExpect, &autoUsingList, &UsingList, &NUsing, &nObjs, c->errcontext.tempErrStr)) { ppl_error(&c->errcontext,ERR_GENERAL, -1, -1, NULL); *(x->status) = 1; return; } // Add extra using items for, e.g. "linewidth $3".
+      if (eps_plot_AddUsingItemsForWithWords(c, &pd->ww_final, &NExpect, &autoUsingList, &UsingList, &NUsing, &nObjs, c->errcontext.tempErrStr)) { ppl_error(&c->errcontext,ERR_GENERIC, -1, -1, NULL); *(x->status) = 1; return; } // Add extra using items for, e.g. "linewidth $3".
 
       if (NExpect != NUsing) { sprintf(c->errcontext.tempErrStr, "The supplied using ... clause contains the wrong number of items. We need %d columns of data, but %d have been supplied.", NExpect, NUsing); ppl_error(&c->errcontext,ERR_SYNTAX,-1,-1,NULL); *(x->status) = 1; return; }
 
@@ -704,7 +704,7 @@ void eps_plot_SampleFunctions(EPSComm *x)
       ppldata_fromFuncs(c, x->current->plotdata+i, pd->functions, pd->NFunctions, SpecialRaster, Nsamples, pd->parametric, &OrdinateAxis->DataUnit, OrdinateRaster2, OrdinateRasterLen2, (OrdinateAxis2==NULL)?NULL:&OrdinateAxis2->DataUnit, UsingList, autoUsingList, NExpect, nObjs, pd->label, pd->SelectCriterion, NULL, pd->continuity, &status, errbuffer, &errCount, x->iterDepth);
       pd->GridXSize = Nsamples;
       pd->GridYSize = OrdinateRasterLen2;
-      if (status) { ppl_error(&c->errcontext,ERR_GENERAL, -1, -1, errbuffer); x->current->plotdata[i]=NULL; }
+      if (status) { ppl_error(&c->errcontext,ERR_GENERIC, -1, -1, errbuffer); x->current->plotdata[i]=NULL; }
 
       // Update axes to reflect usage
       status=eps_plot_styles_UpdateUsage(x, x->current->plotdata[i], pd->ww_final.linespoints, x->current->ThreeDim, &axissets[pd->axis1xyz][pd->axis1], &axissets[pd->axis2xyz][pd->axis2], &axissets[pd->axis3xyz][pd->axis3], &x->current->settings, pd->axis1xyz, pd->axis2xyz, pd->axis3xyz, pd->axis1, pd->axis2, pd->axis3, x->current->id);
@@ -741,7 +741,7 @@ void eps_plot_YieldUpText(EPSComm *x)
     x->current->DatasetTextID[k] = x->NTextItems;
     if (pd->ww_final.linespoints == SW_STYLE_COLORMAP)
      {
-      eps_plot_colourmap_YieldText(x, x->current->plotdata[k], &x->current->settings, pd);
+      eps_plot_colormap_YieldText(x, x->current->plotdata[k], &x->current->settings, pd);
      }
     else if (pd->ww_final.linespoints == SW_STYLE_CONTOURMAP)
      {
@@ -863,7 +863,7 @@ void eps_plot_RenderEPS(EPSComm *x)
        xyzaxis[pd->axis2xyz] = 1;
        xyzaxis[pd->axis3xyz] = 2;
 
-       status = (j?eps_plot_contourmap:eps_plot_colourmap)(x, x->current->plotdata[i], x->current->ThreeDim, xyzaxis[0], xyzaxis[1], xyzaxis[2], &x->current->settings, pd, i, origin_x, origin_y, width, height, zdepth);
+       status = (j?eps_plot_contourmap:eps_plot_colormap)(x, x->current->plotdata[i], x->current->ThreeDim, xyzaxis[0], xyzaxis[1], xyzaxis[2], &x->current->settings, pd, i, origin_x, origin_y, width, height, zdepth);
        if (status) { *(x->status) = 1; return; }
       }
 
@@ -909,7 +909,7 @@ void eps_plot_RenderEPS(EPSComm *x)
   eps_plot_axespaint(x, origin_x, origin_y, width, height, zdepth, 1);
 
   // Render colormap scales
-  eps_plot_colourmap_DrawScales(x, origin_x, origin_y, width, height, zdepth);
+  eps_plot_colormap_DrawScales(x, origin_x, origin_y, width, height, zdepth);
 
   // Render legend
   GraphLegend_Render(x, width, height, zdepth);

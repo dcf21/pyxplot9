@@ -159,8 +159,8 @@ void pplcsp_checkForGvOutput(ppl_context *context)
      ppl_strRemoveCompleteLine(PipeOutputBuffer, linebuffer);
      if (linebuffer[0]=='\0') continue;
      if (strstr(linebuffer, SIGTERM_NAME)!=NULL) continue;
-     if (strncmp(linebuffer, SED_COMMAND, strlen(SED_COMMAND))==0) ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, "A problem was encounter with the supplied regular expression.");
-     else ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, linebuffer);
+     if (strncmp(linebuffer, SED_COMMAND, strlen(SED_COMMAND))==0) ppl_error(&context->errcontext,ERR_GENERIC, -1, -1, "A problem was encounter with the supplied regular expression.");
+     else ppl_error(&context->errcontext,ERR_GENERIC, -1, -1, linebuffer);
     }
   return;
  }
@@ -505,7 +505,7 @@ void pplcsp_forkSed(ppl_context *context, char *cmd, int *fstdin, int *fstdout)
       close(PipeCSP2MAIN[1]);
      }
     if (execl(SED_COMMAND, SED_COMMAND, cmd, NULL)!=0) if (DEBUG) ppl_log(&context->errcontext,"Attempt to execute sed returned error code."); // Execute sed
-    ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, "Execution of helper process 'sed' failed."); // execlp call should not return
+    ppl_error(&context->errcontext,ERR_GENERIC, -1, -1, "Execution of helper process 'sed' failed."); // execlp call should not return
     exit(1);
    }
   return;
@@ -561,7 +561,7 @@ void pplcsp_forkLaTeX(ppl_context *context, char *filename, int *PidOut, int *fs
       close(fd1[1]);
      }
     if (execl(LATEX_COMMAND, LATEX_COMMAND, "-file-line-error", filename, NULL)!=0) if (DEBUG) ppl_log(&context->errcontext,"Attempt to execute latex returned error code."); // Execute latex
-    ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, "Execution of helper process 'latex' failed."); // execlp call should not return
+    ppl_error(&context->errcontext,ERR_GENERIC, -1, -1, "Execution of helper process 'latex' failed."); // execlp call should not return
     exit(1);
    }
   return;
@@ -612,7 +612,7 @@ void pplcsp_forkInputFilter(ppl_context *context, char **cmd, int *fstdout)
      }
     if (execvp(cmd[0], cmd)!=0) if (DEBUG) ppl_log(&context->errcontext,"Attempt to execute input filter returned error code."); // Execute input filter
     sprintf(context->errcontext.tempErrStr, "Execution of input filter '%s' failed.", cmd[0]);
-    ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, NULL); // execvp call should not return
+    ppl_error(&context->errcontext,ERR_GENERIC, -1, -1, NULL); // execvp call should not return
     exit(1);
    }
   return;
@@ -664,7 +664,7 @@ void pplcsp_forkKpseWhich(ppl_context *context, const char *ftype, int *fstdout)
      }
     sprintf(CmdLineOpt, "-show-path=.%s", ftype);
     if (execl(KPSE_COMMAND, KPSE_COMMAND, CmdLineOpt, NULL)!=0) if (DEBUG) ppl_log(&context->errcontext,"Attempt to execute kpsewhich returned error code."); // Execute kpsewhich
-    ppl_error(&context->errcontext,ERR_GENERAL, -1, -1, "Execution of helper process 'kpsewhich' failed."); // execlp call should not return
+    ppl_error(&context->errcontext,ERR_GENERIC, -1, -1, "Execution of helper process 'kpsewhich' failed."); // execlp call should not return
     exit(1);
    }
   return;

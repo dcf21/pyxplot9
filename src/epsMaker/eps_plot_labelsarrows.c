@@ -63,8 +63,8 @@ void eps_plot_labelsarrows_YieldUpText(EPSComm *x)
      if (XA != NULL) \
       { \
        if (!XA->RangeFinalised) { XA = &(XAXES[1]); } /* Default to first axis if desired axis doesn't exist */ \
-       if (XA->HardUnitSet && (!ppl_unitsDimEqual(&(XIN),&(XA->HardUnit)))) { sprintf(x->c->errcontext.tempErrStr, "Position specified for %s dimensionally incompatible with the range specified for the axis. Position has units of <%s> while axis has units of <%s>.", ItemName, ppl_printUnit(x->c, &(XIN), NULL, NULL, 0, 1, 0), ppl_printUnit(x->c, &(XA->HardUnit), NULL, NULL, 1, 1, 0)); ppl_error(&x->c->errcontext, ERR_NUMERIC, -1, -1,NULL); XA=NULL; XOUT=0.5; status=1; } \
-       if (XA->DataUnitSet && (!ppl_unitsDimEqual(&(XIN),&(XA->DataUnit)))) { sprintf(x->c->errcontext.tempErrStr, "Position specified for %s dimensionally incompatible with data plotted against the axis. Position has units of <%s> while axis has units of <%s>.", ItemName, ppl_printUnit(x->c, &(XIN), NULL, NULL, 0, 1, 0), ppl_printUnit(x->c, &(XA->DataUnit), NULL, NULL, 1, 1, 0)); ppl_error(&x->c->errcontext, ERR_NUMERIC, -1, -1,NULL); XA=NULL; XOUT=0.5; status=1; } \
+       if (XA->HardUnitSet && (!ppl_unitsDimEqual(&(XIN),&(XA->HardUnit)))) { sprintf(x->c->errcontext.tempErrStr, "Position specified for %s dimensionally incompatible with the range specified for the axis. Position has units of <%s> while axis has units of <%s>.", ItemName, ppl_printUnit(x->c, &(XIN), NULL, NULL, 0, 1, 0), ppl_printUnit(x->c, &(XA->HardUnit), NULL, NULL, 1, 1, 0)); ppl_error(&x->c->errcontext, ERR_NUMERICAL, -1, -1,NULL); XA=NULL; XOUT=0.5; status=1; } \
+       if (XA->DataUnitSet && (!ppl_unitsDimEqual(&(XIN),&(XA->DataUnit)))) { sprintf(x->c->errcontext.tempErrStr, "Position specified for %s dimensionally incompatible with data plotted against the axis. Position has units of <%s> while axis has units of <%s>.", ItemName, ppl_printUnit(x->c, &(XIN), NULL, NULL, 0, 1, 0), ppl_printUnit(x->c, &(XA->DataUnit), NULL, NULL, 1, 1, 0)); ppl_error(&x->c->errcontext, ERR_NUMERICAL, -1, -1,NULL); XA=NULL; XOUT=0.5; status=1; } \
        if (!XA->RangeFinalised) { XA=NULL; XOUT=0.5; } \
       } \
  }

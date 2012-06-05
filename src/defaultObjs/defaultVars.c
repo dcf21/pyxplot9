@@ -101,11 +101,11 @@ void ppl_makeDefaultVars(ppl_context *out)
     // exceptions module
     ppl_dictAppendCpy(d  , "exceptions", pplObjModule(&m,1,1,1) , sizeof(v));
     d2 = (dict *)m.auxil;
-    pplObjException(&v, 1, 0, "generic", ERR_GENERAL);
+    pplObjException(&v, 1, 0, "generic", ERR_GENERIC);
     ppl_dictAppendCpy(d2 , "generic"   , (void *)&v , sizeof(v));
     pplObjException(&v, 1, 0, "syntax", ERR_SYNTAX);
     ppl_dictAppendCpy(d2 , "syntax"    , (void *)&v , sizeof(v));
-    pplObjException(&v, 1, 0, "numerical", ERR_NUMERIC);
+    pplObjException(&v, 1, 0, "numerical", ERR_NUMERICAL);
     ppl_dictAppendCpy(d2 , "numerical" , (void *)&v , sizeof(v));
     pplObjException(&v, 1, 0, "file", ERR_FILE);
     ppl_dictAppendCpy(d2 , "file"      , (void *)&v , sizeof(v));

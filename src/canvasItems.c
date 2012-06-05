@@ -627,7 +627,7 @@ static int canvas_delete(ppl_context *c, const int id)
   canvas_itemlist *canvas_items = c->canvas_items;
   canvas_item     *ptr = canvas_items->first;
   while ((ptr!=NULL)&&(ptr->id!=id)) ptr=ptr->next;
-  if (ptr==NULL) { sprintf(c->errcontext.tempErrStr, "There is no multiplot item with ID %d.", id); ppl_warning(&c->errcontext, ERR_GENERAL, 0); return 1; }
+  if (ptr==NULL) { sprintf(c->errcontext.tempErrStr, "There is no multiplot item with ID %d.", id); ppl_warning(&c->errcontext, ERR_GENERIC, 0); return 1; }
   else           { ptr->deleted = 1; }
   return 0;
  }
@@ -638,7 +638,7 @@ int ppl_directive_delete(ppl_context *c, parserLine *pl, parserOutput *in, int i
   canvas_itemlist  *canvas_items = c->canvas_items;
   int               pos;
 
-  if (canvas_items==NULL) { TBADD(ERR_GENERAL, "There are currently no items on the multiplot canvas.", 0); return 1; }
+  if (canvas_items==NULL) { TBADD(ERR_GENERIC, "There are currently no items on the multiplot canvas.", 0); return 1; }
 
   pos = PARSE_delete_deleteno;
   while ((stk[pos].objType == PPLOBJ_NUM) && (stk[pos].real > 0))
@@ -666,7 +666,7 @@ int ppl_directive_undelete(ppl_context *c, parserLine *pl, parserOutput *in, int
 
   int               pos;
 
-  if (canvas_items==NULL) { TBADD(ERR_GENERAL, "There are currently no items on the multiplot canvas.", 0); return 1; }
+  if (canvas_items==NULL) { TBADD(ERR_GENERIC, "There are currently no items on the multiplot canvas.", 0); return 1; }
 
   pos = PARSE_undelete_undeleteno;
   while ((stk[pos].objType == PPLOBJ_NUM) && (stk[pos].real > 0))
@@ -677,7 +677,7 @@ int ppl_directive_undelete(ppl_context *c, parserLine *pl, parserOutput *in, int
     id  = (int)round(stk[pos+PARSE_undelete_number_undeleteno].real);
     ptr = canvas_items->first;
     while ((ptr!=NULL)&&(ptr->id!=id)) ptr=ptr->next;
-    if (ptr==NULL) { sprintf(c->errcontext.tempErrStr, "There is no multiplot item with ID %d.", id); ppl_warning(&c->errcontext, ERR_GENERAL, 0); return 1; }
+    if (ptr==NULL) { sprintf(c->errcontext.tempErrStr, "There is no multiplot item with ID %d.", id); ppl_warning(&c->errcontext, ERR_GENERIC, 0); return 1; }
     else           { ptr->deleted = 0; }
    }
 
@@ -700,7 +700,7 @@ int ppl_directive_move(ppl_context *c, parserLine *pl, parserOutput *in, int int
   unsigned char     rotatable;
   canvas_item      *ptr;
 
-  if (canvas_items==NULL) { TBADD(ERR_GENERAL, "There are currently no items on the multiplot canvas.", 0); return 1; }
+  if (canvas_items==NULL) { TBADD(ERR_GENERIC, "There are currently no items on the multiplot canvas.", 0); return 1; }
 
   moveno   = (int)round(stk[PARSE_move_moveno  ].real);
   x        =            stk[PARSE_move_p       ].real ;
@@ -709,9 +709,9 @@ int ppl_directive_move(ppl_context *c, parserLine *pl, parserOutput *in, int int
 
   ptr = canvas_items->first;
   while ((ptr!=NULL)&&(ptr->id!=moveno)) ptr=ptr->next;
-  if (ptr==NULL) { sprintf(c->errStat.errBuff, "There is no multiplot item with ID %d.", moveno); TBADD2(ERR_GENERAL, 0); return 1; }
+  if (ptr==NULL) { sprintf(c->errStat.errBuff, "There is no multiplot item with ID %d.", moveno); TBADD2(ERR_GENERIC, 0); return 1; }
   rotatable = ((ptr->type!=CANVAS_ARROW)&&(ptr->type!=CANVAS_CIRC)&&(ptr->type!=CANVAS_PIE)&&(ptr->type!=CANVAS_PLOT)&&(ptr->type!=CANVAS_POINT));
-  if (gotRotation && !rotatable) { sprintf(c->errcontext.tempErrStr, "It is not possible to rotate multiplot item %d.", moveno); ppl_warning(&c->errcontext, ERR_GENERAL, NULL); }
+  if (gotRotation && !rotatable) { sprintf(c->errcontext.tempErrStr, "It is not possible to rotate multiplot item %d.", moveno); ppl_warning(&c->errcontext, ERR_GENERIC, NULL); }
 
   if (ptr->type==CANVAS_POLYGON)
    {
@@ -768,7 +768,7 @@ int ppl_directive_swap(ppl_context *c, parserLine *pl, parserOutput *in, int int
   int               item1, item2;
   canvas_item     **ptr1, **ptr2, *temp;
 
-  if (canvas_items==NULL) { TBADD(ERR_GENERAL, "There are currently no items on the multiplot canvas.", 0); return 1; }
+  if (canvas_items==NULL) { TBADD(ERR_GENERIC, "There are currently no items on the multiplot canvas.", 0); return 1; }
 
   // Read the ID numbers of the items to be swapped
   item1 = (int)round(stk[PARSE_swap_item1].real);
@@ -777,12 +777,12 @@ int ppl_directive_swap(ppl_context *c, parserLine *pl, parserOutput *in, int int
   // Seek the first item to be swapped
   ptr1 = &canvas_items->first;
   while ((*ptr1!=NULL)&&((*ptr1)->id!=item1)) ptr1=&((*ptr1)->next);
-  if (*ptr1==NULL) { sprintf(c->errStat.errBuff, "There is no multiplot item with ID %d.", item1); TBADD2(ERR_GENERAL, 0); return 1; }
+  if (*ptr1==NULL) { sprintf(c->errStat.errBuff, "There is no multiplot item with ID %d.", item1); TBADD2(ERR_GENERIC, 0); return 1; }
 
   // Seek the second item to be swapped
   ptr2 = &canvas_items->first;
   while ((*ptr2!=NULL)&&((*ptr2)->id!=item2)) ptr2=&((*ptr2)->next);
-  if (*ptr2==NULL) { sprintf(c->errStat.errBuff, "There is no multiplot item with ID %d.", item2); TBADD2(ERR_GENERAL, 0); return 1; }
+  if (*ptr2==NULL) { sprintf(c->errStat.errBuff, "There is no multiplot item with ID %d.", item2); TBADD2(ERR_GENERIC, 0); return 1; }
 
   // Do swap
   (*ptr1)->id = item2;
@@ -839,7 +839,7 @@ int ppl_directive_arrow(ppl_context *c, parserLine *pl, parserOutput *in, int in
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
-    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Arrow has been removed from multiplot, because it generated an error."); return 1; }
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Arrow has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }
@@ -893,7 +893,7 @@ int ppl_directive_box(ppl_context *c, parserLine *pl, parserOutput *in, int inte
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
-    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Box has been removed from multiplot, because it generated an error."); return 1; }
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Box has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }
@@ -932,7 +932,7 @@ int ppl_directive_circle(ppl_context *c, parserLine *pl, parserOutput *in, int i
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
-    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Circle has been removed from multiplot, because it generated an error."); return 1; }
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Circle has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }
@@ -976,7 +976,7 @@ int ppl_directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int 
   if (gotB2 ) { e++; }
   if (gotA  ) { e++; }
   if (gotB  ) { e++; }
-  if (gotEcc) { e++; if ((ecc<0.0) || (ecc>=1.0)) { strcpy(c->errStat.errBuff, "Supplied eccentricity is not in the range 0 <= e < 1."); TBADD2(ERR_NUMERIC,0); return 1; } }
+  if (gotEcc) { e++; if ((ecc<0.0) || (ecc>=1.0)) { strcpy(c->errStat.errBuff, "Supplied eccentricity is not in the range 0 <= e < 1."); TBADD2(ERR_NUMERICAL,0); return 1; } }
   if (gotSlr) { e++; }
   if (gotLr ) { e++; }
 
@@ -987,7 +987,7 @@ int ppl_directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int 
 
   // Check that we have been supplied an appropriate set of inputs
   if ( (!gotX1) && (((p==2)&&((e!=1)||(r!=0))) || ((p<2)&&(e!=2))) )
-   { strcpy(c->errStat.errBuff, "Ellipse command has received an inappropriate set of inputs. Must specify either the position of both the centre and focus of the ellipse, and one further piece of information out of the major axis length, the minor axis length, the eccentricity or the semi-latus rectum, or the position of one of these two points, the rotation angle of the major axis of the ellipse, and two further pieces of information."); TBADD2(ERR_GENERAL,0); return 1; }
+   { strcpy(c->errStat.errBuff, "Ellipse command has received an inappropriate set of inputs. Must specify either the position of both the centre and focus of the ellipse, and one further piece of information out of the major axis length, the minor axis length, the eccentricity or the semi-latus rectum, or the position of one of these two points, the rotation angle of the major axis of the ellipse, and two further pieces of information."); TBADD2(ERR_GENERIC,0); return 1; }
 
   // Convert inputs such that we have the position of the centre of the ellipse and major/minor axes
   if (gotX1) // User has specified two corners of the ellipse
@@ -1008,7 +1008,7 @@ int ppl_directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int 
      {
       a   = fabs(a);
       ecc = hypot(xc - xf , yc - yf) / a;
-      if ((ecc < 0.0) || (ecc >= 1.0)) { strcpy(c->errStat.errBuff, "Supplied semi-major axis length is shorter than the distance between the supplied focus and centre of the ellipse. No ellipse may have such parameters."); TBADD2(ERR_NUMERIC,0); return 1; }
+      if ((ecc < 0.0) || (ecc >= 1.0)) { strcpy(c->errStat.errBuff, "Supplied semi-major axis length is shorter than the distance between the supplied focus and centre of the ellipse. No ellipse may have such parameters."); TBADD2(ERR_NUMERICAL,0); return 1; }
       if (ppl_dblEqual(ecc,0.0)) { b = a; }
       else                             { b = a * sqrt(1.0-pow(ecc,2)); }
      }
@@ -1016,7 +1016,7 @@ int ppl_directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int 
      {
       b   = fabs(b);
       a   = hypot(hypot(xc - xf , yc - yf) , b);
-      if (b > a) { strcpy(c->errStat.errBuff, "Supplied minor axis length is longer than the implied major axis length of the ellipse."); TBADD2(ERR_NUMERIC,0); return 1; }
+      if (b > a) { strcpy(c->errStat.errBuff, "Supplied minor axis length is longer than the implied major axis length of the ellipse."); TBADD2(ERR_NUMERICAL,0); return 1; }
       ecc = sqrt(1.0 - pow(b/a , 2.0));
      }
     else if (gotEcc) // eccentricity...
@@ -1029,7 +1029,7 @@ int ppl_directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int 
      {
       ratio = hypot(xc - xf , yc - yf) / slr;
       ecc   = (sqrt(1+4*pow(ratio,2))-1.0) / (2*ratio);
-      if ((ecc<0.0) || (ecc>=1.0)) { strcpy(c->errStat.errBuff, "Eccentricity implied for ellipse is not in the range 0 <= e < 1."); TBADD2(ERR_NUMERIC,0); return 1; }
+      if ((ecc<0.0) || (ecc>=1.0)) { strcpy(c->errStat.errBuff, "Eccentricity implied for ellipse is not in the range 0 <= e < 1."); TBADD2(ERR_NUMERICAL,0); return 1; }
       a     = hypot(xc - xf , yc - yf) / ecc;
       b     = a * sqrt(1.0 - pow(ecc,2.0));
      }
@@ -1041,7 +1041,7 @@ int ppl_directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int 
      {
       a   = fabs(a);
       b   = fabs(b);
-      if (b>a) { strcpy(c->errStat.errBuff, "Supplied minor axis length is longer than the supplied major axis length of the ellipse."); TBADD2(ERR_NUMERIC,0); TBADD2(ERR_NUMERIC,0); return 1; }
+      if (b>a) { strcpy(c->errStat.errBuff, "Supplied minor axis length is longer than the supplied major axis length of the ellipse."); TBADD2(ERR_NUMERICAL,0); TBADD2(ERR_NUMERICAL,0); return 1; }
       ecc = sqrt(1.0 - pow(b/a , 2.0));
      }
     else if (gotA && gotEcc) // major axis and eccentricity...
@@ -1052,7 +1052,7 @@ int ppl_directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int 
     else if (gotA && gotSlr) // major axis and SLR...
      {
       a   = fabs(a);
-      if (fabs(slr) > a) { strcpy(c->errStat.errBuff, "Supplied semi-latus rectum is longer than the supplied semi-major axis length of the ellipse. No ellipse may have such parameters."); TBADD2(ERR_NUMERIC,0); return 1; }
+      if (fabs(slr) > a) { strcpy(c->errStat.errBuff, "Supplied semi-latus rectum is longer than the supplied semi-major axis length of the ellipse. No ellipse may have such parameters."); TBADD2(ERR_NUMERICAL,0); return 1; }
       ecc = sqrt(1.0 - fabs(slr) / a);
       b   = a * sqrt(1.0 - pow(ecc,2.0));
      }
@@ -1064,7 +1064,7 @@ int ppl_directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int 
     else if (gotB && gotSlr) // minor axis and SLR...
      {
       b   = fabs(b);
-      if (fabs(slr) > b) { strcpy(c->errStat.errBuff, "Supplied semi-latus rectum is longer than the supplied semi-minor axis length of the ellipse. No ellipse may have such parameters."); TBADD2(ERR_NUMERIC,0); return 1; }
+      if (fabs(slr) > b) { strcpy(c->errStat.errBuff, "Supplied semi-latus rectum is longer than the supplied semi-minor axis length of the ellipse. No ellipse may have such parameters."); TBADD2(ERR_NUMERICAL,0); return 1; }
       ecc = sqrt(1.0 - pow(fabs(slr) / b,2.0));
       a   = b / sqrt(1.0 - pow(ecc,2.0));
      }
@@ -1119,7 +1119,7 @@ int ppl_directive_ellipse(ppl_context *c, parserLine *pl, parserOutput *in, int 
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
-    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Ellipse has been removed from multiplot, because it generated an error."); return 1; }
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Ellipse has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }
@@ -1164,7 +1164,7 @@ int ppl_directive_eps(ppl_context *c, parserLine *pl, parserOutput *in, int inte
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
-    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "EPS image has been removed from multiplot, because it generated an error."); return 1; }
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "EPS image has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }
@@ -1205,7 +1205,7 @@ int ppl_directive_point(ppl_context *c, parserLine *pl, parserOutput *in, int in
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
-    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Point has been removed from multiplot, because it generated an error."); return 1; }
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Point has been removed from multiplot, because it generated an error."); return 1; }
    } 
   return 0;
  }
@@ -1293,7 +1293,7 @@ fail:
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
-    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Polygon has been removed from multiplot, because it generated an error."); return 1; }
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Polygon has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }
@@ -1341,7 +1341,7 @@ int ppl_directive_text(ppl_context *c, parserLine *pl, parserOutput *in, int int
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
-    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Text item has been removed from multiplot, because it generated an error."); return 1; }
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Text item has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }
@@ -1394,12 +1394,12 @@ int ppl_directive_image(ppl_context *c, parserLine *pl, parserOutput *in, int in
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
-    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Bitmap image has been removed from multiplot, because it generated an error."); return 1; }
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Bitmap image has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }
 
-#define TBADDP         ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,ERR_NUMERIC,0,pl->linetxt,"")
+#define TBADDP         ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,ERR_NUMERICAL,0,pl->linetxt,"")
 
 #define STACK_POPP \
    { \
@@ -1515,7 +1515,7 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
          if (c->errStat.status) { sprintf(c->errStat.errBuff,"Could not evaluate vector expressions."); TBADDP; ppl_tbWrite(c); ppl_tbClear(c); for (j=0; j<i; j++) ppl_garbageObject(vecs+j); STACK_CLEANP; free(new); return 1; }
          if (obj->objType==PPLOBJ_VEC) { sprintf(c->errcontext.tempErrStr,"Vector data supplied to other columns, but columns %d evaluated to an object of type <%s>.", i+1, pplObjTypeNames[obj->objType]); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); for (j=0; j<i; j++) ppl_garbageObject(vecs+j); STACK_CLEANP; free(new); return 1; }
          l2 = ((pplVector *)first->auxil)->v->size;
-         if (l!=l2) { sprintf(c->errcontext.tempErrStr,"Data supplied as a list of vectors, but they have varying lengths, including %d (vector %d) and %d (vector %d).", l, 1, l2, i+1); ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, NULL); for (j=0; j<i; j++) ppl_garbageObject(vecs+j); STACK_CLEANP; free(new); return 1; }
+         if (l!=l2) { sprintf(c->errcontext.tempErrStr,"Data supplied as a list of vectors, but they have varying lengths, including %d (vector %d) and %d (vector %d).", l, 1, l2, i+1); ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, NULL); for (j=0; j<i; j++) ppl_garbageObject(vecs+j); STACK_CLEANP; free(new); return 1; }
          pplObjCpy(vecs+i,obj,0,0,1);
          STACK_CLEANP;
         }
@@ -1729,7 +1729,7 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
       if ((listlen>=3)&&(listlen<=6)) NExpect=listlen;
      }
 
-    if (eps_plot_AddUsingItemsForWithWords(c, &new->ww_final, &NExpect, &autoUsingList, &UsingList, &NUsing, &nObjs, errbuff)) { free(new); ppl_error(&c->errcontext,ERR_GENERAL, -1, -1, errbuff); return 1; } // Add extra using items for, e.g. "linewidth $3".
+    if (eps_plot_AddUsingItemsForWithWords(c, &new->ww_final, &NExpect, &autoUsingList, &UsingList, &NUsing, &nObjs, errbuff)) { free(new); ppl_error(&c->errcontext,ERR_GENERIC, -1, -1, errbuff); return 1; } // Add extra using items for, e.g. "linewidth $3".
     if (NExpect != NUsing) { sprintf(c->errcontext.tempErrStr, "The supplied using ... clause contains the wrong number of items. We need %d columns of data, but %d have been supplied.", NExpect, NUsing); ppl_error(&c->errcontext,ERR_SYNTAX,-1,-1,NULL); return 1; }
     ppldata_fromFile(c, &new->PersistentDataTable, new->filename, 0, NULL, dataSpool, new->index, UsingList, autoUsingList, NExpect, nObjs, new->label, new->SelectCriterion, NULL, new->UsingRowCols, new->EveryList, new->continuity, 1, &status, errbuff, &errCount, iterDepth);
     free(errbuff);
@@ -1784,7 +1784,7 @@ int ppl_directive_piechart(ppl_context *c, parserLine *pl, parserOutput *in, int
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
-    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Piechart has been removed from multiplot, because it generated an error."); return 1; }
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Piechart has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }
@@ -1808,7 +1808,7 @@ int ppl_directive_plot(ppl_context *c, parserLine *pl, parserOutput *in, int int
       ptr = canvas_items->first;
       while ((ptr!=NULL)&&(ptr->id!=editNo)) ptr=ptr->next;
      }
-    if (ptr == NULL) { sprintf(c->errcontext.tempErrStr, "No plot found to replot."); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, NULL); return 1; }
+    if (ptr == NULL) { sprintf(c->errcontext.tempErrStr, "No plot found to replot."); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, NULL); return 1; }
     id = editNo;
    }
   else
@@ -1952,7 +1952,7 @@ int ppl_directive_plot(ppl_context *c, parserLine *pl, parserOutput *in, int int
           sprintf(c->errcontext.tempErrStr, "The axes clause in the plot command may not list multiple parallel axes.");
         if (c->errcontext.tempErrStr[0]!='\0')
          {
-          ppl_error(&c->errcontext, ERR_NUMERIC, -1, -1, NULL);
+          ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, NULL);
           canvas_delete(c, id);
           return 1;
          }
@@ -1977,7 +1977,7 @@ int ppl_directive_plot(ppl_context *c, parserLine *pl, parserOutput *in, int int
    {
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
-    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERAL, -1, -1, "Plot has been removed from multiplot, because it generated an error."); return 1; }
+    if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Plot has been removed from multiplot, because it generated an error."); return 1; }
    }
   return 0;
  }

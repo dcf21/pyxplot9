@@ -391,8 +391,10 @@ void GraphLegend_Render(EPSComm *x, double width, double height, double zdepth)
 
   // Finally loop over all datasets to display legend items
   LOOP_OVER_DATASETS
-    int xyzaxis[3];
+    int          xyzaxis[3];
     pplset_axis *a1, *a2, *a3, *axissets[3];
+    dataTable   *data = x->current->plotdata[iDataSet];
+    if ((data==NULL) || (data->Nrows<1)) { x->LaTeXpageno++; return; } // No data present
     axissets[0] = x->current->XAxes;
     axissets[1] = x->current->YAxes;
     axissets[2] = x->current->ZAxes;

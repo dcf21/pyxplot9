@@ -427,8 +427,8 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
            {
             int *out = ((i==1)&&maxset) ? &max : &min;
             if ((stk-i)->objType!=PPLOBJ_NUM) { sprintf(context->errStat.errBuff,"Range limits when slicing must be numerical values; supplied limit has type <%s>.",pplObjTypeNames[(stk-1)->objType]); TBADD(ERR_TYPE); goto cleanup_on_error; }
-            if (!(stk-i)->dimensionless) { sprintf(context->errStat.errBuff,"Range limits when slicing must be dimensionless numbers; supplied limit has units of <%s>.", ppl_printUnit(context, stk-i, NULL, NULL, 0, 1, 0) ); TBADD(ERR_NUMERIC); goto cleanup_on_error; }
-            if ((stk-i)->flagComplex) { sprintf(context->errStat.errBuff,"Range limits when slicing must be real numbers; supplied limit is complex."); TBADD(ERR_NUMERIC); goto cleanup_on_error; }
+            if (!(stk-i)->dimensionless) { sprintf(context->errStat.errBuff,"Range limits when slicing must be dimensionless numbers; supplied limit has units of <%s>.", ppl_printUnit(context, stk-i, NULL, NULL, 0, 1, 0) ); TBADD(ERR_NUMERICAL); goto cleanup_on_error; }
+            if ((stk-i)->flagComplex) { sprintf(context->errStat.errBuff,"Range limits when slicing must be real numbers; supplied limit is complex."); TBADD(ERR_NUMERICAL); goto cleanup_on_error; }
             if ( (!gsl_finite((stk-i)->real)) || ((stk-i)->real<INT_MIN) || ((stk-i)->real>INT_MAX) ) { sprintf(context->errStat.errBuff,"Range limits when slicing must be in the range %d to %d.", INT_MIN, INT_MAX); TBADD(ERR_RANGE); goto cleanup_on_error; }
             *out = (int)(stk-i)->real;
            }

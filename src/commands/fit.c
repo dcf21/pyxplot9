@@ -490,7 +490,7 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
   // Exit on error
   if ((status)||(data==NULL))
    {
-    TBADD2(ERR_GENERAL,0);
+    TBADD2(ERR_GENERIC,0);
     ppl_memAlloc_AscendOutOfContext(contextLocalVec);
     return;
    }
@@ -499,7 +499,7 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
   for (j=0; j<NExpect; j++)
    if (minSet[j] || maxSet[j])
     {
-     if (!ppl_unitsDimEqual(&unit[j],data->firstEntries+j)) { sprintf(c->errStat.errBuff, "The minimum and maximum limits specified in range %ld in the fit command have conflicting physical dimensions with the data returned from the data file. The limits have units of <%s>, whilst the data have units of <%s>.", j+1, ppl_printUnit(c,unit+j,NULL,NULL,0,1,0), ppl_printUnit(c,data->firstEntries+j,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERIC,0); return; }
+     if (!ppl_unitsDimEqual(&unit[j],data->firstEntries+j)) { sprintf(c->errStat.errBuff, "The minimum and maximum limits specified in range %ld in the fit command have conflicting physical dimensions with the data returned from the data file. The limits have units of <%s>, whilst the data have units of <%s>.", j+1, ppl_printUnit(c,unit+j,NULL,NULL,0,1,0), ppl_printUnit(c,data->firstEntries+j,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERICAL,0); return; }
     }
 
   // Work out how many data points we have within the specified ranges
@@ -573,7 +573,7 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
 
   // Set up a minimiser
   status = FitMinimiseIterate(&dataComm, &ResidualMinimiserSlave, 0);
-  if (status) { sprintf(c->errStat.errBuff, "%s", dataComm.errtext); TBADD2(ERR_NUMERIC,0); return; }
+  if (status) { sprintf(c->errStat.errBuff, "%s", dataComm.errtext); TBADD2(ERR_NUMERICAL,0); return; }
 
   // Display the results of the minimiser
   ppl_report(&c->errcontext,"\n# Best fit parameters were:\n# -------------------------\n");
@@ -606,7 +606,7 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
     sprintf(c->errcontext.tempErrStr, "\n# Estimating the size of the error bars on supplied data.\n# This may take a while.\n# The fit command can be made to run very substantially faster if the 'withouterrors' option is set.");
     ppl_report(&c->errcontext,NULL);
     status = FitMinimiseIterate(&dataComm, &FitsigmaData, 1);
-    if (status) { sprintf(c->errStat.errBuff, "%s", dataComm.errtext); TBADD2(ERR_NUMERIC,0); gsl_vector_free(bestFitParamVals); return; }
+    if (status) { sprintf(c->errStat.errBuff, "%s", dataComm.errtext); TBADD2(ERR_NUMERICAL,0); gsl_vector_free(bestFitParamVals); return; }
     firstVals[Nargs].real = dataComm.sigmaData;
     firstVals[Nargs].imag = 0.0;
     firstVals[Nargs].flagComplex = 0;
@@ -644,7 +644,7 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if ((gsl_matrix_get(hessian_inv, i, i) <= 0.0) || (!gsl_finite(gsl_matrix_get(hessian_inv, i, i))))
      {
       sprintf(c->errcontext.tempErrStr, "One of the calculated variances for the fitted parameters is negative. This strongly suggests that the fitting process has failed.");
-      ppl_warning(&c->errcontext, ERR_NUMERIC, NULL);
+      ppl_warning(&c->errcontext, ERR_NUMERICAL, NULL);
       stdDev[i] = 1e-100;
      } else {
       stdDev[i] = sqrt( gsl_matrix_get(hessian_inv, i, i) );

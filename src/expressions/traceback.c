@@ -100,7 +100,7 @@ void ppl_tbWrite(ppl_context *c)
    {
     case ERR_INTERNAL : snprintf(out+i, outLen-i, "Internal Error:");  break;
     case ERR_SYNTAX   : snprintf(out+i, outLen-i, "Syntax Error:");    break;
-    case ERR_NUMERIC  : snprintf(out+i, outLen-i, "Numerical Error:"); break;
+    case ERR_NUMERICAL  : snprintf(out+i, outLen-i, "Numerical Error:"); break;
     case ERR_FILE     : snprintf(out+i, outLen-i, "File Error:");      break;
     case ERR_RANGE    : snprintf(out+i, outLen-i, "Range Error:");     break;
     case ERR_UNIT     : snprintf(out+i, outLen-i, "Unit Error:");      break;
@@ -111,7 +111,7 @@ void ppl_tbWrite(ppl_context *c)
     case ERR_DICTKEY  : snprintf(out+i, outLen-i, "Key Error:");       break;
     case ERR_ASSERT   : snprintf(out+i, outLen-i, "Assertion Error:"); break;
     case ERR_MEMORY   :
-    case ERR_GENERAL  :
+    case ERR_GENERIC  :
     default           : snprintf(out+i, outLen-i, "Error:");           break;
    }
   i+=strlen(out+i);

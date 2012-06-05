@@ -3,8 +3,8 @@
 // The code in this file is part of PyXPlot
 // <http://www.pyxplot.org.uk>
 //
-// Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2011 Ross Church
+// Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
+//               2008-2012 Ross Church
 //
 // $Id$
 //
@@ -88,10 +88,10 @@ void ppl_kpse_wrap_init(ppl_context *c)
        }
       break;
      }
-    if (!FD_ISSET(fstdout , &readable)) { ppl_error(ec, ERR_GENERAL, -1, -1, "Got bored waiting for kpsewhich to return data."); sigprocmask(SIG_UNBLOCK, &sigs, NULL); continue; }
+    if (!FD_ISSET(fstdout , &readable)) { ppl_error(ec, ERR_GENERIC, -1, -1, "Got bored waiting for kpsewhich to return data."); sigprocmask(SIG_UNBLOCK, &sigs, NULL); continue; }
 
     // Read data back from kpsewhich process
-    if ((i = read(fstdout, ppl_kpse_FilePaths[j], LSTR_LENGTH)) < 0) { ppl_error(ec, ERR_GENERAL, -1, -1, "Could not read from pipe to kpsewhich."); sigprocmask(SIG_UNBLOCK, &sigs, NULL); continue; }
+    if ((i = read(fstdout, ppl_kpse_FilePaths[j], LSTR_LENGTH)) < 0) { ppl_error(ec, ERR_GENERIC, -1, -1, "Could not read from pipe to kpsewhich."); sigprocmask(SIG_UNBLOCK, &sigs, NULL); continue; }
     ppl_kpse_FilePaths[j][i] = '\0';
     close(fstdout);
     sigprocmask(SIG_UNBLOCK, &sigs, NULL);
@@ -115,7 +115,7 @@ void ppl_kpse_wrap_init(ppl_context *c)
        {
         s=1;
         ppl_kpse_PathList[j][k++] = ppl_kpse_FilePaths[j]+i;
-        if (k==MAX_PATHS) { k--; ppl_error(ec, ERR_GENERAL, -1, -1, "kpsewhich returned too many paths"); }
+        if (k==MAX_PATHS) { k--; ppl_error(ec, ERR_GENERIC, -1, -1, "kpsewhich returned too many paths"); }
        }
      }
     ppl_kpse_PathList[j][k] = NULL;

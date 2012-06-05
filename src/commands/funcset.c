@@ -128,7 +128,7 @@ void ppl_directive_funcset(ppl_context *c, parserLine *pl, parserOutput *in, int
        }
       else
        {
-        if (min->flagComplex) { sprintf(c->errStat.errBuff, "Where ranges are specified for function arguments, these must be real numbers. Ranges may not be imposed upon complex arguments to functions."); TBADD(ERR_NUMERIC,in->stkCharPos[posR+PARSE_func_set_min_0range_list]); goto fail; }
+        if (min->flagComplex) { sprintf(c->errStat.errBuff, "Where ranges are specified for function arguments, these must be real numbers. Ranges may not be imposed upon complex arguments to functions."); TBADD(ERR_NUMERICAL,in->stkCharPos[posR+PARSE_func_set_min_0range_list]); goto fail; }
         pplObjCpy(f->min+j,min,0,0,1);
         f->minActive[j]=1;
        }
@@ -141,8 +141,8 @@ void ppl_directive_funcset(ppl_context *c, parserLine *pl, parserOutput *in, int
        }
       else
        {
-        if (max->flagComplex) { sprintf(c->errStat.errBuff, "Where ranges are specified for function arguments, these must be real numbers. Ranges may not be imposed upon complex arguments to functions."); TBADD(ERR_NUMERIC,in->stkCharPos[posR+PARSE_func_set_max_0range_list]); goto fail; }
-        if (f->minActive[j] && !ppl_unitsDimEqual(min,max)) { sprintf(c->errStat.errBuff, "The minimum and maximum values specified for argument number %d are dimensionally incompatible: the minimum has dimensions of <%s>, while the maximum has dimensions of <%s>.",j+1,ppl_printUnit(c,min,NULL,NULL,0,1,0),ppl_printUnit(c,min,NULL,NULL,1,1,0)); TBADD(ERR_NUMERIC,in->stkCharPos[posR+PARSE_func_set_max_0range_list]); goto fail; }
+        if (max->flagComplex) { sprintf(c->errStat.errBuff, "Where ranges are specified for function arguments, these must be real numbers. Ranges may not be imposed upon complex arguments to functions."); TBADD(ERR_NUMERICAL,in->stkCharPos[posR+PARSE_func_set_max_0range_list]); goto fail; }
+        if (f->minActive[j] && !ppl_unitsDimEqual(min,max)) { sprintf(c->errStat.errBuff, "The minimum and maximum values specified for argument number %d are dimensionally incompatible: the minimum has dimensions of <%s>, while the maximum has dimensions of <%s>.",j+1,ppl_printUnit(c,min,NULL,NULL,0,1,0),ppl_printUnit(c,min,NULL,NULL,1,1,0)); TBADD(ERR_NUMERICAL,in->stkCharPos[posR+PARSE_func_set_max_0range_list]); goto fail; }
         pplObjCpy(f->max+j,max,0,0,1);
         f->maxActive[j]=1;
        }

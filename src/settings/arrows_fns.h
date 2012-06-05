@@ -81,7 +81,7 @@ void          pplarrow_print       (ppl_context *context, pplarrow_object  *in, 
     if (!gsl_finite(o->real)) \
      { \
       sprintf(context->errStat.errBuff, "Coordinates specified are not finite."); \
-      TBADD(ERR_NUMERIC, in->stkCharPos[ptab[X]]); \
+      TBADD(ERR_NUMERICAL, in->stkCharPos[ptab[X]]); \
      } \
    } \
  }
