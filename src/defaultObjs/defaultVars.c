@@ -42,6 +42,7 @@
 #include "defaultObjs/defaultFuncs.h"
 #include "defaultObjs/defaultVars.h"
 #include "defaultObjs/moduleAst.h"
+#include "defaultObjs/moduleColor.h"
 #include "defaultObjs/moduleFractals.h"
 #include "defaultObjs/moduleOs.h"
 #include "defaultObjs/modulePhy.h"
@@ -135,6 +136,8 @@ void ppl_makeDefaultVars(ppl_context *out)
       v.exponent[2] = SW_COLOR_INT[i];
       ppl_dictAppendCpy(d2 , SW_COLOR_STR[i] , (void *)&v , sizeof(v));
      }
+    ppl_addSystemFunc(d2,"wavelength"    ,2,2,1,1,1,0,(void *)&pplfunc_colWavelen  , "wavelength(lambda,norm)", "\\mathrm{wavelength}@<@1,@2@>", "wavelength(lambda,norm) returns a color representation of monochromatic light at wavelength lambda, normalised to brightness norm");
+    ppl_addSystemFunc(d2,"spectrum"      ,2,2,0,0,0,0,(void *)&pplfunc_colSpectrum , "spectrum(spec,norm)", "\\mathrm{spectrum}@<@1,@2@>", "spectrum(spec,norm) returns a color representation of the spectrum spec, normalised to brightness norm. spec should be a function that takes a single input (wavelength) with units of length, and may return an output with arbitrary units.");
 
     // phy module
     ppl_dictAppendCpy(d  , "phy"       , pplObjModule(&m,1,1,1) , sizeof(v));

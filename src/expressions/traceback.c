@@ -98,18 +98,18 @@ void ppl_tbWrite(ppl_context *c)
 
   switch (c->errStat.errType)
    {
-    case ERR_INTERNAL : snprintf(out+i, outLen-i, "Internal Error:");  break;
-    case ERR_SYNTAX   : snprintf(out+i, outLen-i, "Syntax Error:");    break;
-    case ERR_NUMERICAL  : snprintf(out+i, outLen-i, "Numerical Error:"); break;
-    case ERR_FILE     : snprintf(out+i, outLen-i, "File Error:");      break;
-    case ERR_RANGE    : snprintf(out+i, outLen-i, "Range Error:");     break;
-    case ERR_UNIT     : snprintf(out+i, outLen-i, "Unit Error:");      break;
-    case ERR_OVERFLOW : snprintf(out+i, outLen-i, "Overflow Error:");  break;
-    case ERR_NAMESPACE: snprintf(out+i, outLen-i, "Namespace Error:"); break;
-    case ERR_TYPE     : snprintf(out+i, outLen-i, "Type Error:");      break;
-    case ERR_INTERRUPT: snprintf(out+i, outLen-i, "Interrupt Error:"); break;
-    case ERR_DICTKEY  : snprintf(out+i, outLen-i, "Key Error:");       break;
-    case ERR_ASSERT   : snprintf(out+i, outLen-i, "Assertion Error:"); break;
+    case ERR_INTERNAL : snprintf(out+i, outLen-i, "Internal error:");  break;
+    case ERR_SYNTAX   : snprintf(out+i, outLen-i, "Syntax error:");    break;
+    case ERR_NUMERICAL  : snprintf(out+i, outLen-i, "Numerical error:"); break;
+    case ERR_FILE     : snprintf(out+i, outLen-i, "File error:");      break;
+    case ERR_RANGE    : snprintf(out+i, outLen-i, "Range error:");     break;
+    case ERR_UNIT     : snprintf(out+i, outLen-i, "Unit error:");      break;
+    case ERR_OVERFLOW : snprintf(out+i, outLen-i, "Overflow error:");  break;
+    case ERR_NAMESPACE: snprintf(out+i, outLen-i, "Namespace error:"); break;
+    case ERR_TYPE     : snprintf(out+i, outLen-i, "Type error:");      break;
+    case ERR_INTERRUPT: snprintf(out+i, outLen-i, "Interrupt error:"); break;
+    case ERR_DICTKEY  : snprintf(out+i, outLen-i, "Key error:");       break;
+    case ERR_ASSERT   : snprintf(out+i, outLen-i, "Assertion error:"); break;
     case ERR_MEMORY   :
     case ERR_GENERIC  :
     default           : snprintf(out+i, outLen-i, "Error:");           break;

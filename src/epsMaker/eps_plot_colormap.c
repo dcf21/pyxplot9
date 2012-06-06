@@ -411,7 +411,7 @@ int  eps_plot_colormap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int 
        int lOP, outcol; \
        unsigned char d1, d2; \
        v = ppl_expEval(x->c, (pplExpr *)sg->ColMapExpr, &lOP, 1, x->iterDepth+1); \
-       if (x->c->errStat.status) { sprintf(x->c->errcontext.tempErrStr, "Could not evaluate color expression <%s>.", ((pplExpr *)sg->MaskExpr)->ascii); ppl_error(&x->c->errcontext,ERR_NUMERICAL,-1,-1,NULL); ppl_tbWrite(x->c); ppl_tbClear(x->c); return 1; } \
+       if (x->c->errStat.status) { sprintf(x->c->errcontext.tempErrStr, "Could not evaluate color expression <%s>.", ((pplExpr *)sg->ColMapExpr)->ascii); ppl_error(&x->c->errcontext,ERR_NUMERICAL,-1,-1,NULL); ppl_tbWrite(x->c); ppl_tbClear(x->c); return 1; } \
        lOP = ppl_colorFromObj(x->c, v, &outcol, &colspace, NULL, comp, comp+1, comp+2, comp+3, &d1, &d2); \
        if (lOP) { ppl_error(&x->c->errcontext,ERR_NUMERICAL,-1,-1,NULL); return 1; } \
        if (outcol!=0) \
