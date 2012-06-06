@@ -29,11 +29,11 @@
 #include "coreUtils/errorReport.h"
 #include "settings/settingTypes.h"
 
-char *SW_BOOL_STR[] = {"True"       , "False"      };
+char *SW_BOOL_STR[] = {"true"       , "false"      };
 int   SW_BOOL_ACL[] = {1            , 1            };
 int   SW_BOOL_INT[] = {SW_BOOL_TRUE , SW_BOOL_FALSE , -1};
 
-char *SW_ONOFF_STR[] = {"On"        , "Off"       };
+char *SW_ONOFF_STR[] = {"on"        , "off"       };
 int   SW_ONOFF_ACL[] = {2           , 2           };
 int   SW_ONOFF_INT[] = {SW_ONOFF_ON , SW_ONOFF_OFF , -1};
 
@@ -41,7 +41,7 @@ char *SW_COLSPACE_STR[] = {"rgb"           , "hsb"           , "cmyk"           
 int   SW_COLSPACE_ACL[] = {1               , 1               , 1                };
 int   SW_COLSPACE_INT[] = {SW_COLSPACE_RGB , SW_COLSPACE_HSB , SW_COLSPACE_CMYK , -1};
 
-char *SW_STYLE_STR[] = {"points"        , "lines"        , "LinesPoints"        , "XErrorBars"        , "YErrorBars"        , "ZErrorBars"        , "XYErrorBars"        , "XZErrorBars"        , "YZErrorBars"        , "XYZErrorBars"        , "XErrorRange"        , "YErrorRange"        , "ZErrorRange"        , "XYErrorRange"        , "XZErrorRange"        , "YZErrorRange"        , "XYZErrorRange"        , "FilledRegion"        , "YErrorShaded"        , "UpperLimits"        , "LowerLimits"        , "dots"        , "impulses"        , "boxes"        , "wboxes"        , "steps"        , "fsteps"        , "histeps"        , "stars"       , "arrows_head"        , "arrows_nohead"        , "arrows_twohead"        , "surface"        , "colormap"        , "contourmap"        };
+char *SW_STYLE_STR[] = {"points"        , "lines"        , "linesPoints"        , "xErrorBars"        , "yErrorBars"        , "zErrorBars"        , "xyErrorBars"        , "xzErrorBars"        , "yzErrorBars"        , "xyzErrorBars"        , "xErrorRange"        , "yErrorRange"        , "zErrorRange"        , "xyErrorRange"        , "xzErrorRange"        , "yzErrorRange"        , "xyzErrorRange"        , "filledRegion"        , "YErrorShaded"        , "upperLimits"        , "lowerLimits"        , "dots"        , "impulses"        , "boxes"        , "wboxes"        , "steps"        , "fsteps"        , "histeps"        , "stars"       , "arrows_head"        , "arrows_nohead"        , "arrows_twohead"        , "surface"        , "colormap"        , "contourmap"        };
 int   SW_STYLE_ACL[] = {1               , 1              , 6                    , 1                   , 1                   , 1                   , 2                    , 2                    , 2                    , 3                     , 7                    , 7                    , 7                    , 8                     , 8                     , 8                     , 9                      , 3                     , 7                     , 1                    , 2                    , 1             , 1                 , 1              , 1               , 2              , 2               , 2                , 3             , 1                    , 7                      , 8                       , 2                , 3                 , 3                   , -1};
 int   SW_STYLE_INT[] = {SW_STYLE_POINTS , SW_STYLE_LINES , SW_STYLE_LINESPOINTS , SW_STYLE_XERRORBARS , SW_STYLE_YERRORBARS , SW_STYLE_ZERRORBARS , SW_STYLE_XYERRORBARS , SW_STYLE_XZERRORBARS , SW_STYLE_YZERRORBARS , SW_STYLE_XYZERRORBARS , SW_STYLE_XERRORRANGE , SW_STYLE_YERRORRANGE , SW_STYLE_ZERRORRANGE , SW_STYLE_XYERRORRANGE , SW_STYLE_XZERRORRANGE , SW_STYLE_YZERRORRANGE , SW_STYLE_XYZERRORRANGE , SW_STYLE_FILLEDREGION , SW_STYLE_YERRORSHADED , SW_STYLE_UPPERLIMITS , SW_STYLE_LOWERLIMITS , SW_STYLE_DOTS , SW_STYLE_IMPULSES , SW_STYLE_BOXES , SW_STYLE_WBOXES , SW_STYLE_STEPS , SW_STYLE_FSTEPS , SW_STYLE_HISTEPS , SW_STYLE_STARS, SW_STYLE_ARROWS_HEAD , SW_STYLE_ARROWS_NOHEAD , SW_STYLE_ARROWS_TWOHEAD , SW_STYLE_SURFACE , SW_STYLE_COLORMAP , SW_STYLE_CONTOURMAP , -1};
 
@@ -61,7 +61,7 @@ char *SW_AXISUNITSTY_STR[] = {"bracketed"           , "ratio"             , "squ
 int   SW_AXISUNITSTY_ACL[] = {1                     , 1                   , 1                    };
 int   SW_AXISUNITSTY_INT[] = {SW_AXISUNITSTY_BRACKET, SW_AXISUNITSTY_RATIO, SW_AXISUNITSTY_SQUARE, -1};
 
-char *SW_TERMTYPE_STR[] = {"X11_SingleWindow", "X11_MultiWindow" , "X11_Persist"    , "ps"           , "eps"           , "pdf"           , "png"           , "jpg"           , "gif"           , "bmp"           , "tif"          , "svg"           };
+char *SW_TERMTYPE_STR[] = {"X11_singleWindow", "X11_multiWindow" , "X11_persist"    , "ps"           , "eps"           , "pdf"           , "png"           , "jpg"           , "gif"           , "bmp"           , "tif"          , "svg"           };
 int   SW_TERMTYPE_ACL[] = {1                 , 5                 , 5                , 1              , 1               , 2               , 2               , 1               , 1               , 1               , 1              , 1               };
 int   SW_TERMTYPE_INT[] = {SW_TERMTYPE_X11S  , SW_TERMTYPE_X11M  , SW_TERMTYPE_X11P , SW_TERMTYPE_PS , SW_TERMTYPE_EPS , SW_TERMTYPE_PDF , SW_TERMTYPE_PNG , SW_TERMTYPE_JPG , SW_TERMTYPE_GIF , SW_TERMTYPE_BMP, SW_TERMTYPE_TIF , SW_TERMTYPE_SVG , -1};
 
@@ -93,7 +93,7 @@ char *SW_PROJ_STR[] = {"flat"       , "gnomonic"   };
 int   SW_PROJ_ACL[] = {1            , 1            };
 int   SW_PROJ_INT[] = {SW_PROJ_FLAT , SW_PROJ_GNOM , -1};
 
-char *SW_SAMPLEMETHOD_STR[] = {"NearestNeighbour"      , "InverseSquare"       , "MonaghanLattanzio" };
+char *SW_SAMPLEMETHOD_STR[] = {"nearestNeighbour"      , "inverseSquare"       , "monaghanLattanzio" };
 int   SW_SAMPLEMETHOD_ACL[] = {1                       , 1                     , 1                   };
 int   SW_SAMPLEMETHOD_INT[] = {SW_SAMPLEMETHOD_NEAREST , SW_SAMPLEMETHOD_INVSQ , SW_SAMPLEMETHOD_ML  , -1};
 

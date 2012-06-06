@@ -84,10 +84,10 @@ int main(int argc, char **argv)
   waitperiod.tv_nsec = 50000000;
 
   // Initialise sub-modules
+  ppl_PaperSizeInit();
   context = ppl_contextInit();
   if (DEBUG) ppl_log(&context->errcontext,"Initialising PyXPlot.");
   ppl_memAlloc_MemoryInit(&context->errcontext, &ppl_error, &ppl_log);
-  ppl_PaperSizeInit();
   if (!ppl_inputInit(context)) ppl_fatal(&context->errcontext, __FILE__, __LINE__, "Out of memory." );
   ppltxt_init();
 

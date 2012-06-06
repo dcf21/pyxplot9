@@ -52,7 +52,7 @@ int cancellationFlag = 0;
 void pplset_makedefault(ppl_context *context)
  {
   FILE  *LocalePipe;
-  int    Nchars,i;
+  int    Nchars,i,gotPaperSize;
   double PaperWidth, PaperHeight;
   pplObj tempval;
   char   ConfigFname[FNAME_LENGTH];
@@ -364,64 +364,81 @@ void pplset_makedefault(ppl_context *context)
   // Estimate the machine precision of the floating point unit we are using
   ppl_makeMachineEpsilon();
 
-  // Try and find out the default papersize from the locale command
-  // Do this using the popen() command rather than direct calls to nl_langinfo(_NL_PAPER_WIDTH), because the latter is gnu-specific
-  if (DEBUG) ppl_log(&context->errcontext,"Querying papersize from the locale command.");
-  if ((LocalePipe = popen("locale -c LC_PAPER 2> /dev/null","r"))==NULL)
+  gotPaperSize = 0;
+
+  // Try and find out the default papersize from PAPERSIZE environment variable
+  if (!gotPaperSize)
    {
-    if (DEBUG) ppl_log(&context->errcontext,"Failed to open a pipe to the locale command.");
-   } else {
-    ppl_file_readline(LocalePipe, ConfigFname, FNAME_LENGTH); // Should read LC_PAPER
-    ppl_file_readline(LocalePipe, ConfigFname, FNAME_LENGTH); // Should quote the default paper width
-    PaperHeight = ppl_getFloat(ConfigFname, &Nchars);
-    if (Nchars != strlen(ConfigFname)) goto LC_PAPERSIZE_DONE;
-    ppl_file_readline(LocalePipe, ConfigFname, FNAME_LENGTH); // Should quote the default paper height
-    PaperWidth  = ppl_getFloat(ConfigFname, &Nchars);
-    if (Nchars != strlen(ConfigFname)) goto LC_PAPERSIZE_DONE;
-    if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Read papersize %f x %f", PaperWidth, PaperHeight); ppl_log(&context->errcontext,NULL); }
-    s->term_default.PaperHeight.real   = PaperHeight/1000;
-    s->term_default.PaperWidth.real    = PaperWidth /1000;
-    if (0) { LC_PAPERSIZE_DONE: if (DEBUG) ppl_log(&context->errcontext,"Failed to read papersize from the locale command."); }
-    pclose(LocalePipe);
-    ppl_GetPaperName(s->term_default.PaperName, &PaperHeight, &PaperWidth);
+    if (DEBUG) ppl_log(&context->errcontext,"Querying papersize from $PAPERSIZE");
+    PaperSizePtr = getenv("PAPERSIZE");
+    if (PaperSizePtr == NULL)
+     {
+      if (DEBUG) ppl_log(&context->errcontext,"Environment variable $PAPERSIZE not set.");
+     } else {
+      ppl_PaperSizeByName(PaperSizePtr, &PaperHeight, &PaperWidth);
+      if (PaperHeight > 0)
+       {
+        if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Read papersize %s, with dimensions %f x %f", PaperSizePtr, PaperWidth, PaperHeight); ppl_log(&context->errcontext,NULL); }
+        s->term_default.PaperHeight.real   = PaperHeight/1000;
+        s->term_default.PaperWidth.real    = PaperWidth /1000;
+        ppl_GetPaperName(s->term_default.PaperName, &PaperHeight, &PaperWidth);
+        if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Papersize name: %s", s->term_default.PaperName); ppl_log(&context->errcontext,NULL); }
+        //gotPaperSize = 1;
+       } else {
+        if (DEBUG) ppl_log(&context->errcontext,"$PAPERSIZE returned an unrecognised paper size.");
+       }
+     }
    }
 
   // Try and find out the default papersize from /etc/papersize
-  if (DEBUG) ppl_log(&context->errcontext,"Querying papersize from /etc/papersize.");
-  if ((LocalePipe = fopen("/etc/papersize","r"))==NULL)
+  if (!gotPaperSize)
    {
-    if (DEBUG) ppl_log(&context->errcontext,"Failed to open /etc/papersize.");
-   } else {
-    ppl_file_readline(LocalePipe, ConfigFname, FNAME_LENGTH); // Should a papersize name
-    ppl_PaperSizeByName(ConfigFname, &PaperHeight, &PaperWidth);
-    if (PaperHeight > 0)
+    if (DEBUG) ppl_log(&context->errcontext,"Querying papersize from /etc/papersize.");
+    if ((LocalePipe = fopen("/etc/papersize","r"))==NULL)
      {
-      if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Read papersize %s, with dimensions %f x %f", ConfigFname, PaperWidth, PaperHeight); ppl_log(&context->errcontext,NULL); }
-      s->term_default.PaperHeight.real   = PaperHeight/1000;
-      s->term_default.PaperWidth.real    = PaperWidth /1000;
-      ppl_GetPaperName(s->term_default.PaperName, &PaperHeight, &PaperWidth);
+      if (DEBUG) ppl_log(&context->errcontext,"Failed to open /etc/papersize.");
      } else {
-      if (DEBUG) ppl_log(&context->errcontext,"/etc/papersize returned an unrecognised papersize.");
+      ppl_file_readline(LocalePipe, ConfigFname, FNAME_LENGTH); // Should be a papersize name
+      ppl_PaperSizeByName(ConfigFname, &PaperHeight, &PaperWidth);
+      if (PaperHeight > 0)
+       {
+        if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Read papersize %s, with dimensions %f x %f", ConfigFname, PaperWidth, PaperHeight); ppl_log(&context->errcontext,NULL); }
+        s->term_default.PaperHeight.real   = PaperHeight/1000;
+        s->term_default.PaperWidth.real    = PaperWidth /1000;
+        ppl_GetPaperName(s->term_default.PaperName, &PaperHeight, &PaperWidth);
+        if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Papersize name: %s", s->term_default.PaperName); ppl_log(&context->errcontext,NULL); }
+        //gotPaperSize = 1;
+       } else {
+        if (DEBUG) ppl_log(&context->errcontext,"/etc/papersize returned an unrecognised papersize.");
+       }
+      fclose(LocalePipe);
      }
-    fclose(LocalePipe);
    }
 
-  // Try and find out the default papersize from PAPERSIZE environment variable
-  if (DEBUG) ppl_log(&context->errcontext,"Querying papersize from $PAPERSIZE");
-  PaperSizePtr = getenv("PAPERSIZE");
-  if (PaperSizePtr == NULL)
+  // Try and find out the default papersize from the locale command
+  // Do this using the popen() command rather than direct calls to nl_langinfo(_NL_PAPER_WIDTH), because the latter is gnu-specific
+  if (!gotPaperSize)
    {
-    if (DEBUG) ppl_log(&context->errcontext,"Environment variable $PAPERSIZE not set.");
-   } else {
-    ppl_PaperSizeByName(PaperSizePtr, &PaperHeight, &PaperWidth);
-    if (PaperHeight > 0)
+    if (DEBUG) ppl_log(&context->errcontext,"Querying papersize from the locale command.");
+    if ((LocalePipe = popen("locale -c LC_PAPER 2> /dev/null","r"))==NULL)
      {
-      if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Read papersize %s, with dimensions %f x %f", PaperSizePtr, PaperWidth, PaperHeight); ppl_log(&context->errcontext,NULL); }
+      if (DEBUG) ppl_log(&context->errcontext,"Failed to open a pipe to the locale command.");
+     } else {
+      ppl_file_readline(LocalePipe, ConfigFname, FNAME_LENGTH); // Should read LC_PAPER
+      ppl_file_readline(LocalePipe, ConfigFname, FNAME_LENGTH); // Should quote the default paper height
+      PaperHeight = ppl_getFloat(ConfigFname, &Nchars);
+      if (Nchars != strlen(ConfigFname)) goto LC_PAPERSIZE_DONE;
+      ppl_file_readline(LocalePipe, ConfigFname, FNAME_LENGTH); // Should quote the default paper width
+      PaperWidth  = ppl_getFloat(ConfigFname, &Nchars);
+      if (Nchars != strlen(ConfigFname)) goto LC_PAPERSIZE_DONE;
+      if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Read papersize %f x %f", PaperWidth, PaperHeight); ppl_log(&context->errcontext,NULL); }
       s->term_default.PaperHeight.real   = PaperHeight/1000;
       s->term_default.PaperWidth.real    = PaperWidth /1000;
+      if (0) { LC_PAPERSIZE_DONE: if (DEBUG) ppl_log(&context->errcontext,"Failed to read papersize from the locale command."); }
+      pclose(LocalePipe);
       ppl_GetPaperName(s->term_default.PaperName, &PaperHeight, &PaperWidth);
-     } else {
-      if (DEBUG) ppl_log(&context->errcontext,"$PAPERSIZE returned an unrecognised paper size.");
+      if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Papersize name: %s", s->term_default.PaperName); ppl_log(&context->errcontext,NULL); }
+      //gotPaperSize = 1;
      }
    }
 

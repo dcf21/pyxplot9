@@ -143,19 +143,19 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Bar."          , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "BINORIGIN"    )==0)
         if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))             { c->set->term_default.BinOrigin.real = fl;
-                                                                                                 c->set->term_default.BinOriginAuto  = 0;  }
+                                                                                                     c->set->term_default.BinOriginAuto  = 0;  }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting BinOrigin."    , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "BINWIDTH"     )==0)
         if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))             { c->set->term_default.BinWidth.real  = fl;
-                                                                                                 c->set->term_default.BinWidthAuto   = (fl>0.0);  }
+                                                                                                     c->set->term_default.BinWidthAuto   = (fl>0.0);  }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting BinWidth."     , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "BOXFROM"      )==0)
         if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))             { c->set->graph_default.BoxFrom.real  = fl;
-                                                                                                 c->set->graph_default.BoxWidthAuto  = 0;  }
+                                                                                                     c->set->graph_default.BoxFromAuto  = 0;  }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting BoxFrom."      , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "BOXWIDTH"     )==0)
         if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))             { c->set->graph_default.BoxWidth.real = fl;
-                                                                                                 c->set->graph_default.BoxWidthAuto  = (fl>0.0);  }
+                                                                                                     c->set->graph_default.BoxWidthAuto  = (fl>0.0);  }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting BoxWidth."     , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "CALENDARIN"   )==0)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_CALENDAR_INT, SW_CALENDAR_STR ))>0)                c->set->term_default.CalendarIn = i;
@@ -249,31 +249,31 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
          }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting GridAxisZ."    , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if((strcmp(setkey, "GRIDMAJCOLOUR")==0) || (strcmp(setkey, "GRIDMAJCOLOR")==0))
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_COLOR_INT,SW_COLOR_STR))>0)                      c->set->graph_default.GridMajColor = i;
+        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_COLOR_INT,SW_COLOR_STR))>0)                        c->set->graph_default.GridMajColor = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting GridMajColor.", linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if((strcmp(setkey, "GRIDMINCOLOUR")==0) || (strcmp(setkey, "GRIDMINCOLOR")==0))
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_COLOR_INT,SW_COLOR_STR))>0)                      c->set->graph_default.GridMinColor = i;
+        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_COLOR_INT,SW_COLOR_STR))>0)                        c->set->graph_default.GridMinColor = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting GridMinColor.", linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "KEY"          )==0)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_ONOFF_INT, SW_ONOFF_STR ))>0)                      c->set->graph_default.key           = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Key."          , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "KEYCOLUMNS"   )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->graph_default.KeyColumns    = ppl_max((int)fl, 0);
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->graph_default.KeyColumns    = ppl_max((int)fl, 0);
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting KeyColumns."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "KEYPOS"       )==0)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_KEYPOS_INT,SW_KEYPOS_STR))>0)                      c->set->graph_default.KeyPos        = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting KeyPos."       , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "KEY_XOFF"     )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->graph_default.KeyXOff.real  = fl/100;
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->graph_default.KeyXOff.real  = fl/100;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Key_XOff."     , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "KEY_YOFF"     )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->graph_default.KeyYOff.real  = fl/100;
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->graph_default.KeyYOff.real  = fl/100;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Key_YOff."     , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "LANDSCAPE"    )==0)
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_ONOFF_INT, SW_ONOFF_STR ))>0) c->set->term_default .landscape     = i;
+        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_ONOFF_INT, SW_ONOFF_STR ))>0)                      c->set->term_default .landscape     = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Landscape."    , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "LINEWIDTH"    )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->graph_default.LineWidth     = fabs(fl);
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->graph_default.LineWidth     = fabs(fl);
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting LineWidth."    , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "MULTIPLOT"    )==0)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_ONOFF_INT, SW_ONOFF_STR ))>0)                      c->set->term_default .multiplot     = i;
@@ -288,13 +288,13 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_ONOFF_INT, SW_ONOFF_STR ))>0)                      c->set->term_default .ExplicitErrors= i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting NumErr."       , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "NUMSF"        )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->term_default .SignificantFigures = ppl_min(ppl_max((int)fl, 1), 30);
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->term_default .SignificantFigures = ppl_min(ppl_max((int)fl, 1), 30);
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting NumSF."        , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "ORIGINX"      )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->graph_default.OriginX.real  = fl/100;
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->graph_default.OriginX.real  = fl/100;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting OriginX."      , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "ORIGINY"      )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->graph_default.OriginY.real  = fl/100;
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->graph_default.OriginY.real  = fl/100;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting OriginY."      , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "OUTPUT"       )==0)
         strcpy(c->set->term_default.output , setvalue);
@@ -321,28 +321,28 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
                                                                             }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting PaperWidth."  , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "POINTLINEWIDTH")==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->graph_default.PointLineWidth= fl;
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->graph_default.PointLineWidth= fl;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting PointLineWidth.",linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "POINTSIZE"    )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->graph_default.PointSize     = fl;
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->graph_default.PointSize     = fl;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting PointSize."    , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
 //      else if (strcmp(setkey, "PROJECTION"   )==0)
-//        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_PROJ_INT, SW_PROJ_STR ))>0)   c->set->graph_default.projection    = i;
+//        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_PROJ_INT, SW_PROJ_STR ))>0)                        c->set->graph_default.projection    = i;
 //        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Projection."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "SAMPLES"      )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->graph_default.samples       = ppl_max((int)fl, 2);
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->graph_default.samples       = ppl_max((int)fl, 2);
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Samples."      , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "SAMPLES_METHOD")==0)
         if  ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_SAMPLEMETHOD_INT,SW_SAMPLEMETHOD_STR))>0)         c->set->graph_default.Sample2DMethod = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Samples_Method." , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "SAMPLES_X"    )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               { c->set->graph_default.SamplesX = ppl_max((int)fl, 2); c->set->graph_default.SamplesXAuto = SW_BOOL_FALSE; }
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))      { c->set->graph_default.SamplesX = ppl_max((int)fl, 2); c->set->graph_default.SamplesXAuto = SW_BOOL_FALSE; }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Samples_X."      , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "SAMPLES_X_AUTO")==0)
         if  ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_BOOL_INT,SW_BOOL_STR))>0)                         c->set->graph_default.SamplesXAuto  = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Samples_X_Auto." , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "SAMPLES_Y"    )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               { c->set->graph_default.SamplesY = ppl_max((int)fl, 2); c->set->graph_default.SamplesYAuto = SW_BOOL_FALSE; }
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))      { c->set->graph_default.SamplesY = ppl_max((int)fl, 2); c->set->graph_default.SamplesYAuto = SW_BOOL_FALSE; }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Samples_Y."      , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "SAMPLES_Y_AUTO")==0)
         if  ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_BOOL_INT,SW_BOOL_STR))>0)                         c->set->graph_default.SamplesYAuto  = i;
@@ -366,7 +366,7 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_TERMTYPE_INT,SW_TERMTYPE_STR))>0)                  c->set->term_default.TermType  = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting TermType."     , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if((strcmp(setkey, "TEXTCOLOUR"   )==0) || (strcmp(setkey, "TEXTCOLOR")==0))
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_COLOR_INT,SW_COLOR_STR))>0)                      c->set->graph_default.TextColor    = i;
+        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_COLOR_INT,SW_COLOR_STR))>0)                        c->set->graph_default.TextColor    = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting TextColor."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "TEXTHALIGN"   )==0)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_HALIGN_INT,SW_HALIGN_STR))>0)                      c->set->graph_default.TextHAlign    = i;
@@ -377,19 +377,19 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
       else if (strcmp(setkey, "TITLE"        )==0)
         strcpy(c->set->graph_default.title  , setvalue);
       else if (strcmp(setkey, "TITLE_XOFF"   )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->graph_default.TitleXOff.real  = fl/100;
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->graph_default.TitleXOff.real  = fl/100;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Title_XOff."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "TITLE_YOFF"   )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->graph_default.TitleYOff.real  = fl/100;
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->graph_default.TitleYOff.real  = fl/100;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Title_YOff."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "TRANGE_LOG"   )==0)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_BOOL_INT,SW_BOOL_STR))>0)                          c->set->graph_default.Tlog            = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting TRange_Log."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "TRANGE_MIN"   )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))             { c->set->graph_default.Tmin.real       = fl; c->set->graph_default.USE_T_or_uv = 1; }
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))      { c->set->graph_default.Tmin.real       = fl; c->set->graph_default.USE_T_or_uv = 1; }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting TRange_Min."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "TRANGE_MAX"   )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))             { c->set->graph_default.Tmax.real       = fl; c->set->graph_default.USE_T_or_uv = 1; }
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))      { c->set->graph_default.Tmax.real       = fl; c->set->graph_default.USE_T_or_uv = 1; }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting TRange_Max."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "UNITABBREV"   )==0)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_ONOFF_INT, SW_ONOFF_STR ))>0)                      c->set->term_default .UnitDisplayAbbrev= i;
@@ -407,28 +407,28 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_BOOL_INT,SW_BOOL_STR))>0)                          c->set->graph_default.Ulog            = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting URange_Log."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "URANGE_MIN"   )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))             { c->set->graph_default.Umin.real       = fl; c->set->graph_default.USE_T_or_uv = 0; }
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))      { c->set->graph_default.Umin.real       = fl; c->set->graph_default.USE_T_or_uv = 0; }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting URange_Min."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "URANGE_MAX"   )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))             { c->set->graph_default.Umax.real       = fl; c->set->graph_default.USE_T_or_uv = 0; }
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))      { c->set->graph_default.Umax.real       = fl; c->set->graph_default.USE_T_or_uv = 0; }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting URange_Max."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "VRANGE_LOG"   )==0)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_BOOL_INT,SW_BOOL_STR))>0)                          c->set->graph_default.Vlog            = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting VRange_Log."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "VRANGE_MIN"   )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))             { c->set->graph_default.Vmin.real       = fl; c->set->graph_default.USE_T_or_uv = 0; }
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))      { c->set->graph_default.Vmin.real       = fl; c->set->graph_default.USE_T_or_uv = 0; }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting VRange_Min."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "VRANGE_MAX"   )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))             { c->set->graph_default.Vmax.real       = fl; c->set->graph_default.USE_T_or_uv = 0; }
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))      { c->set->graph_default.Vmax.real       = fl; c->set->graph_default.USE_T_or_uv = 0; }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting VRange_Max."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "WIDTH"        )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->graph_default.width.real      = fl/100;
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->graph_default.width.real      = fl/100;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Width."        , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "VIEW_XY"      )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->graph_default.XYview.real     = fl/180*M_PI;
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->graph_default.XYview.real     = fl/180*M_PI;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting View_XY."      , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "VIEW_YZ"      )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->graph_default.YZview.real     = fl/180*M_PI;
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->graph_default.YZview.real     = fl/180*M_PI;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting View_YZ."      , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else
        { sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Unrecognised setting name '%s'.", linecounter, ConfigFname, setkey); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
@@ -437,19 +437,19 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
      {
       ppl_strUpper(setkey, setkey);
       if     ((strcmp(setkey, "COLOUR"       )==0) || (strcmp(setkey, "COLOR"       )==0))
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue, SW_ONOFF_INT,   SW_ONOFF_STR  ))>0)                      c->errcontext.session_default.color      = i;
+        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue, SW_ONOFF_INT,   SW_ONOFF_STR  ))>0)                  c->errcontext.session_default.color      = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Color."       , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if((strcmp(setkey, "COLOUR_ERR"   )==0) || (strcmp(setkey, "COLOR_ERR"   )==0))
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue, SW_TERMCOL_INT, SW_TERMCOL_STR))>0)                      c->errcontext.session_default.color_err  = i;
+        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue, SW_TERMCOL_INT, SW_TERMCOL_STR))>0)                  c->errcontext.session_default.color_err  = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Color_Err."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if((strcmp(setkey, "COLOUR_REP"   )==0) || (strcmp(setkey, "COLOR_REP"   )==0))
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue, SW_TERMCOL_INT, SW_TERMCOL_STR))>0)                      c->errcontext.session_default.color_rep  = i;
+        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue, SW_TERMCOL_INT, SW_TERMCOL_STR))>0)                  c->errcontext.session_default.color_rep  = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Color_Rep."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if((strcmp(setkey, "COLOUR_WRN"   )==0) || (strcmp(setkey, "COLOR_WRN"   )==0))
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue, SW_TERMCOL_INT, SW_TERMCOL_STR))>0)                      c->errcontext.session_default.color_wrn  = i;
+        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue, SW_TERMCOL_INT, SW_TERMCOL_STR))>0)                  c->errcontext.session_default.color_wrn  = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Color_Wrn."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "SPLASH"       )==0)
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue, SW_ONOFF_INT,   SW_ONOFF_STR  ))>0)                      c->errcontext.session_default.splash     = i;
+        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue, SW_ONOFF_INT,   SW_ONOFF_STR  ))>0)                  c->errcontext.session_default.splash     = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting Splash."       , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else
        { sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Unrecognised setting name '%s'.", linecounter, ConfigFname, setkey); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }

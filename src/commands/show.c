@@ -186,13 +186,13 @@ static int ppl_directive_show2(ppl_context *c, char *word, char *itemSet, int in
 
     SHOW_COLOR(sg->AxesColor,sg->AxesCol1234Space,sg->AxesColor1,sg->AxesColor2,sg->AxesColor3,sg->AxesColor4  ,
                 c->set->graph_default.AxesColor,c->set->graph_default.AxesCol1234Space,c->set->graph_default.AxesColor1,c->set->graph_default.AxesColor2,c->set->graph_default.AxesColor3,c->set->graph_default.AxesColor4  ,
-                "AxesColor", "The color used to draw graph axes");
+                "axesColor", "The color used to draw graph axes");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "axisunitstyle", 1)>=0))
    {
     sprintf(buf, "%s", *(char **)ppl_fetchSettingName(&c->errcontext, sg->AxisUnitStyle, SW_AXISUNITSTY_INT, SW_AXISUNITSTY_STR , sizeof(char *)));
-    ppl_directive_show3(c, out+i, itemSet, 0, interactive, "AxisUnitStyle", buf, (c->set->graph_default.AxisUnitStyle == sg->AxisUnitStyle), "Select how the physical units associated with axes are appended to axis labels");
+    ppl_directive_show3(c, out+i, itemSet, 0, interactive, "axisUnitStyle", buf, (c->set->graph_default.AxisUnitStyle == sg->AxisUnitStyle), "Select how the physical units associated with axes are appended to axis labels");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "backup", 1)>=0))
@@ -212,9 +212,9 @@ static int ppl_directive_show2(ppl_context *c, char *word, char *itemSet, int in
     bufp = "Used to control the exact position of the edges of the bins used by the histogram command";
     if (c->set->term_current.BinOriginAuto)
      {
-      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "BinOrigin", "auto", c->set->term_current.BinOriginAuto==c->set->term_default.BinOriginAuto, bufp);
+      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "binOrigin", "auto", c->set->term_current.BinOriginAuto==c->set->term_default.BinOriginAuto, bufp);
      } else {
-      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "BinOrigin", ppl_unitsNumericDisplay(c,&(c->set->term_current.BinOrigin),0,0,0),
+      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "binOrigin", ppl_unitsNumericDisplay(c,&(c->set->term_current.BinOrigin),0,0,0),
                       (c->set->term_current.BinOriginAuto==c->set->term_default.BinOriginAuto) &&
                       ppl_dblEqual( c->set->term_default.BinOrigin.real , c->set->term_current.BinOrigin.real) &&
                       ppl_dblEqual( c->set->term_default.BinOrigin.imag , c->set->term_current.BinOrigin.imag) &&
@@ -229,9 +229,9 @@ static int ppl_directive_show2(ppl_context *c, char *word, char *itemSet, int in
     bufp = "Sets the width of bins used by the histogram command";
     if (c->set->term_current.BinWidthAuto)
      {
-      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "BinWidth", "auto", c->set->term_current.BinWidthAuto==c->set->term_default.BinWidthAuto, bufp);
+      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "binWidth", "auto", c->set->term_current.BinWidthAuto==c->set->term_default.BinWidthAuto, bufp);
      } else {
-      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "BinWidth", ppl_unitsNumericDisplay(c,&(c->set->term_current.BinWidth),0,0,0),
+      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "binWidth", ppl_unitsNumericDisplay(c,&(c->set->term_current.BinWidth),0,0,0),
                       (c->set->term_current.BinWidthAuto==c->set->term_default.BinWidthAuto) &&
                       ppl_dblEqual( c->set->term_default.BinWidth.real , c->set->term_current.BinWidth.real) &&
                       ppl_dblEqual( c->set->term_default.BinWidth.imag , c->set->term_current.BinWidth.imag) &&
@@ -246,9 +246,9 @@ static int ppl_directive_show2(ppl_context *c, char *word, char *itemSet, int in
     bufp = "Sets the vertical level from which the bars of barcharts and histograms are drawn";
     if (sg->BoxFromAuto)
      {
-      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "BoxFrom", "auto", sg->BoxFromAuto==c->set->graph_default.BoxFromAuto, bufp);
+      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "boxFrom", "auto", sg->BoxFromAuto==c->set->graph_default.BoxFromAuto, bufp);
      } else {
-      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "BoxFrom", ppl_unitsNumericDisplay(c,&(sg->BoxFrom),0,0,0),
+      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "boxFrom", ppl_unitsNumericDisplay(c,&(sg->BoxFrom),0,0,0),
                       (sg->BoxFromAuto==c->set->graph_default.BoxFromAuto) &&
                       ppl_dblEqual( c->set->graph_default.BoxFrom.real , sg->BoxFrom.real) &&
                       ppl_dblEqual( c->set->graph_default.BoxFrom.imag , sg->BoxFrom.imag) &&
@@ -263,9 +263,9 @@ static int ppl_directive_show2(ppl_context *c, char *word, char *itemSet, int in
     bufp = "Sets the width of bars on barcharts and histograms";
     if (sg->BoxWidthAuto)
      {
-      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "BoxWidth", "auto", sg->BoxWidthAuto==c->set->graph_default.BoxWidthAuto, bufp);
+      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "boxWidth", "auto", sg->BoxWidthAuto==c->set->graph_default.BoxWidthAuto, bufp);
      } else {
-      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "BoxWidth", ppl_unitsNumericDisplay(c,&(sg->BoxWidth),0,0,0),
+      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "boxWidth", ppl_unitsNumericDisplay(c,&(sg->BoxWidth),0,0,0),
                       (sg->BoxWidthAuto==c->set->graph_default.BoxWidthAuto) &&
                       ppl_dblEqual( c->set->graph_default.BoxWidth.real , sg->BoxWidth.real) &&
                       ppl_dblEqual( c->set->graph_default.BoxWidth.imag , sg->BoxWidth.imag) &&
@@ -330,13 +330,13 @@ int showMinor = 0;
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "calendarin",1)>=0))
    {
     sprintf(buf, "%s", *(char **)ppl_fetchSettingName(&c->errcontext, c->set->term_current.CalendarIn, SW_CALENDAR_INT, SW_CALENDAR_STR , sizeof(char *)));
-    ppl_directive_show3(c, out+i, itemSet, 0, interactive, "calendarin", buf, (c->set->term_current.CalendarIn == c->set->term_default.CalendarIn), "Selects the historical year in which the transition is made between Julian and Gregorian calendars when dates are being input");
+    ppl_directive_show3(c, out+i, itemSet, 0, interactive, "calendarIn", buf, (c->set->term_current.CalendarIn == c->set->term_default.CalendarIn), "Selects the historical year in which the transition is made between Julian and Gregorian calendars when dates are being input");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "calendarout",1)>=0))
    {
     sprintf(buf, "%s", *(char **)ppl_fetchSettingName(&c->errcontext, c->set->term_current.CalendarOut, SW_CALENDAR_INT, SW_CALENDAR_STR , sizeof(char *)));
-    ppl_directive_show3(c, out+i, itemSet, 0, interactive, "calendarout", buf, (c->set->term_current.CalendarOut == c->set->term_default.CalendarOut), "Selects the historical year in which the transition is made between Julian and Gregorian calendars when displaying dates");
+    ppl_directive_show3(c, out+i, itemSet, 0, interactive, "calendarOut", buf, (c->set->term_current.CalendarOut == c->set->term_default.CalendarOut), "Selects the historical year in which the transition is made between Julian and Gregorian calendars when displaying dates");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "clip",1)>=0))
@@ -454,7 +454,7 @@ int showMinor = 0;
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "fontsize",1)>=0) || (ppl_strAutocomplete(word, "fountsize",1)>=0))
    {
     sprintf(buf, "%s", ppl_numericDisplay(sg->FontSize,c->numdispBuff[0],c->set->term_current.SignificantFigures,(c->set->term_current.NumDisplay==SW_DISPLAY_L)));
-    ppl_directive_show3(c, out+i, itemSet, 1, interactive, "FontSize", buf, (c->set->graph_default.FontSize == sg->FontSize), "Sets the font size of text output: 1.0 is the default, and other values multiply this default size");
+    ppl_directive_show3(c, out+i, itemSet, 1, interactive, "fontSize", buf, (c->set->graph_default.FontSize == sg->FontSize), "Sets the font size of text output: 1.0 is the default, and other values multiply this default size");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "axes_", 1)>=0) || (ppl_strAutocomplete(word, "axis", 1)>=0) || (ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "grid",1)>=0))
@@ -496,14 +496,14 @@ int showMinor = 0;
    {
     SHOW_COLOR(sg->GridMajColor,sg->GridMajCol1234Space,sg->GridMajColor1,sg->GridMajColor2,sg->GridMajColor3,sg->GridMajColor4  ,
                 c->set->graph_default.GridMajColor,c->set->graph_default.GridMajCol1234Space,c->set->graph_default.GridMajColor1,c->set->graph_default.GridMajColor2,c->set->graph_default.GridMajColor3,c->set->graph_default.GridMajColor4  ,
-                "GridMajColor", "The color of the major gridlines on graphs");
+                "gridMajColor", "The color of the major gridlines on graphs");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "gridmincolour",1)>=0) || (ppl_strAutocomplete(word, "gridmincolor",1)>=0))
    {
     SHOW_COLOR(sg->GridMinColor,sg->GridMinCol1234Space,sg->GridMinColor1,sg->GridMinColor2,sg->GridMinColor3,sg->GridMinColor4  ,
                 c->set->graph_default.GridMinColor,c->set->graph_default.GridMinCol1234Space,c->set->graph_default.GridMinColor1,c->set->graph_default.GridMinColor2,c->set->graph_default.GridMinColor3,c->set->graph_default.GridMinColor4  ,
-                "GridMinColor", "The color of the minor gridlines on graphs");
+                "gridMinColor", "The color of the minor gridlines on graphs");
     i += strlen(out+i) ; p=1;
    }
 
@@ -523,13 +523,13 @@ int showMinor = 0;
    {
     if (sg->KeyColumns>0) sprintf(buf, "%d", sg->KeyColumns);
     else                  sprintf(buf, "auto");
-    ppl_directive_show3(c, out+i, itemSet, 1, interactive, "KeyColumns", buf, (c->set->graph_default.KeyColumns == sg->KeyColumns), "Sets the number of columns into which legends on graphs are sorted");
+    ppl_directive_show3(c, out+i, itemSet, 1, interactive, "keyColumns", buf, (c->set->graph_default.KeyColumns == sg->KeyColumns), "Sets the number of columns into which legends on graphs are sorted");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "linewidth", 1)>=0) || (ppl_strAutocomplete(word, "lw", 2)>=0))
    {
     sprintf(buf, "%s", ppl_numericDisplay(sg->LineWidth,c->numdispBuff[0],c->set->term_current.SignificantFigures,(c->set->term_current.NumDisplay==SW_DISPLAY_L)));
-    ppl_directive_show3(c, out+i, itemSet, 1, interactive, "LineWidth", buf, (c->set->graph_default.LineWidth == sg->LineWidth), "Sets the widths of lines drawn on graphs");
+    ppl_directive_show3(c, out+i, itemSet, 1, interactive, "lineWidth", buf, (c->set->graph_default.LineWidth == sg->LineWidth), "Sets the widths of lines drawn on graphs");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "multiplot", 1)>=0))
@@ -588,26 +588,31 @@ int showMinor = 0;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "papersize", 1)>=0))
    {
-    sprintf(buf, "%s , %s", ppl_unitsNumericDisplay(c,&(c->set->term_current.PaperWidth),0,0,0), ppl_unitsNumericDisplay(c,&(c->set->term_current.PaperHeight),1,0,0));
-    ppl_directive_show3(c, out+i, itemSet, 0, interactive, "PaperSize", buf, ((c->set->term_default.PaperWidth.real==c->set->term_current.PaperWidth.real)&&(c->set->term_default.PaperHeight.real==c->set->term_current.PaperHeight.real)), "The current papersize for postscript output, in mm");
-    i += strlen(out+i) ; p=1;
     if (ppl_strAutocomplete("user", c->set->term_current.PaperName, 1)<0)
      {
+      char docbuff[FNAME_LENGTH];
+      sprintf(docbuff, "The current papersize for postscript output (%s, %s)", ppl_unitsNumericDisplay(c,&(c->set->term_current.PaperWidth),0,0,0), ppl_unitsNumericDisplay(c,&(c->set->term_current.PaperHeight),1,0,0));
       ppl_strEscapify(c->set->term_current.PaperName,buf);
-      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "PaperSize", buf, (strcmp(c->set->term_default.PaperName, c->set->term_current.PaperName)==0), NULL);
+      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "paperSize", buf, (strcmp(c->set->term_default.PaperName, c->set->term_current.PaperName)==0), docbuff);
+      i += strlen(out+i) ; p=1;
+     }
+    else
+     {
+      sprintf(buf, "%s, %s", ppl_unitsNumericDisplay(c,&(c->set->term_current.PaperWidth),0,0,0), ppl_unitsNumericDisplay(c,&(c->set->term_current.PaperHeight),1,0,0));
+      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "paperSize", buf, ((c->set->term_default.PaperWidth.real==c->set->term_current.PaperWidth.real)&&(c->set->term_default.PaperHeight.real==c->set->term_current.PaperHeight.real)), "The current papersize for postscript output.");
       i += strlen(out+i) ; p=1;
      }
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "pointlinewidth",1)>=0) || (ppl_strAutocomplete(word, "plw",3)>=0))
    {
     sprintf(buf, "%s", ppl_numericDisplay(sg->PointLineWidth,c->numdispBuff[0],c->set->term_current.SignificantFigures,(c->set->term_current.NumDisplay==SW_DISPLAY_L)));
-    ppl_directive_show3(c, out+i, itemSet, 1, interactive, "PointLineWidth", buf, (c->set->graph_default.PointLineWidth==sg->PointLineWidth), "The width of the strokes used to mark points on graphs");
+    ppl_directive_show3(c, out+i, itemSet, 1, interactive, "pointLineWidth", buf, (c->set->graph_default.PointLineWidth==sg->PointLineWidth), "The width of the strokes used to mark points on graphs");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "pointsize",1)>=0) || (ppl_strAutocomplete(word, "ps",2)>=0))
    {
     sprintf(buf, "%s", ppl_numericDisplay(sg->PointSize,c->numdispBuff[0],c->set->term_current.SignificantFigures,(c->set->term_current.NumDisplay==SW_DISPLAY_L)));
-    ppl_directive_show3(c, out+i, itemSet, 1, interactive, "PointSize", buf, (c->set->graph_default.PointSize==sg->PointSize), "The size of points marked on graphs");
+    ppl_directive_show3(c, out+i, itemSet, 1, interactive, "pointSize", buf, (c->set->graph_default.PointSize==sg->PointSize), "The size of points marked on graphs");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "preamble", 1)>=0))
@@ -678,7 +683,7 @@ int showMinor = 0;
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "terminal", 1)>=0) || (ppl_strAutocomplete(word, "antialias",1)>=0))
    {
     sprintf(buf, "%s", *(char **)ppl_fetchSettingName(&c->errcontext, c->set->term_current.TermAntiAlias, SW_ONOFF_INT, SW_ONOFF_STR , sizeof(char *)));
-    ppl_directive_show3(c, out+i, itemSet, 0, interactive, "terminal AntiAlias", buf, (c->set->term_default.TermAntiAlias==c->set->term_current.TermAntiAlias), "Selects whether anti-aliasing is applied to bitmap output");
+    ppl_directive_show3(c, out+i, itemSet, 0, interactive, "terminal antialias", buf, (c->set->term_default.TermAntiAlias==c->set->term_current.TermAntiAlias), "Selects whether anti-aliasing is applied to bitmap output");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "terminal", 1)>=0) || (ppl_strAutocomplete(word, "colour", 1)>=0) || (ppl_strAutocomplete(word, "color",1)>=0))
@@ -707,8 +712,8 @@ int showMinor = 0;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "terminal", 1)>=0) || (ppl_strAutocomplete(word, "landscape", 1)>=0) || (ppl_strAutocomplete(word, "portrait", 1)>=0))
    {
-    if (c->set->term_current.landscape == SW_ONOFF_ON) sprintf(buf, "Landscape");
-    else                                                sprintf(buf, "Portrait");
+    if (c->set->term_current.landscape == SW_ONOFF_ON) sprintf(buf, "landscape");
+    else                                                sprintf(buf, "portrait");
     ppl_directive_show3(c, out+i, itemSet, 0, interactive, "terminal", buf, (c->set->term_default.landscape==c->set->term_current.landscape), "Selects the orientation of output");
     i += strlen(out+i) ; p=1;
    }
@@ -722,19 +727,19 @@ int showMinor = 0;
    {
     SHOW_COLOR(sg->TextColor,sg->TextCol1234Space,sg->TextColor1,sg->TextColor2,sg->TextColor3,sg->TextColor4  ,
                 c->set->graph_default.TextColor,c->set->graph_default.TextCol1234Space,c->set->graph_default.TextColor1,c->set->graph_default.TextColor2,c->set->graph_default.TextColor3,c->set->graph_default.TextColor4  ,
-                "TextColor", "Selects the color of text labels");
+                "textColor", "Selects the color of text labels");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "texthalign",1)>=0))
    {
     sprintf(buf, "%s", *(char **)ppl_fetchSettingName(&c->errcontext, sg->TextHAlign, SW_HALIGN_INT, SW_HALIGN_STR , sizeof(char *)));
-    ppl_directive_show3(c, out+i, itemSet, 1, interactive, "TextHAlign", buf, (c->set->graph_default.TextHAlign==sg->TextHAlign), "Selects the horizontal alignment of text labels");
+    ppl_directive_show3(c, out+i, itemSet, 1, interactive, "textHAlign", buf, (c->set->graph_default.TextHAlign==sg->TextHAlign), "Selects the horizontal alignment of text labels");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "textvalign",1)>=0))
    {
     sprintf(buf, "%s", *(char **)ppl_fetchSettingName(&c->errcontext, sg->TextVAlign, SW_VALIGN_INT, SW_VALIGN_STR , sizeof(char *)));
-    ppl_directive_show3(c, out+i, itemSet, 1, interactive, "TextVAlign", buf, (c->set->graph_default.TextVAlign==sg->TextVAlign), "Selects the vertical alignment of text labels");
+    ppl_directive_show3(c, out+i, itemSet, 1, interactive, "textVAlign", buf, (c->set->graph_default.TextVAlign==sg->TextVAlign), "Selects the vertical alignment of text labels");
     i += strlen(out+i) ; p=1;
    }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "title", 1)>=0))
@@ -899,11 +904,11 @@ int showMinor = 0;
          else           sprintf(buf+m, "%s ", (axisPtr->topbottom ? "top"   : "bottom"));
          m += strlen(buf+m);
          sprintf(buf+m, "%s ", *(char **)ppl_fetchSettingName(&c->errcontext, axisPtr->ArrowType, SW_AXISDISP_INT, SW_AXISDISP_STR , sizeof(char *))); m += strlen(buf+m);
-         sprintf(buf+m, "%s ", (axisPtr->atzero    ? "atzero"    : "notatzero")); m += strlen(buf+m);
+         sprintf(buf+m, "%s ", (axisPtr->atzero    ? "atZero"    : "notAtZero")); m += strlen(buf+m);
          sprintf(buf+m, "%s ", *(char **)ppl_fetchSettingName(&c->errcontext, axisPtr->MirrorType, SW_AXISMIRROR_INT, SW_AXISMIRROR_STR , sizeof(char *))); m += strlen(buf+m);
          if (!axisPtr->linked)
           {
-           sprintf(buf+m, "notlinked"); m += strlen(buf+m);
+           sprintf(buf+m, "notLinked"); m += strlen(buf+m);
           }
          else
           {
@@ -1207,7 +1212,7 @@ int showMinor = 0;
   if (ppl_strAutocomplete(word, "units", 5)>=0)
    {
     SHOW_HIGHLIGHT(1);
-    sprintf(out+i, "\n# Recognised Physical Units:\n\n"); i += strlen(out+i); p=1;
+    sprintf(out+i, "\n# Recognised physical units:\n\n"); i += strlen(out+i); p=1;
     SHOW_DEHIGHLIGHT;
     l=-1;
     do
