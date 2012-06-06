@@ -523,7 +523,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
            }
           case 0xC9: // **
            {
-            int status=0, errType=-1; 
+            int status=0, errType=-1;
             CAST_TO_NUM(stk-1); CAST_TO_NUM(stk-2);
             ppl_uaPow(context, stk-2, stk-1, stk, &status, &errType, context->errStat.errBuff);
             if (status) { TBADD(errType); goto cleanup_on_error; }
@@ -534,7 +534,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
            }
           case 0x4A: // *
            {
-            int status=0, errType=-1; 
+            int status=0, errType=-1;
             ppl_opMul(context, stk-2, stk-1, stk, 1, &status, &errType, context->errStat.errBuff);
             if (status) { TBADD(errType); goto cleanup_on_error; }
             STACK_POP; STACK_POP;
@@ -544,7 +544,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
            }
           case 0x4B: // div
            {
-            int status=0, errType=-1; 
+            int status=0, errType=-1;
             ppl_opDiv(context, stk-2, stk-1, stk, 1, &status, &errType, context->errStat.errBuff);
             if (status) { TBADD(errType); goto cleanup_on_error; }
             STACK_POP; STACK_POP;
@@ -554,7 +554,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
            }
           case 0x4C: // mod
            {
-            int status=0, errType=-1; 
+            int status=0, errType=-1;
             CAST_TO_NUM(stk-1); CAST_TO_NUM(stk-2);
             ppl_uaMod(context, stk-2, stk-1, stk, &status, &errType, context->errStat.errBuff);
             if (status) { TBADD(errType); goto cleanup_on_error; }
@@ -784,7 +784,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
             break;
           default:
            sprintf(context->errStat.errBuff,"Unknown increment/decrement operator with id=%d.",t); TBADD(ERR_INTERNAL); goto cleanup_on_error;
-         }            
+         }
         break;
        }
       case 14: // string substitution

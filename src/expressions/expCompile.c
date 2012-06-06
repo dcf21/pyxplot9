@@ -473,7 +473,7 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
   for (i=0,j=1; i<len; i++,j+=3) printf(" %02x",(int)tdat[j]); printf("\n");
   for (i=0,j=2; i<len; i++,j+=3) printf(" %02x",(int)tdat[j]); printf("\n");
   return;
- }  
+ }
 
 // ppl_expCompile -- compile a textual expression into reverse Polish bytecode
 
@@ -658,7 +658,7 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
       else if ((o=='K')&&(opCode==0xFD)) { BYTECODE_OP(17); *(char *)(out+outpos++) = 1; *(int *)(stack-stackpos-sizeof(int)+1)=outpos; stackpos+=sizeof(int); outpos+=sizeof(int); BYTECODE_ENDOP; } // ? operator -- if false goto
       else if ((o=='K')&&(opCode==0xFE)) { BYTECODE_OP(19);                              *(int *)(stack-stackpos-sizeof(int)+1)=outpos; stackpos+=sizeof(int); outpos+=sizeof(int); BYTECODE_ENDOP; } // : operator -- goto
 
-      if (stackpos>stacklen-32) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; } 
+      if (stackpos>stacklen-32) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
       *(int*)(stack-stackpos-sizeof(int)+1) = ipos;
       stackpos+=sizeof(int);
 

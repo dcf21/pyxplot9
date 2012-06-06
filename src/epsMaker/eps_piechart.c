@@ -194,7 +194,7 @@ void eps_pie_YieldUpText(EPSComm *x)
     ppl_expCompile(c,0,0,"",ascii,&end,0,0,0,&exptmp,&ep,&es,c->errcontext.tempErrStr);
     if (es || c->errStat.status) { ppl_tbClear(c); ppl_error(&c->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); *(x->status) = 1; return; }
     formatExpr = pplExpr_tmpcpy(exptmp);
-    pplExpr_free(exptmp); 
+    pplExpr_free(exptmp);
     if (formatExpr==NULL) { ppl_error(&c->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); *(x->status) = 1; return; }
    }
 

@@ -61,7 +61,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     pplObj  v, m;
     dict   *d, *d2, *d3;
     int     i;
-    m.refCount = v.refCount = 1;  
+    m.refCount = v.refCount = 1;
     ppl_dictAppendCpy(out->namespaces[1] , "defaults" , pplObjModule(&m,1,1,1) , sizeof(v));
     d = (dict *)m.auxil;
     out->namespaces[0] = d;

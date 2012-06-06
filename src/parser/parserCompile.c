@@ -789,7 +789,7 @@ repCleanup:
         repeating=0;
         while (nodeIter != NULL)
          {
-          if (excluded[count]) { nodeIter=nodeIter->nextSibling; count++; continue; } 
+          if (excluded[count]) { nodeIter=nodeIter->nextSibling; count++; continue; }
 
           status = parse_descend(c,s,wo,srcLineN,srcId,srcFname,line,linepos,nodeIter,tabCompNo,tabCompStart,tabCompTxt,level+1,blockDepth,match);
           if (secondPass) { excluded[count]=1; repeating=1; break; }

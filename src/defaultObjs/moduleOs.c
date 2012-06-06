@@ -127,7 +127,7 @@ void pplfunc_osGetHost(ppl_context *c, pplObj *in, int nArgs, int *status, int *
  }
 
 void pplfunc_osGetLogin(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
- {   
+ {
   char *out,*tmp;
   tmp = getlogin();
   out = (char *)malloc(strlen(tmp)+1);

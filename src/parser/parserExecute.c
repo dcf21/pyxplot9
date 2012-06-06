@@ -121,7 +121,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, char *dirName, int intera
     parserAtom *item = in->firstAtom;
 
     //ppl_parserLinePrint(c,in);
-    
+
     // If line contains macros, need to recompile it now
     if (in->containsMacros)
      {

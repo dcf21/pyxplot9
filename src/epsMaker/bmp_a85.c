@@ -91,8 +91,8 @@ unsigned int ppl_bmp_A85(pplerr_context *ec, FILE* fout, unsigned char* in, int 
 
     *outp=0;
 
-	 // Assist things which parse DSC comments by ensuring that any line which
-	 // would start %! or %% has a space prefixed.
+    // Assist things which parse DSC comments by ensuring that any line which
+    // would start %! or %% has a space prefixed.
 
     if ((out[0]=='%')&&((out[1]=='%')||(out[1]=='!'))) length += fprintf(fout," %s\n",out);
     else                                               length += fprintf(fout,"%s\n" ,out);

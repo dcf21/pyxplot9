@@ -482,32 +482,32 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
    {
     if (fn->minArgs == fn->maxArgs)
      {
-      if (nArgs != fn->maxArgs) 
+      if (nArgs != fn->maxArgs)
        {
         if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(context->errStat.errBuff,"Function takes exactly %d arguments; %d supplied.",fn->maxArgs,nArgs); TBADD(ERR_TYPE); goto cleanup; }
         else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; goto cleanup; }
        }
      }
-    else if (nArgs < fn->minArgs) 
+    else if (nArgs < fn->minArgs)
      {
       if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(context->errStat.errBuff,"Function takes a minimum of %d arguments; %d supplied.",fn->minArgs,nArgs); TBADD(ERR_TYPE); goto cleanup; }
       else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; goto cleanup; }
      }
-    else if (nArgs > fn->maxArgs) 
+    else if (nArgs > fn->maxArgs)
      {
       if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(context->errStat.errBuff,"Function takes a maximum of %d arguments; %d supplied.",fn->maxArgs,nArgs); TBADD(ERR_TYPE); goto cleanup; }
       else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; goto cleanup; }
      }
 
     if (fn->numOnly)
-     for (i=0; i<nArgs; i++) if (args[i].objType!=PPLOBJ_NUM) 
+     for (i=0; i<nArgs; i++) if (args[i].objType!=PPLOBJ_NUM)
       {
        if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(context->errStat.errBuff,"Function required numeric arguments; argument %d has type <%s>.",i+1,pplObjTypeNames[args[i].objType]); TBADD(ERR_TYPE); goto cleanup; }
        else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; goto cleanup; }
       }
 
     if (fn->realOnly)
-     for (i=0; i<nArgs; i++) if (args[i].flagComplex) 
+     for (i=0; i<nArgs; i++) if (args[i].flagComplex)
       {
        if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(context->errStat.errBuff,"Function requires real arguments; argument %d is complex.",i+1); TBADD(ERR_TYPE); goto cleanup; }
        else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; goto cleanup; }
@@ -582,7 +582,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
                   sprintf(context->errStat.errBuff,"Argument %d supplied to this function is not numeric, but a numeric range is specified for this argument in the function's definition.",k+1);
                   TBADD(ERR_NUMERICAL);
                   return;
-                 } 
+                 }
                 else if (!ppl_unitsDimEqual(f->max+k , args+k))
                  {
                   sprintf(context->errStat.errBuff,"Argument %d supplied to this function is dimensionally incompatible with the argument's specified min/max range: argument has dimensions of <%s>, meanwhile range has dimensions of <%s>.",k+1,ppl_printUnit(context,args+k,NULL,NULL,0,1,0),ppl_printUnit(context,f->max+k,NULL,NULL,1,1,0));
@@ -601,7 +601,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
            }
           if (l) break;
          }
- 
+
         if (f==NULL)
          {
           if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(context->errStat.errBuff,"This function is not defined in the requested region of parameter space."); TBADD(ERR_RANGE); goto cleanup; }

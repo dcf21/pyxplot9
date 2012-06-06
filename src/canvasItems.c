@@ -484,7 +484,7 @@ char *ppl_canvas_item_textify(ppl_context *c, canvas_item *ptr, char *output)
       if (pd->TRangeSet)  { sprintf(output+i, " [%s:%s]", ppl_unitsNumericDisplay(c,&pd->Tmin,0,0,0), ppl_unitsNumericDisplay(c,&pd->Tmax,1,0,0)); i+=strlen(output+i); }
       if (pd->VRangeSet)  { sprintf(output+i, " [%s:%s]", ppl_unitsNumericDisplay(c,&pd->Vmin,0,0,0), ppl_unitsNumericDisplay(c,&pd->Vmax,1,0,0)); i+=strlen(output+i); }
       if (!pd->function)
-       { 
+       {
         if (pd->filename != NULL)
          {
           output[i++]=' '; ppl_strEscapify(pd->filename, output+i); i+=strlen(output+i); // Filename of datafile we are plotting
@@ -1172,7 +1172,7 @@ int ppl_directive_eps(ppl_context *c, parserLine *pl, parserOutput *in, int inte
 // Implementation of the point command
 int ppl_directive_point(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
-  pplObj        *stk = in->stk; 
+  pplObj        *stk = in->stk;
   canvas_item   *ptr;
   int            id;
   double         x, y;
@@ -1206,7 +1206,7 @@ int ppl_directive_point(ppl_context *c, parserLine *pl, parserOutput *in, int in
     unsigned char *unsuccessful_ops = (unsigned char *)ppl_memAlloc(MULTIPLOT_MAXINDEX);
     ppl_canvas_draw(c, unsuccessful_ops, iterDepth);
     if (unsuccessful_ops[id]) { canvas_delete(c, id); ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Point has been removed from multiplot, because it generated an error."); return 1; }
-   } 
+   }
   return 0;
  }
 
@@ -1356,7 +1356,7 @@ int ppl_directive_image(ppl_context *c, parserLine *pl, parserOutput *in, int in
   int           gotX, gotY, gotAng, gotWidth, gotHeight;
   char         *text, *fname;
 
-  x       = stk[PARSE_image_p       ].real; gotX      = (stk[PARSE_image_p       ].objType==PPLOBJ_NUM); 
+  x       = stk[PARSE_image_p       ].real; gotX      = (stk[PARSE_image_p       ].objType==PPLOBJ_NUM);
   y       = stk[PARSE_image_p+1     ].real; gotY      = (stk[PARSE_image_p+1     ].objType==PPLOBJ_NUM);
   ang     = stk[PARSE_image_rotation].real; gotAng    = (stk[PARSE_image_rotation].objType==PPLOBJ_NUM);
   width   = stk[PARSE_image_width   ].real; gotWidth  = (stk[PARSE_image_width   ].objType==PPLOBJ_NUM);
@@ -1556,7 +1556,7 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
     {
      char *filename = (char *)stk[pos2].auxil;
      int   status   = ppl_getPlotFname(c, filename, wildcardMatchNumber, new);
-     if (status) return 1; 
+     if (status) return 1;
     }
    else
     {

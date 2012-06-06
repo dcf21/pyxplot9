@@ -255,8 +255,8 @@ void ppl_opSub(ppl_context *context, pplObj *a, pplObj *b, pplObj *o, int invert
   else if ((t1==PPLOBJ_DATE)&&(t2==PPLOBJ_NUM)) // subtracting time interval from date
    {
     int i;
-    for (i=0; i<UNITS_MAX_BASEUNITS; i++) if (b->exponent[i] != (i==UNIT_TIME)) 
-     { 
+    for (i=0; i<UNITS_MAX_BASEUNITS; i++) if (b->exponent[i] != (i==UNIT_TIME))
+     {
       *status=1; *errType=ERR_UNIT;
       sprintf(errText, "Can only subtract quantities with units of time from dates. Attempt to subtract a quantity with units of <%s>.", ppl_printUnit(context,b,NULL,NULL,1,1,0));
       return;

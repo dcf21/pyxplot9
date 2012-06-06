@@ -874,7 +874,7 @@ void pplfunc_lrange       (ppl_context *c, pplObj *in, int nArgs, int *status, i
   int    i;
   if (nArgs>1) { CHECK_2INPUT_DIMMATCH; }
   if (nArgs>2) { in++; CHECK_2INPUT_DIMMATCH; in--; }
- 
+
   if      (nArgs==1) { start=1; end=in[0].real; step=2; }
   else if (nArgs==2) { start=in[0].real; end=in[1].real; step=2; }
   else               { start=in[0].real; end=in[1].real; step=in[2].real; }

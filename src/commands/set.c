@@ -1600,7 +1600,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
         else if (j==2) a=&za[i];
         else           a=&xa[i];
         if (!m) { tics_rm(&a->tics ); SET_TICKS(a->tics ,a->ticsM,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
-        else    { tics_rm(&a->ticsM); SET_TICKS(a->ticsM,a->tics ,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); } 
+        else    { tics_rm(&a->ticsM); SET_TICKS(a->ticsM,a->tics ,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
        }
      }
     else

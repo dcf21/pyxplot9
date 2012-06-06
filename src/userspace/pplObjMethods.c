@@ -638,7 +638,7 @@ void pplmethod_vectorExtend(ppl_context *c, pplObj *in, int nArgs, int *status, 
     while ((item = (pplObj*)ppl_listIterate(&li))!=NULL)
      {
       if (item->objType!=PPLOBJ_NUM)
-       { *status=1; *errType=ERR_TYPE; sprintf(errText, "Can only append numbers to vectors; supplied object has type <%s>.",pplObjTypeNames[item->objType]); return; } 
+       { *status=1; *errType=ERR_TYPE; sprintf(errText, "Can only append numbers to vectors; supplied object has type <%s>.",pplObjTypeNames[item->objType]); return; }
       if (!ppl_unitsDimEqual(st, item))
        {
         if (st->dimensionless)

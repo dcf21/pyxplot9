@@ -50,7 +50,7 @@
     if (c->stack[c->stackPtr].refCount != 0) { strcpy(c->errStat.errBuff,"Stack forward reference detected."); TBADD(ERR_INTERNAL); goto cleanup; } \
    }
 
-void ppl_dollarOp_config  (ppl_context *c, 
+void ppl_dollarOp_config  (ppl_context *c,
   char   **columns_str,
   pplObj  *columns_val,
   int      Ncols,

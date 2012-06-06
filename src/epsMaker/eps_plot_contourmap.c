@@ -700,7 +700,7 @@ GOT_CONTOURS:
           int j, palette_index;
           for (j=1; j<PALETTE_LENGTH; j++) if (x->c->set->palette_current[j]==-1) break;
           palette_index = (((int)fc)-1)%j;
-          while (palette_index < 0) palette_index+=j;                                                                
+          while (palette_index < 0) palette_index+=j;
           pd->ww_final.fillcolor        = x->c->set->palette_current [palette_index];
           pd->ww_final.FillCol1234Space = x->c->set->paletteS_current[palette_index];
           pd->ww_final.fillcolor1       = x->c->set->palette1_current[palette_index];
@@ -761,7 +761,7 @@ GOT_CONTOURS:
           double xlab, ylab, wlab, hlab;
           double bb_top,bb_bottom,ab_left,ab_right;
           postscriptPage *dviPage;
-  
+
           xlab = xo + Lx*xlab0/(XSize-1)*sin(ThetaX) + Ly*ylab0/(YSize-1)*sin(ThetaY);
           ylab = yo + Lx*xlab0/(XSize-1)*cos(ThetaX) + Ly*ylab0/(YSize-1)*cos(ThetaY);
           if (x->dvi == NULL) { continue; }

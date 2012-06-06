@@ -381,9 +381,9 @@ void GraphLegend_Render(EPSComm *x, double width, double height, double zdepth)
         yoff += data[3*1+1];
      }
    }
- 
+
   xoff += x->current->settings.KeyXOff.real * M_TO_PS;
-  yoff += x->current->settings.KeyYOff.real * M_TO_PS;   
+  yoff += x->current->settings.KeyYOff.real * M_TO_PS;
   LOOP_OVER_DATASETS;
   pd->TitleFinal_xpos += xoff;
   pd->TitleFinal_ypos += yoff;

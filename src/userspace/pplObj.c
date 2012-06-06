@@ -141,7 +141,7 @@ pplObj *pplObjColor(pplObj *in, unsigned char amMalloced, int scheme, double c1,
   in->self_lval = NULL; in->self_dval = NULL;
   in->self_this = NULL;
   in->auxilMalloced = 0;
-  in->auxilLen = 0; 
+  in->auxilLen = 0;
   in->amMalloced = amMalloced;
   in->immutable = 0;
   in->exponent[ 0] = scheme;
@@ -486,7 +486,7 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char lval, unsigned char out
       break;
      }
     case PPLOBJ_FILE: // file handle
-      __sync_add_and_fetch(&((pplFile *)(out->auxil))->refCount,1); 
+      __sync_add_and_fetch(&((pplFile *)(out->auxil))->refCount,1);
       break;
     case PPLOBJ_FUNC: // function pointer
       __sync_add_and_fetch(&((pplFunc *)(out->auxil))->refCount,1);
@@ -550,7 +550,7 @@ pplObj *pplObjDeepCpy(pplObj *out, pplObj *in, int deep, unsigned char outMalloc
       out->self_this  = NULL;
       out->amMalloced = outMalloced;
       out->auxil      = (void *)(l = ppl_listInit(useMalloc));
-      if (out->auxil==NULL) return NULL; 
+      if (out->auxil==NULL) return NULL;
       while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
        {
         if (!deep) pplObjCpy(&v,item,0,useMalloc,useMalloc);

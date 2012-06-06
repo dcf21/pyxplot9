@@ -118,7 +118,7 @@ void ppl_error(pplerr_context *context, int ErrType, int HighlightPos1, int High
    snprintf(temp_stringC, BLEN, "%s\n", temp_stringB);
   temp_stringC[BLEN]='\0';
   fputs(temp_stringC, stderr);
-  return; 
+  return;
  }
 
 void ppl_fatal(pplerr_context *context, char *file, int line, char *msg)

@@ -108,7 +108,7 @@ void ppl_directive_funcset(ppl_context *c, parserLine *pl, parserOutput *in, int
   j    = 0;
   while ((stk[pos].objType == PPLOBJ_NUM) && (stk[pos].real > 0))
    {
-    char *name; 
+    char *name;
     pos  = (int)round(stk[pos].real);
     name = (char *)stk[pos+PARSE_func_set_argument_name_0argument_list].auxil;
     strcpy(f->argList+i, name);

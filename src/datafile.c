@@ -986,12 +986,12 @@ void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fn
   for (a=0; a<USING_ITEMS_MAX+2; a++) { colData[a].refCount=1; colData[a].objType=PPLOBJ_ZOM; colData[a].amMalloced=0; }
 
   // If sortBy is not null, add it to using list
-  if (sortBy != NULL) 
-   {    
+  if (sortBy != NULL)
+   {
     usingExprs[Ncols] = sortBy;
     NusingObjs++;
     Ncols++;
-   }   
+   }
 
   // Keep a record of the memory context we're going to output into
   contextOutput = ppl_memAlloc_GetMemContext();

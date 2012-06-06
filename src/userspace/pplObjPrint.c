@@ -301,7 +301,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
                                                                                 s->splineType,
                                                                                 (f->functionType == PPL_FUNC_BMPDATA)?"bitmap ":"",
                                                                                 s->filename );
-            i+=strlen(out+i); 
+            i+=strlen(out+i);
             break;
            }
           case PPL_FUNC_HISTOGRAM:
