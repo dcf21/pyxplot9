@@ -35,7 +35,7 @@ typedef struct PaperSize {
   double width;
  } PaperSize;
 
-PaperSize PaperSizeList[128] = {
+PaperSize PaperSizeList[129] = {
   {"crown"                     , 508   , 381   },
   {"demy"                      , 572   , 445   },
   {"double_demy"               , 889   , 597   },
