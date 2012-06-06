@@ -25,7 +25,7 @@
 #include "userspace/context.h"
 #include "userspace/pplObj.h"
 
-void ppl_dollarOp_config  (ppl_context *c, 
+void ppl_dollarOp_config  (ppl_context *c,
   char   **columns_str,
   pplObj  *columns_val,
   int      Ncols,

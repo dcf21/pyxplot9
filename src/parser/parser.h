@@ -51,7 +51,7 @@ typedef struct parserNode {
  } parserNode;
 
 #define PARSER_TYPE_OPTIONS 8
-  
+
 typedef struct parserAtom {
   int stackOutPos;
   int linePos; // Position of this atom in the string copy of the line, used for error reporting
