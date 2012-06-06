@@ -72,6 +72,9 @@ static void canvas_item_delete(ppl_context *c, canvas_item *ptr)
   if (ptr->text  != NULL) free(ptr->text);
   ppl_withWordsDestroy(c, &(ptr->settings.dataStyle));
   ppl_withWordsDestroy(c, &(ptr->settings.funcStyle));
+  pplExpr_free(ptr->settings.ColMapExpr);
+  pplExpr_free(ptr->settings.MaskExpr); 
+  pplExpr_free(ptr->settings.c1format);
   if (ptr->XAxes != NULL) { for (i=0; i<MAX_AXES; i++) pplaxis_destroy(c, &(ptr->XAxes[i]) ); free(ptr->XAxes); }
   if (ptr->YAxes != NULL) { for (i=0; i<MAX_AXES; i++) pplaxis_destroy(c, &(ptr->YAxes[i]) ); free(ptr->YAxes); }
   if (ptr->ZAxes != NULL) { for (i=0; i<MAX_AXES; i++) pplaxis_destroy(c, &(ptr->ZAxes[i]) ); free(ptr->ZAxes); }
@@ -185,7 +188,10 @@ static int canvas_itemlist_add(ppl_context *c, pplObj *command, int type, canvas
   ppl_withWordsZero(c, &ptr->with_data);
 
   // Copy the user's current settings
-  ptr->settings = c->set->graph_current;
+  ptr->settings            = c->set->graph_current;
+  ptr->settings.ColMapExpr = pplExpr_cpy(c->set->graph_current.ColMapExpr);
+  ptr->settings.MaskExpr   = pplExpr_cpy(c->set->graph_current.MaskExpr);
+  ptr->settings.c1format   = pplExpr_cpy(c->set->graph_current.c1format);
   ppl_withWordsCpy(c, &ptr->settings.dataStyle , &c->set->graph_current.dataStyle);
   ppl_withWordsCpy(c, &ptr->settings.funcStyle , &c->set->graph_current.funcStyle);
   if (includeAxes)
@@ -1752,11 +1758,6 @@ int ppl_directive_piechart(ppl_context *c, parserLine *pl, parserOutput *in, int
   // Add this piechart to the linked list which decribes the canvas
   if (canvas_itemlist_add(c,stk,CANVAS_PIE,&ptr,&id,0)) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory (Y)."); return 1; }
 
-  // Copy settings
-  ptr->settings = c->set->graph_current;
-  ppl_withWordsCpy(c, &ptr->settings.dataStyle, &c->set->graph_current.dataStyle);
-  ppl_withWordsCpy(c, &ptr->settings.funcStyle, &c->set->graph_current.funcStyle);
-
   // Look up format string
   if (stk[PARSE_piechart_format_string].objType==PPLOBJ_EXP) ptr->format = pplExpr_cpy((pplExpr *)stk[PARSE_piechart_format_string].auxil);
   else                                                       ptr->format = NULL;
@@ -1821,12 +1822,18 @@ int ppl_directive_plot(ppl_context *c, parserLine *pl, parserOutput *in, int int
   // Copy graph settings and axes to this plot structure. Do this every time that the replot command is called
   ppl_withWordsDestroy(c,&ptr->settings.dataStyle); // First free the old set of settings which we'd stored
   ppl_withWordsDestroy(c,&ptr->settings.funcStyle);
+  pplExpr_free(ptr->settings.ColMapExpr);
+  pplExpr_free(ptr->settings.MaskExpr);
+  pplExpr_free(ptr->settings.c1format);
   if (ptr->XAxes != NULL) { int i; for (i=0; i<MAX_AXES; i++) pplaxis_destroy( c , &(ptr->XAxes[i]) ); free(ptr->XAxes); }
   if (ptr->YAxes != NULL) { int i; for (i=0; i<MAX_AXES; i++) pplaxis_destroy( c , &(ptr->YAxes[i]) ); free(ptr->YAxes); }
   if (ptr->ZAxes != NULL) { int i; for (i=0; i<MAX_AXES; i++) pplaxis_destroy( c , &(ptr->ZAxes[i]) ); free(ptr->ZAxes); }
   pplarrow_list_destroy(c, &ptr->arrow_list);
   ppllabel_list_destroy(c, &ptr->label_list);
   ptr->settings = c->set->graph_current;
+  ptr->settings.ColMapExpr = pplExpr_cpy(c->set->graph_current.ColMapExpr);
+  ptr->settings.MaskExpr   = pplExpr_cpy(c->set->graph_current.MaskExpr); 
+  ptr->settings.c1format   = pplExpr_cpy(c->set->graph_current.c1format);
   ppl_withWordsCpy(c, &ptr->settings.dataStyle , &c->set->graph_current.dataStyle);
   ppl_withWordsCpy(c, &ptr->settings.funcStyle , &c->set->graph_current.funcStyle);
   ptr->XAxes = (pplset_axis *)malloc(MAX_AXES * sizeof(pplset_axis));
