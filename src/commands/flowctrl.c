@@ -460,9 +460,6 @@ void ppl_directive_fordata(ppl_context *c, parserLine *pl, parserOutput *in, int
   ppldata_fromCmd(c, &data, pl, in, 0, NULL, dataSpool, PARSE_TABLE_foreachdatum_, 0, Nvars, Nvars, min, minSet, max, maxSet, unit, 0, &status, c->errcontext.tempErrStr, &errCount, iterDepth);
   if (status || cancellationFlag) { ppl_error(&c->errcontext,ERR_GENERIC,-1,-1,NULL); goto cleanup; }
 
-  // Fetch variable pointers
-  for (i=0; i<Nvars; i++) ppl_contextGetVarPointer(c, varname[i], &varObj[i], &vartmp[i]);
-
   // Loop over data table
   blk = data->first;
   while ((blk!=NULL) && !FOREACH_STOP)
@@ -470,12 +467,17 @@ void ppl_directive_fordata(ppl_context *c, parserLine *pl, parserOutput *in, int
     int j;
     for (j=0; ((j<blk->blockPosition) && !FOREACH_STOP); j++)
      {
-      int k,inRange=1;
+      const int stkLevelOld = c->stackPtr;
+      int       k,inRange=1;
+
       for (k=0; ((k<Nvars)&&inRange); k++)
        {
-        pplObj   *obj     = &blk->data_obj[k+j*Nvars];
-        const int numeric = obj->objType==unit[k].objType;
-        int       om;
+        pplObj   *obj         = &blk->data_obj[k+j*Nvars];
+        const int numeric     = obj->objType==unit[k].objType;
+        int       om, rc;
+
+        // Fetch variable pointer
+        ppl_contextGetVarPointer(c, varname[k], &varObj[k], &vartmp[k]);
 
         // Check units of ranges
         if ((minSet[k]||maxSet[k])&&inRange)
@@ -494,27 +496,27 @@ void ppl_directive_fordata(ppl_context *c, parserLine *pl, parserOutput *in, int
           if (maxSet[k]&&(obj->real>max[k])) inRange=0;
          }
         om=varObj[k]->amMalloced;
+        rc=varObj[k]->refCount;
         varObj[k]->amMalloced=0;
         ppl_garbageObject(varObj[k]);
         pplObjCpy(varObj[k],obj,0,0,1);
         varObj[k]->amMalloced=om;
+        varObj[k]->refCount  =rc;;
        }
       if (inRange)
        {
-        const int stkLevelOld=c->stackPtr;
         ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
-        if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"foreach datum statement"); return; }
-        while (c->stackPtr>stkLevelOld) { STACK_POP; }
-        if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; continue; }
-        if ((c->shellBroken)||(c->shellContinued)||(c->shellReturned)||(c->shellExiting)) break;
        }
+      // Restore variable pointers
+      for (i=0; i<Nvars; i++) ppl_contextRestoreVarPointer(c, varname[i], &vartmp[i]);
+      if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"foreach datum statement"); return; }
+      while (c->stackPtr>stkLevelOld) { STACK_POP; }
+      if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; continue; }
+      if ((c->shellBroken)||(c->shellContinued)||(c->shellReturned)||(c->shellExiting)) break;
      }
     blk=blk->next;
     if (status) break;
    }
-
-  // Restore variable pointers
-  for (i=0; i<Nvars; i++) ppl_contextRestoreVarPointer(c, varname[i], &vartmp[i]);
 
   // Free data tables
   blk = data->first;

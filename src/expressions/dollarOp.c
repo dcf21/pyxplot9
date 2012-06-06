@@ -147,7 +147,7 @@ void ppl_dollarOp_fetchColByNum(ppl_context *c, pplExpr *inExpr, int inExprCharP
     else
      {
       if ((colNum>0)&&(colNum<=c->dollarStat.NcolUnits)) ppl_unitsDimCpy(out, &c->dollarStat.colUnits[colNum-1]);
-      out->real = ppl_getFloat(s,&j);
+      out->real = ppl_getFloat(s,&j) * c->dollarStat.colUnits[colNum-1].real;
      }
    }
   return;
