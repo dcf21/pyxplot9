@@ -1369,7 +1369,7 @@ int ppl_directive_image(ppl_context *c, parserLine *pl, parserOutput *in, int in
   height  = stk[PARSE_image_height  ].real; gotHeight = (stk[PARSE_image_height  ].objType==PPLOBJ_NUM);
   smooth  = (stk[PARSE_image_smooth].objType==PPLOBJ_STR);
   noTrans = (stk[PARSE_image_notrans].objType==PPLOBJ_STR);
-  cTrans  = (stk[PARSE_image_colorR].objType==PPLOBJ_STR);
+  cTrans  = (stk[PARSE_image_colorR].objType==PPLOBJ_NUM);
   if (cTrans)
    {
     transR  = (int)floor(stk[PARSE_image_colorR].real*255); transR = ppl_max(ppl_min(transR,255),0);

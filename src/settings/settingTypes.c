@@ -57,7 +57,7 @@ char *SW_BITMAP_STR[] = {"bmp"        , "gif"        , "jpeg"       , "png"     
 int   SW_BITMAP_ACL[] = {1            , 1            , 1            , 1            };
 int   SW_BITMAP_INT[] = {SW_BITMAP_BMP, SW_BITMAP_GIF, SW_BITMAP_JPG, SW_BITMAP_PNG, -1};
 
-char *SW_AXISUNITSTY_STR[] = {"bracketed"           , "ratio"             , "squarebracketed"    };
+char *SW_AXISUNITSTY_STR[] = {"bracketed"           , "ratio"             , "squareBracketed"    };
 int   SW_AXISUNITSTY_ACL[] = {1                     , 1                   , 1                    };
 int   SW_AXISUNITSTY_INT[] = {SW_AXISUNITSTY_BRACKET, SW_AXISUNITSTY_RATIO, SW_AXISUNITSTY_SQUARE, -1};
 
@@ -81,11 +81,11 @@ char *SW_TICLABDIR_STR[] = {"horizontal"      , "vertical"        , "rotate"    
 int   SW_TICLABDIR_ACL[] = {1                 , 1                 , 1                };
 int   SW_TICLABDIR_INT[] = {SW_TICLABDIR_HORI , SW_TICLABDIR_VERT , SW_TICLABDIR_ROT , -1};
 
-char *SW_AXISDISP_STR[] = {"noarrow"         , "arrow"           , "twowayarrow"     , "reversearrow"    };
+char *SW_AXISDISP_STR[] = {"noarrow"         , "arrow"           , "twoWayArrow"     , "reverseArrow"    };
 int   SW_AXISDISP_ACL[] = {1                 , 1                 , 1                 , 1                 };
 int   SW_AXISDISP_INT[] = {SW_AXISDISP_NOARR , SW_AXISDISP_ARROW , SW_AXISDISP_TWOAR , SW_AXISDISP_BACKA , -1};
 
-char *SW_AXISMIRROR_STR[] = {"automirrored"     , "mirrored"           , "nomirror"             , "fullmirrored"           };
+char *SW_AXISMIRROR_STR[] = {"autoMirrored"     , "mirrored"           , "noMirror"             , "fullMirrored"           };
 int   SW_AXISMIRROR_ACL[] = {1                  , 1                    , 1                      , 1                        };
 int   SW_AXISMIRROR_INT[] = {SW_AXISMIRROR_AUTO , SW_AXISMIRROR_MIRROR , SW_AXISMIRROR_NOMIRROR , SW_AXISMIRROR_FULLMIRROR , -1};
 

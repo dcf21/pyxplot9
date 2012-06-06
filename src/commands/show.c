@@ -124,12 +124,12 @@ static void ppl_directive_show3(ppl_context *c, char *out, char *itemSet, unsign
 
   sprintf(out+i, "set %*s", (int)strlen(itemSet), itemSetShow ? itemSet : ""); i += strlen(out+i); // Start off with a set command
 
-  if (strcmp(setting_value, "On")==0)
+  if (strcmp(setting_value, "on")==0)
    {
     sprintf(out+i, "%-41s", setting_name);
     i += strlen(out+i);
    }
-  else if (strcmp(setting_value, "Off")==0)
+  else if (strcmp(setting_value, "off")==0)
    {
     for (j=0,k=-1; setting_name[j]!='\0'; j++) if (setting_name[j]==' ') k=j; // Find last space in setting name
     for (j=0; j<=k; j++) out[i+j] = setting_name[j];
