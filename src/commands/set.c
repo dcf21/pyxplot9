@@ -1409,7 +1409,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if (command[PARSE_set_size_width].objType==PPLOBJ_NUM)
      {
       if (!gsl_finite(command[PARSE_set_size_width].real)) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "The width supplied to the 'set size' command was not finite."); return; }
-      sg->width=command[PARSE_set_size_width];
+      sg->width.real=command[PARSE_set_size_width].real;
      }
     if (command[PARSE_set_size_height].objType==PPLOBJ_NUM)
      {
@@ -1439,8 +1439,8 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
       sg->zaspect = r;
       sg->AutoZAspect = SW_ONOFF_OFF;
      }
-    if (command[PARSE_set_size_square].objType==PPLOBJ_STR) { sg->aspect = 1; sg->AutoAspect = SW_ONOFF_OFF; }
-    if (command[PARSE_set_size_noratio].objType==PPLOBJ_STR) { sg->aspect = c->set->graph_default.aspect; sg->AutoAspect = 1; }
+    if (command[PARSE_set_size_square  ].objType==PPLOBJ_STR) { sg->aspect = 1; sg->AutoAspect = SW_ONOFF_OFF; sg->zaspect = 1; sg->AutoZAspect = SW_ONOFF_OFF; }
+    if (command[PARSE_set_size_noratio ].objType==PPLOBJ_STR) { sg->aspect = c->set->graph_default.aspect; sg->AutoAspect = 1; }
     if (command[PARSE_set_size_nozratio].objType==PPLOBJ_STR) { sg->zaspect = c->set->graph_default.zaspect; sg->AutoZAspect = 1; }
    }
   else if (strcmp_unset && (strcmp(setoption,"size")==0)) /* unset size */
@@ -1660,8 +1660,8 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
       strncpy(sg->title, tempstr, FNAME_LENGTH-1);
       sg->title[FNAME_LENGTH-1]='\0';
      }
-    if (command[PARSE_set_title_offset  ].objType==PPLOBJ_NUM) sg->TitleXOff = command[PARSE_set_title_offset  ];
-    if (command[PARSE_set_title_offset+1].objType==PPLOBJ_NUM) sg->TitleYOff = command[PARSE_set_title_offset+1];
+    if (command[PARSE_set_title_offset  ].objType==PPLOBJ_NUM) sg->TitleXOff.real = command[PARSE_set_title_offset  ].real;
+    if (command[PARSE_set_title_offset+1].objType==PPLOBJ_NUM) sg->TitleYOff.real = command[PARSE_set_title_offset+1].real;
    }
   else if (strcmp_unset && (strcmp(setoption,"title")==0)) /* unset title */
    {
@@ -1936,7 +1936,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if (command[PARSE_set_width_width].objType==PPLOBJ_NUM)
      {
       if (!gsl_finite(command[PARSE_set_width_width].real)) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "The width supplied to the 'set width' command was not finite."); return; }
-      sg->width=command[PARSE_set_width_width];
+      sg->width.real=command[PARSE_set_width_width].real;
      }
    }
   else if (strcmp_unset && (strcmp(setoption,"width")==0)) /* unset width */

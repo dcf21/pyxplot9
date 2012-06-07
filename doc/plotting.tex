@@ -46,7 +46,7 @@ statement
 plot "data.dat" index 1 using 4:5 with lines
 \end{verbatim}
 specifies that data should be plotted using lines connecting each \datapoint\ to
-its neighbours. More generally, the {\tt with} modifier can be followed by a
+its neighbors. More generally, the {\tt with} modifier can be followed by a
 range of settings which fine-tune the manner in which the data are displayed;
 for example, the statement
 \begin{verbatim}
@@ -1804,11 +1804,11 @@ If a \datafile\ is supplied to the {\tt colourmap} plot style, then the
 datapoints need not lie on the specified regular grid, but are first re-sampled
 onto this grid using the interpolation method specified using the \indcmdt{set
 samples interpolate} (see Section~\ref{sec:spline_command}). Three methods are
-available. {\tt NearestNeighbour} uses the values of $c_1$\ldots$c_4$
+available. {\tt nearest\-Neigh\-bor} uses the values of $c_1$\ldots$c_4$
 associated with the datapoint closest to each grid point, producing colour maps
-which look like Voronoi diagrams. {\tt InverseSquare} interpolation returns a
+which look like Voronoi diagrams. {\tt inverse\-Square} interpolation returns a
 weighted average of the supplied \datapoint s, using the inverse squares of
-their distances from each grid point as weights. {\tt MonaghanLattanzio}
+their distances from each grid point as weights. {\tt monag\-han\-Lattan\-zio}
 interpolation uses the weighting function of Monaghan \& Lattanzio (1985) which
 is described further in Section~\ref{sec:spline_command}).
 

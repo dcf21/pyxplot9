@@ -365,7 +365,7 @@ which it interpolates, PyXPlot returns an error or value of not-a-number.
 In the case of two-dimensional interpolation, the type of interpolation to be
 used is set using the {\tt interpolate} modifier to the \indcmdt{set samples},
 and may be changed at any time after the interpolation function has been
-created.  The options available are nearest neighbour interpolation -- which is
+created.  The options available are nearest neighbor interpolation -- which is
 the two-dimensional equivalent of stepwise interpolation, inverse square
 interpolation -- which returns a weighted average of the supplied \datapoint s,
 using the inverse squares of their distances from the requested point in
@@ -380,9 +380,9 @@ $(x_\mathrm{max}-x_\mathrm{min})(y_\mathrm{max}-y_\mathrm{min})$ and $n$ is the
 number of input datapoints. These are selected as follows:
 
 \begin{verbatim}
-set samples interpolate NearestNeighbour
-set samples interpolate InverseSquare
-set samples interpolate MonaghanLattanzio
+set samples interpolate nearestNeighbor
+set samples interpolate inverseSquare
+set samples interpolate monaghanLattanzio
 \end{verbatim}
 
 Finally, data can be imported from graphical images in bitmap ({\tt .bmp})

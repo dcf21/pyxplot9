@@ -93,9 +93,9 @@ char *SW_PROJ_STR[] = {"flat"       , "gnomonic"   };
 int   SW_PROJ_ACL[] = {1            , 1            };
 int   SW_PROJ_INT[] = {SW_PROJ_FLAT , SW_PROJ_GNOM , -1};
 
-char *SW_SAMPLEMETHOD_STR[] = {"nearestNeighbour"      , "inverseSquare"       , "monaghanLattanzio" };
-int   SW_SAMPLEMETHOD_ACL[] = {1                       , 1                     , 1                   };
-int   SW_SAMPLEMETHOD_INT[] = {SW_SAMPLEMETHOD_NEAREST , SW_SAMPLEMETHOD_INVSQ , SW_SAMPLEMETHOD_ML  , -1};
+char *SW_SAMPLEMETHOD_STR[] = {"nearestNeighbor"      , "inverseSquare"       , "monaghanLattanzio" };
+int   SW_SAMPLEMETHOD_ACL[] = {1                      , 1                     , 1                   };
+int   SW_SAMPLEMETHOD_INT[] = {SW_SAMPLEMETHOD_NEAREST, SW_SAMPLEMETHOD_INVSQ , SW_SAMPLEMETHOD_ML  , -1};
 
 char *SW_HALIGN_STR[] = {"left"         , "centre"       , "right"         };
 int   SW_HALIGN_ACL[] = {1              , 1              , 1               };
