@@ -289,8 +289,8 @@ int  eps_plot_colormap(EPSComm *x, dataTable *data, unsigned char ThreeDim, int 
   img.width    = XSize;
   img.depth    = 24;
   img.data_len = 3*XSize*YSize;
-  img.data     = ppl_memAlloc(3*XSize*YSize);
   img.TargetCompression = BMP_ENCODING_FLATE;
+  BMP_ALLOC(img.data , 3*XSize*YSize);
   if (img.data==NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1,"Out of memory (l)."); return 1; }
 
   // Get pointer to variable c in the user's variable space
@@ -501,7 +501,6 @@ write_rgb: \
      zlen   = img.data_len*1.01+12; /* Nasty guess at size of buffer needed. */ \
      imagez = (unsigned char *)ppl_memAlloc(zlen); \
      if (imagez == NULL) { ppl_error(&x->c->errcontext,ERR_MEMORY, -1, -1,"Out of memory (m)."); img.TargetCompression = BMP_ENCODING_NULL; break; } \
-     memset(imagez, 0, zlen); \
      if (DEBUG) { ppl_log(&x->c->errcontext,"Calling zlib to compress image data."); } \
      j = compress2(imagez,&zlen,img.data,img.data_len,9); /* Call zlib to do deflation */ \
  \

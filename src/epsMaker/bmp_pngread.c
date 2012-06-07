@@ -107,7 +107,7 @@ void ppl_bmp_pngread(pplerr_context *ec, FILE *in, bitmap_data *image)
     i = png_get_PLTE(png_ptr,info_ptr,&palette,&ncols);
     if (i==0) { ppl_error(ec, ERR_FILE, -1, -1, "PNG image file claims to be paletted, but no palette was found"); return; }
     image->pal_len = ncols;
-    image->palette = (unsigned char *)ppl_memAlloc(ncols*3);
+    BMP_ALLOC(image->palette , ncols*3);
     if (image->palette == NULL) { ppl_error(ec, ERR_MEMORY, -1, -1,"Out of memory"); return; }
     for (i=0; i<ncols; i++)
      {
@@ -127,7 +127,7 @@ void ppl_bmp_pngread(pplerr_context *ec, FILE *in, bitmap_data *image)
   row_bytes = png_get_rowbytes(png_ptr, info_ptr);
 
   // Allocate block of memory for uncompressed image
-  image->data = (unsigned char *)ppl_memAlloc(row_bytes*height);
+  BMP_ALLOC(image->data , row_bytes*height);
   if (image->data == NULL) { ppl_error(ec, ERR_MEMORY, -1, -1,"Out of memory"); return; }
 
   // libpng requires a sepate pointer to each row of image

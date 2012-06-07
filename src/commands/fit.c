@@ -38,8 +38,9 @@
 #include "coreUtils/errorReport.h"
 #include "coreUtils/memAlloc.h"
 #include "expressions/expCompile_fns.h"
-#include "expressions/traceback_fns.h"
 #include "expressions/expEval.h"
+#include "expressions/fnCall.h"
+#include "expressions/traceback_fns.h"
 #include "parser/cmdList.h"
 #include "parser/parser.h"
 #include "settings/settings.h"
@@ -72,7 +73,8 @@ typedef struct fitComm {
  pplObj           *firstVals; // The first values found in each column of the supplied datafile. These determine the physical units associated with each column.
  double           *dataTable; // Two-dimensional table of the data read from the datafile.
  unsigned char     flagYErrorBars; // If true, the user has specified errorbars for each target value. If false, we have no idea of uncertainty.
- char             *scratchPad, *errtext, *functionName; // String workspaces
+ char             *errtext, *functionName; // String workspaces
+ pplObj           *functionObj;
  unsigned char     goneNaN; // Used by the minimiser to keep track of when the function being minimised has returned NAN.
  double            sigmaData; // The assumed errorbar (uniform for all datapoints) on the supplied target values if errorbars are not supplied. We fit this.
  int               diff1    , diff2; // The numbers of the free parameters currently being differentiated inside GetHessian()
@@ -113,11 +115,17 @@ static double fitResidual(fitComm *p)
   ppl_context *c = p->c;
   char        *errText = p->errtext;
   const int    stkLevelOld = c->stackPtr;
-  int          i, k, errPos=-1, errType=0, lastOpAssign, explen;
+  int          i, k;
   long int     j;
   double       accumulator, residual;
   pplObj      *out;
-  pplExpr     *e=NULL;
+  pplExpr      dummy;
+
+  // Dummy expression object with dummy line number information
+  dummy.srcLineN = 0;
+  dummy.srcId    = 0;
+  dummy.srcFname = "<dummy>";
+  dummy.ascii    = NULL;
 
   // Set free parameter values
   for (i=0; i<p->NFitVars; i++)
@@ -128,39 +136,41 @@ static double fitResidual(fitComm *p)
 
   accumulator = 0.0; // Add up sum of square residuals
 
+  // Check there's enough space on the stack
+  if (c->stackPtr > ALGEBRA_STACK-4-p->NArgs) { strcpy(errText, "stack overflow in the fit command."); return GSL_NAN; }
+
   for (j=0; j<p->NDataPoints; j++) // Loop over all of the data points in the file that we're fitting
    {
-    i=0;
-    sprintf(p->scratchPad+i, "%s(", p->functionName); i+=strlen(p->scratchPad+i);
+    // Push function object
+    pplObjCpy(&c->stack[c->stackPtr], p->functionObj, 1, 0, 1);
+    c->stack[c->stackPtr].refCount=1;
+    c->stackPtr++;
+
+    // Push each argument in turn
     for (k=0; k<p->NArgs; k++)
      {
-      pplObj x = p->firstVals[k];
-      x.real = p->dataTable[j*p->NExpect+k];
-      x.imag = 0.0;
-      x.flagComplex = 0;
-      sprintf(p->scratchPad+i, "%s,", ppl_unitsNumericDisplay(c,&x, 0, 1, 20));
-      i+=strlen(p->scratchPad+i);
+      pplObjNum(&c->stack[c->stackPtr], 0 , p->dataTable[j*p->NExpect+k], 0);
+      ppl_unitsDimCpy(&c->stack[c->stackPtr], &p->firstVals[k]);
+      c->stack[c->stackPtr].refCount = 1;
+      c->stackPtr++;
      }
-    if (p->NArgs>0) i--; // Remove final comma from list of arguments
-    sprintf(p->scratchPad+i, ")");
-    explen = i+1;
-    ppl_error_setstreaminfo(&c->errcontext, 1, "fitting expression");
-    ppl_expCompile(c,p->pl->srcLineN,p->pl->srcId,p->pl->srcFname,p->scratchPad,&explen,1,1,1,&e,&errPos,&errType,errText);
-    if (c->errStat.status) { errPos=1; strcpy(errText, c->errStat.errMsgExpr); ppl_tbClear(c); return GSL_NAN; }
-    if (errPos>=0)         { return GSL_NAN; }
-    if (explen<i+1)        { strcpy(errText, "Unexpected trailing matter at the end of expression."); pplExpr_free(e); return GSL_NAN; }
-    out = ppl_expEval(c, e, &lastOpAssign, 1, 1);
-    pplExpr_free(e);
-    if (c->errStat.status) { errPos=1; strcpy(errText, c->errStat.errMsgExpr); ppl_tbClear(c); STACK_CLEAN; return GSL_NAN; }
+
+    // Call function
+    c->errStat.errMsgExpr[0]='\0';
+    ppl_fnCall(c, &dummy, 0, 1, 1, 1);
+    out = &c->stack[c->stackPtr-1];
+
+    if (c->errStat.status) { strcpy(errText, c->errStat.errMsgExpr); ppl_tbClear(c); STACK_CLEAN; return GSL_NAN; }
     if (out->objType!=PPLOBJ_NUM) { sprintf(errText, "The supplied function to fit produces a value which is not a number but has type <%s>.", pplObjTypeNames[out->objType]); STACK_CLEAN; return GSL_NAN; }
     if (!ppl_unitsDimEqual(out, p->firstVals+p->NArgs)) { sprintf(errText, "The supplied function to fit produces a value which is dimensionally incompatible with its target value. The function produces a result with dimensions of <%s>, while its target value has dimensions of <%s>.", ppl_printUnit(c,out,NULL,NULL,0,1,0), ppl_printUnit(c,p->firstVals+p->NArgs,NULL,NULL,1,1,0)); STACK_CLEAN; return GSL_NAN; }
     residual = pow(out->real - p->dataTable[j*p->NExpect+k] , 2) + pow(out->imag , 2); // Calculate squared deviation of function result from desired result
     if (p->flagYErrorBars) residual /= 2 * pow(p->dataTable[j*p->NExpect+k+1]    , 2); // Divide square residual by 2 sigma squared.
     else                   residual /= 2 * pow(p->sigmaData                      , 2);
     accumulator += residual; // ... and sum
+
+    STACK_CLEAN;
    }
 
-  STACK_CLEAN;
   return accumulator;
  }
 
@@ -345,7 +355,7 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
  {
   pplObj     *stk=in->stk;
   int         status=0, Nargs, Nvars, NExpect, Nusing;
-  char       *fnName;
+  char       *fnName, *scratchPad;
   long int    i, j, k, NDataPoints;
   int         contextLocalVec, contextDataTab, errCount=DATAFILE_NERRS;
   char       *fitVars[USING_ITEMS_MAX];
@@ -412,6 +422,7 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
   if (funcObj->objType!=PPLOBJ_FUNC) { sprintf(c->errStat.errBuff,"Object '%s' is not a function, but has type <%s>.", fnName, pplObjTypeNames[funcObj->objType]); TBADD2(ERR_TYPE, in->stkCharPos[PARSE_fit_fit_function]); return; }
   funcDef = (pplFunc *)funcObj->auxil;
   if (funcDef->functionType==PPL_FUNC_MAGIC) { sprintf(c->errStat.errBuff,"Function %s() needs wrapping in a user-defined function before it can be fit.", fnName); TBADD2(ERR_TYPE, in->stkCharPos[PARSE_fit_fit_function]); return; }
+  __sync_add_and_fetch(&funcDef->refCount,1);
   Nargs = funcDef->minArgs;
 
   // Count length of using list
@@ -425,7 +436,7 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
     {
      pos = (int)round(stk[pos].real);
      if (pos<=0) break;
-     if (Nusing>=USING_ITEMS_MAX) { sprintf(c->errStat.errBuff, "Too many using items; maximum of %d are allowed.", USING_ITEMS_MAX); TBADD2(ERR_RANGE, in->stkCharPos[pos+o]); return; }
+     if (Nusing>=USING_ITEMS_MAX) { sprintf(c->errStat.errBuff, "Too many using items; maximum of %d are allowed.", USING_ITEMS_MAX); TBADD2(ERR_RANGE, in->stkCharPos[pos+o]); goto cleanup; }
      Nusing++;
     }
    if ((!hadNonNullUsingItem) && (Nusing==1)) Nusing=0; // If we've only had one using item, and it was blank, this is a parser abberation
@@ -450,7 +461,7 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
       {
        sprintf(c->errStat.errBuff,"Too many ranges specified; a maximum of %d are allowed.", USING_ITEMS_MAX);
        TBADD2(ERR_SYNTAX,0);
-       return;
+       goto cleanup;
       }
      if ((stk[pos+o1].objType==PPLOBJ_NUM)||(stk[pos+o1].objType==PPLOBJ_DATE)||(stk[pos+o1].objType==PPLOBJ_BOOL))
       {
@@ -464,13 +475,13 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
         {
          sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d have conflicting types of <%s> and <%s>.", nr+1, pplObjTypeNames[unit[nr].objType], pplObjTypeNames[stk[pos+o2].objType]);
          TBADD2(ERR_TYPE,in->stkCharPos[pos+PARSE_fit_min_0range_list]);
-         return;
+         goto cleanup;
         }
        if ((minSet[nr])&&(!ppl_unitsDimEqual(&unit[nr],&stk[pos+o2])))
         {
          sprintf(c->errStat.errBuff,"Minimum and maximum limits specified for variable %d have conflicting physical units of <%s> and <%s>.", nr+1, ppl_printUnit(c,&unit[nr],NULL,NULL,0,0,0), ppl_printUnit(c,&stk[pos+o2],NULL,NULL,1,0,0));
          TBADD2(ERR_UNIT,in->stkCharPos[pos+PARSE_fit_min_0range_list]);
-         return;
+         goto cleanup;
         }
        unit[nr]=stk[pos+o2];
        max[nr]=unit[nr].real;
@@ -492,14 +503,14 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
    {
     TBADD2(ERR_GENERIC,0);
     ppl_memAlloc_AscendOutOfContext(contextLocalVec);
-    return;
+    goto cleanup;
    }
 
   // Check that the firstEntries above have the same units as any supplied ranges
   for (j=0; j<NExpect; j++)
    if (minSet[j] || maxSet[j])
     {
-     if (!ppl_unitsDimEqual(&unit[j],data->firstEntries+j)) { sprintf(c->errStat.errBuff, "The minimum and maximum limits specified in range %ld in the fit command have conflicting physical dimensions with the data returned from the data file. The limits have units of <%s>, whilst the data have units of <%s>.", j+1, ppl_printUnit(c,unit+j,NULL,NULL,0,1,0), ppl_printUnit(c,data->firstEntries+j,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERICAL,0); return; }
+     if (!ppl_unitsDimEqual(&unit[j],data->firstEntries+j)) { sprintf(c->errStat.errBuff, "The minimum and maximum limits specified in range %ld in the fit command have conflicting physical dimensions with the data returned from the data file. The limits have units of <%s>, whilst the data have units of <%s>.", j+1, ppl_printUnit(c,unit+j,NULL,NULL,0,1,0), ppl_printUnit(c,data->firstEntries+j,NULL,NULL,1,1,0)); TBADD2(ERR_NUMERICAL,0); goto cleanup; }
     }
 
   // Work out how many data points we have within the specified ranges
@@ -523,7 +534,7 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
 
   // Copy data into a new table and apply the specified ranges to it
   localDataTable = (double *)ppl_memAlloc_incontext(NDataPoints * NExpect * sizeof(double), contextLocalVec);
-  if (localDataTable==NULL) { sprintf(c->errStat.errBuff, "Out of memory."); TBADD2(ERR_MEMORY,0); return; }
+  if (localDataTable==NULL) { sprintf(c->errStat.errBuff, "Out of memory."); TBADD2(ERR_MEMORY,0); goto cleanup; }
   i=0;
   blk = data->first;
   while (blk != NULL)
@@ -554,6 +565,7 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
   dataComm.c            = c;
   dataComm.pl           = pl;
   dataComm.functionName = fnName;
+  dataComm.functionObj  = funcObj;
   dataComm.NFitVars     = Nvars;
   dataComm.NArgs        = Nargs;
   dataComm.NExpect      = NExpect;
@@ -566,14 +578,14 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
   dataComm.dataTable    = localDataTable;
   dataComm.flagYErrorBars = (NExpect == Nargs+2);
   dataComm.sigmaData    = 1.0;
-  dataComm.scratchPad   = (char *)ppl_memAlloc_incontext(LSTR_LENGTH, contextLocalVec);
-  dataComm.errtext      = (char *)ppl_memAlloc_incontext(LSTR_LENGTH, contextLocalVec); // functionName was already set above
-  if ((dataComm.scratchPad==NULL)||(dataComm.errtext==NULL)) { sprintf(c->errStat.errBuff, "Out of memory."); TBADD2(ERR_MEMORY,0); return; }
+  dataComm.errtext      = (char *)ppl_memAlloc_incontext(LSTR_LENGTH, contextLocalVec);
+  scratchPad            = (char *)ppl_memAlloc_incontext(LSTR_LENGTH, contextLocalVec);
+  if ((scratchPad==NULL)||(dataComm.errtext==NULL)) { sprintf(c->errStat.errBuff, "Out of memory."); TBADD2(ERR_MEMORY,0); goto cleanup; }
   dataComm.errtext[0]   = '\0';
 
   // Set up a minimiser
   status = FitMinimiseIterate(&dataComm, &ResidualMinimiserSlave, 0);
-  if (status) { sprintf(c->errStat.errBuff, "%s", dataComm.errtext); TBADD2(ERR_NUMERICAL,0); return; }
+  if (status) { sprintf(c->errStat.errBuff, "%s", dataComm.errtext); TBADD2(ERR_NUMERICAL,0); goto cleanup; }
 
   // Display the results of the minimiser
   ppl_report(&c->errcontext,"\n# Best fit parameters were:\n# -------------------------\n");
@@ -588,7 +600,7 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
   if (stk[PARSE_fit_withouterrors].objType==PPLOBJ_STR)
    {
     ppl_memAlloc_AscendOutOfContext(contextLocalVec);
-    return;
+    goto cleanup;
    }
 
   // Store best-fit position
@@ -606,7 +618,7 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
     sprintf(c->errcontext.tempErrStr, "\n# Estimating the size of the error bars on supplied data.\n# This may take a while.\n# The fit command can be made to run very substantially faster if the 'withouterrors' option is set.");
     ppl_report(&c->errcontext,NULL);
     status = FitMinimiseIterate(&dataComm, &FitsigmaData, 1);
-    if (status) { sprintf(c->errStat.errBuff, "%s", dataComm.errtext); TBADD2(ERR_NUMERICAL,0); gsl_vector_free(bestFitParamVals); return; }
+    if (status) { sprintf(c->errStat.errBuff, "%s", dataComm.errtext); TBADD2(ERR_NUMERICAL,0); gsl_vector_free(bestFitParamVals); goto cleanup; }
     firstVals[Nargs].real = dataComm.sigmaData;
     firstVals[Nargs].imag = 0.0;
     firstVals[Nargs].flagComplex = 0;
@@ -615,8 +627,8 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
 
   // Calculate and print the Hessian matrix
   hessian = GetHessian(&dataComm);
-  matrixPrint(c, hessian, dataComm.NParams, dataComm.scratchPad);
-  sprintf(c->errcontext.tempErrStr, "\n# Hessian matrix of log-probability distribution:\n# -----------------------------------------------\n\nhessian = %s", dataComm.scratchPad);
+  matrixPrint(c, hessian, dataComm.NParams, scratchPad);
+  sprintf(c->errcontext.tempErrStr, "\n# Hessian matrix of log-probability distribution:\n# -----------------------------------------------\n\nhessian = %s", scratchPad);
   ppl_report(&c->errcontext,NULL);
 
   // Set variables in user's variable space to best-fit values
@@ -634,8 +646,8 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
   perm = gsl_permutation_alloc(dataComm.NParams);
   gsl_linalg_LU_decomp(hessian_lu,perm,&sgn);
   gsl_linalg_LU_invert(hessian_lu,perm,hessian_inv);
-  matrixPrint(c, hessian_inv, dataComm.NParams, dataComm.scratchPad);
-  sprintf(c->errcontext.tempErrStr, "\n# Covariance matrix of probability distribution:\n# ----------------------------------------------\n\ncovariance = %s", dataComm.scratchPad);
+  matrixPrint(c, hessian_inv, dataComm.NParams, scratchPad);
+  sprintf(c->errcontext.tempErrStr, "\n# Covariance matrix of probability distribution:\n# ----------------------------------------------\n\ncovariance = %s", scratchPad);
   ppl_report(&c->errcontext,NULL);
 
   // Calculate the standard deviation of each parameter
@@ -654,8 +666,8 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
   // Calculate the correlation matrix
   for (i=0; i<dataComm.NParams; i++) for (j=0; j<dataComm.NParams; j++)
    gsl_matrix_set(hessian_inv, i, j, gsl_matrix_get(hessian_inv, i, j) / stdDev[i] / stdDev[j]);
-  matrixPrint(c, hessian_inv, dataComm.NParams, dataComm.scratchPad);
-  sprintf(c->errcontext.tempErrStr, "\n# Correlation matrix of probability distribution:\n# ----------------------------------------------\n\ncorrelation = %s", dataComm.scratchPad);
+  matrixPrint(c, hessian_inv, dataComm.NParams, scratchPad);
+  sprintf(c->errcontext.tempErrStr, "\n# Correlation matrix of probability distribution:\n# ----------------------------------------------\n\ncorrelation = %s", scratchPad);
   ppl_report(&c->errcontext,NULL);
 
   // Print a list of standard deviations
@@ -668,14 +680,14 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
       dummyTemp.real = stdDev[i] ; dummyTemp.imag = 0.0; dummyTemp.flagComplex = 0; // Apply appropriate unit to standard deviation, which is currently just a double
       if (c->set->term_current.NumDisplay != SW_DISPLAY_L)
        {
-        sprintf(dataComm.scratchPad, "sigma_%s", fitVars[i]);
-        sprintf(c->errcontext.tempErrStr, "%22s = %s", dataComm.scratchPad, ppl_unitsNumericDisplay(c,&dummyTemp,0,0,0));
+        sprintf(scratchPad, "sigma_%s", fitVars[i]);
+        sprintf(c->errcontext.tempErrStr, "%22s = %s", scratchPad, ppl_unitsNumericDisplay(c,&dummyTemp,0,0,0));
        } else {
-        sprintf(dataComm.scratchPad, "$\\sigma_\\textrm{");
-        j = strlen(dataComm.scratchPad);
-        for (k=0; fitVars[i][k]!='\0'; k++) { if (fitVars[i][k]=='_') dataComm.scratchPad[j++]='\\'; dataComm.scratchPad[j++]=fitVars[i][k]; }
-        dataComm.scratchPad[j++]='\0';
-        sprintf(c->errcontext.tempErrStr, "%33s} = %s", dataComm.scratchPad, ppl_unitsNumericDisplay(c,&dummyTemp,0,0,0)+1);
+        sprintf(scratchPad, "$\\sigma_\\textrm{");
+        j = strlen(scratchPad);
+        for (k=0; fitVars[i][k]!='\0'; k++) { if (fitVars[i][k]=='_') scratchPad[j++]='\\'; scratchPad[j++]=fitVars[i][k]; }
+        scratchPad[j++]='\0';
+        sprintf(c->errcontext.tempErrStr, "%33s} = %s", scratchPad, ppl_unitsNumericDisplay(c,&dummyTemp,0,0,0)+1);
        }
       ppl_report(&c->errcontext,NULL);
      }
@@ -684,25 +696,25 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
       if (c->set->term_current.NumDisplay != SW_DISPLAY_L)
        {
         dummyTemp.real = stdDev[2*i  ] ; dummyTemp.imag = 0.0; dummyTemp.flagComplex = 0;
-        sprintf(dataComm.scratchPad, "sigma_%s_real", fitVars[i]);
-        sprintf(c->errcontext.tempErrStr, "%27s = %s", dataComm.scratchPad, ppl_unitsNumericDisplay(c,&dummyTemp,0,0,0));
+        sprintf(scratchPad, "sigma_%s_real", fitVars[i]);
+        sprintf(c->errcontext.tempErrStr, "%27s = %s", scratchPad, ppl_unitsNumericDisplay(c,&dummyTemp,0,0,0));
         ppl_report(&c->errcontext,NULL);
         dummyTemp.real = stdDev[2*i+1] ; dummyTemp.imag = 0.0; dummyTemp.flagComplex = 0;
-        sprintf(dataComm.scratchPad, "sigma_%s_imag", fitVars[i]);
-        sprintf(c->errcontext.tempErrStr, "%27s = %s", dataComm.scratchPad, ppl_unitsNumericDisplay(c,&dummyTemp,0,0,0));
+        sprintf(scratchPad, "sigma_%s_imag", fitVars[i]);
+        sprintf(c->errcontext.tempErrStr, "%27s = %s", scratchPad, ppl_unitsNumericDisplay(c,&dummyTemp,0,0,0));
         ppl_report(&c->errcontext,NULL);
        }
       else
        {
         dummyTemp.real = stdDev[2*i  ] ; dummyTemp.imag = 0.0; dummyTemp.flagComplex = 0;
-        sprintf(dataComm.scratchPad, "$\\sigma_\\textrm{");
-        j = strlen(dataComm.scratchPad);
-        for (k=0; fitVars[i][k]!='\0'; k++) { if (fitVars[i][k]=='_') dataComm.scratchPad[j++]='\\'; dataComm.scratchPad[j++]=fitVars[i][k]; }
-        dataComm.scratchPad[j++]='\0';
-        sprintf(c->errcontext.tempErrStr, "%38s,real} = %s", dataComm.scratchPad, ppl_unitsNumericDisplay(c,&dummyTemp,0,0,0)+1);
+        sprintf(scratchPad, "$\\sigma_\\textrm{");
+        j = strlen(scratchPad);
+        for (k=0; fitVars[i][k]!='\0'; k++) { if (fitVars[i][k]=='_') scratchPad[j++]='\\'; scratchPad[j++]=fitVars[i][k]; }
+        scratchPad[j++]='\0';
+        sprintf(c->errcontext.tempErrStr, "%38s,real} = %s", scratchPad, ppl_unitsNumericDisplay(c,&dummyTemp,0,0,0)+1);
         ppl_report(&c->errcontext,NULL);
         dummyTemp.real = stdDev[2*i+1] ; dummyTemp.imag = 0.0; dummyTemp.flagComplex = 0;
-        sprintf(c->errcontext.tempErrStr, "%38s,imag} = %s", dataComm.scratchPad, ppl_unitsNumericDisplay(c,&dummyTemp,0,0,0)+1);
+        sprintf(c->errcontext.tempErrStr, "%38s,imag} = %s", scratchPad, ppl_unitsNumericDisplay(c,&dummyTemp,0,0,0)+1);
         ppl_report(&c->errcontext,NULL);
        }
      }
@@ -730,10 +742,10 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
        sprintf(c->errcontext.tempErrStr, "%16s = (%s +/- %s) %s", fitVars[i], ppl_unitsNumericDisplay(c,&dummyTemp,1,0,0), ppl_numericDisplay(stdDev[i]*tmp3,c->numdispBuff[0],c->set->term_current.SignificantFigures,0), cptr);
       else
        {
-        dataComm.scratchPad[0]='$';
-        for (j=1,k=0; fitVars[i][k]!='\0'; k++) { if (fitVars[i][k]=='_') dataComm.scratchPad[j++]='\\'; dataComm.scratchPad[j++]=fitVars[i][k]; }
-        dataComm.scratchPad[j++]='\0';
-        sprintf(c->errcontext.tempErrStr, "%17s = (%s", dataComm.scratchPad, ppl_unitsNumericDisplay(c,&dummyTemp,1,0,0)+1);
+        scratchPad[0]='$';
+        for (j=1,k=0; fitVars[i][k]!='\0'; k++) { if (fitVars[i][k]=='_') scratchPad[j++]='\\'; scratchPad[j++]=fitVars[i][k]; }
+        scratchPad[j++]='\0';
+        sprintf(c->errcontext.tempErrStr, "%17s = (%s", scratchPad, ppl_unitsNumericDisplay(c,&dummyTemp,1,0,0)+1);
         j=strlen(c->errcontext.tempErrStr)-1; // Remove final $
         sprintf(c->errcontext.tempErrStr+j, "\\pm%s)%s$", ppl_numericDisplay(stdDev[i]*tmp3,c->numdispBuff[0],c->set->term_current.SignificantFigures,0), cptr);
        }
@@ -744,10 +756,10 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
        sprintf(c->errcontext.tempErrStr, "%16s = (%s +/- %s +/- %s*sqrt(-1))%s", fitVars[i], ppl_unitsNumericDisplay(c,&dummyTemp,1,0,0), ppl_numericDisplay(stdDev[2*i]*tmp3,c->numdispBuff[0],c->set->term_current.SignificantFigures,0), ppl_numericDisplay(stdDev[2*i+1]*tmp3,c->numdispBuff[2],c->set->term_current.SignificantFigures,0), cptr);
       else if (c->set->term_current.NumDisplay == SW_DISPLAY_L)
        {
-        dataComm.scratchPad[0]='$';
-        for (j=1,k=0; fitVars[i][k]!='\0'; k++) { if (fitVars[i][k]=='_') dataComm.scratchPad[j++]='\\'; dataComm.scratchPad[j++]=fitVars[i][k]; }
-        dataComm.scratchPad[j++]='\0';
-        sprintf(c->errcontext.tempErrStr, "%17s = (%s", dataComm.scratchPad, ppl_unitsNumericDisplay(c,&dummyTemp,1,0,0)+1);
+        scratchPad[0]='$';
+        for (j=1,k=0; fitVars[i][k]!='\0'; k++) { if (fitVars[i][k]=='_') scratchPad[j++]='\\'; scratchPad[j++]=fitVars[i][k]; }
+        scratchPad[j++]='\0';
+        sprintf(c->errcontext.tempErrStr, "%17s = (%s", scratchPad, ppl_unitsNumericDisplay(c,&dummyTemp,1,0,0)+1);
         j=strlen(c->errcontext.tempErrStr)-1; // Remove final $
         sprintf(c->errcontext.tempErrStr+j, "\\pm %s\\pm %si)%s$", ppl_numericDisplay(stdDev[2*i]*tmp3,c->numdispBuff[0],c->set->term_current.SignificantFigures,0), ppl_numericDisplay(stdDev[2*i+1]*tmp3,c->numdispBuff[2],c->set->term_current.SignificantFigures,0), cptr);
        }
@@ -764,6 +776,9 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
   gsl_matrix_free(hessian);
   gsl_permutation_free(perm);
   ppl_memAlloc_AscendOutOfContext(contextLocalVec);
+
+cleanup:
+  __sync_sub_and_fetch(&funcDef->refCount,1);
   return;
  }
 

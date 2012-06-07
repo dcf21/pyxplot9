@@ -50,7 +50,7 @@ void ppl_bmp_jpegread(pplerr_context *ec, FILE *jpeg, bitmap_data *image)
   unsigned int width=0, height=0, save;
   unsigned char *buff, *header, *headp, *headendp, type=0, comp=0, *p;
 
-  buff     = (unsigned char *)ppl_memAlloc(chunk);
+  BMP_ALLOC(buff , chunk);
   header   = (unsigned char *)ppl_memAlloc(HEADLEN);
   headp    = header;
   headendp = header + HEADLEN - 8;
@@ -200,7 +200,7 @@ void ppl_bmp_jpegread(pplerr_context *ec, FILE *jpeg, bitmap_data *image)
   while (i==len)
    {
     chunk *= 2;
-    p      = (unsigned char *)ppl_memAlloc(chunk); // We didn't malloc enough memory, and ppl_memAlloc can't realloc, so just have to malloc a new chunk :(
+    BMP_ALLOC(p , chunk); // We didn't malloc enough memory, and ppl_memAlloc can't realloc, so just have to malloc a new chunk :(
     if (p == NULL) { ppl_error(ec, ERR_MEMORY, -1, -1, "Out of memory"); return; }
     memcpy(p, buff, chunk/2);
     buff = p;

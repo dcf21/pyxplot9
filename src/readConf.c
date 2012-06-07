@@ -112,7 +112,8 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
      {
       ppl_strUpper(setkey, setkey);
       if      (strcmp(setkey, "ASPECT"       )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))&&(fl>=1e-6)&&(fl<=1e4)))
+        if      (ppl_strCmpNoCase(setvalue, "auto")==0) { c->set->graph_default.AutoAspect = SW_ONOFF_ON; }
+        else if (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))&&(fl>=1e-6)&&(fl<=1e4)))
                                                                                                { c->set->graph_default.aspect        = fl;
                                                                                                  c->set->graph_default.AutoAspect    = SW_ONOFF_OFF;
                                                                                                }
@@ -121,7 +122,8 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
         if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_ONOFF_INT, SW_ONOFF_STR ))>0)                      c->set->graph_default.AutoAspect    = i;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting <autoAspect>."   , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "ZASPECT"      )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))&&(fl>=1e-6)&&(fl<=1e4)))
+        if      (ppl_strCmpNoCase(setvalue, "auto")==0) { c->set->graph_default.AutoZAspect = SW_ONOFF_ON; }
+        else if (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))&&(fl>=1e-6)&&(fl<=1e4)))
                                                                                                { c->set->graph_default.zaspect       = fl;
                                                                                                  c->set->graph_default.AutoZAspect   = SW_ONOFF_OFF;
                                                                                                }
@@ -142,28 +144,23 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
         if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->graph_default.bar = fl;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting <bar>."          , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "BINORIGIN"    )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))             { c->set->term_default.BinOrigin.real = fl;
+        if      (ppl_strCmpNoCase(setvalue, "auto")==0) { c->set->term_default.BinOriginAuto = 1; }
+        else if (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))         { c->set->term_default.BinOrigin.real = fl;
                                                                                                      c->set->term_default.BinOriginAuto  = 0;  }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting <binOrigin>."    , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
-      else if (strcmp(setkey, "AUTOBINORIGIN")==0)
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_ONOFF_INT, SW_ONOFF_STR ))>0)                      c->set->term_default.BinOriginAuto = (i==SW_ONOFF_ON);
-        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting <autoBinOrigin>."  , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "BINWIDTH"     )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))             { c->set->term_default.BinWidth.real = fl;
+        if      (ppl_strCmpNoCase(setvalue, "auto")==0) { c->set->term_default.BinWidthAuto = 1; }
+        else if (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))         { c->set->term_default.BinWidth.real = fl;
                                                                                                      c->set->term_default.BinWidthAuto  = (fl>0.0);  }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting <binWidth>."     , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
-      else if (strcmp(setkey, "AUTOBINWIDTH")==0)
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_ONOFF_INT, SW_ONOFF_STR ))>0)                      c->set->term_default.BinWidthAuto = (i==SW_ONOFF_ON);
-        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting <autoBinWidth>."  , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "BOXFROM"      )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))             { c->set->graph_default.BoxFrom.real = fl;
+        if      (ppl_strCmpNoCase(setvalue, "auto")==0) { c->set->graph_default.BoxFromAuto = 1; }
+        else if (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))         { c->set->graph_default.BoxFrom.real = fl;
                                                                                                      c->set->graph_default.BoxFromAuto  = 0;  }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting <boxFrom>."      , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
-      else if (strcmp(setkey, "AUTOBOXFROM")==0)
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_ONOFF_INT, SW_ONOFF_STR ))>0)                      c->set->graph_default.BoxFromAuto = (i==SW_ONOFF_ON);
-        else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting <autoBoxFrom>."  , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "BOXWIDTH"     )==0)
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))             { c->set->graph_default.BoxWidth.real = fl;
+        if      (ppl_strCmpNoCase(setvalue, "auto")==0) { c->set->graph_default.BoxWidthAuto = 1; }
+        else if (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))         { c->set->graph_default.BoxWidth.real = fl;
                                                                                                      c->set->graph_default.BoxWidthAuto  = (fl>0.0);  }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting <boxWidth>."     , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
       else if (strcmp(setkey, "AUTOBOXWIDTH")==0)

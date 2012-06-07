@@ -135,17 +135,15 @@ detail.
 %Projection = Flat
 \begin{verbatim}
 [settings]
-aspect = 1.0
-autoAspect = on
-autoZAspect = on
+aspect = auto
 axesColor = black
 axisUnitStyle = ratio
 backup = off
 bar = 1.0
-autoBinOrigin = on
-autoBinWidth = on
-autoBoxFrom = on
-autoBoxWidth = on
+binOrigin = auto
+binWidth = auto
+boxFrom = auto
+boxWidth = auto
 calendarIn = British
 calendarOut = British
 clip = off
@@ -245,7 +243,7 @@ unitScheme = si
 width = 8.0
 view_xy = 60
 view_yz = 30
-zAspect = 1.0
+zAspect = auto
 
 [terminal]
 color = on
@@ -309,7 +307,7 @@ filters, see Section~\ref{sec:filters}.
 The {\tt settings} section can contain any of the following settings in any order:
 
 \begin{longtable}{p{3.4cm}p{9cm}}
-{\tt aspect} & {\bf Possible values:} Any floating-point number.
+{\tt aspect} & {\bf Possible values:} {\tt auto}, or any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set size ratio}
 
@@ -319,13 +317,13 @@ The {\tt settings} section can contain any of the following settings in any orde
 
                {\bf Analogous set command:} {\tt set size ratio}
 
-               Sets whether plots have the automatic $y/x$ aspect ratio, which is the golden ratio. If {\tt on}, then the above setting is ignored.
+               Sets whether plots have the automatic $y/x$ aspect ratio, which is the golden ratio. If {\tt on}, then the {\tt aspect} setting is ignored. Deprecated: new scripts should use {\tt aspect=auto} instead.
                \\
 {\tt autoZAspect} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} {\tt set size zratio}
 
-               Sets whether 3d plots have the automatic $z/x$ aspect ratio, which is the golden ratio. If {\tt on}, then the above setting is ignored.
+               Sets whether 3d plots have the automatic $z/x$ aspect ratio, which is the golden ratio. If {\tt on}, then the {\tt zAspect} setting is ignored. Deprecated: new scripts should use {\tt zAspect=auto} instead.
                \\
 {\tt axesColour} & {\bf Possible values:} Any recognised color.
 
@@ -351,53 +349,29 @@ The {\tt settings} section can contain any of the following settings in any orde
 
                Sets the horizontal length of the lines drawn at the end of errorbars, in units of their default length.
                \\
-{\tt binOrigin} & {\bf Possible values:} Any floating-point number.
+{\tt binOrigin} & {\bf Possible values:} {\tt auto}, or any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set binorigin}
 
                Sets the point along the abscissa axis from which the bins used by the \indcmdt{histogram} originate.
                \\
-{\tt autoBinOrigin} & {\bf Possible values:} {\tt on}, {\tt off}.
-
-               {\bf Analogous set command:} {\tt set binorigin}
-
-               Sets the point along the abscissa axis from which the bins used by the \indcmdt{histogram} originate to be chosen automatically.
-               \\
-{\tt binWidth} & {\bf Possible values:} Any floating-point number.
+{\tt binWidth} & {\bf Possible values:} {\tt auto}, or any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set binwidth}
 
                Sets the widths of the bins used by the \indcmdt{histogram}.
                \\
-{\tt autoBinWidth} & {\bf Possible values:} {\tt on}, {\tt off}.
-
-               {\bf Analogous set command:} {\tt set binwidth}
-
-               Sets the widths of the bins used by the \indcmdt{histogram} to be chosen automatically.
-               \\
-{\tt boxFrom} & {\bf Possible values:} Any floating-point number.
+{\tt boxFrom} & {\bf Possible values:} {\tt auto}, or any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set boxfrom}
 
                Sets the horizontal point from which bars on bar charts appear to emanate.
                \\
-{\tt autoBoxFrom} & {\bf Possible values:} {\tt on}, {\tt off}.
-
-               {\bf Analogous set command:} {\tt set boxfrom}
-
-               Sets the horizontal point from which bars on bar charts appear to emanate to be chosen automatically.
-               \\
-{\tt boxWidth} & {\bf Possible values:} Any floating-point number.
+{\tt boxWidth} & {\bf Possible values:} {\tt auto}, or any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set boxwidth}
 
                Sets the default width of boxes on barcharts. If negative, then the boxes have automatically selected widths, so that the interfaces between bars occur at the horizontal midpoints between the specified datapoints.
-               \\
-{\tt autoBoxWidth} & {\bf Possible values:} {\tt on}, {\tt off}.
-
-               {\bf Analogous set command:} {\tt set boxwidth}
-
-               Sets the boxes on barcharts to have automatically-selected widths.
                \\
 {\tt calendarIn} & {\bf Possible values:} {\tt British}, {\tt French}, {\tt Greek}, {\tt Gregorian}, {\tt Hebrew}, {\tt Islamic}, {\tt Julian}, {\tt Papal}, {\tt Russian}.
 
@@ -873,7 +847,7 @@ The {\tt settings} section can contain any of the following settings in any orde
 
                Sets the viewing angle of three-dimensional plots in the $y$-$z$ plane in degrees.
                \\
-{\tt zAspect} & {\bf Possible values:} Any floating-point number.
+{\tt zAspect} & {\bf Possible values:} {\tt auto}, or any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set size ratio}
 

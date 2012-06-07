@@ -166,7 +166,7 @@ void ppl_bmp_gifread(pplerr_context *ec, FILE *in, bitmap_data *image)
    }
   if (DEBUG) { sprintf(ec->tempErrStr, "Total GIF data length=%ld",datalen); ppl_log(ec, NULL); }
 
-  image->data = (unsigned char *)ppl_memAlloc(width*height);
+  BMP_ALLOC(image->data , width*height);
   if (image->data == NULL) { ppl_error(ec, ERR_MEMORY, -1, -1,"Out of memory"); return; }
 
   datalen = ppl_bmp_de_lzw(ec,rawz,image->data,width*height,lzwcs);
@@ -193,7 +193,7 @@ int ppl_bmp_de_gifinterlace(pplerr_context *ec, bitmap_data *image)
   int i,j;
   unsigned char *out,*in,*outp;
 
-  out = (unsigned char *)ppl_memAlloc(image->height*image->width);
+  BMP_ALLOC(out , image->height*image->width);
   if (out == NULL) { ppl_error(ec, ERR_MEMORY, -1, -1,"Out of memory"); return 1; }
 
   in = image->data;

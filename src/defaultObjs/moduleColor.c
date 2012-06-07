@@ -52,6 +52,8 @@
 #include "defaultObjs/defaultFuncs.h"
 #include "defaultObjs/defaultFuncsMacros.h"
 
+#define GAMMA_FUDGE 0.45
+
 struct colourSystem
  {
   char *name;             // Colour system name
@@ -199,6 +201,16 @@ void pplfunc_colWavelen (ppl_context *c, pplObj *in, int nArgs, int *status, int
   y    = cie_colour_match[i][1]*wi + cie_colour_match[j][1]*wj;
   z    = cie_colour_match[i][2]*wi + cie_colour_match[j][2]*wj;
 
+  // Fudge to brightness of spectrum
+  {
+   double xyz   = gsl_hypot3(x,y,z); if (xyz>1) xyz=1; if (xyz<0) xyz=0;
+   double XYZ   = pow(xyz, GAMMA_FUDGE);
+   double gamma = XYZ / xyz;
+          x    *= gamma;
+          y    *= gamma;
+          z    *= gamma;
+  }
+
   xyz_to_rgb(&SMPTEsystem, x, y, z, &r, &g, &b);
   if (!inside_gamut(r,g,b)) constrain_rgb(&r,&g,&b);
   r*=fabs(norm); if (r<0) r=0; if (r>1) r=1;
@@ -231,6 +243,9 @@ void pplfunc_colSpectrum(ppl_context *c, pplObj *in, int nArgs, int *status, int
   pplObjColor(&OUTPUT,0,SW_COLSPACE_RGB,0,0,0,0);
 
   norm = in[1].real;
+
+  // Check there's enough space on the stack
+  if (c->stackPtr > ALGEBRA_STACK-4) { *status=1; *errType=ERR_MEMORY; sprintf(errText, "stack overflow in the colors.spectrum function."); return; }
 
   for (i=0; i<N_CIE_STEPS; i++)
    {
@@ -282,6 +297,16 @@ void pplfunc_colSpectrum(ppl_context *c, pplObj *in, int nArgs, int *status, int
     y += cie_colour_match[i][1]*w;
     z += cie_colour_match[i][2]*w;
    }
+
+  // Fudge to brightness of spectrum
+  {
+   double xyz   = gsl_hypot3(x,y,z); if (xyz>1) xyz=1; if (xyz<0) xyz=0;
+   double XYZ   = pow(xyz, GAMMA_FUDGE);
+   double gamma = XYZ / xyz;
+          x    *= gamma;
+          y    *= gamma;
+          z    *= gamma;
+  }
 
   xyz_to_rgb(&SMPTEsystem, x, y, z, &r, &g, &b);
   if (!inside_gamut(r,g,b)) constrain_rgb(&r,&g,&b);
