@@ -56,14 +56,14 @@ unset multiplot
 ordinarily turns off multiplot mode, it may turn it on if a configuration file
 contains the line
 \begin{verbatim}
-MultiPlot=On
+multiPlot=on
 \end{verbatim}
-When coloured terminal output is enabled, the colour-coding of the
+When colored terminal output is enabled, the color-coding of the
 \indcmdt{show} also reflects the current default configuration: settings which
-match their default values are shown in green\footnote{This colour can be
+match their default values are shown in green\footnote{This color can be
 changed using the {\tt Colour\_Rep} setting in a configuration file.} whilst
 those settings which have been changed from their default values are shown in
-amber\footnote{This colour can be changed using the {\tt Colour\_Wrn} setting
+amber\footnote{This color can be changed using the {\tt Colour\_Wrn} setting
 in a configuration file.}.
 
 Configuration files should take the form of a series of sections, each headed
@@ -78,11 +78,11 @@ The following sections are used, although they do not all need to be present in
 any given file, and they may appear in any order:
 
 \begin{itemize}
-\item {\tt colours} -- contains a single setting {\tt palette}, which should be
-set to a comma-separated list of colours which should make up the palette used
-to plot datasets. The first will be called colour~1 in PyXPlot, the second
-colour~2, etc. A list of recognised colour names is given in
-Section~\ref{sec:colour_names}.
+\item {\tt colors} -- contains a single setting {\tt palette}, which should be
+set to a comma-separated list of colors which should make up the palette used
+to plot datasets. The first will be called color~1 in PyXPlot, the second
+color~2, etc. A list of recognised color names is given in
+Section~\ref{sec:color_names}.
 \item {\tt filters} -- can be used to define input filters which should be used
 for certain file types (see Section~\ref{sec:filters}).
 \item {\tt functions} -- contains user-defined function definitions which
@@ -135,151 +135,151 @@ detail.
 %Projection = Flat
 \begin{verbatim}
 [settings]
-Aspect = 1.0
-AutoAspect = On
-AutoZAspect = On
-AxesColour = Black
-AxisUnitStyle = Ratio
-Backup = Off
-Bar = 1.0
-BinOrigin = 0
-BinWidth = 1
-BoxFrom = 0
-BoxWidth = 0
-CalendarIn = British
-CalendarOut = British
-Clip = Off
-ColKey = On
-ColKeyPos = Right
-Colour = On
-Contours = 12
-C1Range_Log = False
-C1Range_Max = 0
-C1Range_Max_Auto = True
-C1Range_Min = 0
-C1Range_Min_Auto = True
-C1Range_Renorm = True
-C1Range_Reverse = False
-C2Range_Log = False
-C2Range_Max = 0
-C2Range_Max_Auto = True
-C2Range_Min = 0
-C2Range_Min_Auto = True
-C2Range_Renorm = True
-C2Range_Reverse = False
-C3Range_Log = False
-C3Range_Max = 0
-C3Range_Max_Auto = True
-C3Range_Min = 0
-C3Range_Min_Auto = True
-C3Range_Renorm = True
-C3Range_Reverse = False
-C4Range_Log = False
-C4Range_Max = 0
-C4Range_Max_Auto = True
-C4Range_Min = 0
-C4Range_Min_Auto = True
-C4Range_Renorm = True
-C4Range_Reverse = False
-DataStyle = Points
-Display = On
-DPI = 300
-FontSize = 1
-FuncStyle = Lines
-Grid = Off
-GridAxisX = 1
-GridAxisY = 1
-GridAxisZ = 1
-GridMajColour = Grey70
-GridMinColour = Grey85
-Key = On
-KeyColumns = 0
-KeyPos = Top Right
-Key_XOff = 0.0
-Key_YOff = 0.0
-Landscape = Off
-LineWidth = 1.0
-MultiPlot = Off
-NumComplex = Off
-NumDisplay = Natural
-NumErr = On
-NumSF = 8
-OriginX = 0.0
-OriginY = 0.0
-Output =
-PaperHeight = 297
-PaperName = a4
-PaperWidth = 210
-PointLineWidth = 1.0
-PointSize = 1.0
-Samples = 250
-Samples_Method = NearestNeighbour
-Samples_X_Auto = False
-Samples_X = 40
-Samples_Y_Auto = False
-Samples_Y = 40
-TermAntiAlias = On
-TermEnlarge = Off
-TermInvert = Off
-TermTransparent = Off
-TermType = X11_SingleWindow
-TextColour = Black
-TextHAlign = Left
-TextVAlign = Bottom
-Title =
-Title_XOff = 0.0
-Title_YOff = 0.0
-URange_Log = False
-URange_Max = 1.0
-URange_Min = 0.0
-VRange_Log = False
-VRange_Max = 1.0
-VRange_Min = 0.0
-TRange_Log = False
-TRange_Max = 1.0
-TRange_Min = 0.0
-UnitAbbrev = On
-UnitAngleDimless = On
-UnitPrefix = On
-UnitScheme = SI
-Width = 8.0
-View_XY = 60
-View_YZ = 30
-ZAspect = 1.0
+aspect = 1.0
+autoAspect = on
+autoZAspect = on
+axesColor = black
+axisUnitStyle = ratio
+backup = off
+bar = 1.0
+autoBinOrigin = on
+autoBinWidth = on
+autoBoxFrom = on
+autoBoxWidth = on
+calendarIn = British
+calendarOut = British
+clip = off
+colKey = on
+colKeyPos = Right
+color = on
+contours = 12
+c1Range_log = false
+c1Range_max = 0
+c1Range_max_Auto = true
+c1Range_min = 0
+c1Range_min_Auto = true
+c1Range_renorm = true
+c1Range_reverse = false
+c2Range_log = false
+c2Range_max = 0
+c2Range_max_auto = true
+c2Range_min = 0
+c2Range_min_auto = true
+c2Range_renorm = true
+c2Range_reverse = false
+c3Range_log = false
+c3Range_max = 0
+c3Range_max_auto = true
+c3Range_min = 0
+c3Range_min_auto = true
+c3Range_renorm = true
+c3Range_reverse = false
+c4Range_log = false
+c4Range_max = 0
+c4Range_max_auto = true
+c4Range_min = 0
+c4Range_min_auto = true
+c4Range_renorm = true
+c4Range_reverse = false
+dataStyle = Points
+display = on
+dpi = 300
+fontSize = 1
+funcStyle = Lines
+grid = off
+gridAxisX = 1
+gridAxisY = 1
+gridAxisZ = 1
+gridMajColour = grey70
+gridMinColour = grey85
+key = on
+keyColumns = 0
+keyPos = top right
+key_Xoff = 0.0
+key_Yoff = 0.0
+landscape = off
+lineWidth = 1.0
+multiPlot = off
+numComplex = off
+numDisplay = natural
+numErr = on
+numSF = 8
+originX = 0.0
+originY = 0.0
+output =
+paperHeight = 297
+paperName = a4
+paperWidth = 210
+pointLineWidth = 1.0
+pointSize = 1.0
+samples = 250
+samples_method = nearestNeighbour
+samples_x_auto = false
+samples_x = 40
+samples_y_auto = false
+samples_y = 40
+termAntiAlias = on
+termEnlarge = off
+termInvert = off
+termTransparent = off
+termType = X11_singleWindow
+textColor = black
+textHAlign = left
+textVAlign = bottom
+title =
+title_Xoff = 0.0
+title_Yoff = 0.0
+uRange_log = false
+uRange_max = 1.0
+uRange_min = 0.0
+vRange_log = false
+vRange_max = 1.0
+vRange_min = 0.0
+tRange_log = false
+tRange_max = 1.0
+tRange_min = 0.0
+unitAbbrev = on
+unitAngleDimless = on
+unitPrefix = on
+unitScheme = si
+width = 8.0
+view_xy = 60
+view_yz = 30
+zAspect = 1.0
 
 [terminal]
-Colour = On
-Colour_Err = Red
-Colour_Rep = Green
-Colour_Wrn = Amber
-Splash = On
+color = on
+color_err = red
+color_rep = green
+color_wrn = amber
+splash = on
 
 [styling]
-Arrow_HeadAngle = 45
-Arrow_HeadSize = 1.0
-Arrow_HeadBackIndent = 0.2
-Axes_LineWidth = 1.0
-Axes_MajTickLen = 1.0
-Axes_MinTickLen = 1.0
-Axes_Separation = 1.0
-Axes_TextGap = 1.0
-ColourScale_Margin = 1.0
-ColourScale_Width = 1.0
-Grid_MajLineWidth = 1.0
-Grid_MinLineWidth = 0.5
-Baseline_LineWidth = 1.0
-Baseline_PointSize = 1.0
+arrow_headAngle = 45
+arrow_headSize = 1.0
+arrow_headBackIndent = 0.2
+axes_lineWidth = 1.0
+axes_majTickLen = 1.0
+axes_minTickLen = 1.0
+axes_separation = 1.0
+axes_textGap = 1.0
+colorScale_margin = 1.0
+colorScale_width = 1.0
+grid_majLineWidth = 1.0
+grid_minLineWidth = 0.5
+baseline_lineWidth = 1.0
+baseline_pointSize = 1.0
 
 [variables]
 pi = 3.14159265358979
 
-[colours]
-palette = Black, Red, Blue, Magenta, Cyan, Brown, Salmon, Gray,
-Green, NavyBlue, Periwinkle, PineGreen, SeaGreen, GreenYellow,
-Orange, CarnationPink, Plum
+[colors]
+palette = black, red, blue, magenta, cyan, brown, salmon, gray,
+green, navyBlue, periwinkle, pineGreen, seaGreen, greenYellow,
+orange, carnationPink, plum
 
 [latex]
-Preamble =
+preamble =
 \end{verbatim}
 
 \section{Setting definitions}
@@ -309,547 +309,571 @@ filters, see Section~\ref{sec:filters}.
 The {\tt settings} section can contain any of the following settings in any order:
 
 \begin{longtable}{p{3.4cm}p{9cm}}
-{\tt Aspect} & {\bf Possible values:} Any floating-point number.
+{\tt aspect} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set size ratio}
 
                Sets the $y/x$ aspect ratio of plots.
                \\
-{\tt AutoAspect} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt autoAspect} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} {\tt set size ratio}
 
-               Sets whether plots have the automatic $y/x$ aspect ratio, which is the golden ratio. If {\tt On}, then the above setting is ignored.
+               Sets whether plots have the automatic $y/x$ aspect ratio, which is the golden ratio. If {\tt on}, then the above setting is ignored.
                \\
-{\tt AutoZAspect} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt autoZAspect} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} {\tt set size zratio}
 
-               Sets whether 3d plots have the automatic $z/x$ aspect ratio, which is the golden ratio. If {\tt On}, then the above setting is ignored.
+               Sets whether 3d plots have the automatic $z/x$ aspect ratio, which is the golden ratio. If {\tt on}, then the above setting is ignored.
                \\
-{\tt AxesColour} & {\bf Possible values:} Any recognised colour.
+{\tt axesColour} & {\bf Possible values:} Any recognised color.
 
-               {\bf Analogous set command:} \indcmdts{set axescolour}
+               {\bf Analogous set command:} \indcmdts{set axescolor}
 
-               Sets the colour of axis lines and ticks.
+               Sets the color of axis lines and ticks.
                \\
-{\tt AxisUnitStyle} & {\bf Possible values:} {\tt Bracketed}, {\tt Ratio}, {\tt SquareBracketed}
+{\tt axisUnitStyle} & {\bf Possible values:} {\tt Bracketed}, {\tt Ratio}, {\tt SquareBracketed}
 
                {\bf Analogous set command:} \indcmdts{set axisunitstyle}
 
                Sets the style in which the physical units of quantities plotted against axes are appended to axis labels.
                \\
-{\tt Backup} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt backup} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set backup}
 
-               When this switch is set to {\tt On}, and plot output is being directed to file, attempts to write output over existing files cause a copy of the existing file to be preserved, with a tilde after its old filename (see Section~\ref{sec:file_backup}).
+               When this switch is set to {\tt on}, and plot output is being directed to file, attempts to write output over existing files cause a copy of the existing file to be preserved, with a tilde after its old filename (see Section~\ref{sec:file_backup}).
                \\
-{\tt Bar}     & {\bf Possible values:}  Any floating-point number.
+{\tt bar}     & {\bf Possible values:}  Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set bar}
 
                Sets the horizontal length of the lines drawn at the end of errorbars, in units of their default length.
                \\
-{\tt BinOrigin} & {\bf Possible values:} Any floating-point number.
+{\tt binOrigin} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set binorigin}
 
                Sets the point along the abscissa axis from which the bins used by the \indcmdt{histogram} originate.
                \\
-{\tt BinWidth} & {\bf Possible values:} Any floating-point number.
+{\tt autoBinOrigin} & {\bf Possible values:} {\tt on}, {\tt off}.
+
+               {\bf Analogous set command:} {\tt set binorigin}
+
+               Sets the point along the abscissa axis from which the bins used by the \indcmdt{histogram} originate to be chosen automatically.
+               \\
+{\tt binWidth} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set binwidth}
 
                Sets the widths of the bins used by the \indcmdt{histogram}.
                \\
-{\tt BoxFrom} & {\bf Possible values:} Any floating-point number.
+{\tt autoBinWidth} & {\bf Possible values:} {\tt on}, {\tt off}.
+
+               {\bf Analogous set command:} {\tt set binwidth}
+
+               Sets the widths of the bins used by the \indcmdt{histogram} to be chosen automatically.
+               \\
+{\tt boxFrom} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set boxfrom}
 
                Sets the horizontal point from which bars on bar charts appear to emanate.
                \\
-{\tt BoxWidth} & {\bf Possible values:} Any floating-point number.
+{\tt autoBoxFrom} & {\bf Possible values:} {\tt on}, {\tt off}.
+
+               {\bf Analogous set command:} {\tt set boxfrom}
+
+               Sets the horizontal point from which bars on bar charts appear to emanate to be chosen automatically.
+               \\
+{\tt boxWidth} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set boxwidth}
 
                Sets the default width of boxes on barcharts. If negative, then the boxes have automatically selected widths, so that the interfaces between bars occur at the horizontal midpoints between the specified datapoints.
                \\
-{\tt CalendarIn} & {\bf Possible values:} {\tt British}, {\tt French}, {\tt Greek}, {\tt Gregorian}, {\tt Hebrew}, {\tt Islamic}, {\tt Julian}, {\tt Papal}, {\tt Russian}.
+{\tt autoBoxWidth} & {\bf Possible values:} {\tt on}, {\tt off}.
+
+               {\bf Analogous set command:} {\tt set boxwidth}
+
+               Sets the boxes on barcharts to have automatically-selected widths.
+               \\
+{\tt calendarIn} & {\bf Possible values:} {\tt British}, {\tt French}, {\tt Greek}, {\tt Gregorian}, {\tt Hebrew}, {\tt Islamic}, {\tt Julian}, {\tt Papal}, {\tt Russian}.
 
                {\bf Analogous set command:} \indcmdts{set calendar}
 
                Sets the default calendar for the input of dates from day, month and year representation into Julian Date representation. See Section~\ref{sec:time_series} for more details.
                \\
-{\tt CalendarOut} & {\bf Possible values:} {\tt British}, {\tt French}, {\tt Greek}, {\tt Gregorian}, {\tt Hebrew}, {\tt Islamic}, {\tt Julian}, {\tt Papal}, {\tt Russian}.
+{\tt calendarOut} & {\bf Possible values:} {\tt British}, {\tt French}, {\tt Greek}, {\tt Gregorian}, {\tt Hebrew}, {\tt Islamic}, {\tt Julian}, {\tt Papal}, {\tt Russian}.
 
                {\bf Analogous set command:} \indcmdts{set calendar}
 
                Sets the default calendar for the output of dates from Julian Date representation to day, month and year representation. See Section~\ref{sec:time_series} for more details.
                \\
-{\tt Clip} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt clip} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set clip}
 
-               Sets whether datapoints close to the edges of graphs should be clipped at the edges ({\tt On}) or allowed to overrun the axes ({\tt Off}).
+               Sets whether datapoints close to the edges of graphs should be clipped at the edges ({\tt on}) or allowed to overrun the axes ({\tt off}).
                \\
-{\tt ColKey} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt colKey} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set colkey}
 
-               Sets whether \indpst{colourmap} plots have a scale along one side relating colour to ordinate value.
+               Sets whether \indpst{colormap} plots have a scale along one side relating color to ordinate value.
                \\
-{\tt ColKeyPos} & {\bf Possible values:} {\tt Top}, {\tt Bottom}, {\tt Left}, {\tt Right}.
+{\tt colKeyPos} & {\bf Possible values:} {\tt top}, {\tt bottom}, {\tt left}, {\tt right}.
 
                {\bf Analogous set command:} \indcmdts{set colkey}
 
-               Sets the side of the plot along which the colour legend should appear on \indpst{colourmap} plots.
+               Sets the side of the plot along which the color legend should appear on \indpst{colormap} plots.
                \\
-{\tt Colour} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt color} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set terminal}
 
-               Sets whether output should be colour ({\tt On}) or monochrome ({\tt Off}).
+               Sets whether output should be color ({\tt on}) or monochrome ({\tt off}).
                \\
-{\tt Contour} & {\bf Possible values:} Any integer.
+{\tt contour} & {\bf Possible values:} Any integer.
 
                {\bf Analogous set command:} \indcmdts{set contour}
 
                Sets the number of contours which are drawn in the \indpst{contourmap} plot style.
                \\
-{\tt C?Range\_Log} & {\bf Possible values:} {\tt True}, {\tt False}.
+{\tt c?Range\_log} & {\bf Possible values:} {\tt true}, {\tt false}.
 
                {\bf Analogous set command:} \indcmdts{set logscale c}
 
-               When the variables {\tt c1}--{\tt c4} are set to renormalise in the {\tt C?Range\_Renorm} setting, this setting determines whether colour maps are drawn with logarithmic or linear colour scales. The {\tt ?} wildcard should be replaced with an integer in the range 1--4 to alter the renormalisation of the variables {\tt c1} through {\tt c4} respectively in the expressions supplied to the {\tt colmap} setting. In the case of {\tt c1}, this setting also determines whether contours demark linear or logarithmic intervals on contour maps.\indps{contourmap}\indps{colourmap}
+               When the variables {\tt c1}--{\tt c4} are set to renormalise in the {\tt c?Range\_renorm} setting, this setting determines whether color maps are drawn with logarithmic or linear color scales. The {\tt ?} wildcard should be replaced with an integer in the range 1--4 to alter the renormalisation of the variables {\tt c1} through {\tt c4} respectively in the expressions supplied to the {\tt colmap} setting. In the case of {\tt c1}, this setting also determines whether contours demark linear or logarithmic intervals on contour maps.\indps{contourmap}\indps{colormap}
                \\
-{\tt C?Range\_Max} & {\bf Possible values:} Any floating-point number.
+{\tt c?Range\_max} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set crange}
 
-               When the variables {\tt c1}--{\tt c4} are set to renormalise in the {\tt C?Range\_Renorm} setting, this setting determines the upper limit of the range of values demarked by differing colours on colour maps. The {\tt ?} wildcard should be replaced with an integer in the range 1--4 to alter the renormalisation of the variables {\tt c1} through {\tt c4} respectively in the expressions supplied to the {\tt colmap} setting. In the case of {\tt c1}, this setting also determines the range of ordinate values for which contours are drawn on contour maps.
+               When the variables {\tt c1}--{\tt c4} are set to renormalise in the {\tt c?Range\_renorm} setting, this setting determines the upper limit of the range of values demarked by differing colors on color maps. The {\tt ?} wildcard should be replaced with an integer in the range 1--4 to alter the renormalisation of the variables {\tt c1} through {\tt c4} respectively in the expressions supplied to the {\tt colmap} setting. In the case of {\tt c1}, this setting also determines the range of ordinate values for which contours are drawn on contour maps.
                \\
-{\tt C?Range\_Max\_Auto} & {\bf Possible values:} {\tt True}, {\tt False}.
+{\tt c?Range\_max\_auto} & {\bf Possible values:} {\tt true}, {\tt false}.
 
                {\bf Analogous set command:} \indcmdts{set crange}
 
-               When the variables {\tt c1}--{\tt c4} are set to renormalise in the {\tt C?Range\_Renorm} setting, this setting determines whether the upper limit of the range of values demarked by differing colours on colour maps should autoscale to fit the data, or be a fixed value as specified in the {\tt C?Range\_Max} setting. The {\tt ?} wildcard should be replaced with an integer in the range 1--4 to alter the renormalisation of the variables {\tt c1} through {\tt c4} respectively. In the case of {\tt c1}, this setting also affects the range of ordinate values for which contours are drawn on contour maps.
+               When the variables {\tt c1}--{\tt c4} are set to renormalise in the {\tt c?Range\_renorm} setting, this setting determines whether the upper limit of the range of values demarked by differing colors on color maps should autoscale to fit the data, or be a fixed value as specified in the {\tt C?Range\_max} setting. The {\tt ?} wildcard should be replaced with an integer in the range 1--4 to alter the renormalisation of the variables {\tt c1} through {\tt c4} respectively. In the case of {\tt c1}, this setting also affects the range of ordinate values for which contours are drawn on contour maps.
                \\
-{\tt C?Range\_Min} & {\bf Possible values:} Any floating-point number.
+{\tt c?Range\_min} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set crange}
 
-               When the variables {\tt c1}--{\tt c4} are set to renormalise in the {\tt C?Range\_Renorm} setting, this setting determines the lower limit of the range of values demarked by differing colours on colour maps. The {\tt ?} wildcard should be replaced with an integer in the range 1--4 to alter the renormalisation of the variables {\tt c1} through {\tt c4} respectively in the expressions supplied to the {\tt colmap} setting. In the case of {\tt c1}, this setting also determines the range of ordinate values for which contours are drawn on contour maps.
+               When the variables {\tt c1}--{\tt c4} are set to renormalise in the {\tt c?Range\_renorm} setting, this setting determines the lower limit of the range of values demarked by differing colors on color maps. The {\tt ?} wildcard should be replaced with an integer in the range 1--4 to alter the renormalisation of the variables {\tt c1} through {\tt c4} respectively in the expressions supplied to the {\tt colmap} setting. In the case of {\tt c1}, this setting also determines the range of ordinate values for which contours are drawn on contour maps.
                \\
-{\tt C?Range\_Min\_Auto} & {\bf Possible values:} {\tt True}, {\tt False}.
+{\tt c?Range\_min\_auto} & {\bf Possible values:} {\tt true}, {\tt false}.
 
                {\bf Analogous set command:} \indcmdts{set crange}
 
-               When the variables {\tt c1}--{\tt c4} are set to renormalise in the {\tt C?Range\_Renorm} setting, this setting determines whether the lower limit of the range of values demarked by differing colours on colour maps should autoscale to fit the data, or be a fixed value as specified in the {\tt C?Range\_Min} setting. The {\tt ?} wildcard should be replaced with an integer in the range 1--4 to alter the renormalisation of the variables {\tt c1} through {\tt c4} respectively. In the case of {\tt c1}, this setting also affects the range of ordinate values for which contours are drawn on contour maps.
+               When the variables {\tt c1}--{\tt c4} are set to renormalise in the {\tt c?Range\_renorm} setting, this setting determines whether the lower limit of the range of values demarked by differing colors on color maps should autoscale to fit the data, or be a fixed value as specified in the {\tt C?Range\_min} setting. The {\tt ?} wildcard should be replaced with an integer in the range 1--4 to alter the renormalisation of the variables {\tt c1} through {\tt c4} respectively. In the case of {\tt c1}, this setting also affects the range of ordinate values for which contours are drawn on contour maps.
                \\
-{\tt C?Range\_Renorm} & {\bf Possible values:} {\tt True}, {\tt False}.
+{\tt c?Range\_renorm} & {\bf Possible values:} {\tt true}, {\tt false}.
 
                {\bf Analogous set command:} \indcmdts{set crange}
 
-               Sets whether the variables {\tt c1}--{\tt c4}, used in the construction of colour maps, should be renormalised into the range 0--1 before being passed to the expressions supplied to the {\tt set colmap} command, or whether they should contain the exact data values supplied in the 3rd--6th columns of data to the {\tt colourmap} plot style. The {\tt ?} wildcard should be replaced with an integer in the range 1--4 to alter the renormalisation of the variables {\tt c1} through {\tt c4} respectively.
+               Sets whether the variables {\tt c1}--{\tt c4}, used in the construction of color maps, should be renormalised into the range 0--1 before being passed to the expressions supplied to the {\tt set colmap} command, or whether they should contain the exact data values supplied in the 3rd--6th columns of data to the {\tt colormap} plot style. The {\tt ?} wildcard should be replaced with an integer in the range 1--4 to alter the renormalisation of the variables {\tt c1} through {\tt c4} respectively.
                \\
-{\tt C?Range\_Reverse} & {\bf Possible values:} {\tt True}, {\tt False}.
+{\tt c?Range\_reverse} & {\bf Possible values:} {\tt true}, {\tt false}.
 
                {\bf Analogous set command:} \indcmdts{set crange}
 
-               When the variables {\tt c1}--{\tt c4} are set to renormalise in the {\tt C?Range\_Renorm} setting, this setting determines whether the renormalisation into the range 0--1 is inverted such that the maximum value maps to zero and the minimum value maps to one. The {\tt ?} wildcard should be replaced with an integer in the range 1--4 to alter the renormalisation of the variables {\tt c1} through {\tt c4} respectively.
+               When the variables {\tt c1}--{\tt c4} are set to renormalise in the {\tt c?Range\_renorm} setting, this setting determines whether the renormalisation into the range 0--1 is inverted such that the maximum value maps to zero and the minimum value maps to one. The {\tt ?} wildcard should be replaced with an integer in the range 1--4 to alter the renormalisation of the variables {\tt c1} through {\tt c4} respectively.
                \\
-{\tt DataStyle} & {\bf Possible values:} Any plot style.
+{\tt dataStyle} & {\bf Possible values:} Any plot style.
 
                {\bf Analogous set command:} \indcmdts{set data style}
 
                Sets the plot style used by default when plotting \datafile s.
                \\
-{\tt Display} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt display} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set display}
 
-               When set to {\tt On}, no output is produced until the \indcmdt{set display} is issued. This is useful for speeding up scripts which produce large multiplots; see Section~\ref{sec:set_display} for more details.
+               When set to {\tt on}, no output is produced until the \indcmdt{set display} is issued. This is useful for speeding up scripts which produce large multiplots; see Section~\ref{sec:set_display} for more details.
                \\
-{\tt DPI} & {\bf Possible values:} Any floating-point number.
+{\tt dpi} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set terminal dpi}
 
                Sets the sampling quality used, in dots per inch, when output is sent to a bitmapped terminal (the bmp, jpeg, gif, png and tif terminals).
                \\
-{\tt FontSize} & {\bf Possible values:} Any floating-point number.
+{\tt fontSize} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set fontsize}
 
                Sets the fontsize of text, where $1.0$ represents 10-point text, and other values differ multiplicatively.
                \\
-{\tt FuncStyle} & {\bf Possible values:} Any plot style.
+{\tt funcStyle} & {\bf Possible values:} Any plot style.
 
                {\bf Analogous set command:} \indcmdts{set function style}
 
                Sets the plot style used by default when plotting functions.
                \\
-{\tt Grid} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt grid} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set grid}
 
                Sets whether a grid should be displayed on plots.
                \\
-{\tt GridAxisX} & {\bf Possible values:} Any integer.
+{\tt gridAxisX} & {\bf Possible values:} Any integer.
 
                {\bf Analogous set command:} None
 
                Sets the default horizontal axis to which gridlines should attach, if the {\tt set grid} command is called without specifying which axes to use.
                \\
-{\tt GridAxisY} & {\bf Possible values:} Any integer.
+{\tt gridAxisY} & {\bf Possible values:} Any integer.
 
                {\bf Analogous set command:} None
 
                Sets the default vertical axis to which gridlines should attach, if the {\tt set grid} command is called without specifying which axes to use.
                \\
-{\tt GridAxisZ} & {\bf Possible values:} Any integer.
+{\tt gridAxisZ} & {\bf Possible values:} Any integer.
 
                {\bf Analogous set command:} None
 
                Sets the default $z$-axis to which gridlines should attach, if the {\tt set grid} command is called without specifying which axes to use.
                \\
-{\tt GridMajColour} & {\bf Possible values:} Any recognised colour.
+{\tt gridMajColour} & {\bf Possible values:} Any recognised color.
 
-               {\bf Analogous set command:} \indcmdts{set gridmajcolour}
+               {\bf Analogous set command:} \indcmdts{set gridmajcolor}
 
-               Sets the colour of major grid lines.
+               Sets the color of major grid lines.
                \\
-{\tt GridMinColour} & {\bf Possible values:} Any recognised colour.
+{\tt gridMinColour} & {\bf Possible values:} Any recognised color.
 
-               {\bf Analogous set command:} \indcmdts{set gridmincolour}
+               {\bf Analogous set command:} \indcmdts{set gridmincolor}
 
-               Sets the colour of minor grid lines.
+               Sets the color of minor grid lines.
                \\
-{\tt Key} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt key} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set key}
 
                Sets whether a legend is displayed on plots.
                \\
-{\tt KeyColumns} & {\bf Possible values:} Any integer $\geq 0$.
+{\tt keyColumns} & {\bf Possible values:} Any integer $\geq 0$.
 
                {\bf Analogous set command:} \indcmdts{set keycolumns}
 
                Sets the number of columns into which the legends of plots should be divided. If a value of zero is given, then the number of columns is decided automatically for each plot.
                \\
-{\tt KeyPos} & {\bf Possible values:} {\tt Top Right}, {\tt Top XCentre}, {\tt Top Left}, {\tt YCentre Right}, {\tt YCentre XCentre}, {\tt YCentre Left}, {\tt Bottom Right}, {\tt Bottom XCentre}, {\tt Bottom Left}, {\tt Above}, {\tt Below}, {\tt Outside}.
+{\tt keyPos} & {\bf Possible values:} {\tt top right}, {\tt top xcenter}, {\tt top left}, {\tt ycenter right}, {\tt ycenter xcenter}, {\tt ycenter left}, {\tt bottom right}, {\tt bottom xcenter}, {\tt bottom left}, {\tt above}, {\tt below}, {\tt outside}.
 
                {\bf Analogous set command:} \indcmdts{set key}
 
                Sets where the legend should appear on plots.
                \\
-{\tt Key\_XOff} & {\bf Possible values:} Any floating-point number.
+{\tt key\_xOff} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set key}
 
                Sets the horizontal offset, in approximate graph-widths, that should be applied to the legend, relative to its default position, as set by {\tt KEYPOS}.
                \\
-{\tt Key\_YOff} & {\bf Possible values:} Any floating-point number.
+{\tt key\_yOff} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set key}
 
                Sets the vertical offset, in approximate graph-heights, that should be applied to the legend, relative to its default position, as set by {\tt KEYPOS}.
                \\
-{\tt Landscape} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt landscape} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set terminal}
 
-               Sets whether output is in portrait orientation ({\tt Off}), or landscape orientation ({\tt On}).
+               Sets whether output is in portrait orientation ({\tt off}), or landscape orientation ({\tt on}).
                \\
-{\tt LineWidth} & {\bf Possible values:} Any floating-point number.
+{\tt lineWidth} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set linewidth}
 
                Sets the width of lines on plots, as a multiple of the default.
                \\
-{\tt MultiPlot} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt multiPlot} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set multiplot}
 
                Sets whether multiplot mode is on or off.
                \\
-{\tt NumComplex} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt numComplex} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set numerics}
 
                Sets whether complex arithmetic is enabled, or whether all non-real results to calculations should raise numerical exceptions.
                \\
-{\tt NumDisplay} & {\bf Possible values:} {\tt LaTeX}, {\tt Natural}, {\tt Typeable}.
+{\tt numDisplay} & {\bf Possible values:} {\tt latex}, {\tt natural}, {\tt typeable}.
 
                {\bf Analogous set command:} \indcmdts{set numerics}
 
                Sets whether numerical results are displayed in a natural human-readable way, e.g.\ $2\,\mathrm{m}$, in LaTeX, e.g.\ {\tt \$$2\backslash$,$\backslash$mathrm\{m\}\$}, or in a way which may be pasted back into PyXPlot, e.g.\ {\tt 2*unit(m)}.
                \\
-{\tt NumErr} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt numErr} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set numerics}
 
                Sets whether explicit error messages are thrown when calculations yield undefined results, as in the cases of division by zero or the evaluation of functions in regions where they are undefined or infinite. If explicit error messages are disabled, such calculations quietly return {\tt nan}.
                \\
-{\tt NumSF} & {\bf Possible values:} Any integer between 0 and 30.
+{\tt numSF} & {\bf Possible values:} Any integer between 0 and 30.
 
                {\bf Analogous set command:} \indcmdts{set numerics}
 
                Sets the number of significant figures to which numerical quantities are displayed by default.
                \\
-{\tt OriginX} & {\bf Possible values:} Any floating point number.
+{\tt originX} & {\bf Possible values:} Any floating point number.
 
                {\bf Analogous set command:} \indcmdts{set origin}
 
                Sets the horizontal position, in centimetres, of the default origin of plots on the page. Most useful when multiplotting many plots.
                \\
-{\tt OriginY} & {\bf Possible values:} Any floating point number.
+{\tt originY} & {\bf Possible values:} Any floating point number.
 
                {\bf Analogous set command:} \indcmdts{set origin}
 
                Sets the vertical position, in centimetres, of the default origin of plots on the page. Most useful when multiplotting many plots.
                \\
-{\tt Output} & {\bf Possible values:} Any string (case sensitive).
+{\tt output} & {\bf Possible values:} Any string (case sensitive).
 
                {\bf Analogous set command:} \indcmdts{set output}
 
                Sets the output filename for plots. If blank, the default filename of {\tt pyxplot.foo} is used, where {\tt foo} is an extension appropriate for the file format.
                \\
-{\tt PaperHeight} & {\bf Possible values:} Any floating-point number.
+{\tt paperHeight} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set papersize}
 
                Sets the height of the papersize for PostScript output in millimetres.
                \\
-{\tt PaperName} & {\bf Possible values:} A string matching any of the papersizes listed in Chapter~\ref{ch:paper_sizes}.
+{\tt paperName} & {\bf Possible values:} A string matching any of the papersizes listed in Chapter~\ref{ch:paper_sizes}.
 
                {\bf Analogous set command:} \indcmdts{set papersize}
 
                Sets the papersize for PostScript output to one of the pre-defined papersizes listed in Chapter~\ref{ch:paper_sizes}.
                \\
-{\tt PaperWidth} & {\bf Possible values:} Any floating-point number.
+{\tt paperWidth} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set papersize}
 
                Sets the width of the papersize for PostScript output in millimetres.
                \\
-{\tt PointLineWidth} & {\bf Possible values:} Any floating-point number.
+{\tt pointLineWidth} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set pointlinewidth}
 
                Sets the linewidth used to stroke points onto plots, as a multiple of the default.
                \\
-{\tt PointSize} & {\bf Possible values:} Any floating-point number.
+{\tt pointSize} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set pointsize}
 
                Sets the sizes of points on plots, as a multiple of their normal sizes.
                \\
-%{\tt Projection} & {\bf Possible values:} {\tt gnomonic}, {\tt flat}.
+%{\tt projection} & {\bf Possible values:} {\tt gnomonic}, {\tt flat}.
 %
 %               {\bf Analogous set command:} \indcmdts{set projection}
 %
 %               Sets the projection used on graphs. Flat projection is useful for most purposes, but gnomonic projection is useful for representing curved spaces on flat pieces of paper, when drawing world maps, for example.
 %               \\
-{\tt Samples} & {\bf Possible values:} Any integer.
+{\tt samples} & {\bf Possible values:} Any integer.
 
                {\bf Analogous set command:} \indcmdts{set samples}
 
                Sets the number of samples (datapoints) to be evaluated along the abscissa axis when plotting a function.
                \\
-{\tt Samples\_Method} & {\bf Possible values:} {\tt Inverse\-Square}, {\tt Nearest\-Neigh\-bour}.
+{\tt samples\_method} & {\bf Possible values:} {\tt Inverse\-Square}, {\tt Nearest\-Neigh\-bour}.
 
                {\bf Analogous set command:} \indcmdts{set samples}
 
-               Sets the method used to interpolate two-dimensional non-gridded arrays of datapoints from datafiles within the \indcmdt{interpolate} and when plotting using the \indpst{colourmap}, \indpst{contourmap} and \indpst{surface} plot styles.
+               Sets the method used to interpolate two-dimensional non-gridded arrays of datapoints from datafiles within the \indcmdt{interpolate} and when plotting using the \indpst{colormap}, \indpst{contourmap} and \indpst{surface} plot styles.
                \\
-{\tt Samples\_X} & {\bf Possible values:} Any integer.
+{\tt samples\_x} & {\bf Possible values:} Any integer.
 
                {\bf Analogous set command:} \indcmdts{set samples}
 
-               Sets the number of samples (datapoints) to be evaluated along the first abscissa axis when drawing colour maps and surfaces, and when calculating contour maps.
+               Sets the number of samples (datapoints) to be evaluated along the first abscissa axis when drawing color maps and surfaces, and when calculating contour maps.
                \\
-{\tt Samples\_X\_Auto} & {\bf Possible values:} {\tt True}, {\tt False}.
+{\tt samples\_x\_auto} & {\bf Possible values:} {\tt true}, {\tt false}.
 
                {\bf Analogous set command:} \indcmdts{set samples}
 
-               Sets whether the number of samples (datapoints) to be evaluated along the first abscissa axis when drawing colour maps and surfaces, and when calculating contour maps should follow the number of samples set with the \indcmdts{set samples} command.
+               Sets whether the number of samples (datapoints) to be evaluated along the first abscissa axis when drawing color maps and surfaces, and when calculating contour maps should follow the number of samples set with the \indcmdts{set samples} command.
                \\
-{\tt Samples\_Y} & {\bf Possible values:} Any integer.
+{\tt samples\_y} & {\bf Possible values:} Any integer.
 
                {\bf Analogous set command:} \indcmdts{set samples}
 
-               Sets the number of samples (datapoints) to be evaluated along the second abscissa axis when drawing colour maps and surfaces, and when calculating contour maps.
+               Sets the number of samples (datapoints) to be evaluated along the second abscissa axis when drawing color maps and surfaces, and when calculating contour maps.
                \\
-{\tt Samples\_Y\_Auto} & {\bf Possible values:} {\tt True}, {\tt False}.
+{\tt samples\_y\_auto} & {\bf Possible values:} {\tt true}, {\tt false}.
 
                {\bf Analogous set command:} \indcmdts{set samples}
 
-               Sets whether the number of samples (datapoints) to be evaluated along the second abscissa axis when drawing colour maps and surfaces, and when calculating contour maps should follow the number of samples set with the \indcmdts{set samples} command.
+               Sets whether the number of samples (datapoints) to be evaluated along the second abscissa axis when drawing color maps and surfaces, and when calculating contour maps should follow the number of samples set with the \indcmdts{set samples} command.
                \\
-{\tt TermAntiAlias} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt termAntiAlias} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set terminal}
 
-               Sets whether output sent to the bitmapped graphics output terminals -- i.e.\ the bmp, jpeg, gif, png and tif terminals -- is antialiased. Antialiasing smooths the colour boundaries to disguise the effects of pixelisation and is almost invariably desirable.
+               Sets whether output sent to the bitmapped graphics output terminals -- i.e.\ the bmp, jpeg, gif, png and tif terminals -- is antialiased. Antialiasing smooths the color boundaries to disguise the effects of pixelisation and is almost invariably desirable.
                \\
-{\tt TermEnlarge} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt termEnlarge} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set terminal}
 
-               When set to {\tt On} output is enlarged or shrunk to fit the current paper size.
+               When set to {\tt on} output is enlarged or shrunk to fit the current paper size.
                \\
-{\tt TermInvert} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt termInvert} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set terminal}
 
-               Sets whether jpeg/gif/png output has normal colours ({\tt Off}), or inverted colours ({\tt On}).
+               Sets whether jpeg/gif/png output has normal colors ({\tt off}), or inverted colors ({\tt on}).
                \\
-{\tt TermTransparent} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt termTransparent} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set terminal}
 
-               Sets whether jpeg/gif/png output has transparent background ({\tt On}), or solid background ({\tt Off}).
+               Sets whether jpeg/gif/png output has transparent background ({\tt on}), or solid background ({\tt off}).
                \\
-{\tt TermType} & {\bf Possible values:} {\tt bmp}, {\tt eps}, {\tt gif}, {\tt jpg}, {\tt pdf}, {\tt png}, {\tt ps}, {\tt svg}, {\tt tif}, {\tt X11\_multiwindow}, {\tt X11\_persist}, {\tt X11\_singlewindow}.
+{\tt termType} & {\bf Possible values:} {\tt bmp}, {\tt eps}, {\tt gif}, {\tt jpg}, {\tt pdf}, {\tt png}, {\tt ps}, {\tt svg}, {\tt tif}, {\tt X11\_multiWindow}, {\tt X11\_persist}, {\tt X11\_singleWindow}.
 
                {\bf Analogous set command:} \indcmdts{set terminal}
 
                Sets whether output is sent to the screen, using one of the {\tt X11\_}... terminals, or to disk. In the latter case, output may be produced in a wide variety of graphical formats.
                \\
-{\tt TextColour} & {\bf Possible values:} Any recognised colour.
+{\tt textColour} & {\bf Possible values:} Any recognised color.
 
-               {\bf Analogous set command:} \indcmdts{set textcolour}
+               {\bf Analogous set command:} \indcmdts{set textcolor}
 
-               Sets the colour of all text output.
+               Sets the color of all text output.
                \\
-{\tt TextHAlign} & {\bf Possible values:} {\tt Left}, {\tt Centre}, {\tt Right}.
+{\tt textHAlign} & {\bf Possible values:} {\tt left}, {\tt center}, {\tt right}.
 
                {\bf Analogous set command:} \indcmdts{set texthalign}
 
                Sets the horizontal alignment of text labels to their given reference positions.
                \\
-{\tt TextVAlign} & {\bf Possible values:} {\tt Top}, {\tt Centre}, {\tt Bottom}.
+{\tt textVAlign} & {\bf Possible values:} {\tt top}, {\tt center}, {\tt bottom}.
 
                {\bf Analogous set command:} \indcmdts{set textvalign}
 
                Sets the vertical alignment of text labels to their given reference positions.
                \\
-{\tt Title} & {\bf Possible values:} Any string (case sensitive).
+{\tt title} & {\bf Possible values:} Any string (case sensitive).
 
                {\bf Analogous set command:} \indcmdts{set title}
 
                Sets the title to appear at the top of the plot.
                \\
-{\tt Title\_XOff} & {\bf Possible values:} Any floating point number.
+{\tt title\_xOff} & {\bf Possible values:} Any floating point number.
 
                {\bf Analogous set command:} \indcmdts{set title}
 
                Sets the horizontal offset of the title of the plot from its default central location.
                \\
-{\tt Title\_YOff} & {\bf Possible values:} Any floating point number.
+{\tt title\_yOff} & {\bf Possible values:} Any floating point number.
 
                {\bf Analogous set command:} \indcmdts{set title}
 
                Sets the vertical offset of the title of the plot from its default location at the top of the plot.
                \\
-{\tt TRange\_Log} & {\bf Possible values:} {\tt True}, {\tt False}.
+{\tt tRange\_log} & {\bf Possible values:} {\tt true}, {\tt false}.
 
                {\bf Analogous set command:} \indcmdts{set logscale t}
 
                Sets whether the $t$-axis -- used for parametric plotting -- is linear or logarithmic.
                \\
-{\tt TRange\_Max} & {\bf Possible values:} Any floating-point number.
+{\tt tRange\_max} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set trange}
 
                Sets upper limit of the $t$-axis, used for parametric plotting.
                \\
-{\tt TRange\_Min} & {\bf Possible values:} Any floating-point number.
+{\tt tRange\_min} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set trange}
 
                Sets lower limit of the $t$-axis, used for parametric plotting.
                \\
-{\tt UnitAbbrev} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt unitAbbrev} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set unit}
 
                Sets whether physical units are displayed in abbreviated form, e.g.\ {\tt mm}, or in full, e.g.\ {\tt millimetres}.
                \\
-{\tt UnitAngleDimless} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt unitAngleDimless} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set unit}
 
                Sets whether angles are treated as dimensionless units, or whether the radian is treated as a base unit.
                \\
-{\tt UnitPrefix} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt unitPrefix} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous set command:} \indcmdts{set unit}
 
                Sets whether SI prefixes, such as {\tt milli-} and {\tt mega-} are prepended to SI units where appropriate.
                \\
-{\tt UnitScheme} & {\bf Possible values:} {\tt Ancient}, {\tt CGS}, {\tt Imperial}, {\tt Planck}, {\tt SI}, {\tt USCustomary}.
+{\tt unitScheme} & {\bf Possible values:} {\tt ancient}, {\tt cgs}, {\tt imperial}, {\tt planck}, {\tt si}, {\tt USCustomary}.
 
                {\bf Analogous set command:} \indcmdts{set unit}
 
                Sets the scheme of physical units in which quantities are displayed.
                \\
-{\tt URange\_Log} & {\bf Possible values:} {\tt True}, {\tt False}.
+{\tt uRange\_log} & {\bf Possible values:} {\tt true}, {\tt false}.
 
                {\bf Analogous set command:} \indcmdts{set logscale u}
 
                Sets whether the $u$-axis -- used for parametric plotting -- is linear or logarithmic.
                \\
-{\tt URange\_Max} & {\bf Possible values:} Any floating-point number.
+{\tt uRange\_max} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set urange}
 
                Sets upper limit of the $u$-axis, used for parametric plotting.
                \\
-{\tt URange\_Min} & {\bf Possible values:} Any floating-point number.
+{\tt uRange\_min} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set urange}
 
                Sets lower limit of the $t$-axis, used for parametric plotting.
                \\
-{\tt VRange\_Log} & {\bf Possible values:} {\tt True}, {\tt False}.
+{\tt vRange\_log} & {\bf Possible values:} {\tt true}, {\tt false}.
 
                {\bf Analogous set command:} \indcmdts{set logscale v}
 
                Sets whether the $v$-axis -- used for parametric plotting -- is linear or logarithmic.
                \\
-{\tt VRange\_Max} & {\bf Possible values:} Any floating-point number.
+{\tt vRange\_max} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set vrange}
 
                Sets upper limit of the $v$-axis, used for parametric plotting.
                \\
-{\tt VRange\_Min} & {\bf Possible values:} Any floating-point number.
+{\tt vRange\_min} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set vrange}
 
                Sets lower limit of the $v$-axis, used for parametric plotting.
                \\
-{\tt Width} & {\bf Possible values:} Any floating-point number.
+{\tt width} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set commands:} \indcmdts{set width}, \indcmdts{set size}
 
                Sets the width of plots in centimetres.
                \\
-{\tt View\_XY} & {\bf Possible values:} Any floating-point number.
+{\tt view\_xy} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set commands:} \indcmdts{set view}
 
                Sets the viewing angle of three-dimensional plots in the $x$-$y$ plane in degrees.
                \\
-{\tt View\_YZ} & {\bf Possible values:} Any floating-point number.
+{\tt view\_yz} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set commands:} \indcmdts{set view}
 
                Sets the viewing angle of three-dimensional plots in the $y$-$z$ plane in degrees.
                \\
-{\tt ZAspect} & {\bf Possible values:} Any floating-point number.
+{\tt zAspect} & {\bf Possible values:} Any floating-point number.
 
                {\bf Analogous set command:} \indcmdts{set size ratio}
 
@@ -862,59 +886,59 @@ The {\tt settings} section can contain any of the following settings in any orde
 The {\tt styling} section can contain any of the following settings in any order:
 
 \begin{longtable}{p{3.4cm}p{9cm}}
-{\tt Arrow\_HeadAngle} & {\bf Possible values:} Any floating-point number.
+{\tt arrow\_headAngle} & {\bf Possible values:} Any floating-point number.
 
                Sets the angle, in degrees, at which the two sides of arrow heads meet at its point.
                \\
-{\tt Arrow\_HeadSize} & {\bf Possible values:} Any floating-point number.
+{\tt arrow\_headSize} & {\bf Possible values:} Any floating-point number.
 
                Sets the size of all arrow heads. A value of 1.0 corresponds to PyXPlot's default size.
                \\
-{\tt Arrow\_HeadBackIndent} & {\bf Possible values:} Any floating-point number.
+{\tt arrow\_headBackIndent} & {\bf Possible values:} Any floating-point number.
 
                Sets the size of the indentation in the back of arrow heads. The default size is 0.2. Sensible values lie in the range 0 (no indentation) to 1 (the indentation extends the whole length of the arrow head). Less sensible values may be used by the aesthetically adventurous.
                \\
-{\tt Axes\_LineWidth}  & {\bf Possible values:} Any floating-point number.
+{\tt axes\_lineWidth}  & {\bf Possible values:} Any floating-point number.
 
                Sets the line width used to draw graph axes.
                \\
-{\tt Axes\_MajTickLen} & {\bf Possible values:} Any floating-point number.
+{\tt axes\_majTickLen} & {\bf Possible values:} Any floating-point number.
 
                Sets the length of major axis ticks. A value of 1.0 corresponds to PyXPlot's default length of $1.2\,\mathrm{mm}$; other values differ from this multiplicatively.
                \\
-{\tt Axes\_MinTickLen} & {\bf Possible values:} Any floating-point number.
+{\tt axes\_minTickLen} & {\bf Possible values:} Any floating-point number.
 
                Sets the length of minor axis ticks. A value of 1.0 corresponds to PyXPlot's default length of $0.85\,\mathrm{mm}$; other values differ from this multiplicatively.
                \\
-{\tt Axes\_Separation} & {\bf Possible values:} Any floating-point number.
+{\tt axes\_separation} & {\bf Possible values:} Any floating-point number.
 
                Sets the separation between parallel axes on graphs, less the width of any text labels associated with the axes. A value of 1.0 corresponds to PyXPlot's default spacing of $8\,\mathrm{mm}$; other values differ from this multiplicatively.
                \\
-{\tt Axes\_TextGap} & {\bf Possible values:} Any floating-point number.
+{\tt axes\_textGap} & {\bf Possible values:} Any floating-point number.
 
                Sets the separation between axes and the text labels which are associated with them. A value of 1.0 corresponds to PyXPlot's default spacing of $3\,\mathrm{mm}$; other values differ from this multiplicatively.
                \\
-{\tt ColourScale\_Margin} & {\bf Possible values:} Any floating-point number.
+{\tt colorScale\_margin} & {\bf Possible values:} Any floating-point number.
 
-               Sets the separation left between the axes of plots drawn using the {\tt colourmap} plot style, and of the colour scales drawn alongside them. A value of 1.0 corresponds to PyXPlot's default spacing; other values differ from this multiplicatively.
+               Sets the separation left between the axes of plots drawn using the {\tt colormap} plot style, and of the color scales drawn alongside them. A value of 1.0 corresponds to PyXPlot's default spacing; other values differ from this multiplicatively.
                \\
-{\tt ColourScale\_Width} & {\bf Possible values:} Any floating-point number.
+{\tt colorScale\_width} & {\bf Possible values:} Any floating-point number.
 
-               Sets the width of the colour scale bars drawn alonside plots drawn using the {\tt colourmap} plot style. A value of 1.0 corresponds to PyXPlot's width; other values differ from this multiplicatively.
+               Sets the width of the color scale bars drawn alonside plots drawn using the {\tt colormap} plot style. A value of 1.0 corresponds to PyXPlot's width; other values differ from this multiplicatively.
                \\
-{\tt Grid\_MajLineWidth} & {\bf Possible values:} Any floating-point number.
+{\tt grid\_majLineWidth} & {\bf Possible values:} Any floating-point number.
 
                Sets the line width used to draw major gridlines (default $1.0$).
                \\
-{\tt Grid\_MinLineWidth} & {\bf Possible values:} Any floating-point number.
+{\tt grid\_minLineWidth} & {\bf Possible values:} Any floating-point number.
 
                Sets the line width used to draw minor gridlines (default $0.5$).
                \\
-{\tt Baseline\_LineWidth} & {\bf Possible values:} Any floating-point number.
+{\tt baseline\_lineWidth} & {\bf Possible values:} Any floating-point number.
 
                Sets the PostScript line width which corresponds to a {\tt linewidth} of 1.0. A value of 1.0 corresponds to PyXPlot's default line width of $0.2\,\mathrm{mm}$; other values differ from this multiplicatively.
                \\
-{\tt Baseline\_PointSize} & {\bf Possible values:} Any floating-point number.
+{\tt baseline\_pointSize} & {\bf Possible values:} Any floating-point number.
 
                Sets the baseline point size which corresponds to a {\tt pointsize} of 1.0. A value of 1.0 corresponds to PyXPlot's default; other values differ from this multiplicatively.
                \\
@@ -926,31 +950,31 @@ The {\tt styling} section can contain any of the following settings in any order
 The {\tt terminal} section can contain any of the following settings in any order:
 
 \begin{longtable}{p{3.4cm}p{9cm}}
-{\tt Colour} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt color} & {\bf Possible values:} {\tt on}, {\tt off}.
 
-               {\bf Analogous command-line switches:} {\tt -c}, {\tt --colour}, {\tt -m}, {\tt --monochrome}.
+               {\bf Analogous command-line switches:} {\tt -c}, {\tt --color}, {\tt -m}, {\tt --monochrome}.
 
-               Sets whether colour highlighting should be used in the interactive terminal. If turned on, output is displayed in green, warning messages in amber, and error messages in red; these colours are configurable, as described below. Note that not all UNIX terminals support the use of colour.
+               Sets whether color highlighting should be used in the interactive terminal. If turned on, output is displayed in green, warning messages in amber, and error messages in red; these colors are configurable, as described below. Note that not all UNIX terminals support the use of color.
                \\
-{\tt Colour\_Err} & {\bf Possible values:} Any recognised terminal colour (see below).
+{\tt color\_err} & {\bf Possible values:} Any recognised terminal color (see below).
 
                {\bf Analogous command-line switches:} None.
 
-               Sets the colour in which error messages are displayed when colour highlighting is used. Note that the list of recognised colour names differs from that used in PyXPlot; a list is given at the end of this section.
+               Sets the color in which error messages are displayed when color highlighting is used. Note that the list of recognised color names differs from that used in PyXPlot; a list is given at the end of this section.
                \\
-{\tt Colour\_Rep} & {\bf Possible values:} Any recognised terminal colour (see below).
+{\tt color\_rep} & {\bf Possible values:} Any recognised terminal color (see below).
 
                {\bf Analogous command-line switches:} None.
 
-               As above, but sets the colour in which PyXPlot displays its non-error-related output.
+               As above, but sets the color in which PyXPlot displays its non-error-related output.
                \\
-{\tt Colour\_Wrn} & {\bf Possible values:} Any recognised terminal colour (see below).
+{\tt color\_wrn} & {\bf Possible values:} Any recognised terminal color (see below).
 
                {\bf Analogous command-line switches:} None.
 
-               As above, but sets the colour in which PyXPlot displays its warning messages.
+               As above, but sets the color in which PyXPlot displays its warning messages.
                \\
-{\tt Splash} & {\bf Possible values:} {\tt On}, {\tt Off}.
+{\tt splash} & {\bf Possible values:} {\tt on}, {\tt off}.
 
                {\bf Analogous command-line switches:} {\tt -q}, {\tt --quiet}, {\tt -V}, {\tt --verbose}
 
@@ -958,10 +982,10 @@ The {\tt terminal} section can contain any of the following settings in any orde
                \\
 \end{longtable}
 
-The colours recognised by the {\tt COLOUR\_XXX} configuration options above
+The colors recognised by the {\tt COLOR\_XXX} configuration options above
 are: {\tt Red}, {\tt Green}, {\tt Amber}, {\tt Blue}, {\tt Purple}, {\tt
 Magenta}, {\tt Cyan}, {\tt White}, {\tt Normal}. The final option produces the
-default foreground colour of the terminal.
+default foreground color of the terminal.
 
 \renewcommand{\arraystretch}{1.00}
 
@@ -1001,29 +1025,29 @@ is assumed to be a new base unit which is not related to any pre-existing
 units.
 
 \section{Recognised Colour Names}
-\label{sec:colour_names}
+\label{sec:color_names}
 
-The following is a complete list of the colour names which PyXPlot recognises
-in the {\tt set textcolour}, {\tt set axescolour} commands, and in the {\tt
-colours} section of its configuration file.  A colour chart of these can be
-found in Appendix~\ref{ch:colour_charts}.  All colour names are case
+The following is a complete list of the color names which PyXPlot recognises
+in the {\tt set textcolor}, {\tt set axescolor} commands, and in the {\tt
+colors} section of its configuration file.  A color chart of these can be
+found in Appendix~\ref{ch:color_charts}.  All color names are case
 insensitive.
 
 \vspace{5mm}\noindent
-\index{configuration file!colours}\index{colours!configuration file}
+\index{configuration file!colors}\index{colors!configuration file}
 {\tt
-GreenYellow, Yellow, Goldenrod, Dandelion, Apricot, Peach, Melon,\newline\noindent
-YellowOrange, Orange, BurntOrange, Bittersweet, RedOrange,\newline\noindent
-Mahogany, Maroon, BrickRed, Red, OrangeRed, RubineRed,\newline\noindent
-WildStrawberry, Salmon, CarnationPink, Magenta, VioletRed,\newline\noindent
-Rhodamine, Mulberry, RedViolet, Fuchsia, Lavender, Thistle,\newline\noindent
-Orchid, DarkOrchid, Purple, Plum, Violet, RoyalPurple,\newline\noindent
-BlueViolet, Periwinkle, CadetBlue, CornflowerBlue, MidnightBlue,\newline\noindent
-NavyBlue, RoyalBlue, Blue, Cerulean, Cyan, ProcessBlue, SkyBlue,\newline\noindent
-Turquoise, TealBlue, Aquamarine, BlueGreen, Emerald, JungleGreen,\newline\noindent
-SeaGreen, Green, ForestGreen, PineGreen, LimeGreen, YellowGreen,\newline\noindent
-SpringGreen, OliveGreen, RawSienna, Sepia, Brown, Tan, Gray,\newline\noindent
-Grey, Black, White.
+greenYellow, yellow, goldenrod, dandelion, apricot, peach, melon,\newline\noindent
+yellowOrange, orange, burntOrange, bittersweet, redOrange,\newline\noindent
+mahogany, maroon, brickRed, red, orangeRed, rubineRed,\newline\noindent
+wildStrawberry, salmon, carnationPink, magenta, violetRed,\newline\noindent
+rhodamine, mulberry, redViolet, fuchsia, lavender, thistle,\newline\noindent
+orchid, darkOrchid, purple, plum, violet, royalPurple,\newline\noindent
+blueViolet, periwinkle, cadetBlue, cornflowerBlue, midnightBlue,\newline\noindent
+navyBlue, royalBlue, blue, cerulean, cyan, processBlue, skyBlue,\newline\noindent
+turquoise, tealBlue, aquamarine, blueGreen, emerald, jungleGreen,\newline\noindent
+seaGreen, green, forestGreen, pineGreen, limeGreen, yellowGreen,\newline\noindent
+springGreen, oliveGreen, rawSienna, sepia, brown, tan, gray,\newline\noindent
+grey, black, white.
 }
 
 \vspace{5mm}
@@ -1031,9 +1055,9 @@ In addition, a scale of 100~shades of grey is available, ranging from {\tt
 grey00}, which is black, to {\tt grey99}, which is very nearly white.  The US
 spelling, {\tt gray??}, is also accepted.
 
-Arbitrary colours may be specified in the forms {\tt rgb0:0:0}, {\tt hsb0:0:0}
+Arbitrary colors may be specified in the forms {\tt rgb0:0:0}, {\tt hsb0:0:0}
 or {\tt cmyk0:0:0:0}, where the colon-separated zeros should be replaced by
-values in the range of~0 to~1 to represent the components of the desired colour
+values in the range of~0 to~1 to represent the components of the desired color
 in RGB, HSB or CMYK space
-respectively.\index{colours!RGB}\index{colours!HSB}\index{colours!CMYK}
+respectively.\index{colors!RGB}\index{colors!HSB}\index{colors!CMYK}
 

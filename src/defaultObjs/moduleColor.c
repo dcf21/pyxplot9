@@ -19,6 +19,16 @@
 
 // ----------------------------------------------------------------------------
 
+// Parts of this source file are modified from public domain code by John
+// Walker, including corrections by Andrew J. S. Hamilton.
+
+// See <http://www.fourmilab.ch/documents/specrend/>
+// Source code at <http://www.fourmilab.ch/documents/specrend/specrend.c>
+
+// Referenced from <http://stackoverflow.com/questions/1472514/convert-light-frequency-to-rgb>
+
+// John Walker's homepage is at <http://www.fourmilab.ch/>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
@@ -41,8 +51,6 @@
 #include "defaultObjs/moduleColor.h"
 #include "defaultObjs/defaultFuncs.h"
 #include "defaultObjs/defaultFuncsMacros.h"
-
-// See http://stackoverflow.com/questions/1472514/convert-light-frequency-to-rgb
 
 struct colourSystem
  {

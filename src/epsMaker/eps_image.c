@@ -171,6 +171,7 @@ void eps_image_RenderEPS(EPSComm *x)
       zlen   = data.data_len*1.01+12; // Nasty guess at size of buffer needed.
       imagez = (unsigned char *)ppl_memAlloc(zlen);
       if (imagez == NULL) { ppl_error(&x->c->errcontext, ERR_MEMORY, -1, -1,"Out of memory"); return; }
+      memset(imagez, 0, zlen);
       if (DEBUG) { ppl_log(&x->c->errcontext, "Calling zlib to compress image data"); }
       j = compress2(imagez,&zlen,data.data,data.data_len,9); // Call zlib to do deflation
 
