@@ -54,7 +54,7 @@
 void pplaxis_destroy(ppl_context *context, pplset_axis *in)
  {
   int i;
-  if (in->format    != NULL) { free        (           in->format   ); in->format    = NULL; }
+  if (in->format    != NULL) { pplExpr_free(           in->format   ); in->format    = NULL; }
   if (in->label     != NULL) { free        (           in->label    ); in->label     = NULL; }
   if (in->linkusing != NULL) { pplExpr_free((pplExpr *)in->linkusing); in->linkusing = NULL; }
   if (in->ticsM.tickList != NULL) { free(in->ticsM.tickList); in->ticsM.tickList = NULL; }
@@ -81,7 +81,7 @@ void pplaxis_copy(ppl_context *context, pplset_axis *out, const pplset_axis *in)
  {
   void *tmp;
   *out = *in;
-  if (in->format    != NULL) { out->format   = (char *)XMALLOC(strlen(in->format    )+1); strcpy(out->format   , in->format    ); }
+  if (in->format    != NULL) { out->format   = (void *)pplExpr_cpy((pplExpr *)in->format   ); }
   if (in->label     != NULL) { out->label    = (char *)XMALLOC(strlen(in->label     )+1); strcpy(out->label    , in->label     ); }
   if (in->linkusing != NULL) { out->linkusing= (void *)pplExpr_cpy((pplExpr *)in->linkusing); }
   pplaxis_copyTics (context,out,in);

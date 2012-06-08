@@ -205,6 +205,8 @@ static int canvas_itemlist_add(ppl_context *c, pplObj *command, int type, canvas
       if (ptr->XAxes!=NULL) { free(ptr->XAxes); ptr->XAxes = NULL; }
       if (ptr->YAxes!=NULL) { free(ptr->YAxes); ptr->YAxes = NULL; }
       if (ptr->ZAxes!=NULL) { free(ptr->ZAxes); ptr->ZAxes = NULL; }
+      free(ptr);
+      return 1;
      }
     else
      {
@@ -1845,6 +1847,7 @@ int ppl_directive_plot(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if (ptr->XAxes!=NULL) { free(ptr->XAxes); ptr->XAxes = NULL; }
     if (ptr->YAxes!=NULL) { free(ptr->YAxes); ptr->YAxes = NULL; }
     if (ptr->ZAxes!=NULL) { free(ptr->ZAxes); ptr->ZAxes = NULL; }
+    return 1;
    }
   else
    {

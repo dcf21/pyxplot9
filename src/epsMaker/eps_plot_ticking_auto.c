@@ -331,10 +331,12 @@ static int AutoTickListFinalise(EPSComm *X, pplset_axis *axis, const double Unit
        const int stkLevelOld = c->stackPtr;
        int       lOp;
        double    x = GSL_NAN;
-       pplObj   *o = ppl_expEval(c, formatExp[i], &lOp, 1, X->iterDepth+1);
+       pplObj   *o = NULL;
 
        axispos_mid = (axispos_min+axispos_max)/2;
        VarVal->real = eps_plot_axis_InvGetPosition(axispos_mid, axis) * UnitMultiplier;
+
+       o = ppl_expEval(c, formatExp[tick->ArgNo], &lOp, 1, X->iterDepth+1);
 
        if (arg->StringArg) // Evaluate argument at midpoint of the interval we know it to be in
         {
@@ -426,7 +428,8 @@ void eps_plot_ticking_auto(EPSComm *x, pplset_axis *axis, double UnitMultiplier,
   // Work through format string identifying substitution expressions
   VarName[0] = "xyzc"[axis->xyz];
   if (axis->format == NULL) { sprintf(FormatTemp, "\"%%s\"%%(%s)", VarName); format=FormatTemp; }
-  else                      { format=axis->format; }
+  else                      { format=((pplExpr *)axis->format)->ascii; }
+  if (DEBUG) { sprintf(x->c->errcontext.tempErrStr, "format string is <<%s>>.", format); ppl_log(&x->c->errcontext,NULL); }
   if ((format==FormatTemp) && (axis->AxisLinearInterpolation==NULL) && (axis->LogFinal==SW_BOOL_TRUE) && (log(axis->MaxFinal / axis->MinFinal) / log(axis->tics.logBase) > axis->PhysicalLengthMajor)) { sprintf(FormatTemp, "\"%%s\"%%(logn(%s,%d))", VarName, axis->tics.logBase); }
   for (i=0; ((format[i]!='\0')&&(format[i]!='\'')&&(format[i]!='\"')); i++);
   QuoteType = format[i];
@@ -527,7 +530,7 @@ void eps_plot_ticking_auto(EPSComm *x, pplset_axis *axis, double UnitMultiplier,
         else { x=o->real; }
         err = !gsl_finite(x);
         args[i].NumericValues[j] = x;
-        if ((!err) && (x!=args[i].NumericValues[j-1])) args[i].NValueChanges++;
+        if ((!err) && (j>0) && (x!=args[i].NumericValues[j-1])) args[i].NValueChanges++;
         if ((!err) && ((!args[i].MinValueSet) || (x < args[i].MinValue))) { args[i].MinValue = x; args[i].MinValueSet=1; }
         if ((!err) && ((!args[i].MaxValueSet) || (x > args[i].MaxValue))) { args[i].MaxValue = x; args[i].MaxValueSet=1; }
        }

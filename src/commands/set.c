@@ -1042,7 +1042,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    }
   else if (strcmp_set && (strcmp(setoption,"noc1format")==0)) /* set noc1format */
    {
-    strcpy(sg->c1format, "");
+    sg->c1format    = NULL;
     sg->c1formatset = 0;
    }
   else if (strcmp_set && (strcmp(setoption,"noc1label")==0)) /* set noc1label */
@@ -1128,7 +1128,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    {
     strcpy(sg->title, "");
    }
-  else if (strcmp_set && (strcmp(setoption,"xformat")==0)) /* set noxformat */
+  else if (strcmp_set && (strcmp(setoption,"noxformat")==0)) /* set noxformat */
    {
     int i = (int)round(command[PARSE_set_noxformat_axis].real);
     int j = (int)round(command[PARSE_set_noxformat_axis].exponent[0]);
