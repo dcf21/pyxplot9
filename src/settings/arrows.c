@@ -69,12 +69,12 @@ void pplarrow_add(ppl_context *context, pplarrow_object **inlist, parserOutput *
   pplarrow_add_check_dimensions(PARSE_INDEX_y1 , system_y1);
   pplarrow_add_check_dimensions(PARSE_INDEX_z1 , system_z1);
 
-  pplarrow_add_check_axis(PARSE_INDEX_x0);
-  pplarrow_add_check_axis(PARSE_INDEX_y0);
-  pplarrow_add_check_axis(PARSE_INDEX_z0);
-  pplarrow_add_check_axis(PARSE_INDEX_x1);
-  pplarrow_add_check_axis(PARSE_INDEX_y1);
-  pplarrow_add_check_axis(PARSE_INDEX_z1);
+  pplarrow_add_check_axis(PARSE_INDEX_x0_axis);
+  pplarrow_add_check_axis(PARSE_INDEX_y0_axis);
+  pplarrow_add_check_axis(PARSE_INDEX_z0_axis);
+  pplarrow_add_check_axis(PARSE_INDEX_x1_axis);
+  pplarrow_add_check_axis(PARSE_INDEX_y1_axis);
+  pplarrow_add_check_axis(PARSE_INDEX_z1_axis);
 
   i = (int)round(in->stk[ptab[PARSE_INDEX_arrow_id]].real);
   while ((*inlist != NULL) && ((*inlist)->id < i)) inlist = &((*inlist)->next);

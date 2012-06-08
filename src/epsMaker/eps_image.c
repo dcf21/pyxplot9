@@ -162,6 +162,10 @@ void eps_image_RenderEPS(EPSComm *x)
      }
    }
 
+#ifdef FLATE_DISABLE
+if (data.TargetCompression==BMP_ENCODING_FLATE) data.TargetCompression=BMP_ENCODING_NULL;
+#endif
+
   // Apply compression to image data
   switch (data.TargetCompression)
    {

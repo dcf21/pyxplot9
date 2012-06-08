@@ -36,13 +36,7 @@
 #define BMP_ENCODING_FLATE 1102
 #define BMP_ENCODING_DCT   1103
 
-// Allow a zeroed margin after malloced blocks for zlib to avoid making valgrind unhappy
-
-#define MARGIN_LEN 1024
-
-#define BMP_ALLOC(X,Y) \
- X = (unsigned char *)ppl_memAlloc((Y) + MARGIN_LEN); \
- if (X!=NULL) memset(X, 0, (Y)+MARGIN_LEN);
+#define BMP_ALLOC(X,Y) { X = (unsigned char *)ppl_memAlloc(Y); }
 
 typedef struct bitmap_data
  {
