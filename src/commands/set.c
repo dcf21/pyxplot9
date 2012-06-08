@@ -160,7 +160,8 @@ static void tics_cp(pplset_tics *o, pplset_tics *i)
       ol = &command[pos+lab]; \
       if((ox->objType == PPLOBJ_STR) && ((ol->objType==PPLOBJ_NUM)||(ol->objType==PPLOBJ_BOOL)||(ol->objType==PPLOBJ_DATE)) ) { pplObj *tmp=ol; ol=ox; ox=tmp; } \
       if (ox->objType != PPLOBJ_NUM) { sprintf(c->errcontext.tempErrStr, "Ticks can only be set at numeric values; supplied value is of type <%s>.", pplObjTypeNames[ox->objType]); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); return; } \
-      if (ol->objType != PPLOBJ_STR) { sprintf(c->errcontext.tempErrStr, "Ticks labels must be strings; supplied value is of type <%s>.", pplObjTypeNames[ol->objType]); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); return; } \
+      if ((ol->objType != PPLOBJ_ZOM) && (ol->objType != PPLOBJ_STR)) \
+         { sprintf(c->errcontext.tempErrStr, "Ticks labels must be strings; supplied value is of type <%s>.", pplObjTypeNames[ol->objType]); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); return; } \
       if (!gsl_finite(ox->real)) { sprintf(c->errcontext.tempErrStr, "Ticks can only be set at finite numeric values; supplied value is not finite."); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); return; } \
       if (ox->flagComplex) { sprintf(c->errcontext.tempErrStr, "Ticks can only be set at real numeric values; supplied value is complex."); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); return; } \
       if (i==0) \

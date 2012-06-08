@@ -159,23 +159,23 @@ double Lcdm_z_from_t(double t, double H, double OmegaM, double OmegaL)
 
 // Lambda Cold Dark Matter Cosmology Wrappers
 
-#define CHECK_LCDM_INPUTS(H0NUM) \
- CHECK_DIMLESS_OR_HAS_UNIT(in[0], H0NUM, "a recession velocity per unit distance", UNIT_TIME, -1); \
- if (in[0].dimensionless) in[0].real *= 1e3 / (GSL_CONST_MKSA_PARSEC * 1e6); \
- if (!(in[1].dimensionless && in[2].dimensionless)) \
+#define CHECK_LCDM_INPUTS(XN,H0NUM) \
+ CHECK_DIMLESS_OR_HAS_UNIT(in[XN], H0NUM, "a recession velocity per unit distance", UNIT_TIME, -1); \
+ if (in[XN].dimensionless) in[XN].real *= 1e3 / (GSL_CONST_MKSA_PARSEC * 1e6); \
+ if (!(in[XN+1].dimensionless && in[XN+2].dimensionless)) \
    { \
     *status = 1; \
     *errType = ERR_UNIT; \
-    sprintf(errText, "The %s function can only act upon dimensionless values for w_m and w_l. Supplied values have dimensions of <%s> and <%s>.", FunctionDescription, ppl_printUnit(c, &in[1], NULL, NULL, 0, 1, 0), ppl_printUnit(c, &in[2], NULL, NULL, 1, 1, 0)); \
+    sprintf(errText, "The %s function can only act upon dimensionless values for w_m and w_l. Supplied values have dimensions of <%s> and <%s>.", FunctionDescription, ppl_printUnit(c, &in[XN+1], NULL, NULL, 0, 1, 0), ppl_printUnit(c, &in[XN+2], NULL, NULL, 1, 1, 0)); \
     return; \
    } \
 
 #define CHECK_LCDM_REDSHIFT \
- if (!(in[3].dimensionless)) \
+ if (!(in[0].dimensionless)) \
    { \
     *status = 1; \
     *errType = ERR_UNIT; \
-    sprintf(errText, "The %s function can only act upon dimensionless values for redshift. Supplied value has dimensions of <%s>.", FunctionDescription, ppl_printUnit(c, &in[3], NULL, NULL, 0, 1, 0)); \
+    sprintf(errText, "The %s function can only act upon dimensionless values for redshift. Supplied value has dimensions of <%s>.", FunctionDescription, ppl_printUnit(c, &in[0], NULL, NULL, 0, 1, 0)); \
     return; \
    } \
 
@@ -183,7 +183,7 @@ void pplfunc_Lcdm_age     (ppl_context *c, pplObj *in, int nArgs, int *status, i
  {
   char *FunctionDescription = "Lcdm_age(H0,w_m,w_l)";
   int i;
-  CHECK_LCDM_INPUTS("first");
+  CHECK_LCDM_INPUTS(0,"first");
   OUTPUT.real = Lcdm_age(in[0].real, in[1].real, in[2].real);
   CLEANUP_APPLYUNIT(UNIT_TIME);
   CHECK_OUTPUT_OKAY;
@@ -193,9 +193,9 @@ void pplfunc_Lcdm_angscale(ppl_context *c, pplObj *in, int nArgs, int *status, i
  {
   char *FunctionDescription = "Lcdm_age(z,H0,w_m,w_l)";
   int i;
-  CHECK_LCDM_INPUTS("second");
+  CHECK_LCDM_INPUTS(1,"second");
   CHECK_LCDM_REDSHIFT;
-  OUTPUT.real = Lcdm_DA(in[3].real, in[0].real, in[1].real, in[2].real);
+  OUTPUT.real = Lcdm_DA(in[0].real, in[1].real, in[2].real, in[3].real);
   CLEANUP_APPLYUNIT(UNIT_LENGTH);
   OUTPUT.exponent[UNIT_ANGLE] = -1;
   CHECK_OUTPUT_OKAY;
@@ -205,9 +205,9 @@ void pplfunc_Lcdm_DA      (ppl_context *c, pplObj *in, int nArgs, int *status, i
  {
   char *FunctionDescription = "Lcdm_DA(z,H0,w_m,w_l)";
   int i;
-  CHECK_LCDM_INPUTS("second");
+  CHECK_LCDM_INPUTS(1,"second");
   CHECK_LCDM_REDSHIFT;
-  OUTPUT.real = Lcdm_DA(in[3].real, in[0].real, in[1].real, in[2].real);
+  OUTPUT.real = Lcdm_DA(in[0].real, in[1].real, in[2].real, in[3].real);
   CLEANUP_APPLYUNIT(UNIT_LENGTH);
   CHECK_OUTPUT_OKAY;
  }
@@ -216,9 +216,9 @@ void pplfunc_Lcdm_DL      (ppl_context *c, pplObj *in, int nArgs, int *status, i
  {
   char *FunctionDescription = "Lcdm_DL(z,H0,w_m,w_l)";
   int i;
-  CHECK_LCDM_INPUTS("second");
+  CHECK_LCDM_INPUTS(1,"second");
   CHECK_LCDM_REDSHIFT;
-  OUTPUT.real = Lcdm_DA(in[3].real, in[0].real, in[1].real, in[2].real) * pow(1+in[3].real, 2);
+  OUTPUT.real = Lcdm_DA(in[0].real, in[1].real, in[2].real, in[3].real) * pow(1+in[0].real, 2);
   CLEANUP_APPLYUNIT(UNIT_LENGTH);
   CHECK_OUTPUT_OKAY;
  }
@@ -227,9 +227,9 @@ void pplfunc_Lcdm_DM      (ppl_context *c, pplObj *in, int nArgs, int *status, i
  {
   char *FunctionDescription = "Lcdm_DM(z,H0,w_m,w_l)";
   int i;
-  CHECK_LCDM_INPUTS("second");
+  CHECK_LCDM_INPUTS(1,"second");
   CHECK_LCDM_REDSHIFT;
-  OUTPUT.real = Lcdm_DA(in[3].real, in[0].real, in[1].real, in[2].real) * (1+in[3].real);
+  OUTPUT.real = Lcdm_DA(in[0].real, in[1].real, in[2].real, in[3].real) * (1+in[0].real);
   CLEANUP_APPLYUNIT(UNIT_LENGTH);
   CHECK_OUTPUT_OKAY;
  }
@@ -238,9 +238,9 @@ void pplfunc_Lcdm_t       (ppl_context *c, pplObj *in, int nArgs, int *status, i
  {
   char *FunctionDescription = "Lcdm_t(z,H0,w_m,w_l)";
   int i;
-  CHECK_LCDM_INPUTS("second");
+  CHECK_LCDM_INPUTS(1,"second");
   CHECK_LCDM_REDSHIFT;
-  OUTPUT.real = Lcdm_t_from_z(in[3].real, in[0].real, in[1].real, in[2].real);
+  OUTPUT.real = Lcdm_t_from_z(in[0].real, in[1].real, in[2].real, in[3].real);
   CLEANUP_APPLYUNIT(UNIT_TIME);
   CHECK_OUTPUT_OKAY;
  }
@@ -249,9 +249,9 @@ void pplfunc_Lcdm_z       (ppl_context *c, pplObj *in, int nArgs, int *status, i
  {
   char *FunctionDescription = "Lcdm_z(t,H0,w_m,w_l)";
   int i;
-  CHECK_LCDM_INPUTS("second");
-  CHECK_DIMLESS_OR_HAS_UNIT(in[3], "first", "a time", UNIT_TIME, 1);
-  OUTPUT.real = Lcdm_z_from_t(in[3].real, in[0].real, in[1].real, in[2].real);
+  CHECK_LCDM_INPUTS(1,"second");
+  CHECK_DIMLESS_OR_HAS_UNIT(in[0], "first", "a time", UNIT_TIME, 1);
+  OUTPUT.real = Lcdm_z_from_t(in[0].real, in[1].real, in[2].real, in[3].real);
   CHECK_OUTPUT_OKAY;
  }
 

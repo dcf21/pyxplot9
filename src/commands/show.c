@@ -107,10 +107,10 @@ if (interactive!=0) /* On interactive sessions, highlight those settings which h
            for (n=0; T.tickStrs[n]!=NULL; n++) \
             { \
              strcpy(buf+m, (n==0)?"":", "); m += strlen(buf+m); \
+             U.real = T.tickList[n]; \
              sprintf(buf+m, "%s", ppl_unitsNumericDisplay(c,&(U),0,0,0)); \
              m += strlen(buf+m); \
              if (T.tickStrs[n][0]!='\xFF') { buf[m++]=' '; buf[m]='\0'; ppl_strEscapify(T.tickStrs[n], buf+m); m += strlen(buf+m); } \
-             U.real = T.tickList[n]; \
             } \
            sprintf(buf+m, ")"); \
           } \
