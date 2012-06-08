@@ -56,50 +56,50 @@
 [ %v:function_name ]:function_names. (@n [ %v:argument_name ]:0argument_list, )@n [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n ]:0range_list =@n:directive:func_set = { %E:definition }
 arc@3:directive = { item@1 %d:editno } { at@1 } %p:centre radius@1 %D:r from@1 %A:angle1 to@1 %A:angle2 { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < fillcolour@1 | fillcolor@1 | fc@2 > %c:fillcolor ) }
 < line@2:directive | arrow@2:directive > = { item@1 %d:editno } { from@1 } %p:p1 to@1 %p:p2 { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < nohead@2:arrow_style | head@2:arrow_style | twohead@2:arrow_style:twoway | twoway@2:arrow_style > ) }
-assert@2:directive = < version@4 < >=@n:gtreq | <@n:lt > < %S:version | %q:version > | %b:expr > { %q:message }
+assert@6:directive = < version@4 < >=@n:gtreq | <@n:lt > < %S:version | %q:version > | %b:expr > { %q:message }
 < box@2:directive | rectangle@2:directive:box > = { item@1 %d:editno } < from@1 %p:p1 to@1 %p:p2 { rotate@1 %A:rotation } | at@1 %p:p3 ( width@1 %D:width ~ height@1 %D:height ~ rotate@1 %A:rotation ) > { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < fillcolour@1 | fillcolor@1 | fc@2 > %c:fillcolor ) }
-break@2:directive = { %v:loopname }
-call@2:directive = %o:object
+break@5:directive = { %v:loopname }
+call@3:directive = %o:object
 cd@2:directive = [ < %S:directory | %q:directory > ]:path
-circle@2:directive = { item@1 %d:editno } { at@1 } %p:p radius@1 %D:r { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < fillcolour@1 | fillcolor@1 | fc@2 > %c:fillcolor ) }
+circle@4:directive = { item@1 %d:editno } { at@1 } %p:p radius@1 %D:r { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < fillcolour@1 | fillcolor@1 | fc@2 > %c:fillcolor ) }
 clear@3:directive =
-continue@2:directive = { %v:loopname }
+continue@4:directive = { %v:loopname }
 delete@3:directive = { item@1 } [ %d:number ]:deleteno,
 do@2:directive = { loopname@1 %v:loopname } CODEBLOCK:code while@1 %E:condition
-ellipse@2:directive = { item@1 %d:editno } < from@2 %p:p1 { to@1 } %p:p2 ( rotate@1 %A:rotation ~ arc { from@1 } %A:arcfrom { to@1 } %A:arcto ) | ( < centre@1 | center@1 > %p:center ~ focus@1 %p:focus ~ < majoraxis@2 %D:majoraxis | semimajoraxis@6 %D:semimajoraxis > ~ < minoraxis@2 %D:minoraxis | semiminoraxis@6 %D:semiminoraxis > ~ eccentricity@1 %f:eccentricity ~ < < semilatusrectum@5 | slr@2 > %D:slr | < latusrectum@2 | lr@2 > %D:lr > ~ rotate@1 %A:rotation ~ arc { from@1 } %A:arcfrom { to@1 } %A:arcto ) > { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < fillcolour@1 | fillcolor@1 | fc@2 > %c:fillcolor ) }
-eps@2:directive = { item@1 %d:editno } < %S:filename | %q:filename > ( at@2 %p:p ~ rotate@1 %A:rotation ~ width@1 %D:width ~ height@1 %D:height ~ clip@2:clip ~ calcbbox@2:calcbbox )
+ellipse@5:directive = { item@1 %d:editno } < from@2 %p:p1 { to@1 } %p:p2 ( rotate@1 %A:rotation ~ arc { from@1 } %A:arcfrom { to@1 } %A:arcto ) | ( < centre@1 | center@1 > %p:center ~ focus@1 %p:focus ~ < majoraxis@2 %D:majoraxis | semimajoraxis@6 %D:semimajoraxis > ~ < minoraxis@2 %D:minoraxis | semiminoraxis@6 %D:semiminoraxis > ~ eccentricity@1 %f:eccentricity ~ < < semilatusrectum@5 | slr@2 > %D:slr | < latusrectum@2 | lr@2 > %D:lr > ~ rotate@1 %A:rotation ~ arc { from@1 } %A:arcfrom { to@1 } %A:arcto ) > { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < fillcolour@1 | fillcolor@1 | fc@2 > %c:fillcolor ) }
+eps@3:directive = { item@1 %d:editno } < %S:filename | %q:filename > ( at@2 %p:p ~ rotate@1 %A:rotation ~ width@1 %D:width ~ height@1 %D:height ~ clip@2:clip ~ calcbbox@2:calcbbox )
 exec@3:directive = %q:command
-exit@2:directive:quit =
+exit@3:directive:quit =
 fit@3:directive = [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n ]:0range_list %v:fit_function (@n [ %v:inputvar ]:0operands, )@n { withouterrors@1:withouterrors } < %S:filename | %q:filename > ( every@1 [ { %d:every_item } ]:every_list: ~ index@1 %d:index ~ select@1 %E:select_criterion ~ using@1 { < rows@1:use_rows | columns@1:use_columns > } [ { %E:using_item } ]:using_list: ) via@1 [ %v:fit_variable ]:fit_variables,
-< fft@2:directive | ifft@3:directive > = [ [@n %u:min < :@n | to@n > %u:max < :@n | step@n > %u:step ]@n ]:range_list [ %v:varname ]:varnames. (@n [ %v:inputvar ]:0in_operands, )@n { of@1 } < [ %v:fnname ]:fnnames. (@n [ %v:outvar ]:0out_operands, )@n ( every@1 [ { %d:every_item } ]:every_list: ~ index@1 %d:index ~ select@1 %E:select_criterion ~ using@1 { < rows@1:use_rows | columns@1:use_columns > } [ { %E:using_item } ]:using_list: ~ window@1 < rectangular@1:window | hamming@3:window | hann@3:window | cosine@1:window | lanczos@1:window | bartlett@2:window | triangular@1:window | gauss@1:window | bartletthann@9:window | blackman@2:window > ) | %q:filename { window@1 < rectangular@1:window | hamming@3:window | hann@3:window | cosine@1:window | lanczos@1:window | bartlett@2:window | triangular@1:window | gauss@1:window | bartletthann@9:window | blackman@2:window > } >
-for@2:directive = < %v:var_name =@n %u:start_value to@n %u:final_value ( step@2:step %u:step_size ) | (@n { %E:begin } ;@n { %E:criterion } ;@n { %E:iterate } )@n > { loopname@1 %v:loopname } CODEBLOCK:code
+< fft@3:directive | ifft@4:directive > = [ [@n %u:min < :@n | to@n > %u:max < :@n | step@n > %u:step ]@n ]:range_list [ %v:varname ]:varnames. (@n [ %v:inputvar ]:0in_operands, )@n { of@1 } < [ %v:fnname ]:fnnames. (@n [ %v:outvar ]:0out_operands, )@n ( every@1 [ { %d:every_item } ]:every_list: ~ index@1 %d:index ~ select@1 %E:select_criterion ~ using@1 { < rows@1:use_rows | columns@1:use_columns > } [ { %E:using_item } ]:using_list: ~ window@1 < rectangular@1:window | hamming@3:window | hann@3:window | cosine@1:window | lanczos@1:window | bartlett@2:window | triangular@1:window | gauss@1:window | bartletthann@9:window | blackman@2:window > ) | %q:filename { window@1 < rectangular@1:window | hamming@3:window | hann@3:window | cosine@1:window | lanczos@1:window | bartlett@2:window | triangular@1:window | gauss@1:window | bartletthann@9:window | blackman@2:window > } >
+for@3:directive = < %v:var_name =@n %u:start_value to@n %u:final_value ( step@2:step %u:step_size ) | (@n { %E:begin } ;@n { %E:criterion } ;@n { %E:iterate } )@n > { loopname@1 %v:loopname } CODEBLOCK:code
 foreach@4:directive:foreachdatum datum@5:df = [ %v:variable ]:variables, in@n:in [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n ]:0range_list { parametric@1:parametric { [@n %u:tmin < :@n | to@n > %u:tmax ]@n { [@n %u:vmin < :@n | to@n > %u:vmax ]@n } } } [ %e:expression ]:expression_list: ( every@1 [ { %d:every_item } ]:every_list: ~ index@1 %d:index ~ select@1 %E:select_criterion ~ using@1 { < rows@1:use_rows | columns@1:use_columns > } [ { %E:using_item } ]:using_list: ) { loopname@1 %v:loopname } CODEBLOCK:code DATABLOCK:data
 foreach@4:directive = %v:var_name in@n:in %o:item_list { loopname@1 %s:loopname } CODEBLOCK:code
 global@6:directive = [ %v:var_name ]:var_names,
-help@2:directive = %r:topic
-history@2:directive = { %d:number_lines }
+help@4:directive = %r:topic
+history@4:directive = { %d:number_lines }
 histogram@5:directive = [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n ]:0range_list [ %v:varname ]:varnames. ()@2 { parametric@1:parametric { [@n %u:tmin < :@n | to@n > %u:tmax ]@n { [@n %u:vmin < :@n | to@n > %u:vmax ]@n } } } [ %e:expression ]:expression_list: ( every@1 [ { %d:every_item } ]:every_list: ~ index@1 %d:index ~ select@1 %E:select_criterion ~ using@1 { < rows@1:use_rows | columns@1:use_columns > } [ { %E:using_item } ]:using_list: ~ binwidth@4 %u:binwidth ~ binorigin@4 %u:binorigin ~ bins@n (@n [ %u:x ]:bin_list, )@n )
-< image@2:directive | jpeg@2:directive:image > = { item@1 %d:editno } = < %S:filename | %q:filename > ( at@2 %p:p ~ smooth@1:smooth ~ < notransparent@3:notrans | notransparency@3:notrans | transparent@1 rgb@n %f:colorR :@n %f:colorG :@n %f:colorB > ~ rotate@1 %A:rotation ~ < width@1 %D:width | height@1 %D:height > )
+< image@4:directive | jpeg@4:directive:image > = { item@1 %d:editno } = < %S:filename | %q:filename > ( at@2 %p:p ~ smooth@1:smooth ~ < notransparent@3:notrans | notransparency@3:notrans | transparent@1 rgb@n %f:colorR :@n %f:colorG :@n %f:colorB > ~ rotate@1 %A:rotation ~ < width@1 %D:width | height@1 %D:height > )
 if@2:directive = %E:criterion CODEBLOCK:code [ else@4 if@1 %E:criterion CODEBLOCK:code_elif ]:0elifs { else CODEBLOCK:code_else }
-< list@2:directive | ls@2:directive:list > =
-load@2:directive = < %S:filename | %q:filename >
+< list@3:directive | ls@2:directive:list > =
+load@4:directive = < %S:filename | %q:filename >
 local@5:directive = [ %v:var_name ]:var_names,
-< maximise@2:directive | maximize@2:directive:maximise > = %e:expression via@1 [ %v:fit_variable ]:fit_variables,
-< minimise@2:directive | minimize@2:directive:minimise > = %e:expression via@1 [ %v:fit_variable ]:fit_variables,
-move@2:directive = { item@1 } %d:moveno to@1 %p:p { rotate@1 %A:rotation }
+< maximise@3:directive | maximize@3:directive:maximise > = %e:expression via@1 [ %v:fit_variable ]:fit_variables,
+< minimise@3:directive | minimize@3:directive:minimise > = %e:expression via@1 [ %v:fit_variable ]:fit_variables,
+move@3:directive = { item@1 } %d:moveno to@1 %p:p { rotate@1 %A:rotation }
 ?@n:directive:help = %r:topic
 !@n:directive:pling = %r:cmd
 piechart@3:directive = { item@1 %d:editno } < [ %e:expression ]:expression_list: > ( every@1 [ { %d:every_item } ]:every_list: ~ index@1 %d:index ~ label@1 { < auto@1:piekeypos | inside@1:piekeypos | key@1:piekeypos | outside@1:piekeypos > } { %E:label } ~ select@1 %E:select_criterion  ~ using@1 { < rows@1:use_rows | columns@1:use_columns > } [ { %E:using_item } ]:using_list: ~ with@1 ( < linetype@5 | lt@2 > < %dE:linetype > ~ < linewidth@5 | lw@2 > < %fE:linewidth > ~ style@2 %d:style_number ~ < colour@1 | color@1 > < %cE:color > ) ~ format@1 < auto@3:auto_format | %E:format_string > ) DATABLOCK:data
 < plot@1:directive = { item@1 %d:editno } { 3d@2:threedim } | replot@3:directive = { item@1 %d:editno } > [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n ]:0range_list [ { parametric@1:parametric { [@n %u:tmin < :@n | to@n > %u:tmax ]@n { [@n %u:vmin < :@n | to@n > %u:vmax ]@n } } } [ %e:expression ]:expression_list: ( axes@1 %a:axis_1 %a:axis_2 { %a:axis_3 } ~ every@1 [ { %d:every_item } ]:every_list: ~ index@1 %d:index ~ label@1 %E:label ~ select@1 %E:select_criterion { < continuous@1:continuous | discontinuous@1:discontinuous > } ~ < title@1 %q:title | notitle@3:notitle > ~ using@1 { < rows@1:use_rows | columns@1:use_columns > } [ { %E:using_item } ]:using_list: ~ with@1 ( < linetype@5 | lt@2 > < %dE:linetype > ~ < linewidth@5 | lw@2 > < %fE:linewidth > ~ < pointsize@7 | ps@2 > < %fE:pointsize > ~ < pointtype@6 | pt@2 > < %dE:pointtype > ~ style@2 %d:style_number ~ < pointlinewidth@6 | plw@3 > < %fE:pointlinewidth > ~ < colour@1 | color@1 > < %cE:color > ~ < fillcolour@2 | fillcolor@2 | fc@2 > < %cE:fillcolor > ~ < lines@1:style | points@1:style | lp@2:style:linespoints | linespoints@5:style | pl@2:style:linespoints | pointslines@5:style:linespoints | errorbars@6:style:yerrorbars | xerrorbars@1:style | yerrorbars@1:style | zerrorbars@1:style | xyerrorbars@3:style | xzerrorbars@3:style | yzerrorbars@3:style | xyzerrorbars@3:style | errorrange@6:style:yerrorrange | xerrorrange@1:style | yerrorrange@1:style | zerrorrange@1:style | xyerrorrange@3:style | xzerrorrange@3:style | yzerrorrange@3:style | xyzerrorrange@3:style | filledregion@3:style | yerrorshaded@8:style | upperlimits@1:style | lowerlimits@2:style | dots@1:style | impulses@1:style | boxes@1:style | wboxes@1:style | steps@1:style | fsteps@1:style | histeps@1:style | stars@3:style | arrows@3:style:arrows_head | arrows_head@3:style | arrows_nohead@3:style | arrows_twoway@3:style:arrows_twohead | arrows_twohead@3:style | surface@2:style | colormap@3:style | colourmap@4:style:colormap | colmap@4:style:colormap | contourmap@3:style | contours@3:style:contourmap > ) ) ]:0plot_list, DATABLOCK:data
-point@3:directive = { item@1 %d:editno } { at@2 } %p:p { label@1 %q:label } { with@1 ( < pointsize@7 | ps@2 > < %fE:pointsize > ~ < pointtype@6 | pt@2 > < %dE:pointtype > ~ style@2 %d:style_number ~ < pointlinewidth@6 | plw@3 > < %fE:pointlinewidth > ~ < colour@1 | color@1 > %c:color ) }
-polygon@3:directive = { item@1 %d:editno } %o:pointlist { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < fillcolour@1 | fillcolor@1 | fc@2 > %c:fillcolor ) }
+point@5:directive = { item@1 %d:editno } { at@2 } %p:p { label@1 %q:label } { with@1 ( < pointsize@7 | ps@2 > < %fE:pointsize > ~ < pointtype@6 | pt@2 > < %dE:pointtype > ~ style@2 %d:style_number ~ < pointlinewidth@6 | plw@3 > < %fE:pointlinewidth > ~ < colour@1 | color@1 > %c:color ) }
+polygon@5:directive = { item@1 %d:editno } %o:pointlist { with@1 ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ style@2 %d:style_number ~ < colour@1 | color@1 > %c:color ~ < fillcolour@1 | fillcolor@1 | fc@2 > %c:fillcolor ) }
 print@2:directive = [ %o:expression ]:0print_list,
-pwd@2:directive =
-quit@1:directive =
+pwd@3:directive =
+quit@4:directive =
 refresh@3:directive =
-reset@3:directive =
+reset@5:directive =
 return@3:directive = { %o:return_value }
-save@2:directive = < %S:filename | %q:filename >
+save@3:directive = < %S:filename | %q:filename >
 set@2:directive { item@1 %d:editno } %a:axis format@1:set_option:xformat = < auto@3:auto_format | %E:format_string > { < horizontal@1:orient | vertical@1:orient | rotate@1:orient %A:rotation > }
 set@2:directive { item@1 %d:editno } %a:axis label@1:set_option:xlabel = ( rotate@3 %A:rotation ~ %q:label_text )
 set@2:directive { item@1 %d:editno } %a:axis range@1:set_option = < reversed@1:reverse | noreversed@3:noreverse | [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n { < reversed@1:reverse | noreversed@3:noreverse > } >
@@ -126,7 +126,7 @@ set@2:directive { item@1 %d:editno } contours@3:set_option = ( < label@3:label |
 set@2:directive { item@1 %d:editno } c@n < 1@n:c_number | 2@n:c_number | 3@n:c_number | 4@n:c_number > range@2:set_option:crange = ( < reversed@1:reverse | noreversed@3:noreverse > ~ [@n { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } ]@n ~ < renormalise@3:renormalise | renormalize@3:renormalise | norenormalise@3:norenormalise | norenormalize@3:norenormalise > )
 set@2:directive < { item@1 %d:editno } < data@1:dataset_type style@1:set_option | style@2:set_option data@1:dataset_type | function@1:dataset_type style@1:set_option | style@2:set_option function@1:dataset_type > | style@2:set_option:style_numbered %d:style_set_number > = ( < linetype@5 | lt@2 > %d:linetype ~ < linewidth@5 | lw@2 > %f:linewidth ~ < pointsize@7 | ps@2 > %f:pointsize ~ < pointtype@6 | pt@2 > %d:pointtype ~ style@2 %d:style_number ~ < pointlinewidth@6 | plw@3 > %f:pointlinewidth ~ < colour@1 | color@1 > %c:color ~ < fillcolour@2 | fillcolor@2 | fc@2 > %c:fillcolor ~ < lines@1:style | points@1:style | lp@2:style:linespoints | linespoints@5:style | pl@2:style:linespoints | pointslines@5:style:linespoints | errorbars@6:style:yerrorbars | xerrorbars@1:style | yerrorbars@1:style | zerrorbars@1:style | xyerrorbars@3:style | xzerrorbars@3:style | yzerrorbars@3:style | xyzerrorbars@3:style | errorrange@6:style:yerrorrange | xerrorrange@1:style | yerrorrange@1:style | zerrorrange@1:style | xyerrorrange@3:style | xzerrorrange@3:style | yzerrorrange@3:style | xyzerrorrange@3:style | filledregion@3:style | yerrorshaded@8:style | upperlimits@1:style | lowerlimits@2:style | dots@1:style | impulses@1:style | boxes@1:style | wboxes@1:style | steps@1:style | fsteps@1:style | histeps@1:style | arrows@3:style:arrows_head | arrows_head@3:style | arrows_nohead@3:style | arrows_twoway@3:style:arrows_twohead | arrows_twohead@3:style | surface@2:style | colormap@3:style | colourmap@4:style:colormap | colmap@4:style:colormap | contourmap@3:style > )
 set@2:directive                      display@1:set_option =
-set@3:directive                      filter@2:set_option = < %S:filename | %q:filename > < %S:filter | %q:filter >
+set@2:directive                      filter@2:set_option = < %S:filename | %q:filename > < %S:filter | %q:filter >
 set@2:directive { item@1 %d:editno } < fountsize@2set_option:fontsize | fontsize@2:set_option > = %f:fontsize
 set@2:directive { item@1 %d:editno } grid@1:set_option = [ %a:axis ]:0axes
 set@2:directive { item@1 %d:editno } < gridmajcolor@6:set_option | gridmajcolour@6:set_option:gridmajcolor > = %c:color
@@ -181,20 +181,20 @@ set@2:directive { item@1 %d:editno } vrange@2:set_option = { [@n:range { %u:min 
 set@2:directive { item@1 %d:editno } width@1:set_option = %D:width
 set@2:directive:set_error = { item@1 %d:editno } { %s:set_option } %r:restofline
 show@2:directive = { item@1 %d:editno } [ %S:setting ]:0setting_list
-solve@2:directive = [ %g:left_expression =@n %g:right_expression ]:expressions, via@1 [ %v:fit_variable ]:fit_variables,
+solve@4:directive = [ %g:left_expression =@n %g:right_expression ]:expressions, via@1 [ %v:fit_variable ]:fit_variables,
 < spline@3:directive = | interpolate@4 = < akima@1:directive | linear@2:directive | loglinear@2:directive | polynomial@1:directive | spline@2:directive | stepwise@2:directive | 2d@2:directive:interpolate2d { < bmp_r:bmp | bmp_g:bmp | bmp_b:bmp > } > > [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n ]:0range_list [ %v:varname ]:varnames. ()@2 { parametric@1:parametric { [@n %u:tmin < :@n | to@n > %u:tmax ]@n { [@n %u:vmin < :@n | to@n > %u:vmax ]@n } } } [ %e:expression ]:expression_list: ( every@1 [ { %d:every_item } ]:every_list: ~ index@1 %d:index ~ select@1 %E:select_criterion ~ using@1 { < rows@1:use_rows | columns@1:use_columns > } [ { %E:using_item } ]:using_list: )
-subroutine@2:directive = [ %v:subroutine_name ]:subroutine_names. (@n [ %v:argument_name ]:0argument_list, )@n CODEBLOCK:code
-swap@2:directive = %d:item1 %d:item2
-tabulate@2:directive = [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n ]:0range_list [ { parametric@1:parametric { [@n %u:tmin < :@n | to@n > %u:tmax ]@n { [@n %u:vmin < :@n | to@n > %u:vmax ]@n } } } [ %e:expression ]:expression_list: ( every@1 [ { %d:every_item } ]:every_list: ~ index@1 %d:index ~ select@1 %E:select_criterion ~ sortby %E:sort_expression ~ using@1 { < rows@1:use_rows | columns@1:use_columns > } [ { %E:using_item } ]:using_list: ) { with@1 ( format@1 %q:format ~ spacing@1 %u:spacing ) } ]:0tabulate_list, DATABLOCK:data
-text@3:directive = { item@1 %d:editno } < %q:string > ( at@1 %p:p ~ rotate@1 %A:rotation ~ gap@1 %D:gap ~ halign@2 < left@1:halign | centre@1:halign | center@1:halign:centre | right@1:halign > ~ valign@2 < top@1:valign | centre@1:valign | center@1:valign:centre | bottom@1:valign > ~ with@1 < colour@1 | color@1 > %c:color )
-undelete@3:directive = { item@1 } [ %d:number ]:undeleteno,
+subroutine@4:directive = [ %v:subroutine_name ]:subroutine_names. (@n [ %v:argument_name ]:0argument_list, )@n CODEBLOCK:code
+swap@4:directive = %d:item1 %d:item2
+tabulate@5:directive = [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n ]:0range_list [ { parametric@1:parametric { [@n %u:tmin < :@n | to@n > %u:tmax ]@n { [@n %u:vmin < :@n | to@n > %u:vmax ]@n } } } [ %e:expression ]:expression_list: ( every@1 [ { %d:every_item } ]:every_list: ~ index@1 %d:index ~ select@1 %E:select_criterion ~ sortby %E:sort_expression ~ using@1 { < rows@1:use_rows | columns@1:use_columns > } [ { %E:using_item } ]:using_list: ) { with@1 ( format@1 %q:format ~ spacing@1 %u:spacing ) } ]:0tabulate_list, DATABLOCK:data
+text@4:directive = { item@1 %d:editno } < %q:string > ( at@1 %p:p ~ rotate@1 %A:rotation ~ gap@1 %D:gap ~ halign@2 < left@1:halign | centre@1:halign | center@1:halign:centre | right@1:halign > ~ valign@2 < top@1:valign | centre@1:valign | center@1:valign:centre | bottom@1:valign > ~ with@1 < colour@1 | color@1 > %c:color )
+undelete@5:directive = { item@1 } [ %d:number ]:undeleteno,
 unset@3:directive { item@1 %d:editno } { no@n } %a:axis format@1:set_option:xformat =
 unset@3:directive { item@1 %d:editno } %a:axis label@1:set_option:xlabel =
 unset@3:directive { item@1 %d:editno } %a:axis range@1:set_option =
 unset@3:directive { item@1 %d:editno } { no@n } { m@n:minor } { %a:axis } < tics@1:set_option | ticks@1:set_option:tics > =
 unset@3:directive { item@1 %d:editno } { no@n } { m@n:minor } < c1tics@1:set_option | c1ticks@1:set_option:c1tics > =
 unset@3:directive { item@1 %d:editno } arrow@2:set_option = [ %d:arrow_id ]:0arrow_list,
-unset@2:directive { item@1 %d:editno } autoscale@2:set_option = { [ %a:axis ]:axes }
+unset@3:directive { item@1 %d:editno } autoscale@2:set_option = { [ %a:axis ]:axes }
 unset@3:directive { item@1 %d:editno } < axescolor@5:set_option | axescolour@5:set_option:axescolor > =
 unset@3:directive { item@1 %d:editno } axis@2:set_option = [ %a:axis ]:0axes
 unset@3:directive { item@1 %d:editno } axisunitstyle@5:set_option =
@@ -247,7 +247,7 @@ unset@3:directive { item@1 %d:editno } < pointlinewidth@6:set_option |  plw@3:se
 unset@3:directive { item@1 %d:editno } < pointsize@1:set_option | ps@2:set_option:pointsize > =
 unset@3:directive { item@1 %d:editno } preamble@2:set_option =
 unset@3:directive { item@1 %d:editno } samples@2:set_option =
-unset@2:directive                      seed@2:set_option =
+unset@3:directive                      seed@2:set_option =
 unset@3:directive:set { item@1 %d:editno } < axis@1:set_option:noaxis | noaxis@3:set_option > = [ %a:axis ]:axes
 unset@3:directive { item@1 %d:editno } size@1:set_option =
 unset@3:directive                      terminal@1:set_option =
@@ -255,12 +255,12 @@ unset@3:directive { item@1 %d:editno } < textcolor@5:set_option | textcolour@5:s
 unset@3:directive { item@1 %d:editno } texthalign@5:set_option =
 unset@3:directive { item@1 %d:editno } textvalign@5:set_option =
 unset@3:directive { item@1 %d:editno } title@2:set_option =
-unset@2:directive { item@1 %d:editno } trange@2:set_option =
+unset@3:directive { item@1 %d:editno } trange@2:set_option =
 unset@3:directive                      unit@1:set_option = { < display@1:set_option:unit_display | scheme@1:set_option:unit_scheme | of@1:set_option:unit_of %s:quantity | preferred@1:set_option:unit_preferred > }
-unset@2:directive { item@1 %d:editno } urange@2:set_option =
+unset@3:directive { item@1 %d:editno } urange@2:set_option =
 unset@3:directive { item@1 %d:editno } view@1:set_option =
 unset@3:directive                      viewer@1:set_option =
-unset@2:directive { item@1 %d:editno } vrange@2:set_option =
+unset@3:directive { item@1 %d:editno } vrange@2:set_option =
 unset@3:directive { item@1 %d:editno } width@1:set_option =
 unset@3:directive:unset_error = { item@1 %d:editno } { %s:set_option } %r:restofline
 while@5:directive = %e:criterion { loopname@1 %v:loopname } CODEBLOCK:code

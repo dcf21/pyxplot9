@@ -27,6 +27,8 @@
 #include <glob.h>
 #include <wordexp.h>
 
+#include <gsl/gsl_math.h>
+
 #include "canvasItems.h"
 #include "datafile.h"
 
@@ -1574,6 +1576,31 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
      return 1;
     }
   }
+
+  // Read parametric flag
+  new->parametric = ( (ptab[PARSE_INDEX_parametric]>0) && (stk[stkbase+ptab[PARSE_INDEX_parametric]].objType==PPLOBJ_STR) );
+
+  // Read T and V ranges
+  new->TRangeSet = ( (ptab[PARSE_INDEX_tmin]>0) && (stk[stkbase+ptab[PARSE_INDEX_tmin]].objType!=PPLOBJ_ZOM) );
+  new->VRangeSet = ( (ptab[PARSE_INDEX_vmin]>0) && (stk[stkbase+ptab[PARSE_INDEX_vmin]].objType!=PPLOBJ_ZOM) );
+
+  if (new->TRangeSet)
+   {
+    new->Tmin = stk[stkbase+ptab[PARSE_INDEX_tmin]];
+    new->Tmax = stk[stkbase+ptab[PARSE_INDEX_tmax]];
+    if      (!gsl_finite(new->Tmin.real)) { sprintf(c->errcontext.tempErrStr, "Lower limit specified for parameter t is not finite."); ppl_error(&c->errcontext,ERR_NUMERICAL,-1,-1,NULL); new->TRangeSet=0; }
+    else if (!gsl_finite(new->Tmax.real)) { sprintf(c->errcontext.tempErrStr, "Upper limit specified for parameter t is not finite."); ppl_error(&c->errcontext,ERR_NUMERICAL,-1,-1,NULL); new->TRangeSet=0; }
+    else if (!ppl_unitsDimEqual(&new->Tmin, &new->Tmax)) { sprintf(c->errcontext.tempErrStr, "Upper and lower limits specified for parameter t have conflicting physical units of <%s> and <%s>.", ppl_printUnit(c,&new->Tmin,NULL,NULL,0,1,0), ppl_printUnit(c,&new->Tmax,NULL,NULL,1,1,0)); ppl_error(&c->errcontext,ERR_NUMERICAL,-1,-1,NULL); new->TRangeSet=0; }
+   }
+
+  if (new->VRangeSet)
+   {
+    new->Vmin = stk[stkbase+ptab[PARSE_INDEX_vmin]];
+    new->Vmax = stk[stkbase+ptab[PARSE_INDEX_vmax]];
+    if      (!gsl_finite(new->Vmin.real)) { sprintf(c->errcontext.tempErrStr, "Lower limit specified for parameter v is not finite."); ppl_error(&c->errcontext,ERR_NUMERICAL,-1,-1,NULL); new->VRangeSet=0; }
+    else if (!gsl_finite(new->Vmax.real)) { sprintf(c->errcontext.tempErrStr, "Upper limit specified for parameter v is not finite."); ppl_error(&c->errcontext,ERR_NUMERICAL,-1,-1,NULL); new->VRangeSet=0; }
+    else if (!ppl_unitsDimEqual(&new->Vmin, &new->Vmax)) { sprintf(c->errcontext.tempErrStr, "Upper and lower limits specified for parameter v have conflicting physical units of <%s> and <%s>.", ppl_printUnit(c,&new->Vmin,NULL,NULL,0,1,0), ppl_printUnit(c,&new->Vmax,NULL,NULL,1,1,0)); ppl_error(&c->errcontext,ERR_NUMERICAL,-1,-1,NULL); new->VRangeSet=0; }
+   }
 
   // Read axes
   new->axis1set = new->axis2set = new->axis3set = 0;

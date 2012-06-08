@@ -232,9 +232,8 @@
   if (!OUTPUT.flagComplex) OUTPUT.imag=0.0;
 
 #define CLEANUP_APPLYUNIT(UNIT) \
-  OUTPUT.dimensionless = 0; \
-  if ((UNIT!=UNIT_ANGLE)||(c->set->term_current.UnitAngleDimless != SW_ONOFF_ON)) OUTPUT.exponent[UNIT] = 1; \
-
+  OUTPUT.dimensionless = ((UNIT==UNIT_ANGLE)&&(c->set->term_current.UnitAngleDimless==SW_ONOFF_ON)); \
+  if (!OUTPUT.dimensionless) OUTPUT.exponent[UNIT] = 1; \
 
 #define CHECK_OUTPUT_OKAY \
  if ((!gsl_finite(OUTPUT.real)) || (!gsl_finite(OUTPUT.imag)) || ((OUTPUT.flagComplex) && (c->set->term_current.ComplexNumbers == SW_ONOFF_OFF))) \
