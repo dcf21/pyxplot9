@@ -82,7 +82,6 @@ int eps_plot_AddUsingItemsForWithWords(ppl_context *c, withWords *ww, int *NExpe
  {
   *NObjs = 0;
   *autoUsingList = 0;
-  if (ww->linespoints == SW_STYLE_CONTOURMAP) return 0; // Contourplot evaluate expressions in terms of c1
 
   // If using list was empty, generate an automatic list before we start
   if (*Nusing==0)
@@ -110,6 +109,8 @@ int eps_plot_AddUsingItemsForWithWords(ppl_context *c, withWords *ww, int *NExpe
 
   // If using list is wrong length, give up and let ppl_datafile return an error
   if (*Nusing != *NExpect) return 0;
+
+  if (ww->linespoints == SW_STYLE_CONTOURMAP) return 0; // Contourplot evaluate expressions in terms of c1
 
 #define ADD_FAKE_USING_ITEM(X) \
  { \

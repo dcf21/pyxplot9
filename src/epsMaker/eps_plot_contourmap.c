@@ -653,7 +653,7 @@ GOT_CONTOURS:
           int           *outI [] = {&pd->ww_final.linetype    ,  NULL                      ,  NULL                           ,  NULL                      , &pd->ww_final.pointtype    ,  NULL                      ,  NULL                          , NULL};
           unsigned char *flagU[] = {&pd->ww_final.USElinetype , &pd->ww_final.USElinewidth , &pd->ww_final.USEpointlinewidth , &pd->ww_final.USEpointsize , &pd->ww_final.USEpointtype ,  NULL                      ,  NULL                          , NULL};
           int           *flagA[] = {&pd->ww_final.AUTOlinetype,  NULL                      ,  NULL                           ,  NULL                      , &pd->ww_final.AUTOpointtype,  NULL                      ,  NULL                          , NULL};
-          unsigned char  clip [] = {0,0,0,0,0,1,1,1,1,1,1,1,1,2};
+          unsigned char  clip [] = {0,0,0,0,0,0,0,2};
           pplObj *outval; double dbl; int errpos=-1;
 
           if (clip[i]>1) break;
@@ -667,7 +667,6 @@ GOT_CONTOURS:
           if (!gsl_finite(outval->real)) { sprintf(x->c->errcontext.tempErrStr, "The style expression <%s> yielded a result which was not a finite number.", expr[i]->ascii); ppl_error(&x->c->errcontext,ERR_NUMERICAL,-1,-1,NULL); continue; }
           dbl = outval->real;
 
-          if (clip[i]) { if (dbl<0.0) dbl=0.0; if (dbl>1.0) dbl=1.0; }
           if (outD[i]!=NULL) *outD[i] = dbl;
           if (outI[i]!=NULL) { if (dbl<INT_MIN) dbl=INT_MIN+1; if (dbl>INT_MAX) dbl=INT_MAX-1; *outI[i] = (int)dbl; }
           if (flagU[i]!=NULL) *flagU[i] = 1;
