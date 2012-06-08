@@ -66,9 +66,9 @@ void ppllabel_add(ppl_context *context, ppllabel_object **inlist, parserOutput *
   pplarrow_add_check_dimensions(PARSE_INDEX_y , system_y);
   pplarrow_add_check_dimensions(PARSE_INDEX_z , system_z);
 
-  pplarrow_add_check_axis(PARSE_INDEX_x);
-  pplarrow_add_check_axis(PARSE_INDEX_y);
-  pplarrow_add_check_axis(PARSE_INDEX_z);
+  pplarrow_add_check_axis(PARSE_INDEX_x_axis);
+  pplarrow_add_check_axis(PARSE_INDEX_y_axis);
+  pplarrow_add_check_axis(PARSE_INDEX_z_axis);
 
   tempstr = (char *)in->stk[ptab[PARSE_INDEX_label_text]].auxil; // Read label text
   label = (char *)malloc(strlen(tempstr)+1);
