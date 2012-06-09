@@ -1,0 +1,3 @@
+x=0.5
+minimise cos(x) via x
+print x

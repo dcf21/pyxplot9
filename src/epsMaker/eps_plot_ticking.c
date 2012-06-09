@@ -356,7 +356,7 @@ void TickLabelAutoGen(EPSComm *X, char **output, double x, double log_base, int 
 
 void TickLabelFromFormat(EPSComm *X, char **output, pplExpr *FormatExp, double x, pplObj *xunit, int xyz, int OutContext)
  {
-  int       lOP;
+  int       lOP, rc;
   const int stkLevelOld = X->c->stackPtr;
   pplObj   *outval;
   char     *VarName, *tmp_string;
@@ -371,7 +371,9 @@ void TickLabelFromFormat(EPSComm *X, char **output, pplExpr *FormatExp, double x
   ppl_contextGetVarPointer(X->c, VarName, &VarVal, &DummyTemp);
 
   // Set value of x (or y/z)
-  *VarVal = *xunit;
+  rc                  = VarVal->refCount;
+  *VarVal             = *xunit;
+  VarVal->refCount    = rc;
   VarVal->imag        = 0.0;
   VarVal->flagComplex = 0;
   VarVal->real        = x;

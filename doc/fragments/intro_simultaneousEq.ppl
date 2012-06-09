@@ -1,0 +1,2 @@
+solve x+y=1 , 2*x+3*y=7 via x,y
+print "x=%s; y=%s"%(x,y)

@@ -178,29 +178,25 @@ a hash character ({\tt\it \#}).
 \item What is $80^\circ$F in Celsius?
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf print 80*unit(oF) / unit(oC)}}\newline
-\noindent{\tt 26.666667}
+\input{fragments/tex/intro_tempConvert.tex}
 \vspace{3mm}
 
 \item How long does it take for light to travel from the Sun to the Earth?
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf print unit(AU) / phy\_c}}\newline
-\noindent{\tt 499.00478 s}
+\input{fragments/tex/intro_earthDistance.tex}
 \vspace{3mm}
 
 \item What wavelength of light corresponds to the ionisation energy of hydrogen (13.6\,eV)?
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf print phy\_c * phy\_h / (13.6 * unit(eV))}}\newline
-\noindent{\tt 91.164844 nm}
+\input{fragments/tex/intro_Hionisation.tex}
 \vspace{3mm}
 
 \item What is the escape velocity of the Earth?
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf print sqrt(2 * phy\_G * unit(Mearth) / unit(Rearth))}}\newline
-\noindent{\tt 11.186948 km/s}
+\input{fragments/tex/intro_escapeVelocity.tex}
 \vspace{3mm}
 \end{itemize}
 
@@ -210,25 +206,19 @@ following example evaluates $\int_{0\,\mathrm{s}}^{2\,\mathrm{s}}
 x^2\,\mathrm{d}x$:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf print int\_dx(x**2,0*unit(s),2*unit(s))}}\newline
-\noindent{\tt 2.6666667 s**3}
+\input{fragments/tex/intro_integration.tex}
 \vspace{3mm}
 
 \noindent This example solves a simple pair of simultaneous equations of two variables:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf solve x+y=1 , 2*x+3*y=7 via x,y}}\newline
-\noindent{\tt pyxplot> {\bf print "x=\%s; y=\%s"\%(x,y)}}\newline
-\noindent{\tt x=-4; y=5}
+\input{fragments/tex/intro_simultaneousEq.tex}
 \vspace{3mm}
 
 \noindent And this third example searches for the minimum of the function $\cos(x)$ closest to $x=0.5$:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf x=0.5}}\newline
-\noindent{\tt pyxplot> {\bf minimise cos(x) via x}}\newline
-\noindent{\tt pyxplot> {\bf print x}}\newline
-\noindent{\tt 3.1415927}
+\input{fragments/tex/intro_cosMin.tex}
 \vspace{3mm}
 
 This tour has touched briefly upon a few areas of PyXPlot's functionality, but

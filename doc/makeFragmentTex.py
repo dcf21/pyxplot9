@@ -1,4 +1,4 @@
-# makeFigureTex.py
+# makeFragmentTex.py
 #
 # The code in this file is part of PyXPlot
 # <http://www.pyxplot.org.uk>
@@ -20,10 +20,13 @@
 
 # Turn scripts of examples into latex
 
-import os,glob,re
+import os,sys,glob,re,subprocess
 
-os.system("rm -Rf examples/tex")
-os.system("mkdir  examples/tex")
+os.system("rm -Rf fragments/tex")
+os.system("mkdir  fragments/tex")
+
+if len(sys.argv)>=2: pyxplot = sys.argv[1]
+else               : pyxplot = "../bin/pyxplot"
 
 def line_texify(line):
   line = re.sub(r'[\\]', r'gpzywxqqq', line) # LaTeX does not like backslashs
@@ -39,50 +42,34 @@ def line_texify(line):
   line = re.sub(r'[<]', r'$<$', line) # LaTeX does not like < outside of mathmode....
   line = re.sub(r'[>]', r'$>$', line) # LaTeX does not like > outside of mathmode....
   line = re.sub(r'gpzywxqqq', r'$\\backslash$', line) # LaTeX does not like backslashs
+  line = re.sub(r' ', r'~', line)
   return line
 
-def makeTeX(fname, counter, linelist):
-  fname  = os.path.join("examples","tex",os.path.split(fname)[1][:-4]+"_%d.tex"%counter)
-  output = open(fname,"w")
-  fns    = max([len(l) for l in linelist]) > 50
-  if fns: output.write("{\\footnotesize\n")
-  for line in linelist:
-    if (len(line.strip())==0):
-      if fns: output.write("}\\\\{\\footnotesize")
-      else  : output.write("\\\\\n")
-      continue
-    line = line_texify(line)
-    for i in range(len(line)):
-      if (line[i]!=' '):
-        break;
-    if (i>0):
-      line2 = "\\phantom{"
-      for j in range(i): line2 += "x"
-      line2 += "}" + line.strip()
-      line = line2
-    else:
-      line = line.strip()
-    output.write("\\noindent{\\tt %s}\\newline\n"%line)
-  if fns: output.write("}\n")
-  output.close()
-
-files = glob.glob("examples/ex_*.ppl")
+files = glob.glob("fragments/*.ppl")
 files.sort()
 for fname in files:
-  print "Converting example to latex <%s>..."%os.path.split(fname)[1]
-  buffer    = []
-  buffering = False
-  counter   = 1
-  for line in open(fname):
-    if (line.strip()=="# BEGIN"):
-      buffering = True
-      buffer    = []
-      continue
-    if (line.strip()=="# END"):
-      makeTeX(fname, counter, buffer)
-      counter   = counter+1
-      buffering = False
-      continue
-    if (buffering):
-      buffer.append(line)
-
+  print "Converting fragment to latex <%s>..."%os.path.split(fname)[1]
+  out       = os.path.join("fragments","tex",os.path.split(fname)[1][:-4]+".tex")
+  linecount = 0
+  lines     = open(fname).readlines()
+  out       = open(out,"w")
+  first     = True
+  for i in range(len(lines)):
+    if (len(lines[i].strip())<1): continue
+    if (not first): out.write("\\newline\n")
+    first = False
+    out.write(r"\noindent{\tt pyxplot> {\bf %s}}"%(line_texify(lines[i].strip())))
+    sp = subprocess.Popen([pyxplot], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    o  = sp.communicate(input="\n".join(lines[0:i+1])) # returns (stdout,stderr)
+    if (len(o[1])>0): raise RuntimeError("pyxplot failed: %s"%o[1])
+    olines = o[0].strip().split('\n')
+    if (olines==['']): olines=[]
+    linecountNew = len(olines)
+    if linecountNew<=linecount: continue
+    olines = olines[linecount:]
+    linecount = linecountNew
+    for line in olines:
+      if (len(line.strip())<1): continue
+      out.write("\\newline\n\\noindent{\\tt %s}"%line)
+  out.write("\n")
+  out.close()

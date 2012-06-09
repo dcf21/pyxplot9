@@ -1,0 +1,1 @@
+print sqrt(2 * phy.G * unit(Mearth) / unit(Rearth))

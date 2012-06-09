@@ -22,27 +22,31 @@
 
 PYXPLOT    = ../bin/pyxplot
 EXAMPLEDIR = examples
+FRAGDIR    = fragments
 EX_EPSDIR  = $(EXAMPLEDIR)/eps
 EX_TEXDIR  = $(EXAMPLEDIR)/tex
+EX_FRAGDIR = $(FRAGDIR)/tex
 FIGFILES   = $(wildcard $(EXAMPLEDIR)/*.ppl)
 SOURCES    = $(wildcard *.tex)
 
-all: $(EX_EPSDIR)/timestamp $(EX_TEXDIR)/timestamp \
+all: $(EX_EPSDIR)/timestamp $(EX_TEXDIR)/timestamp $(EX_FRAGDIR)/timestamp \
      pyxplot-plain.ps pyxplot-plain.pdf pyxplot.pdf
 
 clean:
-	rm -Rf $(EX_EPSDIR) $(EX_TEXDIR)
+	rm -Rf $(EX_EPSDIR) $(EX_TEXDIR) $(EX_FRAGDIR)
 	rm -f *.pdf *.ps *.dvi *.aux *.idx *.ilg *.ind *.lob *.loe *.lof *.log *.out *.toc
 
 $(EX_EPSDIR)/timestamp: $(FIGFILES) $(PYXPLOT) .pyxplotrc
-	mkdir -p $(EX_EPSDIR)
 	python makeFigureEps.py $(PYXPLOT)
 	date > $(EX_EPSDIR)/timestamp
 
 $(EX_TEXDIR)/timestamp: $(FIGFILES) $(PYXPLOT) .pyxplotrc
-	mkdir -p $(EX_TEXDIR)
 	python makeFigureTex.py
-	date > $(EX_TEXDIR)
+	date > $(EX_TEXDIR)/timestamp
+
+$(EX_FRAGDIR)/timestamp: $(FRAGFILES) $(PYXPLOT) .pyxplotrc
+	python makeFragmentTex.py
+	date > $(EX_FRAGDIR)/timestamp
 
 pyxplot-plain.pdf: pyxplot-plain.ps
 	echo "Making plain pdf documentation..."
@@ -62,7 +66,7 @@ pyxplot.pdf: $(SOURCES) pyxplot-plain.dvi
 	echo "Making postscript documentation..."
 	dvips -Pcmz -Pamz $< -o $@ > /dev/null 2> /dev/null
 
-pyxplot-plain.dvi: $(SOURCES) $(EX_EPSDIR)/timestamp $(EX_TEXDIR)/timestamp
+pyxplot-plain.dvi: $(SOURCES) $(EX_EPSDIR)/timestamp $(EX_TEXDIR)/timestamp $(EX_FRAGDIR)/timestamp
 	echo "Compiling documentation..."
 	rm -f *.aux *.idx *.ilg *.ind *.lob *.loe *.lof
 	latex pyxplot-plain.tex > /dev/null 2> /dev/null
