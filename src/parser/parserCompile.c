@@ -268,11 +268,11 @@ repLoopCleanup:
          {
           int i, endBlock=1;
           for (i=3; line[*linepos+i]!='\0'; i++) if (line[*linepos+i]>' ') { endBlock=0; break; }
-          if (endBlock) { s->NinlineDatafiles--; first=1; }
+          if (endBlock) { s->NinlineDatafiles[blockDepth]--; first=1; }
          }
 
         // Return status 1 or 3 depending whether we're still looking for more data
-        if (s->NinlineDatafiles<1) { status=1; strcpy(s->prompt, "pyxplot"); }
+        if (s->NinlineDatafiles[blockDepth]<1) { status=1; strcpy(s->prompt, "pyxplot"); }
         else if (first)            { status=3; strcpy(s->prompt, "data>>>"); }
         else                       { status=3; strcpy(s->prompt, "data..."); }
         *linepos += strlen(line+*linepos);
@@ -605,7 +605,7 @@ finished_looking_for_tabcomp:
                 if (!(strcmp(node->varName,"expression")==0)) isInline=0;
                 if (isInline && (strncmp(line+*linepos,"\"--\"",4)!=0) && (strncmp(line+*linepos,"'--'",4)!=0) ) isInline=0;
                 for (j=4; j<explen; j++) if (line[*linepos+j]>' ') isInline=0;
-                if (isInline) s->NinlineDatafiles++;
+                if (isInline) s->NinlineDatafiles[blockDepth]++;
                 pplObjExpression(&val,0,(void *)expr);
                 ppl_parserAtomAdd(s->pl[blockDepth], s->pl[blockDepth]->stackOffset + node->outStackPos, *linepos, "", NULL, &val);
                }
@@ -865,7 +865,7 @@ cleanup:
 
   if             (status==1)              ppl_tbClear(c);
   if ((s!=NULL)&&(status!=3))             s->blockDepth=0;
-  if ((s!=NULL)&&(status!=3)&&(level==0)) s->NinlineDatafiles=0;
+  if ((s!=NULL)&&(status!=3)&&(level==0)) s->NinlineDatafiles[blockDepth]=0;
 //printf("%d %d %d %d\n",blockDepth,level,status,s->blockDepth);
   return status;
  }
@@ -908,7 +908,7 @@ void ppl_parserStatReInit(parserStatus *in)
   for (i=0; i<MAX_RECURSION_DEPTH; i++) in->outputPos[i] = -1;
   strcpy(in->prompt, "pyxplot");
   in->blockDepth       = 0;
-  in->NinlineDatafiles = 0;
+  for (i=0; i<MAX_RECURSION_DEPTH; i++) in->NinlineDatafiles[i] = 0;
   in->waitingForBrace  = 0;
   in->eLPos            = 0;
   in->eLlinePos        = 0;

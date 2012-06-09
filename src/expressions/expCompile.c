@@ -138,6 +138,7 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
       if      (trialstate=='B') // string literal
        {
         char quoteType;
+        if ( (in[scanpos]=='r') && ((in[scanpos+1]=='\'') || (in[scanpos+1]=='"')) ) NEWSTATE(1,0,0);
         if ( (in[scanpos]==(quoteType='\'')) || (in[scanpos]==(quoteType='"')) )
          {
           int j;
@@ -597,7 +598,16 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
       char quoteType=in[ipos];
       char *oc = (char *)out;
       BYTECODE_OP(2); // bytecode op 2
-      if ((quoteType!='\'')&&(quoteType!='"')) // Unquoted string
+      if ((quoteType=='r') && ((in[ipos+1]=='\'') || (in[ipos+1]=='\"')) )
+       {
+        quoteType=in[ipos+1];
+        for ( i=ipos+2 ; (in[i]!=quoteType) ; i++ )
+         {
+          if (in[i]=='\0') { *errPos=i; *errType=ERR_INTERNAL; strcpy(errText, "Unexpected end of string."); *end=-1; return; }
+          oc[outpos++] = in[i];
+         }
+       }
+      else if ((quoteType!='\'')&&(quoteType!='"')) // Unquoted string
        {
         while ((tpos<tlen) && (tdata[tpos]+'@' == o))
          {

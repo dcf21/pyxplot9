@@ -1333,6 +1333,7 @@ void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutp
    {
     const int pos = ptab[PARSE_INDEX_data];
     if ((pos>0)&&(stk[pos].objType==PPLOBJ_BYT)) *dataSpool = (parserLine *)stk[pos].auxil;
+    if (*dataSpool!=NULL) *dataSpool = (*dataSpool)->next; // first line is command line
    }
 
   // Read select criterion

@@ -69,6 +69,32 @@
 
 #define TBADD(et,pos) ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,et,pos,pl->linetxt,"")
 
+#define GET_AXISLOG(OUT,AXIS,DEFAULT) \
+ { \
+  pplset_axis *ai = (AXIS); \
+  int C=0, *out=&ai->log; \
+  while ((ai->linked)&&(C<100)) \
+   { \
+    if (ai->LinkedAxisCanvasID > 0) { out=&(AXIS)->log; *out=0; } \
+    if (!DEFAULT) \
+     { \
+      if      (ai->LinkedAxisToXYZ == 0) ai = xa + ai->LinkedAxisToNum; \
+      else if (ai->LinkedAxisToXYZ == 1) ai = ya + ai->LinkedAxisToNum; \
+      else                               ai = za + ai->LinkedAxisToNum; \
+     } \
+    else \
+     { \
+      if      (ai->LinkedAxisToXYZ == 0) ai = c->set->XAxesDefault + ai->LinkedAxisToNum; \
+      else if (ai->LinkedAxisToXYZ == 1) ai = c->set->YAxesDefault + ai->LinkedAxisToNum; \
+      else                               ai = c->set->ZAxesDefault + ai->LinkedAxisToNum; \
+     } \
+    C++; \
+    if (!ai->enabled) { out=&(AXIS)->log; *out=0; break; } \
+    out=&ai->log; \
+   } \
+  OUT=out; \
+ }
+
 static void tics_rm(pplset_tics *a)
  {
   a->tickMinSet = a->tickMaxSet = a->tickStepSet = 0;
@@ -961,6 +987,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
         if (pos<=0) break;
         if (command[pos+ap].objType==PPLOBJ_NUM)
          {
+          int *alog, *adlog;
           int i = (int)round(command[pos+ap].real);
           int j = (int)round(command[pos+ap].exponent[0]);
           int newstate;
@@ -968,12 +995,14 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
           if      (j==1) { a = &ya[i]; ad = &c->set->YAxesDefault[i]; }
           else if (j==2) { a = &za[i]; ad = &c->set->ZAxesDefault[i]; }
           else           { a = &xa[i]; ad = &c->set->XAxesDefault[i]; }
+          GET_AXISLOG(alog , a , 0);
+          GET_AXISLOG(adlog, ad, 1);
           if      (sl ) { a->enabled = 1; newstate = SW_BOOL_TRUE; }
           else if (snl) { a->enabled = 1; newstate = SW_BOOL_FALSE; }
-          else          {                 newstate = ad->log; }
+          else          {                 newstate = *adlog; }
 
-          if (a->log != newstate) { tics_rm(&a->tics); tics_rm(&a->ticsM); }
-          a->log     = newstate;
+          if (*alog != newstate) { tics_rm(&a->tics); tics_rm(&a->ticsM); }
+          *alog = newstate;
           a->tics .logBase = b;
           a->ticsM.logBase = b;
          }
@@ -998,18 +1027,18 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
      }
     else if (!ul) // set logscale or nologscale on all axes
      {
-      int i;
+      int i, *alog;
       pplset_axis *a;
       int newstate = sl ? SW_BOOL_TRUE : SW_BOOL_FALSE;
       if (sg->Clog[0] != newstate) { tics_rm(&sg->ticsC); tics_rm(&sg->ticsCM); }
       sg->Clog[0] = sg->Clog[1] = sg->Clog[2] = sg->Clog[3] = sg->Tlog = sg->Ulog = sg->Vlog = newstate;
-      for (i=0;i<MAX_AXES;i++) { a=&xa[i]; if (a->enabled) { if (a->log != newstate) { tics_rm(&a->tics); tics_rm(&a->ticsM); } a->log=newstate; a->tics.logBase=a->ticsM.logBase=b; } }
-      for (i=0;i<MAX_AXES;i++) { a=&ya[i]; if (a->enabled) { if (a->log != newstate) { tics_rm(&a->tics); tics_rm(&a->ticsM); } a->log=newstate; a->tics.logBase=a->ticsM.logBase=b; } }
-      for (i=0;i<MAX_AXES;i++) { a=&za[i]; if (a->enabled) { if (a->log != newstate) { tics_rm(&a->tics); tics_rm(&a->ticsM); } a->log=newstate; a->tics.logBase=a->ticsM.logBase=b; } }
+      for (i=0;i<MAX_AXES;i++) { a=&xa[i]; if (a->enabled) { GET_AXISLOG(alog,a,0); if (*alog != newstate) { tics_rm(&a->tics); tics_rm(&a->ticsM); } *alog=newstate; a->tics.logBase=a->ticsM.logBase=b; } }
+      for (i=0;i<MAX_AXES;i++) { a=&ya[i]; if (a->enabled) { GET_AXISLOG(alog,a,0); if (*alog != newstate) { tics_rm(&a->tics); tics_rm(&a->ticsM); } *alog=newstate; a->tics.logBase=a->ticsM.logBase=b; } }
+      for (i=0;i<MAX_AXES;i++) { a=&za[i]; if (a->enabled) { GET_AXISLOG(alog,a,0); if (*alog != newstate) { tics_rm(&a->tics); tics_rm(&a->ticsM); } *alog=newstate; a->tics.logBase=a->ticsM.logBase=b; } }
      }
     else // unset logscale on all axes
      {
-      int i;
+      int i, *alog, *adlog;
       pplset_axis *a, *ad;
       if (sg->Clog[0] != c->set->graph_default.Clog[0]) { tics_rm(&sg->ticsC); tics_rm(&sg->ticsCM); }
       sg->Clog[0] = c->set->graph_default.Clog[0];
@@ -1019,9 +1048,9 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
       sg->Tlog    = c->set->graph_default.Tlog;
       sg->Ulog    = c->set->graph_default.Ulog;
       sg->Vlog    = c->set->graph_default.Vlog;
-      for (i=0;i<MAX_AXES;i++) { a=&xa[i]; ad=&c->set->XAxesDefault[i]; if (a->enabled) { if (a->log != ad->log) { tics_rm(&a->tics); tics_rm(&a->ticsM); } a->log=ad->log; a->tics.logBase=a->ticsM.logBase=b; } }
-      for (i=0;i<MAX_AXES;i++) { a=&ya[i]; ad=&c->set->YAxesDefault[i]; if (a->enabled) { if (a->log != ad->log) { tics_rm(&a->tics); tics_rm(&a->ticsM); } a->log=ad->log; a->tics.logBase=a->ticsM.logBase=b; } }
-      for (i=0;i<MAX_AXES;i++) { a=&za[i]; ad=&c->set->ZAxesDefault[i]; if (a->enabled) { if (a->log != ad->log) { tics_rm(&a->tics); tics_rm(&a->ticsM); } a->log=ad->log; a->tics.logBase=a->ticsM.logBase=b; } }
+      for (i=0;i<MAX_AXES;i++) { a=&xa[i]; ad=&c->set->XAxesDefault[i]; if (a->enabled) { GET_AXISLOG(alog,a,0); GET_AXISLOG(adlog,ad,1); if (*alog != *adlog) { tics_rm(&a->tics); tics_rm(&a->ticsM); } *alog=*adlog; a->tics.logBase=a->ticsM.logBase=b; } }
+      for (i=0;i<MAX_AXES;i++) { a=&ya[i]; ad=&c->set->YAxesDefault[i]; if (a->enabled) { GET_AXISLOG(alog,a,0); GET_AXISLOG(adlog,ad,1); if (*alog != *adlog) { tics_rm(&a->tics); tics_rm(&a->ticsM); } *alog=*adlog; a->tics.logBase=a->ticsM.logBase=b; } }
+      for (i=0;i<MAX_AXES;i++) { a=&za[i]; ad=&c->set->ZAxesDefault[i]; if (a->enabled) { GET_AXISLOG(alog,a,0); GET_AXISLOG(adlog,ad,1); if (*alog != *adlog) { tics_rm(&a->tics); tics_rm(&a->ticsM); } *alog=*adlog; a->tics.logBase=a->ticsM.logBase=b; } }
      }
    }
   else if (strcmp_set && (strcmp(setoption,"multiplot")==0)) /* set multiplot */
@@ -1596,12 +1625,14 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
       sprintf(cmd, "%s%c%d", m?"m":"", 'x'+j, i);
       if ( !((xa==NULL)||(ya==NULL)||(za==NULL)) )
        {
+        int *alog;
         pplset_axis *a;
         if      (j==1) a=&ya[i];
         else if (j==2) a=&za[i];
         else           a=&xa[i];
-        if (!m) { tics_rm(&a->tics ); SET_TICKS(a->tics ,a->ticsM,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
-        else    { tics_rm(&a->ticsM); SET_TICKS(a->ticsM,a->tics ,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
+        GET_AXISLOG(alog,a,0);
+        if (!m) { tics_rm(&a->tics ); SET_TICKS(a->tics ,a->ticsM,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(*alog==SW_BOOL_TRUE)); }
+        else    { tics_rm(&a->ticsM); SET_TICKS(a->ticsM,a->tics ,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(*alog==SW_BOOL_TRUE)); }
        }
      }
     else
@@ -1610,18 +1641,21 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
       char *cmd = m ? "mtics" : "tics";
       for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &xa[i]; if (a->enabled)
        {
-        if (!m) { tics_rm(&a->tics ); SET_TICKS(a->tics ,a->ticsM,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
-        else    { tics_rm(&a->ticsM); SET_TICKS(a->ticsM,a->tics ,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
+        int *alog; GET_AXISLOG(alog,a,0);
+        if (!m) { tics_rm(&a->tics ); SET_TICKS(a->tics ,a->ticsM,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(*alog==SW_BOOL_TRUE)); }
+        else    { tics_rm(&a->ticsM); SET_TICKS(a->ticsM,a->tics ,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(*alog==SW_BOOL_TRUE)); }
        }}
       for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &ya[i]; if (a->enabled)
        {
-        if (!m) { tics_rm(&a->tics ); SET_TICKS(a->tics ,a->ticsM,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
-        else    { tics_rm(&a->ticsM); SET_TICKS(a->ticsM,a->tics ,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
+        int *alog; GET_AXISLOG(alog,a,0);
+        if (!m) { tics_rm(&a->tics ); SET_TICKS(a->tics ,a->ticsM,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(*alog==SW_BOOL_TRUE)); }
+        else    { tics_rm(&a->ticsM); SET_TICKS(a->ticsM,a->tics ,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(*alog==SW_BOOL_TRUE)); }
        }}
       for (i=0; i<MAX_AXES; i++) { pplset_axis *a = &za[i]; if (a->enabled)
        {
-        if (!m) { tics_rm(&a->tics ); SET_TICKS(a->tics ,a->ticsM,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
-        else    { tics_rm(&a->ticsM); SET_TICKS(a->ticsM,a->tics ,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(a->log==SW_BOOL_TRUE)); }
+        int *alog; GET_AXISLOG(alog,a,0);
+        if (!m) { tics_rm(&a->tics ); SET_TICKS(a->tics ,a->ticsM,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(*alog==SW_BOOL_TRUE)); }
+        else    { tics_rm(&a->ticsM); SET_TICKS(a->ticsM,a->tics ,a->unit,((a->MinSet==SW_BOOL_TRUE)||(a->MaxSet==SW_BOOL_TRUE)),(*alog==SW_BOOL_TRUE)); }
        }}
      }
    }

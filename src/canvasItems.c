@@ -1431,7 +1431,7 @@ static int ppl_getPlotFname(ppl_context *c, char *in, int wildcardMatchNumber, c
   out->vectors=NULL;
   if (wildcardMatchNumber<0) wildcardMatchNumber=0;
   C = wildcardMatchNumber;
-  if ((strcmp(in,"-")==0)||(strcmp(in,"--")==0)) // special filenames match once only
+  if ((strcmp(in,"")==0)||(strcmp(in,"-")==0)||(strcmp(in,"--")==0)) // special filenames match once only
    {
     if (wildcardMatchNumber>0) return 1;
     out->filename = (char *)malloc(4);
