@@ -27,12 +27,13 @@ title = "ex_intro_func"
 load "examples/fig_init.ppl"
 set width 8
 
-# Main body of figure script
+# BEGIN
 a = 0.02
 b = -1
 c = 5
 f(x) = a*(x**3) + b*x + c
 plot f(x)
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

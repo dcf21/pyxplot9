@@ -481,7 +481,7 @@ finished_looking_for_tabcomp:
        {
         pplExpr *expr;
         int      explen=0, errPos=-1, errType;
-        int      dollarAllowed = (node->matchString[1]=='E');
+        int      dollarAllowed = ((node->matchString[1]=='E') || (node->matchString[2]=='E'));
         int      equalsAllowed = (node->matchString[1]!='g');
         int      vectorAllowed = (node->matchString[1]=='P')||(node->matchString[1]=='p');
         int      vectorLength  = (node->matchString[1]=='P')?3:2;

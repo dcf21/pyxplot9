@@ -26,7 +26,7 @@ reset
 title = "ex_funcsplice2"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set numeric errors quiet
 k=1
 l=1
@@ -41,6 +41,7 @@ set xlabel "$x/l$"
 set ylabel "$F(x)/kl$"
 set key top right
 plot F(x)
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

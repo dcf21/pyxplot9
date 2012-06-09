@@ -26,16 +26,17 @@ reset
 title = "ex_quadrupole"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set nokey
 set size 8 square
-set samples grid 200x200 interpolate InverseSquare
-plot [-4:4][-4:4] '--' with colourmap
+set samples grid 200x200 interpolate inverseSquare
+plot [-4:4][-4:4] '--' with colormap
 -1 -1  1
 -1  1 -1
  1 -1 -1
  1  1  1
 END
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

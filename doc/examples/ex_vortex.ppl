@@ -26,7 +26,7 @@ reset
 title = "ex_vortex"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set size square
 set width 9
 set nokey
@@ -36,6 +36,7 @@ set trange [0:2*pi]
 plot \
  'examples/ex_vortex.dat' u 1:2:($1+$3):($2+$4) w arrows, \
  parametric 4*sin(t):4*cos(t) w lt 2 col black
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

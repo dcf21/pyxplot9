@@ -26,7 +26,7 @@ reset
 title = "ex_euclid_I_47"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set unit angle nodimensionless
 set multiplot ; set nodisplay
 
@@ -57,9 +57,9 @@ Gx = Ax + AB*cos(CBA+90*unit(deg))
 Gy = Ay + AB*sin(CBA+90*unit(deg))
 
 # Construct diagram
-box from Dx,Dy to Cx,Cy with fillcol grey50
-box at Ax,Ay width AC height AC rot CBA-90*unit(deg) with fillcol grey50
-box at Bx,By width AB height AB rot CBA with fillcol grey50
+box from Dx,Dy to Cx,Cy with fillcol gray50
+box at Ax,Ay width AC height AC rot CBA-90*unit(deg) with fillcol gray50
+box at Bx,By width AB height AB rot CBA with fillcol gray50
 line from Bx,By to Kx,Ky
 line from Fx,Fy to Cx,Cy
 line from Ax,Ay to Dx,Dy
@@ -82,6 +82,7 @@ text "L" at Lx,Ly gap TG   hal c val t
 
 # Display diagram
 set display ; refresh
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

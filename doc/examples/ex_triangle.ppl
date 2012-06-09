@@ -26,11 +26,11 @@ reset
 title = "ex_triangle"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set unit angle nodimensionless
 
 # Define subroutine for drawing triangles
-subroutine TriangleDraw(Bx,By,AB,AC,BC)
+subroutine triangleDraw(Bx,By,AB,AC,BC)
  {
   # Use cosine rule to find interior angles
   ABC = acos((AB**2 + BC**2 - AC**2) / (2*AB*BC))
@@ -75,10 +75,11 @@ subroutine TriangleDraw(Bx,By,AB,AC,BC)
 
 # Display diagram with three triangles
 set multiplot ; set nodisplay
-call TriangleDraw(2.8*unit(cm),3.2*unit(cm), 3*unit(cm),4*unit(cm),4*unit(cm))
-call TriangleDraw(0.0*unit(cm),0.0*unit(cm), 3*unit(cm),4*unit(cm),5*unit(cm))
-call TriangleDraw(6.5*unit(cm),0.0*unit(cm), 3*unit(cm),3*unit(cm),3*unit(cm))
+call triangleDraw(2.8*unit(cm),3.2*unit(cm), 3*unit(cm),4*unit(cm),4*unit(cm))
+call triangleDraw(0.0*unit(cm),0.0*unit(cm), 3*unit(cm),4*unit(cm),5*unit(cm))
+call triangleDraw(6.5*unit(cm),0.0*unit(cm), 3*unit(cm),3*unit(cm),3*unit(cm))
 set display ; refresh
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

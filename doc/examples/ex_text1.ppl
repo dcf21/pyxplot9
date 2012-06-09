@@ -26,13 +26,14 @@ reset
 title = "ex_text1"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
-text '\parbox[t]{6cm}{\setlength{\parindent}{1cm} \
+# BEGIN
+text r'\parbox[t]{6cm}{\setlength{\parindent}{1cm} \
 \noindent There once was a lady from Hyde, \newline \
 Who ate a green apple and died, \newline \
 \indent While her lover lamented, \newline \
 \indent The apple fermented, \newline \
 and made cider inside her inside.}'
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

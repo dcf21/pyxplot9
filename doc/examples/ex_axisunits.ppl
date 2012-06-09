@@ -26,12 +26,10 @@ reset
 title = "ex_axisunits"
 load "examples/fig_init.ppl"
 
-# Initialise
 set unit preferred kg*m/s
 s = unit(-2.2*cm)
 x = unit(kg*m/s)
 
-# Main body of figure script
 set multiplot
 set nodisplay
 set size ratio 1e-3

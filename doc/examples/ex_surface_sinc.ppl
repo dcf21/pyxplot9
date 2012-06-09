@@ -26,13 +26,13 @@ reset
 title = "ex_surface_sinc"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set numerics complex
 set xlabel "$x$"
 set ylabel "$y$"
 set zlabel "$z$"
-set xformat "%s$\pi$"%(x/pi)
-set yformat "%s$\pi$"%(y/pi)
+set xformat r"%s$\pi$"%(x/pi)
+set yformat r"%s$\pi$"%(y/pi)
 set xtics 3*pi ; set mxtics pi
 set ytics 3*pi ; set mytics pi
 set ztics
@@ -40,8 +40,9 @@ set key below
 set size 8 square
 set grid
 plot 3d [-6*pi:6*pi][-6*pi:6*pi][-0.3:1] sinc(hypot(x,y)) \
-     with surface col black \
-     fillcol hsb(atan2($1,$2)/(2*pi)+0.5):hypot($1,$2)/30+0.2:($3*0.5+0.5)
+  with surface col black \
+  fillcol hsb(atan2($1,$2)/(2*pi)+0.5,hypot($1,$2)/30+0.2,$3*0.5+0.5)
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

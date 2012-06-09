@@ -26,11 +26,12 @@ reset
 title = "ex_surface_polynomial"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set nokey
 set size 8 square
 plot 3d x**3/20+y**2 with surface col black fillc red, \
         x**3/20+y**2 with contours col black
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

@@ -26,10 +26,7 @@ reset
 title = "ex_axislabs"
 load "examples/fig_init.ppl"
 
-# Set output destination
 set width 8
-
-# Main body of figure script
 set xlabel "Horizontal axis"
 set ylabel "Vertical axis"
 set title 'A plot with labelled axes'

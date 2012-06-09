@@ -27,9 +27,10 @@ title = "ex_intro_legendre"
 load "examples/fig_init.ppl"
 set width 8
 
-# Main body of figure script
+# BEGIN
 set key xcentre
 p [-1:1][:] legendreP(2,x), legendreP(4,x), legendreP(6,x)
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

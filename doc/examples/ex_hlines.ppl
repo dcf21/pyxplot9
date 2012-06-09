@@ -27,7 +27,7 @@ title = "ex_hlines"
 load "examples/fig_init.ppl"
 set terminal landscape
 
-# Main body of figure script
+# BEGIN
 set numeric display latex
 set width 20
 set size ratio 0.4
@@ -36,26 +36,26 @@ set log x
 set x1label "Wavelength"
 set x2label "Frequency"     ; set unit of frequency Hz
 set x3label "Photon Energy" ; set unit of energy eV
-set axis x2 linked x1 using phy_c/x
-set axis x3 linked x2 using phy_h*x
+set axis x2 linked x1 using phy.c/x
+set axis x3 linked x2 using phy.h*x
 set noytics ; set nomytics
 
 # Draw lines of first four series of hydrogen lines
 an=2
 n=1
-foreach SeriesName in ("Ly","Ba","Pa","Br")
+foreach SeriesName in ["Ly","Ba","Pa","Br"]
  {
   for m=n+1 to n+21
    {
-    wl = 1/(phy_Ry*(1/n**2-1/m**2))
+    wl = 1/(phy.Ry*(1/n**2-1/m**2))
     set arrow an from wl,0.3 to wl,0.6 with nohead col n
-    if (m-n==1) { ; GreekLetter = "\\alpha" ; }
-    if (m-n==2) { ; GreekLetter = "\\beta"  ; }
-    if (m-n==3) { ; GreekLetter = "\\gamma" ; }
+    if (m-n==1) { ; GreekLetter = r"\alpha" ; }
+    if (m-n==2) { ; GreekLetter = r"\beta"  ; }
+    if (m-n==3) { ; GreekLetter = r"\gamma" ; }
     if (m-n<4)
      {
-      set label an "\parbox{5cm}{\footnotesize\center{\
-        %s-$%s$\\newline $%d\to%d$\\newline %s\\newline}}" \
+      set label an r"\parbox{5cm}{\footnotesize\center{\
+        %s-$%s$\newline $%d\to%d$\newline %s\newline}}" \
         %(SeriesName,GreekLetter,m,n,wl) at wl,0.55+0.2*(m-n) \
         hal centre val centre
      }
@@ -64,7 +64,7 @@ foreach SeriesName in ("Ly","Ba","Pa","Br")
   n=n+1
  }
 
-# Label astronomical photometric colours
+# Label astronomical photometric colors
 foreach datum i,name,wl_c,wl_w in "--" using \
     1:"%s"%($2):($3*unit(nm)):($4*unit(nm))
  {
@@ -97,6 +97,7 @@ set label 1 "Lyman Limit: %s"%(ll) at 95*unit(nm),0.17 \
 
 # Finally produce plot
 plot [80*unit(nm):5500*unit(nm)][0:1.25]
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

@@ -31,18 +31,20 @@ set nokey
 set fontsize 1.5
 set width 16
 
+# BEGIN
 h0 = 70
 omega_m = 0.27
 omega_l = 0.73
-age = ast_Lcdm_age(h0,omega_m,omega_l)
+age = ast.Lcdm_age(h0,omega_m,omega_l)
 set xrange [0.01*age:0.99*age]
 set xtics (unit(1*Gyr),unit(4*Gyr),unit(7*Gyr),unit(10*Gyr),unit(13.6*Gyr))
 set unit of time Gyr
-set axis x2 linked x using ast_Lcdm_z(age-x,h0,omega_m,omega_l)
+set axis x2 linked x using ast.Lcdm_z(age-x,h0,omega_m,omega_l)
 set xlabel "Time since Big Bang $t$"
 set ylabel "CMBR Temperature $T$"
 set x2label "Redshift $z$"
 plot unit(2.73*K)*(1+x) ax x2y1
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

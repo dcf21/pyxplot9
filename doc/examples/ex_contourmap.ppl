@@ -26,11 +26,12 @@ reset
 title = "ex_contourmap"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set nokey
 set size 8 square
-plot [-10:10][-10:10] x**3/20+y**2 with colourmap, \
+plot [-10:10][-10:10] x**3/20+y**2 with colormap, \
                       x**3/20+y**2 with contours col green lw 2 lt 1
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

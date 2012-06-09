@@ -23,6 +23,5 @@
 
 set term eps mono portrait
 set output "examples/eps/%s.eps"%(title)
-gold_ratio = 1/((1+sqrt(5))/2)
-set width 10.0
+set width 10
 

@@ -26,7 +26,7 @@ reset
 title = "ex_noentry"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set multiplot ; set nodisplay
 
 w = 10 # Width of sign / cm
@@ -39,10 +39,11 @@ box from -(0.8*w),-(0.2*w) to (0.8*w),(0.2*w) \
 # Put a warning beneath the sign
 set fontsize 3
 set texthalign centre ; set textvalign centre
-text "\bf Keep Out! Code Monkey at work!" at 0,-1.2*w
+text r"\bf Keep Out! Code Monkey at work!" at 0,-1.2*w
 
 # Display sign
 set display ; refresh
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

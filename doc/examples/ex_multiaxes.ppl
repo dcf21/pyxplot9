@@ -26,30 +26,31 @@ reset
 title = "ex_multiaxes"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set numeric display latex
 set unit angle nodimensionless
 set log x y
 set key bottom right
-set ylabel "Flux density"   ; set unit preferred W/Hz/m**2/sterad
+set ylabel  "Flux density" ; set unit preferred W/Hz/m**2/sterad
 set x1label "Wavelength"
 set x2label "Frequency"     ; set unit of frequency Hz
 set x3label "Photon Energy" ; set unit of energy eV
-set axis x2 linked x1 using phy_c/x
-set axis x3 linked x2 using phy_h*x
+set axis x2 linked x1 using phy.c/x
+set axis x3 linked x2 using phy.h*x
 set xtics unit(0.1*um),10
 set x2tics 1e12*unit(Hz),10
 set x3tics 0.01*unit(eV),10
 set xrange [80*unit(nm):unit(mm)]
 set yrange [1e-20*unit(W/Hz/m**2/sterad):]
 
-bb(wlen,T) = Bv(phy_c/wlen,T)
+bb(wlen,T) = phy.Bv(phy.c/wlen,T)
 
-plot bb(x,  30) title "$T=  30$\,K", \
-     bb(x, 100) title "$T= 100$\,K", \
-     bb(x, 300) title "$T= 300$\,K", \
-     bb(x,1000) title "$T=1000$\,K", \
-     bb(x,3000) title "$T=3000$\,K"
+plot bb(x,  30) title r"$T=  30$\,K", \
+     bb(x, 100) title r"$T= 100$\,K", \
+     bb(x, 300) title r"$T= 300$\,K", \
+     bb(x,1000) title r"$T=1000$\,K", \
+     bb(x,3000) title r"$T=3000$\,K"
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

@@ -138,13 +138,19 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
       if      (trialstate=='B') // string literal
        {
         char quoteType;
-        if ( (in[scanpos]=='r') && ((in[scanpos+1]=='\'') || (in[scanpos+1]=='"')) ) NEWSTATE(1,0,0);
+        int  raw=0;
+        if ( (in[scanpos]=='r') && ((in[scanpos+1]=='\'') || (in[scanpos+1]=='"')) ) { raw=1; NEWSTATE(1,0,0); }
         if ( (in[scanpos]==(quoteType='\'')) || (in[scanpos]==(quoteType='"')) )
          {
-          int j;
-          for (j=1; ((in[scanpos+j]!=quoteType)&&(in[scanpos+j]!='\0')); j++)
-            if ((in[scanpos+j]=='\\')&&(in[scanpos+j+1]!='\0')) j++;
-          if (in[scanpos+j]==quoteType) { j++; NEWSTATE(j,0,0); }
+          int j=1, tripleQuote=0;
+          if ((in[scanpos+1]==quoteType)&&(in[scanpos+2]==quoteType)) { j=3; tripleQuote=1; }
+          for ( ; (in[scanpos+j]!='\0') &&
+                  ( ((!tripleQuote) && (in[scanpos+j]!=quoteType)) ||
+                    (  tripleQuote  && ((in[scanpos+j]!=quoteType)||(in[scanpos+j+1]!=quoteType)||(in[scanpos+j+2]!=quoteType)) )
+                  )
+                ; j++)
+            if ((!raw)&&(in[scanpos+j]=='\\')&&(in[scanpos+j+1]!='\0')) j++;
+          if (in[scanpos+j]==quoteType) { if (tripleQuote) { j+=3; } else { j++; } NEWSTATE(j,0,0); }
           else                          { *errPos = scanpos; *errType=ERR_SYNTAX; strcpy(errText, "Mismatched quote."); *end=-1; *outlen=0; return; }
          }
        }
@@ -600,8 +606,14 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
       BYTECODE_OP(2); // bytecode op 2
       if ((quoteType=='r') && ((in[ipos+1]=='\'') || (in[ipos+1]=='\"')) )
        {
+        int offset=2, tripleQuote=0;
         quoteType=in[ipos+1];
-        for ( i=ipos+2 ; (in[i]!=quoteType) ; i++ )
+        if ((in[ipos+2]==quoteType)&&(in[ipos+3]==quoteType)) { offset=4; tripleQuote=1; }
+        for ( i=ipos+offset ;
+              ( ((!tripleQuote) &&  (in[i]!=quoteType)) ||
+                (  tripleQuote  && ((in[i]!=quoteType)||(in[i+1]!=quoteType)||(in[i+2]!=quoteType)) ) );
+              i++
+            )
          {
           if (in[i]=='\0') { *errPos=i; *errType=ERR_INTERNAL; strcpy(errText, "Unexpected end of string."); *end=-1; return; }
           oc[outpos++] = in[i];
@@ -619,7 +631,14 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
        }
       else
        {
-        for ( i=ipos+1 ; (in[i]!=quoteType) ; i++ )
+        int offset=1, tripleQuote=0;
+        if ((in[ipos+1]==quoteType)&&(in[ipos+2]==quoteType)) { offset=3; tripleQuote=1; }
+
+        for ( i=ipos+offset ;
+              ( ((!tripleQuote) &&  (in[i]!=quoteType)) ||
+                (  tripleQuote  && ((in[i]!=quoteType)||(in[i+1]!=quoteType)||(in[i+2]!=quoteType)) ) );
+              i++
+            )
          {
           if (in[i]=='\0') { *errPos=i; *errType=ERR_INTERNAL; strcpy(errText, "Unexpected end of string."); *end=-1; return; }
           if (in[i]=='\\')

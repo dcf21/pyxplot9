@@ -26,9 +26,10 @@ reset
 title = "ex_axistics2"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
-set xformat "%s$\pi$"%(x/pi)
+# BEGIN
+set xformat r"%s$\pi$"%(x/pi)
 plot [-pi:2*pi] sin(x)
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

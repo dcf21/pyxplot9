@@ -27,7 +27,6 @@ reset
 # Set output destination
 title = "ex_linestyles" ; load "examples/fig_init.ppl"
 
-# Main body of figure script
 set multiplot
 set nodisplay
 set texthalign left
@@ -37,9 +36,9 @@ for i=0 to 43
  {
   y = -(i%15) * unit(1*cm)
   x = floor(i/15) * unit(4*cm)
-  point x,y with pt i+1 colour rgb1:0:0
-  if (i<10) { ; name = "Point type \phantom{0}%d"%(i+1)
-  } else    { ; name = "Point type %d"%(i+1) ; }
+  point x,y with pt i+1 color red
+  if (i<10) { ; name = r"Point type \phantom{0}%d"%(i+1)
+  } else    { ; name = r"Point type %d"%(i+1) ; }
   text name at x+unit(5*mm),y
  }
 set display
@@ -65,8 +64,8 @@ for i=0 to 9
   line from x+unit(0.0*cm),y to x+unit( 2.5*cm),y with lw 1 lt i+1
   line from x+unit(5.5*cm),y to x+unit( 8.0*cm),y with lw 2 lt i+1
   line from x+unit(9.0*cm),y to x+unit(11.5*cm),y with lw 4 lt i+1
-  if (i<10) { ; name = "Line type \phantom{0}%d"%(i+1)
-  } else    { ; name = "Line type %d"%(i+1) ; }
+  if (i<10) { ; name = r"Line type \phantom{0}%d"%(i+1)
+  } else    { ; name = r"Line type %d"%(i+1) ; }
   text name at x+unit(3.0*cm),y
  }
 set display
@@ -96,8 +95,8 @@ for i=0 to 9
   x = floor(i/5) * unit(7.6cm)
   set origin x,y
   plot 'examples/ex_linestyles.dat' with stars pt i+1
-  if (i<10) { ; name = "Star type \phantom{0}%d"%(i+1)
-  } else    { ; name = "Star type %d"%(i+1) ; }
+  if (i<10) { ; name = r"Star type \phantom{0}%d"%(i+1)
+  } else    { ; name = r"Star type %d"%(i+1) ; }
   text name at x+unit(2.4*cm),y
  }
 set display

@@ -19,9 +19,7 @@
 
 # ----------------------------------------------------------------------------
 
-# This script initialises the figures in the PyXPlot Users' Guide
+# This script is called after each figure is produced.
 
-set term pdf
-set output "examples/eps/%s.pdf"%(title)
-refresh
+# At present this script is intentionally blank.
 

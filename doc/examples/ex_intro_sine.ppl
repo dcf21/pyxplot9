@@ -27,8 +27,9 @@ title = "ex_intro_sine"
 load "examples/fig_init.ppl"
 set width 8
 
-# Main body of figure script
+# BEGIN
 plot sin(x) with lines
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

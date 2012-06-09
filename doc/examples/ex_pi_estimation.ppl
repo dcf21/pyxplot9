@@ -26,7 +26,6 @@ reset
 title = "null"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
 set multiplot
 set nodisplay
 set seed 0
@@ -34,10 +33,12 @@ width = 7
 
 Nsamples = 500
 
+rand() = random.random()
+
 # Make a table of random numbers
 set samp Nsamples
 set output "examples/eps/ex_pi_estimation.dat"
-tabulate 1-2*random():1-2*random() using 0:2:3
+tabulate 1-2*rand():1-2*rand() using 0:2:3
 
 # Draw a unit circle and a unit square
 title = "ex_pi_estimation" ; load "examples/fig_init.ppl"

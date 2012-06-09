@@ -25,18 +25,17 @@
 reset
 title = "ex_datagrid"
 load "examples/fig_init.ppl"
-set num err quiet
 
-# Main body of figure script
+# BEGIN
+set num err quiet
 set nokey
 set size 7 square
 set sample grid 20x20
-set urange [-1:1]
-set vrange [-1:1]
-set xrange [-1.1:1.1]
+set urange [-1:1] ; set vrange [-1:1]
 set xrange [-1.1:1.1]
 f(u,v) = 0.4*exp(-(u**2+v**2)/0.2)
 plot parametric u:v+f(u,v) with l
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

@@ -25,9 +25,8 @@
 reset
 title = "ex_gallery"
 load "examples/fig_init.ppl"
-set term colour
+set term color
 
-# Main body of figure script
 set multiplot
 set nodisplay
 width=5.4
@@ -42,29 +41,29 @@ set textvalign centre
 # Plot 1 (bottom left)
 set xlabel "$x$"
 set ylabel ""
-set label 1 "(c) fsteps" at graph width*0.03 , graph width*gold_ratio*0.9
+set label 1 "(c) fsteps" at graph width*0.03 , graph width/goldenRatio*0.9
 plot "examples/ex_barchart1.dat" with fsteps, "" with points
 
 set axis x linked item 1 x
 set axis y linked item 1 y
 
 # Plot 2 (bottom right)
-set origin 1*width, 0*width*gold_ratio
+set origin 1*width, 0*width/goldenRatio
 set yformat ""
-set label 1 "(d) histeps" at graph width*0.03 , graph width*gold_ratio*0.9
+set label 1 "(d) histeps" at graph width*0.03 , graph width/goldenRatio*0.9
 plot "examples/ex_barchart1.dat" with histeps, "" with points
 
 # Plot 3 (top left)
-set origin 0*width, 1*width*gold_ratio
+set origin 0*width, 1*width/goldenRatio
 set xformat "" ; set xlabel ""
-unset yformat ; set ylabel texify(poissonPDF(x,18))
-set label 1 "(a) impulses" at graph width*0.03 , graph width*gold_ratio*0.9
+unset yformat ; set ylabel texify("poissonPDF(x,18)")
+set label 1 "(a) impulses" at graph width*0.03 , graph width/goldenRatio*0.9
 plot "examples/ex_barchart1.dat" with impulses, "" with points
 
 # Plot 4 (top right)
-set origin 1*width, 1*width*gold_ratio
+set origin 1*width, 1*width/goldenRatio
 set yformat "" ; set ylabel ""
-set label 1 "(b) steps" at graph width*0.03 , graph width*gold_ratio*0.9
+set label 1 "(b) steps" at graph width*0.03 , graph width/goldenRatio*0.9
 plot "examples/ex_barchart1.dat" with steps, "" with points
 
 # Now that we are finished preparing multiplot, turn display on

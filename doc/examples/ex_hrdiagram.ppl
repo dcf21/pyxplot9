@@ -26,12 +26,13 @@ reset
 title = "ex_hrdiagram"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set nokey
 set size square
-set xlabel '$B-V$ colour'
+set xlabel '$B-V$ color'
 set ylabel 'Absolute magnitude $M$'
 plot [-0.4:2][14:-4] 'examples/ex_hrdiagram.dat.gz' w d ps 3
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

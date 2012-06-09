@@ -26,7 +26,6 @@ reset
 title = "ex_col_vs_mono"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
 W=unit(5*cm)
 
 set multiplot
@@ -34,8 +33,8 @@ set nodisplay
 set width W
 set size ratio 1
 set noxtics
-set terminal colour
-set title 'colour'
+set terminal color
+set title 'color'
 set nokey
 set samples 8
 plot [][6:0] 1 with lp c 1 lt 1 pt 1, \

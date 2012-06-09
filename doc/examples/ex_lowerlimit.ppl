@@ -60,75 +60,75 @@ load "examples/fig_end.ppl"
 title = "ex_plotstyletab" ; load "examples/fig_init.ppl"
 
 # Main body of figure script
-set preamble '\usepackage{wasysym}'
+set preamble r'\usepackage{wasysym}'
 set multiplot
 clear
 set texthalign centre
 set textvalign centre
-text "{\bf Plot Styles}" at -2,35/7*0.4*9+1.5
+text r"{\bf Plot Styles}" at -2,35/7*0.4*9+1.5
 set axis x2 mirror top
 set width 9
 set size ratio 35/7*0.4
-set x2label "{\bf Style Modifiers}"
+set x2label r"{\bf Style Modifiers}"
 set x2range[0.2:7.3]
-set x2tics ("{\tt colour}" 1, "{\tt fillcolour}" 2, "{\tt linetype}" 3, "{\tt linewidth}" 4, "{\tt pointlinewidth}" 5, "{\tt pointsize}" 6, "{\tt pointtype}" 7)
+set x2tics (r"{\tt color}" 1, r"{\tt fillcolor}" 2, r"{\tt linetype}" 3, r"{\tt linewidth}" 4, r"{\tt pointlinewidth}" 5, r"{\tt pointsize}" 6, r"{\tt pointtype}" 7)
 set x2format auto rotate 30
 set axis y visible mirror left
 set yrange[35.6:0.4]
 set ytics ( \
-"{\tt arrows\_head}" 1, \
-"{\tt arrows\_nohead}" 2, \
-"{\tt arrows\_twohead}" 3, \
-"{\tt boxes}" 4, \
-"{\tt colourmap}" 5, \
-"{\tt contourmap}" 6, \
-"{\tt dots}" 7, \
-"{\tt FilledRegion}" 8, \
-"{\tt fsteps}" 9, \
-"{\tt histeps}" 10, \
-"{\tt impulses}" 11, \
-"{\tt lines}" 12, \
-"{\tt LinesPoints}" 13, \
-"{\tt LowerLimits}" 14, \
-"{\tt points}" 15, \
-"{\tt stars}" 16, \
-"{\tt steps}" 17, \
-"{\tt surface}" 18, \
-"{\tt UpperLimits}" 19, \
-"{\tt wboxes}" 20, \
-"{\tt XErrorBars}" 21, \
-"{\tt XErrorRange}" 22, \
-"{\tt XYErrorBars}" 23, \
-"{\tt XYErrorRange}" 24, \
-"{\tt XYZErrorBars}" 25, \
-"{\tt XYZErrorRange}" 26, \
-"{\tt XZErrorBars}" 27, \
-"{\tt XZErrorRange}" 28, \
-"{\tt YErrorBars}" 29, \
-"{\tt YErrorRange}" 30, \
-"{\tt YErrorShaded}" 31, \
-"{\tt YZErrorBars}" 32, \
-"{\tt YZErrorRange}" 33, \
-"{\tt ZErrorBars}" 34, \
-"{\tt ZErrorRange}" 35 \
+r"{\tt arrows\_head}" 1, \
+r"{\tt arrows\_nohead}" 2, \
+r"{\tt arrows\_twohead}" 3, \
+r"{\tt boxes}" 4, \
+r"{\tt colormap}" 5, \
+r"{\tt contourmap}" 6, \
+r"{\tt dots}" 7, \
+r"{\tt filledRegion}" 8, \
+r"{\tt fsteps}" 9, \
+r"{\tt histeps}" 10, \
+r"{\tt impulses}" 11, \
+r"{\tt lines}" 12, \
+r"{\tt linesPoints}" 13, \
+r"{\tt lowerLimits}" 14, \
+r"{\tt points}" 15, \
+r"{\tt stars}" 16, \
+r"{\tt steps}" 17, \
+r"{\tt surface}" 18, \
+r"{\tt upperLimits}" 19, \
+r"{\tt wboxes}" 20, \
+r"{\tt xErrorBars}" 21, \
+r"{\tt xErrorRange}" 22, \
+r"{\tt xyErrorBars}" 23, \
+r"{\tt xyErrorRange}" 24, \
+r"{\tt xyzErrorBars}" 25, \
+r"{\tt xyzErrorRange}" 26, \
+r"{\tt xzErrorBars}" 27, \
+r"{\tt xzErrorRange}" 28, \
+r"{\tt yErrorBars}" 29, \
+r"{\tt yErrorRange}" 30, \
+r"{\tt yErrorShaded}" 31, \
+r"{\tt yzErrorBars}" 32, \
+r"{\tt yzErrorRange}" 33, \
+r"{\tt zErrorBars}" 34, \
+r"{\tt zErrorRange}" 35 \
 )
 set grid x2y1
-set gridmajcol grey80
+set gridmajcol gray80
 set gridmincol null
 
-yes = "\CIRCLE"
-no  = "\Circle"
+yes = r"\CIRCLE"
+no  = r"\Circle"
 
 i=1
 foreach datum a,b,c,d,e,f,g in '--'
  {
-  set label 10*i+1 conditionalS(a,yes,no) at second 1, first i
-  set label 10*i+2 conditionalS(b,yes,no) at second 2, first i
-  set label 10*i+3 conditionalS(c,yes,no) at second 3, first i
-  set label 10*i+4 conditionalS(d,yes,no) at second 4, first i
-  set label 10*i+5 conditionalS(e,yes,no) at second 5, first i
-  set label 10*i+6 conditionalS(f,yes,no) at second 6, first i
-  set label 10*i+7 conditionalS(g,yes,no) at second 7, first i
+  set label 10*i+1 a?"yes":"no" at second 1, first i
+  set label 10*i+2 b?"yes":"no" at second 2, first i
+  set label 10*i+3 c?"yes":"no" at second 3, first i
+  set label 10*i+4 d?"yes":"no" at second 4, first i
+  set label 10*i+5 e?"yes":"no" at second 5, first i
+  set label 10*i+6 f?"yes":"no" at second 6, first i
+  set label 10*i+7 g?"yes":"no" at second 7, first i
   i=i+1
  }
 1 0 1 1 0 0 0

@@ -26,19 +26,22 @@ reset
 title = "ex_apachelog"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
-
-# set output 'apache.dat'
-# histogram f() '/var/log/apache2/access.log' using time_julianday($7,$6,$5,$8,$9,$10) binwidth 1/24
-# tabulate f(x) with format "%16f %16f"
+# BEGIN
+#NC set output 'apache.dat'
+#NC histogram f() '/var/log/apache2/access.log' \
+#NC    using time.fromCalendar($7,$6,$5,$8,$9,$10).toUnix() \
+#NC    binwidth 1/24
+#NC tabulate f(x) with format "%16f %16f"
 
 set width 10
 set xlabel 'Day'
 set ylabel 'Rate of downloads per day'
-set xtics 0.5, 1
-set mxtics 0.5, 0.25
-set xformat "%s"%(time_dayweekname(x,0)) rotate 30
-plot [2455284.9:2455290.9] "examples/ex_apachelog.dat" notitle with lines
+set xtics 0, 86400
+set mxtics 0, 21600
+set xformat "%s"%(time.fromUnix(x).toDayWeekName()) rot 30
+set xrange [1269855360:1270373760]
+plot "examples/ex_apachelog.dat" notitle with lines
+#END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

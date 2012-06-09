@@ -26,7 +26,7 @@ reset
 title = "ex_ellipse"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set multiplot ; set nodisplay
 
 a   = 6.0              # Semi-major axis
@@ -60,6 +60,7 @@ text '$L=a(1-e^2)$' at  0.2-fd,slr/2
 
 # Display diagram
 set display ; refresh
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

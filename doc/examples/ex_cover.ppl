@@ -26,7 +26,6 @@ reset
 title = "ex_cover"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
 set multiplot
 set nodisplay
 set width 8
@@ -36,40 +35,39 @@ set axis y invisible
 set nokey
 logo_x = 0.0
 logo_y = 0.0
-set textcolour Grey80
-text '\large $\frac{\hbar^2}{2m}\frac{\partial^2 \psi}{\partial \
+set textcolor gray80
+text r'\large $\frac{\hbar^2}{2m}\frac{\partial^2 \psi}{\partial \
        x^2} + V\psi = E\psi$' at logo_x+2.1, logo_y+0.5
-text '\large $d \sin \theta = n\lambda$' at logo_x+0.5, logo_y+3.5
+text r'\large $d \sin \theta = n\lambda$' at logo_x+0.5, logo_y+3.5
 
-set textcolour Grey70
-text '\Large $\nabla \cdot D = \rho_{\mathrm{free}}$' \
+set textcolor gray70
+text r'\Large $\nabla \cdot D = \rho_{\mathrm{free}}$' \
       at logo_x+2.9, logo_y+4.6
-text '\Large $\nabla \times E = - \frac{\partial \bf B} \
+text r'\Large $\nabla \times E = - \frac{\partial \bf B} \
       {\partial t}$' at logo_x+1.2, logo_y+4.0
-text '\Large $\nabla \cdot B = 0$' at logo_x+0.9, logo_y+1.2
-text '\Large $\nabla \times H = J_{\mathrm{free}} - \
+text r'\Large $\nabla \cdot B = 0$' at logo_x+0.9, logo_y+1.2
+text r'\Large $\nabla \times H = J_{\mathrm{free}} - \
       \frac{\partial \bf D}{\partial t}$' at logo_x+3.8,logo_y+1.8
 
-set textcolour Grey55
-text '\Large $ds^2=\left(1-\frac{2GM}{rc^2}\right) \
+set textcolor gray55
+text r'\Large $ds^2=\left(1-\frac{2GM}{rc^2}\right) \
       dt^2$' at logo_x+0.17, logo_y+2.6
-text '\large $H(t)=\frac{\dot R}{R}$' at logo_x+6.1,logo_y+3.1
-text '$q(t) = - \frac{\ddot R R}{\dot R^2}$' \
+text r'\large $H(t)=\frac{\dot R}{R}$' at logo_x+6.1,logo_y+3.1
+text r'$q(t) = - \frac{\ddot R R}{\dot R^2}$' \
      at logo_x+5.3, logo_y+3.9
-text '\large $d_\mathrm{L} = \left( \frac{L}{4\pi F} \right) \
+text r'\large $d_\mathrm{L} = \left( \frac{L}{4\pi F} \right) \
       ^\frac{1}{2}$' at logo_x+3.7, logo_y+1.2
-text '\Large $\ddot x^a + \Gamma^a_{\phantom{a}bc} \
+text r'\Large $\ddot x^a + \Gamma^a_{\phantom{a}bc} \
       \dot x^b \dot x^c = 0$' at logo_x+4.5, logo_y+2.5
 
-set textcolour Black
-# set label 1 '\Huge \textbf{PyXPlot}' at -8.5 , 0.05
+set textcolor black
 set arrow 1 from 0.0 , -0.590 to 2.75 , -0.590 \
-            with nohead linetype 3 colour 1
+            with nohead linetype 3 color black
 set arrow 2 from 2.5 , -0.590 to 2.5 , -0.325 with twoway
-set label 2 '\Large ${\bf \Delta \phi}$' at 2.7, -0.5
+set label 2 r'\Large ${\bf \Delta \phi}$' at 2.7, -0.5
 set origin logo_x, logo_y
 p [-9.5:4.8][-0.75:0.60] - x*exp(-x**2) + \
-   (1/(exp((x-1)*3)+1) - 0.5)/4 - 0.2 with l lw 3 colour 1
+   (1/(exp((x-1)*3)+1) - 0.5)/4 - 0.2 with l lw 3 color black
 
 # Now that we are finished preparing multiplot, turn display on
 set display

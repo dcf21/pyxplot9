@@ -26,14 +26,15 @@ reset
 title = "ex_mandelbrot"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set numerics complex
 set sample grid 500x500
 set size square
 set nokey
 set nocolkey
 set log c1
-plot [-2:2][-2:2] fractal_mandelbrot(x+i*y,70)+1 with colourmap
+plot [-2:2][-2:2] fractals.mandelbrot(x+i*y,70)+1 with colormap
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

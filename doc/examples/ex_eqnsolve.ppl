@@ -26,19 +26,23 @@ reset
 title = "ex_eqnsolve"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 T = 5800*unit(K)
-xmin = phy_c/(  20*unit(um))
-xmax = phy_c/( 140*unit(nm))
+xmin = phy.c/(  20*unit(um))
+xmax = phy.c/( 140*unit(nm))
 set xrange[xmin:xmax]
 set yrange[1e-9:1e-4]
 set log x y
 set ytics (1e-8,1e-6,1e-4)
 set mytics (1e-9,1e-7,1e-5)
 set xlabel "Frequency"
-set ylabel "%s / $\mathrm{erg}\,\mathrm{s}^{-1}\,\mathrm{Hz}^{-1}\,\mathrm{cm}^{-2}\,\mathrm{sterad}^{-1}$"%(texify(Bv(nu,T)))
+set ylabel r"%s / $\mathrm{erg}\,\mathrm{s}^{-1}\,\
+             \mathrm{Hz}^{-1}\,\mathrm{cm}^{-2}\,\
+             \mathrm{sterad}^{-1}$"%(texify("Bv(nu,T)"))
 set key bottom right
-plot Bv(x,T) / unit(erg/s/Hz/cm**2/sterad) title "Blackbody at %s"%(T)
+plot phy.Bv(x,T) / unit(erg/s/Hz/cm**2/sterad) \
+  title "Blackbody at %s"%(T)
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

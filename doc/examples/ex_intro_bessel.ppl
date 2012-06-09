@@ -27,8 +27,9 @@ title = "ex_intro_bessel"
 load "examples/fig_init.ppl"
 set width 8
 
-# Main body of figure script
+# BEGIN
 plot [0:10][-0.5:1] besselJ(0,x), besselJ(1,x), besselJ(2,x)
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

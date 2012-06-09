@@ -26,10 +26,9 @@ reset
 title = "ex_lenses"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
-
+# BEGIN
 # Define subroutine for drawing lens diagrams
-subroutine LensDraw(x0,y0,u,h,f)
+subroutine lensDraw(x0,y0,u,h,f)
  {
   # Use the thin-lens equation to find v and H
   v = 1/(1/f - 1/u)
@@ -72,8 +71,9 @@ subroutine LensDraw(x0,y0,u,h,f)
 # Display diagram of lens
 set unit angle nodimensionless
 set multiplot ; set nodisplay
-call LensDraw(0*unit(cm),0*unit(cm), 5*unit(cm),1.5*unit(cm),2*unit(cm))
+call lensDraw(0*unit(cm),0*unit(cm), 5*unit(cm),1.5*unit(cm),2*unit(cm))
 set display ; refresh
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

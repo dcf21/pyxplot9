@@ -57,7 +57,7 @@ triangular(n)    [0:N-1] = (2/N)*(N/2 - abs(n-(N-1)/2))
 set multiplot
 set nodisplay
 width = 5
-height = width*gold_ratio
+height = width/goldenRatio
 set width width
 set nokey
 set xtics (0,0.5,1)

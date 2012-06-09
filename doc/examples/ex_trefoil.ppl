@@ -25,9 +25,9 @@
 reset
 title = "ex_trefoil"
 load "examples/fig_init.ppl"
-set term colour
+set term color
 
-# Main body of figure script
+# BEGIN
 r = 5
 R = 2
 f(u,v) = cos(2*u)*cos(v) + r*cos(2*u)*(1.5+sin(3*u)/2)
@@ -42,6 +42,7 @@ set size 8 square
 set grid
 set sample grid 150x20
 plot 3d parametric f(u,v):g(u,v):h(u,v) with surf fillcol blue
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

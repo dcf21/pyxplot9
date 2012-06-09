@@ -386,7 +386,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addMagicFunction(d, "unit", 1, "unit(...)", "\\mathrm{unit}@<@0@>", "unit(...) multiplies a number by a physical unit");
     ppl_addSystemFunc(d,"zernike"       ,4,4,1,1,1,0,(void *)&pplfunc_zernike     , "zernike(n,m,r,phi)", "\\mathrm{zernike}@<@1,@2,@3,@4@>", "zernike(n,m,r,phi) evaluates the (n,m)th Zernike polynomial at radius r and position angle phi");
     ppl_addSystemFunc(d,"zernikeR"      ,3,3,1,1,1,1,(void *)&pplfunc_zernikeR    , "zernikeR(n,m,r)", "\\mathrm{zernikeR}@<@1,@2,@3@>", "zernikeR(n,m,r) evaluates the (n,m)th radial Zernike polynomial at radius r");
-    ppl_addSystemFunc(d,"zeta"          ,1,1,1,1,1,1,(void *)&pplfunc_zeta        , "zeta(z)", "\\zeta@<@1@>", "zeta(x) evaluates the Riemann zeta function at x");
+    ppl_addSystemFunc(d,"zeta"          ,1,1,1,1,0,1,(void *)&pplfunc_zeta        , "zeta(z)", "\\zeta@<@1@>", "zeta(x) evaluates the Riemann zeta function at x");
 
     // Shortcuts to module, vector and matrix
     pplObjCpy(&v, &pplObjPrototypes[PPLOBJ_MAT], 0, 1, 1); ppl_dictAppendCpy(d, pplObjTypeNames[PPLOBJ_MAT], (void *)&v, sizeof(v));

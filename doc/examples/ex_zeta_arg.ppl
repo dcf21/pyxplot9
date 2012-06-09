@@ -26,14 +26,15 @@ reset
 title = "ex_zeta_arg"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set numerics complex
 set nokey
 set size 8 square
 set samples grid 400x400
 set c1range[-pi:pi]
-set c1format "$%s\pi$"%(c/pi)
-plot [-20:6][-13:13] arg(zeta(x+i*y)) with colourmap
+set c1format r"$%s\pi$"%(c/pi)
+plot [-20:6][-13:13] arg(zeta(x+i*y)) with colormap
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

@@ -26,17 +26,18 @@ reset
 title = "ex_surface_log"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set numerics complex
-set xlabel "Re($z$)"
-set ylabel "Im($z$)"
-set zlabel "$\mathrm{Im}(\mathrm{log}[z])$"
+set xlabel r"Re($z$)"
+set ylabel r"Im($z$)"
+set zlabel r"$\mathrm{Im}(\mathrm{log}[z])$"
 set key below
 set size 8 square
 set grid
 set view -30,30
 plot 3d [-10:10][-10:10] Im(log(x+i*y)) \
      with surface col black fillcol blue
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

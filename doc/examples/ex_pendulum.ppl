@@ -27,24 +27,25 @@ reset
 # Set output destination
 title = "ex_pendulum" ; load "examples/fig_init.ppl"
 
-# Main body of figure script
-theta_approx(a,t) = a * sin(2*pi*t)
-theta_exact (a,t) = 2*asin(sin(a/2)*jacobi_sn(2*pi*t,sin(a/2)))
+# BEGIN
+theta_approx(a,t) = a*sin(2*pi*t)
+theta_exact (a,t) = 2*asin(sin(a/2)*jacobi_sn(2*pi*t,sin(a/2)))*unit(rad)
 
 set unit of angle degrees
 set key below
-set xlabel 'Time / $\sqrt{g/l}$'
-set ylabel '$\theta$'
+set xlabel r'Time / $\sqrt{g/l}$'
+set ylabel r'$\theta$'
 omega = unit(30*deg)
 plot [0:4] theta_approx(omega,x) title 'Approximate solution', \
            theta_exact (omega,x) title 'Exact solution'
+# END
 
 # Set output destination
 load "examples/fig_end.ppl"
 title = "ex_pendulum2" ; load "examples/fig_init.ppl"
 
-# Main body of figure script
-subroutine PendulumDivergenceTime(omega, deviation)
+# BEGIN
+subroutine pendulumDivergenceTime(omega, deviation)
  {
   for t=0 to 20 step 0.05
    {
@@ -56,13 +57,14 @@ subroutine PendulumDivergenceTime(omega, deviation)
  }
 
 set key top right
-set xlabel 'Amplitude of swing'
-set ylabel 'Time / $\sqrt{g/l}$ taken to diverge'
+set xlabel r'Amplitude of swing'
+set ylabel r'Time / $\sqrt{g/l}$ taken to diverge'
 set samples 40
 plot [unit(5*deg):unit(30*deg)][0:19] \
-  PendulumDivergenceTime(x,unit(20*deg)) title "$20^\circ$ deviation", \
-  PendulumDivergenceTime(x,unit(10*deg)) title "$10^\circ$ deviation", \
-  PendulumDivergenceTime(x,unit( 5*deg)) title "$ 5^\circ$ deviation"
+  pendulumDivergenceTime(x,unit(20*deg)) title r"$20^\circ$ deviation", \
+  pendulumDivergenceTime(x,unit(10*deg)) title r"$10^\circ$ deviation", \
+  pendulumDivergenceTime(x,unit( 5*deg)) title r"$ 5^\circ$ deviation"
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

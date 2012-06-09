@@ -26,7 +26,7 @@ reset
 title = "ex_spirograph"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set nogrid
 set nokey
 
@@ -37,6 +37,7 @@ set trange[0:40*pi]
 set samples 2500
 plot parametric r1*sin(t) + r2*sin(t*(r1/r2)) : \
                 r1*cos(t) + r2*cos(t*(r1/r2))
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

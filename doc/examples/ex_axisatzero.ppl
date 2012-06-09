@@ -25,21 +25,26 @@
 reset
 set fontsize 1.2
 
-# Main body of figure script
 title = "ex_axisatzero"  ; load "examples/fig_init.ppl"
+# BEGIN
 set axis x atzero twoway
 set axis y atzero twoway
 plot [-2:8][-10:10]
+# END
 load "examples/fig_end.ppl"
 
 title = "ex_axisatzero2" ; load "examples/fig_init.ppl"
+# BEGIN
 set axis x atzero arrow
 plot [0:10][-10:10]
+# END
 load "examples/fig_end.ppl"
 
 title = "ex_axisatzero3" ; load "examples/fig_init.ppl"
+# BEGIN
 set axis x notatzero arrow nomirror
 set axis y notatzero arrow nomirror
 plot [0:10][0:20]
+# END
 load "examples/fig_end.ppl"
 

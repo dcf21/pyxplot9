@@ -26,10 +26,11 @@ reset
 title = "ex_text2"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set preamble \usepackage{marvosym}
-text "{\Huge\Dontwash\ \NoIroning\ \NoTumbler}$\;$ Do not \
+text r"{\Huge\Dontwash\ \NoIroning\ \NoTumbler}$\;$ Do not \
 wash, iron or tumble-dry this plot."
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

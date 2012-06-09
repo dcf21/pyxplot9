@@ -26,16 +26,20 @@ reset
 
 # Main body of figure script
 title = "ex_fft" ; load "examples/fig_init.ppl"
+# BEGIN
 set numerics complex
 step(x) = tophat(x,0.5)
 fft [-1:1:0.01] f() of step()
-plot [-10:10] Re(f(x*1)) title texify(Re(f(x))), sinc(pi*x)
+plot [-10:10] Re(f(x*1)) title texify("Re(f(x))"), sinc(pi*x)
+# END
 load "examples/fig_end.ppl"
 
 # Main body of figure script
 title = "ex_fft2" ; load "examples/fig_init.ppl"
+# BEGIN
 g(x) = f(x)**2
 ifft [-50:49.5:0.5] h(x) of g(x)
 plot [-2:2] Re(h(x))
+# END
 load "examples/fig_end.ppl"
 

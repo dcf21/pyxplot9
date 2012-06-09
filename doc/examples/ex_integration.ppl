@@ -26,13 +26,14 @@ reset
 title = "ex_integration"
 load "examples/fig_init.ppl"
 
-# Main body of figure script
+# BEGIN
 set samples 80
 set key bottom right
-set xformat "%s$\pi$"%(x/pi)
-set yformat "%s$\pi$"%(y/pi)
+set xformat r"%s$\pi$"%(x/pi)
+set yformat r"%s$\pi$"%(y/pi)
 set xrange [-5*pi:5*pi]
 plot int_dz(sinc(z),0,x)
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"
