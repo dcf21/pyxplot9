@@ -201,6 +201,7 @@ void ppl_processScript(ppl_context *context, char *input, int iterDepth)
   if ((!context->shellExiting)&&(!context->shellBroken)&&(!context->shellContinued)&&(!context->shellReturned)&&(!cancellationFlag))
    if (context->inputLineAddBuffer != NULL) // Process last line of file if there is still text buffered
     {
+     ppl_warning(&context->errcontext,ERR_SYNTAX,"Line continuation character (\\) at the end of command script, with no line following it.");
      ppl_error_setstreaminfo(&context->errcontext, linenumber, filename_description);
      status = ppl_processLine(context, ps, "", 0, iterDepth);
      ppl_error_setstreaminfo(&context->errcontext, -1, "");

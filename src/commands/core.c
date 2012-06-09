@@ -168,7 +168,6 @@ void ppl_directive_cd(ppl_context *c, parserLine *pl, parserOutput *in)
 
 void ppl_directive_exec(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {
-  int           stat=0;
   pplObj       *stk = in->stk;
   char         *cmd = (char *)stk[PARSE_exec_command].auxil;
   parserLine   *pl2 = NULL;
@@ -178,12 +177,16 @@ void ppl_directive_exec(ppl_context *c, parserLine *pl, parserOutput *in, int in
   if ( (ps2==NULL) || (c->inputLineBuffer == NULL) ) { ppl_error(&c->errcontext,ERR_MEMORY,-1,-1,"Out of memory."); return; }
   ppl_error_setstreaminfo(&c->errcontext, -1, "executed statement");
 
-  stat = ppl_parserCompile(c, ps2, c->errcontext.error_input_linenumber, c->errcontext.error_input_sourceId, c->errcontext.error_input_filename, cmd, 0, iterDepth+1);
-  if ((!stat) && (!c->errStat.status)) ppl_parserExecute(c, ps2->pl[iterDepth+1], NULL, interactive, iterDepth+1);
-  if (stat || c->errStat.status)
+  ppl_processLine(c, ps2, cmd, interactive, iterDepth+1);
+  if (c->errStat.status)
    {
     strcpy(c->errStat.errBuff, "");
     ppl_tbAdd(c,pl->srcLineN,pl->srcId,pl->srcFname,0,ERR_GENERIC,0,pl->linetxt,"executed statement");
+   }
+  if (c->inputLineAddBuffer != NULL)
+   {
+    ppl_warning(&c->errcontext,ERR_SYNTAX,"Line continuation character (\\) at the end of executed string, with no line following it.");
+    free(c->inputLineAddBuffer); c->inputLineAddBuffer=NULL;
    }
   ppl_parserStatFree(&ps2);
   return;

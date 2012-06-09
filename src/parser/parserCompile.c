@@ -36,16 +36,13 @@
 
 #include "expressions/expCompile_fns.h"
 #include "expressions/traceback_fns.h"
-
+#include "mathsTools/dcfmath.h"
 #include "settings/epsColors.h"
 #include "settings/settingTypes.h"
-
 #include "stringTools/asciidouble.h"
 #include "stringTools/strConstants.h"
-
 #include "parser/cmdList.h"
 #include "parser/parser.h"
-
 #include "userspace/context.h"
 #include "userspace/garbageCollector.h"
 #include "userspace/pplObj_fns.h"
@@ -1029,6 +1026,7 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
     TEST_FOR_MACROS;
     if (containsMacros && (s!=NULL) && !fail) // If we're not expanding macros at this stage, flag this parserLine as containing macros, and exit
      {
+      const int bd = ppl_max(blockDepth,s->blockDepth);
       if (s->waitingForBrace) { sprintf(c->errStat.errBuff,"Cannot process a macro on the same line as the opening brace of a loop."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,0,line,""); ppl_parserStatReInit(s); return 1; }
       parserLine *output=NULL;
       if ((s->stk[blockDepth][0]==NULL)&&(blockDepth==0)) ppl_parserStatReInit(s);
@@ -1036,14 +1034,14 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
       if (output==NULL) { sprintf(c->errStat.errBuff,"Out of memory."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_MEMORY,0,line,""); ppl_parserStatReInit(s); return 1; }
       output->stackLen       = 0;
       output->containsMacros = 1;
-      ppl_parserStatAdd(s, s->blockDepth, output);
-      if ((s->blockDepth>0)&&(s->outputPos[s->blockDepth-1]>=0))
+      ppl_parserStatAdd(s, bd, output);
+      if ((bd>0)&&(s->outputPos[bd-1]>=0))
        {
         pplObj val;
         val.refCount=1;
-        pplObjBytecode(&val,0,(void *)s->pl[s->blockDepth]);
-        ppl_parserAtomAdd(s->pl[s->blockDepth-1], s->outputPos[s->blockDepth-1], 0, "", NULL, &val);
-        s->outputPos[s->blockDepth-1]=-1;
+        pplObjBytecode(&val,0,(void *)s->pl[bd]);
+        ppl_parserAtomAdd(s->pl[bd-1], s->outputPos[bd-1], 0, "", NULL, &val);
+        s->outputPos[bd-1]=-1;
        }
       return 0;
      }
