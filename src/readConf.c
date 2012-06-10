@@ -277,7 +277,7 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
 
       else if (strcmp(setkey, "DATASTYLE"    )==0)
        {
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_STYLE_INT, SW_STYLE_STR ))>0)                      { c->set->graph_default.dataStyle.style = i; c->set->graph_default.dataStyle.USEstyle=1; }
+        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_STYLE_INT, SW_STYLE_STR ))>0) { c->set->graph_default.dataStyle.linespoints = i; c->set->graph_default.dataStyle.USElinespoints=1; }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting <dataStyle>."    , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
        }
       else if (strcmp(setkey, "DISPLAY"      )==0)
@@ -287,17 +287,17 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
        }
       else if (strcmp(setkey, "DPI"          )==0)
        {
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))&&(fl>2)))       c->set->term_default .dpi           = fl;
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))&&(fl>2)))                      c->set->term_default .dpi           = fl;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting <dpi>."          , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
        }
       else if (strcmp(setkey, "FONTSIZE"     )==0)
        {
-        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))               c->set->graph_default.FontSize      = fl;
+        if  (fl=ppl_getFloat(setvalue, &i), ((gsl_finite(fl))&&(i==strlen(setvalue))))                              c->set->graph_default.FontSize      = fl;
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting <fontSize>."     , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
        }
       else if (strcmp(setkey, "FUNCSTYLE"    )==0)
        {
-        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_STYLE_INT, SW_STYLE_STR ))>0)                      { c->set->graph_default.funcStyle.style = i; c->set->graph_default.funcStyle.USEstyle=1; }
+        if ((i=ppl_fetchSettingByName(&c->errcontext,setvalue,SW_STYLE_INT, SW_STYLE_STR ))>0) { c->set->graph_default.funcStyle.linespoints = i; c->set->graph_default.funcStyle.USElinespoints=1; }
         else {sprintf(c->errcontext.tempErrStr, "Error in line %d of configuration file %s: Illegal value for setting <funcStyle>."    , linecounter, ConfigFname); ppl_warning(&c->errcontext, ERR_PREFORMED, c->errcontext.tempErrStr); continue; }
        }
       else if (strcmp(setkey, "GRID"         )==0)
