@@ -908,7 +908,7 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
           int to    = *(int *)(out+i+2+2*sizeof(int));
           int to_o  = (int)(*(unsigned char *)(out+to+0+2*sizeof(int))); // Opcode branching to
           int to_o2 = (int)(*(unsigned char *)(out+to+1+2*sizeof(int)));
-
+          if ((to_o!=17)&&(to_o!=18)) to_o2=-1; // this shouldn't be necessary, but optimisation of the below code makes valgrind unhappy
           if ((o==17)&&(o2==0)&&(to_o==17)&&(to_o2==0)) { *(int *)(out+i+2+2*sizeof(int)) = *(int *)(out+to+2+2*sizeof(int)); optimised=1; }
           if ((o==18)&&(o2==0)&&(to_o==18)&&(to_o2==0)) { *(int *)(out+i+2+2*sizeof(int)) = *(int *)(out+to+2+2*sizeof(int)); optimised=1; }
           if ((o==17)         &&(to_o==19)            ) { *(int *)(out+i+2+2*sizeof(int)) = *(int *)(out+to+1+2*sizeof(int)); optimised=1; }

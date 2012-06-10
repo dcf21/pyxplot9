@@ -139,9 +139,9 @@ int ppl_validFloat(const char *str, int *end)
      }
 
    }
-  while ((str[pos]!='\0')&&(str[pos]<=' ')) pos++; /* Fast-forward over spaces at end */
 
 VALID_FLOAT_ENDED:
+  while ((str[pos]!='\0')&&(str[pos]<=' ')) pos++; /* Fast-forward over spaces at end */
   if ((!had_number)||(!expvalid)) return 0;
   if (end==NULL) return 1;
   if ((*end>=0)&&(pos<*end)) return 0;

@@ -1024,6 +1024,8 @@ void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fn
       *(ordinateVar[a]) = **ru;
       ordinateVar[a]->amMalloced  = am;
       ordinateVar[a]->refCount    = rc;
+      ordinateVar[a]->self_lval   = NULL;
+      ordinateVar[a]->self_this   = NULL;
       ordinateVar[a]->imag        = 0.0;
       ordinateVar[a]->flagComplex = 0;
      }

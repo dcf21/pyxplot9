@@ -86,7 +86,7 @@ int eps_plot_AddUsingItemsForWithWords(ppl_context *c, withWords *ww, int *NExpe
   // If using list was empty, generate an automatic list before we start
   if (*Nusing==0)
    {
-    if (*usingList==NULL) *usingList = (pplExpr **)malloc(((*NExpect)+8)*sizeof(pplExpr *));
+    if (*usingList==NULL) *usingList = (pplExpr **)ppl_memAlloc(((*NExpect)+8)*sizeof(pplExpr *));
     if (*usingList==NULL) { sprintf(errtext, "Out of memory (a)."); if (DEBUG) ppl_log(&c->errcontext, errtext); return 1; }
     if (ppldata_autoUsingList(c, *usingList, *NExpect, errtext)) return 1;
     *Nusing = *NExpect;

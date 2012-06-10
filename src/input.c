@@ -325,6 +325,11 @@ int ppl_ProcessStatement(ppl_context *context, parserStatus *ps, char *line, int
     return 1;
    }
 
+  if (iterDepth>0)
+   {
+    ppl_parserLineFree(ps->pl[iterDepth]);
+    ps->pl[iterDepth]=NULL;
+   }
   return 0;
  }
 

@@ -354,6 +354,8 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
         in_cpy = (pplObj *)malloc(sizeof(pplObj));
         if (in_cpy == NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY); goto cleanup_on_error; }
         memcpy(in_cpy, in, sizeof(pplObj));
+        in_cpy->refCount=1;
+        in_cpy->amMalloced=1;
         // Loop through module / class instance and its prototypes looking for named method
         for ( ; (t==PPLOBJ_MOD)||(t==PPLOBJ_USER) ; iter=iter->objPrototype , t=iter->objType )
          {
@@ -371,7 +373,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
          {
           dict   *d   = pplObjMethods[in->objType];
           pplObj *obj = (pplObj *)ppl_dictLookup(d , key);
-          if (obj==NULL) { sprintf(context->errStat.errBuff,"No such method '%s'.",key); TBADD(ERR_NAMESPACE); goto cleanup_on_error; }
+          if (obj==NULL) { sprintf(context->errStat.errBuff,"No such method '%s'.",key); TBADD(ERR_NAMESPACE); free(in_cpy); goto cleanup_on_error; }
           pplObjCpy(stk-1 , obj , 1 , 0 , 1);
           (stk-1)->immutable = 1;
           (stk-1)->refCount=1;
