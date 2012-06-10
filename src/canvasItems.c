@@ -108,6 +108,8 @@ static void canvas_item_delete(ppl_context *c, canvas_item *ptr)
     if (pd->SelectCriterion != NULL) pplExpr_free(pd->SelectCriterion);
     if (pd->title           != NULL) free(pd->title);
     if (pd->UsingList       != NULL) free(pd->UsingList);
+    ppl_withWordsDestroy(c, &pd->ww);
+    ppl_withWordsDestroy(c, &pd->ww_final);
     free(pd);
     pd = pd2;
    }
@@ -1473,6 +1475,8 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
   memset((void *)new, 0, sizeof(canvas_plotdesc));
   new->filename=NULL;
   new->PersistentDataTable=NULL;
+  ppl_withWordsZero(c, &new->ww);
+  ppl_withWordsZero(c, &new->ww_final);
 
   // Test for expression list or filename
   {
@@ -1764,7 +1768,7 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
       if ((listlen>=3)&&(listlen<=6)) NExpect=listlen;
      }
 
-    if (eps_plot_AddUsingItemsForWithWords(c, &new->ww_final, &NExpect, &autoUsingList, &UsingList, &NUsing, &nObjs, errbuff)) { free(new); ppl_error(&c->errcontext,ERR_GENERIC, -1, -1, errbuff); return 1; } // Add extra using items for, e.g. "linewidth $3".
+    if (eps_plot_AddUsingItemsForWithWords(c, &new->ww, &NExpect, &autoUsingList, &UsingList, &NUsing, &nObjs, errbuff)) { free(new); ppl_error(&c->errcontext,ERR_GENERIC, -1, -1, errbuff); return 1; } // Add extra using items for, e.g. "linewidth $3".
     if (NExpect != NUsing) { sprintf(c->errcontext.tempErrStr, "The supplied using ... clause contains the wrong number of items. We need %d columns of data, but %d have been supplied.", NExpect, NUsing); ppl_error(&c->errcontext,ERR_SYNTAX,-1,-1,NULL); return 1; }
     ppldata_fromFile(c, &new->PersistentDataTable, new->filename, 0, NULL, dataSpool, new->index, UsingList, autoUsingList, NExpect, nObjs, new->label, new->SelectCriterion, NULL, new->UsingRowCols, new->EveryList, new->continuity, 1, &status, errbuff, &errCount, iterDepth);
     free(errbuff);

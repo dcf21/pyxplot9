@@ -240,12 +240,9 @@ static void expEval_stringSubs(ppl_context *context, pplExpr *inExpr, int charpo
 #define STACK_POP \
    { \
     context->stackPtr--; \
-    if (context->stack[context->stackPtr].objType!=PPLOBJ_NUM) /* optimisation: Don't waste time garbage collecting numbers */ \
-     { \
-      ppl_garbageObject(&context->stack[context->stackPtr]); \
-      if (context->stack[context->stackPtr].refCount != 0) { strcpy(context->errStat.errBuff,"Stack forward reference detected."); TBADD(ERR_INTERNAL); goto cleanup_on_error; } \
-    } \
-   } \
+    ppl_garbageObject(&context->stack[context->stackPtr]); \
+    if (context->stack[context->stackPtr].refCount != 0) { strcpy(context->errStat.errBuff,"Stack forward reference detected."); TBADD(ERR_INTERNAL); goto cleanup_on_error; } \
+   }
 
 pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, int dollarAllowed, int iterDepth)
  {

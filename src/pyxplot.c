@@ -46,6 +46,7 @@
 #include "coreUtils/errorReport.h"
 #include "epsMaker/kpse_wrap.h"
 
+#include "canvasItems.h"
 #include "children.h"
 #include "input.h"
 #include "pplConstants.h"
@@ -264,6 +265,7 @@ int main(int argc, char **argv)
 #endif
 
   // Terminate
+  ppl_directive_clear(context,NULL,NULL,0);
   if (signal(SIGCHLD, SIG_DFL) == SIG_ERR) ppl_fatal(&context->errcontext,__FILE__,__LINE__,"Main process could not unconfigure signal handler for SIGCHLD.");
   ppl_memAlloc_FreeAll(0);
   ppl_memAlloc_MemoryStop();

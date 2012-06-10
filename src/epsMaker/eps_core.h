@@ -28,12 +28,9 @@
   while (x->c->stackPtr>stkLevelOld) \
    { \
     x->c->stackPtr--; \
-    if (x->c->stack[x->c->stackPtr].objType!=PPLOBJ_NUM) /* optimisation: Don't waste time garbage collecting numbers */ \
-     { \
-      ppl_garbageObject(&x->c->stack[x->c->stackPtr]); \
-      if (x->c->stack[x->c->stackPtr].refCount != 0) { ppl_error(&x->c->errcontext,ERR_INTERNAL,-1,-1,"Stack forward reference detected."); } \
-     } \
-   } \
+    ppl_garbageObject(&x->c->stack[x->c->stackPtr]); \
+    if (x->c->stack[x->c->stackPtr].refCount != 0) { ppl_error(&x->c->errcontext,ERR_INTERNAL,-1,-1,"Stack forward reference detected."); } \
+   }
 
 #include "epsMaker/eps_comm.h"
 

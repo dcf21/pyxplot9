@@ -98,6 +98,7 @@ void eps_pie_ReadAccessibleData(EPSComm *x)
 
   // Merge together with words to form a final set
   eps_withwords_default(x, &ww_default, &x->current->settings, 1, 0, 0, 0, c->set->term_current.color==SW_ONOFF_ON);
+  ppl_withWordsDestroy(c, &pd->ww_final);
   ppl_withWordsMerge(c, &pd->ww_final, &pd->ww, &x->current->settings.funcStyle, &ww_default, NULL, NULL, 1);
   pd->ww_final.linespoints = SW_STYLE_LINES; // In case FuncStyle is something bonkers like contourplot
 

@@ -68,12 +68,9 @@
 #define STACK_POP \
    { \
     c->stackPtr--; \
-    if (c->stack[c->stackPtr].objType!=PPLOBJ_NUM) /* optimisation: Don't waste time garbage collecting numbers */ \
-     { \
-      ppl_garbageObject(&c->stack[c->stackPtr]); \
-      if (c->stack[c->stackPtr].refCount != 0) { strcpy(c->errStat.errBuff,"Stack forward reference detected."); TBADD(ERR_INTERNAL,0); return; } \
-    } \
-   } \
+    ppl_garbageObject(&c->stack[c->stackPtr]); \
+    if (c->stack[c->stackPtr].refCount != 0) { strcpy(c->errStat.errBuff,"Stack forward reference detected."); TBADD(ERR_INTERNAL,0); return; } \
+   }
 
 void ppl_directive_break(ppl_context *c, parserLine *pl, parserOutput *in, int interactive, int iterDepth)
  {

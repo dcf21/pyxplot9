@@ -575,7 +575,7 @@ int dviInOpFntdef1234(pplerr_context *ec, dviInterpreterState *interp, DVIOperat
   if (font->area==NULL) { ppl_error(ec, ERR_MEMORY, -1, -1, "Out of memory"); return DVIE_MEMORY; }
   for (i=0; i<op->ul[4]; i++) font->area[i] = op->s[0][i];
   font->area[op->ul[4]] = '\0';
-  font->name = (char *)malloc(op->ul[5]+1);
+  font->name = (char *)ppl_memAlloc(op->ul[5]+1);
   if (font->name==NULL) { ppl_error(ec, ERR_MEMORY, -1, -1, "Out of memory"); return DVIE_MEMORY; }
   for (i=0; i<op->ul[5]; i++) font->name[i] = op->s[0][op->ul[4]+i];
   font->name[op->ul[5]] = '\0';

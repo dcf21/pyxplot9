@@ -130,8 +130,8 @@ void ppl_bmp_pngread(pplerr_context *ec, FILE *in, bitmap_data *image)
   BMP_ALLOC(image->data , row_bytes*height);
   if (image->data == NULL) { ppl_error(ec, ERR_MEMORY, -1, -1,"Out of memory"); return; }
 
-  // libpng requires a sepate pointer to each row of image
-  row_ptrs = (png_bytep *)malloc(height*sizeof(png_bytep));
+  // libpng requires a separate pointer to each row of image
+  row_ptrs = (png_bytep *)ppl_memAlloc(height*sizeof(png_bytep));
   if (row_ptrs == NULL) { ppl_error(ec, ERR_MEMORY, -1, -1,"Out of memory"); image->data = NULL; return; }
 
   for (i=0; i<height; i++) row_ptrs[i] = image->data + row_bytes*i;

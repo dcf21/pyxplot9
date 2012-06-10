@@ -114,7 +114,7 @@ int eps_plot_AddUsingItemsForWithWords(ppl_context *c, withWords *ww, int *NExpe
 
 #define ADD_FAKE_USING_ITEM(X) \
  { \
-  (*usingList)[(*NExpect)++] = pplExpr_cpy(X); \
+  (*usingList)[(*NExpect)++] = pplExpr_tmpcpy(X); \
   *Nusing = *NExpect; \
  }
 
@@ -426,6 +426,7 @@ void eps_plot_ReadAccessibleData(EPSComm *x)
 
     // Merge together with words to form a final set
     eps_withwords_default(x, &ww_default, &x->current->settings, pd->function, Ccounter, LTcounter, PTcounter, c->set->term_current.color==SW_ONOFF_ON);
+    ppl_withWordsDestroy(c, &pd->ww_final);
     if (pd->function != 0) { ppl_withWordsMerge(c, &pd->ww_final, &pd->ww, &x->current->settings.funcStyle, &ww_default, NULL, NULL, 1); }
     else                   { ppl_withWordsMerge(c, &pd->ww_final, &pd->ww, &x->current->settings.dataStyle, &ww_default, NULL, NULL, 1); }
     eps_withwords_default_counterinc(x, &Ccounter, &LTcounter, &PTcounter, c->set->term_current.color==SW_ONOFF_ON, &pd->ww_final, &x->current->settings);

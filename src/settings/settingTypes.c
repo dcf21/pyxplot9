@@ -65,7 +65,7 @@ char *SW_TERMTYPE_STR[] = {"X11_singleWindow", "X11_multiWindow" , "X11_persist"
 int   SW_TERMTYPE_ACL[] = {1                 , 5                 , 5                , 1              , 1               , 2               , 2               , 1               , 1               , 1               , 1              , 1               };
 int   SW_TERMTYPE_INT[] = {SW_TERMTYPE_X11S  , SW_TERMTYPE_X11M  , SW_TERMTYPE_X11P , SW_TERMTYPE_PS , SW_TERMTYPE_EPS , SW_TERMTYPE_PDF , SW_TERMTYPE_PNG , SW_TERMTYPE_JPG , SW_TERMTYPE_GIF , SW_TERMTYPE_BMP, SW_TERMTYPE_TIF , SW_TERMTYPE_SVG , -1};
 
-char *SW_KEYPOS_STR[] = {"top right"  , "top xcentre" , "top left"   , "ycentre right" , "ycentre xcentre" , "ycentre left" , "bottom right" , "bottom xcentre" , "bottom left" , "above"         , "below"         , "outside"         };
+char *SW_KEYPOS_STR[] = {"top right"  , "top xcenter" , "top left"   , "ycenter right" , "ycenter xcenter" , "ycenter left" , "bottom right" , "bottom xcenter" , "bottom left" , "above"         , "below"         , "outside"         };
 int   SW_KEYPOS_ACL[] = {5            , 5             , 5            , 9               , 9                 , 9              , 8              , 8                , 8             , 1               , 2               , 1                 };
 int   SW_KEYPOS_INT[] = {SW_KEYPOS_TR , SW_KEYPOS_TM  , SW_KEYPOS_TL , SW_KEYPOS_MR    , SW_KEYPOS_MM      , SW_KEYPOS_ML   , SW_KEYPOS_BR   , SW_KEYPOS_BM     , SW_KEYPOS_BL  , SW_KEYPOS_ABOVE , SW_KEYPOS_BELOW , SW_KEYPOS_OUTSIDE , -1};
 
@@ -97,11 +97,11 @@ char *SW_SAMPLEMETHOD_STR[] = {"nearestNeighbor"      , "inverseSquare"       , 
 int   SW_SAMPLEMETHOD_ACL[] = {1                      , 1                     , 1                   };
 int   SW_SAMPLEMETHOD_INT[] = {SW_SAMPLEMETHOD_NEAREST, SW_SAMPLEMETHOD_INVSQ , SW_SAMPLEMETHOD_ML  , -1};
 
-char *SW_HALIGN_STR[] = {"left"         , "centre"       , "right"         };
+char *SW_HALIGN_STR[] = {"left"         , "center"       , "right"         };
 int   SW_HALIGN_ACL[] = {1              , 1              , 1               };
 int   SW_HALIGN_INT[] = {SW_HALIGN_LEFT , SW_HALIGN_CENT , SW_HALIGN_RIGHT , -1};
 
-char *SW_VALIGN_STR[] = {"top"         , "centre"       , "bottom"      };
+char *SW_VALIGN_STR[] = {"top"         , "center"       , "bottom"      };
 int   SW_VALIGN_ACL[] = {1             , 1              , 1             };
 int   SW_VALIGN_INT[] = {SW_VALIGN_TOP , SW_VALIGN_CENT , SW_VALIGN_BOT , -1};
 

@@ -164,7 +164,7 @@ static double MultiMinSlave(const gsl_vector *x, void *params)
       return GSL_NAN;
      }
     memcpy(&output1,tmp,sizeof(pplObj));
-    c->stackPtr--; // pop tmp from stack
+    ppl_garbageObject(&c->stack[--c->stackPtr]); // trash and pop tmp from stack
 
     if (data->expr2[i] != NULL)
      {
@@ -182,7 +182,7 @@ static double MultiMinSlave(const gsl_vector *x, void *params)
         return GSL_NAN;
        }
       memcpy(&output2,tmp,sizeof(pplObj));
-      c->stackPtr--; // pop tmp from stack
+      ppl_garbageObject(&c->stack[--c->stackPtr]); // trash and pop tmp from stack
 
       if (!ppl_unitsDimEqual(&output1, &output2))
        {

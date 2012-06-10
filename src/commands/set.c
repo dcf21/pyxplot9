@@ -870,7 +870,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
           else if ((sg->KeyPos==SW_KEYPOS_BR)||(sg->KeyPos==SW_KEYPOS_BM)||(sg->KeyPos==SW_KEYPOS_BL)) sg->KeyPos=SW_KEYPOS_BL;
           else                                                                                         sg->KeyPos=SW_KEYPOS_ML;
          }
-        if (strcmp(tempstr,"xcentre")==0)
+        if (strcmp(tempstr,"xcenter")==0)
          {
           if      ((sg->KeyPos==SW_KEYPOS_TR)||(sg->KeyPos==SW_KEYPOS_TM)||(sg->KeyPos==SW_KEYPOS_TL)) sg->KeyPos=SW_KEYPOS_TM;
           else if ((sg->KeyPos==SW_KEYPOS_BR)||(sg->KeyPos==SW_KEYPOS_BM)||(sg->KeyPos==SW_KEYPOS_BL)) sg->KeyPos=SW_KEYPOS_BM;
@@ -895,7 +895,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
           else if ((sg->KeyPos==SW_KEYPOS_TR)||(sg->KeyPos==SW_KEYPOS_MR)||(sg->KeyPos==SW_KEYPOS_BR)) sg->KeyPos=SW_KEYPOS_TR;
           else                                                                                         sg->KeyPos=SW_KEYPOS_TM;
          }
-        if (strcmp(tempstr,"ycentre")==0)
+        if (strcmp(tempstr,"ycenter")==0)
          {
           if      ((sg->KeyPos==SW_KEYPOS_TL)||(sg->KeyPos==SW_KEYPOS_ML)||(sg->KeyPos==SW_KEYPOS_BL)) sg->KeyPos=SW_KEYPOS_ML;
           else if ((sg->KeyPos==SW_KEYPOS_TR)||(sg->KeyPos==SW_KEYPOS_MR)||(sg->KeyPos==SW_KEYPOS_BR)) sg->KeyPos=SW_KEYPOS_MR;
@@ -1595,7 +1595,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
   else if (strcmp_set && (strcmp(setoption,"texthalign")==0)) /* set texthalign */
    {
     if (command[PARSE_set_texthalign_left  ].objType == PPLOBJ_STR) sg->TextHAlign = SW_HALIGN_LEFT;
-    if (command[PARSE_set_texthalign_centre].objType == PPLOBJ_STR) sg->TextHAlign = SW_HALIGN_CENT;
+    if (command[PARSE_set_texthalign_center].objType == PPLOBJ_STR) sg->TextHAlign = SW_HALIGN_CENT;
     if (command[PARSE_set_texthalign_right ].objType == PPLOBJ_STR) sg->TextHAlign = SW_HALIGN_RIGHT;
    }
   else if (strcmp_unset && (strcmp(setoption,"texthalign")==0)) /* unset texthalign */
@@ -1605,7 +1605,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
   else if (strcmp_set && (strcmp(setoption,"textvalign")==0)) /* set textvalign */
    {
     if (command[PARSE_set_textvalign_top   ].objType == PPLOBJ_STR) sg->TextVAlign = SW_VALIGN_TOP;
-    if (command[PARSE_set_textvalign_centre].objType == PPLOBJ_STR) sg->TextVAlign = SW_VALIGN_CENT;
+    if (command[PARSE_set_textvalign_center].objType == PPLOBJ_STR) sg->TextVAlign = SW_VALIGN_CENT;
     if (command[PARSE_set_textvalign_bottom].objType == PPLOBJ_STR) sg->TextVAlign = SW_VALIGN_BOT;
    }
   else if (strcmp_unset && (strcmp(setoption,"textvalign")==0)) /* unset textvalign */

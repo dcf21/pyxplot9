@@ -88,6 +88,7 @@ void ppl_parserOutFree(parserOutput *in)
   if (in==NULL) return;
   for (i=0; i<in->stackLen; i++) ppl_garbageObject(&in->stk[i]);
   free(in->stk);
+  free(in->stkCharPos);
   free(in);
   return;
  }
@@ -95,16 +96,16 @@ void ppl_parserOutFree(parserOutput *in)
 #define STACK_POP \
    { \
     c->stackPtr--; \
-    if (c->stack[c->stackPtr].objType!=PPLOBJ_NUM) /* optimisation: Don't waste time garbage collecting numbers */ \
-     { \
-      ppl_garbageObject(&c->stack[c->stackPtr]); \
-      if (c->stack[c->stackPtr].refCount != 0) { strcpy(c->errStat.errBuff,"Stack forward reference detected."); TBADD(ERR_INTERNAL,0); return; } \
-    } \
-   } \
+    ppl_garbageObject(&c->stack[c->stackPtr]); \
+    if (c->stack[c->stackPtr].refCount != 0) { strcpy(c->errStat.errBuff,"Stack forward reference detected."); TBADD(ERR_INTERNAL,0); return; } \
+   }
+
+#define STACK_CLEAN    while (c->stackPtr>stkLevelOld) { STACK_POP; }
 
 void ppl_parserExecute(ppl_context *c, parserLine *in, char *dirName, int interactive, int iterDepth)
  {
   int           i;
+  const int     stkLevelOld = c->stackPtr;
   parserOutput *out  = NULL;
   pplObj       *stk  = NULL;
   char         *eB   = c->errStat.errBuff;
@@ -133,6 +134,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, char *dirName, int intera
       stat = ppl_parserCompile(c, ps, in->srcLineN, in->srcId, in->srcFname, in->linetxt, 1, iterDepth+1);
       if (stat || c->errStat.status) break;
       ppl_parserExecute(c, ps->pl[iterDepth+1], dirName, interactive, iterDepth+1);
+      ppl_parserLineFree(ps->pl[iterDepth+1]);
       ppl_parserStatFree(&ps);
       in = in->next;
       continue;
@@ -344,6 +346,7 @@ gotTypeCexpression:
      }
 
     // Free output stack
+    STACK_CLEAN;
     ppl_parserOutFree(out);
 
     in = in->next;

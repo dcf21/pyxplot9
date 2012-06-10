@@ -137,7 +137,7 @@ void ppl_bmp_gifread(pplerr_context *ec, FILE *in, bitmap_data *image)
     ncols=2<<(flags&0x7);
     if (DEBUG) { sprintf(ec->tempErrStr, "Local number of colours=%d",ncols); ppl_log(ec, NULL); }
     if (gcm) free (image->palette);
-    image->palette=malloc(ncols*3);
+    image->palette=ppl_memAlloc(ncols*3);
     if (image->palette == NULL) { ppl_error(ec, ERR_MEMORY, -1, -1,"Out of memory"); return; }
     if (fread(image->palette,ncols*3,1,in)!=1) { ppl_error(ec, ERR_FILE, -1, -1,"This GIF image file appears to be corrupted"); return; }
     image->pal_len=ncols;

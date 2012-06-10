@@ -599,7 +599,7 @@ int showMinor = 0;
     else
      {
       sprintf(buf, "%s, %s", ppl_unitsNumericDisplay(c,&(c->set->term_current.PaperWidth),0,0,0), ppl_unitsNumericDisplay(c,&(c->set->term_current.PaperHeight),1,0,0));
-      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "paperSize", buf, ((c->set->term_default.PaperWidth.real==c->set->term_current.PaperWidth.real)&&(c->set->term_default.PaperHeight.real==c->set->term_current.PaperHeight.real)), "The current papersize for postscript output.");
+      ppl_directive_show3(c, out+i, itemSet, 0, interactive, "paperSize", buf, ((c->set->term_default.PaperWidth.real==c->set->term_current.PaperWidth.real)&&(c->set->term_default.PaperHeight.real==c->set->term_current.PaperHeight.real)), "The current papersize for postscript output");
       i += strlen(out+i) ; p=1;
      }
    }
