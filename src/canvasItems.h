@@ -72,6 +72,7 @@ typedef struct canvas_plotdesc {
  // Structure members which are used at plot time
  dataTable              *data;
  withWords               ww_final;
+ char                   *filenameFinal;
  char                   *TitleFinal;
  int                     TitleFinal_col;
  double                  TitleFinal_xpos, TitleFinal_ypos, TitleFinal_width, TitleFinal_height;

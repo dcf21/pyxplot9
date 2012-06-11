@@ -112,7 +112,7 @@ void GraphLegend_YieldUpText(EPSComm *x)
         k=0;
         if (pd->parametric) { sprintf(cptr+k, "parametric"); k+=strlen(cptr+k); }
         if (pd->TRangeSet)  { sprintf(cptr+k, " [%s:%s]", ppl_unitsNumericDisplay(x->c,&pd->Tmin,0,SW_DISPLAY_L,0), ppl_unitsNumericDisplay(x->c,&pd->Tmax,1,SW_DISPLAY_L,0)); k+=strlen(cptr+k); }
-        if (!pd->function) { cptr[k++]=' '; ppl_strEscapify(pd->filename, buffer); inlen=strlen(buffer); ppl_texify_generic(x->c, buffer, -1, &inlen, cptr+k, LSTR_LENGTH-k, NULL, NULL); k+=strlen(cptr+k); } // Filename of datafile we are plotting
+        if (!pd->function) { cptr[k++]=' '; ppl_strEscapify((pd->filenameFinal==NULL)?pd->filename:pd->filenameFinal, buffer); inlen=strlen(buffer); ppl_texify_generic(x->c, buffer, -1, &inlen, cptr+k, LSTR_LENGTH-k, NULL, NULL); k+=strlen(cptr+k); } // Filename of datafile we are plotting
         else
          for (j=0; j<pd->NFunctions; j++) // Print out the list of functions which we are plotting
           {

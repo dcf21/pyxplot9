@@ -420,6 +420,7 @@ void eps_plot_ReadAccessibleData(EPSComm *x)
    {
     double *special_raster=NULL, *special_raster2=NULL;
 
+    pd->filenameFinal=NULL;
     pd->TitleFinal=NULL;
     pd->TitleFinal_col=0;
     pd->TitleFinal_height = pd->TitleFinal_width = pd->TitleFinal_xpos = pd->TitleFinal_ypos = 0;
@@ -462,7 +463,14 @@ void eps_plot_ReadAccessibleData(EPSComm *x)
         if (pd->filename != NULL) // Read data from file
          {
           if (DEBUG) { sprintf(c->errcontext.tempErrStr, "Reading data from file '%s' for dataset %d in plot item %d", pd->filename, i+1, x->current->id); ppl_log(&c->errcontext,NULL); }
-          if (pd->PersistentDataTable==NULL) ppldata_fromFile(c, x->current->plotdata+i, pd->filename, 0, NULL, NULL, pd->index, UsingList, autoUsingList, NExpect, nObjs, pd->label, pd->SelectCriterion, NULL, pd->UsingRowCols, pd->EveryList, pd->continuity, 0, &status, c->errcontext.tempErrStr, &errCount, x->iterDepth+1);
+          if (pd->PersistentDataTable==NULL)
+           {
+            char *fnameFinal, tmp[FNAME_LENGTH]="";
+            ppldata_fromFile(c, x->current->plotdata+i, pd->filename, 0, tmp, NULL, pd->index, UsingList, autoUsingList, NExpect, nObjs, pd->label, pd->SelectCriterion, NULL, pd->UsingRowCols, pd->EveryList, pd->continuity, 0, &status, c->errcontext.tempErrStr, &errCount, x->iterDepth+1);
+            fnameFinal = (char *)ppl_memAlloc(strlen(tmp)+1);
+            if (fnameFinal!=NULL) strcpy(fnameFinal, tmp);
+            pd->filenameFinal = fnameFinal;
+           }
           else                               x->current->plotdata[i] = pd->PersistentDataTable;
          }
         else if (pd->vectors != NULL)

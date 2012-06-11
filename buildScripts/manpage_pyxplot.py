@@ -40,8 +40,8 @@ sys.stdout.write(r"""
 .\" The manpage in this file is part of PyXPlot
 .\" <http://www.pyxplot.org.uk>
 .\"
-.\" Copyright (C) 2006-2011 Dominic Ford <coders@pyxplot.org.uk>
-.\"               2008-2011 Ross Church
+.\" Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
+.\"               2008-2012 Ross Church
 .\"
 .\" $Id$
 .\"
@@ -60,8 +60,7 @@ sys.stdout.write(r"""
 
 .TH PYXPLOT 1
 .SH NAME
-pyxplot \- a commandline data processing, graph plotting, and vector graphics
-suite.
+pyxplot \- a multi-purpose command-line data processing, vector graphics and graph-plotting tool.
 .SH SYNOPSIS
 .B pyxplot
 [file ...]
@@ -74,14 +73,15 @@ Full documentation can be found in:
   \-v, \-\-version:    Display version number.
   \-q, \-\-quiet:      Turn off initial welcome message.
   \-V, \-\-verbose:    Turn on initial welcome message.
-  \-c, \-\-colour:     Use coloured highlighting of output.
+  \-c, \-\-color:      Use colored highlighting of output.
   \-m, \-\-monochrome: Turn off coloured highlighting.
 .SH AUTHORS
 %s.
 .SH CREDITS
-Thanks to Dave Ansell, Rachel Holdforth, Stuart Prescott, Michael Rutter and
-Matthew Smith, all of whom have made substantial contributions to the
-development of PyXPlot.
+Matthew Smith, Michael Rutter, Zoltan Voros and John Walker have all
+contributed code to PyXPlot.  We welcome bug reports, which can be submitted to
+our project page on Sourceforge, and thank the many testers who have already
+made significant contributions to the project by helping us to track down bugs.
 .SH "SEE ALSO"
 .BR pyxplot_watch (1), gnuplot (1)
 """%(description,docpath,author))
