@@ -26,38 +26,47 @@ reset
 title = "null"
 load "examples/fig_init.ppl"
 
-set multiplot
-set nodisplay
 set seed 0
 width = 7
 
+# Make a table of random numbers
+
+# BEGIN
 Nsamples = 500
 
 rand() = random.random()
 
-# Make a table of random numbers
 set samp Nsamples
 set output "examples/eps/ex_pi_estimation.dat"
 tabulate 1-2*rand():1-2*rand() using 0:2:3
+
+n=0
+foreach datum i,j in 'random.dat' using 2:3
+ {
+  n = n + (hypot(i,j)<1)
+ }
+print "pi=\%s"\%(n / Nsamples * 4)
+# END
+
+# BEGIN
+set multiplot ; set nodisplay
 
 # Draw a unit circle and a unit square
 title = "ex_pi_estimation" ; load "examples/fig_init.ppl"
 box from -width/2,-width/2 to width/2,width/2
 circle at 0,0 radius width/2 with lt 2
 
-# Now plot the positions of these random data points and count how many
-# lie within a unit circle
+# Now plot the positions of these random data points andi
+# count how many lie within a unit circle
 n=0
 foreach datum i,j in 'examples/eps/ex_pi_estimation.dat' using 2:3
  {
   point at width/2*i , width/2*j with ps 0.1
   n = n + (hypot(i,j)<1)
  }
-
+set display ; refresh
 print "pi=%.4f"%(n / Nsamples * 4)
-
-set display
-refresh
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

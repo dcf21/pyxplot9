@@ -1,0 +1,5 @@
+set numeric complex
+x=0.5
+print Re(exp(i*x))
+print cos(x)        # This equals the above
+print arg(exp(i*x)) # This equals x

@@ -1,0 +1,4 @@
+set numerics complex
+solve exp(x)=e*i via x
+print Re(x)
+print Im(x)/pi

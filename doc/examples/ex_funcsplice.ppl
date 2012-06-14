@@ -30,7 +30,9 @@ load "examples/fig_init.ppl"
 f(x)     = 0.0
 f(x)[1:] = 1.0
 f(x)[3:] = f(x-1) + f(x-2)
+# END
 
+# BEGIN
 # Binet's Formula for the Fibonacci numbers
 set numerics complex
 binet(x) = Re((goldenRatio**x - (1-goldenRatio)**x) / sqrt(5))

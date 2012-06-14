@@ -1,0 +1,4 @@
+nu = 2e14*unit(Hz)
+solve diff_dv(phy.Bv(v,5800*unit(K)),nu) = \
+        unit(0*W/Hz**2/m**2/sterad) via nu
+print nu

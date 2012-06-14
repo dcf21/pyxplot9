@@ -57,6 +57,7 @@ typedef struct calculusComm {
 double ppl_expEvalCalculusSlave(double x, void *params)
  {
   int           lastOpAssign;
+  double        r,i;
   pplObj       *output;
   calculusComm *data = (calculusComm *)params;
 
@@ -76,7 +77,6 @@ double ppl_expEvalCalculusSlave(double x, void *params)
     ppl_garbageObject(&data->context->stack[--data->context->stackPtr]); // trash and pop output from stack
     return GSL_NAN;
    }
-  data->context->stackPtr--; // pop output from stack
 
   // Check that integrand is dimensionally consistent over integration range
   if (data->isFirst)
@@ -90,15 +90,20 @@ double ppl_expEvalCalculusSlave(double x, void *params)
      {
       strcpy(data->context->errStat.errBuff, "This operand does not have consistent units across the range where calculus is being attempted.");
       ppl_tbAdd(data->context,data->expr->srcLineN,data->expr->srcId,data->expr->srcFname,0,ERR_UNIT,0,data->expr->ascii,data->integrate?"integrand":"differentiated expression");
+      ppl_garbageObject(&data->context->stack[--data->context->stackPtr]); // trash and pop output from stack
       return GSL_NAN;
      }
    }
 
+  r = output->real;
+  i = output->imag;
+  ppl_garbageObject(&data->context->stack[--data->context->stackPtr]); // trash and pop output from stack
+
   // Integrand was complex, but complex arithmetic is turned off
   if ((!ppl_dblEqual(output->imag, 0)) && (data->context->set->term_current.ComplexNumbers == SW_ONOFF_OFF)) return GSL_NAN;
 
-  if (data->testingReal) return output->real;
-  else                   return output->imag;
+  if (data->testingReal) return r;
+  else                   return i;
  }
 
 void ppl_expIntegrate(ppl_context *c, pplExpr *inExpr, int inExprCharPos, char *expr, int exprPos, char *dummy, pplObj *min, pplObj *max, pplObj *out, int dollarAllowed, int iterDepth)
@@ -144,7 +149,11 @@ void ppl_expIntegrate(ppl_context *c, pplExpr *inExpr, int inExprCharPos, char *
   pplObjNum(&commlink.first,0,0,0);
 
   ppl_contextGetVarPointer(c, dummy, &dummyVar, &dummyTemp);
-  memcpy(dummyVar, min, sizeof(pplObj)); // Get units of dummyVar right
+  dummyVar->objType     = min->objType;
+  dummyVar->real        = min->real;
+  dummyVar->imag        = min->imag;
+  dummyVar->flagComplex = min->flagComplex;
+  ppl_unitsDimCpy(dummyVar, min); // Get units of dummyVar right
   commlink.dummy     = dummyVar;
   commlink.dummyReal = dummyVar->real;
   commlink.dummyImag = dummyVar->imag;
@@ -233,7 +242,11 @@ void ppl_expDifferentiate(ppl_context *c, pplExpr *inExpr, int inExprCharPos, ch
   pplObjNum(&commlink.first,0,0,0);
 
   ppl_contextGetVarPointer(c, dummy, &dummyVar, &dummyTemp);
-  memcpy(dummyVar, point, sizeof(pplObj)); // Get units of dummyVar right
+  dummyVar->objType     = point->objType;
+  dummyVar->real        = point->real;
+  dummyVar->imag        = point->imag;
+  dummyVar->flagComplex = point->flagComplex;
+  ppl_unitsDimCpy(dummyVar, point); // Get units of dummyVar right
   commlink.dummy     = dummyVar;
   commlink.dummyReal = dummyVar->real;
   commlink.dummyImag = dummyVar->imag;

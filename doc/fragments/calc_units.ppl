@@ -1,0 +1,2 @@
+a = 2*unit(m**2)
+print "An area of %f square feet"%(a/unit(ft**2))

@@ -1,0 +1,5 @@
+vol = 3*unit(m**3)
+set unit scheme si ; print vol
+set unit scheme cgs ; print vol
+set unit scheme imperial ; print vol
+set unit scheme us ; print vol

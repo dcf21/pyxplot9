@@ -1,0 +1,5 @@
+a = time.fromCalendar(2000,1,1,0,0,0)
+time.string(a)
+time.string(a,"%d %B %Y")
+set calendar muslim
+time.string(a,"%d %B %Y")

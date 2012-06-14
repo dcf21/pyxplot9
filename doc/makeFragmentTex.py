@@ -54,13 +54,18 @@ for fname in files:
   lines     = open(fname).readlines()
   out       = open(out,"w")
   first     = True
+  prompt    = "pyxplot"
   for i in range(len(lines)):
     if (len(lines[i].strip())<1): continue
     if (not first): out.write("\\newline\n")
     first = False
     out.write(r"\noindent{\tt pyxplot> {\bf %s}}"%(line_texify(lines[i].strip())))
+    if lines[i].strip()[-1]=="\\":
+      prompt = "......."
+      continue
+    prompt = "pyxplot"
     sp = subprocess.Popen([pyxplot], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    o  = sp.communicate(input="\n".join(lines[0:i+1])) # returns (stdout,stderr)
+    o  = sp.communicate(input="\n".join([ ll.strip() for ll in lines[0:i+1]])) # returns (stdout,stderr)
     if (len(o[1])>0): raise RuntimeError("pyxplot failed: %s"%o[1])
     olines = o[0].strip().split('\n')
     if (olines==['']): olines=[]

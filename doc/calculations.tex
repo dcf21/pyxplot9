@@ -205,9 +205,7 @@ would have to penetrate the hard walls. It is left as an exercise for the
 reader to use Hooke's Law to derive the following expression, but in summary,
 the force on the bead can be defined in PyXPlot as:
 \nlscf
-\noindent {\tt F(x)[-2*l~:-~~l]~= -k*(x+l)}\newline
-\noindent {\tt F(x)[-~~l~:~~~l]~= -2*k*x}\newline
-\noindent {\tt F(x)[~~~l~:~2*l]~= -k*(x+l)}
+\input{examples/tex/ex_funcsplice2_1.tex}
 \nlscf
 \noindent where it is necessary to first define a value for {\tt l} and {\tt
 k}. Plotting these functions yields the result:
@@ -235,9 +233,7 @@ knowledge that all of the subsequent members are the sums of their two
 immediate predecessors:
 
 \nlscf
-\noindent {\tt f(x)     = 0.0}\newline
-\noindent {\tt f(x)[1:] = 1.0}\newline
-\noindent {\tt f(x)[3:] = f(x-1) + f(x-2)}
+\input{examples/tex/ex_funcsplice_1.tex}
 \nlfcf
 This method is highly inefficient because each evaluation spawns two further
 evaluations of the function, and so the number of operations required to
@@ -253,7 +249,7 @@ expression for the sequence.  In the following script, we compare the values
 returned by these two implementations. We enable complex arithmetic as Binet's
 formula returns complex numbers for non-integer values of $x$.
 \nlscf
-\input{examples/tex/ex_funcsplice_1.tex}
+\input{examples/tex/ex_funcsplice_2.tex}
 \nlscf
 \begin{center}
 \includegraphics[width=\textwidth]{examples/eps/ex_funcsplice}
@@ -363,14 +359,7 @@ complex conjugate of $z$. The following lines of code demonstrate the use of
 these functions:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf set numeric complex}}\newline
-\noindent{\tt pyxplot> {\bf x=0.5}}\newline
-\noindent{\tt pyxplot> {\bf print Re(exp(i*x))}}\newline
-\noindent{\tt 0.87758256}\newline
-\noindent{\tt pyxplot> {\bf print cos(x)}~~~~~~~~{\it \# This equals the above}}\newline
-\noindent{\tt 0.87758256}\newline
-\noindent{\tt pyxplot> {\bf print arg(exp(i*x))}~{\it \# This equals x}}\newline
-\noindent{\tt 0.5}
+\input{fragments/tex/calc_complex.tex}
 \vspace{3mm}
 
 \section{Working with physical units}
@@ -425,9 +414,7 @@ same character is used for the binary exclusive or operator in PyXPlot's normal
 arithmetic.}, as in the example:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf a = 2*unit(m**2)}}\newline
-\noindent{\tt pyxplot> {\bf print "An area of \%f square feet"\%(a/unit(ft**2))}}\newline
-\noindent{\tt An area of 21.527821 square feet}
+\input{fragments/tex/calc_units.tex}
 \vspace{3mm}
 
 \noindent As these examples also demonstrate, units may be referred to by either
@@ -626,15 +613,7 @@ unit scheme, US customary units are used. The current unit scheme can be
 changed using the \indcmdt{set unit scheme}:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf vol = 3*unit(m**3)}}\newline
-\noindent{\tt pyxplot> {\bf set unit scheme si ; print vol}}\newline
-\noindent{\tt 3 cubic\_m}\newline
-\noindent{\tt pyxplot> {\bf set unit scheme cgs ; print vol}}\newline
-\noindent{\tt 3000000 cubic\_cm}\newline
-\noindent{\tt pyxplot> {\bf set unit scheme imperial ; print vol}}\newline
-\noindent{\tt 82.488468 bushels\_(UK)}\newline
-\noindent{\tt pyxplot> {\bf set unit scheme us ; print vol}}\newline
-\noindent{\tt 85.13278 bushels\_(US)}
+\input{fragments/tex/calc_numdisp.tex}
 \vspace{3mm}
 
 \noindent A complete list of PyXPlot's unit schemes can be found in
@@ -754,17 +733,7 @@ Section~\ref{sec:stringsubop} may be used to specify how a number should be
 displayed on a one-by-one basis, as in the examples:
 
 \vspace{3mm}
-{\footnotesize
-\noindent{\tt pyxplot>~{\bf print~"\%d"~~\%(pi)}~{\it \#~Print~the~integer~part~of~pi}}\newline
-\noindent{\tt 3}\newline
-\noindent{\tt pyxplot>~{\bf print~"\%.5f"\%(pi)}~{\it \#~Print~pi~in~non-scientific~format,~to~5~d.p.}}\newline
-\noindent{\tt 3.14159}\newline
-\noindent{\tt pyxplot>~{\bf print~"\%.5e"\%(pi)}~{\it \#~Print~pi~in~scientific~format,~to~5~d.p.}}\newline
-\noindent{\tt 3.14159e+00}\newline
-\noindent{\tt pyxplot>~{\bf print~"\%s"~~\%(pi)}~{\it \#~Print~pi~as~normal}}\newline
-\noindent{\tt 3.1415927}\vspace{3mm}
-}
-
+\input{fragments/tex/calc_numsf.tex}
 
 \subsection{Creating pastable text}
 \label{sec:pastable}
@@ -783,15 +752,7 @@ could be used in a \LaTeX\ text label on a plot. For this reason, the
 different ways in which numbers can be displayed:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf set numerics display natural}}\newline
-\noindent{\tt pyxplot> {\bf print phy\_c}}\newline
-\noindent{\tt 299792 km/s}\newline
-\noindent{\tt pyxplot> {\bf set numerics display typeable}}\newline
-\noindent{\tt pyxplot> {\bf print phy\_c}}\newline
-\noindent{\tt 299792*unit(km/s)}\newline
-\noindent{\tt pyxplot> {\bf set numerics display latex}}\newline
-\noindent{\tt pyxplot> {\bf print phy\_c}}\newline
-\noindent{\tt 299792 km/s}
+\input{fragments/tex/calc_numtype.tex}
 \vspace{3mm}
 
 The first case is the default way in which PyXPlot displays numbers. The second
@@ -890,11 +851,7 @@ simultaneously decreases. The following example solves a simple pair of
 simultaneous equations of two variables:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf solve x+y=10, x-y=3 via x,y}}\newline
-\noindent{\tt pyxplot> {\bf print x}}\newline
-\noindent{\tt 6.5}\newline
-\noindent{\tt pyxplot> {\bf print y}}\newline
-\noindent{\tt 3.5}
+\input{fragments/tex/calc_solve1.tex}
 \vspace{3mm}
 
 \noindent No output is returned to the terminal if the numerical solver
@@ -905,14 +862,7 @@ for each fitting variable is assumed. Thus, the same \indcmdt{solve} returns
 two different values in the following two cases:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf x=} {\it \# Undefine x}}\newline
-\noindent{\tt pyxplot> {\bf solve cos(x)=0 via x}}\newline
-\noindent{\tt pyxplot> {\bf print x/pi}}\newline
-\noindent{\tt 0.5}\newline
-\noindent{\tt pyxplot> {\bf x=10}}\newline
-\noindent{\tt pyxplot> {\bf solve cos(x)=0 via x}}\newline
-\noindent{\tt pyxplot> {\bf print x/pi}}\newline
-\noindent{\tt 3.5}
+\input{fragments/tex/calc_solve2.tex}
 \vspace{3mm}
 
 \noindent In cases where any of the variables being solved for are not
@@ -939,11 +889,7 @@ three equations with two variables is over-constrained -- but PyXPlot
 nonetheless finds a compromise solution:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf solve x+y=10, x-y=3, 2*x+y=16 via x,y}}\newline
-\noindent{\tt pyxplot> {\bf print x}}\newline
-\noindent{\tt 6.3571429}\newline
-\noindent{\tt pyxplot> {\bf print y}}\newline
-\noindent{\tt 3.4285714}
+\input{fragments/tex/calc_solve3.tex}
 \vspace{3mm}
 
 When complex arithmetic is enabled, the \indcmdt{solve} allows each of the
@@ -953,12 +899,7 @@ and imaginary components of each variable are solved for separately -- as in
 the following example:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf set numerics complex}}\newline
-\noindent{\tt pyxplot> {\bf solve exp(x)=e*i via x}}\newline
-\noindent{\tt pyxplot> {\bf print Re(x)}}\newline
-\noindent{\tt 1}\newline
-\noindent{\tt pyxplot> {\bf print Im(x)/pi}}\newline
-\noindent{\tt 0.5}
+\input{fragments/tex/calc_solve4.tex}
 \vspace{3mm}
 
 \section{Searching for minima and maxima of functions}
@@ -971,11 +912,7 @@ should be optimised. In the following example, a minimum of the sinusoidal
 function $\cos(x)$ is sought:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf set numerics real}}\newline
-\noindent{\tt pyxplot> {\bf x=0.1}}\newline
-\noindent{\tt pyxplot> {\bf minimize cos(x) via x}}\newline
-\noindent{\tt pyxplot> {\bf print x/pi}}\newline
-\noindent{\tt 1}
+\input{fragments/tex/calc_min1.tex}
 \vspace{3mm}
 
 \noindent Note that this particular example doesn't work when complex
@@ -1025,10 +962,7 @@ To search for the maximum of this function using the \indcmdt{maximize}, we
 must provide an initial guess to indicate that the answer sought should have
 units of Hz:
 \nlscf
-\noindent {\tt pyxplot> {\bf nu = 1e14*unit(Hz)}}\newline
-\noindent {\tt pyxplot> {\bf maximize Bv(nu,5800*unit(K)) via nu}}\newline
-\noindent {\tt pyxplot> {\bf print nu}}\newline
-\noindent {\tt 340.9781 THz}
+\input{fragments/tex/calc_min2.tex}
 \nlnp
 This maximum could also be sought be searching for turning points in the
 function $B_\nu(\nu,T)$, i.e.\ by solving the equation
@@ -1037,15 +971,10 @@ function $B_\nu(\nu,T)$, i.e.\ by solving the equation
 \end{displaymath}
 This can be done as follows:
 \nlscf
-\noindent {\tt pyxplot> {\bf nu = 1e14*unit(Hz)}}\newline
-\noindent {\tt pyxplot> {\bf solve diff\_dnu(Bv(nu,5800*unit(K)),nu) = $\backslash$}}\newline
-\noindent {\tt .......> {\bf ~~~~~~~~~unit(0*W/Hz**2/m**2) via nu}}\newline
-\noindent {\tt pyxplot> {\bf print nu}}\newline
-\noindent {\tt 340.9781 THz}
+\input{fragments/tex/calc_min3.tex}
 \nlnp
 Finally, this maximum could also be found using PyXPlot's built-in function {\tt Bvmax(T)}:\vspace{2mm}\newline
-\noindent {\tt pyxplot> {\bf print Bvmax(5800*unit(K))}}\newline
-\noindent {\tt 340.9781 THz}
+\input{fragments/tex/calc_min4.tex}
 }
 
 \section{Working with time-series data}
@@ -1080,8 +1009,7 @@ minutes (0--59), and the number of seconds (0--59). To enter dates before
 Day number at midnight on 1st~January 2000:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf print time\_julianday(2000,1,1,0,0,0.0)}}\newline
-\noindent{\tt 2451544.5}
+\input{fragments/tex/calc_date1.tex}
 \vspace{3mm}
 
 By default, the {\tt time\_julianday()} function makes a transition from the
@@ -1171,13 +1099,7 @@ Token & Substitution value \\
 \end{table}
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf print time\_string(2451544.5)}}\newline
-\noindent{\tt Sat 2000 Jan 1 00:00:00}\newline
-\noindent{\tt pyxplot> {\bf print time\_string(2451544.5+50, "\%d \%B \%Y")}}\newline
-\noindent{\tt 20 February 2000}\newline
-\noindent{\tt pyxplot> {\bf set calendar muslim}}\newline
-\noindent{\tt pyxplot> {\bf print time\_string(2451544.5+50, "\%d \%B \%Y")}}\newline
-\noindent{\tt 15 Dhu l-Qa'da 1420}
+\input{fragments/tex/calc_date2.tex}
 \vspace{3mm}
 
 Several functions are provided for numerically returning the various parts of
@@ -1316,9 +1238,9 @@ produce a plot of the rate of downloads from an Apache webserver based upon the
 download log which it stores in the file {\tt /var/log/apache2/access.log}.
 This file contain a line of the following form for each page or file requested
 from the webserver:
-\vspace{3mm}\newline\noindent{\tt\footnotesize 127.0.0.1 - - [14/Jun/2012:16:43:18 +0100] "GET / HTTP/1.1" 200 484 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 (KHTML, like Gecko) Ubuntu/12.04 Chromium/18.0.1025.151 Chrome/18.0.1025.151 Safari/535.19"}\vspace{3mm}\newline
+\vspace{3mm}\newline\noindent{\tt\footnotesize 127.0.0.1 - - [14/Jun/2012:16:43:18 +0100] "GET / HTTP/1.1" 200 484 "-" "Mozilla/5.0 (X11; Linux x86\_64) AppleWebKit/535.19 (KHTML, like Gecko) Ubuntu/12.04 Chromium/18.0.1025.151 Chrome/18.0.1025.151 Safari/535.19"}\vspace{3mm}\newline
 However, PyXPlot's default input filter for {\tt .log} files (see Section~\ref{sec:filters}) manipulates the dates in strings such as these into the form
-\vspace{3mm}\newline\noindent{\tt\footnotesize 127.0.0.1 - -~~[~14~~6~~2012~16~43~18~+0100~]~~"GET~~~HTTP 1.1" 200 484 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 (KHTML, like Gecko) Ubuntu/12.04 Chromium/18.0.1025.151 Chrome/18.0.1025.151 Safari/535.19"}\vspace{3mm}\newline
+\vspace{3mm}\newline\noindent{\tt\footnotesize 127.0.0.1 - -~~[~14~~6~~2012~16~43~18~+0100~]~~"GET~~~HTTP 1.1" 200 484 "-" "Mozilla/5.0 (X11; Linux x86\_64) AppleWebKit/535.19 (KHTML, like Gecko) Ubuntu/12.04 Chromium/18.0.1025.151 Chrome/18.0.1025.151 Safari/535.19"}\vspace{3mm}\newline
 such that the day, month, year, hour, minute and second components of the date
 are contained in the 5th to 10th white-space-separated columns respectively.
 In the script below, the {\tt time\_\-julianday()} is then used to convert

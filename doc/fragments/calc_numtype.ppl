@@ -1,0 +1,6 @@
+set numerics display natural
+print phy.c
+set numerics display typeable
+print phy.c
+set numerics display latex
+print phy.c

@@ -1,0 +1,3 @@
+nu = 1e14*unit(Hz)
+maximize phy.Bv(nu,5800*unit(K)) via nu
+print nu

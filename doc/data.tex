@@ -773,18 +773,7 @@ samples. Firstly, the positions of the random samples are generated using the
 introduced in Section~\ref{sec:foreach_datum} -- is used to loop over these,
 counting how many lie within the unit circle.
 \nlscf
-\noindent {\tt Nsamples = 5000 }\newline
-\noindent {\tt }\newline
-\noindent {\tt set samp Nsamples }\newline
-\noindent {\tt set output "random.dat" }\newline
-\noindent {\tt tabulate 1-2*random():1-2*random() using 0:2:3 }\newline
-\noindent {\tt }\newline
-\noindent {\tt n=0 }\newline
-\noindent {\tt foreach datum i,j in 'random.dat' using 2:3 \{ }\newline
-\noindent {\tt \phantom{xx}n = n + (hypot(i,j)<1) }\newline
-\noindent {\tt \} }\newline
-\noindent {\tt }\newline
-\noindent {\tt print "pi=\%s"\%(n / Nsamples * 4) }
+\input{examples/tex/ex_pi_estimation_1.tex}
 \nlfcf
 On the author's machine, this script returns a value of $3.1352$ when executed
 using the random samples which are returned immediately after starting PyXPlot.
@@ -802,21 +791,7 @@ will be introduced in Chapter~\ref{ch:vector_graphics}, to produce such a
 diagram:
 
 \nlscf
-\noindent {\tt set multiplot ; set nodisplay}\newline
-\noindent {\tt \# Draw a unit circle and a unit square}\newline
-\noindent {\tt box from -width/2,-width/2 to width/2,width/2}\newline
-\noindent {\tt circle at 0,0 radius width/2 with lt 2}\newline
-\noindent {\tt }\newline
-\noindent {\tt \# Now plot the positions of the random data points}\newline
-\noindent {\tt n=0}\newline
-\noindent {\tt foreach datum i,j in 'random.dat' using 2:3}\newline
-\noindent {\tt \phantom{x}\{}\newline
-\noindent {\tt \phantom{xx}point at width/2*i , width/2*j with ps 0.1}\newline
-\noindent {\tt \phantom{xx}n = n + (hypot(i,j)<1)}\newline
-\noindent {\tt \phantom{x}\}}\newline
-\noindent {\tt set display ; refresh}\newline
-\noindent {\tt }\newline
-\noindent {\tt print "pi=\%s"\%(n / Nsamples * 4) }
+\input{examples/tex/ex_pi_estimation_2.tex}
 \nlscf
 The graphical output from this script is shown below. The number of datapoints
 has been reduced to {\tt Nsamples}$=500$ for clarity:

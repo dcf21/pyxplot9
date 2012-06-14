@@ -26,7 +26,7 @@ os.system("rm -Rf examples/tex")
 os.system("mkdir  examples/tex")
 
 def line_texify(line):
-  if line.beginswith("#NC "): line=line[4:]
+  if line.startswith("#NC "): line=line[4:]
   line = re.sub(r'examples/eps/ex_','',line)
   line = re.sub(r'examples/ex_','',line)
   line = re.sub(r'examples/','',line)

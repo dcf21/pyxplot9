@@ -1,0 +1,3 @@
+solve x+y=10, x-y=3 via x,y
+print x
+print y

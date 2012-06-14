@@ -1,0 +1,5 @@
+print "%d"  %(pi) # Print the integer part of pi
+print "%.5f"%(pi) # Print pi in non-scientific format, to 5 d.p.
+print "%.5e"%(pi) # Print pi in scientific format, to 5 d.p.
+print "%s"  %(pi) # Print pi as normal
+

@@ -26,14 +26,15 @@ reset
 title = "ex_funcsplice2"
 load "examples/fig_init.ppl"
 
-# BEGIN
 set numeric errors quiet
 k=1
 l=1
 
+# BEGIN
 F(x)[-2*l :-  l] = -k*(x-l)
 F(x)[-  l :   l] = -2*k*x
 F(x)[   l : 2*l] = -k*(x+l)
+# END
 
 set xrange [-2.5:2.5]
 set yrange [-4.5:4.5]
@@ -41,7 +42,6 @@ set xlabel "$x/l$"
 set ylabel "$F(x)/kl$"
 set key top right
 plot F(x)
-# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

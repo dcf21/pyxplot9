@@ -349,7 +349,13 @@ static void minOrMax(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     pos = &stk[ (int)round(pos->real) ];
     varName = (char *)(pos + PARSE_minimise_fit_variable_fit_variables)->auxil;
     ppl_contextGetVarPointer(c, varName, &commlink.fitvar[commlink.Nfitvars], &dummyTemp);
-    if (dummyTemp.objType==PPLOBJ_NUM) ppl_unitsDimCpy(commlink.fitvar[commlink.Nfitvars], &dummyTemp);
+    if (dummyTemp.objType==PPLOBJ_NUM)
+     {
+      ppl_unitsDimCpy(commlink.fitvar[commlink.Nfitvars], &dummyTemp);
+      commlink.fitvar[commlink.Nfitvars]->real        = dummyTemp.real;
+      commlink.fitvar[commlink.Nfitvars]->imag        = dummyTemp.imag;
+      commlink.fitvar[commlink.Nfitvars]->flagComplex = dummyTemp.flagComplex;
+     }
     dummyTemp.amMalloced=0;
     ppl_garbageObject(&dummyTemp);
     commlink.fitvarname[ commlink.Nfitvars ] = varName;
@@ -406,7 +412,13 @@ void ppl_directive_solve(ppl_context *c, parserLine *pl, parserOutput *in, int i
     pos = (int)round(stk[pos].real);
     varName = (char *)stk[pos+PARSE_solve_fit_variable_fit_variables].auxil;
     ppl_contextGetVarPointer(c, varName, &commlink.fitvar[commlink.Nfitvars], &dummyTemp);
-    if (dummyTemp.objType==PPLOBJ_NUM) ppl_unitsDimCpy(commlink.fitvar[commlink.Nfitvars], &dummyTemp);
+    if (dummyTemp.objType==PPLOBJ_NUM)
+     {
+      ppl_unitsDimCpy(commlink.fitvar[commlink.Nfitvars], &dummyTemp);
+      commlink.fitvar[commlink.Nfitvars]->real        = dummyTemp.real;
+      commlink.fitvar[commlink.Nfitvars]->imag        = dummyTemp.imag;
+      commlink.fitvar[commlink.Nfitvars]->flagComplex = dummyTemp.flagComplex;
+     }
     dummyTemp.amMalloced=0;
     ppl_garbageObject(&dummyTemp);
     commlink.fitvarname[ commlink.Nfitvars ] = varName;
