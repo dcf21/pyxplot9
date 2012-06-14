@@ -1,4 +1,4 @@
-% FIRST_STEPS.TEX
+% first_steps.tex
 %
 % The documentation in this file is part of PyXPlot
 % <http://www.pyxplot.org.uk>
@@ -21,7 +21,7 @@
 
 % LaTeX source for the PyXPlot Users' Guide
 
-\chapter{First Steps With PyXPlot}
+\chapter{First steps with PyXPlot}
 \label{ch:first_steps}
 
 In this chapter, we provide a brief overview of the commands which are used to
@@ -35,7 +35,7 @@ to render text.
 In Chapter~\ref{ch:plotting} we will revisit and extend the material of this
 chapter to show how to produce more advanced plots.
 
-\section{Getting Started}
+\section{Getting started}
 
 The simplest way to start PyXPlot is to type {\tt pyxplot} at a shell prompt.
 This starts an interactive session, and a PyXPlot command-line prompt into
@@ -44,7 +44,7 @@ which commands can be typed will appear. PyXPlot can be exited either by typing
 be specified on the shell command line to modify PyXPlot's behaviour; these are
 listed in Box~\ref{box:CommandSwitches}.  Of especial interest may be the
 switches {\tt -c} and {\tt -m}, which change between the use of
-colour-highlighted (default) and non-coloured text.
+color-highlighted (default) and non-colored text.
 
 Typing commands into interactive terminals will probably be a sufficient way to
 drive PyXPlot to begin with, but as the number of commands required to set up
@@ -68,8 +68,8 @@ modify its behaviour:\index{command line syntax}
 {\tt -v --version} & Display the current version number of PyXPlot.\\
 {\tt -q --quiet} & Turn off the display of the welcome message on startup. \\
 {\tt -V --verbose} & Display the welcome message on startup, as happens by default. \\
-{\tt -c --colour} & Use colour highlighting\footnote{This will only function on terminals which support colour output.}, as is the default behaviour, to display output in green, warning messages in amber, and error messages in red.\footnote{The authors apologise to those members of the population who are red/green colour blind, but draw their attention to the following sentence.} These colours can be changed in the {\tt terminal} section of the configuration file; see Section~\ref{sec:configfile_terminal} for more details. \\
-{\tt -m --monochrome} & Do not use colour highlighting. \\
+{\tt -c --color} & Use color highlighting\footnote{This will only function on terminals which support color output.}, as is the default behaviour, to display output in green, warning messages in amber, and error messages in red.\footnote{The authors apologise to those members of the population who are red/green color blind, but draw their attention to the following sentence.} These colors can be changed in the {\tt terminal} section of the configuration file; see Section~\ref{sec:configfile_terminal} for more details. \\
+{\tt -m --monochrome} & Do not use color highlighting. \\
 \end{tabular}
 }
 
@@ -136,7 +136,7 @@ only displays the last $n$ commands, e.g.:\vspace{3mm}
 \noindent {\tt history 20 }
 }
 
-\section{First Plots}
+\section{First plots}
 \label{sec:first_plots}
 
 The basic workhorse command of PyXPlot is the \indcmdt{plot}, which is used to
@@ -274,7 +274,7 @@ set nokey # I'll have no key on _my_ plot
 \noindent In both cases, all of the characters following the hash character are
 ignored.
 
-\section{Splitting Long Commands}
+\section{Splitting long commands}
 
 Long commands may be split over multiple lines in scripts provided that each
 line of the command is terminated with a backslash character, whereupon the
@@ -289,7 +289,7 @@ following line will be appended to it, as in this example:
 \noindent Such lines splits will be used extensively in this manual where
 command lines are longer than the width of the page.
 
-\section{Printing Text}
+\section{Printing text}
 
 PyXPlot's \indcmdt{print} can be used to display strings and the results of
 calculations on the terminal, as in the following examples:
@@ -337,7 +337,7 @@ The detailed behaviour of the string substitution operator, and a full list of
 the substitution tokens which it accepts, are given in
 Section~\ref{sec:stringsubop}.
 
-\section{Axis Labels and Titles}
+\section{Axis labels and titles}
 \label{sec:latex_incompatibility}
 
 Labels can be added to the axes of a plot, and a title put at the top.  Labels
@@ -430,7 +430,7 @@ set} command, such as {\tt xlabel} or {\tt title}, to return that setting to
 its default configuration. The \indcmdt{reset} restores all configurable
 parameters to their default states.
 
-\section{Querying the Values of Settings}
+\section{Querying the values of settings}
 
 As the previous section has demonstrated, the \indcmdt{set} is used in a wide
 range of ways to configure the way in which plots appear; we will meet many
@@ -484,12 +484,12 @@ session to another. However, it should be noted that some settings, such as
 {\tt papersize} are only pastable once the \indcmdt{set numerics typeable} has
 been issued, for reasons which will be explained in Section~\ref{sec:pastable}.
 
-When a colour-highlighted interactive session is used, settings which have been
+When a color-highlighted interactive session is used, settings which have been
 changed are highlighted in yellow, whilst those settings which are unchanged
 from PyXPlot's default configuration, or from a user-supplied configuration
 file, are shown in green.
 
-\section{Plotting \Datafile s}
+\section{Plotting \datafile s}
 \label{sec:plot_datafiles}
 
 In the simple example of the previous section, we plotted the first column of a
@@ -618,7 +618,7 @@ from some comment lines which follow particular syntax.
 %Here, we have an example of plotting a datafile.
 %}
 
-\section{Plotting Many \Datafile s at Once}
+\section{Plotting many \datafile s at once}
 
 \index{globbing}\index{wildcards}\index{datafiles!globbing}
 
@@ -647,7 +647,7 @@ plot 'data.dat' using 1:2, '' using 2:3
 plot '*.dat' using 1:2, '' using 2:3
 \end{verbatim}
 
-\subsection{Horizontally arranged \Datafile s}
+\subsection{Horizontally arranged \datafile s}
 \label{sec:horizontal_datafiles}
 \index{horizontal datafiles}\index{datafiles!horizontal}\index{using rows
 modifier@{\tt using rows} modifier}\index{using columns modifier@{\tt using
@@ -687,7 +687,7 @@ plot 'data.dat' using rows 1:2 every 2::3::9
 \noindent would plot the data in row~2 against that in row~1, using only the
 values in every other column, between columns~3 and~9.
 
-\subsection{Choosing which Data to Plot}
+\subsection{Choosing which data to plot}
 \label{sec:select_modifier}
 
 The final modifier which the {\tt plot} command takes to allow the user to
@@ -722,7 +722,7 @@ plot sin(x) select ($2>0) discontinuous
 %Here, we have an example of the use of the {\tt select} modifier.
 %}
 
-\section{The {\tt replot} Command}
+\section{The {\tt replot} command}
 \label{sec:replot}
 
 The \indcmdt{replot} may be used to add more datasets to an existing plot, or
@@ -746,7 +746,7 @@ the command
 replot [0:1][0:1]
 \end{verbatim}
 
-\section{Directing Where Output Goes}
+\section{Directing where output goes}
 \label{sec:directing_output}
 
 By default, when PyXPlot is used interactively, all plots are displayed on the
@@ -770,15 +770,15 @@ plot 'datafile.dat'
 
 The \indcmdt{set terminal} can also be used to configure various output options
 within each supported file format.  For example, the following commands would
-produce black-and-white or colour output respectively:
+produce black-and-white or color output respectively:
 
 \begin{verbatim}
 set terminal monochrome
-set terminal colour
+set terminal color
 \end{verbatim}
 
 \noindent The former is useful for preparing plots for black-and-white
-publications, the latter for preparing plots for colourful presentations.
+publications, the latter for preparing plots for colorful presentations.
 
 Both PostScript and Encapsulated PostScript can be produced. The former is
 recommended for producing figures to embed into documents, the latter for plots
@@ -807,7 +807,7 @@ More than one of the above keywords can be combined on a single line, for
 example:
 
 \begin{verbatim}
-set terminal postscript colour
+set terminal postscript color
 set terminal gif monochrome
 \end{verbatim}
 
@@ -828,7 +828,7 @@ been generated in the newly-selected graphical format.  For more details of the
 \indcmdt{set terminal}, including how to produce gif and png images with
 transparent backgrounds, see Chapter~\ref{ch:image_formats}.
 
-\section{Setting the Size of Output}
+\section{Setting the size of output}
 
 The widths of plots may be set by means of two commands -- {\tt set
 size}\indcmd{set size} and {\tt set width}\indcmd{set width}. Both are
@@ -853,7 +853,7 @@ aspect ratio of the golden ratio, i.e.\ $\left((1+\sqrt{5})/2\right)^{-1}$. The
 special command {\tt set size square}\indcmd{set size square} sets the aspect
 ratio to unity.
 
-\section{Plotting Styles}
+\section{Plotting styles}
 \label{sec:plotting_styles}
 
 By default, data from files are plotted with points and functions are plotted
@@ -925,7 +925,7 @@ style used when functions are plotted.
 %Here, we have an example of the errorbars plot style.
 %}
 
-\section{Setting Axis Ranges}
+\section{Setting axis ranges}
 \label{sec:plot_ranges}
 
 By default, PyXPlot automatically scales axes to some sensible range which
@@ -1072,7 +1072,7 @@ PyXPlot's automatic ability to convert numbers between different physical
 units.
 }
 
-\section{Interactive Help}
+\section{Interactive help}
 
 In addition to this {\it Users' Guide}, PyXPlot also has a \indcmdt{help},
 which provides a hierarchical source of information. Typing {\tt help} alone

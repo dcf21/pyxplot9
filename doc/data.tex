@@ -1,4 +1,4 @@
-% DATA.TEX
+% data.tex
 %
 % The documentation in this file is part of PyXPlot
 % <http://www.pyxplot.org.uk>
@@ -21,7 +21,7 @@
 
 % LaTeX source for the PyXPlot Users' Guide
 
-\chapter{Working with Data}
+\chapter{Working with data}
 \label{ch:numerics}
 
 In this chapter, we return to PyXPlot's commands for acting upon data stored in
@@ -31,7 +31,7 @@ command in turn. We leave the {\tt plot} command, which was introduced in
 Chapter~\ref{ch:first_steps}, to be described in more detail in
 Chapter~\ref{ch:plotting}.
 
-\section{Input Filters}
+\section{Input filters}
 \label{sec:filters}
 
 By default, PyXPlot expects \datafile s to be in a simple plaintext format
@@ -67,7 +67,7 @@ necessary to write a short program or shell script, and the simple filters
 provided in PyXPlot's source code for {\tt .log} and {.fits} files may provide
 a useful model.
 
-\section{Reading Data from a Pipe}
+\section{Reading data from a pipe}
 
 PyXPlot usually reads data from files, but it is also possible to read data
 from pipes from other processes if these are directed to PyXPlot's standard
@@ -87,7 +87,7 @@ form or in a different style, remembering how to use a sizable program can
 prove tricky -- especially if the person struggling to do so is not you! But a
 simple \datafile\ is quite straightforward to plot time and again.
 
-\section{Including Data within Command Scripts}
+\section{Including data within command scripts}
 
 It is also possible to embed data directly within PyXPlot scripts, which may be
 useful when a small number of markers are wanted at particular pre-defined
@@ -106,7 +106,7 @@ END
 print "More PyXPlot commands can be placed after END"
 \end{verbatim}
 
-\section{Special Comment Lines in Datafiles}
+\section{Special comment lines in \datafile s}
 \label{sec:special_comments}
 \index{comment lines!in datafiles}
 
@@ -147,7 +147,7 @@ plot 'data' using 1:2
 and the axes of the graph would indicate the units of the data (see
 Section~\ref{sec:set_axisunitstyle}).
 
-\section{Tabulating Functions and Slicing Data Files}
+\section{Tabulating functions and slicing \datafile s}
 \label{sec:tabulate}
 
 PyXPlot's \indcmdt{tabulate} is similar to its {\tt plot} command, but instead
@@ -233,7 +233,7 @@ where such expressions are supplied, the data are sorted in order from the
 smallest value of the expression to the largest.
 
 
-\section{Function Fitting}
+\section{Function fitting}
 \label{sec:fit_command}
 
 The \indcmdt{fit} can be used to fit arbitrary functional forms to \datapoint s
@@ -342,7 +342,7 @@ fit f() 'data.dat' via a
 
 \end{itemize}
 
-\section{Datafile Interpolation}
+\section{Datafile interpolation}
 \label{sec:spline_command}
 \index{best fit lines}
 
@@ -387,7 +387,7 @@ set samples interpolate monaghanLattanzio
 
 Finally, data can be imported from graphical images in bitmap ({\tt .bmp})
 format to produce a function of two arguments returning a value in the
-range~$0\to1$ which represents the data in one of the image's three colour
+range~$0\to1$ which represents the data in one of the image's three color
 channels. The two arguments are the horizontal and vertical position within the
 bitmap image, as measured in pixels.
 
@@ -445,25 +445,14 @@ ways, we plot them with a vertical offset of~$0.1$ between them for clarity.
 The interpolated \datafile is plotted with points three times to show where
 each of the interpolation functions is pinned.
 \nlscf
-\noindent{\tt interpolate linear f\_linear() "data.dat"}\newline
-\noindent{\tt interpolate spline f\_spline() "data.dat"}\newline
-\noindent{\tt interpolate akima  f\_akima () "data.dat"}\newline
-\\
-\noindent{\tt set key top left}\newline
-\noindent{\tt plot [0:4][-0.1:1.3] $\backslash$}\newline
-\noindent{\tt \phantom{xxx}"data.dat" using 1:(\$2+0.0) notitle with points pt 1, $\backslash$}\newline
-\noindent{\tt \phantom{xxx}f\_linear(x)+0.0 title "Linear", $\backslash$}\newline
-\noindent{\tt \phantom{xxx}"data.dat" using 1:(\$2+0.1) notitle with points pt 1, $\backslash$}\newline
-\noindent{\tt \phantom{xxx}f\_spline(x)+0.1 title "Spline", $\backslash$}\newline
-\noindent{\tt \phantom{xxx}"data.dat" using 1:(\$2+0.2) notitle with points pt 1, $\backslash$}\newline
-\noindent{\tt \phantom{xxx}f\_akima (x)+0.2 title "Akima"}\newline
+\input{examples/tex/ex_interpolation_1.tex}
 \nlscf
 The resulting plot is shown below:
 \nlscf
 \centerline{\includegraphics[width=\textwidth]{examples/eps/ex_interpolation}}
 }
 
-\section{Fourier Transforms}
+\section{Fourier transforms}
 
 The {\tt fft} and {\tt ifft} commands\indcmd{fft}\indcmd{ifft} take Fourier
 transforms and inverse Fourier transforms respectively of data supplied either
@@ -616,7 +605,7 @@ transformed, the result is the convolution of the two original functions. The
 convolution of a top-hat function with itself is, indeed, a triangle function.
 }
 
-\subsection{Window Functions}
+\subsection{Window functions}
 \index{window functions}
 
 A range of commonly-used window functions may automatically be applied to data
@@ -740,7 +729,7 @@ spaced intervals along the abscissa axis, but at the centres of each bin. If
 the \indpst{boxes} plot style is used, the box boundaries are conveniently
 drawn to coincide with the bins into which the data were sorted.
 
-\section{Random Data Generation}
+\section{Random data generation}
 
 PyXPlot has a range of mathematical functions which draw random samples from a
 variety of probability distributions. These are:

@@ -1,4 +1,4 @@
-% PLOTTING.TEX
+% plotting.tex
 %
 % The documentation in this file is part of PyXPlot
 % <http://www.pyxplot.org.uk>
@@ -21,7 +21,7 @@
 
 % LaTeX source for the PyXPlot Users' Guide
 
-\chapter{Plotting: A Detailed Survey}
+\chapter{Plotting: a complete guide}
 \label{ch:plotting}
 
 This part of the manual returns to the subject of how PyXPlot may be used to
@@ -60,8 +60,8 @@ given. In this section, we list all of the modifiers such as {\tt line\-width}
 which may be used to alter the exact appearance of these plot styles, which are
 as follows:
 \begin{itemize}
-\item \indmodt{colour} -- used to select the colour in which the dataset is to be plotted. It should be followed either by an integer, to select a colour from the present palette (see Section~\ref{sec:palette}), or by a recognised colour name, a complete list of which can be found in Section~\ref{sec:colour_names}. Alternatively, arbitrary colours may be specified by using one of the forms {\tt rgb<r>:\-<g>:\-<b>}, {\tt hsb<h>:\-<s>:\-<b>} or {\tt cmyk<c>:\-<m>:\-<y>:\-<k>}, where the colon-separated values indicate the RGB, HSB or CMYK components of the desired colour in the range~0 to~1. This modifier may also be spelt {\tt color}.\index{colours!setting for datasets}
-\item \indmodt{fillcolour} -- used to select the colour in which the dataset is filled. The colour may be specified using any of the styles listed for {\tt colour}. May also be spelt {\tt fillcolor}.
+\item \indmodt{color} -- used to select the color in which the dataset is to be plotted. It should be followed either by an integer, to select a color from the present palette (see Section~\ref{sec:palette}), or by a recognised color name, a complete list of which can be found in Section~\ref{sec:color_names}. Alternatively, arbitrary colors may be specified by using one of the forms {\tt rgb<r>:\-<g>:\-<b>}, {\tt hsb<h>:\-<s>:\-<b>} or {\tt cmyk<c>:\-<m>:\-<y>:\-<k>}, where the colon-separated values indicate the RGB, HSB or CMYK components of the desired color in the range~0 to~1. This modifier may also be spelt {\tt color}.\index{colors!setting for datasets}
+\item \indmodt{fillcolor} -- used to select the color in which the dataset is filled. The color may be specified using any of the styles listed for {\tt color}. May also be spelt {\tt fillcolor}.
 \item \indmodt{linetype} -- used to numerically select the type of line -- for example, solid, dotted, dashed, etc.\ -- which should be used by line-based plot styles. A complete list of PyXPlot's numbered line types can be found in Chapter~\ref{ch:linetypes_table}. May be abbreviated {\tt lt}.
 \item \indmodt{linewidth} -- used to select the width of line which should be used by line-based plot styles, where unity represents the default width. May be abbreviated {\tt lw}.
 \item \indmodt{pointlinewidth} -- used to select the width of line which should be used to stroke points in point-based plot styles, where unity represents the default width. May be abbreviated {\tt plw}.
@@ -74,14 +74,14 @@ with}, as in the following examples:
 
 \begin{verbatim}
 plot 'datafile' using 1:2 with points pointsize 2
-plot 'datafile' using 1:2 with lines colour red linewidth 2
+plot 'datafile' using 1:2 with lines color red linewidth 2
 plot 'datafile' using 1:2 with lp col 1 lw 2 ps 3
 \end{verbatim}
 
 \noindent Where modifiers take numerical values, expressions of the form {\tt
 \$2+1}, similar to those supplied to the {\tt using} modifier, may be used to
 indicate that each datapoint should be displayed in a different style or in a
-different colour. The following example would plot a \datafile\ with {\tt
+different color. The following example would plot a \datafile\ with {\tt
 points}, drawing the position of each point from the first two columns of the
 supplied \datafile\ and the size of each point from the third column:
 \begin{verbatim}
@@ -101,30 +101,30 @@ plot styles.
 \label{tab:style_modifiers}
 \end{table}
 
-\subsection{The Palette}
+\subsection{The palette}
 \label{sec:palette}
 
-\index{palette}\index{colours!setting the palette} As indicated above, colours
+\index{palette}\index{colors!setting the palette} As indicated above, colors
 may be referred to either specifically by name, by RGB, HSB or CMYK components,
 or by their positions in the current palette. By default, PyXPlot's palette
-contains a series of visually distinctive colours which are, insofar as
-possible, also distinctive to users with most common forms of colour blindness.
+contains a series of visually distinctive colors which are, insofar as
+possible, also distinctive to users with most common forms of color blindness.
 The current palette may be queried using the \indcmdt{show palette}, and
 changed using the \indcmdt{set palette}, which takes a comma-separated list of
-colours, as in the example:
+colors, as in the example:
 
 \begin{verbatim}
-set palette BrickRed, LimeGreen, CadetBlue
+set palette brickRed, limeGreen, cadetBlue
 \end{verbatim}
 
 \noindent The palette is treated as a cyclic list, and so in the above example,
-colour number~4 would map to {\tt BrickRed}, as would colour number~0. A list
-of all of the named colours which PyXPlot recognises is given in
-Section~\ref{sec:colour_names}. The default palette which PyXPlot uses upon
+color number~4 would map to {\tt BrickRed}, as would color number~0. A list
+of all of the named colors which PyXPlot recognises is given in
+Section~\ref{sec:color_names}. The default palette which PyXPlot uses upon
 startup may be changed by setting up a configuration file, as described in
 Chapter~\ref{ch:configuration}.
 
-\subsection{Default Settings}
+\subsection{Default settings}
 
 In addition to setting these parameters on a per-dataset basis, the {\tt
 linewidth}, {\tt pointlinewidth} and {\tt pointsize} settings can also have
@@ -136,10 +136,10 @@ set pointsize 3
 plot "datafile"
 \end{verbatim}
 In each case, the normal default values of these settings are~1. The default
-values of the {\tt colour}, {\tt linetype} and {\tt pointtype} settings depend
-upon whether the current graphic output device is set to produce colour or
+values of the {\tt color}, {\tt linetype} and {\tt pointtype} settings depend
+upon whether the current graphic output device is set to produce color or
 monochrome output (see Chapter~\ref{sec:set_terminal}). In the former case
-(colour output), the colours of each of the comma-separated datasets plotted on
+(color output), the colors of each of the comma-separated datasets plotted on
 a graph are drawn sequentially from the currently-selected palette, all lines
 are drawn as solid lines ({\tt line\-type~1}), and the symbols used to draw
 each dataset are drawn sequentially from PyXPlot's available point types. In
@@ -148,14 +148,14 @@ both the line types and point types used to draw each dataset are drawn
 sequentially from PyXPlot's available options. The following simple example
 demonstrates this:
 \begin{verbatim}
-set terminal colour
+set terminal color
 plot [][6:0] 1 with lp, 2 with lp, 3 w lp, 4 w lp, 5 w lp
 set terminal monochrome
 replot
 \end{verbatim}
 \centerline{\includegraphics[width=\textwidth]{examples/eps/ex_col_vs_mono}}
 
-\section{PyXPlot's Plot Styles}
+\section{PyXPlot's plot styles}
 \label{sec:list_of_plotstyles}
 
 This section provides an exhaustive list of all of PyXPlot's {\it plot styles},
@@ -172,7 +172,7 @@ each of the plot styles when used on two- and three-dimensional plots.
 {\tt arrows\_nohead} & $(x_1,y_1,x_2,y_2)$ & $(x_1,y_1,z_1,x_2,y_2,z_2)$ \\
 {\tt arrows\_twohead} & $(x_1,y_1,x_2,y_2)$ & $(x_1,y_1,z_1,x_2,y_2,z_2)$ \\
 {\tt boxes} & $(x,y)$ & $(x,y)$ \\
-{\tt colourmap} & $(x,y,c_1,\ldots)$ & $(x,y,c_1,\ldots)$ \\
+{\tt colormap} & $(x,y,c_1,\ldots)$ & $(x,y,c_1,\ldots)$ \\
 {\tt contourmap} & $(x,y,c_1,\ldots)$ & $(x,y,c_1,\ldots)$ \\
 {\tt dots} & $(x,y)$ & $(x,y,z)$ \\
 {\tt FilledRegion} & $(x,y)$ & $(x,y)$ \\
@@ -210,7 +210,7 @@ each of the plot styles when used on two- and three-dimensional plots.
 \label{tab:plot_style_columns}
 \end{table}
 
-\subsection{Lines and Points}
+\subsection{Lines and points}
 
 The following is a list of PyXPlot's simplest plot styles, all of which take
 two (or three) columns of input data on 2D (or 3D) plots, representing the
@@ -227,7 +227,7 @@ $x$-, $y$- (and $z$-)coordinates of the positions of each point:
 
 \example{ex:hrdiagram}{A Hertzsprung-Russell Diagram}{
 Hertzsprung-Russell (HR) Diagrams are scatter-plots of the luminosities of
-stars plotted against their colours, on which most normal stars lie
+stars plotted against their colors, on which most normal stars lie
 along a tight line called the main sequence, whilst unusual classes of stars --
 giants and dwarfs -- can be readily identified on account of their not lying
 along this main sequence. The principal difficulty in constructing accurate HR
@@ -244,7 +244,7 @@ of the catalogue can be found at
 \url{http://cdsarc.u-strasbg.fr/viz-bin/Cat?I/239}. In summary, though the data
 is arranged in a non-standard format which PyXPlot cannot read without a
 special input filter, the following Python script generates a text file with
-four columns containing the magnitudes $m$, $B-V$ colours and parallaxes $p$ of
+four columns containing the magnitudes $m$, $B-V$ colors and parallaxes $p$ of
 the stars, together with the uncertainties in the parallaxes. From these
 values, the absolute magnitudes $M$ of the stars -- a measure of their
 luminosities -- can be calculated using the expression
@@ -267,19 +267,12 @@ uncertainties in their vertical positions on the plot, we use the {\tt select}
 statement to pick out those datapoints with parallax signal-to-noise ratios of
 better than~20.
 \nlscf
-\noindent{\tt set nokey}\newline
-\noindent{\tt set size square}\newline
-\noindent{\tt set xlabel '\$B-V\$ colour'}\newline
-\noindent{\tt set ylabel 'Absolute magnitude \$M\$'}\newline
-\noindent{\tt plot [-0.4:2][14:-4] 'hr\_data.dat' $\backslash$}\newline
-\noindent{\tt \phantom{xxxxx}using \$2:(\$1+5*log10(1e2*\$3)) $\backslash$}\newline
-\noindent{\tt \phantom{xxxxx}select (\$4/\$3<0.05) $\backslash$}\newline
-\noindent{\tt \phantom{xxxxx}with dots ps 3}
+\input{examples/tex/ex_hrdiagram_1.tex}
 \nlscf
 \centerline{\includegraphics[width=10cm]{examples/eps/ex_hrdiagram}}
 }
 
-\subsection{Error Bars}
+\subsection{Error bars}
 \index{errorbars}\label{sec:errorbars}
 
 The following pair of plot styles allow datapoints to be plotted with errorbars
@@ -321,9 +314,9 @@ xyzerrorbars}, {\tt xyzerrorrange}. Though it does not make sense to use these
 on two-dimensional plots, it is not an error to do so; they expect the same
 number of columns of input data on both two- and three-dimensional plots.
 
-\subsection{Shaded Regions}
+\subsection{Shaded regions}
 
-The following plot styles allow regions of graphs to be shaded with colour:
+The following plot styles allow regions of graphs to be shaded with color:
 
 \begin{itemize}
 \item \indpst{yerrorshaded}
@@ -331,14 +324,14 @@ The following plot styles allow regions of graphs to be shaded with colour:
 \end{itemize}
 
 Both of these plot styles fill specified regions of graphs with the selected
-{\tt fillcolour} and draw a line around the boundary of the region with the
-selected {\tt colour}, {\tt linetype} and {\tt linewidth}. They differ in the
+{\tt fillcolor} and draw a line around the boundary of the region with the
+selected {\tt color}, {\tt linetype} and {\tt linewidth}. They differ in the
 format in which they expect the input data to be arranged. The
 \indpst{yerrorshaded} plot style is similar to the \indpst{yerrorrange} plot
 style, and expects three columns of data, specifying respectively the
 $x$-coordinate and the minimum and maximum extremes of the vertical errorbar on
 each \datapoint.  The region contained between the upper and lower limits of
-these error bars is filled with colour.  Note that the \datapoint s must be
+these error bars is filled with color.  Note that the \datapoint s must be
 sorted in order of either increasing or decreasing $x$-coordinate for sensible
 behaviour.
 
@@ -350,7 +343,7 @@ path is closed and filled.
 The use of these plot styles on three-dimensional graphs may produce unexpected
 results.
 
-\subsection{Barcharts and Histograms}
+\subsection{Barcharts and histograms}
 \label{sec:barcharts}
 \index{bar charts}
 
@@ -422,11 +415,11 @@ produce this image are available on the PyXPlot website at
 \label{fig:ex_barchart1}
 \end{figure}
 
-The bars may be filled using the {\tt with} \indmodt{fillcolour} modifier,
-followed by the name of a colour:
+The bars may be filled using the {\tt with} \indmodt{fillcolor} modifier,
+followed by the name of a color:
 
 \begin{verbatim}
-plot 'data.dat' with boxes fillcolour blue
+plot 'data.dat' with boxes fillcolor blue
 plot 'data.dat' with boxes fc 4
 \end{verbatim}
 
@@ -439,7 +432,7 @@ drawn in the plane $z=0$. The {\tt impulses} plot style takes an additional
 column of data on three-dimensional plots, specifying the $z$-coordinate at
 which each impulse should be drawn.
 
-\subsubsection{Stacked Bar Charts}
+\subsubsection{Stacked bar charts}
 
 If multiple \datapoint s are supplied to the \indpst{boxes} or \indpst{wboxes}
 plot styles at a common $x$-coordinate, then the bars are stacked one above
@@ -453,8 +446,8 @@ another into a stacked barchart. Consider the following \datafile:
 \end{verbatim}
 
 \noindent The second bar at $x=2$ would be placed on top of the first, spanning
-the range $2<y<5$, and having the same width as the first. If plot colours are
-being automatically selected from the palette, then a different palette colour
+the range $2<y<5$, and having the same width as the first. If plot colors are
+being automatically selected from the palette, then a different palette color
 is used to plot the upper bar.
 
 \subsection{Steps}
@@ -522,35 +515,28 @@ the four columns:
 \nlscf
 This data can then be plotted using the following PyXPlot script:
 \nlscf
-\noindent{\tt set size square}\newline
-\noindent{\tt set nokey}\newline
-\noindent{\tt set xlabel 'x'}\newline
-\noindent{\tt set ylabel 'y'}\newline
-\noindent{\tt set trange [0:2*pi]}\newline
-\noindent{\tt plot $\backslash$}\newline
-\noindent{\tt \phantom{x}'data' u 1:2:(\$1+\$3):(\$2+\$4) w arrows, $\backslash$}\newline
-\noindent{\tt \phantom{x}parametric 4*sin(t):4*cos(t) w lt 2 col black}
+\input{examples/tex/ex_vortex_1.tex}
 \nlscf
 \centerline{\includegraphics[width=10cm]{examples/eps/ex_vortex}}
 }
 
-\subsection{Colour Maps, Contour Maps and Surface Plots}
+\subsection{Color maps, contour maps and surface plots}
 
 The following plot styles differ from those above in that, regardless of
 whether a three-dimensional plot is being produced, they read in datapoints
 with $x$, $y$ and $z$ coordinates in three columns. The first two are useful
 for producing two-dimensional representations of $(x,y,z)$ surfaces using
-colours or contours to show the magnitude of $z$, while the third is useful for
+colors or contours to show the magnitude of $z$, while the third is useful for
 producing three-dimensional graphs of such surfaces:
 \begin{itemize}
-\item colourmap
+\item colormap
 \item contourmap
 \item surface
 \end{itemize}
-They are discussed in detail in Sections~\ref{sec:colourmaps},
+They are discussed in detail in Sections~\ref{sec:colormaps},
 \ref{sec:contourmaps} and \ref{sec:surfaces} respectively.
 
-\section{Labelling Datapoints}
+\section{Labelling datapoints}
 
 The {\tt label} modifier to the {\tt plot} command may be used to render text
 labels next to datapoints, as in the following examples:
@@ -573,10 +559,10 @@ Datapoints can be labelled when plotted in any of the following plot styles:
 styles), {\tt errorrange} (and similar styles), {\tt impulses}, {\tt
 linespoints}, {\tt lowerlimits}, {\tt points}, {\tt stars} and {\tt
 upperlimits}. It is not possible to label datapoints plotted in other styles.
-Labels are rendered in the same colour as the datapoints with which they are
+Labels are rendered in the same color as the datapoints with which they are
 associated.
 
-\section{The {\tt style} Keyword}
+\section{The {\tt style} keyword}
 
 At times, the string of style keywords placed after the {\tt with} modifier in
 {\tt plot} commands can grow rather unwieldy in its length. For clarity,
@@ -594,7 +580,7 @@ subsequent {\tt plot} statement, this style can be recalled as follows:
 plot sin(x) with style 2
 \end{verbatim}
 
-\section{Plotting Functions in Exotic Styles}
+\section{Plotting functions in exotic styles}
 
 The use of plot styles which take more than two columns of input data to plot
 functions requires more than one function to be supplied.  When functions are
@@ -632,7 +618,7 @@ to the spread of values of $f(x)$, but find that this itself changed depending
 upon the range of the {\tt x}-axis. In this case, the user should have used the
 {\tt parametric} plot option described in the next section.
 
-\section{Plotting Parametric Functions}
+\section{Plotting parametric functions}
 \label{sec:parametric_plotting}
 
 Parametric functions are functions expressed in forms such as
@@ -697,13 +683,7 @@ configuration; if the two chosen angular speeds for the rods have a large
 lowest common multiple, then a highly complicated pattern will result. In the
 example below, we pick a ratio of $8:15$:
 \nlscf
-\noindent{\tt r1 = 1.5}\newline
-\noindent{\tt r2 = 0.8}\newline
-\noindent{\tt set size square}\newline
-\noindent{\tt set trange[0:40*pi]}\newline
-\noindent{\tt set samples 2500}\newline
-\noindent{\tt plot parametric r1*sin(t) + r2*sin(t*(r1/r2)) : $\backslash$}\newline
-\noindent{\tt \phantom{xxxxxxxxxxxxxxxx}r1*cos(t) + r2*cos(t*(r1/r2))}
+\input{examples/tex/ex_spirograph_1.tex}
 \nlscf
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_spirograph}}
 \nlscf
@@ -738,13 +718,9 @@ which specifies that~20 different values of $u$ and~50 different values of $v$
 should be used, yielding a total of~1000 datapoints. The following example uses
 the {\tt lines} plot style to generate a sequence of cross-sections through a
 two-dimensional Gaussian surface:
-\begin{verbatim}
-set sample grid 20x20
-set urange [-1:1]
-set vrange [-1:1]
-f(u,v) = 0.4*exp(-(u**2+v**2)/0.2)
-plot parametric u:v+f(u,v) with l
-\end{verbatim}
+\vspace{2mm}
+\input{examples/tex/ex_datagrid_1.tex}
+\vspace{2mm}
 \centerline{\includegraphics[width=5cm]{examples/eps/ex_datagrid}}
 
 The ranges of values to use for $u$ and $v$ may alternatively be specified on a dataset-by-dataset
@@ -765,20 +741,7 @@ z & = & r\sin(v)  ,
 where $u$ and $v$ both run in the range $[0:2\pi]$, $R$ is the distance of the
 tube's centre from the centre of the torus, and $r$ is the radius of the tube.
 \nlscf
-\noindent{\tt R = 3}\newline
-\noindent{\tt r = 0.5}\newline
-\noindent{\tt set size square}\newline
-\noindent{\tt f(u,v) = (R+r*cos(v))*cos(u)}\newline
-\noindent{\tt g(u,v) = (R+r*cos(v))*sin(u)}\newline
-\noindent{\tt h(u,v) = r*sin(v)}\newline
-
-\noindent{\tt set urange [0:2*pi]}\newline
-\noindent{\tt set vrange [0:2*pi]}\newline
-\noindent{\tt set zrange [-2.5:2.5]}\newline
-
-\noindent{\tt set nokey}\newline
-\noindent{\tt set sample grid 50x20}\newline
-\noindent{\tt plot 3d parametric f(u,v):g(u,v):h(u,v) with surf fillcol blue}\newline
+\input{examples/tex/ex_torus_1.tex}
 \nlscf
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_torus}}	
 \nlscf
@@ -804,25 +767,13 @@ where $u$ and $v$ run in the ranges $[0:2\pi]$ and $[-\pi:\pi]$ respectively,
 and $r$ and $R$ determine the size and thickness of the knot as in an analogous
 fashion to the previous example.
 \nlscf
-\noindent{\tt R = 2}\newline
-\noindent{\tt r = 5}\newline
-\noindent{\tt set size square}\newline
-\noindent{\tt f(u,v) = cos(2*u)*cos(v) + r*cos(2*u)*(1.5+sin(3*u)/2)}\newline
-\noindent{\tt g(u,v) = sin(2*u)*cos(v) + r*sin(2*u)*(1.5+sin(3*u)/2)}\newline
-\noindent{\tt h(u,v) = sin(v)+R*cos(3*u)}\newline
-
-\noindent{\tt set urange [0:2*pi]}\newline
-\noindent{\tt set vrange [-pi:pi]}\newline
-
-\noindent{\tt set nokey}\newline
-\noindent{\tt set sample grid 150x20}\newline
-\noindent{\tt plot 3d parametric f(u,v):g(u,v):h(u,v) with surf fillcol blue}\newline
+\input{examples/tex/ex_trefoil_1.tex}
 \nlscf
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_trefoil}}
 \nlscf
 }
 
-\section{Graph Legends}
+\section{Graph legends}
 \index{keys}\index{legends}
 \label{sec:legends}
 
@@ -888,9 +839,9 @@ set keycolumns 2
 set keycolumns auto
 \end{verbatim}
 
-\section{Configuring Axes}
+\section{Configuring axes}
 
-\subsection{Adding Additional Axes}
+\subsection{Adding additional axes}
 \label{sec:multiple_axes}
 
 By default, plots have only one horizontal {\tt x}-axis and one vertical {\tt
@@ -943,7 +894,7 @@ unset x3label 'foo'
 have implicitly created one. This would need to be removed with the {\tt unset
 axis x3} command if it was not desired.
 
-\subsection{Selecting which Axes to Plot Against}
+\subsection{Selecting which axes to plot against}
 
 The axes against which data are plotted can be selected by passing the {\tt
 axes} modifier to the {\tt plot} command. By default, data is plotted against
@@ -961,7 +912,7 @@ plot f(x) axes y3x2
 Similar syntax is used when plotting three-dimensional graphs, except that
 three perpendicular axes should be specified.
 
-\subsection{Plotting Quantities with Physical Units}
+\subsection{Plotting quantities with physical units}
 \label{sec:set_axisunitstyle}
 
 When data with non-dimensionless physical units are plotted against an axis,
@@ -1004,7 +955,7 @@ indication of the units associated with axes are appended to axis labels, as
 the \indcmdt{set xformat} can be used to hard-code this information. The user
 must include this information in the axis label manually if it is needed.
 
-\subsection{Specifying the Positioning of Axes}
+\subsection{Specifying the positioning of axes}
 
 By default, the {\tt x1}-axis is placed along the bottom of graphs and the {\tt
 y1}-axis is placed up the left-hand side of graphs. On three-dimensional plots,
@@ -1025,7 +976,7 @@ Horizontal axes can be set to appear either at the {\tt top} or {\tt bottom};
 vertical axes can be set to appear either at the {\tt left} or {\tt right}; and
 $z$-axes can be set to appear either at the {\tt front} or {\tt back}.
 
-\subsection{Configuring the Appearance of Axes}
+\subsection{Configuring the appearance of axes}
 
 The \indcmdt{set axis} also accepts the following keywords alongside the
 positional keywords listed above, which specify how the axis should appear:
@@ -1071,20 +1022,20 @@ plot [0:10][0:20]
 
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_axisatzero3}}
 
-\subsection{Setting the Colour of Axes}
+\subsection{Setting the color of axes}
 
-The colours of axes\index{axes!colour}\index{colours!axes} can be controlled
-via the \indcmdts{set axescolour}.  The following example would set axes to be
+The colors of axes\index{axes!color}\index{colors!axes} can be controlled
+via the \indcmdts{set axescolor}.  The following example would set axes to be
 drawn in blue:
 
 \begin{verbatim}
-set axescolour blue
+set axescolor blue
 \end{verbatim}
 
-\noindent Any of the colour names listed in Section~\ref{sec:colour_names} can
+\noindent Any of the color names listed in Section~\ref{sec:color_names} can
 be used.
 
-\subsection{Specifying where Ticks should Appear along Axes}
+\subsection{Specifying where ticks should appear along axes}
 
 By default, PyXPlot places a series of tick marks at significant points along
 each axis, with the most significant points being labelled.  Labelled tick
@@ -1150,24 +1101,12 @@ at $x=1/\pi, 2/\pi$, etc., pointing outwards from the plot.  The left-hand {\tt
 y}-axis has tick marks placed automatically whereas the {\tt y2}-axis has no
 tics at all.
 \nlscf
-\noindent{\tt set log x1x2}\newline
-\noindent{\tt set xrange [0.05:0.5]}\newline
-\noindent{\tt set axis x2 top linked x}\newline
-\noindent{\tt set xtics 0.05, 2, 0.4}\newline
-\noindent{\tt set x2tics border $\backslash$}\newline
-\noindent{\tt \phantom{xxxxx}("\$$\backslash$frac\{1\}\{$\backslash$pi\}\$" 1/pi,      "\$$\backslash$frac\{1\}\{2$\backslash$pi\}\$" 1/(2*pi), $\backslash$}\newline
-\noindent{\tt \phantom{xxxxxx}"\$$\backslash$frac\{1\}\{3$\backslash$pi\}\$" 1/(3*pi), "\$$\backslash$frac\{1\}\{4$\backslash$pi\}\$" 1/(4*pi), $\backslash$}\newline
-\noindent{\tt \phantom{xxxxxx}"\$$\backslash$frac\{1\}\{5$\backslash$pi\}\$" 1/(5*pi), "\$$\backslash$frac\{1\}\{6$\backslash$pi\}\$" 1/(6*pi))}\newline
-\noindent{\tt set grid x2}\newline
-\noindent{\tt set nokey}\newline
-\noindent{\tt set xlabel '\$x\$'}\newline
-\noindent{\tt set ylabel '\$$\backslash$exp(x)$\backslash$sin(1/x)\$'}\newline
-\noindent{\tt plot exp(x)*sin(1/x), 0}
+\input{examples/tex/ex_axistics_1.tex}
 \nlscf
 \centerline{\includegraphics[width=9cm]{examples/eps/ex_axistics}}
 }
 
-\subsection{Configuring how Tick Marks are Labelled}
+\subsection{Configuring how tick marks are labelled}
 \label{sec:set_xformat}
 
 By default, the major tick marks along axes are labelled with representations
@@ -1244,7 +1183,7 @@ set xformat "\%s"\%time\_string(x)
 set xformat "\%d/\%02d/\%d"\%(time\_day(x), $\backslash$\newline time\_monthnum(x),time\_daymonth(x))
 \end{dodo}
 
-\subsubsection{Changing the Slant of Axis Labels}
+\subsubsection{Changing the slant of axis labels}
 
 The \indcmdt{set xformat} and its companions may also be followed by keywords
 which control the angle at which tick labels are drawn. By default, all tick
@@ -1268,7 +1207,7 @@ set unit angle nodimensionless
 set xlabel "I'm upside down" rotate unit(0.5*revolution)
 \end{verbatim}
 
-\subsubsection{Removing Axis Tick Labels}
+\subsubsection{Removing axis tick labels}
 
 Axes may be set to have no textual labels associated with the ticks along them
 using the command:
@@ -1279,7 +1218,7 @@ This is particularly useful when compiling galleries of plots using linked axes
 (see the next section) and the multiplot environment (see
 Chapter~\ref{ch:vector_graphics}).
 
-\subsection{Linked Axes}
+\subsection{Linked axes}
 \label{sec:linked_axes}
 
 Often it may be desired that multiple axes on a graph share a common range, or
@@ -1338,29 +1277,7 @@ Bv(nu,T)}. We use the axis linkage commands listed as an example in the text of
 Section~\ref{sec:linked_axes} to produce three parallel horizontal axes showing
 wavelength of light, frequency of light and photon energy.
 \nlscf
-\noindent{\tt set numeric display latex}\newline
-\noindent{\tt set unit angle nodimensionless}\newline
-\noindent{\tt set log x y}\newline
-\noindent{\tt set key bottom right}\newline
-\noindent{\tt set ylabel "Flux density"   ; set unit preferred W/Hz/m**2/sterad}\newline
-\noindent{\tt set x1label "Wavelength"}\newline
-\noindent{\tt set x2label "Frequency"     ; set unit of frequency Hz}\newline
-\noindent{\tt set x3label "Photon Energy" ; set unit of energy eV}\newline
-\noindent{\tt set axis x2 linked x1 using phy\_c/x}\newline
-\noindent{\tt set axis x3 linked x2 using phy\_h*x}\newline
-\noindent{\tt set xtics unit(0.1*um),10}\newline
-\noindent{\tt set x2tics 1e12*unit(Hz),10}\newline
-\noindent{\tt set x3tics 0.01*unit(eV),10}\newline
-\noindent{\tt set xrange [80*unit(nm):unit(mm)]}\newline
-\noindent{\tt set yrange [1e-20*unit(W/Hz/m**2/sterad):]}\newline
-\\
-\noindent{\tt bb(wlen,T) = Bv(phy\_c/wlen,T)}\newline
-\\
-\noindent{\tt plot bb(x,  30) title "\$T=  30\$$\backslash$,K", $\backslash$}\newline
-\noindent{\tt \phantom{xxxxx}bb(x, 100) title "\$T= 100\$$\backslash$,K", $\backslash$}\newline
-\noindent{\tt \phantom{xxxxx}bb(x, 300) title "\$T= 300\$$\backslash$,K", $\backslash$}\newline
-\noindent{\tt \phantom{xxxxx}bb(x,1000) title "\$T=1000\$$\backslash$,K", $\backslash$}\newline
-\noindent{\tt \phantom{xxxxx}bb(x,3000) title "\$T=3000\$$\backslash$,K"}
+\input{examples/tex/ex_multiaxes_1.tex}
 \nlscf
 \centerline{\includegraphics[width=10cm]{examples/eps/ex_multiaxes}}
 }
@@ -1377,17 +1294,7 @@ $\Omega_\mathrm{M}$ and $\Omega_\Uplambda$. Because the temperature of the CMBR
 is most easily expressed as a function of redshift as $T=2.73\,\mathrm{K}/(1+z)$,
 we plot this function against axis {\tt x2}.
 \nlscf
-\noindent{\tt h0 = 70}\newline
-\noindent{\tt omega\_m = 0.27}\newline
-\noindent{\tt omega\_l = 0.73}\newline
-\noindent{\tt age = ast\_Lcdm\_age(h0,omega\_m,omega\_l)}\newline
-\noindent{\tt set xrange [0.01*age:0.99*age]}\newline
-\noindent{\tt set unit of time Gyr}\newline
-\noindent{\tt set axis x2 linked x using ast\_Lcdm\_z(age-x,h0,omega\_m,omega\_l)}\newline
-\noindent{\tt set xlabel "Time since Big Bang \$t\$"}\newline
-\noindent{\tt set ylabel "CMBR Temperature \$T\$"}\newline
-\noindent{\tt set x2label "Redshift \$z\$"}\newline
-\noindent{\tt plot unit(2.73*K)*(1+x) axes x2y1}
+\input{examples/tex/ex_cmbrtemp_1.tex}
 \nlscf
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_cmbrtemp}}
 }
@@ -1431,21 +1338,21 @@ axes via:
 set nogrid x2x3
 \end{verbatim}
 
-\label{sec:set_colours}
-The colours of gridlines\index{grid!colour}\index{colours!grid} can be
-controlled via the \indcmdts{set gridmajcolour} and \indcmdts{set
-gridmincolour} commands, which control the gridlines emanating from major and
+\label{sec:set_colors}
+The colors of gridlines\index{grid!color}\index{colors!grid} can be
+controlled via the \indcmdts{set gridmajcolor} and \indcmdts{set
+gridmincolor} commands, which control the gridlines emanating from major and
 minor axis ticks respectively. The following example would set the minor grid
 lines on a graph to be drawn in blue:
 
 \begin{verbatim}
-set gridmincolour blue
+set gridmincolor blue
 \end{verbatim}
 
-\noindent Any of the colour names listed in Section~\ref{sec:colour_names} can
+\noindent Any of the color names listed in Section~\ref{sec:color_names} can
 be used.
 
-\section{Clipping Behaviour}
+\section{Clipping behaviour}
 
 The treatment of datapoints close to the edges of plots may be specified using
 the \indcmdt{set clip}, which provides two options. Either datapoints close to
@@ -1453,7 +1360,7 @@ the axes can be clipped and not allowed to overrun the axes -- specified by
 {\tt set clip} -- or such datapoints may be allowed to extend over the lines of
 the axes -- specified by {\tt set noclip} and the default behaviour.
 
-\section{Labelling Graphs}
+\section{Labelling graphs}
 
 The {\tt set arrow}\indcmd{set arrow} and \indcmdt{set label}s allow arrows and
 text labels to be added to graphs to label significant points or to add simple
@@ -1497,7 +1404,7 @@ arrow heads, or with two arrow heads.  \indkeyt{twoway} is an alias for
 set arrow 1 from 0,0 to 1,1 with twoway
 \end{verbatim}
 
-\noindent Line types and colours can also be specified after the keyword {\tt
+\noindent Line types and colors can also be specified after the keyword {\tt
 with}, as in the example:
 
 \begin{verbatim}
@@ -1528,7 +1435,7 @@ set arrow 1 from first  x0, first  y0 \
             with nohead
 \end{verbatim}
 
-\subsection{Text Labels}
+\subsection{Text labels}
 
 Text labels may be placed on plots using the \indcmdt{set label}. As with all
 textual labels in PyXPlot, these are rendered in \LaTeX:
@@ -1556,11 +1463,11 @@ example, the following would produce upward-running text:
 set label 1 'Hello World' at axis3 3.0, axis4 2.7 rotate 90
 \end{verbatim}
 
-A colour can also be specified, if desired, using the {\tt with colour}
+A color can also be specified, if desired, using the {\tt with color}
 modifier.  For example, the following would produce a green label at the origin:
 
 \begin{verbatim}
-set label 2 'This label is green' at 0, 0 with colour green
+set label 2 'This label is green' at 0, 0 with color green
 \end{verbatim}
 
 \index{fontsize}\index{text!size} The size of the text in such labels can be set
@@ -1570,18 +1477,18 @@ supplied should be a multiplicative factor greater than zero; a
 value of~{\tt 2} would cause text to be rendered at twice its normal size, and
 a value of~{\tt 0.5} would cause text to be rendered at half its normal size.
 
-\index{text!colour}\index{colours!text} The \indcmdt{set textcolour} can be
-used to globally set the colour of all text output, and applies to all of the
+\index{text!color}\index{colors!text} The \indcmdt{set textcolor} can be
+used to globally set the color of all text output, and applies to all of the
 text that the {\tt set fontsize} command does. It is especially useful when
 producing plots to be embedded in presentation slideshows, where bright text on
 a dark background may be desired. It should be followed either by an integer,
-to set a colour from the present palette, or by a colour name. A list of the
-recognised colour names can be found in Section~\ref{sec:colour_names}.  For
+to set a color from the present palette, or by a color name. A list of the
+recognised color names can be found in Section~\ref{sec:color_names}.  For
 example:
 
 \begin{verbatim}
-set textcolour 2
-set textcolour blue
+set textcolor 2
+set textcolor blue
 \end{verbatim}
 
 \index{text!alignment}\index{alignment!text}By default, each label's specified
@@ -1611,81 +1518,11 @@ m}$=${\tt n}$+1$, $\beta$ for {\tt m}$=${\tt n}$+2$, and so forth.
 \nlnp
 In the following example, we produce a diagram of the lines in the first four
 series, drawing the first~20 lines within each. At the bottom of the diagram,
-we overlay indications of the wavelengths of ten colour filters commonly used
+we overlay indications of the wavelengths of ten color filters commonly used
 by astronomers (data taken from Binney \& Merrifield, {\it Galactic Astronomy},
 Princeton, 1998).
 \nlscf
-{\footnotesize
-\noindent{\tt set numeric display latex}\newline
-\noindent{\tt set width 20}\newline
-\noindent{\tt set size ratio 0.4}\newline
-\noindent{\tt set numerics sf 4}\newline
-\noindent{\tt set log x}\newline
-\noindent{\tt set x1label "Wavelength"}\newline
-\noindent{\tt set x2label "Frequency"     ; set unit of frequency Hz}\newline
-\noindent{\tt set x3label "Photon Energy" ; set unit of energy eV}\newline
-\noindent{\tt set axis x2 linked x1 using phy\_c/x}\newline
-\noindent{\tt set axis x3 linked x2 using phy\_h*x}\newline
-\noindent{\tt set noytics ; set nomytics}\newline
-}\\{\footnotesize
-\noindent{\tt \# Draw lines of first four series of hydrogen lines}\newline
-\noindent{\tt an=2}\newline
-\noindent{\tt n=1}\newline
-\noindent{\tt foreach SeriesName in ("Ly","Ba","Pa","Br")}\newline
-\noindent{\tt \phantom{x}\{}\newline
-\noindent{\tt \phantom{xx}for m=n+1 to n+21}\newline
-\noindent{\tt \phantom{xxx}\{}\newline
-\noindent{\tt \phantom{xxxx}wl = 1/(phy\_Ry*(1/n**2-1/m**2))}\newline
-\noindent{\tt \phantom{xxxx}set arrow an from wl,0.3 to wl,0.6 with nohead col n}\newline
-\noindent{\tt \phantom{xxxx}if (m-n==1) \{ ; GreekLetter = "$\backslash$$\backslash$alpha" ; \}}\newline
-\noindent{\tt \phantom{xxxx}if (m-n==2) \{ ; GreekLetter = "$\backslash$$\backslash$beta"  ; \}}\newline
-\noindent{\tt \phantom{xxxx}if (m-n==3) \{ ; GreekLetter = "$\backslash$$\backslash$gamma" ; \}}\newline
-\noindent{\tt \phantom{xxxx}if (m-n$<$4)}\newline
-\noindent{\tt \phantom{xxxxx}\{}\newline
-\noindent{\tt \phantom{xxxxxx}set label an "$\backslash$parbox\{5cm\}\{$\backslash$footnotesize$\backslash$center\{$\backslash$}\newline
-\noindent{\tt \phantom{xxxxxxxx}\%s-\$\%s\$$\backslash$$\backslash$newline \$\%d$\backslash$to\%d\$$\backslash$$\backslash$newline \%s$\backslash$$\backslash$newline\}\}" $\backslash$}\newline
-\noindent{\tt \phantom{xxxxxxxx}\%(SeriesName,GreekLetter,n,m,wl) at wl,0.55+0.2*(m-n) $\backslash$}\newline
-\noindent{\tt \phantom{xxxxxxxx}hal centre val centre}\newline
-\noindent{\tt \phantom{xxxxx}\}}\newline
-\noindent{\tt \phantom{xxxx}an = an+1}\newline
-\noindent{\tt \phantom{xxx}\}}\newline
-\noindent{\tt \phantom{xx}n=n+1}\newline
-\noindent{\tt \phantom{x}\}}\newline
-}\\{\footnotesize
-\noindent{\tt \# Label astronomical photometric colours}\newline
-\noindent{\tt foreach datum i,name,wl\_c,wl\_w in "--" using $\backslash$}\newline
-\noindent{\tt \phantom{xxxx}1:"\%s"\%(\$2):(\$3*unit(nm)):(\$4*unit(nm))}\newline
-\noindent{\tt \phantom{x}\{}\newline
-\noindent{\tt \phantom{xx}arry = 0.12+0.1*(i\%2) \# Vertical positions for arrows}\newline
-\noindent{\tt \phantom{xx}laby = 0.07+0.1*(i\%2) \# Vertical positions for labels}\newline
-\noindent{\tt \phantom{xx}x0 = (wl\_c-wl\_w/2) \# Shortward end of passband}\newline
-\noindent{\tt \phantom{xx}x1 =  wl\_c         \# Centre of passband}\newline
-\noindent{\tt \phantom{xx}x2 = (wl\_c+wl\_w/2) \# Longward end of passband}\newline
-\noindent{\tt \phantom{xx}set arrow an from x0,arry to x2,arry with nohead}\newline
-\noindent{\tt \phantom{xx}set label an name at x1,laby hal centre val centre}\newline
-\noindent{\tt \phantom{xx}an = an+1}\newline
-\noindent{\tt \phantom{x}\}}\newline
-\noindent{\tt \phantom{x}1 U  365   66}\newline
-\noindent{\tt \phantom{x}2 B  445   94}\newline
-\noindent{\tt \phantom{x}3 V  551   88}\newline
-\noindent{\tt \phantom{x}4 R  658  138}\newline
-\noindent{\tt \phantom{x}5 I  806  149}\newline
-\noindent{\tt \phantom{x}6 J 1220  213}\newline
-\noindent{\tt \phantom{x}7 H 1630  307}\newline
-\noindent{\tt \phantom{x}8 K 2190  390}\newline
-\noindent{\tt \phantom{x}9 L 3450  472}\newline
-\noindent{\tt 10 M 4750  460}\newline
-\noindent{\tt END}\newline
-}\\{\footnotesize
-\noindent{\tt \# Draw a marker for the Lyman limit}\newline
-\noindent{\tt ll = 91.1267*unit(nm)}\newline
-\noindent{\tt set arrow 1 from ll,0.12 to ll,0.22}\newline
-\noindent{\tt set label 1 "Lyman Limit: \%s"\%(ll) at 95*unit(nm),0.17 $\backslash$}\newline
-\noindent{\tt \phantom{xxxxx}hal left val centre}\newline
-}\\{\footnotesize
-\noindent{\tt \# Finally produce plot}\newline
-\noindent{\tt plot [80*unit(nm):5500*unit(nm)][0:1.25]}\newline
-}
+\input{examples/tex/ex_hlines_1.tex}
 \nlscf
 \begin{center}
 \includegraphics[width=11cm]{examples/eps/ex_hlines}
@@ -1700,76 +1537,38 @@ outline obtained from \protect\url{http://www.maproom.psu.edu/dcw/}. We use the
 ex\_\-map\_\-1.dat.gz} and {\tt ex\_\-map\_\-2.dat} can be found in the PyXPlot
 installation tarball in the directory {\tt doc/\-examples/}.
 \nlscf
-{\footnotesize
-\noindent{\tt set width 20}\newline
-}\\{\footnotesize
-\noindent{\tt \# We want a plot without axes or key}\newline
-\noindent{\tt set nokey}\newline
-\noindent{\tt set axis x invisible}\newline
-\noindent{\tt set axis y invisible}\newline
-}\\{\footnotesize
-\noindent{\tt \# Labels for the states}\newline
-\noindent{\tt set label 1 '\{$\backslash$large $\backslash$sf $\backslash$slshape Western Australia\}' 117, -28}\newline
-\noindent{\tt set label 2 '\{$\backslash$large $\backslash$sf $\backslash$slshape South Australia\}' 130, -29.5}\newline
-\noindent{\tt set label 3 '\{$\backslash$large $\backslash$sf $\backslash$slshape Northern Territory\}' 129.5, -20.5}\newline
-\noindent{\tt set label 4 '\{$\backslash$large $\backslash$sf $\backslash$slshape Queensland\}' 141,-24}\newline
-\noindent{\tt set label 5 '\{$\backslash$large $\backslash$sf $\backslash$slshape New South Wales\}' 142,-32.5}\newline
-\noindent{\tt set label 6 '\{$\backslash$large $\backslash$sf $\backslash$slshape Victoria\}' 139,-41}\newline
-\noindent{\tt set arrow 6 from 141,-40 to 142, -37 with nohead}\newline
-\noindent{\tt set label 7 '\{$\backslash$large $\backslash$sf $\backslash$slshape Tasmania\}' 149,-42}\newline
-\noindent{\tt set arrow 7 from 149, -41.5 to 146.5, -41.75 with nohead}\newline
-\noindent{\tt set label 8 '\{$\backslash$large $\backslash$sf $\backslash$slshape Capital Territory\}' 151,-37}\newline
-\noindent{\tt set arrow 8 from 151, -36.25 to 149, -36 with nohead}\newline
-}\\{\footnotesize
-\noindent{\tt \# Labels for the cities}\newline
-\noindent{\tt set label 10 '\{$\backslash$sf Perth\}' 116.5, -32.4}\newline
-\noindent{\tt set label 11 '\{$\backslash$sf Adelaide\}' 136, -38}\newline
-\noindent{\tt set arrow 11 from 137.5,-37.2 to 138.601, -34.929}\newline
-\noindent{\tt set label 12 '\{$\backslash$sf Darwin\}' 131, -13.5}\newline
-\noindent{\tt set label 13 '\{$\backslash$sf Brisbane\}' 149, -27.5}\newline
-\noindent{\tt set label 14 '\{$\backslash$sf Sydney\}' 151.5, -34.5}\newline
-\noindent{\tt set label 15 '\{$\backslash$sf Melbourne\}' 143, -37.3}\newline
-\noindent{\tt set label 16 '\{$\backslash$sf Hobart\}' 147.5, -44.25}\newline
-\noindent{\tt set label 17 '\{$\backslash$sf Canberra\}' 145, -35.25}\newline
-}\\{\footnotesize
-\noindent{\tt \# A big label saying "Australia"}\newline
-\noindent{\tt set label 20 '\{$\backslash$Huge $\backslash$sf $\backslash$slshape Australia\}' 117,-42}\newline
-}\\{\footnotesize
-\noindent{\tt \# Plot the coastline and cities}\newline
-\noindent{\tt plot [][-45:] 'ex\_map\_1.dat.gz' every ::1 with lines, $\backslash$}\newline
-\noindent{\tt \phantom{xxxxx}'ex\_map\_2.dat' with points pointtype 10 pointsize 2}
-}
+\input{examples/tex/ex_map_1.tex}
 \nlscf
 \begin{center}
 \includegraphics[width=\textwidth]{examples/eps/ex_map}
 \end{center}
 }
 
-\section{Colour Maps}
-\label{sec:colourmaps}
+\section{Color maps}
+\label{sec:colormaps}
 
-Colour maps provide a graphical means of producing two-dimensional
+Color maps provide a graphical means of producing two-dimensional
 representations of $(x,y,z)$ surfaces, or equivalently of producing maps of the
 values $z(x,y)$ of functions of two variables. Each point in the $(x,y)$ plane
-is assigned a colour which indicates the value $z$ associated with that point.
+is assigned a color which indicates the value $z$ associated with that point.
 In the following Section, we refer to the third coordinate as $c$ rather than
 $z$, to distinguish it from the third axes of three-dimensional
-plots\footnote{When colour maps are plotted on three-dimensional graphs, they
+plots\footnote{When color maps are plotted on three-dimensional graphs, they
 appear in a flat plane on one of the back faces of the plot selected using the
 {\tt axes} modifier to the {\tt plot} command, and the {\tt c}-axes associated
 with each are entirely independent of the plot's {\tt z}-axis.}.
 
-The default mapping used between values of $c$ and colour is a greyscale
-mapping, such that the smallest value of $c$ in any given colour map
+The default mapping used between values of $c$ and color is a greyscale
+mapping, such that the smallest value of $c$ in any given color map
 corresponds to black, and largest value corresponds to white. More generally,
 however, the user can supply any algebraic expressions for the RGB, HSB or CMYK
-components of the colours to be used, and even specify a mask such that some
-parts of the colour map appear transparent. Moreover, these custom colour
+components of the colors to be used, and even specify a mask such that some
+parts of the color map appear transparent. Moreover, these custom color
 mappings need not be one-parameter mappings depending only upon a single
 variable $c$, but can depend on up to four quantities $c_1$, $c_2$, $c_3$ and
 $c_4$.
 
-PyXPlot's \indpst{colourmap} plot style takes between three and seven columns
+PyXPlot's \indpst{colormap} plot style takes between three and seven columns
 of data, which may be supplied either from one or more function(s), or from a
 \datafile. If data is read from a \datafile, then the first two columns of
 output data are assumed to contain the respective positions of each datapoint
@@ -1780,19 +1579,14 @@ to be functions of both $x$ and $y$, and are sampled at a grid of points in the
 $(x,y)$ plane; the first supplied function returns the value $c_1$, and may be
 followed by up to three further optional functions.
 
-In the following simple example, a colour map of the complex argument of the
+In the following simple example, a color map of the complex argument of the
 Riemann zeta function $\zeta(z)$ is produced, taking the $(x,y)$ plane to be an
 Argand plane in which each point corresponds to a value of $z$, with $x$ being
 the real axis, and $y$ being the imaginary axis:
 
-\noindent{\tt set numerics complex}\newline
-\noindent{\tt set nokey}\newline
-\noindent{\tt set size 8 square}\newline
-\noindent{\tt set samples grid 400x400}\newline
-\noindent{\tt set c1range[-pi:pi]}\newline
-\noindent{\tt set c1format "\$\%s$\backslash$pi\$"\%(c/pi)}\newline
-\noindent{\tt plot [-20:6][-13:13] arg(zeta(x+i*y)) with colourmap}
-
+\vspace{2mm}
+\input{examples/tex/ex_zeta_arg_1.tex}
+\vspace{2mm}
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_zeta_arg}}
 
 The command \indcmdt{set samples grid} sets the dimensions of the grid of
@@ -1800,64 +1594,57 @@ samples -- or pixels -- taken of the input functions. If either value is
 replaced with an asterisk ({\tt *}) then the current number of samples set in
 the {\tt set samples} command is substituted.
 
-If a \datafile\ is supplied to the {\tt colourmap} plot style, then the
+If a \datafile\ is supplied to the {\tt colormap} plot style, then the
 datapoints need not lie on the specified regular grid, but are first re-sampled
 onto this grid using the interpolation method specified using the \indcmdt{set
 samples interpolate} (see Section~\ref{sec:spline_command}). Three methods are
 available. {\tt nearest\-Neigh\-bor} uses the values of $c_1$\ldots$c_4$
-associated with the datapoint closest to each grid point, producing colour maps
+associated with the datapoint closest to each grid point, producing color maps
 which look like Voronoi diagrams. {\tt inverse\-Square} interpolation returns a
 weighted average of the supplied \datapoint s, using the inverse squares of
 their distances from each grid point as weights. {\tt monag\-han\-Lattan\-zio}
 interpolation uses the weighting function of Monaghan \& Lattanzio (1985) which
 is described further in Section~\ref{sec:spline_command}).
 
-In the following example, a colour map of a quadrupole is produced using four
+In the following example, a color map of a quadrupole is produced using four
 input datapoints:
 
-\noindent{\tt set nokey}\newline
-\noindent{\tt set size 8 square}\newline
-\noindent{\tt set samples grid 200x200 interpolate InverseSquare}\newline
-\noindent{\tt plot [-4:4][-4:4] '--' with colourmap}\newline
-\noindent{\tt -1 -1  1}\newline
-\noindent{\tt -1  1 -1}\newline
-\noindent{\tt \phantom{x}1 -1 -1}\newline
-\noindent{\tt \phantom{x}1  1  1}\newline
-\noindent{\tt END}
-
+\vspace{2mm}
+\input{examples/tex/ex_quadrupole_1.tex}
+\vspace{2mm}
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_quadrupole}}
 
-\subsection{Custom Colour Mappings}
+\subsection{Custom color mappings}
 
-The colour mapping used by the {\tt colourmap} plot style is set using the
-\indcmdt{set colourmap}, which takes algebraic expressions for the RGB, HSB or
-CMYK components of the colour to use as a function of the variables {\tt c1},
-{\tt c2}, {\tt c3} and {\tt c4}. As elsewhere in PyXPlot, these colour
+The color mapping used by the {\tt colormap} plot style is set using the
+\indcmdt{set colormap}, which takes algebraic expressions for the RGB, HSB or
+CMYK components of the color to use as a function of the variables {\tt c1},
+{\tt c2}, {\tt c3} and {\tt c4}. As elsewhere in PyXPlot, these color
 components should take values in the range zero to one; values outside of this
-range are clipped.  The syntax of the \indcmdt{set colourmap} is as follows:
+range are clipped.  The syntax of the \indcmdt{set colormap} is as follows:
 
 \begin{verbatim}
-set colourmap ( rgb<r>:<g>:<b> |
+set colormap ( rgb<r>:<g>:<b> |
                 hsb<h>:<s>:<b> |
                 cmyk<c>:<m>:<y>:<k> )
               [ mask <expr> ]
 \end{verbatim}
 
 \noindent If the optional mask expression is supplied, then any areas in a
-colour map where this expression evaluates to zero (i.e.\ false) are made
-transparent. The following colour mapping, which is the default, produces a
-greyscale colour mapping of the third column of data supplied to the
-\indpst{colourmap} plot style; further columns of data, if supplied, are not
+color map where this expression evaluates to zero (i.e.\ false) are made
+transparent. The following color mapping, which is the default, produces a
+greyscale color mapping of the third column of data supplied to the
+\indpst{colormap} plot style; further columns of data, if supplied, are not
 used:
 
 \begin{verbatim}
 set c1range [*:*] renormalise noreverse
-set colourmap rgb(c1):(c1):(c1)
+set colormap rgb(c1):(c1):(c1)
 \end{verbatim}
 
 The \indcmdt{set c<n>range} command specifies how the values of $c_n$ are
 processed before being used in the expressions supplied to the \indcmdt{set
-colourmap}. It has the following syntax:
+colormap}. It has the following syntax:
 
 \begin{verbatim}
 set c<n>range [ <range> ]
@@ -1867,7 +1654,7 @@ set c<n>range [ <range> ]
 
 \noindent If the {\tt renor\-malise} option is specified, then the values of
 $c_n$ at each point in the data grid are first scaled into the range zero to
-one. This is generally useful, since the colour components themselves must be
+one. This is generally useful, since the color components themselves must be
 in this range; in the example given above, the lowest value of $c_1$
 corresponds to black (i.e.\ brightness 0), and the highest value corresponds to
 white (i.e.\ brightness 1). If an explicit range is specified to the {\tt set
@@ -1883,31 +1670,24 @@ set logscale c1
 set linearscale c1
 \end{verbatim}
 
-In the example below, a colour map of the function $f(z)=3x^2/(x^3+1)$ is made,
+In the example below, a color map of the function $f(z)=3x^2/(x^3+1)$ is made,
 using hue to represent the magnitude of $f(z)$ and saturation to represent the
 complex argument of $f(z)$:
 
-\noindent{\tt set numerics complex}\newline
-\noindent{\tt set sample grid 400x400}\newline
-\noindent{\tt set nogrid}\newline
-\noindent{\tt set size square}\newline
-\noindent{\tt set key below}\newline
-\noindent{\tt set c1range[0:2]}\newline
-\noindent{\tt set colmap hsb(c1):(c2*0.7+0.3):1}\newline
-\noindent{\tt f(x) = 3*x**2 / (x**3+1)}\newline
-\noindent{\tt plot [-3:3][-3:3] abs(f(x+i*y)):arg(f(x+i*y)) with colourmap}
-
+\vspace{2mm}
+\input{examples/tex/ex_branch_cuts_1.tex}
+\vspace{2mm}
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_branch_cuts}}
 
-\subsection{Colour Scale Bars}
+\subsection{Color scale bars}
 
-By default, plots with colour maps with single-parameter colour mappings are
-accompanied by colour scale bars, which appear by default on the right-hand
+By default, plots with color maps with single-parameter color mappings are
+accompanied by color scale bars, which appear by default on the right-hand
 side of the plot. Such scale bars may be configured using the \indcmdt{set
-colourkey}. Issuing the command
+colorkey}. Issuing the command
 
 \begin{verbatim}
-set colourkey
+set colorkey
 \end{verbatim}
 
 \noindent by itself causes such a scale to be drawn on graphs in the default
@@ -1915,21 +1695,21 @@ position, usually along the right-hand edge of the graphs. The converse action
 is achieved by:
 
 \begin{verbatim}
-set nocolourkey
+set nocolorkey
 \end{verbatim}
 
 \noindent The command
 
 \begin{verbatim}
-unset colourkey
+unset colorkey
 \end{verbatim}
 
 \noindent causes PyXPlot to revert to its default behaviour, as specified in a
 configuration file, if present. A position for the key may optionally be
-specified after the {\tt set colourkey} command, as in the example:
+specified after the {\tt set colorkey} command, as in the example:
 
 \begin{verbatim}
-set colourkey bottom
+set colorkey bottom
 \end{verbatim}
 
 Recognised positions are {\tt top}, {\tt bottom}, {\tt left} and {\tt right}.
@@ -1952,7 +1732,7 @@ subject to the starting condition $z_0=0$, remains bounded.
 \nlnp
 The map of this set of points has become a widely-used image of the power of
 chaos theory to produce complicated structure out of simple algorithms. To
-produce a more pleasing image, points in the complex plane are often coloured
+produce a more pleasing image, points in the complex plane are often colored
 differently, depending upon how many iterations $n$ of the above series are
 required for $|z_n|$ to exceed~2. This is the point of no return, beyond which
 it can be shown that $|z_{n+1}|>|z_n|$ and that divergence is guaranteed. In
@@ -1964,24 +1744,17 @@ built-in mathematical function {\tt
 fractal\_\-mandel\-brot(z,m)}\indfun{fractal\_mandelbrot($z$,$m$)}, which
 returns an integer in the range $0\leq i\leq m$.
 \nlscf
-\noindent{\tt set numerics complex}\newline
-\noindent{\tt set sample grid 500x500}\newline
-\noindent{\tt set size square}\newline
-\noindent{\tt set nokey}\newline
-\noindent{\tt set log c1}\newline
-\noindent{\tt plot [-2:2][-2:2] fractal\_mandelbrot(x+i*y,70)+1 with colourmap}
-\nlscf
-The resulting image is shown below:
+\input{examples/tex/ex_mandelbrot_1.tex}
 \nlscf
 \begin{center}
 \includegraphics[width=8cm]{examples/eps/ex_mandelbrot}
 \end{center}
 }
 
-\section{Contour Maps}
+\section{Contour maps}
 \label{sec:contourmaps}
 
-Contour maps are similar to colour maps, but instead of colouring the whole
+Contour maps are similar to color maps, but instead of coloring the whole
 $(x,y)$ plane, lines are drawn to indicate paths of constant $c(x,y)$. The
 number of contours drawn, and the values $c$ that they correspond to, is set
 using the \indcmdt{set contour}, which has the following syntax:
@@ -2022,15 +1795,11 @@ If the option {\tt label} is specified to the \indcmdt{set contour}, then each
 contour is labelled with the value of $c$ that it corresponds to. If the option
 {\tt nolabel} is specified, then the contours are left unlabelled.
 
-In the following example, a contour map is overlaid on top of a colour map of
+In the following example, a contour map is overlaid on top of a color map of
 the function $x^3/20+y^2$:
 
 \vspace{2mm}
-\noindent{\tt set nokey}\newline
-\noindent{\tt set size 8 square}\newline
-\noindent{\tt plot [-10:10][-10:10] x**3/20+y**2 with colourmap, $\backslash$}\newline
-\noindent{\tt \phantom{xxxxxxxxxxxxxxxxxxxxxx}x**3/20+y**2 with contours col green lw 2 lt 1}
-
+\input{examples/tex/ex_contourmap_1.tex}
 \vspace{2mm}
 \centerline{\includegraphics[width=10cm]{examples/eps/ex_contourmap}}
 \vspace{2mm}
@@ -2050,7 +1819,7 @@ plot 'datafile' with contourmap linetype \$5
 plot 'datafile' with contourmap linetype c1/10
 \end{dodo}
 
-\section{Three-Dimensional Plotting}
+\section{Three-dimensional plotting}
 \label{sec:threedim}
 
 Three-dimensional graphs may be produced by placing the modifier {\tt 3d}
@@ -2058,11 +1827,7 @@ immediately after the {\tt plot} command, as demonstrated by the following
 simple example which draws a helix:
 
 \vspace{2mm}
-\noindent{\tt set key below}\newline
-\noindent{\tt set size 8 ratio 0.6 zratio 0.6}\newline
-\noindent{\tt set grid}\newline
-\noindent{\tt plot 3d sin(x):cos(x) with lw 3 col hsb(x/20+0.5):0.9:0.8}
-
+\input{examples/tex/ex_3d_helix_1.tex}
 \vspace{2mm}
 \centerline{\includegraphics[width=10cm]{examples/eps/ex_3d_helix}}
 \vspace{2mm}
@@ -2102,10 +1867,10 @@ The \indcmdt{replot} command may be used to add additional datasets to
 three-dimensional plots in an entirely analogous fashion to two-dimensional
 plots.
 
-\subsection{Surface Plotting}
+\subsection{Surface plotting}
 \label{sec:surfaces}
 
-The {\tt surface} plot style is similar to the {\tt colourmap} and {\tt
+The {\tt surface} plot style is similar to the {\tt colormap} and {\tt
 contourmap} plot styles, but produces maps of the values $z(x,y)$ of functions
 of two variables using three-dimensional surfaces. The surface is displayed as
 a grid of four-sided elements, whose number may be specified using the
@@ -2114,23 +1879,13 @@ a grid of four-sided elements, whose number may be specified using the
 set samples grid 40x40
 \end{verbatim}
 If data is supplied from a \datafile, then it is first re-sampled onto a regular
-grid using one of the methods described in Section~\ref{sec:colourmaps}.
+grid using one of the methods described in Section~\ref{sec:colormaps}.
 
 The example below plots a surface indicating the magnitude of the imaginary
 part of $\log(x+iy)$:
 
 \vspace{2mm}
-\noindent{\tt set numerics complex}\newline
-\noindent{\tt set xlabel "Re(\$z\$)"}\newline
-\noindent{\tt set ylabel "Im(\$z\$)"}\newline
-\noindent{\tt set zlabel "\$$\backslash$mathrm\{Im\}($\backslash$mathrm\{log\}[z])\$"}\newline
-\noindent{\tt set key below}\newline
-\noindent{\tt set size 8 square}\newline
-\noindent{\tt set grid}\newline
-\noindent{\tt set view -30,30}\newline
-\noindent{\tt plot 3d [-10:10][-10:10] Im(log(x+i*y)) $\backslash$}\newline
-\noindent{\tt \phantom{xxxxx}with surface col black fillcol blue}
-
+\input{examples/tex/ex_surface_log_1.tex}
 \vspace{2mm}
 \centerline{\includegraphics[width=10cm]{examples/eps/ex_surface_log}}
 \vspace{2mm}
@@ -2139,12 +1894,7 @@ part of $\log(x+iy)$:
 In this example, we plot a surface showing the value of the expression
 $x^3/20+y^2$, and project below it a series of contours in the $(x,y)$ plane.
 \nlscf
-\noindent{\tt set nokey}\newline
-\noindent{\tt set size 8 square}\newline
-\noindent{\tt plot 3d x**3/20+y**2 with surface col black fillc red, $\backslash$}\newline
-\noindent{\tt \phantom{xxxxxxxx}x**3/20+y**2 with contours col black}
-\nlscf
-The resulting image is shown below:
+\input{examples/tex/ex_surface_polynomial_1.tex}
 \nlscf
 \begin{center}
 \includegraphics[width=10cm]{examples/eps/ex_surface_polynomial}
@@ -2153,29 +1903,12 @@ The resulting image is shown below:
 
 \example{ex:surface-sinc}{The sinc($x$) function represented as a surface}{
 In this example, we produce a surface showing the function $\mathrm{sinc}(r)$
-where $r=\sqrt{x^2+y^2}$. To produce a prettier result, we vary the colour of
+where $r=\sqrt{x^2+y^2}$. To produce a prettier result, we vary the color of
 the surface such that the hue of the surface varies with azimuthal position,
 its saturation varies with radius $r$, and its brightness varies with height
 $z$.
 \nlscf
-\noindent{\tt set numerics complex}\newline
-\noindent{\tt set xlabel "\$x\$"}\newline
-\noindent{\tt set ylabel "\$y\$"}\newline
-\noindent{\tt set zlabel "\$z\$"}\newline
-\noindent{\tt set xformat "\%s\$$\backslash$pi\$"\%(x/pi)}\newline
-\noindent{\tt set yformat "\%s\$$\backslash$pi\$"\%(y/pi)}\newline
-\noindent{\tt set xtics 3*pi ; set mxtics pi}\newline
-\noindent{\tt set ytics 3*pi ; set mytics pi}\newline
-\noindent{\tt set ztics}\newline
-\noindent{\tt set key below}\newline
-\noindent{\tt set size 8 square}\newline
-\noindent{\tt set grid}\newline
-\noindent{\tt plot 3d [-6*pi:6*pi][-6*pi:6*pi][-0.3:1] sinc(hypot(x,y)) $\backslash$}\newline
-\noindent{\tt \phantom{xxxxx}with surface col black $\backslash$}\newline
-\noindent{\tt \phantom{xxxxx}fillcol hsb(atan2(\$1,\$2)/(2*pi)+0.5):hypot(\$1,\$2)/30+0.2: $\backslash$}\newline
-\noindent{\tt \phantom{xxxxxxxxxxxxxxx}(\$3*0.5+0.5)}
-\nlscf
-The resulting image is shown below:
+\input{examples/tex/ex_surface_sinc_1.tex}
 \nlscf
 \begin{center}
 \includegraphics[width=10cm]{examples/eps/ex_surface_sinc}

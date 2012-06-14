@@ -1,4 +1,4 @@
-% REFERENCE.TEX
+% reference.tex
 %
 % The documentation in this file is part of PyXPlot
 % <http://www.pyxplot.org.uk>
@@ -21,7 +21,7 @@
 
 % LaTeX source for the PyXPlot Users' Guide
 
-\chapter{Command Reference}
+\chapter{Command reference}
 \label{ch:reference}
 
 This chapter contains an alphabetically ordered list of all of PyXPlot's
@@ -96,7 +96,7 @@ arc at 0,0 radius 2 from 90 to 270
 
 \noindent would draw a semi-circle beneath the line $x=0$, centred on the
 origin with radius $2\,\mathrm{cm}$.  The usual style modifiers for lines may
-be passed after the keyword {\tt with}; if the {\tt fillcolour} modifier is
+be passed after the keyword {\tt with}; if the {\tt fillcolor} modifier is
 specified then the arc will be filled to form a pie-chart slice.
 
 All vector graphics objects placed on multiplot canvases receive unique
@@ -116,13 +116,13 @@ arrow [ item <id> ] [from] <x>, <y> [to] <x>, <y>
 Arrows may be drawn on multiplot canvases using the \indcmdt{arrow}. The style
 of the arrows produced may be specified by following the \indmodt{with}
 modifier by one of the style keywords \indkeyt{nohead}, \indkeyt{head}
-(default) or \indkeyt{twohead}. In addition, keywords such as \indkeyt{colour},
+(default) or \indkeyt{twohead}. In addition, keywords such as \indkeyt{color},
 \indkeyt{linewidth} and \indkeyt{linetype} have the same syntax and meaning
 following the keyword \indmodt{with} as in the {\tt plot} command. The
 following example would draw a bidirectional blue arrow:
 
 \begin{verbatim}
-arrow from x1,y1 to x2,y2 with twohead linetype 2 colour blue
+arrow from x1,y1 to x2,y2 with twohead linetype 2 color blue
 \end{verbatim}
 
 The {\tt arrow} command has a twin, the {\tt line} command, which has the same
@@ -272,7 +272,7 @@ modifier allows the style of the circle to be specified using similar options
 to those accepted by the {\tt plot} command.  The example
 
 \begin{verbatim}
-circle at 2,2 radius 1 with colour red fillcolour blue
+circle at 2,2 radius 1 with color red fillcolor blue
 \end{verbatim}
 
 \noindent would draw a red circle of unit radius filled in blue, centred
@@ -435,7 +435,7 @@ ellipse centre 0,0 majoraxis 4 minoraxis 4
 \end{verbatim}
 \end{enumerate}
 
-The line type, line width, and colour of line with which the outlines of
+The line type, line width, and color of line with which the outlines of
 ellipses are drawn may be specified after the keyword {\tt with}, as in the
 {\tt box} and {\tt circle} commands above. Likewise, ellipses may be filled in
 the same manner.
@@ -494,7 +494,7 @@ exec "set terminal %s"%(terminal)
 \end{verbatim}
 
 \noindent It can also be used to write obfuscated PyXPlot scripts, and its use
-should be minimised wherever possible.
+should be minimized wherever possible.
 
 
 \section{exit}\indcmd{exit}
@@ -883,10 +883,10 @@ images to be interpolated\footnote{Many commonly-used PostScript display
 engines, including Ghostscript, do not support this functionality.}.  Images
 which include transparency are supported. The optional keyword {\tt
 notransparent} may be supplied to cause transparent regions to be filled with
-the image's default background colour. Alternatively, an RGB colour may be
+the image's default background color. Alternatively, an RGB color may be
 specified in the form {\tt rgb<r>:<g>:<b>} after the keyword {\tt transparent}
-to cause that particular colour to become transparent; the three components of
-the RGB colour should be in the range~0 to~255.
+to cause that particular color to become transparent; the three components of
+the RGB color should be in the range~0 to~255.
 
 All vector graphics objects placed on multiplot canvases receive unique
 identification numbers which count sequentially from one, and which may be
@@ -950,7 +950,7 @@ set samples interpolate monaghanLattanzio
 
 Finally, data can be imported from graphical images in bitmap ({\tt .bmp}) 
 format to produce a function of two arguments returning a value in the
-range~$0\to1$ which represents the data in one of the image's three colour
+range~$0\to1$ which represents the data in one of the image's three color
 channels. The two arguments are the horizontal and vertical position within the
 bitmap image, as measured in pixels.
 
@@ -1047,13 +1047,13 @@ load '*.script'
 \end{verbatim}
 
 
-\section{maximise}\indcmd{maximise}
+\section{maximize}\indcmd{maximize}
 
 \begin{verbatim}
-maximise <expression> via <variable> {, variable}
+maximize <expression> via <variable> {, variable}
 \end{verbatim}
 
-The \indcmdt{maximise} can be used to find the maxima of algebraic expressions.
+The \indcmdt{maximize} can be used to find the maxima of algebraic expressions.
 A single algebraic expression should be supplied for optimisation, together
 with a comma-separated list of the variables with respect to which it should be
 optimised.  In the following example, a maximum of the sinusoidal function
@@ -1062,7 +1062,7 @@ $\cos(x)$ is sought:
 \vspace{3mm}
 \noindent{\tt pyxplot> {\bf set numerics real}}\newline
 \noindent{\tt pyxplot> {\bf x=0.1}}\newline
-\noindent{\tt pyxplot> {\bf maximise cos(x) via x}}\newline
+\noindent{\tt pyxplot> {\bf maximize cos(x) via x}}\newline
 \noindent{\tt pyxplot> {\bf print x/pi}}\newline
 \noindent{\tt 0}
 \vspace{3mm}
@@ -1070,8 +1070,8 @@ $\cos(x)$ is sought:
 \noindent Note that this particular example doesn't work when complex
 arithmetic is enabled, since $\cos(x)$ diverges to $\infty$ at $x=\infty i$.
 
-Various caveats apply the {\tt maximise} command, as well as to the {\tt
-minimise} and {\tt solve} commands.  All of these commands operate by searching
+Various caveats apply the {\tt maximize} command, as well as to the {\tt
+minimize} and {\tt solve} commands.  All of these commands operate by searching
 numerically for optimal sets of input parameters to meet the criteria set by
 the user. As with all numerical algorithms, there is no guarantee that the {\it
 locally} optimum solutions returned are the {\it globally} optimum solutions.
@@ -1088,13 +1088,13 @@ cases.  To reiterate, it is always advisable to double-check that the answers
 returned agree with common sense.
 
 
-\section{minimise}\indcmd{minimise}
+\section{minimize}\indcmd{minimize}
 
 \begin{verbatim}
-minimise <expression> via <variable> {, variable}
+minimize <expression> via <variable> {, variable}
 \end{verbatim}
 
-The \indcmdt{minimise} can be used to find the minima of algebraic expressions.
+The \indcmdt{minimize} can be used to find the minima of algebraic expressions.
 A single algebraic expression should be supplied for optimisation, together
 with a comma-separated list of the variables with respect to which it should be
 optimised. In the following example, a minimum of the sinusoidal function
@@ -1103,7 +1103,7 @@ $\cos(x)$ is sought:
 \vspace{3mm}
 \noindent{\tt pyxplot> {\bf set numerics real}}\newline
 \noindent{\tt pyxplot> {\bf x=0.1}}\newline
-\noindent{\tt pyxplot> {\bf minimise cos(x) via x}}\newline
+\noindent{\tt pyxplot> {\bf minimize cos(x) via x}}\newline
 \noindent{\tt pyxplot> {\bf print x/pi}}\newline
 \noindent{\tt 1}
 \vspace{3mm}
@@ -1112,8 +1112,8 @@ $\cos(x)$ is sought:
 arithmetic is enabled, since $\cos(x)$ diverges to $-\infty$ at $x=\pi+\infty
 i$.
 
-Various caveats apply the {\tt minimise} command, as well as to the {\tt
-maximise} and {\tt solve} commands.  All of these commands operate by searching
+Various caveats apply the {\tt minimize} command, as well as to the {\tt
+maximize} and {\tt solve} commands.  All of these commands operate by searching
 numerically for optimal sets of input parameters to meet the criteria set by
 the user. As with all numerical algorithms, there is no guarantee that the {\it
 locally} optimum solutions returned are the {\it globally} optimum solutions.
@@ -1196,7 +1196,7 @@ Multiple datasets can be plotted on a single graph by specifying them in a
 comma-separated list, as in the example:
 
 \begin{verbatim}
-plot sin(x) with colour blue, cos(x) with linetype 2
+plot sin(x) with color blue, cos(x) with linetype 2
 \end{verbatim}
 
 If the {\tt 3d} modifier is supplied to the {\tt plot} command, then a
@@ -1251,7 +1251,7 @@ Datapoints can be labelled when plotted in any of the following plot styles:
 styles), {\tt errorrange} (and similar styles), {\tt impulses}, {\tt
 linespoints}, {\tt lowerlimits}, {\tt points}, {\tt stars} and {\tt 
 upperlimits}. It is not possible to label datapoints plotted in other styles.
-Labels are rendered in the same colour as the datapoints with which they are
+Labels are rendered in the same color as the datapoints with which they are
 associated.
 
 
@@ -1307,8 +1307,8 @@ As well as the names of these plot styles, the {\tt with} modifier can also be
 followed by style modifiers such as {\tt line\-width} which alter the exact
 appearance of various plot styles. A complete list of these is as follows:
 \begin{itemize}
-\item \indmodt{colour} -- used to select the colour in which each dataset is to be plotted. It should be followed either by an integer, to set a colour from the present palette (see Section~\ref{sec:palette}), or by a recognised colour name, a complete list of which can be found in Section~\ref{sec:colour_names}. Alternatively, arbitrary colours may be specified by using one of the forms {\tt rgb0.1:\-0.2:\-0.3}, {\tt hsb0.1:\-0.2:\-0.3} or {\tt cmyk0.4:\-0.3:\-0.2:\-0.1}, where the colon-separated values indicate the RGB, HSB or CMYK components of the desired colour in the range~0 to~1. This modifier may also be spelt {\tt color}.\index{colours!setting for datasets}
-\item \indmodt{fillcolour} -- used to select the colour in which each dataset is filled. The colour may be specified using any of the styles listed for {\tt colour}. May also be spelt {\tt fillcolour}.
+\item \indmodt{color} -- used to select the color in which each dataset is to be plotted. It should be followed either by an integer, to set a color from the present palette (see Section~\ref{sec:palette}), or by a recognised color name, a complete list of which can be found in Section~\ref{sec:color_names}. Alternatively, arbitrary colors may be specified by using one of the forms {\tt rgb0.1:\-0.2:\-0.3}, {\tt hsb0.1:\-0.2:\-0.3} or {\tt cmyk0.4:\-0.3:\-0.2:\-0.1}, where the colon-separated values indicate the RGB, HSB or CMYK components of the desired color in the range~0 to~1. This modifier may also be spelt {\tt color}.\index{colors!setting for datasets}
+\item \indmodt{fillcolor} -- used to select the color in which each dataset is filled. The color may be specified using any of the styles listed for {\tt color}. May also be spelt {\tt fillcolor}.
 \item \indmodt{linetype} -- used to numerically select the type of line -- for example, solid, dotted, dashed, etc.\ -- which should be used in line-based plot styles. A complete list of PyXPlot's numbered line types can be found in Chapter~\ref{ch:linetypes_table}. May be abbreviated {\tt lt}.
 \item \indmodt{linewidth} -- used to select the width of line which should be used in line-based plot styles, where unity represents the default width. May be abbreviated {\tt lw}.
 \item \indmodt{pointlinewidth} -- used to select the width of line which should be used to stroke points in point-based plot styles, where unity represents the default width. May be abbreviated {\tt plw}.
@@ -1321,14 +1321,14 @@ with}, as in the following examples:
 
 \begin{verbatim}
 plot 'datafile' using 1:2 with points pointsize 2
-plot 'datafile' using 1:2 with lines colour red linewidth 2
+plot 'datafile' using 1:2 with lines color red linewidth 2
 plot 'datafile' using 1:2 with lp col 1 lw 2 ps 3
 \end{verbatim}
 
 \noindent Where modifiers take numerical values, expressions of the form {\tt
 \$2+1}, similar to those supplied to the {\tt using} modifier, may be used to
 indicate that each datapoint should be displayed in a different style or in a
-different colour. The following example would plot a \datafile\ with {\tt
+different color. The following example would plot a \datafile\ with {\tt
 points}, drawing the position of each point from the first two columns of the
 supplied \datafile\ and the size of each point from the third column:
 \begin{verbatim}
@@ -1595,7 +1595,7 @@ accepted by the {\tt plot} command can also be used here, as in the example:
 
 \begin{verbatim}
 set arrow 2 from first 0, second 2.5 to axis3 0,
-             axis4 2.5 with colour blue nohead
+             axis4 2.5 with color blue nohead
 \end{verbatim}
 
 
@@ -1624,20 +1624,20 @@ set autoscale x1y3
 override the {\tt set autoscale} command.
 
 
-\subsection{axescolour}\indcmd{set axescolour}
+\subsection{axescolor}\indcmd{set axescolor}
 
 \begin{verbatim}
-set axescolour <colour>
+set axescolor <color>
 \end{verbatim}
 
-The setting {\tt axescolour} changes the colour used to draw graph axes.  The example
+The setting {\tt axescolor} changes the color used to draw graph axes.  The example
 
 \begin{verbatim}
-set axescolour blue
+set axescolor blue
 \end{verbatim}
 
 \noindent would specify that graph axes should be drawn in blue. Any of the
-recognised colour names listed in Section~\ref{sec:colour_names} can be used.
+recognised color names listed in Section~\ref{sec:color_names} can be used.
 
 
 \subsection{axis}\indcmd{set axis}
@@ -1838,8 +1838,8 @@ set c1format ( auto | '<format>' )
 \end{verbatim}
 
 The {\tt c1format} setting is used to manually specify an explicit format for
-the axis labels to take along the colour scale bars drawn alongside plots which
-make use of the \indpst{colourmap} plot style. It has similar syntax to the
+the axis labels to take along the color scale bars drawn alongside plots which
+make use of the \indpst{colormap} plot style. It has similar syntax to the
 {\tt set xformat} command.
 
 \subsection{c1label}\indcmd{set c1label}
@@ -1849,7 +1849,7 @@ set c1label '<text>' [ rotate <angle> ]
 \end{verbatim}
 
 The setting {\tt c1label} sets the label which should be written alongside the
-colour scale bars drawn next to plots when the \indpst{colourmap} plot style
+color scale bars drawn next to plots when the \indpst{colormap} plot style
 is used. An optional rotation angle may be specified to rotate axis labels
 clockwise by arbitrary angles. The angle should be specified either as a
 dimensionless number of degrees, or as a quantity with physical dimensions of
@@ -1884,21 +1884,21 @@ of plots. The opposite effect is achieved using the {\tt set noclip}
 command.
 
 
-\subsection{colourkey}\indcmd{set colourkey}
+\subsection{colorkey}\indcmd{set colorkey}
 
 \begin{verbatim}
-set colourkey [<position>]
+set colorkey [<position>]
 \end{verbatim}
 
-The setting {\tt colourkey} determines whether colour scales are drawn along
-the edges of plots drawn using the \indpst{colourmap} plot style, indicating
-the mapping between represented values and colours. Note that such scales are
-only ever drawn when the \indpst{colourmap} plot style is supplied with only
-three columns of data, since the colour mappings are themselves
+The setting {\tt colorkey} determines whether color scales are drawn along
+the edges of plots drawn using the \indpst{colormap} plot style, indicating
+the mapping between represented values and colors. Note that such scales are
+only ever drawn when the \indpst{colormap} plot style is supplied with only
+three columns of data, since the color mappings are themselves
 multi-dimensional when more columns are supplied. Issuing the command
 
 \begin{verbatim}
-set colourkey
+set colorkey
 \end{verbatim}
 
 \noindent by itself causes such a scale to be drawn on graphs in the default
@@ -1906,21 +1906,21 @@ position, usually along the right-hand edge of the graphs. The converse action
 is achieved by:
 
 \begin{verbatim}
-set nocolourkey
+set nocolorkey
 \end{verbatim}
 
 \noindent The command
 
 \begin{verbatim}
-unset colourkey
+unset colorkey
 \end{verbatim}
 
 \noindent causes PyXPlot to revert to its default behaviour, as specified in a
 configuration file, if present. A position for the key may optionally be
-specified after the {\tt set colourkey} command, as in the example:
+specified after the {\tt set colorkey} command, as in the example:
 
 \begin{verbatim}
-set colourkey bottom
+set colorkey bottom
 \end{verbatim}
 
 Recognised positions are {\tt top}, {\tt bottom}, {\tt left} and {\tt right}.
@@ -1928,32 +1928,32 @@ Recognised positions are {\tt top}, {\tt bottom}, {\tt left} and {\tt right}.
 and {\tt outside} is an alias for {\tt right}.
 
 
-\subsection{colourmap}\indcmd{set colourmap}
+\subsection{colormap}\indcmd{set colormap}
 
 \begin{verbatim}
-set colourmap ( rgb<r>:<g>:<b> |
+set colormap ( rgb<r>:<g>:<b> |
                 hsb<h>:<s>:<b> |
                 cmyk<c>:<m>:<y>:<k> )
               [ mask <expr> ]
 \end{verbatim}
 
-The setting {\tt colourmap} is used to specify the mapping between ordinate
-values and colours used by the \indpst{colourmap} plot style. As elsewhere in
-PyXPlot, the colour components should be numerical expressions which evaluate
+The setting {\tt colormap} is used to specify the mapping between ordinate
+values and colors used by the \indpst{colormap} plot style. As elsewhere in
+PyXPlot, the color components should be numerical expressions which evaluate
 to a value in the range zero to one. Within these expressions, the variables
 {\tt c1}, {\tt c2}, {\tt c3} and {\tt c4} refer quantities calculated from the
-third through sixth columns of data supplied to the \indpst{colourmap} plot
+third through sixth columns of data supplied to the \indpst{colormap} plot
 style in a way determined by the {\tt c<n>range} setting.  Thus, the following
-colour mapping, which is the default, produces a greyscale colour mapping of
-the third column of data supplied to the \indpst{colourmap} plot style; further
+color mapping, which is the default, produces a greyscale color mapping of
+the third column of data supplied to the \indpst{colormap} plot style; further
 columns of data, if supplied, are not used:
 
 \begin{verbatim}
 set c1range [*:*] renormalise
-set colourmap rgb(c1):(c1):(c1)
+set colormap rgb(c1):(c1):(c1)
 \end{verbatim}
 
-If a mask expression is supplied, then any areas in a colour map where this
+If a mask expression is supplied, then any areas in a color map where this
 expression evaluates to zero (i.e.\ false) are made transparent.
 
 
@@ -1986,7 +1986,7 @@ set c<n>range [ <range> ]
 \end{verbatim}
 
 The {\tt set c<n>range} command changes the range of ordinate values
-represented by different colours in the \indpst{colourmap} plot style, and in
+represented by different colors in the \indpst{colormap} plot style, and in
 the case of the {\tt set c1range} command, also by contours in the
 \indpst{contourmap} plot style. The value {\tt <n>} should be an integer in the
 range 1--4.
@@ -2007,15 +2007,15 @@ scaled to fit the range of the data supplied.
 
 \subsubsection{Colour Maps}
 
-The colour of each pixel in a colour map is determined by the {\tt colourmap}
+The color of each pixel in a color map is determined by the {\tt colormap}
 setting, which should contain an expression of the form {\tt
-rgb(c1):(c2):(c3)}, specifying the components of a colour in either RGB, HSB or
+rgb(c1):(c2):(c3)}, specifying the components of a color in either RGB, HSB or
 CMYK space, as a function of the variables {\tt c1}, {\tt c2}, {\tt c3} and
-{\tt c4}. The {\tt colourmap} plot style should be supplied with between three
+{\tt c4}. The {\tt colormap} plot style should be supplied with between three
 and six columns of data, the first two of which contain the $x$- and
 $y$-positions of points, and the remainder of which are used to set the values
 of the variables {\tt c1}, {\tt c2}, {\tt c3} and {\tt c4} when calculating the
-colour with which that point should be represented. If fewer than six columns
+color with which that point should be represented. If fewer than six columns
 of data are supplied, then not all of these variables will be set.
 
 The {\tt set c<n>range} command is used to determine how the raw data values
@@ -2149,44 +2149,44 @@ set grid x1x2x3
 \end{verbatim}
 
 
-\subsection{gridmajcolour}\indcmd{set gridmajcolour}
+\subsection{gridmajcolor}\indcmd{set gridmajcolor}
 
 \begin{verbatim}
-set gridmajcolour <colour>
+set gridmajcolor <color>
 \end{verbatim}
 
-The setting {\tt gridmajcolour} changes the colour that is used to draw the
+The setting {\tt gridmajcolor} changes the color that is used to draw the
 gridlines (see the {\tt set grid} command) which are associated with the major
 ticks of axes (i.e.\ major gridlines). For example:
 
 \begin{verbatim}
-set gridmajcolour purple
+set gridmajcolor purple
 \end{verbatim}
 
 \noindent would cause the major gridlines to be drawn in purple. Any of the
-recognised colour names listed in Section~\ref{sec:colour_names} can be used.
+recognised color names listed in Section~\ref{sec:color_names} can be used.
 
-See also the {\tt set gridmincolour} command.
+See also the {\tt set gridmincolor} command.
 
 
-\subsection{gridmincolour}\indcmd{set gridmincolour}
+\subsection{gridmincolor}\indcmd{set gridmincolor}
 
 \begin{verbatim}
-set gridmincolour <colour>
+set gridmincolor <color>
 \end{verbatim}
 
-The setting {\tt gridmincolour} changes the colour that is used to draw the
+The setting {\tt gridmincolor} changes the color that is used to draw the
 gridlines (see the {\tt set grid} command) which are associated with the minor
 ticks of axes (i.e.\ minor gridlines). For example:
 
 \begin{verbatim}
-set gridmincolour purple
+set gridmincolor purple
 \end{verbatim}
 
 \noindent would cause the minor gridlines to be drawn in purple. Any of the
-recognised colour names listed in Section~\ref{sec:colour_names} can be used.
+recognised color names listed in Section~\ref{sec:color_names} can be used.
 
-See also the {\tt set gridmajcolour} command.
+See also the {\tt set gridmajcolor} command.
 
 
 \subsection{key}\indcmd{set key}
@@ -2264,7 +2264,7 @@ set keycolumns 3
 set label <label number> '<text>'
       [<system>] <x>, [<system>] <y>
       [ rotate <angle> ]
-      [ with colour <colour> ]
+      [ with color <color> ]
 \end{verbatim}
 
 \noindent where {\tt <system>} may take any of the values
@@ -2310,11 +2310,11 @@ counter-clockwise. The following example would produce upward-running text:
 set label 1 'Hello' 1.2, 2.5 rotate 90
 \end{verbatim}
 
-By default the labels are black; however, an arbitrary colour may be specified
-using the {\tt with colour} modifier.  For example,
+By default the labels are black; however, an arbitrary color may be specified
+using the {\tt with color} modifier.  For example,
 
 \begin{verbatim}
-set label 3 'A purple label' 0, 0 with colour purple
+set label 3 'A purple label' 0, 0 with color purple
 \end{verbatim}
 
 \noindent would place a purple label at the origin.
@@ -2398,7 +2398,7 @@ default base is~10.
 In addition to acting upon any combination of $x$-, $y$- and $z$-axes, the {\tt
 set logscale} command may also be requested to set the {\tt c1}, {\tt c2}, {\tt
 c3}, {\tt c4}, {\tt t}, {\tt u} and/or {\tt v} axes to scale logarithmically.
-The first four of these options affect whether the colours on colour maps scale
+The first four of these options affect whether the colors on color maps scale
 linearly or logarithmically with input ordinate values; see the {\tt set
 c<n>range} command for more details. The final three of these options specifies
 whether parametric functions are sampled linearly or logarithmically in the
@@ -2484,15 +2484,15 @@ See {\tt backup}.
 See {\tt clip}.
 
 
-\subsection{nocolourkey}\indcmd{set nocolourkey}
+\subsection{nocolorkey}\indcmd{set nocolorkey}
 
 \begin{verbatim}
-set nocolourkey
+set nocolorkey
 \end{verbatim}
 
-Issuing the command {\tt set nocolourkey} causes plots to be generated with no
-colour scale when the \indpst{colourmap} plot style is used. See the {\tt set
-colourkey} command for more details.
+Issuing the command {\tt set nocolorkey} causes plots to be generated with no
+color scale when the \indpst{colormap} plot style is used. See the {\tt set
+colorkey} command for more details.
 
 
 \subsection{nodisplay}\indcmd{set nodisplay}
@@ -2725,21 +2725,21 @@ set output 'myplot.eps'
 \subsection{palette}\indcmd{set palette}
 
 \begin{verbatim}
-set palette <colour> {, <colour>}
+set palette <color> {, <color>}
 \end{verbatim}
 
-PyXPlot has a palette of colours which it assigns sequentially to datasets when
-colours are not manually assigned. This is also the palette to which reference
+PyXPlot has a palette of colors which it assigns sequentially to datasets when
+colors are not manually assigned. This is also the palette to which reference
 is made if the user issues a command such as
 
 \begin{verbatim}
-plot sin(x) with colour 5
+plot sin(x) with color 5
 \end{verbatim}
 
-\noindent requesting the fifth colour from the palette. By default, this palette
-contains a range of distinctive colours. However, the user can choose to
-substitute his own list of colours using the {\tt set palette} command. It
-should be followed by a comma-separated list of colour names, for example:
+\noindent requesting the fifth color from the palette. By default, this palette
+contains a range of distinctive colors. However, the user can choose to
+substitute his own list of colors using the {\tt set palette} command. It
+should be followed by a comma-separated list of color names, for example:
 
 \begin{verbatim}
 set palette red,green,blue
@@ -2756,7 +2756,7 @@ plot sin(x), cos(x), tan(x), exp(x)
 the third in blue. Upon reaching the fourth, the palette would cycle back to
 red.
 
-Any of the recognised colour names listed in Section~\ref{sec:colour_names} can
+Any of the recognised color names listed in Section~\ref{sec:color_names} can
 be used.
 
 
@@ -2868,7 +2868,7 @@ larger. When functions are plotted with the {\tt points} plot style, this
 setting controls the number of points plotted.
 
 After the keyword {\tt grid} may be specified the dimensions of the
-two-dimensional grid of samples used in the \indpst{colourmap} and
+two-dimensional grid of samples used in the \indpst{colormap} and
 \indpst{surface} plot styles, and internally when calculating the contours to
 be plotted in the \indpst{contourmap} plot style. If a {\tt *} is given in
 place of either of the dimensions, then the same number of samples as are
@@ -3014,7 +3014,7 @@ functions using lines with the first defined line style.
 set terminal ( X11_SingleWindow | X11_MultiWindow | X11_Persist |
                bmp | eps | gif | jpeg | pdf | png | postscript |
                svg | tiff )
-             ( colour | color | monochrome )
+             ( color | color | monochrome )
              ( dpi <value> )
              ( portrait | landscape )
              ( invert | noinvert )
@@ -3039,7 +3039,7 @@ formats, simply type the name of the desired format after the {\tt set
 terminal} command. To obtain more details on each, see the subtopics below.
 The following settings, which can also be typed following the {\tt set
 terminal} command, are used to change the options within some of these graphic
-formats: {\tt colour}, {\tt monochrome}, {\tt dpi}, {\tt portrait}, {\tt
+formats: {\tt color}, {\tt monochrome}, {\tt dpi}, {\tt portrait}, {\tt
 landscape}, {\tt invert}, {\tt noinvert}, {\tt transparent}, {\tt solid}, {\tt
 enlarge}, {\tt noenlarge}. Details of each of these can be found below.
 
@@ -3057,18 +3057,18 @@ The {\tt bmp} terminal renders output as Windows bitmap images. The filename to
 which output is to be sent should be set using the {\tt set output} command;
 the default is {\tt pyxplot.bmp}. The number of dots per inch used can be
 changed using the {\tt dpi} option. The {\tt invert} option may be used to produce an
-image with inverted colours.
+image with inverted colors.
 
 
-\subsubsection{colour}\index{set terminal command!colour modifier@{\tt colour} modifier}
+\subsubsection{color}\index{set terminal command!color modifier@{\tt color} modifier}
 
-The {\tt colour} terminal option causes plots to be produced in colour; this is
+The {\tt color} terminal option causes plots to be produced in color; this is
 the default behaviour.
 
 
 \subsubsection{color}\index{set terminal command!color modifier@{\tt color} modifier}
 
-The {\tt color} terminal option is the US-English equivalent of {\tt colour}.
+The {\tt color} terminal option is the US-English equivalent of {\tt color}.
 
 
 \subsubsection{dpi}\index{set terminal command!dpi modifier@{\tt dpi} modifier}
@@ -3109,14 +3109,14 @@ output should be sent can be set using the {\tt set output} command; the
 default is {\tt pyxplot.gif}. The number of dots per inch used can be changed
 using the {\tt dpi} option. Transparent gifs can be produced with the {\tt
 transparent} option. The {\tt invert} option may be used to produce an image
-with inverted colours.
+with inverted colors.
 
 
 \subsubsection{invert}\index{set terminal command!invert modifier@{\tt invert} modifier}
 
 The {\tt invert} terminal option causes the bitmap terminals (i.e.\ {\tt bmp},
 {\tt gif}, {\tt jpeg}, {\tt png} and {\tt tiff}) to produce output with
-inverted colours.
+inverted colors.
 
 
 \subsubsection{jpeg}\index{set terminal command!jpeg modifier@{\tt jpeg} modifier}
@@ -3125,7 +3125,7 @@ The {\tt jpeg} terminal renders output as jpeg images. The filename to which
 output should be sent can be set using the {\tt set output} command; the
 default is {\tt pyxplot.jpg}.  The number of dots per inch used can be changed
 using the {\tt dpi} option. The {\tt invert} option may be used to produce an
-image with inverted colours.
+image with inverted colors.
 
 
 \subsubsection{landscape}\index{set terminal command!landscape modifier@{\tt landscape} modifier}
@@ -3161,7 +3161,7 @@ within the margins of the currently-selected papersize. This is the opposite of
 \subsubsection{noinvert}\index{set terminal command!noinvert modifier@{\tt noinvert} modifier}
 
 The {\tt noinvert} terminal option causes the bitmap terminals (i.e.\ {\tt
-gif}, {\tt jpeg}, {\tt png}) to produce normal output without inverted colours.
+gif}, {\tt jpeg}, {\tt png}) to produce normal output without inverted colors.
 This is the opposite of the {\tt inverse} option.
 
 
@@ -3179,7 +3179,7 @@ output should be sent can be set using the {\tt set output} command; the
 default is {\tt pyxplot.png}. The number of dots per inch used can be changed
 using the {\tt dpi} option. Transparent pngs can be produced with the {\tt
 transparent} option. The {\tt invert} option may be used to produce an image
-with inverted colours.
+with inverted colors.
 
 
 \subsubsection{portrait}\index{set terminal command!portrait modifier@{\tt portrait} modifier}
@@ -3234,22 +3234,22 @@ the desktop from becoming flooded with old plots. This terminal is the default
 when running interactively.
 
 
-\subsection{textcolour}\indcmd{set textcolour}
+\subsection{textcolor}\indcmd{set textcolor}
 
 \begin{verbatim}
-set textcolour <colour>
+set textcolor <color>
 \end{verbatim}
 
-The setting {\tt textcolour} changes the default colour of all text displayed
+The setting {\tt textcolor} changes the default color of all text displayed
 on plots or multiplot canvases.  For example,
 
 \begin{verbatim}
-set textcolour red
+set textcolor red
 \end{verbatim}
 
 \noindent causes all text labels, including the labels on graph axes and
-legends, etc.\ to be rendered in red. Any of the recognised colour names listed
-in Section~\ref{sec:colour_names} can be used; colours can also be referred to
+legends, etc.\ to be rendered in red. Any of the recognised color names listed
+in Section~\ref{sec:color_names} can be used; colors can also be referred to
 numerically with reference to the current palette.
 
 
@@ -3954,7 +3954,7 @@ smallest value of the expression to the largest.
 text [ item <id> ] '<text string>' [ at <x>, <y> ]
      [ rotate <angle> ] [ gap <gap> ]
      [ halign <alignment> ] [ valign <alignment> ]
-     [ with colour <colour> ]
+     [ with color <color> ]
 \end{verbatim}
 
 The \indcmdt{text} allows strings of text to a added as labels on multiplot
@@ -3983,11 +3983,11 @@ counter-clockwise. The following example would produce upward-running text:
 text 'Hello' at 1.5, 3.6 rotate 90
 \end{verbatim}
 
-By default the text is black; however, an arbitrary colour may be specified
-using the {\tt with colour} modifier.  For example:
+By default the text is black; however, an arbitrary color may be specified
+using the {\tt with color} modifier.  For example:
 
 \begin{verbatim}
-text 'A purple label' at 0, 0 with colour purple
+text 'A purple label' at 0, 0 with color purple
 \end{verbatim}
 
 \noindent would add a purple label at the origin of the multiplot.

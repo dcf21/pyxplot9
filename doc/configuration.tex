@@ -1,4 +1,4 @@
-% CONFIGURATION.TEX
+% configuration.newst
 %
 % The documentation in this file is part of PyXPlot
 % <http://www.pyxplot.org.uk>
@@ -61,9 +61,9 @@ multiPlot=on
 When colored terminal output is enabled, the color-coding of the
 \indcmdt{show} also reflects the current default configuration: settings which
 match their default values are shown in green\footnote{This color can be
-changed using the {\tt Colour\_Rep} setting in a configuration file.} whilst
+changed using the {\tt Color\_Rep} setting in a configuration file.} whilst
 those settings which have been changed from their default values are shown in
-amber\footnote{This color can be changed using the {\tt Colour\_Wrn} setting
+amber\footnote{This color can be changed using the {\tt Color\_Wrn} setting
 in a configuration file.}.
 
 Configuration files should take the form of a series of sections, each headed
@@ -188,8 +188,8 @@ grid = off
 gridAxisX = 1
 gridAxisY = 1
 gridAxisZ = 1
-gridMajColour = grey70
-gridMinColour = grey85
+gridMajColor = grey70
+gridMinColor = grey85
 key = on
 keyColumns = 0
 keyPos = top right
@@ -325,7 +325,7 @@ The {\tt settings} section can contain any of the following settings in any orde
 
                Sets whether 3d plots have the automatic $z/x$ aspect ratio, which is the golden ratio. If {\tt on}, then the {\tt zAspect} setting is ignored. Deprecated: new scripts should use {\tt zAspect=auto} instead.
                \\
-{\tt axesColour} & {\bf Possible values:} Any recognised color.
+{\tt axesColor} & {\bf Possible values:} Any recognised color.
 
                {\bf Analogous set command:} \indcmdts{set axescolor}
 
@@ -511,13 +511,13 @@ The {\tt settings} section can contain any of the following settings in any orde
 
                Sets the default $z$-axis to which gridlines should attach, if the {\tt set grid} command is called without specifying which axes to use.
                \\
-{\tt gridMajColour} & {\bf Possible values:} Any recognised color.
+{\tt gridMajColor} & {\bf Possible values:} Any recognised color.
 
                {\bf Analogous set command:} \indcmdts{set gridmajcolor}
 
                Sets the color of major grid lines.
                \\
-{\tt gridMinColour} & {\bf Possible values:} Any recognised color.
+{\tt gridMinColor} & {\bf Possible values:} Any recognised color.
 
                {\bf Analogous set command:} \indcmdts{set gridmincolor}
 
@@ -715,7 +715,7 @@ The {\tt settings} section can contain any of the following settings in any orde
 
                Sets whether output is sent to the screen, using one of the {\tt X11\_}... terminals, or to disk. In the latter case, output may be produced in a wide variety of graphical formats.
                \\
-{\tt textColour} & {\bf Possible values:} Any recognised color.
+{\tt textColor} & {\bf Possible values:} Any recognised color.
 
                {\bf Analogous set command:} \indcmdts{set textcolor}
 
@@ -998,7 +998,7 @@ to be the same as the long name. If the definition is left blank then the unit
 is assumed to be a new base unit which is not related to any pre-existing
 units.
 
-\section{Recognised Colour Names}
+\section{Recognised Color Names}
 \label{sec:color_names}
 
 The following is a complete list of the color names which PyXPlot recognises

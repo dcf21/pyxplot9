@@ -32,7 +32,9 @@ load "examples/fig_init.ppl"
 #NC    using time.fromCalendar($7,$6,$5,$8,$9,$10).toUnix() \
 #NC    binwidth 1/24
 #NC tabulate f(x) with format "%16f %16f"
+# END
 
+# BEGIN
 set width 10
 set xlabel 'Day'
 set ylabel 'Rate of downloads per day'
@@ -41,7 +43,7 @@ set mxtics 0, 21600
 set xformat "%s"%(time.fromUnix(x).toDayWeekName()) rot 30
 set xrange [1269855360:1270373760]
 plot "examples/ex_apachelog.dat" notitle with lines
-#END
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

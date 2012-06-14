@@ -19,26 +19,26 @@
 
 # ----------------------------------------------------------------------------
 
-# This python produces figures showing all of the built-in colours defined in
+# This python produces figures showing all of the built-in colors defined in
 # PyX
 
 import pyx
 from pyx import *
 from math import *
 
-# Fetch a list of all built-in colours defined in PyX
-colours = [ i for i in pyx.color.cmyk.__dict__.keys() if isinstance(pyx.color.cmyk.__dict__[i],pyx.color.cmyk) ]
-h_list  = [ pyx.color.cmyk.__dict__[i].hsb().color['h']*2*pi for i in colours ]
-s_list  = [ pyx.color.cmyk.__dict__[i].hsb().color['s']      for i in colours ]
+# Fetch a list of all built-in colors defined in PyX
+colors = [ i for i in pyx.color.cmyk.__dict__.keys() if isinstance(pyx.color.cmyk.__dict__[i],pyx.color.cmyk) ]
+h_list = [ pyx.color.cmyk.__dict__[i].hsb().color['h']*2*pi for i in colors ]
+s_list = [ pyx.color.cmyk.__dict__[i].hsb().color['s']      for i in colors ]
 
-# Figure 1: Colours arranges in hue/saturation space
+# Figure 1: Colors arranges in hue/saturation space
 
 c = canvas.canvas()
 outline = path.circle(0,0,7.5) # Draw the hue axis around the edge
 c.stroke(outline)
 
 item_list = []
-for name,h,s in zip(colours,h_list,s_list): # Convert hue/saturation into x/y coordinates
+for name,h,s in zip(colors,h_list,s_list): # Convert hue/saturation into x/y coordinates
  x = s*sin(h)*7.5
  y = s*cos(h)*7.5
  item_list.append([x,y,name])
@@ -55,56 +55,56 @@ for x,y,name in item_list:
   textbox = c.texrunner.text(x, y, name, position)
   collision = False
   for item in boxes:
-   if textbox.bbox().intersects(item.bbox()): # If this colour collides with one already drawn, try moving label
+   if textbox.bbox().intersects(item.bbox()): # If this color collides with one already drawn, try moving label
     collision = True
     continue
   if not collision: break
  if not collision:
   shell = path.circle(x,y,0.2)
-  c.fill(shell, [ pyx.color.cmyk.__dict__[name] ]) # Draw a blob of the appropriate colour
+  c.fill(shell, [ pyx.color.cmyk.__dict__[name] ]) # Draw a blob of the appropriate color
   boxes.append(textbox)
  else:
   print name
 
 for box in boxes: c.insert(box) # ... and then label it
 
-c.writeEPSfile("pyx_colours.eps")
-c.writePDFfile("pyx_colours.pdf")
+c.writeEPSfile("pyx_colors.eps")
+c.writePDFfile("pyx_colors.pdf")
 
 # --------------
-# Figure 2: A list of colours, sorted alphabetically
+# Figure 2: A list of colors, sorted alphabetically
 
 c = canvas.canvas()
 
-colours2 = colours[:]
-colours2.sort()
-Clen = 20 # 20 colours in each column
-for i in range(len(colours2)):
- name = colours2[i]
+colors2 = colors[:]
+colors2.sort()
+Clen = 20 # 20 colors in each column
+for i in range(len(colors2)):
+ name = colors2[i]
  y =  - (i % Clen) * 0.5
  x = int(i / Clen) * 3.5
  shell = path.circle(x,y,0.2)
  c.fill(shell, [ pyx.color.cmyk.__dict__[name] ])
  c.text(x+0.5,y,name, [ text.halign.boxleft, text.valign.middle ] )
 
-c.writeEPSfile("pyx_colours2.eps")
-c.writePDFfile("pyx_colours2.pdf")
+c.writeEPSfile("pyx_colors2.eps")
+c.writePDFfile("pyx_colors2.pdf")
 
 # ------------
-# Figure 3: A list of colours, sorted by hue
+# Figure 3: A list of colors, sorted by hue
 
 c = canvas.canvas()
 
-colours3 = zip(colours,h_list)
-colours3.sort(lambda x,y: cmp(y[1],x[1]))
-for i in range(len(colours3)):
- name = colours3[i][0]
+colors3 = zip(colors,h_list)
+colors3.sort(lambda x,y: cmp(y[1],x[1]))
+for i in range(len(colors3)):
+ name = colors3[i][0]
  y =  - (i % Clen) * 0.5
  x = int(i / Clen) * 3.5
  shell = path.circle(x,y,0.2)
  c.fill(shell, [ pyx.color.cmyk.__dict__[name] ])
  c.text(x+0.5,y,name, [ text.halign.boxleft, text.valign.middle ] )
 
-c.writeEPSfile("pyx_colours3.eps")
-c.writePDFfile("pyx_colours3.pdf")
+c.writeEPSfile("pyx_colors3.eps")
+c.writePDFfile("pyx_colors3.pdf")
 

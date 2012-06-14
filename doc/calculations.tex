@@ -1,4 +1,4 @@
-% CALCULATIONS.TEX
+% calculations.tex
 %
 % The documentation in this file is part of PyXPlot <http://www.pyxplot.org.uk>
 %
@@ -20,7 +20,7 @@
 
 % LaTeX source for the PyXPlot Users' Guide
 
-\chapter{Performing Calculations}
+\chapter{Performing calculations}
 
 The previous chapter described how PyXPlot can be used to plot data directly
 from \datafile s onto graphs. Often, however, calculations need to be performed
@@ -61,18 +61,18 @@ hold string values -- i.e.\ to hold pieces of text -- and that such variables
 can have great power in allowing the user to auto-generate titles and labels
 for graphs.
 
-\section{Physical Constants} \label{sec:constants} \index{physical
+\section{Physical constants} \label{sec:constants} \index{physical
 constants}\index{constants}
 
 A wide range of mathematical and physical constants are pre-defined by default.
-A complete list of these can be obtained by typing {\tt show variables} or by
-consulting Chapter~\ref{ch:constants}. Some of these, for example, {\tt e},
-{\tt pi} and {\tt GoldenRatio} are standard mathematical constants, the last of
-these being the default aspect ratio of plots produced by PyXPlot. Many of the
-others are physical constants, which are prefixed with {\tt phy\_} to minimise
-clashes between their names and those of variables which the user may wish to
-define.  Nonetheless, pre-defined constants are no different from any other
-variables in PyXPlot, and the user can freely re-define them.
+A complete list of these can be obtained by typing {\tt show variables}; they
+are also listed in Chapter~\ref{ch:constants}. Some of these, for example, {\tt
+e}, {\tt pi} and {\tt goldenRatio} are standard mathematical constants, the
+last of these being the default aspect ratio of plots produced by PyXPlot. Many
+of the others are physical constants, which are prefixed with {\tt phy\_} to
+minimize clashes between their names and those of variables which the user may
+wish to define.  Nonetheless, pre-defined constants are no different from any
+other variables in PyXPlot, and the user can freely re-define them.
 
 Most of the pre-defined physical constants are not dimensionless quantities,
 and make use of PyXPlot's native ability to keep track of the physical units of
@@ -115,7 +115,7 @@ contained in a single algebraic expression, a subroutine should be used (see
 Section~\ref{sec:subroutines}); these allow an arbitrary numbers of lines of
 PyXPlot code to be executed whenever a function is evaluated.
 
-\subsection{Spliced Functions} \index{function splicing} \index{splicing
+\subsection{Spliced functions} \index{function splicing} \index{splicing
 functions}
 
 The definitions of functions can be declared to be valid only within a certain
@@ -253,28 +253,14 @@ expression for the sequence.  In the following script, we compare the values
 returned by these two implementations. We enable complex arithmetic as Binet's
 formula returns complex numbers for non-integer values of $x$.
 \nlscf
-\noindent {\tt f(x)~~~~~= 0.0}\newline
-\noindent {\tt f(x)[1:]~= 1.0}\newline
-\noindent {\tt f(x)[3:]~= f(x-1) + f(x-2)}\newline
-\\
-\noindent {\tt \# Binet's Formula for the Fibonacci numbers}\newline
-\noindent {\tt set numerics complex}\newline
-\noindent {\tt binet(x) = Re((GoldenRatio**x - (1-GoldenRatio)**x) / sqrt(5))}\newline
-\\
-\noindent {\tt set samples 100}\newline
-\noindent {\tt set xrange [0:9.5]}\newline
-\noindent {\tt set yrange [0:35]}\newline
-\noindent {\tt set xlabel "\$x\$"}\newline
-\noindent {\tt set ylabel "\$y\$"}\newline
-\noindent {\tt set key bottom right}\newline
-\noindent {\tt plot f(x) , binet(x)}
+\input{examples/tex/ex_funcsplice_1.tex}
 \nlscf
 \begin{center}
 \includegraphics[width=\textwidth]{examples/eps/ex_funcsplice}
 \end{center}
 }
 
-\section{Handling Numerical Errors}
+\section{Handling numerical errors}
 \label{sec:num_errs}
 \index{numerical errors}
 
@@ -309,7 +295,7 @@ be re-enabled by typing: \indcmd{set numeric errors explicit}
 set numeric errors explicit
 \end{verbatim}
 
-\section{Working with Complex Numbers}
+\section{Working with complex numbers}
 \label{sec:complex_numbers}
 \index{complex numbers}
 
@@ -387,7 +373,7 @@ these functions:
 \noindent{\tt 0.5}
 \vspace{3mm}
 
-\section{Working with Physical Units}
+\section{Working with physical units}
 \label{sec:units}
 \index{physical units}\index{units}
 
@@ -486,7 +472,7 @@ discussed in Chapter~\ref{ch:configuration}. New units may either be derived
 from existing SI units, alternative measures of existing quantities, or
 entirely new base units such as numbers of CPU cycles or man-hours of labour.
 
-\subsection{Treatment of Angles in PyXPlot}
+\subsection{Treatment of angles in PyXPlot}
 \label{sec:angles}
 \index{units!angle}\index{angles, handling of}
 
@@ -533,7 +519,7 @@ dimensionally correct.  Nonetheless, the $\exp()$ function and all of the
 trigonometric functions continue to accept not only quantities with dimensions
 of angles, but also dimensionless numbers, as inputs.
 
-\subsection{Converting between different Temperature Scales}
+\subsection{Converting between different temperature scales}
 \index{temperature conversions}\index{units!temperature}
 
 PyXPlot's facilities for converting quantities between different physical units
@@ -609,21 +595,14 @@ convert all of your temperatures to that scale, and then stick to it.
 In this example, we use PyXPlot's automatic conversion of physical units to
 create a temperature conversion scale.
 \nlscf
-\noindent{\tt set size ratio 1e-2}\newline
-\noindent{\tt set axis x2 linked x using x*unit(oC)/unit(oF)}\newline
-\noindent{\tt set axis y invisible}\newline
-\noindent{\tt set xtics outward -10,10}\newline
-\noindent{\tt set x2tics outward 20,20}\newline
-\noindent{\tt set xlabel "\$\^{}$\backslash$circ\$C"}\newline
-\noindent{\tt set x2label "\$\^{}$\backslash$circ\$F"}\newline
-\noindent{\tt plot [-10:100]}\newline
+\input{examples/tex/ex_tempscale_1.tex}
 \nlscf
 \begin{center}
 \includegraphics{examples/eps/ex_tempscale}
 \end{center}
 }
 
-\section{Configuring how Numbers are Displayed}
+\section{Configuring how numbers are displayed}
 \label{sec:unitdisp}
 
 \subsection{Units}
@@ -742,7 +721,7 @@ set unit display prefix
 set unit display noprefix
 \end{verbatim}
 
-\subsection{Changing the Accuracy to which Numbers are Displayed}
+\subsection{Changing the accuracy to which numbers are displayed}
 
 By default, when numbers are displayed, they are printed accurate to eight
 significant figures, although fewer figures may actually be displayed if the
@@ -787,7 +766,7 @@ displayed on a one-by-one basis, as in the examples:
 }
 
 
-\subsection{Creating Pastable Text}
+\subsection{Creating pastable text}
 \label{sec:pastable}
 
 PyXPlot's default convention of displaying numbers in a format such as
@@ -820,7 +799,7 @@ case produces text which forms a valid algebraic expression which could be
 pasted into another PyXPlot calculation. The final case produces a string of
 \LaTeX\ text which could be used as a label on a plot.
 
-\section{Numerical Integration and Differentiation}
+\section{Numerical integration and differentiation}
 
 \index{differentiation}\index{integration} Two special functions,
 \indfunt{int\_dx()} and \indfunt{diff\_dx()}, may be used to integrate or
@@ -888,17 +867,12 @@ evaluation of the numerical integral may be time consuming on older computers.
 We use the \indcmdt{set xformat} (see Section~\ref{sec:set_xformat}) to demark
 both the {\tt x}- and {\tt y}-axes in fractions of $\pi$:
 \nlscf
-\noindent{\tt set samples 80}\newline
-\noindent{\tt set key bottom right}\newline
-\noindent{\tt set xformat "\%s\$$\backslash$pi\$"\%(x/pi)}\newline
-\noindent{\tt set yformat "\%s\$$\backslash$pi\$"\%(y/pi)}\newline
-\noindent{\tt set xrange [-5*pi:5*pi]}\newline
-\noindent{\tt plot int\_dz(sinc(z),0,x)}
+\input{examples/tex/ex_integration_1.tex}
 \nlscf
 \centerline{\includegraphics[width=\textwidth]{examples/eps/ex_integration}}
 }
 
-\section{Solving Systems of Equations}
+\section{Solving systems of equations}
 
 The \indcmdt{solve} can be used to solve simple systems of one or more
 equations numerically. It takes as its arguments a comma-separated list of the
@@ -987,9 +961,9 @@ the following example:
 \noindent{\tt 0.5}
 \vspace{3mm}
 
-\section{Searching for Minima and Maxima of Functions}
+\section{Searching for minima and maxima of functions}
 
-The \indcmd{minimise}\indcmd{maximise} {\tt minimise} and {\tt maximise}
+The \indcmd{minimize}\indcmd{maximize} {\tt minimize} and {\tt maximize}
 commands can be used to find the minima or maxima of algebraic expressions. In
 each case, a single algebraic expression should be supplied for optimisation,
 together with a comma-separated list of the variables with respect to which it
@@ -999,7 +973,7 @@ function $\cos(x)$ is sought:
 \vspace{3mm}
 \noindent{\tt pyxplot> {\bf set numerics real}}\newline
 \noindent{\tt pyxplot> {\bf x=0.1}}\newline
-\noindent{\tt pyxplot> {\bf minimise cos(x) via x}}\newline
+\noindent{\tt pyxplot> {\bf minimize cos(x) via x}}\newline
 \noindent{\tt pyxplot> {\bf print x/pi}}\newline
 \noindent{\tt 1}
 \vspace{3mm}
@@ -1008,7 +982,7 @@ function $\cos(x)$ is sought:
 arithmetic is enabled, since $\cos(x)$ diverges to $-\infty$ at $x=\pi+\infty
 i$.
 
-Various caveats apply both to the {\tt minimise} and {\tt maximise} commands,
+Various caveats apply both to the {\tt minimize} and {\tt maximize} commands,
 as well as to the {\tt solve} command.  All of these commands operate by
 searching numerically for optimal sets of input parameters to meet the criteria
 set by the user. As with all numerical algorithms, there is no guarantee that
@@ -1035,7 +1009,7 @@ B_\nu(\nu,T)=\left(\frac{2h^3}{c^2}\right)\frac{\nu^3}{\exp(h\nu/kT)-1}
 \end{displaymath}
 The visible surface of the Sun has a temperature of approximately
 $5800\,\mathrm{K}$ and radiates in such a fashion. In this example, we use the
-{\tt solve}, {\tt minimise} and {\tt maximise} commands to locate the frequency
+{\tt solve}, {\tt minimize} and {\tt maximize} commands to locate the frequency
 of light at which it emits the most energy per unit frequency interval.  This
 task is simplified as PyXPlot has a system-defined mathematical function {\tt
 Bv(nu,T)} which evaluates the expression given above.
@@ -1047,12 +1021,12 @@ visualising the solution to this problem:
 \includegraphics[width=\textwidth]{examples/eps/ex_eqnsolve}
 \end{center}
 \nlnp
-To search for the maximum of this function using the \indcmdt{maximise}, we
+To search for the maximum of this function using the \indcmdt{maximize}, we
 must provide an initial guess to indicate that the answer sought should have
 units of Hz:
 \nlscf
 \noindent {\tt pyxplot> {\bf nu = 1e14*unit(Hz)}}\newline
-\noindent {\tt pyxplot> {\bf maximise Bv(nu,5800*unit(K)) via nu}}\newline
+\noindent {\tt pyxplot> {\bf maximize Bv(nu,5800*unit(K)) via nu}}\newline
 \noindent {\tt pyxplot> {\bf print nu}}\newline
 \noindent {\tt 340.9781 THz}
 \nlnp
@@ -1074,7 +1048,7 @@ Finally, this maximum could also be found using PyXPlot's built-in function {\tt
 \noindent {\tt 340.9781 THz}
 }
 
-\section{Working with Time-Series Data}
+\section{Working with time-series data}
 \label{sec:time_series}
 
 Time-series data often need special consideration when intervals of days or
@@ -1267,7 +1241,7 @@ in the Western calendar?
 \noindent {\tt Sun 1910 Nov 20 12:00:00}
 }
 
-\subsection{Time Intervals}
+\subsection{Time intervals}
 
 Two functions are provided for measuring the time intervals elapsed between
 pairs of Julian Day numbers.  These are useful when an experiment is started at
@@ -1342,9 +1316,9 @@ produce a plot of the rate of downloads from an Apache webserver based upon the
 download log which it stores in the file {\tt /var/log/apache2/access.log}.
 This file contain a line of the following form for each page or file requested
 from the webserver:
-\vspace{3mm}\newline\noindent{\tt\footnotesize 127.0.0.1 - - [14/Apr/2010:16:05:36 +0100] "GET / HTTP/1.1" 200 2623 "-" "Mozilla/5.0 (X11; U; Linux x86\_64; en-GB; rv:1.9.1.9) Gecko/20100402 Ubuntu/9.10 (karmic) Firefox/3.5.9"}\vspace{3mm}\newline
+\vspace{3mm}\newline\noindent{\tt\footnotesize 127.0.0.1 - - [14/Jun/2012:16:43:18 +0100] "GET / HTTP/1.1" 200 484 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 (KHTML, like Gecko) Ubuntu/12.04 Chromium/18.0.1025.151 Chrome/18.0.1025.151 Safari/535.19"}\vspace{3mm}\newline
 However, PyXPlot's default input filter for {\tt .log} files (see Section~\ref{sec:filters}) manipulates the dates in strings such as these into the form
-\vspace{3mm}\newline\noindent{\tt\footnotesize 127.0.0.1 - -~~[~14~~4~~2010~16~05~36~+0100~]~~"GET~~~HTTP 1.1" 200 2623 "-" "Mozilla 5.0 (X11; U; Linux x86\_64; en-GB; rv 1.9.1.9) Gecko 20100402 Ubuntu 9.10 (karmic) Firefox 3.5.9"}\vspace{3mm}\newline
+\vspace{3mm}\newline\noindent{\tt\footnotesize 127.0.0.1 - -~~[~14~~6~~2012~16~43~18~+0100~]~~"GET~~~HTTP 1.1" 200 484 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 (KHTML, like Gecko) Ubuntu/12.04 Chromium/18.0.1025.151 Chrome/18.0.1025.151 Safari/535.19"}\vspace{3mm}\newline
 such that the day, month, year, hour, minute and second components of the date
 are contained in the 5th to 10th white-space-separated columns respectively.
 In the script below, the {\tt time\_\-julianday()} is then used to convert
@@ -1355,10 +1329,7 @@ time-consuming process for large log files on busy servers, we use the
 \indcmdt{tabulate} (see Section~\ref{sec:tabulate}) to store the data into a
 temporary datafile on disk before deciding how to plot it:
 \nlscf
-\noindent{\tt set output 'apache.dat'}\newline
-\noindent{\tt histogram f() '/var/log/apache2/access.log' $\backslash$}\newline
-\noindent{\tt \phantom{xxxxx} using time\_julianday(\$7,\$6,\$5,\$8,\$9,\$10) binwidth 1/24}\newline
-\noindent{\tt tabulate f(x) with format "\%16f \%16f"}
+\input{examples/tex/ex_apachelog_1.tex}
 \nlscf
 Having stored our histogram in the file {\tt apache.dat}, we
 now plot the resulting histogram, labelling the horizontal axis with the days
@@ -1368,12 +1339,7 @@ axis are placed not at integer Julian Days, which fall at midday on each day,
 but at ---$.5$, which falls at midnight on each day. Minor axis ticks are
 placed along the axis every quarter day, i.e.\ every six hours.
 \nlscf
-\noindent{\tt set xlabel 'Day'}\newline
-\noindent{\tt set ylabel 'Rate of downloads per day'}\newline
-\noindent{\tt set xtics 0.5, 1}\newline
-\noindent{\tt set mxtics 0.5, 0.25}\newline
-\noindent{\tt set xformat "\%s"\%(time\_dayweekname(x,0)) rotate unit(30*deg)}\newline
-\noindent{\tt plot "apache.dat" notitle with lines}
+\input{examples/tex/ex_apachelog_2.tex}
 \nlscf
 The plot below shows the graph which results on a moderately busy webserver
 which hosts, among many other sites, the PyXPlot website:

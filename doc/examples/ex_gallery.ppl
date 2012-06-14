@@ -27,6 +27,7 @@ title = "ex_gallery"
 load "examples/fig_init.ppl"
 set term color
 
+# BEGIN
 set multiplot
 set nodisplay
 width=5.4
@@ -69,6 +70,7 @@ plot "examples/ex_barchart1.dat" with steps, "" with points
 # Now that we are finished preparing multiplot, turn display on
 set display
 refresh
+# END
 
 # Call common cleanup script
 load "examples/fig_end.ppl"

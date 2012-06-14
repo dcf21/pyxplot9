@@ -1,4 +1,4 @@
-% PROGRAMMING.TEX
+% programming.tex
 %
 % The documentation in this file is part of PyXPlot
 % <http://www.pyxplot.org.uk>
@@ -21,7 +21,7 @@
 
 % LaTeX source for the PyXPlot Users' Guide
 
-\chapter{Programming and Flow Control}
+\chapter{Programming and flow control}
 
 In this chapter we describe the facilities which PyXPlot has for automating
 repetitive tasks. We begin by introducing string variables, which can be useful
@@ -34,7 +34,7 @@ a simple framework for automatically re-executing PyXPlot scripts whenever they
 change, allowing plots to be automatically regenerated whenever the scripts
 used to produce them are modified.
 
-\section{String Variables}
+\section{String variables}
 \label{sec:stringvars}
 \index{variables!string}
 
@@ -49,7 +49,7 @@ plotname = "Insert title here"
 set title plotname
 \end{verbatim}
 
-\subsection{The String Substitution Operator}
+\subsection{The string substitution operator}
 \label{sec:stringsubop}
 
 Most string manipulations are performed using the string substitution operator,
@@ -131,7 +131,7 @@ to be substituted, as happens in C's {\tt printf} command:
 \noindent{\tt 3.141593}
 \vspace{3mm}
 
-\subsection{Regular Expressions}
+\subsection{Regular expressions}
 
 String variables can be modified using the search-and-replace string
 operator\index{string operators!search and replace}\footnote{Programmers with
@@ -192,7 +192,7 @@ recognised by the =$\sim$ operator.
 \label{tab:re_flags}
 \end{table}
 
-\subsection{String Manipulation Functions}
+\subsection{String manipulation functions}
 
 The following functions are provided for performing simple manipulations upon
 strings:
@@ -314,7 +314,7 @@ else if (x> 0) { ; print "x is positive" ; } \
 else           { ; print "x is negative" ; }
 \end{verbatim}
 
-\section{For Loops}
+\section{For loops}
 
 For loops may be used to execute a series of commands multiple times. PyXPlot's
 \indcmdt{for} has the syntax:
@@ -351,7 +351,7 @@ The optional {\tt loopname} which can be specified in the {\tt for} statement
 is used in conjunction with the {\tt break} and {\tt continue} statements which
 will be introduced in Section~\ref{sec:breakcontinue}.
 
-\section{Foreach Loops}
+\section{Foreach loops}
 \indcmd{foreach}
 \index{wildcards}
 
@@ -406,7 +406,7 @@ foreach x in "foo_*.dat" "bar_*.dat"
  }
 \end{verbatim}
 
-\section{Foreach Datum Loops}
+\section{Foreach datum loops}
 \label{sec:foreach_datum}
 
 Foreach datum loops are similar to foreach loops in that they run a script
@@ -432,7 +432,7 @@ variable, {\tt name}, is set using a quoted string, indicating that it will be
 set to equal whatever string of text is found in the third column of the
 \datafile.
 
-\example{ex:meansd}{Calculating the Mean and Standard Deviation of Data}{
+\example{ex:meansd}{Calculating the mean and standard deviation of data}{
 The following PyXPlot script calculates the mean and standard deviation of a
 set of \datapoint s using the \indcmdt{foreach datum}:
 \nlscf
@@ -463,7 +463,7 @@ set of \datapoint s using the \indcmdt{foreach datum}:
 $0.133$ are returned.
 }
 
-\section{While and Do Loops}
+\section{While and do loops}
 
 The \indcmdt{while} may be used to continue running a script block until some
 stopping criterion is met. Two types of while loop are supported:
@@ -547,7 +547,7 @@ foreach i in "*.dat" loopname DatafileLoop
 statements may be followed by the name of the loop to be broken out of,
 allowing the user to act upon loops other than the innermost one.
 
-\section{Conditional Functions}
+\section{Conditional functions}
 \indfun{conditionalN($a,b,c$)}
 \indfun{conditionalS($a,b,c$)}
 
@@ -644,51 +644,20 @@ solution being sought. The Newton fractal is formed by asking which solution
 the iteration converges upon, as a function of the position of the initial
 guess $c$ in the complex plane. In the case of the cubic polynomial
 $f(z)=z^3-1$, which has three solutions, a map might be generated with points
-coloured red, green or blue to represent convergence towards the three roots.
+colored red, green or blue to represent convergence towards the three roots.
 \nlnp
 If $c$ is close to one of the roots, then convergence towards that particular
 root is guaranteed, but further afield the map develops a fractal structure. In
 this example, we define a PyXPlot subroutine to produce such a map as a
-function of $c=x+iy$, and then plot the resulting map using the {\tt colourmap}
-plot style (see Section~\ref{sec:colourmaps}).  To make the fractal prettier --
-it contains, after all, only three colours as strictly defined -- we vary the
+function of $c=x+iy$, and then plot the resulting map using the {\tt colormap}
+plot style (see Section~\ref{sec:colormaps}).  To make the fractal prettier --
+it contains, after all, only three colors as strictly defined -- we vary the
 brightness of each point depending upon how many iterations are required before
 the series ventures within a distance of $|z_n-r_i|<10^{-2}$ of any of the
 roots $r_i$.
 
 \nlscf
-\noindent{\tt set numerics complex}\newline
-\noindent{\tt set unit angle nodimensionless}\newline
-\\
-\noindent{\tt Root1 = exp(i*unit(  0*deg))}\newline
-\noindent{\tt Root2 = exp(i*unit(120*deg))}\newline
-\noindent{\tt Root3 = exp(i*unit(240*deg))}\newline
-\\
-\noindent{\tt Tolerance = 1e-2}\newline
-\\
-\noindent{\tt subroutine NewtonFractal(x,y)}\newline
-\noindent{\tt \phantom{x}\{}\newline
-\noindent{\tt \phantom{xx}z = x+i*y;}\newline
-\noindent{\tt \phantom{xx}iter = 0}\newline
-\noindent{\tt \phantom{xx}while (1)}\newline
-\noindent{\tt \phantom{xxx}\{}\newline
-\noindent{\tt \phantom{xxxx}z = z - (z**3-1)/(3*z**2)}\newline
-\noindent{\tt \phantom{xxxx}if abs(z-Root1)$<$Tolerance \{ ; return 1 ; \}}\newline
-\noindent{\tt \phantom{xxxx}if abs(z-Root2)$<$Tolerance \{ ; return 2 ; \}}\newline
-\noindent{\tt \phantom{xxxx}if abs(z-Root3)$<$Tolerance \{ ; return 3 ; \}}\newline
-\noindent{\tt \phantom{xxxx}iter = iter + 1}\newline
-\noindent{\tt \phantom{xxx}\}}\newline
-\noindent{\tt \phantom{x}\}}\newline
-\\
-\noindent{\tt \# Plot Newton fractal}\newline
-\noindent{\tt set size square}\newline
-\noindent{\tt set key below}\newline
-\noindent{\tt set xrange [-1.5:1.5]}\newline
-\noindent{\tt set yrange [-1.5:1.5]}\newline
-\noindent{\tt set sample grid 250x250}\newline
-\noindent{\tt set colmap hsb(c1*0.667):(0.8+0.2*c2):(1.0-0.8*c2)}\newline
-\noindent{\tt set log c2}\newline
-\noindent{\tt plot NewtonFractal(x,y):iter+2 with colourmap}
+\input{examples/tex/ex_newton_1.tex}
 \nlscf
 \begin{center}
 \includegraphics[width=8cm]{examples/eps/ex_newton}
@@ -728,18 +697,7 @@ Below, we produce a plot of Equations~(\ref{eq:pendulum_approx}) and
 dimensionless period of the pendulum to eliminate $g$ and $l$, and a swing
 amplitude of $\pm30^\circ$ is assumed:
 \nlscf
-{\footnotesize
-\noindent{\tt theta\_approx(a,t) = a * sin(2*pi*t)}\newline
-\noindent{\tt theta\_exact (a,t) = 2*asin(sin(a/2)*jacobi\_sn(2*pi*t,sin(a/2)))}\newline
-}\\{\footnotesize
-\noindent{\tt set unit of angle degrees}\newline
-\noindent{\tt set key below}\newline
-\noindent{\tt set xlabel 'Time / \$$\backslash$sqrt\{g/l\}\$'}\newline
-\noindent{\tt set ylabel '\$$\backslash$theta\$'}\newline
-\noindent{\tt omega = unit(30*deg)}\newline
-\noindent{\tt plot [0:4] theta\_approx(omega,x) title 'Approximate solution', $\backslash$}\newline
-\noindent{\tt \phantom{xxxxxxxxxxx}theta\_exact (omega,x) title 'Exact solution'}
-}
+\input{examples/tex/ex_pendulum_1.tex}
 \nlscf
 \centerline{\includegraphics[width=9cm]{examples/eps/ex_pendulum}}
 \nlnp
@@ -752,26 +710,7 @@ function of amplitude $\omega$ for three deviation thresholds. Because this
 subroutine takes a significant amount of time to run, we only compute~40
 samples for each value of $\psi$:
 \nlscf
-{\footnotesize
-\noindent{\tt subroutine PendulumDivergenceTime(omega, psi)}\newline
-\noindent{\tt \phantom{x}\{}\newline
-\noindent{\tt \phantom{xx}for t=0 to 20 step 0.05}\newline
-\noindent{\tt \phantom{xxx}\{}\newline
-\noindent{\tt \phantom{xxxx}approx = theta\_approx(omega,t)}\newline
-\noindent{\tt \phantom{xxxx}exact  = theta\_exact (omega,t)}\newline
-\noindent{\tt \phantom{xxxx}if (abs(approx-exact)$>$psi) \{ ;break; \}}\newline
-\noindent{\tt \phantom{xxx}\}}\newline
-\noindent{\tt \phantom{xx}return t}\newline
-\noindent{\tt \phantom{x}\}}
-}\\{\footnotesize
-\noindent{\tt set xlabel 'Amplitude of swing'}\newline
-\noindent{\tt set ylabel 'Time / \$$\backslash$sqrt\{g/l\}\$ taken to diverge'}\newline
-\noindent{\tt set samples 40}\newline
-\noindent{\tt plot [unit(5*deg):unit(30*deg)][0:19] $\backslash$}\newline
-\noindent{\tt \phantom{xx}PendulumDivergenceTime(x,unit(20*deg)) title "\$20\^{}$\backslash$circ\$ deviation", $\backslash$}\newline
-\noindent{\tt \phantom{xx}PendulumDivergenceTime(x,unit(10*deg)) title "\$10\^{}$\backslash$circ\$ deviation", $\backslash$}\newline
-\noindent{\tt \phantom{xx}PendulumDivergenceTime(x,unit( 5*deg)) title "\$ 5\^{}$\backslash$circ\$ deviation"}
-}
+\input{examples/tex/ex_pendulum_2.tex}
 \nlscf
 \centerline{\includegraphics[width=9cm]{examples/eps/ex_pendulum2}}
 }
@@ -845,7 +784,7 @@ exec "set terminal %s"%(terminal)
 \end{verbatim}
 
 \noindent It can also be used to write obfuscated PyXPlot scripts, and its use
-should be minimised wherever possible.
+should be minimized wherever possible.
 
 \section{Assertions}
 \index{assertions}
@@ -872,7 +811,7 @@ assert version <  0.8  "This script is designed for PyXPlot 0.7"
 \end{verbatim}
 
 
-\section{Shell Commands}
+\section{Shell commands}
 
 Shell commands\index{shell commands!executing} may be executed directly from
 within PyXPlot by prefixing them with an \indcmdts{!} character. The
@@ -927,7 +866,7 @@ directory of the shell in which the single command is executed:
 cd ..
 \end{dodo}
 
-\section{Script Watching: pyxplot\_watch}
+\section{Script watching: pyxplot\_watch}
 
 PyXPlot includes a simple tool for watching command script files and executing
 them whenever they are modified. This may be useful when developing a command

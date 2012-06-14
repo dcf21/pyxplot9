@@ -1,4 +1,4 @@
-% FIT_MATHS.TEX
+% fit_maths.tex
 %
 % The documentation in this file is part of PyXPlot
 % <http://www.pyxplot.org.uk>
@@ -21,7 +21,7 @@
 
 % LaTeX source for the PyXPlot Users' Guide
 
-\chapter{The {\tt fit} Command: Mathematical Details}
+\chapter{The {\tt fit} Command: mathematical details}
 \chaptermark{Details of the {\tt fit} command}
 \label{ch:fit_maths}
 
@@ -60,7 +60,7 @@ probable, given these observations. The probability of any given $\mathbf{u}$
 is written
 $\mathrm{P}\left( \mathbf{u} | \left\{ \mathbf{x}_i, f_i, \sigma_i \right\} \right)$.
 
-\section{The Probability Density Function}
+\section{The probability density function}
 \label{sec:bayes_pdf}
 
 Bayes' Theorem states that:
@@ -121,7 +121,7 @@ process. It is this quantity, the familiar sum-of-square-residuals, that we
 numerically maximise to find our best-fitting set of parameters, which I shall
 refer to from here on as $\mathbf{u}^0$.
 
-\section{Estimating the Error in $\mathbf{u}^0$}
+\section{Estimating the error in $\mathbf{u}^0$}
 
 To estimate the error in the best-fitting parameter values that we find, we
 assume $\mathrm{P}\left( \mathbf{u} | \left\{ \mathbf{x}_i, f_i, \sigma_i
@@ -194,7 +194,7 @@ elliptical equi-probability contours in directions which are, in general, not
 aligned with their principal axes. To achieve this, we first convert our
 Hessian matrix into a covariance matrix.
 
-\section{The Covariance Matrix}
+\section{The covariance matrix}
 \index{covariance matrix}
 
 The terms of the covariance matrix $V_{ij}$ are defined by:
@@ -282,7 +282,7 @@ V_{ij} = \frac{-\mathbf{A}^\dagger}{\mathrm{Det}(\mathbf{-A})} \equiv (-\mathbf{
 
 \noindent which proves the result stated earlier.
 
-\section{The Correlation Matrix}
+\section{The correlation matrix}
 \label{sec:correlation_matrix}
 \index{correlation matrix}
 

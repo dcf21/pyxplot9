@@ -26,6 +26,10 @@ os.system("rm -Rf examples/tex")
 os.system("mkdir  examples/tex")
 
 def line_texify(line):
+  if line.beginswith("#NC "): line=line[4:]
+  line = re.sub(r'examples/eps/ex_','',line)
+  line = re.sub(r'examples/ex_','',line)
+  line = re.sub(r'examples/','',line)
   line = re.sub(r'[\\]', r'gpzywxqqq', line) # LaTeX does not like backslashs
   line = re.sub(r'[_]', r'\\_', line) # LaTeX does not like underscores....
   line = re.sub(r'[&]', r'\\&', line) # LaTeX does not like ampersands....
@@ -39,18 +43,24 @@ def line_texify(line):
   line = re.sub(r'[<]', r'$<$', line) # LaTeX does not like < outside of mathmode....
   line = re.sub(r'[>]', r'$>$', line) # LaTeX does not like > outside of mathmode....
   line = re.sub(r'gpzywxqqq', r'$\\backslash$', line) # LaTeX does not like backslashs
+  line = re.sub(r' ', r'~', line)
   return line
 
 def makeTeX(fname, counter, linelist):
   fname  = os.path.join("examples","tex",os.path.split(fname)[1][:-4]+"_%d.tex"%counter)
   output = open(fname,"w")
   fns    = max([len(l) for l in linelist]) > 50
+  first  = True
   if fns: output.write("{\\footnotesize\n")
   for line in linelist:
+    if (not first):
+      output.write("\\newline\n")
     if (len(line.strip())==0):
-      if fns: output.write("}\\\\{\\footnotesize")
+      if fns: output.write("}\\\\{\\footnotesize\n")
       else  : output.write("\\\\\n")
+      first = True
       continue
+    first = False
     line = line_texify(line)
     for i in range(len(line)):
       if (line[i]!=' '):
@@ -62,8 +72,8 @@ def makeTeX(fname, counter, linelist):
       line = line2
     else:
       line = line.strip()
-    output.write("\\noindent{\\tt %s}\\newline\n"%line)
-  if fns: output.write("}\n")
+    output.write("\\noindent{\\tt %s}"%line)
+  if fns: output.write("\n}")
   output.close()
 
 files = glob.glob("examples/ex_*.ppl")

@@ -1,4 +1,4 @@
-% TERMINALS.TEX
+% terminals.tex
 %
 % The documentation in this file is part of PyXPlot
 % <http://www.pyxplot.org.uk>
@@ -21,7 +21,7 @@
 
 % LaTeX source for the PyXPlot Users' Guide
 
-\chapter{Producing Image Files}
+\chapter{Producing image files}
 \label{ch:image_formats}
 
 PyXPlot is able to produce graphical output in a wide range of image formats,
@@ -31,12 +31,12 @@ jpeg. Additionally, it can produce graphical output for immediate preview on
 screen. In this chapter we describe how to select and control which image
 format should be used.
 
-\section{The {\tt set terminal} Command}
+\section{The {\tt set terminal} command}
 \label{sec:set_terminal}
 
 The \indcmdt{set terminal} is used to select the image format in which output
 should be produced, and also to specify a range of fine controls such as
-whether output should be in colour or black-and-white. In its simplest usage,
+whether output should be in color or black-and-white. In its simplest usage,
 the command is followed by the name of the output image format which is to be
 used, which may be any of the options listed in Table~\ref{tab:output_terminals}.
 
@@ -46,7 +46,7 @@ used, which may be any of the options listed in Table~\ref{tab:output_terminals}
 \label{tab:output_terminals}
 \end{table}
 
-\subsection{Previewing Graphs On Screen}
+\subsection{Previewing graphs on the screen}
 \index{X11 terminal}
 
 Three output terminal produce immediate previews to the screen: {\tt
@@ -82,7 +82,7 @@ X11\_\-Multi\-Window} but keeps plot windows open after PyXPlot terminates in
 distinction from the above two terminals, which close all plot windows upon
 exit.
 
-\subsection{Producing Images on Disk}
+\subsection{Producing images on disk}
 
 The remaining terminals listed in Table~\ref{tab:output_terminals} direct
 graphical output to disk in a selection of rasterised and vector graphics
@@ -103,7 +103,7 @@ section of a configuration file (see Chapter~\ref{ch:configuration}).\index{set
 terminal command!dpi modifier@{\tt dpi} modifier}\index{bitmap
 output!resolution}\index{image resolution}
 
-\subsection{The Complete Syntax of the {\tt set terminal} Command}
+\subsection{The complete syntax of the {\tt set terminal} command}
 
 In addition to being used to select the graphical format in which output should
 be produced, the \indcmdt{set terminal} takes many options for fine-tuning the
@@ -113,7 +113,7 @@ behaviours of particular terminals. Its complete syntax is:
 set terminal ( X11_SingleWindow | X11_MultiWindow | X11_Persist |
                bmp | eps | gif | jpeg | pdf | png | postscript |
                svg | tiff )
-             ( colour | color | monochrome )
+             ( color | color | monochrome )
              ( dpi <value> )
              ( portrait | landscape )
              ( invert | noinvert )
@@ -137,23 +137,23 @@ The following table lists the effects which each of these settings has:
 {\tt postscript} & As above, but sends output to a PostScript file. {\bf [default when running non-interactively; see below]}\index{PostScript output}\\
 {\tt svg} & As above, but produces an svg image.\footnote{The {\tt svg} output terminal is experimental and may be unstable. It relies upon the use of the {\tt svg} output device in Ghostscript, which may not be present on all systems.}\index{svg output}\\
 {\tt tiff} & As above, but produces a tiff image. This is a bitmap graphics terminal.\index{tiff output}\\
-{\tt colour} & Allows datasets to be plotted in colour. Automatically they will be displayed in a series of different colours, or alternatively colours may be specified using the {\tt with colour} plot modifier (see below). {\bf [default]}\index{colour output}\\
+{\tt color} & Allows datasets to be plotted in color. Automatically they will be displayed in a series of different colors, or alternatively colors may be specified using the {\tt with color} plot modifier (see below). {\bf [default]}\index{color output}\\
 {\tt color} & Equivalent US spelling of the above. \\
 {\tt monochrome} & Opposite to the above; all datasets will be plotted in black by default.\index{monochrome output}\\
 {\tt dpi} & Sets the number of dots per inch at which rasterised graphic output should be sampled (i.e.\ the output image resolution)\\
 {\tt portrait} & Sets plots to be displayed in upright (normal) orientation. {\bf [default]}\index{portrait orientation}\\
 {\tt landscape} & Opposite of the above; produces side-ways plots. Not very useful when displayed on the screen, but you fit more on a sheet of paper that way around.\index{landscape orientation}\\
-{\tt invert} & Modifier for the bitmap output terminals identified above -- i.e.\ the {\tt bmp}, {\tt gif}, {\tt jpeg}, {\tt png} and {\tt tiff} terminals -- which produces output with inverted colours.\footnote{This terminal setting is useful for producing plots to embed in talk slideshows, which often contain bright text on a dark background. It only works when producing bitmapped output, though a similar effect can be achieved in PostScript using the {\tt set textcolour} and {\tt set axescolour} commands (see Section~\ref{sec:set_colours}).}\index{colours!inverting}\\
+{\tt invert} & Modifier for the bitmap output terminals identified above -- i.e.\ the {\tt bmp}, {\tt gif}, {\tt jpeg}, {\tt png} and {\tt tiff} terminals -- which produces output with inverted colors.\footnote{This terminal setting is useful for producing plots to embed in talk slideshows, which often contain bright text on a dark background. It only works when producing bitmapped output, though a similar effect can be achieved in PostScript using the {\tt set textcolor} and {\tt set axescolor} commands (see Section~\ref{sec:set_colors}).}\index{colors!inverting}\\
 {\tt noinvert} & Modifier for the bitmap output terminals identified above; opposite to the above. {\bf [default]}\\
 {\tt transparent} & Modifier for the {\tt gif} and {\tt png} terminals; produces output with a transparent background.\index{transparent terminal}\index{gif output!transparency}\index{png output!transparency}\\
 {\tt solid} & Modifier for the {\tt gif} and {\tt png} terminals; opposite to the above. {\bf [default]}\\
-{\tt antialias} & Modifier for the bitmap output terminals identified above; produces antialiased output, with colour boundaries smoothed to disguise the effects of pixelisation {\bf [default]}\\
+{\tt antialias} & Modifier for the bitmap output terminals identified above; produces antialiased output, with color boundaries smoothed to disguise the effects of pixelisation {\bf [default]}\\
 {\tt noantialias} & Modifier for the bitmap output terminals identified above; opposite to the above\\
 {\tt enlarge} & Enlarge or shrink contents to fit the current paper size.\index{enlarging output}\\
 {\tt noenlarge} & Do not enlarge output; opposite to the above. {\bf [default]}\\
 \end{longtable}
 
-\section{The Default Terminal}
+\section{The default terminal}
 
 The default terminal is normally {\tt X11\_SingleWindow}, except when PyXPlot
 is used non-interactively -- i.e.\ one or more command scripts are specified on
@@ -172,13 +172,13 @@ environment variable} is not set, PyXPlot detects that it has access to no
 X-terminal on which to display plots, and defaults to the {\tt eps}
 terminal.
 
-\section{PostScript Output}
+\section{PostScript output}
 
 If the {\tt enlarge} modifier is used with the \indcmdt{set terminal} then the
 whole plot is enlarged, or, in the case of large plots, shrunk, to the current
 paper size, minus a small margin. The aspect ratio of the plot is preserved.
 
-\subsection{Paper Sizes}
+\subsection{Paper sizes}
 \label{sec:set_papersize}
 
 By default, the {\tt postscript} terminal, and the {\tt enlarge} terminal
@@ -201,7 +201,7 @@ Swedish extensions to this system, and the Japanese B-series, can be found on
 Wikipedia: \url{http://en.wikipedia.org/wiki/Paper_size}.}\index{Kuhn,
 Marcus}\index{paper sizes}
 
-\section{Backing Up Over-Written Files}
+\section{Backing up over-written files}
 \index{overwriting files}\index{backup files}\label{sec:file_backup}
 
 By default, when graphical output is sent to a file -- i.e.\ a PostScript file
