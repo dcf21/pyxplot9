@@ -41,11 +41,11 @@ set output "examples/eps/ex_pi_estimation.dat"
 tabulate 1-2*rand():1-2*rand() using 0:2:3
 
 n=0
-foreach datum i,j in 'random.dat' using 2:3
+foreach datum i,j in "examples/eps/ex_pi_estimation.dat" u 2:3
  {
   n = n + (hypot(i,j)<1)
  }
-print "pi=\%s"\%(n / Nsamples * 4)
+print "pi=%s"%(n / Nsamples * 4)
 # END
 
 # BEGIN
@@ -59,7 +59,7 @@ circle at 0,0 radius width/2 with lt 2
 # Now plot the positions of these random data points andi
 # count how many lie within a unit circle
 n=0
-foreach datum i,j in 'examples/eps/ex_pi_estimation.dat' using 2:3
+foreach datum i,j in "examples/eps/ex_pi_estimation.dat" using 2:3
  {
   point at width/2*i , width/2*j with ps 0.1
   n = n + (hypot(i,j)<1)
