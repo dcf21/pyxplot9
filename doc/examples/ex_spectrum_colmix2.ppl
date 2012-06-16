@@ -1,0 +1,51 @@
+# ex_colmix2.ppl
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2012 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_spectrum_colmix2"
+load "examples/fig_init.ppl"
+
+# BEGIN
+set size square
+set nokey
+set nocolkey
+set numeric errors quiet
+set noxtics ; set noytics
+set axis x invisible
+set axis y invisible
+d    = 0.5
+t(x) = max(0,2-exp(x**8))
+set colmap cmyk(t(hypot(c1  ,c2-d/sqrt(2))), \
+                t(hypot(c1+d,c2+d        )), \
+                t(hypot(c1-d,c2+d        )), \
+                0  )
+set sample grid 250x250
+set c1range norenorm
+set c2range norenorm
+plot [-1.5:1.5][-1.5:1.5] x:y with colormap
+# END
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

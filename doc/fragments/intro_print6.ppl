@@ -1,0 +1,2 @@
+set unit preferred miles/year
+print phy.c

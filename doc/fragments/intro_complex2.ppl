@@ -1,0 +1,5 @@
+set numerics complex
+print exp(2+3*i)
+print sin(i)
+print arg(2+3*i)
+print Re(2+3*i)

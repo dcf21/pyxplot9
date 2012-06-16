@@ -12,36 +12,45 @@ Send comments, bug reports, feature requests and coffee supplies to:
 
 1. INTRODUCTION
 
-PyXPlot is a multi-purpose command-line tool for performing simple data
-processing and for producing graphs and vector graphics. The central philosophy
-of PyXPlot's interface is that common tasks -- for example, plotting labelled
-graphs of data -- should be accessible via short, simple and intuitive commands
-which require minimal typing to produce a first draft result. At the same time,
-these commands also take a sufficient range of optional arguments and settings
-to allow these figures to be subsequently fine-tuned into a wide range of
-different styles, appropriate for inclusion in reports, talks or academic
-journals.
+PyXPlot is a multi-purpose scientific scripting language, graph plotting tool,
+vector graphics suite, and data processing package.  Its interface is designed
+so that common tasks -- e.g., plotting labelled graphs of data -- should be
+accessible via short, simple and intuitive commands. At the same time, these
+commands also take many optional settings which allow their output to be
+fine-tuned into a wide range of different styles, appropriate for inclusion in
+reports, talks or academic journals.
 
-As well as being a graph-plotting package, PyXPlot also has facilities for
-fitting mathematical functions to data, for numerically solving simple systems
-of equations, and for converting datafiles between different formats. Its
-mathematical environment can interpolate datasets, integrate and differentiate
-them, and take Fourier transforms. PyXPlot's ability to keep track of the
-physical units in which data are expressed, and to convert data between
-different units of measurement, mean that it can be used as a powerful desktop
-calculator.
+A scientific scripting language
+-------------------------------
 
-PyXPlot's interface bears some striking similarities to that of Gnuplot.
-Specifically, the commands used for plotting simple graphs in the two programs
-are virtually identical, though the syntax used for more advanced plotting
-often differs and PyXPlot's mathematical environment is hugely extended over
-that of Gnuplot. This means that Gnuplot users will have a head start with
-PyXPlot: simple Gnuplot scripts will often run in PyXPlot with minimal
-modification.
+PyXPlot has all the features of a scripting language: string manipulation, 
+modules and classes. Numbers have physical units, and calculations
+automatically return results in appropriate units. Datafiles can
+straightforwardly be converted between physical units. PyXPlot natively handles
+dictionaries, lists, dates and file handles. It also supports vector and matrix
+algebra, can integrate or differentiate expressions, and numerically solve 
+systems of equations.
 
-A number of examples of the graphical output which PyXPlot can produce may be
-found on the PyXPlot website: <http://www.pyxplot.org.uk/>.
+A vector graphics suite
+-----------------------
 
+The graphical canvas isn't just for plotting graphs. Circles, polygons and 
+ellipses can be drawn using simple commands. Colors are a native type of object
+for easy customisation. For the mathematically minded, PyXPlot's canvas
+interfaces cleanly to its vector math environment, making geometric
+construction easy.
+
+A data processing package
+-------------------------
+
+PyXPlot can interpolate data, find best fit lines, and compile histograms. It
+can Fourier transform data, calculate statistics, and output results to new
+datafiles. Where fine control is needed, custom code can be used to process
+every data point in a file.
+
+
+Examples of the graphical output produced by PyXPlot can be found on the
+PyXPlot website: <http://www.pyxplot.org.uk/>.
 
 
 2. SYSTEM REQUIREMENTS
@@ -49,8 +58,9 @@ found on the PyXPlot website: <http://www.pyxplot.org.uk/>.
 PyXPlot works on most UNIX-like operating systems. We have tested it under
 Linux, Solaris and MacOS X, and believe that it should work on other similar
 POSIX systems. We regret that it is not available for Microsoft Windows, and
-have no plans for porting it at this time. It requires that the following
-software packages (not included) be installed:
+have no plans for porting it at this time.
+
+It requires that the following software packages (not included) be installed:
 
 - fftw                       (version 2 or, preferably, 3+)
 - gcc and make
@@ -62,12 +72,8 @@ software packages (not included) be installed:
 - libxml2                    (version 2.6+)
 - zlib
 
-It is also very strongly recommended that the following software packages be
-installed. In each case, PyXPlot tests for the availability of these packages
-upon installation, and issues a warning if the package is not found.
-Installation can proceed, but some of PyXPlot's features will be disabled. Once
-they have been added to the system, PyXPlot should be reinstalled to take
-advantage of their presence.
+It is also strongly recommended that the following software packages be
+installed:
 
 - cfitsio -- required for PyXPlot to be able to plot datafiles in FITS format.
 - Ghostview (or ggv) -- required for PyXPlot to be able to display plots live
@@ -107,15 +113,13 @@ export C_INCLUDE_PATH=/opt/local/include
 before running the configure script below.
 
 
-3. INSTALLATION
+3. INSTALLATION FROM SOURCE ARCHIVE
 
-
-3A. INSTALLATION AS USER
-
-The following steps describe the installation of PyXPlot from a .tar.gz archive
-by a user without superuser (i.e. root) access to his machine. It is assumed
-that the packages listed above have already been installed; if they are not,
-you need to contact your system administrator.
+First, download the required archive can be downloaded from the front page of
+PyXPlot website -- <http://www.pyxplot.org.uk>. It is assumed that the packages
+listed above have already been installed; if they are not, you will need to
+either install them yourself, if you have superuser access to your machine, or
+contact your system administrator.
 
 * Unpack the distributed .tar.gz:
 
@@ -132,12 +136,12 @@ make
 ./bin/pyxplot
 
 
-3B. SYSTEM-WIDE INSTALLATION
+3A. SYSTEM-WIDE INSTALLATION
 
 Having completed the steps described above, PyXPlot may be installed
 system-wide by a superuser with the following additional step:
 
-make install
+sudo make install
 
 By default, the PyXPlot executable installs to /usr/local/bin/pyxplot.  If
 desired, this installation path may be modified in the file Makefile.skel, by
@@ -159,5 +163,4 @@ website: <http://www.pyxplot.org.uk/>.
 ----
 Dominic Ford
 Ross Church
-Zoltan Voros
 

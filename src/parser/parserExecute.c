@@ -255,7 +255,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, char *dirName, int intera
                {
                 double      m=1,x=0,y=0,z=0;
                 gsl_vector *v=((pplVector *)val->auxil)->v;
-                int         l=v->size;
+                int         l=v->size, rc;
                 if ( (l<2) || (l>((item->options[j]=='P')?3:2)) ) break; // wrong size
                 if (val->dimensionless) m=0.01;
                 else
@@ -266,7 +266,9 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, char *dirName, int intera
                 if (l>0) x = gsl_vector_get(v,0) * m;
                 if (l>1) y = gsl_vector_get(v,1) * m;
                 if (l>2) z = gsl_vector_get(v,2) * m;
+                rc = val->refCount;
                 ppl_garbageObject(val);
+                val->refCount = rc;
                                            pplObjNum(val                      ,0,x,0);
                                            pplObjNum(&stk[item->stackOutPos+1],0,y,0);
                 if (item->options[j]=='P') pplObjNum(&stk[item->stackOutPos+2],0,z,0);
@@ -276,7 +278,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, char *dirName, int intera
                {
                 double  x[3]={0,0,0};
                 list   *li=(list *)val->auxil;
-                int     l=li->length, i;
+                int     l=li->length, i, rc;
                 if ( (l<2) || (l>((item->options[j]=='P')?3:2)) ) break; // wrong size
                 for (i=0; i<l; i++)
                  {
@@ -292,7 +294,9 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, char *dirName, int intera
                    }
                   x[i] = xo->real * m;
                  }
+                rc = val->refCount;
                 ppl_garbageObject(val);
+                val->refCount = rc;
                                            pplObjNum(val                      ,0,x[0],0);
                                            pplObjNum(&stk[item->stackOutPos+1],0,x[1],0);
                 if (item->options[j]=='P') pplObjNum(&stk[item->stackOutPos+2],0,x[2],0);

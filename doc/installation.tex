@@ -25,17 +25,38 @@
 
 \label{ch:installation}
 
-In this chapter we describe in outline how to install PyXPlot on a range of
-UNIX-like operating systems.
+In this chapter we describe how to install PyXPlot on a range of UNIX-like
+operating systems.
+
+PyXPlot works on most UNIX-like operating systems. We have tested it under
+Linux, Solaris\index{Solaris} and MacOS\index{MacOS}, and believe that it
+should work on other similar POSIX systems. We regret that it is not available
+for Microsoft Windows, and have no plans for porting it at this time.
+
+\section{Linux Distributions}
+
+By far the easiest way to install PyXPlot under Linux is to use your
+distribution's package manager.  If you use a recent release of
+Gentoo\index{Gentoo Linux}\index{installation!under Gentoo}\footnote{See
+\url{http://gentoo-portage.com/sci-visualization/pyxplot}}, Ubuntu\index{Ubuntu
+Linux}\index{installation!under Ubuntu} or Debian, your package manager can
+install PyXPlot and all its dependencies for you, though the packaged version
+may be several months behind the latest release. Please note that this manual
+describes PyXPlot~0.9.x, which is a very substantial upgrade to version~0.8.x.
+To install the packaged version of PyXPlot under Debian or Ubuntu, simply type:
+
+\begin{verbatim}
+apt-get install pyxplot gv
+\end{verbatim}
+
+Users of other distributions, or who want a newer version of PyXPlot, should
+use the {\tt .tar.gz} archives available from the PyXPlot website. The process
+is described below.
 
 \section{System Requirements}
 
-PyXPlot works on most UNIX-like operating systems. We have tested it under
-Linux, Solaris\index{Solaris} and MacOS~X\index{MacOS X}, and believe that it
-should work on other similar POSIX systems. We regret that it is not available
-for Microsoft Windows, and have no plans for porting it at this time. It
-requires that the following software packages (not included) be
-installed:\index{system requirements}
+PyXPlot depends on the following software packages, which are not included in
+the source tarball:\index{system requirements}
 
 \vspace{0.5cm}
 \begin{itemize}
@@ -51,12 +72,8 @@ installed:\index{system requirements}
 \end{itemize}
 \vspace{0.5cm}
 
-\noindent It is also very strongly recommended that the following software
-packages be installed. In each case, PyXPlot tests for the availability of
-these packages upon installation, and issues a warning if the package is not
-found. Installation can proceed, but some of PyXPlot's features will be
-disabled. Once they have been added to the system, PyXPlot should be
-reinstalled to take advantage of their presence.
+\noindent It is very strongly recommended that the following software packages
+also be installed:
 
 \vspace{0.5cm}
 \begin{itemize}
@@ -69,8 +86,19 @@ reinstalled to take advantage of their presence.
 \end{itemize}
 \vspace{0.5cm}
 
-Debian and Ubuntu users can find the above software in the following packages:
-\index{Debian Linux}\index{Ubuntu Linux}\index{installation!under Debian}\index{installation!under Ubuntu}
+\noindent In the case of the recommended packages, PyXPlot tests for the
+availability of each when it is installed and issues a warning if any are not
+found. Installation can proceed, but some of PyXPlot's features will be
+disabled. If they are later added to the system, PyXPlot should be reinstalled
+to take advantage of their presence.
+
+\subsection{Dependencies in Debian and Ubuntu}
+
+Debian and Ubuntu users can find the above software in the following
+packages\footnote{The package names listed here are correct as of Debian
+Squeeze and Ubuntu 12.04 (Precise). However, packages occasionally change name
+between versions.}: \index{Debian Linux}\index{Ubuntu
+Linux}\index{installation!under Debian}\index{installation!under Ubuntu}
 
 \vspace{2mm}
 \noindent {\tt fftw3-dev}, {\tt gcc}, {\tt ghostscript}, {\tt gv}, {\tt imagemagick}, {\tt libc6-dev},\newline
@@ -91,6 +119,8 @@ sudo apt-get install fftw3-dev gcc ghostscript gv imagemagick
        zlib1g-dev
 \end{verbatim}
 
+\subsection{Dependencies in MacOS}
+
 Users of MacOS~X can find the above software in the following MacPorts packages:
 \index{MacOS X}\index{MacPorts}
 
@@ -105,45 +135,21 @@ export C_INCLUDE_PATH=/opt/local/include
 \end{verbatim}
 before running the {\tt configure} script below.
 
-\section{Installation}
+\section{Installation from source archive}
 \index{installation}
 
-\subsection{Installation within Linux Distributions}
-
-PyXPlot is available as a user-installable package within some Linux
-distributions. At the time of writing, Gentoo\index{Gentoo
-Linux}\index{installation!under Gentoo}\footnote{See
-\url{http://gentoo-portage.com/sci-visualization/pyxplot}}, Ubuntu\index{Ubuntu
-Linux}\index{installation!under Ubuntu} and Debian provide packages containing
-PyXPlot~0.7.x. It should be noted that this manual describes PyXPlot~0.8.x,
-which is a very substantial upgrade to version~0.7.x. Many of the features
-described in this manual are not available in previous versions.
-
-Under Debian and Ubuntu Linux, version~0.8.5 may be manually installed by
-downloading the appropriate {\tt .deb} file for your distribution from the
-PyXPlot website and typing
-
-\begin{verbatim}
-dpkg -i <filename>.deb
-\end{verbatim}
-
-Users of other distributions should use the {\tt .tar.gz} archives available
-from the PyXPlot website as described below.
-
-\subsection{Installation as User}
-
-The following steps describe the installation of PyXPlot from a {\tt .tar.gz}
-archive by a user without superuser (i.e.\ root) access to his machine. The
-required archive can be downloaded from the PyXPlot website. It is assumed that
-the packages listed above have already been installed; if they are not, you
-will need to contact your system administrator.\index{installation!user-level}
+First, download the required archive can be downloaded from the front page of
+PyXPlot website -- \url{http://www.pyxplot.org.uk}. It is assumed that the
+packages listed above have already been installed; if they are not, you will
+need to either install them yourself, if you have superuser access to your
+machine, or contact your system administrator.\index{installation!user-level}
 
 \begin{itemize}
 \item Unpack the distributed .tar.gz:
 
 \begin{verbatim}
-tar xvfz pyxplot_0.8.5.tar.gz
-cd pyxplot-0.8.5
+tar xvfz pyxplot_0.9.0.tar.gz
+cd pyxplot-0.9.0
 \end{verbatim}
 
 \item Run the installation script:
@@ -161,14 +167,14 @@ make
 
 \end{itemize}
 
-\subsection{System-wide Installation}
+\subsection{System-wide installation}
 
 Having completed the steps described above, PyXPlot may be installed
 system-wide by a superuser with the following additional
 step:\index{installation!system-wide}
 
 \begin{verbatim}
-make install
+sudo make install
 \end{verbatim}
 
 By default, the PyXPlot executable installs to {\tt /usr/local/bin/pyxplot}.
@@ -176,7 +182,7 @@ If desired, this installation path may be modified in the file {\tt
 Makefile.skel}, by changing the variable {\tt USRDIR} in the first line to an
 alternative desired installation location.
 
-PyXPlot may now be started by any system user, simply by typing
+PyXPlot may now be started by any user of the system, simply by typing:
 
 \begin{verbatim}
 pyxplot

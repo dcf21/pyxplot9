@@ -1,0 +1,46 @@
+# ex_spectrum_1.ppl
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2012 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_spectrum_1"
+load "examples/fig_init.ppl"
+
+# BEGIN
+set nokey
+set nocolkey
+set size ratio 0.2
+set noytics
+set xlabel 'Wavelength'
+set noylabel
+set linear x y
+set colmap colors.wavelength(c1,1)
+set sample grid 200x2
+set c1range norenorm
+set title 'The electromagnetic spectrum'
+plot [unit(350*nm):unit(700*nm)][0:1] x with colormap
+# END
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+

@@ -1,0 +1,48 @@
+# ex_spectrum_bbcol.ppl
+#
+# The code in this file is part of PyXPlot
+# <http://www.pyxplot.org.uk>
+#
+# Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
+#               2008-2012 Ross Church
+#
+# $Id$
+#
+# PyXPlot is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# You should have received a copy of the GNU General Public License along with
+# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+# ----------------------------------------------------------------------------
+
+# This script produces a figure for the PyXPlot Users' Guide
+
+# Call common initialisation script
+reset
+title = "ex_spectrum_bbcol"
+load "examples/fig_init.ppl"
+
+# BEGIN
+set log x
+set linear y
+set nokey
+set nocolkey
+set size ratio 0.2
+set noytics
+set xlabel 'Temperature'
+set noylabel
+f(lambda) = phy.Bv(phy.c/lambda,c1) / (c1**4 / unit(6000*K)**4)
+set colmap colors.spectrum(f,3e3)
+set sample grid 200x2
+set c1range norenorm
+set title 'Colors of blackbodies of different temperatures'
+plot [unit(2000*K):unit(20000*K)] x with colormap
+# END
+
+# Call common cleanup script
+load "examples/fig_end.ppl"
+
