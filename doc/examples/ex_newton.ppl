@@ -39,7 +39,7 @@ tolerance = 1e-2
 subroutine newtonFractal(x,y)
  {
   global iter
-  z = x+i*y;
+  z = x+i*y
   iter = 0
   while (1)
    {

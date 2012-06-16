@@ -28,8 +28,10 @@ reset
 title = "ex_pendulum" ; load "examples/fig_init.ppl"
 
 # BEGIN
+set unit angle nodimensionless
+
 theta_approx(a,t) = a*sin(2*pi*t)
-theta_exact (a,t) = 2*asin(sin(a/2)*jacobi_sn(2*pi*t,sin(a/2)))*unit(rad)
+theta_exact (a,t) = 2*asin(sin(a/2)*jacobi_sn(2*pi*t,sin(a/2)))
 
 set unit of angle degrees
 set key below

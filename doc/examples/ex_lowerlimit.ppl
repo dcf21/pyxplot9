@@ -63,8 +63,8 @@ title = "ex_plotstyletab" ; load "examples/fig_init.ppl"
 set preamble r'\usepackage{wasysym}'
 set multiplot
 clear
-set texthalign centre
-set textvalign centre
+set texthalign center
+set textvalign center
 text r"{\bf Plot Styles}" at -2,35/7*0.4*9+1.5
 set axis x2 mirror top
 set width 9

@@ -64,7 +64,7 @@ set xtics (0,0.5,1)
 set ytics (0,0.5,1)
 set xrange [-0.1:1.1]
 set yrange [-0.1:1.1]
-set texthalign centre
+set texthalign center
 set textvalign bottom
 
 set origin 0*width , 0*height

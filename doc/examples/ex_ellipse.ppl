@@ -33,13 +33,13 @@ a   = 6.0              # Semi-major axis
 b   = 4.0              # Semi-minor axis
 e   = sqrt(1-(b/a)**2) # Eccentricity
 slr = a*(1-e**2)       # Length of semi-latus rectum
-fd  = a*e              # Distance of focus from centre
+fd  = a*e              # Distance of focus from center
 
 # Draw ellipse
-ellipse centre 0,0 SemiMajor a SemiMinor b with lw 3
+ellipse center 0,0 semiMajor a semiMinor b with lw 3
 
-# Draw points at centre and focus
-set texthalign centre ; set textvalign top
+# Draw points at center and focus
+set texthalign center ; set textvalign top
 set fontsize 1.5
 point at 0,0 label "Centre" with pointsize 2 plw 2
 point at -fd,0 label "Focus" with pointsize 2 plw 2
@@ -51,11 +51,11 @@ arrow from -fd,0 to -fd,slr with tw lw 2 lt 3  # SLR
 arrow from 0,0 to -fd,0 with twohead lw 2 lt 3 # Focus <-> Centre
 
 # Label ellipse
-set texthalign centre ; set textvalign centre
+set texthalign center ; set textvalign center
 text '$ae$' at -fd/2,-0.3
 text '$a$' at a/2,+0.3
 text '$b$' at 0.3,b/2
-set texthalign left ; set textvalign centre
+set texthalign left ; set textvalign center
 text '$L=a(1-e^2)$' at  0.2-fd,slr/2
 
 # Display diagram

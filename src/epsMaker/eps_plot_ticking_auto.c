@@ -406,8 +406,8 @@ void eps_plot_ticking_auto(EPSComm *x, pplset_axis *axis, double UnitMultiplier,
   ppl_context  *c = x->c;
   int           i, j, k, start, NArgs, OutContext, ContextRough=-1, CommaPositions[MAX_ARGS+2], NFactorsLogBase, LogBase;
   int           FactorsLogBase[MAX_FACTORS];
-  int           N_STEPS;
-  char         *format, VarName[2]="\0\0", FormatTemp[32], QuoteType, *DummyStr;
+  int           N_STEPS, tripleQuote=0, rawString=0;
+  char         *format, VarName[2]="\0\0", FormatTemp[32], quoteType, *DummyStr;
   pplObj        CentralValue, *VarVal=NULL, DummyTemp;
   pplExpr     **formatExp=NULL;
   ArgumentInfo *args;
@@ -432,12 +432,23 @@ void eps_plot_ticking_auto(EPSComm *x, pplset_axis *axis, double UnitMultiplier,
   if (DEBUG) { sprintf(x->c->errcontext.tempErrStr, "format string is <<%s>>.", format); ppl_log(&x->c->errcontext,NULL); }
   if ((format==FormatTemp) && (axis->AxisLinearInterpolation==NULL) && (axis->LogFinal==SW_BOOL_TRUE) && (log(axis->MaxFinal / axis->MinFinal) / log(axis->tics.logBase) > axis->PhysicalLengthMajor)) { sprintf(FormatTemp, "\"%%s\"%%(logn(%s,%d))", VarName, axis->tics.logBase); }
   for (i=0; ((format[i]!='\0')&&(format[i]!='\'')&&(format[i]!='\"')); i++);
-  QuoteType = format[i];
-  if (QuoteType=='\0') goto FAIL;
-  i++;
-  for (; ((format[i]!='\0')&&((format[i]!=QuoteType)||(format[i-1]=='\\'))); i++);
-  if (format[i]!=QuoteType) goto FAIL;
-  i++;
+  quoteType = format[i];
+  if (quoteType=='\0') goto FAIL;
+  if ((i>0)&&(format[i-1]=='r')) { rawString=1; }
+  if ((format[i+1]==quoteType)&&(format[i+2]==quoteType)) { tripleQuote=1; i+=3; }
+  else                                                    { i++; }
+  if (!rawString)
+   {
+    if (!tripleQuote) for (; ((format[i]!='\0')&&((format[i]!=quoteType)||(format[i-1]=='\\'))); i++);
+    else              for (; ((format[i]!='\0')&&((format[i]!=quoteType)||(format[i+1]!=quoteType)||(format[i+2]!=quoteType)||(format[i-1]=='\\'))); i++);
+   }
+  else
+   {
+    if (!tripleQuote) for (; ((format[i]!='\0')&&((format[i]!=quoteType))); i++);
+    else              for (; ((format[i]!='\0')&&((format[i]!=quoteType)||(format[i+1]!=quoteType)||(format[i+2]!=quoteType))); i++);
+   }
+  if (format[i]!=quoteType) goto FAIL;
+  i+=tripleQuote?3:1;
   for (;((format[i]<=' ')&&(format[i]!='\0'));i++);
   if (format[i]!='%') goto FAIL;
   i++;

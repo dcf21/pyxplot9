@@ -72,7 +72,7 @@ def makeTeX(fname, counter, linelist):
       line = line2
     else:
       line = line.strip()
-    output.write("\\noindent{\\tt %s}"%line)
+    output.write("\\noindent\\texttt{%s}"%line)
   if fns: output.write("\n}")
   output.close()
 

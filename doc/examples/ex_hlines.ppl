@@ -57,7 +57,7 @@ foreach SeriesName in ["Ly","Ba","Pa","Br"]
       set label an r"\parbox{5cm}{\footnotesize\center{\
         %s-$%s$\newline $%d\to%d$\newline %s\newline}}" \
         %(SeriesName,GreekLetter,m,n,wl) at wl,0.55+0.2*(m-n) \
-        hal centre val centre
+        hal center val center
      }
     an = an+1
    }
@@ -74,7 +74,7 @@ foreach datum i,name,wl_c,wl_w in "--" using \
   x1 =  wl_c         # Centre of passband
   x2 = (wl_c+wl_w/2) # Longward end of passband
   set arrow an from x0,arry to x2,arry with nohead
-  set label an name at x1,laby hal centre val centre
+  set label an name at x1,laby hal center val center
   an = an+1
  }
  1 U  365   66
@@ -93,7 +93,7 @@ END
 ll = 91.1267*unit(nm)
 set arrow 1 from ll,0.12 to ll,0.22
 set label 1 "Lyman Limit: %s"%(ll) at 95*unit(nm),0.17 \
-     hal left val centre
+     hal left val center
 
 # Finally produce plot
 plot [80*unit(nm):5500*unit(nm)][0:1.25]

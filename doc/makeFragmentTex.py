@@ -59,7 +59,7 @@ for fname in files:
     if (len(lines[i].strip())<1): continue
     if (not first): out.write("\\newline\n")
     first = False
-    out.write(r"\noindent{\tt pyxplot> {\bf %s}}"%(line_texify(lines[i].strip())))
+    out.write(r"\noindent\texttt{%s> \textbf{%s}}"%(prompt,line_texify(lines[i].rstrip())))
     if lines[i].strip()[-1]=="\\":
       prompt = "......."
       continue
@@ -75,6 +75,6 @@ for fname in files:
     linecount = linecountNew
     for line in olines:
       if (len(line.strip())<1): continue
-      out.write("\\newline\n\\noindent{\\tt %s}"%line)
+      out.write("\\newline\n\\noindent\\texttt{%s}"%line_texify(line))
   out.write("\n")
   out.close()

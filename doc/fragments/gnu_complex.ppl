@@ -1,0 +1,2 @@
+set numerics complex
+print (1+2*i) + (3+4*i)

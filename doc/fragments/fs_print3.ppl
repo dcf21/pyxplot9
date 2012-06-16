@@ -1,0 +1,4 @@
+f(x)=x**2 ; a=3
+print "The value of %d squared is %d."%(a,f(a))
+print "The %s of f(%f) is %d."%("value",sqrt(2), \
+                                f(sqrt(2))     )

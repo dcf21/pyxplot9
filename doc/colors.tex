@@ -25,17 +25,35 @@
 \label{ch:color_charts}
 
 \index{colors!charts} Figures~\ref{fig:color_table1}, \ref{fig:color_table2}
-and \ref{fig:color_table3} show the named colors which PyXPlot recognises.
-These figures exclude the 100~shades of grey which PyXPlot recognises, which
-are named from {\tt grey00} (black) to {\tt grey99} (almost white).  These
-shades of grey may also be spelt {\tt gray??}.  \index{colors!shades of grey}
+and \ref{fig:color_table3} show the default named colors which PyXPlot recognises.
+In addition to using these colors in statements such as
+
+\begin{verbatim}
+plot 'data' with color red
+\end{verbatim}
+
+\noindent it is also possible to make custom colors using the {\tt rgb(r,g,b)},
+{\tt cmyk(c,m,y,k)}, {\tt gray(g)} and {\tt hsb(h,s,b)} functions, whose inputs
+should be in the range 0--1. For example:
+
+\begin{verbatim}
+plot 'data' with color rgb(0.8,0.8,0.2)
+
+myColor = cmyk(0.2,0.8,0.8,0.1)
+plot 'data' with color myColor
+\end{verbatim}
+
+These figures also exclude the 100~shades of gray which PyXPlot recognises,
+which are named from {\tt gray00} (black) to {\tt gray99} (almost white).
+These shades of gray may also be spelt in the UK English form {\tt grey??}.
+\index{colors!shades of gray}
 
 \begin{figure}
 \begin{center}
 \includegraphics[width=\textwidth]{figures/pyx_colors2}
 \end{center}
 \caption[A list of the named colors which PyXPlot recognises, sorted alphabetically]
-{A list of the named colors which PyXPlot recognises, sorted alphabetically. The numerous shades of grey which it recognises are not shown.}
+{A list of the named colors which PyXPlot recognises, sorted alphabetically. The numerous shades of gray which it recognises are not shown.}
 \label{fig:color_table1}
 \end{figure}
 
@@ -44,7 +62,7 @@ shades of grey may also be spelt {\tt gray??}.  \index{colors!shades of grey}
 \includegraphics[width=\textwidth]{figures/pyx_colors3}
 \end{center}
 \caption[A list of the named colors which PyXPlot recognises, sorted by hue]
-{A list of the named colors which PyXPlot recognises, sorted by hue. The numerous shades of grey which it recognises are not shown.}
+{A list of the named colors which PyXPlot recognises, sorted by hue. The numerous shades of gray which it recognises are not shown.}
 \label{fig:color_table2}
 \end{figure}
 

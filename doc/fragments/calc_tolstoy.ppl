@@ -1,0 +1,5 @@
+set calendar in russian out british
+birth = time.fromCalendar(1828, 8,28,12,0,0)
+death = time.fromCalendar(1910,11, 7,12,0,0)
+print birth
+print death

@@ -37,7 +37,7 @@ set yrange [0:0.11]
 set nokey
 
 set texthalign left
-set textvalign centre
+set textvalign center
 
 # Plot 1 (bottom left)
 set xlabel "$x$"

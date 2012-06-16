@@ -1,0 +1,4 @@
+print texify("sqrt(x**2+1)")
+a=50
+print texifyText("A %d%% increase"%a)
+set ylabel texify("cos(x**2)")

@@ -1,0 +1,4 @@
+print (a=3)+(b=2)
+print a>0?"yes":"no"
+print "%s  %s"%(++a,b++)
+print (a+=10 , b+=10 , a+b)

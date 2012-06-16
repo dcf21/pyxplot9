@@ -37,7 +37,7 @@ subroutine lensDraw(x0,y0,u,h,f)
   # Draw lens
   lc = 5.5*unit(cm) # Radius of curvature of lens
   lt = 0.5*unit(cm) # Thickness of lens
-  la = acos((lc-lt/2)/lc) # Angular size of lens from centre of curvature
+  la = acos((lc-lt/2)/lc) # Angular size of lens from center of curvature
   lh = lc*sin(la) # Physical height of lens on paper
   arc at x0-(lc-lt/2),y0 radius lc from  90*unit(deg)-la to  90*unit(deg)+la
   arc at x0+(lc-lt/2),y0 radius lc from 270*unit(deg)-la to 270*unit(deg)+la

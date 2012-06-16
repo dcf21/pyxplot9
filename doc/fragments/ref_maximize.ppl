@@ -1,0 +1,4 @@
+set numerics real
+x=0.1
+maximize cos(x) via x
+print x/pi

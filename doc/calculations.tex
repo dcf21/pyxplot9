@@ -304,8 +304,8 @@ The most obvious example of this is the built-in variable {\tt i}, which is set
 to equal {\tt sqrt(-1)}:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf print i}}\newline
-\noindent{\tt nan}
+\noindent\texttt{pyxplot> \textbf{print i}}\newline
+\noindent\texttt{nan}
 \vspace{3mm}
 
 Complex arithmetic may be enabled by typing
@@ -1145,8 +1145,8 @@ arguments, returns the Julian Day number corresponding to the current system
 clock time, as in the following example:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf print time\_string(time\_now())}}\newline
-\noindent{\tt Wed 2010 Mar 3 17:04:07}
+\noindent\texttt{pyxplot> \textbf{print time.now()}}\newline
+\noindent\texttt{Sat 2012 Jun 16 15:12:39}
 \vspace{3mm}
 
 \example{ex:tolstoy}{Calculating the date of Leo Tolstoy's birth}{
@@ -1154,13 +1154,7 @@ The Russian novelist Leo Tolstoy was born on 28th~August~$1828$ and died on
 7th~November~$1910$ in the Russian calendar. What dates do these correspond to
 in the Western calendar?
 \nlscf
-\noindent {\tt pyxplot> {\bf set calendar in russian out british}}\newline
-\noindent {\tt pyxplot> {\bf birth = time\_julianday(1828, 8,28,12,0,0)}}\newline
-\noindent {\tt pyxplot> {\bf death = time\_julianday(1910,11, 7,12,0,0)}}\newline
-\noindent {\tt pyxplot> {\bf print time\_string(birth)}}\newline
-\noindent {\tt Tue 1828 Sep 9 12:00:00}\newline
-\noindent {\tt pyxplot> {\bf print time\_string(death)}}\newline
-\noindent {\tt Sun 1910 Nov 20 12:00:00}
+\input{fragments/tex/calc_tolstoy.tex}
 }
 
 \subsection{Time intervals}
@@ -1179,12 +1173,7 @@ the deposition of the last Emperor of the Western Empire in {\footnotesize
 AD}\,476:
 
 \vspace{3mm}
-\noindent {\tt pyxplot> {\bf x = time\_julianday(-752,4,21,12,0,0)}}\newline
-\noindent {\tt pyxplot> {\bf y = time\_julianday( 476,9, 4,12,0,0)}}\newline
-\noindent {\tt pyxplot> {\bf print time\_diff(x,y)}}\newline
-\noindent {\tt 3.8764483e+10 s}\newline
-\noindent {\tt pyxplot> {\bf print time\_diff(x,y)/unit(year)}}\newline
-\noindent {\tt 1228.3723}
+\input{fragments/tex/calc_interval.tex}
 \vspace{3mm}
 
 The function {\tt time\_diff\_string()}\indfun{time\_\-diff\_\-string({\it
@@ -1224,12 +1213,7 @@ Token & Substitution value \\
 \end{table}
 
 \vspace{3mm}
-\noindent {\tt pyxplot> {\bf x = time\_julianday(-752,4,21,12,0,0)}}\newline
-\noindent {\tt pyxplot> {\bf y = time\_julianday( 476,9, 4,12,0,0)}}\newline
-\noindent {\tt pyxplot> {\bf print time\_diff\_string(x,y)}}\newline
-\noindent {\tt 1229 years 78 days 0 hours 0 minutes and 0 seconds}\newline
-\noindent {\tt pyxplot> {\bf print time\_diff\_string(x,y,"\$\%Y\^{}$\backslash$mathrm\{y\}\%d\^{}$\backslash$mathrm\{d\}\$")}}\newline
-\noindent {\tt $1229^\mathrm{y}78^\mathrm{d}$}
+\input{fragments/tex/calc_interval2.tex}
 \vspace{3mm}
 
 \example{ex:timeseries}{A plot of the rate of downloads from an Apache webserver}{

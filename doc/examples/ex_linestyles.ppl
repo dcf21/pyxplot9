@@ -30,7 +30,7 @@ title = "ex_linestyles" ; load "examples/fig_init.ppl"
 set multiplot
 set nodisplay
 set texthalign left
-set textvalign centre
+set textvalign center
 
 for i=0 to 43
  {

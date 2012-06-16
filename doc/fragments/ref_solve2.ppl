@@ -1,0 +1,6 @@
+x= # Undefine x
+solve cos(x)=0 via x
+print x/pi
+x=10
+solve cos(x)=0 via x
+print x/pi

@@ -39,7 +39,7 @@ line from w,h to 0,h with linewidth 5
 line from 0,h to 0,0 with linewidth 5
 
 # Write text of notice
-set texthalign centre ; set fontsize 3
+set texthalign center ; set fontsize 3
 text r"\bf Astrophysical Fluids Lecture" at w/2,3/4*h
 text r"\bf MOVED to Seminar Room 3" at w/2, h/2
 arrow from w/4, h/4 to 3/4*w, h/4 with linewidth 8

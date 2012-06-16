@@ -38,7 +38,7 @@ box from -(0.8*w),-(0.2*w) to (0.8*w),(0.2*w) \
 
 # Put a warning beneath the sign
 set fontsize 3
-set texthalign centre ; set textvalign centre
+set texthalign center ; set textvalign center
 text r"\bf Keep Out! Code Monkey at work!" at 0,-1.2*w
 
 # Display sign

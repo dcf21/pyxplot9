@@ -64,16 +64,25 @@ The}, which is available for free download from:
 
 \noindent \url{http://www.ctan.org/tex-archive/info/lshort/english/lshort.pdf}
 
-PyXPlot's built-in {\tt texify()} function can also assist by automatically
-converting mathematical expressions and  strings of text into \LaTeX, as in the
-following examples:
+Two built-in functions provide some assistance in generating \LaTeX\ labels.
+The \indfunt{texify()} takes as its argument a string containing a mathematical
+expression, and returns a \LaTeX\ representation of it.  The
+\indfunt{texifyText()} takes as its argument a text string, and returns a
+\LaTeX\ representation of it, with any necessary escape characters added. For
+example:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf a=50}}\newline
-\noindent{\tt pyxplot> {\bf print texify("A \%d\% increase"\%(a))}}\newline
-\noindent{\tt A 50$\backslash$\% increase}\newline
-\noindent{\tt pyxplot> {\bf print texify(sqrt(x**2+1))}}\newline
-\noindent{\tt \$\\displaystyle $\backslash$sqrt\{x\^{}\{2\}+1\}\$}
+\input{fragments/tex/fs_texify.tex}
+\vspace{3mm}
+Two built-in functions provide some assistance in generating \LaTeX\ labels.
+The \indfunt{texify()} takes as its argument a string containing a mathematical
+expression, and returns a \LaTeX\ representation of it.  The
+\indfunt{texifyText()} takes as its argument a text string, and returns a
+\LaTeX\ representation of it, with any necessary escape characters added. For
+example:
+
+\vspace{3mm}
+\input{fragments/tex/fs_texify.tex}
 \vspace{3mm}
 
 \section{Complex numbers}
@@ -90,9 +99,7 @@ entered.  This is illustrated by the following example:
 \noindent{\tt gnuplot> {\bf print \{1,2\} + \{3,4\}}}\newline
 \noindent{\tt \{4.0, 6.0\}}
 \vspace{3mm}\newline
-\noindent{\tt pyxplot> {\bf set numerics complex}}\newline
-\noindent{\tt pyxplot> {\bf print (1+2*i) + (3+4*i)}}\newline
-\noindent{\tt (4+6i)}
+\input{fragments/tex/gnu_complex.tex}
 \vspace{3mm}
 
 \section{The multiplot environment}
@@ -144,8 +151,8 @@ the keyword {\tt parametric} before the algebraic expression to be plotted:
 \noindent{\tt gnuplot> {\bf set trange [0:2*pi]}}\newline
 \noindent{\tt gnuplot> {\bf plot sin(t),cos(t)}}
 \vspace{3mm}\newline
-\noindent{\tt pyxplot> {\bf set trange [0:2*pi]}}\newline
-\noindent{\tt pyxplot> {\bf plot parametric sin(t):cos(t)}}
+\noindent\texttt{pyxplot> \textbf{set trange [0:2*pi]}}\newline
+\noindent\texttt{pyxplot> \textbf{plot parametric sin(t):cos(t)}}
 \vspace{3mm}
 
 \noindent This makes it straightforward to plot parametric functions alongside

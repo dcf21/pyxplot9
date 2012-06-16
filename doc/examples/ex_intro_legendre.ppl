@@ -28,7 +28,7 @@ load "examples/fig_init.ppl"
 set width 8
 
 # BEGIN
-set key xcentre
+set key xcenter
 p [-1:1][:] legendreP(2,x), legendreP(4,x), legendreP(6,x)
 # END
 

@@ -1010,8 +1010,8 @@ canvas, giving their identification numbers and the commands used to produce
 them.  The following is an example of the output produced:
 
 {\footnotesize
+\texttt{pyxplot> \textbf{list}}
 \begin{verbatim}
-pyxplot> list
 # ID   Command
     1  plot item 1 f(x) using columns
     2  [deleted] text item 2 "Figure 1: A plot of f(x)" at 0,0 rotate 0 gap 0
@@ -1060,11 +1060,7 @@ optimised.  In the following example, a maximum of the sinusoidal function
 $\cos(x)$ is sought:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf set numerics real}}\newline
-\noindent{\tt pyxplot> {\bf x=0.1}}\newline
-\noindent{\tt pyxplot> {\bf maximize cos(x) via x}}\newline
-\noindent{\tt pyxplot> {\bf print x/pi}}\newline
-\noindent{\tt 0}
+\input{fragments/tex/ref_maximize.tex}
 \vspace{3mm}
 
 \noindent Note that this particular example doesn't work when complex
@@ -1101,11 +1097,7 @@ optimised. In the following example, a minimum of the sinusoidal function
 $\cos(x)$ is sought:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf set numerics real}}\newline
-\noindent{\tt pyxplot> {\bf x=0.1}}\newline
-\noindent{\tt pyxplot> {\bf minimize cos(x) via x}}\newline
-\noindent{\tt pyxplot> {\bf print x/pi}}\newline
-\noindent{\tt 1}
+\input{fragments/tex/ref_minimize.tex}
 \vspace{3mm}
 
 \noindent Note that this particular example doesn't work when complex
@@ -3748,13 +3740,9 @@ of variables which are simultaneously found, whereas the accuracy achieved
 simultaneously decreases. The following example solves a simple pair of
 simultaneous equations of two variables:
 
-\begin{verbatim}
-pyxplot> solve x+y=10, x-y=3 via x,y
-pyxplot> print x
-6.5
-pyxplot> print y
-3.5
-\end{verbatim}
+\vspace{3mm}
+\input{fragments/tex/ref_solve1.tex}
+\vspace{3mm}
 
 \noindent No output is returned to the terminal if the numerical solver
 succeeds, otherwise an error message is displayed. If any of the fitting
@@ -3763,16 +3751,9 @@ their values are used as initial guesses, otherwise an initial guess of unity
 for each fitting variable is assumed. Thus, the same \indcmdt{solve} returns
 two different values in the following two cases:
 
-\begin{verbatim}
-pyxplot> x= # Undefine x
-pyxplot> solve cos(x)=0 via x
-pyxplot> print x/pi
-0.5
-pyxplot> x=10
-pyxplot> solve cos(x)=0 via x
-pyxplot> print x/pi
-3.5
-\end{verbatim}
+\vspace{3mm}
+\input{fragments/tex/ref_solve2.tex}
+\vspace{3mm}
 
 \noindent In cases where any of the variables being solved for are not
 dimensionless, it is essential that an initial guess with appropriate units be
@@ -3791,13 +3772,9 @@ best compromise is returned. The following example has no solution -- a system
 of three equations with two variables is over-constrained -- but PyXPlot
 nonetheless finds a compromise solution:
 
-\begin{verbatim}
-pyxplot> solve x+y=10, x-y=3, 2*x+y=16 via x,y
-pyxplot> print x
-6.3571429
-pyxplot> print y
-3.4285714
-\end{verbatim}
+\vspace{3mm}
+\input{fragments/tex/ref_solve3.tex}
+\vspace{3mm}
 
 When complex arithmetic is enabled, the {\tt solve} command allows each of the
 variables being fitted to take any value in the complex plane, and thus the
@@ -3805,14 +3782,9 @@ number of dimensions of the fitting problem is effectively doubled -- the real
 and imaginary components of each variable are solved for separately -- as in
 the following example:
 
-\begin{verbatim}
-pyxplot> set numerics complex
-pyxplot> solve exp(x)=e*i via x
-pyxplot> print Re(x)
-1
-pyxplot> print Im(x)/pi
-0.5
-\end{verbatim}
+\vspace{3mm}
+\input{fragments/tex/ref_solve4.tex}
+\vspace{3mm}
 
 
 \section{spline}\indcmd{spline}

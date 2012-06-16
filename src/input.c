@@ -315,6 +315,12 @@ int ppl_ProcessStatement(ppl_context *context, parserStatus *ps, char *line, int
     ppl_parserExecute(context, ps->pl[iterDepth], NULL, interactive, iterDepth);
    }
 
+  if ((iterDepth>0)&&(ps->blockDepth==0))
+   {
+    ppl_parserLineFree(ps->pl[iterDepth]);
+    ps->pl[iterDepth]=NULL;
+   }
+
   if (stat || context->errStat.status)
    {
     if (iterDepth==0)
@@ -325,11 +331,6 @@ int ppl_ProcessStatement(ppl_context *context, parserStatus *ps, char *line, int
     return 1;
    }
 
-  if (iterDepth>0)
-   {
-    ppl_parserLineFree(ps->pl[iterDepth]);
-    ps->pl[iterDepth]=NULL;
-   }
   return 0;
  }
 

@@ -104,7 +104,7 @@ From within an interactive session, it is possible to run a command script
 using the \indcmdt{load}, as in the example:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf load 'foo.ppl'}}
+\noindent\texttt{pyxplot> \textbf{load 'foo.ppl'}}
 \vspace{3mm}
 
 \noindent This example would have the same effect as typing the contents of the
@@ -138,9 +138,8 @@ only displays the last $n$ commands, e.g.:\vspace{3mm}
 \section{First plots}
 \label{sec:first_plots}
 
-The basic workhorse command of PyXPlot is the \indcmdt{plot}, which is used to
-produce all plots. The following simple example would plot the trigonometric
-function $\sin(x)$:
+The core graph-plotting command of PyXPlot is the \indcmdt{plot}. The following
+simple example would plot the trigonometric function $\sin(x)$:
 
 \begin{verbatim}
 plot sin(x)
@@ -150,9 +149,9 @@ plot sin(x)
 \includegraphics[width=8cm]{examples/eps/ex_intro_sine}
 \end{center}
 
-\noindent This is one of a large number of standard mathematical functions
-which are built into PyXPlot. We will meet more of these in due course, but a
-complete list can be found in Appendix~\ref{ch:function_list}.
+\noindent This is one of a large number of mathematical functions which are
+built into PyXPlot; a complete alphabetical list of them can be found in
+Chapter~\ref{ch:function_list}.
 
 As well as plotting functions, it is also possible to plot data stored in
 files. The following would plot data from a file {\tt data.dat}, taking the
@@ -163,7 +162,7 @@ it is assuming to be gzipped plaintext, and is decoded accordingly. Other
 formats of \datafile\ can be opened with the use of input filters; see
 Section~\ref{sec:filters}.}, with columns separated by whitespace and/or
 commas\footnote{This format is compatible with the Comma Separated Values (CSV)
-format produced by many applications, including Microsoft Excel.}\index{csv
+format produced by many applications such as Microsoft Excel.}\index{csv
 files}\index{spreadsheets, importing data from}\index{Microsoft
 Excel}\index{gzip}:
 
@@ -193,49 +192,72 @@ plot f(x)
 \includegraphics[width=8cm]{examples/eps/ex_intro_func}
 \end{center}
 
-\noindent A complete list of the mathematical operators which can be used to
-put together algebraic expressions can be found in
+PyXPlot supports almost all of the same mathematical operators as the C
+programming language; a complete list of them can be found in
 Table~\ref{tab:operators_table}.\index{functions!pre-defined}\index{operators}
+If you have experience of similar tricks in C, it is quite possible to write
+the following expressions in PyXPlot (but don't worry if this is a little over
+your head):
+
+\vspace{3mm}
+\input{fragments/tex/fs_operators.tex}
+\vspace{3mm}
+
+\noindent In the final example, the comma operator is used as in C, to return
+only the value of the final comma-separated expression.
 
 \begin{table}
 \begin{center}
 \begin{tabular}{|>{\columncolor{LightGrey}}l>{\columncolor{LightGrey}}l>{\columncolor{LightGrey}}l|}
 \hline
 {\bf Symbol} & {\bf Description} & {\bf Operator Associativity} \\
-\hline
+\hline % level 2
 {\tt **} & Algebraic exponentiation & right \\
-\hline
-{\tt -} & Unary minus sign & left \\
-{\tt not} & Logical not & left \\
-\hline
+\hline % level 3
+{\tt -} & Unary minus sign & right \\
+{\tt --} & Unary decrement & right \\
+{\tt +} & Unary plus sign & right \\
+{\tt ++} & Unary increment & right \\
+{\tt not~~!} & Logical not & right \\
+{\tt $\sim$} & Unary one's complement & right \\
+\hline % level 5
 {\tt *} & Algebraic multiplication & left \\
 {\tt /} & Algebraic division & left \\
 {\tt \%} & Modulo operator & left \\
-\hline
+\hline % level 6
 {\tt +} & Algebraic sum & left \\
 {\tt -} & Algebraic subtraction & left \\
-\hline
+\hline % level 7
 {\tt <<} & Left binary shift & left \\
 {\tt >>} & Right binary shift & left \\
-\hline
+\hline % level 8
 {\tt <} & Magnitude comparison & right \\
 {\tt >} & Magnitude comparison & right \\
 {\tt <=} & Magnitude comparison & right \\
 {\tt >=} & Magnitude comparison & right \\
-\hline
-{\tt ==} & Equality comparison & right \\
+\hline % level 9
+{\tt ==~~<>} & Equality comparison & right \\
 {\tt !=} & Equality comparison & right \\
-{\tt <>} & Alias for {\tt !=} & right \\
-\hline
+\hline % level 11
 {\tt \&} & Binary and & left \\
-\hline
+\hline % level 12
 {\tt \^{}} & Binary exclusive or & left \\
-\hline
+\hline % level 13
 {\tt |} & Binary or & left \\
-\hline
-{\tt and} & Logical and & left \\
-\hline
-{\tt or} & Logical or & left \\
+\hline % level 14
+{\tt and~~\&\&} & Logical and & left \\
+\hline % level 15
+{\tt or~~||} & Logical or & left \\
+\hline % level 16
+{\tt ?:} & Ternary conditional & right \\
+\hline % level 17
+{\tt =} & Assignment operator & right \\
+{\tt += -= *=  } & Assignment operators & right \\
+{\tt /= \%= \&=} & & \\
+{\tt \^{}= |=  } & & \\
+{\tt <<= >>=   } & & \\
+\hline % level 18
+{\tt ,} & Comma separator & left \\
 \hline
 \end{tabular}
 \end{center}
@@ -280,9 +302,7 @@ line of the command is terminated with a backslash character, whereupon the
 following line will be appended to it, as in this example:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf print~~2~$\backslash$}}\newline
-\noindent{\tt .......>~~~~~~~{\bf +3}}\newline
-\noindent{\tt 5}
+\input{fragments/tex/fs_longline.tex}
 \vspace{3mm}
 
 \noindent Such lines splits will be used extensively in this manual where
@@ -294,11 +314,7 @@ PyXPlot's \indcmdt{print} can be used to display strings and the results of
 calculations on the terminal, as in the following examples:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf a=2}}\newline
-\noindent{\tt pyxplot> {\bf print "Hello World!"}}\newline
-\noindent{\tt Hello World!}\newline
-\noindent{\tt pyxplot> {\bf print a}}\newline
-\noindent{\tt 2}
+\input{fragments/tex/fs_print1.tex}
 \vspace{3mm}
 
 Multiple items can be displayed one-after-another on a single line by
@@ -306,35 +322,83 @@ separating them with commas. The following example displays the values of the
 variable {\tt a} and the function {\tt f(a)} in the middle of a text string:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf f(x) = x**2}}\newline
-\noindent{\tt pyxplot> {\bf a=3}}\newline
-\noindent{\tt pyxplot> {\bf print "The value of ",a," squared is ",f(a),"."}}\newline
-\noindent{\tt The value of 3 squared is 9.}
+\input{fragments/tex/fs_print2.tex}
 \vspace{3mm}
 
-A similar effect is often achieved more neatly using the string substitution
-operator, {\tt \%}\index{\% operator@{\tt \%} operator}\index{string
-operators!substitution}.  The operator is preceded by a format string, in
-which the places where numbers and strings are to be substituted are marked by
-tokens such as {\tt \%e} and {\tt \%s}. The substitution operator is followed
-by a ()-bracketed list of the quantities which are to be substituted into the
-format string. This behaviour is similar to that of the Python programming
-language's \% operator\footnote{Unlike in Python, the brackets are obligatory;
-{\tt '\%d'\%2} is {\it not} valid in PyXPlot, and should be written as {\tt
-'\%d'\%(2)}.}, and of the {\tt printf} command in C.  The following examples
-demonstrate the use of this operator:
+Strings can be enclosed either in single ({\tt '}) or double ({\tt "}) quotes.
+Strings may also be enclosed by three quote characters in a row: either {\tt
+'''} or {\tt """}. Special care needs to be taken when using apostrophes or
+quotes in single-quote delimited strings, as these characters may be
+misinterpreted as string delimiters, as in the example:
+
+\begin{dontdo}
+'Robert's data'
+\end{dontdo}
+
+\noindent This easiest way to avoid such problems is to use three quotes:
+
+\begin{dodo}
+'''Robert's data'''
+\end{dodo}
+
+Special characters such as tabs and newlines can be inserted into strings using
+escape codes such as {\tt $\backslash$t} and {\tt $\backslash$n}; see
+Table~\ref{tab:escape_sequences} for a list of these. The following string is
+split over three lines:
 
 \vspace{3mm}
-\noindent{\tt pyxplot> {\bf print "The value of \%d squared is \%d."\%(a,f(a))}}\newline
-\noindent{\tt The value of 3 squared is 9.}\newline
-\noindent{\tt pyxplot> {\bf print "The \%s of f(\%f) is \%d."\%("value",sqrt(2), $\backslash$}}\newline
-\noindent{\tt .......>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{\bf f(sqrt(2)) )}}\newline
-\noindent{\tt The value of f(1.414214) is 2.}
+\input{fragments/tex/fs_print4.tex}
+\vspace{3mm}
+
+Sometimes these escape codes can be rather annoying, especially when entering
+\LaTeX control codes, which all begin with backslash characters. Rather than
+having to escape every backslash, it is generally easier to prefix the string
+with the character {\tt r}, which turns off all escape codes:
+
+\vspace{3mm}
+\input{fragments/tex/fs_print5.tex}
+\vspace{3mm}
+
+It is usually neater to use the string substitution operator, {\tt \%}\index{\%
+operator@{\tt \%} operator}\index{string operators!substitution}.  The operator
+is preceded by a format string, in which the places where numbers and strings
+are to be substituted are marked by tokens such as {\tt \%e} and {\tt \%s}. The
+substitution operator is followed by a ()-bracketed list of the quantities
+which are to be substituted into the format string. This behaviour is similar
+to that of python's \% operator, and of the {\tt printf} command in C, as the
+following examples demonstrate:
+
+\vspace{3mm}
+\input{fragments/tex/fs_print3.tex}
 \vspace{3mm}
 
 The detailed behaviour of the string substitution operator, and a full list of
 the substitution tokens which it accepts, are given in
 Section~\ref{sec:stringsubop}.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|>{\columncolor{LightGrey}}l>{\columncolor{LightGrey}}l|}
+\hline
+{\bf Escape sequence} & {\bf Description} \\
+\hline
+{\tt $\backslash$?} & Question mark \\
+{\tt $\backslash$'} & Apostrophe \\
+{\tt $\backslash$"} & Double quote \\
+{\tt $\backslash\backslash$} & Literal backslash \\
+{\tt $\backslash$a} & Bell character \\
+{\tt $\backslash$b} & Backspace \\
+{\tt $\backslash$f} & Formfeed \\
+{\tt $\backslash$n} & Newline \\
+{\tt $\backslash$r} & Carriage return \\
+{\tt $\backslash$t} & Horizontal tab \\
+{\tt $\backslash$v} & Vertical tab \\
+\hline
+\end{tabular}
+\end{center}
+\caption{A complete list of PyXPlot's string escape sequences. These are a subset of those available in C.}
+\label{tab:escape_sequences}
+\end{table}
 
 \section{Axis labels and titles}
 \label{sec:latex_incompatibility}
@@ -361,53 +425,59 @@ great flexibility, but means that care needs to be taken to escape any of
 \LaTeX's reserved characters -- i.e. $\backslash$~\&~\%~\#~\{~\}~\$~\_~\^{} or
 $\sim$.
 
-Because of the use of quotes to delimit text labels, special care needs to be
-taken when apostrophe and quote characters are used. The following command
-would raise an error, because the apostrophe would be interpreted as marking
-the end of the text label:
+Two built-in functions provide some assistance in generating \LaTeX\ labels.
+The \indfunt{texify()} takes as its argument a string containing a mathematical
+expression, and returns a \LaTeX\ representation of it.  The
+\indfunt{texifyText()} takes as its argument a text string, and returns a
+\LaTeX\ representation of it, with any necessary escape characters added. For
+example:
+
+\vspace{3mm}
+\input{fragments/tex/fs_texify.tex}
+\vspace{3mm}
+
+Special care needs to be taken when typesetting \LaTeX\ expressions that
+contain apostrophe, quote and backslash characters.  It is recommended that
+\LaTeX\ expressions be enclosed in triple quotes, as raw strings with escape
+characters turned off, for example:
+
+\begin{dodo}
+set xlabel r"""\textrm{J\"org's data}"""
+\end{dodo}
+
+The reason for recommending this syntax is demonstrated by the examples below,
+all of which will fail. In
 
 \begin{dontdo}
 set xlabel 'My plot's X axis'
 \end{dontdo}
 
-\noindent The following would achieve the desired effect:
+\noindent the apostrophe will be mis-interpreted as a closing quote character. In
+\index{backslash character}\index{accented characters}
+
+\begin{dontdo}
+set xlabel "J$\backslash$"org's data"
+\end{dontdo}
+
+\noindent the backslash before the " character will be interpreted as a PyXPlot escape character; it will not be passed to \LaTeX, and a \LaTeX error will result. There are similar problems with
+
+\begin{dontdo}
+set xlabel "2 $\backslash$times 3"
+\end{dontdo}
+
+\noindent where the \texttt{$\backslash$t} will be turned into a tab character. Whilst it is possible to write
+
+\begin{verbatim}
+set xlabel "2 \\times 3"
+set xlabel "J\\\"org's data"
+\end{verbatim}
+
+\noindent this syntax is messy, especially in the last example where three backslashes are needed. It is much neater to use:\index{backslash character}\index{accented characters}
 
 \begin{dodo}
-set xlabel "My plot's X axis"
+set xlabel r"""2 $\backslash$times 3"""
+set xlabel r"""J$\backslash$"org's data"""
 \end{dodo}
-
-To make it possible to render \LaTeX\ strings containing both single and double
-quote characters -- for example, the string {\tt J$\backslash$"org's Data},
-which puts a German umlaut on the letter o as well as having a possessive
-apostrophe -- PyXPlot recognises the backslash character to be an escape
-character when followed by either~' or~". A double backslash
-($\backslash\backslash$) represents a literal backslash. These are the
-\textit{only} cases in which PyXPlot considers $\backslash$ an escape
-character. To render the example string above, one would type:\index{escape
-characters}\index{backslash character}\index{accented characters}
-
-\begin{dodo}
-set xlabel "J$\backslash\backslash\backslash$"org's Data"
-\end{dodo}
-
-\noindent In this example, three backslashes are required. The first pair
-produce the \LaTeX\ escape character used to produce the umlaut; the second is
-a PyXPlot escape character, used so that the~" character is not interpreted as
-delimiting the string. \index{escape characters}\index{quote
-characters}\index{special characters}
-
-The pre-defined \indfunt{texify()} function may provide some assistance in
-generating \LaTeX\ labels: it takes either an algebraic expression, or a string
-in quotes, and produces a \LaTeX\ representation of it, as in the following
-examples:
-
-\vspace{3mm}
-\noindent{\tt pyxplot> {\bf a=50}}\newline
-\noindent{\tt pyxplot> {\bf print texify("A \%d\% increase"\%(a))}}\newline
-\noindent{\tt A 50$\backslash$\% increase}\newline
-\noindent{\tt pyxplot> {\bf print texify(sqrt(x**2+1))}}\newline
-\noindent{\tt \$$\backslash$displaystyle $\backslash$sqrt\{x\^{}\{2\}+1\}\$}
-\vspace{3mm}
 
 Having set labels and titles, they may be removed thus:
 
@@ -613,10 +683,6 @@ blocks.  It is usually good practice to include comment lines at the top of
 Section~\ref{sec:special_comments} we will see that PyXPlot can read metadata
 from some comment lines which follow particular syntax.
 
-%\example{ex:datafile}{An example}{
-%Here, we have an example of plotting a datafile.
-%}
-
 \section{Plotting many \datafile s at once}
 
 \index{globbing}\index{wildcards}\index{datafiles!globbing}
@@ -716,10 +782,6 @@ plot sin(x) select ($2>0) discontinuous
 \end{verbatim}
 
 \noindent which plots a set of disconnected peaks from the sine function.
-
-%\example{ex:select}{An example}{
-%Here, we have an example of the use of the {\tt select} modifier.
-%}
 
 \section{The {\tt replot} command}
 \label{sec:replot}
@@ -920,10 +982,6 @@ set style data lines
 {\tt lines}. Similarly, the \indcmdt{set style function} changes the default
 style used when functions are plotted.
 
-%\example{ex:errorbars}{An example}{
-%Here, we have an example of the errorbars plot style.
-%}
-
 \section{Setting axis ranges}
 \label{sec:plot_ranges}
 
@@ -1035,40 +1093,12 @@ h(x) = x\tan\,\theta - \frac{gx^2}{2v^2\cos^2\,\theta}.
 In the script below, we plot this function for five different values of $v$ and
 $\theta$.
 \nlscf
-{\footnotesize
-\noindent {\tt g~~~= 9.81~~~~\# Acceleration due to gravity}\newline
-\noindent {\tt d2r~= pi/180~~\# Convert degrees to radians}\newline
-\noindent {\tt }\newline}\\{\footnotesize
-\noindent {\tt \# The mathematical equation of a trajectory}\newline
-\noindent {\tt h(x,theta,v) = x*tan(theta*d2r) - 0.5*g*x**2/(v**2*cos(theta*d2r)**2)}\newline
-\noindent {\tt }\newline}\\{\footnotesize
-\noindent {\tt \# Plot configuration}\newline
-\noindent {\tt set xlabel "\$x/{$\backslash$rm m}\$"}\newline
-\noindent {\tt set ylabel "\$h/{$\backslash$rm m}\$"}\newline
-\noindent {\tt set xrange [0:20]}\newline
-\noindent {\tt set yrange [0:]}\newline
-\noindent {\tt set key below}\newline
-\noindent {\tt set title 'Trajectories of projectiles fired with speed \$v\$ and angle \$$\backslash$theta\$'}\newline
-\noindent {\tt plot h(x,30,10) title "\$$\backslash$theta=30\^{}$\backslash$circ;$\backslash$qquad v=10$\backslash$,\{$\backslash$rm m$\backslash$,s\^{}\{-1\}\}\$", $\backslash$}\newline
-\noindent {\tt \phantom{xxxxx}h(x,45,10) title "\$$\backslash$theta=45\^{}$\backslash$circ;$\backslash$qquad v=10$\backslash$,\{$\backslash$rm m$\backslash$,s\^{}\{-1\}\}\$", $\backslash$}\newline
-\noindent {\tt \phantom{xxxxx}h(x,60,10) title "\$$\backslash$theta=60\^{}$\backslash$circ;$\backslash$qquad v=10$\backslash$,\{$\backslash$rm m$\backslash$,s\^{}\{-1\}\}\$", $\backslash$}\newline
-\noindent {\tt \phantom{xxxxx}h(x,30,15) title "\$$\backslash$theta=30\^{}$\backslash$circ;$\backslash$qquad v=15$\backslash$,\{$\backslash$rm m$\backslash$,s\^{}\{-1\}\}\$", $\backslash$}\newline
-\noindent {\tt \phantom{xxxxx}h(x,60,15) title "\$$\backslash$theta=60\^{}$\backslash$circ;$\backslash$qquad v=15$\backslash$,\{$\backslash$rm m$\backslash$,s\^{}\{-1\}\}\$"}
-}
-\nlscf
-The resulting plot is shown below:
+\input{examples/tex/ex_trajectories_1.tex}
 \nlscf
 \begin{center}
 \includegraphics{examples/eps/ex_trajectories}
 \end{center}
 \nlscf
-In the next chapter, we will meet various ways in which this script could be
-improved. Here, we have used to numerical constants, {\tt g} being the
-acceleration due to gravity, and {\tt d2r} being a factor for converting angles
-between degrees and radians.  The former is, in fact, already defined within
-PyXPlot as a numerical constant, and the latter conversion can be made using
-PyXPlot's automatic ability to convert numbers between different physical
-units.
 }
 
 \section{Interactive help}

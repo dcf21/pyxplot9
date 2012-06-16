@@ -1,0 +1,4 @@
+x = time.fromCalendar(-752,4,21,12,0,0)
+y = time.fromCalendar( 476,9, 4,12,0,0)
+print y-x
+print (y-x)/unit(year)

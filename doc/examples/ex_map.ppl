@@ -28,7 +28,7 @@ load "examples/fig_init.ppl"
 set term color
 
 # BEGIN
-set size 20 ratio (45-10)/(154-112)*cos(radians(25))
+set size 20 ratio (45-10)/(154-112)*cos(25*unit(deg))
 set xrange [112:154]
 set yrange [-45:-10]
 
