@@ -1,0 +1,227 @@
+% types.tex
+%
+% The documentation in this file is part of PyXPlot
+% <http://www.pyxplot.org.uk>
+%
+% Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
+%               2008-2012 Ross Church
+%
+% $Id$
+%
+% PyXPlot is free software; you can redistribute it and/or modify it under the
+% terms of the GNU General Public License as published by the Free Software
+% Foundation; either version 2 of the License, or (at your option) any later
+% version.
+%
+% You should have received a copy of the GNU General Public License along with
+% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+% ----------------------------------------------------------------------------
+
+% LaTeX source for the PyXPlot Users' Guide
+
+\chapter{List of data types}
+\label{ch:types_list}
+
+The following is a list of PyXPlot's data types:
+
+\begin{itemize}
+\item boolean
+\item color
+\item date
+\item dictionary
+\item exception
+\item fileHandle
+\item function
+\item instance
+\item list
+\item matrix
+\item module
+\item null
+\item number
+\item string
+\item type
+\item vector
+\end{itemize}
+
+Each of these data types has a prototype object in the module {\tt types},
+which can be called like a function to create a new object of the type. See
+Section~\ref{sec:functions_types} for details of the arguments accepted by each
+prototype.
+
+All objects in PyXPlot have methods that can be called on them, using the generic syntax:
+
+\begin{verbatim}
+object.methodName(arguments)
+\end{verbatim}
+
+\noindent For example:
+
+\vspace{3mm}
+\input{fragments/tex/types_methods.tex}
+\vspace{3mm}
+
+\noindent The sections below list the methods of each data type.
+
+\section{Methods common to all data types}
+
+\newcommand{\methdef}[2]{
+\vspace{5mm}
+\begin{samepage}
+\noindent
+{\large \bf #1}
+\newline
+\noindent
+The #1 method #2
+\indfun{#1}
+\end{samepage}
+
+}
+
+\methdef{class()}{returns the class prototype of an object.}
+\methdef{contents()}{returns a list of all the methods and internal variables of an object.}
+\methdef{data()}{returns a list of all the internal variables (not methods) of an object.}
+\methdef{methods()}{returns a list of the methods of an object.}
+\methdef{str()}{returns a string representation of an object.}
+\methdef{type()}{returns the type of an object.}
+
+\section{The \texttt{boolean} type}
+
+The \texttt{boolean} type has no methods other than those common to all types.
+Objects of type \texttt{boolean} have no methods other than those common to all types.
+
+\section{The \texttt{color} type}
+
+\methdef{componentsCMYK}{returns a vector CMYK representation of a color.}
+\methdef{componentsHSB}{returns a vector HSB representation of a color.}
+\methdef{componentsRGB}{returns a vector RGB representation of a color.}
+\methdef{toCMYK}{returns color object containing a CMYK representation of a color.}
+\methdef{toHSB}{returns color object containing an HSB representation of a color.}
+\methdef{toRGB}{returns color object containing an RGB representation of a color.}
+
+\section{The \texttt{date} type}
+
+\methdef{toDayOfMonth}{returns the day of the month of a date object in the current calendar.}
+\methdef{toDayWeekName()}{returns the name of the day of the week of a date object.}
+\methdef{toDayWeekNum()}{returns the day of the week (1--7) of a date object.}
+\methdef{toHour()}{returns the integer hour component (0--23) of a date object.}
+\methdef{toJD()}{converts a date object to a numerical Julian date.}
+\methdef{toMinute()}{returns the integer minute component (0--59) of a date object.}
+\methdef{toMJD()}{converts a date object to a modified Julian date.}
+\methdef{toMonthName()}{returns the name of the month in which a date object falls.}
+\methdef{toMonthNum()}{returns the number (1--12) of the month in which a date object falls.}
+\methdef{toSecond()}{returns the seconds component (0--60) of a date object, including the non-integer component.}
+\methdef{str(...)}{converts a date object to a string with an optional format string supplied as an argument (see the {\tt time.string()} function).}
+\methdef{toUnix()}{converts a date object to a Unix time.}
+\methdef{toYear()}{returns the year in which a date object falls in the current calendar.}
+
+\section{The \texttt{dictionary} type}
+
+\methdef{hasKey($x$)}{returns a boolean indicating whether the key $x$ exists in the dictionary.}
+\methdef{items()}{returns a list of the [key,value] pairs in a dictionary.}
+\methdef{keys()}{returns a list of the keys defined in a dictionary.}
+\methdef{len()}{returns the number of entries in a dictionary.}
+\methdef{values()}{returns a list of the values in a dictionary.}
+
+\section{The \texttt{exception} type}
+
+\methdef{raise($x$)}{raises an exception with error message string $x$.}
+
+\section{The \texttt{fileHandle} type}
+
+\methdef{close()}{closes a file handle.}
+\methdef{eof()}{returns a boolean flag to indicate whether the end of a file has been reached.}
+\methdef{flush()}{flushes any buffered data which has not yet physically been written to a file.}
+\methdef{getPos()}{returns a file handle's current position in a file.}
+\methdef{isOpen()}{returns a boolean flag indicating whether a file is open.}
+\methdef{read()}{returns the contents of a file as a string.}
+\methdef{readline()}{returns a single line of a file as a string.}
+\methdef{readlines()}{returns the lines of a file as a list of strings.}
+\methdef{setPos($x$)}{sets a file handle's current position in a file.}
+\methdef{write($x$)}{writes the string $x$ to a file.}
+
+\section{The \texttt{function} type}
+
+Objects of type \texttt{function} have no methods other than those common to all types.
+
+\section{The \texttt{instance} type}
+
+\methdef{hasKey($x$)}{returns a boolean indicating whether the key $x$ exists in the instance.}
+\methdef{items()}{returns a list of the [key,value] pairs in a instance.}
+\methdef{keys()}{returns a list of the keys defined in a instance.}
+\methdef{len()}{returns the number of entries in a instance.}
+\methdef{values()}{returns a list of the values in a instance.}
+
+\section{The \texttt{list} type}
+
+\methdef{append($x$)}{appends the object $x$ to a list and returns the new list.}
+\methdef{extend($x$)}{appends the members of a list or vector $x$ to the operand and returns the new list.}
+\methdef{insert$n,x$)}{inserts the number $x$ into a list at position $n$, and returns the new list.}
+\methdef{len()}{returns the number of elements in a list.}
+\methdef{max()}{returns the highest-valued item in a list.}
+\methdef{min()}{returns the lowest-valued item in a list.}
+\methdef{pop()}{returns the last item in a list, and removes it from the list.}
+\methdef{reverse()}{reverses the order of the members of a list, and returns the new list.}
+\methdef{sort()}{sorts the members of a list into ascending order, and returns the new list.}
+\methdef{vector()}{returns the elements in a list as a vector.}
+
+\section{The \texttt{matrix} type}
+
+\methdef{det()}{returns the determinant of a square matrix.}
+\methdef{diagonal()}{returns a boolean indicating whether a matrix is diagonal.}
+\methdef{eigenvalues()}{returns a vector containing the eigenvalues of a square symmetric matrix.}
+\methdef{eigenvectors()}{returns a list of the eigenvectors of a square symmetric matrix.}
+\methdef{inv()}{returns the inverse of a square matrix.}
+\methdef{size()}{returns the dimensions of a matrix.}
+\methdef{symmetric()}{returns a boolean indicating whether a matrix is symmetric.}
+\methdef{transpose()}{returns the transpose of a matrix.}
+
+\section{The \texttt{module} type}
+
+\methdef{hasKey($x$)}{returns a boolean indicating whether the key $x$ exists in the module.}
+\methdef{items()}{returns a list of the [key,value] pairs in a module.}
+\methdef{keys()}{returns a list of the keys defined in a module.}
+\methdef{len()}{returns the number of entries in a module.}
+\methdef{values()}{returns a list of the values in a module.}
+
+\section{The \texttt{null} type}
+
+Objects of type \texttt{null} have no methods other than those common to all types.
+
+\section{The \texttt{number} type}
+
+Objects of type \texttt{number} have no methods other than those common to all types.
+
+\section{The \texttt{string} type}
+
+\methdef{append($x$)}{appends the string $x$ to the end of a string.}
+\methdef{beginsWith($x$)}{returns a boolean indicating whether a string begins with the substring $x$.}
+\methdef{endsWith($x$)}{returns a boolean indicating whether a string ends with the substring $x$.}
+\methdef{find($x$)}{returns the position of the first occurrence of $x$ in a string, or $-1$ if it is not found.}
+\methdef{findAll($x$)}{returns a list of the positions where the substring $x$ occurs in a string.}
+\methdef{isalnum()}{returns a boolean indicating whether all of the characters of a string are alphanumeric.}
+\methdef{isalpha()}{returns a boolean indicating whether all of the characters of a string are alphabetic.}
+\methdef{isdigit()}{returns a boolean indicating whether all of the characters of a string are numeric.}
+\methdef{len()}{returns the length of a string.}
+\methdef{lower()}{converts a string to lowercase.}
+\methdef{lstrip()}{strips whitespace off the beginning of a string.}
+\methdef{strip()}{strips whitespace off the beginning and end of a string.}
+\methdef{rstrip()}{strips whitespace off the end of a string.}
+\methdef{upper()}{converts a string to uppercase.}
+
+\section{The \texttt{type} type}
+
+Objects of type \texttt{type} have no methods other than those common to all types.
+
+\section{The \texttt{vector} type}
+
+\methdef{append($x$)}{appends the number $x$ to a vector and returns the new vector.}
+\methdef{extend($x$)}{appends the members of a list or vector $x$ to the operand and returns the new vector.}
+\methdef{insert$n,x$)}{inserts the number $x$ into a vector at position $n$, and returns the new vector.}
+\methdef{len()}{returns the number of elements in a vector.}
+\methdef{list()}{returns the elements in a vector as a list.}
+\methdef{norm()}{returns the quadrature sum of the elements in a vector.}
+\methdef{reverse()}{reverses the order of the elements of a vector, and returns the new vector.}
+\methdef{sort()}{sorts the elements of a vector into ascending order, and returns the new vector.}
+

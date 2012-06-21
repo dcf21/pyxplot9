@@ -137,7 +137,7 @@ void ppl_makeDefaultVars(ppl_context *out)
       ppl_dictAppendCpy(d2 , SW_COLOR_STR[i] , (void *)&v , sizeof(v));
      }
     ppl_addSystemFunc(d2,"wavelength"    ,2,2,1,1,1,0,(void *)&pplfunc_colWavelen  , "wavelength(lambda,norm)", "\\mathrm{wavelength}@<@1,@2@>", "wavelength(lambda,norm) returns a color representation of monochromatic light at wavelength lambda, normalised to brightness norm");
-    ppl_addSystemFunc(d2,"spectrum"      ,2,2,0,0,0,0,(void *)&pplfunc_colSpectrum , "spectrum(spec,norm)", "\\mathrm{spectrum}@<@1,@2@>", "spectrum(spec,norm) returns a color representation of the spectrum spec, normalised to brightness norm. spec should be a function that takes a single input (wavelength) with units of length, and may return an output with arbitrary units.");
+    ppl_addSystemFunc(d2,"spectrum"      ,2,2,0,0,0,0,(void *)&pplfunc_colSpectrum , "spectrum(spec,norm)", "\\mathrm{spectrum}@<@1,@2@>", "spectrum(spec,norm) returns a color representation of the spectrum spec, normalised to brightness norm. spec should be a function that takes a single input (wavelength) with units of length, and may return an output with arbitrary units");
 
     // phy module
     ppl_dictAppendCpy(d  , "phy"       , pplObjModule(&m,1,1,1) , sizeof(v));
@@ -245,7 +245,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d2,"glob"          ,1,1,0,0,0,0,(void *)&pplfunc_osGlob    , "glob(x)", "\\mathrm{glob}@<@1@>", "glob(x) returns a list of files which match the supplied wildcard");
     ppl_addSystemFunc(d2,"popen"         ,1,2,0,0,0,0,(void *)&pplfunc_osPopen   , "popen(x[,y])", "\\mathrm{popen}@<@0@>", "popen(x[,y]) opens a pipe to the command x with access mode y, and returns a file object");
     ppl_addSystemFunc(d2,"stat"          ,1,1,0,0,0,0,(void *)&pplfunc_osStat    , "stat(x)", "\\mathrm{stat}@<@1@>", "stat(x) returns a dictionary of information about the file x");
-    ppl_addSystemFunc(d2,"system"        ,1,1,0,0,0,0,(void *)&pplfunc_osSystem  , "system()", "\\mathrm{system}@<@1@>", "system() executes a command in a subshell");
+    ppl_addSystemFunc(d2,"system"        ,1,1,0,0,0,0,(void *)&pplfunc_osSystem  , "system(x)", "\\mathrm{system}@<@1@>", "system(x) executes a command in a subshell");
     ppl_addSystemFunc(d2,"tmpfile"       ,0,0,1,1,1,1,(void *)&pplfunc_osTmpfile , "tmpfile()", "\\mathrm{tmpfile}@<@>", "tmpfile() returns a file handle for a temporary file");
     ppl_addSystemFunc(d2,"uname"         ,0,0,1,1,1,1,(void *)&pplfunc_osUname   , "uname()", "\\mathrm{uname}@<@>", "uname() returns a dictionary of information about the operating system");
     ppl_dictAppendCpy(d2 , "path"      , pplObjModule(&m,1,1,1) , sizeof(v));
@@ -396,13 +396,15 @@ void ppl_makeDefaultVars(ppl_context *out)
     // Ast module
     ppl_dictAppendCpy(d, "ast", pplObjModule(&m,1,1,1) , sizeof(v));
     d2 = (dict *)m.auxil;
-    ppl_addSystemFunc(d2,"Lcdm_age"     ,3,3,1,1,1,0,(void *)&pplfunc_Lcdm_age     , "Lcdm_age(H0,w_m,w_l)", "\\mathrm{\\Lambda_{CDM}\\_age@<@1,@2,@3@>", "Lcdm_age(H0,w_m,w_l) returns the current age of the Universe in an L_CDM cosmology");
-    ppl_addSystemFunc(d2,"Lcdm_angscale",4,4,1,1,1,0,(void *)&pplfunc_Lcdm_angscale, "Lcdm_age(z,H0,w_m,w_l)", "\\mathrm{\\Lambda_{CDM}\\_angscale@<@1,@2,@3,@4@>", "Lcdm_angscale(z,H0,w_m,w_l) returns the angular scale of the sky in distance per unit angle for an L_CDM cosmology");
-    ppl_addSystemFunc(d2,"Lcdm_DA"      ,4,4,1,1,1,0,(void *)&pplfunc_Lcdm_DA      , "Lcdm_DA(z,H0,w_m,w_l)", "\\mathrm{\\Lambda_{CDM}\\_D_A@<@1,@2,@3,@4@>", "Lcdm_DA(z,H0,w_m,w_l) returns the angular size distance corresponding to redshift z in an L_CDM cosmology");
-    ppl_addSystemFunc(d2,"Lcdm_DL"      ,4,4,1,1,1,0,(void *)&pplfunc_Lcdm_DL      , "Lcdm_DL(z,H0,w_m,w_l)", "\\mathrm{\\Lambda_{CDM}\\_D_L@<@1,@2,@3,@4@>", "Lcdm_DL(z,H0,w_m,w_l) returns the luminosity distance corresponding to redshift z in an L_CDM cosmology");
-    ppl_addSystemFunc(d2,"Lcdm_DM"      ,4,4,1,1,1,0,(void *)&pplfunc_Lcdm_DM      , "Lcdm_DM(z,H0,w_m,w_l)", "\\mathrm{\\Lambda_{CDM}\\_D_M@<@1,@2,@3,@4@>", "Lcdm_DM(z,H0,w_m,w_l) returns the comoving distance corresponding to redshift z in an L_CDM cosmology");
-    ppl_addSystemFunc(d2,"Lcdm_t"       ,4,4,1,1,1,0,(void *)&pplfunc_Lcdm_t       , "Lcdm_t(z,H0,w_m,w_l)", "\\mathrm{\\Lambda_{CDM}\\_t@<@1,@2,@3,@4@>", "Lcdm_t(z,H0,w_m,w_l) returns the lookback time corresponding to redshift z in an L_CDM cosmology");
-    ppl_addSystemFunc(d2,"Lcdm_z"       ,4,4,1,1,1,0,(void *)&pplfunc_Lcdm_z       , "Lcdm_z(t,H0,w_m,w_l)", "\\mathrm{\\Lambda_{CDM}\\_z@<@1,@2,@3,@4@>", "Lcdm_z(t,H0,w_m,w_l) returns the redshift corresponding to a lookback time t in an L_CDM cosmology");
+    ppl_addSystemFunc(d2,"Lcdm_age"     ,3,3,1,1,1,0,(void *)&pplfunc_Lcdm_age     , "Lcdm_age(H0,w_m,w_l)", "\\mathrm{\\Lambda_{CDM}\\_age}@<@1,@2,@3@>", "Lcdm_age(H0,w_m,w_l) returns the current age of the Universe in an L_CDM cosmology");
+    ppl_addSystemFunc(d2,"Lcdm_angscale",4,4,1,1,1,0,(void *)&pplfunc_Lcdm_angscale, "Lcdm_age(z,H0,w_m,w_l)", "\\mathrm{\\Lambda_{CDM}\\_angscale}@<@1,@2,@3,@4@>", "Lcdm_angscale(z,H0,w_m,w_l) returns the angular scale of the sky in distance per unit angle for an L_CDM cosmology");
+    ppl_addSystemFunc(d2,"Lcdm_DA"      ,4,4,1,1,1,0,(void *)&pplfunc_Lcdm_DA      , "Lcdm_DA(z,H0,w_m,w_l)", "\\mathrm{\\Lambda_{CDM}\\_D_A}@<@1,@2,@3,@4@>", "Lcdm_DA(z,H0,w_m,w_l) returns the angular size distance corresponding to redshift z in an L_CDM cosmology");
+    ppl_addSystemFunc(d2,"Lcdm_DL"      ,4,4,1,1,1,0,(void *)&pplfunc_Lcdm_DL      , "Lcdm_DL(z,H0,w_m,w_l)", "\\mathrm{\\Lambda_{CDM}\\_D_L}@<@1,@2,@3,@4@>", "Lcdm_DL(z,H0,w_m,w_l) returns the luminosity distance corresponding to redshift z in an L_CDM cosmology");
+    ppl_addSystemFunc(d2,"Lcdm_DM"      ,4,4,1,1,1,0,(void *)&pplfunc_Lcdm_DM      , "Lcdm_DM(z,H0,w_m,w_l)", "\\mathrm{\\Lambda_{CDM}\\_D_M}@<@1,@2,@3,@4@>", "Lcdm_DM(z,H0,w_m,w_l) returns the comoving distance corresponding to redshift z in an L_CDM cosmology");
+    ppl_addSystemFunc(d2,"Lcdm_t"       ,4,4,1,1,1,0,(void *)&pplfunc_Lcdm_t       , "Lcdm_t(z,H0,w_m,w_l)", "\\mathrm{\\Lambda_{CDM}\\_t}@<@1,@2,@3,@4@>", "Lcdm_t(z,H0,w_m,w_l) returns the lookback time corresponding to redshift z in an L_CDM cosmology");
+    ppl_addSystemFunc(d2,"Lcdm_z"       ,4,4,1,1,1,0,(void *)&pplfunc_Lcdm_z       , "Lcdm_z(t,H0,w_m,w_l)", "\\mathrm{\\Lambda_{CDM}\\_z}@<@1,@2,@3,@4@>", "Lcdm_z(t,H0,w_m,w_l) returns the redshift corresponding to a lookback time t in an L_CDM cosmology");
+    ppl_addSystemFunc(d2,"moonPhase"    ,1,1,0,1,1,1,(void *)&pplfunc_moonphase    , "moonPhase(d)"        , "\\mathrm{moonPhase}@<@1@>", "moonPhase(d) returns the phase of the Moon at time d, specified either as a date object or a Unix time");
+    ppl_addSystemFunc(d2,"siderealTime" ,1,1,0,1,1,1,(void *)&pplfunc_sidereal_time, "siderealTime(d)"     , "\\mathrm{siderealTime}@<@1@>", "siderealTime(d) returns the sidereal time at Greenwich at time d, specified either as a date object or a Unix time");
 
     // Fractals module
     ppl_dictAppendCpy(d, "fractals", pplObjModule(&m,1,1,1) , sizeof(v));

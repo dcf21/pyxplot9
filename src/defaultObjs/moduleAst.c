@@ -255,3 +255,53 @@ void pplfunc_Lcdm_z       (ppl_context *c, pplObj *in, int nArgs, int *status, i
   CHECK_OUTPUT_OKAY;
  }
 
+void pplfunc_sidereal_time(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *FunctionDescription = "siderealTime(d)";
+  if ((nArgs!=1)&&((in[0].objType!=PPLOBJ_NUM)||(in[0].objType!=PPLOBJ_DATE))) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The function %s requires a date object or numeric Unix time as its first argument; supplied argument had type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
+  CHECK_1NOTNAN;
+  CHECK_1INPUT_DIMLESS;
+  IF_1COMPLEX { QUERY_MUST_BE_REAL }
+  ELSE_REAL
+   {
+    double JD   = in->real / 86400.0 + 40587.5;
+    double T = (JD - 51545.0) / 36525.0; // See pages 87-88 of Astronomical Algorithms, by Jean Meeus
+    OUTPUT.real = fmod( M_PI/180 * (
+                                    280.46061837 +
+                                    360.98564736629 * (JD - 51545.0) +
+                                    0.000387933     * T*T +
+                                    T*T*T / 38710000.0
+                                   ), 2*M_PI);
+   }
+  ENDIF
+  CLEANUP_APPLYUNIT(UNIT_ANGLE);
+  CHECK_OUTPUT_OKAY;
+ }
+
+void pplfunc_moonphase    (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *FunctionDescription = "moonPhase(d)";
+  if ((nArgs!=1)&&((in[0].objType!=PPLOBJ_NUM)||(in[0].objType!=PPLOBJ_DATE))) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The function %s requires a date object or numeric Unix time as its first argument; supplied argument had type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
+  CHECK_1NOTNAN;
+  CHECK_1INPUT_DIMLESS;
+  IF_1COMPLEX { QUERY_MUST_BE_REAL }
+  ELSE_REAL
+   {
+    double JD   = in->real / 86400.0 + 40587.5;
+    double t    = (JD - 51545)/36525; // Time in Julian Centuries since 2000.0
+    double Msun = 2*M_PI*fmod(0.993133+99.997361*t, 1);
+    double Lsun = 2*M_PI*fmod(0.7859453+Msun/(2*M_PI)+(6893.0*sin(Msun)+72.0*sin(2*Msun)+6191.2*t)/1296e3, 1);
+    double L0   = 2*M_PI*fmod(0.606433+1336.855225*t, 1);
+    double l    = 2*M_PI*fmod(0.374897+1325.552410*t, 1);
+    double ls   = 2*M_PI*fmod(0.993133+99.997361*t, 1);
+    double D    = 2*M_PI*fmod(0.827361+1236.853086*t, 1);
+    double F    = 2*M_PI*fmod(0.259086+1342.227825*t, 1);
+    double dL   = 22640*sin(l) - 4586*sin(l-2*D) + 2370*sin(2*D) + 769*sin(2*l) - 668*sin(ls) - 412*sin(2*F) - 212*sin(2*l-2*D) - 206*sin(l+ls-2*D) + 192*sin(l+2*D) - 165*sin(ls-2*D) - 125*sin(D) - 110*sin(l+ls) + 148*sin(l-ls) - 55*sin(2*F-2*D);
+    OUTPUT.real = fmod(L0 + dL/1296e3*2*M_PI - Lsun , 2*M_PI);
+    while (OUTPUT.real<0) OUTPUT.real += 2*M_PI;
+   }
+  ENDIF
+  CLEANUP_APPLYUNIT(UNIT_ANGLE);
+  CHECK_OUTPUT_OKAY;
+ }
+

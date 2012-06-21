@@ -72,12 +72,6 @@
    } \
  }
 
-#define WRAPPER_INIT \
- { \
-  *status = 0; \
-  ppl_units_zero(OUTPUT); \
- }
-
 #define NAN_CHECK_FAIL \
  { \
   if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The function %s has received a non-finite input.",FunctionDescription); return; } \
@@ -86,14 +80,12 @@
 
 #define CHECK_1NOTNAN \
  { \
-  WRAPPER_INIT; \
   if ((c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && (in[0].flagComplex)) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[0].real)) || (!gsl_finite(in[0].imag))) { NAN_CHECK_FAIL; } \
  }
 
 #define CHECK_2NOTNAN \
  { \
-  WRAPPER_INIT; \
   if ((c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && ((in[0].flagComplex) || (in[1].flagComplex))) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[0].real)) || (!gsl_finite(in[0].imag))) { NAN_CHECK_FAIL; } \
   if ((!gsl_finite(in[1].real)) || (!gsl_finite(in[1].imag))) { NAN_CHECK_FAIL; } \

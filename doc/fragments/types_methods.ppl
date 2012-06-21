@@ -1,0 +1,4 @@
+pi.type()
+"hello world".methods()
+[3,2,1].len()
+time.fromCalendar(2000,1,1,0,0,0).toUnix()

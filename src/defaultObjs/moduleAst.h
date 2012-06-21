@@ -32,6 +32,8 @@ void pplfunc_Lcdm_DL      (ppl_context *c, pplObj *in, int nArgs, int *status, i
 void pplfunc_Lcdm_DM      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_Lcdm_t       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_Lcdm_z       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_moonphase    (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_sidereal_time(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 
 #endif
 

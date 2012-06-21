@@ -165,7 +165,6 @@ void pplfunc_acoth       (ppl_context *c, pplObj *in, int nArgs, int *status, in
   gsl_complex z;
   GSL_SET_COMPLEX(&z,in[0].real,in[0].imag); z=gsl_complex_arccoth(z);
   CLEANUP_GSLCOMPLEX;
-  CLEANUP_APPLYUNIT(UNIT_ANGLE);
   CHECK_OUTPUT_OKAY;
  }
 
@@ -187,7 +186,6 @@ void pplfunc_acsch       (ppl_context *c, pplObj *in, int nArgs, int *status, in
   gsl_complex z;
   GSL_SET_COMPLEX(&z,in[0].real,in[0].imag); z=gsl_complex_arccsch(z);
   CLEANUP_GSLCOMPLEX;
-  CLEANUP_APPLYUNIT(UNIT_ANGLE);
   CHECK_OUTPUT_OKAY;
  }
 
@@ -263,7 +261,6 @@ void pplfunc_asech       (ppl_context *c, pplObj *in, int nArgs, int *status, in
   gsl_complex z;
   GSL_SET_COMPLEX(&z,in[0].real,in[0].imag); z=gsl_complex_arcsech(z);
   CLEANUP_GSLCOMPLEX;
-  CLEANUP_APPLYUNIT(UNIT_ANGLE);
   CHECK_OUTPUT_OKAY;
  }
 
@@ -285,7 +282,6 @@ void pplfunc_asinh       (ppl_context *c, pplObj *in, int nArgs, int *status, in
   gsl_complex z;
   GSL_SET_COMPLEX(&z,in[0].real,in[0].imag); z=gsl_complex_arcsinh(z);
   CLEANUP_GSLCOMPLEX;
-  CLEANUP_APPLYUNIT(UNIT_ANGLE);
   CHECK_OUTPUT_OKAY;
  }
 
@@ -307,7 +303,6 @@ void pplfunc_atanh       (ppl_context *c, pplObj *in, int nArgs, int *status, in
   ELSE_REAL   { z=gsl_complex_arctanh_real(in[0].real); }
   ENDIF;
   CLEANUP_GSLCOMPLEX;
-  CLEANUP_APPLYUNIT(UNIT_ANGLE);
   CHECK_OUTPUT_OKAY;
  }
 
