@@ -49,7 +49,7 @@ def line_texify(line):
 def makeTeX(fname, counter, linelist):
   fname  = os.path.join("examples","tex",os.path.split(fname)[1][:-4]+"_%d.tex"%counter)
   output = open(fname,"w")
-  fns    = max([len(l) for l in linelist]) > 50
+  fns    = max([len(l) for l in linelist]) > 64
   first  = True
   if fns: output.write("{\\footnotesize\n")
   for line in linelist:

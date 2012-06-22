@@ -35,38 +35,24 @@ be wanted side-by-side, or some line-art annotations may be wanted on top of a
 graph. Additionally, PyXPlot can also produce technical diagrams as well as
 graphs. In this chapter, we turn our attention to such cases.
 
-Several of the vector graphics commands described in this chapter take rotation
-angles as one of their inputs.  It should be stressed that PyXPlot has two
-modes for handling angles: they can either be treated as dimensionless numbers
-or as being an additional base unit within the SI system (see
-Section~\ref{sec:angles}).  Where the vector graphics commands described in
-this chapter take rotation angles, a choice is always provided between
-expressing the angles as dimensionless numbers, measured in degrees, or as
-quantities with physical dimensions of angle. Thus, the following ways of
-specifying angles are all valid:
+\section{Adding other vector graphics objects}
 
-\begin{dodo}
-set unit angle nodimensionless\newline
-text "foo" rotate unit(pi*rad)\newline
-text "foo" rotate 180\newline
-text "foo" rotate unit(0.25*revolution)
-\end{dodo}
-
-\noindent as are these ways:
-
-\begin{dodo}
-set unit angle dimensionless\newline
-text "foo" rotate 180\newline
-text "foo" rotate degrees(pi)
-\end{dodo}
-
-\noindent The following is {\it not} valid, because the angle of $180^\circ$ is
-passed to the {\tt text} command in radians:
-
-\begin{dontdo}
-set unit angle dimensionless\newline
-text "foo" rotate unit(180*deg)
-\end{dontdo}
+In addition to graphs, a range of other objects can be placed on multiplot
+canvases:
+\begin{itemize}
+\item Rectangular boxes (the \indcmdt{box}).
+\item Circles and arcs (the {\tt arc} and \indcmdt{circle}s).
+\item Ellipses and elliptical arcs (the \indcmdt{ellipse}).
+\item Graphical images in {\tt bmp}, {\tt eps}, {\tt gif}, {\tt jpeg} or {\tt png} formats (the {\tt eps} and \indcmdt{image}s).
+\item Lines and arrows (the {\tt arrow} and \indcmdt{line}s).
+\item Piecharts (the \indcmdt{piechart}).
+\item Points labelled by crosses and other symbols (the \indcmdt{point}).
+\item Polygons (the \indcmdt{polygon}).
+\item Text labels (the \indcmdt{text}).
+\end{itemize}
+Put together, these commands can be used to produce a wide range of vector
+graphics. In the remainder of this chapter, we describe these commands in turn,
+providing a variety of examples of their use.
 
 \section{Multiplot mode}
 \label{sec:multiplot}
@@ -95,6 +81,93 @@ plot sin(x)
 set origin 10,0
 plot cos(x)
 \end{verbatim}
+
+\section{The {\tt text} command}
+
+Text labels may be added to multiplot canvases using the \indcmdt{text}. This
+has the following syntax:
+
+\begin{verbatim}
+text 'This is some text' at x,y
+\end{verbatim}
+
+In this case, the string `This is some text' would be rendered at position
+$(x,y)$ on the multiplot. As with the \indcmdt{set label}, a color may
+optionally be specified with the {\tt with color} modifier, as well as a
+rotation angle to rotate text labels through any given angle, measured in
+degrees counter-clockwise. For example:\indkey{rotate}
+
+\begin{verbatim}
+text 'This is some text' at x,y rotate r with color red
+\end{verbatim}
+
+The commands \indcmdts{set textcolor}, \indcmdts{set texthalign} and
+\indcmdts{set textvalign} can be used to set the color and alignment of the
+text produced with the \indcmdt{text}. Alternatively, the \indcmdt{text} takes
+three modifiers to control the alignment of the text which override these {\tt
+set} commands. The {\tt halign} and {\tt valign} modifiers may be followed by
+any of the settings which may follow the {\tt set texthalign} and {\tt set
+textvalign} commands respectively, as in the following examples:
+
+\begin{verbatim}
+text 'This is some text' at 0,0 halign left valign top
+text 'This is some text' at 0,0 halign right valign centre
+\end{verbatim}
+
+\noindent The {\tt gap} modifier allows a gap to be inserted in the alignment
+of the text. For example, the string {\tt halign left gap 3*unit(mm)} would
+cause text to be rendered with its left side $3\,\mathrm{mm}$ to the right of
+the position specified for the text. This is useful for labelling points on
+diagrams, where the labels should be slightly offset from the points that they
+are associated with. If the {\tt gap} modifier is followed by a dimensionless
+number, rather than one with dimensions of lengths, then it is assumed to be
+measured in centimetres.
+
+It should be noted that the \indcmdt{text} can also be used outside of the
+multiplot environment, to render a single piece of short text instead of a
+graph. One obvious application is to produce equations rendered as graphical
+files which can subsequently be imported into documents, slideshows or
+webpages.\index{presentations}
+
+\section{The {\tt arrow} and {\tt line} commands}
+
+Arrows may also be added to multiplot canvases using the \indcmdt{arrow}, which
+has syntax:
+
+\begin{verbatim}
+arrow from x,y to x,y
+\end{verbatim}
+
+The \indcmdt{arrow} may be followed by the \indmodt{with} keyword to specify to
+style of the arrow. The line type, line width and color of the arrow, may be
+specified using the same syntax as used in the plot command, using the {\tt
+linetype}, {\tt linewidth} and {\tt color} modifiers after the word {\tt
+with}, as in the example:
+
+\begin{verbatim}
+arrow from 0,0 to 10,10 \
+with linetype 2 linewidth 5 color red
+\end{verbatim}
+
+\noindent The style of the arrow may also be specified after the word {\tt
+with}, and three options are available: {\tt head} (the default), {\tt nohead},
+which produces line segments with no arrowheads on them, and {\tt twoway},
+which produces bidirectional  arrows with heads on both ends.
+
+The \indcmdt{arrow} has a twin, the \indcmdt{line}, which has the same syntax
+but with a different style setting of {\tt nohead}.
+
+\example{ex:notice}{A simple notice generated with the {\tt text} and {\tt arrow} commands}{
+In this example script, we use PyXPlot's {\tt arrow} and {\tt text} commands to
+produce a simple notice advertising that a lecture has moved to a different
+seminar room:
+\nlscf
+\input{examples/tex/ex_notice_1.tex}
+\nlscf
+\centerline{\includegraphics[width=\textwidth]{examples/eps/ex_notice}}
+}
+
+\section{Editing items on the canvas}
 
 All objects on a multiplot canvas have a unique identification number.  By
 default, these count up from one, such that the first item placed on the canvas
@@ -227,6 +300,29 @@ set display
 refresh
 \end{verbatim}
 
+\example{ex:euclid}{A diagram from Euclid's {\it Elements}}{
+In this more extended example script, we use PyXPlot's {\tt arrow} and {\tt
+text} commands to reproduce a diagram illustrating the 47th Proposition from
+Euclid's First Book of {\it Elements}, better known as Pythagoras' Theorem. A
+full text of the proof which accompanies this diagram can be found at
+\url{http://www.gutenberg.org/etext/21076}.
+\nlscf
+\input{examples/tex/ex_euclid_I_47_1.tex}
+\nlscf
+\centerline{\includegraphics[width=8cm]{examples/eps/ex_euclid_I_47}}
+}
+
+\example{ex:nanotubes}{A diagram of the conductivity of nanotubes}{
+In this example we produce a diagram of the {\it irreducible wedge} of possible
+carbon nanotube configurations, highlighting those configurations which are
+electrically conductive. We use PyXPlot's loop constructs to automate the
+production of the hexagonal grid which forms the basis of the diagram.
+\nlscf
+\input{examples/tex/ex_nanotubes_1.tex}
+\nlscf
+\centerline{\includegraphics[width=9cm]{examples/eps/ex_nanotubes}}
+}
+
 \section{Linked axes and galleries of plots}
 
 In the previous chapter (Section~\ref{sec:linked_axes}), linked axes were
@@ -254,7 +350,7 @@ axes only labelled along the bottom and left sides of the grid:
 
 \centerline{\includegraphics[width=\textwidth]{examples/eps/ex_gallery}}
 
-\section{The {\tt replot} command revisited}
+\subsection{The {\tt replot} command revisited}
 
 In multiplot mode, the \indcmdt{replot} can be used to modify the last plot
 added to the page. For example, the following would change the title of the
@@ -281,136 +377,28 @@ replot item 1 h(x)
 If no {\tt item} number is specified, then the \indcmdt{replot} acts by default
 upon the most recent plot to have been added to the multiplot canvas.
 
-\section{Adding other vector graphics objects}
+\section{The {\tt polygon} command}
 
-In addition to graphs, a range of other objects can be placed on multiplot
-canvases:
-\begin{itemize}
-\item Arcs of circles (the \indcmdt{arc}).
-\item Arrows (the \indcmdt{arrow}).
-\item Rectangular boxes (the \indcmdt{box}).
-\item Circles (the \indcmdt{circle}).
-\item Ellipses (the \indcmdt{ellipse}).
-\item Encapsulated PostScript images (the \indcmdt{eps}).
-\item Graphical images in {\tt bmp}, {\tt gif}, {\tt jpeg} or {\tt png} formats (the \indcmdt{image}).
-\item Lines (the \indcmdt{line}).
-\item Piecharts (the \indcmdt{piechart}).
-\item Points labelled by crosses and other symbols (the \indcmdt{point}).
-\item Text labels (the \indcmdt{text}).
-\end{itemize}
-Put together, these commands can be used to produce a wide range of vector
-graphics. In the remainder of this chapter, we describe these commands in turn,
-providing a variety of examples of their use.
-
-\subsection{The {\tt text} command}
-
-Text labels may be added to multiplot canvases using the \indcmdt{text}. This
-has the following syntax:
-
-\begin{verbatim}
-text 'This is some text' at x,y
-\end{verbatim}
-
-In this case, the string `This is some text' would be rendered at position
-$(x,y)$ on the multiplot. As with the \indcmdt{set label}, a color may
-optionally be specified with the {\tt with color} modifier, as well as a
-rotation angle to rotate text labels through any given angle, measured in
-degrees counter-clockwise. For example:\indkey{rotate}
-
-\begin{verbatim}
-text 'This is some text' at x,y rotate r with color red
-\end{verbatim}
-
-The commands \indcmdts{set textcolor}, \indcmdts{set texthalign} and
-\indcmdts{set textvalign} can be used to set the color and alignment of the
-text produced with the \indcmdt{text}. Alternatively, the \indcmdt{text} takes
-three modifiers to control the alignment of the text which override these {\tt
-set} commands. The {\tt halign} and {\tt valign} modifiers may be followed by
-any of the settings which may follow the {\tt set texthalign} and {\tt set
-textvalign} commands respectively, as in the following examples:
-
-\begin{verbatim}
-text 'This is some text' at 0,0 halign left valign top
-text 'This is some text' at 0,0 halign right valign centre
-\end{verbatim}
-
-\noindent The {\tt gap} modifier allows a gap to be inserted in the alignment
-of the text. For example, the string {\tt halign left gap 3*unit(mm)} would
-cause text to be rendered with its left side $3\,\mathrm{mm}$ to the right of
-the position specified for the text. This is useful for labelling points on
-diagrams, where the labels should be slightly offset from the points that they
-are associated with. If the {\tt gap} modifier is followed by a dimensionless
-number, rather than one with dimensions of lengths, then it is assumed to be
-measured in centimetres.
-
-It should be noted that the \indcmdt{text} can also be used outside of the
-multiplot environment, to render a single piece of short text instead of a
-graph. One obvious application is to produce equations rendered as graphical
-files which can subsequently be imported into documents, slideshows or
-webpages.\index{presentations}
-
-\subsection{The {\tt arrow} and {\tt line} commands}
-
-Arrows may also be added to multiplot canvases using the \indcmdt{arrow}, which
-has syntax:
-
-\begin{verbatim}
-arrow from x,y to x,y
-\end{verbatim}
-
-The \indcmdt{arrow} may be followed by the \indmodt{with} keyword to specify to
-style of the arrow. The line type, line width and color of the arrow, may be
-specified using the same syntax as used in the plot command, using the {\tt
-linetype}, {\tt linewidth} and {\tt color} modifiers after the word {\tt
-with}, as in the example:
-
-\begin{verbatim}
-arrow from 0,0 to 10,10 \
-with linetype 2 linewidth 5 color red
-\end{verbatim}
-
-\noindent The style of the arrow may also be specified after the word {\tt
-with}, and three options are available: {\tt head} (the default), {\tt nohead},
-which produces line segments with no arrowheads on them, and {\tt twoway},
-which produces bidirectional  arrows with heads on both ends.
-
-The \indcmdt{arrow} has a twin, the \indcmdt{line}, which has the same syntax
-but with a different style setting of {\tt nohead}.
-
-\example{ex:notice}{A simple notice generated with the {\tt text} and {\tt arrow} commands}{
-In this example script, we use PyXPlot's {\tt arrow} and {\tt text} commands to
-produce a simple notice advertising that a lecture has moved to a different
-seminar room:
+\example{ex:polygon1}{}{A simple polygon}{
+In this simple example, we use PyXPlot's {\tt polygon} command to generate a
+geometric shape from a list of points.
 \nlscf
-\input{examples/tex/ex_notice_1.tex}
+\input{examples/tex/ex_polygon1_1.tex}
 \nlscf
-\centerline{\includegraphics[width=\textwidth]{examples/eps/ex_notice}}
+\centerline{\includegraphics[width=8cm]{examples/eps/ex_polygon1}}
 }
 
-\example{ex:euclid}{A diagram from Euclid's {\it Elements}}{
-In this more extended example script, we use PyXPlot's {\tt arrow} and {\tt
-text} commands to reproduce a diagram illustrating the 47th Proposition from
-Euclid's First Book of {\it Elements}, better known as Pythagoras' Theorem. A
-full text of the proof which accompanies this diagram can be found at
-\url{http://www.gutenberg.org/etext/21076}.
+\example{ex:polygon2}{The first eight regular polygons}{
+This example uses PyXPlot's flow control commands, together with its list
+methods and the {\tt polygon} command, to generate a diagram of the first eight
+regular polygons.
 \nlscf
-\input{examples/tex/ex_euclid_I_47_1.tex}
+\input{examples/tex/ex_polygon2_1.tex}
 \nlscf
-\centerline{\includegraphics[width=8cm]{examples/eps/ex_euclid_I_47}}
+\centerline{\includegraphics[width=8cm]{examples/eps/ex_polygon2}}
 }
 
-\example{ex:nanotubes}{A diagram of the conductivity of nanotubes}{
-In this example we produce a diagram of the {\it irreducible wedge} of possible
-carbon nanotube configurations, highlighting those configurations which are
-electrically conductive. We use PyXPlot's loop constructs to automate the
-production of the hexagonal grid which forms the basis of the diagram.
-\nlscf
-\input{examples/tex/ex_nanotubes_1.tex}
-\nlscf
-\centerline{\includegraphics[width=9cm]{examples/eps/ex_nanotubes}}
-}
-
-\subsection{The {\tt image} command}
+\section{The {\tt image} command}
 
 Graphical images in {\tt bmp}, {\tt gif}, {\tt jpeg} or {\tt png} format may be
 placed on multiplot canvases using the \indcmdt{image}\footnote{To maintain
@@ -437,7 +425,7 @@ keyword {\tt transparent} to cause that particular color to become
 transparent; the three components of the RGB color should be in the range~0
 to~255.
 
-\subsection{The {\tt eps} command}
+\section{The {\tt eps} command}
 
 Vector graphic images in eps format may be placed on multiplot canvases
 using the \indcmdt{eps}, which has a syntax analogous to the {\tt image}
@@ -451,7 +439,7 @@ eps 'filename' at 3,2 rotate 5
 \noindent will place the eps file with its bottom-left corner at position
 $(3,2)$\,cm from the origin, rotated counter-clockwise through 5 degrees.
 
-\subsection{The {\tt box} and {\tt circle} commands}
+\section{The {\tt box} and {\tt circle} commands}
 \label{sec:rectangle}
 
 Rectangular boxes and circles may be placed on multiplot canvases
@@ -510,7 +498,7 @@ when interrupted from their work.
 \centerline{\includegraphics[width=5cm]{examples/eps/ex_noentry}}
 }
 
-\subsection{The {\tt arc} command}
+\section{The {\tt arc} command}
 \label{sec:arc}
 
 Partial arcs of circles may be drawn using the \indcmdt{arc}. This has similar
@@ -532,7 +520,7 @@ arc at 0,0 radius 5 from   0 to -90 with lw 3 col green
 arc at 0,0 radius 5 from 0 to 30 with lw 3 fillcolor red
 \end{verbatim}
 
-\example{ex:triangle}{A labelled diagram of a triangle}{
+\example{ex:triangle}{Labelled diagrams of triangles}{
 In this example, we make a subroutine to draw labelled diagrams of the interior
 angles of triangles, taking as its inputs the lengths of the three sides of the
 triangle to be drawn and the position of its lower-left corner. The subroutine
@@ -556,7 +544,7 @@ lenses forming real images.
 \centerline{\includegraphics{examples/eps/ex_lenses}}
 }
 
-\subsection{The {\tt point} command}
+\section{The {\tt point} command}
 \label{sec:point}
 
 The \indcmdt{point} places a single point on a multiplot canvases, in the same
@@ -578,7 +566,7 @@ set textvalign centre
 point at 0,0 label "The Origin" with ps 2
 \end{verbatim}
 
-\subsection{The {\tt ellipse} command}
+\section{The {\tt ellipse} command}
 \label{sec:ellipse}
 
 Ellipses may be placed on multiplot canvases using the \indcmdt{ellipse}. The
@@ -640,7 +628,7 @@ the eccentricity of the ellipse.
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_ellipse}}
 }
 
-\subsection{The {\tt piechart} command}
+\section{The {\tt piechart} command}
 \label{sec:piechart}
 
 The \indcmdt{piechart} produces piecharts based upon single columns of data

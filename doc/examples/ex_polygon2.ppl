@@ -1,4 +1,4 @@
-# ex_nanotubes.ppl
+# ex_polygon1.ppl
 #
 # The code in this file is part of PyXPlot
 # <http://www.pyxplot.org.uk>
@@ -23,46 +23,41 @@
 
 # Call common initialisation script
 reset
-title = "ex_nanotubes"
+title = "ex_polygon2"
 load "examples/fig_init.ppl"
 
 # BEGIN
-basisAngleX =   0*unit(deg)
-basisAngleY = 120*unit(deg)
-lineLen     =   5*unit(mm)
+rotate(a) = matrix( [cos(a), -sin(a)], \
+                    [sin(a),  cos(a)] )
 
-# Set up a transformation matrix
-transformMat = matrix([[sin(basisAngleX),sin(basisAngleY)], \
-                       [cos(basisAngleX),cos(basisAngleY)] ])
-transformMat *= lineLen
-
-subroutine line(p1,p2,lw)
+subroutine makePolygon(Nsides, centre)
  {
-  line from transformMat*p1 to transformMat*p2 with linewid lw
- }
-
-subroutine hexagon(p,lw)
- {
-  call line(p+vector([ 0, 0]),p+vector([ 0,-1]),lw)
-  call line(p+vector([ 0,-1]),p+vector([ 1,-1]),lw)
-  call line(p+vector([ 1,-1]),p+vector([ 2, 0]),lw)
-  call line(p+vector([ 2, 0]),p+vector([ 2, 1]),lw)
-  call line(p+vector([ 2, 1]),p+vector([ 1, 1]),lw)
-  call line(p+vector([ 1, 1]),p+vector([ 0, 0]),lw)
- }
-
-set multiplot ; set nodisplay
-
-for x=0 to 10
- {
-  for y=0 to x+1
+  points = []
+  for i=0 to Nsides
    {
-    p = vector([x+2*y , 2*x+y])
-    call hexagon(p, ((x-y)%3==0)?4:1)
-    text '%d,%d'%(x,y) at transformMat*(p+vector([1,0])) \
-      hal cen val cen
+    call points.append(centre + \
+       rotate(i/Nsides*unit(rev)) * vector(1,0))
    }
+  polygon points with fillcol gray50 col black
  }
+
+set nodisplay ; set multiplot
+
+set texthalign center
+set textvalign top
+
+foreach datum x,y,Nsides,name in "--"
+ {
+  call makePolygon(Nsides,vector(x,y))
+  text name at x,y-1.25
+ }
+0 0 3 Triangle
+3 0 4 Square
+6 0 5 Pentagon
+0 4 6 Hexagon
+3 4 7 Heptagon
+6 4 8 Octagon
+END
 
 set display ; refresh
 # END

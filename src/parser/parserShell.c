@@ -60,6 +60,7 @@
 #include "expressions/traceback_fns.h"
 
 #include "userspace/context.h"
+#include "userspace/contextVarDef.h"
 #include "userspace/garbageCollector.h"
 #include "userspace/pplObj_fns.h"
 #include "userspace/pplObjPrint.h"
@@ -92,6 +93,26 @@ void ppl_parserShell(ppl_context *c, parserLine *pl, parserOutput *in, int inter
     pplObj  *val  = ppl_expEval(c, expr, &lastOpAssign, 1, iterDepth+1);
     if (c->errStat.status) return; // On error, stop
     if (!lastOpAssign) { pplObjPrint(c,val,NULL,c->errcontext.tempErrStr,LSTR_LENGTH,0,0); ppl_report(&c->errcontext, NULL); }
+
+    // set ans
+     {
+      pplObj *optr, dummyTemp;
+      int     am, rc;
+      ppl_contextGetVarPointer(c, "ans", &optr, &dummyTemp);
+      dummyTemp.amMalloced=0;
+      ppl_garbageObject(&dummyTemp);
+      am = optr->amMalloced;
+      rc = optr->refCount;
+      optr->amMalloced = 0;
+      ppl_garbageObject(optr);
+      pplObjCpy(optr,val,0,0,1);
+      optr->amMalloced = am;
+      optr->refCount   = rc;
+      optr->self_lval  = NULL;
+      optr->self_this  = NULL;
+     }
+
+    // Clean up stack
     while (c->stackPtr>stkLevelOld) { STACK_POP; }
     return;
    }

@@ -348,7 +348,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
             const long s2 = nArgs;
             gsl_matrix *m;
             for (i=0; i<s2; i++) if (args[i].objType!=PPLOBJ_LIST) { sprintf(context->errStat.errBuff,"When initialising a matrix from a list of lists, all arguments must be lists. Supplied argument has type <%s>.", pplObjTypeNames[args[i].objType]); TBADD(ERR_TYPE); goto cleanup; }
-            if (pplObjMatrix(out,0,1,s1,s2)==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY); goto cleanup; }
+            if (pplObjMatrix(out,0,1,s2,s1)==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY); goto cleanup; }
             m = ((pplMatrix *)out->auxil)->m;
             ppl_unitsDimCpy(out,item);
             for (i=0; i<s2; i++)
@@ -363,7 +363,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
                 if (item->objType!=PPLOBJ_NUM) { sprintf(context->errStat.errBuff,"When initialising a matrix from a list of lists, the elements must all be numerical values; supplied element has type <%s>.", pplObjTypeNames[item->objType]); TBADD(ERR_RANGE); goto cleanup; }
                 if (!ppl_unitsDimEqual(out, item)) { sprintf(context->errStat.errBuff,"When initialising a matrix from a list of lists, all of the elements must have the same dimensions. Supplied elements have units of <%s> and <%s>.", ppl_printUnit(context, out, NULL, NULL, 0, 1, 0), ppl_printUnit(context, item, NULL, NULL, 1, 1, 0) ); TBADD(ERR_UNIT); goto cleanup; }
                 if (item->flagComplex) { sprintf(context->errStat.errBuff,"Matrices can only hold real numbers; supplied elements are complex."); TBADD(ERR_NUMERICAL); goto cleanup; }
-                gsl_matrix_set(m, j, i, item->real );
+                gsl_matrix_set(m, i, j, item->real );
                }
              }
             goto cleanup;
@@ -399,7 +399,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
             gsl_matrix *m;
             if (nArgs!=1) { sprintf(context->errStat.errBuff,"When initialising a matrix from a list of lists, only one argument should be supplied. %d arguments were supplied.",nArgs); TBADD(ERR_RANGE); goto cleanup; }
             if (s1==0) { sprintf(context->errStat.errBuff,"Cannot create a matrix of dimension zero."); TBADD(ERR_MEMORY); goto cleanup; }
-            if (pplObjMatrix(out,0,1,s1,s2)==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY); goto cleanup; }
+            if (pplObjMatrix(out,0,1,s2,s1)==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY); goto cleanup; }
             m = ((pplMatrix *)out->auxil)->m;
             ppl_unitsDimCpy(out,((pplObj*)((list*)item->auxil)->first->data));
             for (i=0; i<s2; i++)
@@ -416,7 +416,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
                 if (item2->objType!=PPLOBJ_NUM) { sprintf(context->errStat.errBuff,"When initialising a matrix from a list of lists, the elements must all be numerical values; supplied element has type <%s>.", pplObjTypeNames[item2->objType]); TBADD(ERR_RANGE); goto cleanup; }
                 if (!ppl_unitsDimEqual(out, item2)) { sprintf(context->errStat.errBuff,"When initialising a matrix from a list of lists, all of the elements must have the same dimensions. Supplied elements have units of <%s> and <%s>.", ppl_printUnit(context, out, NULL, NULL, 0, 1, 0), ppl_printUnit(context, item2, NULL, NULL, 1, 1, 0) ); TBADD(ERR_UNIT); goto cleanup; }
                 if (item->flagComplex) { sprintf(context->errStat.errBuff,"Matrices can only hold real numbers; supplied elements are complex."); TBADD(ERR_NUMERICAL); goto cleanup; }
-                gsl_matrix_set(m, j, i, item2->real );
+                gsl_matrix_set(m, i, j, item2->real );
                }
              }
             goto cleanup;

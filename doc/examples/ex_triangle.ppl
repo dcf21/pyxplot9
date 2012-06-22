@@ -28,9 +28,17 @@ load "examples/fig_init.ppl"
 
 # BEGIN
 set unit angle nodimensionless
+set unit of length cm # Display lengths in cm
+set unit of angle degree # Display angles in degrees
+set numeric sigfig 3 display latex # Correct to 3 significant figure
+cm  = unit(cm) # Shorthand to save space
+deg = unit(deg)
+
+turn(a) = matrix( [cos(a),-sin(a)], \
+                  [sin(a), cos(a)]  )
 
 # Define subroutine for drawing triangles
-subroutine triangleDraw(Bx,By,AB,AC,BC)
+subroutine triangleDraw(B,AB,AC,BC)
  {
   # Use cosine rule to find interior angles
   ABC = acos((AB**2 + BC**2 - AC**2) / (2*AB*BC))
@@ -38,46 +46,41 @@ subroutine triangleDraw(Bx,By,AB,AC,BC)
   CAB = acos((AC**2 + AB**2 - BC**2) / (2*AC*AB))
 
   # Positions of three corners of triangle
-  Cx = Bx + BC          ; Cy = By
-  Ax = Bx + AB*cos(ABC) ; Ay = By + AB*sin(ABC)
+  C = B + vector(BC,0*cm)
+  A = B + turn(ABC)*vector(AB,0*cm)
 
   # Draw triangle
-  line from Ax,Ay to Bx,By
-  line from Ax,Ay to Cx,Cy
-  line from Bx,By to Cx,Cy
+  polygon [A,B,C]
 
   # Draw angle symbols
-  ArcRad = 4*unit(mm) # Radius of angle arcs
-  arc at Bx,By radius ArcRad from  90*unit(deg)-ABC to  90*unit(deg)
-  arc at Cx,Cy radius ArcRad from -90*unit(deg)     to -90*unit(deg)+BCA
-  arc at Ax,Ay radius ArcRad from  90*unit(deg)+BCA to 270*unit(deg)-ABC
+  arcRad = 0.4*cm # Radius of angle arcs
+  arc at B radius arcRad from  90*deg-ABC to  90*deg
+  arc at C radius arcRad from -90*deg     to -90*deg+BCA
+  arc at A radius arcRad from  90*deg+BCA to 270*deg-ABC
 
   # Label lengths of sides
-  set unit of length cm # Display lengths in cm
-  set numeric sigfig 3 display latex # Correct to 3 significant figure
-  TextGap = 1*unit(mm)
-  text "%s"%(BC) at (Bx+Cx)/2,(By+Cy)/2 gap TextGap hal c val t
-  text "%s"%(AB) at (Ax+Bx)/2,(Ay+By)/2 gap TextGap rot  ABC hal c val b
-  text "%s"%(AC) at (Ax+Cx)/2,(Ay+Cy)/2 gap TextGap rot -BCA hal c val b
+  textGap = 0.1*cm
+  text "%s"%(BC) at (B+C)/2 gap textGap hal c val t
+  text "%s"%(AB) at (A+B)/2 gap textGap rot  ABC hal c val b
+  text "%s"%(AC) at (A+C)/2 gap textGap rot -BCA hal c val b
 
   # Label angles
-  set unit of angle degree # Display angles in degrees
-  ArcRad2 = 1.4 * ArcRad # Distance of text from apex of angles
-  text "%s"%(CAB) at Ax+ArcRad2*sin(ABC-BCA),Ay-ArcRad2*cos(ABC-BCA) hal c val t
-  text "%s"%(ABC) at Bx+ArcRad2*cos(ABC/2),By+ArcRad2*sin(ABC/2) hal l val c
-  text "%s"%(BCA) at Cx-ArcRad2*cos(BCA/2),Cy+ArcRad2*sin(BCA/2) hal r val c
+  arcRad2 = vector(1.4*arcRad , 0*cm)
+  text "%s"%CAB at A+turn(-90*deg+ABC-BCA)*arcRad2 hal c val t
+  text "%s"%ABC at B+turn(          ABC/2)*arcRad2 hal l val c
+  text "%s"%BCA at C+turn(180*deg - BCA/2)*arcRad2 hal r val c
 
   # Label points ABC
-  text "A" at Ax,Ay gap TextGap hal c val b
-  text "B" at Bx,By gap TextGap hal r val c
-  text "C" at Cx,Cy gap TextGap hal l val c
+  text "A" at A gap textGap hal c val b
+  text "B" at B gap textGap hal r val c
+  text "C" at C gap textGap hal l val c
  }
 
 # Display diagram with three triangles
 set multiplot ; set nodisplay
-call triangleDraw(2.8*unit(cm),3.2*unit(cm), 3*unit(cm),4*unit(cm),4*unit(cm))
-call triangleDraw(0.0*unit(cm),0.0*unit(cm), 3*unit(cm),4*unit(cm),5*unit(cm))
-call triangleDraw(6.5*unit(cm),0.0*unit(cm), 3*unit(cm),3*unit(cm),3*unit(cm))
+call triangleDraw(vector([2.8,3.2])*cm, 3*cm, 4*cm, 4*cm)
+call triangleDraw(vector([0.0,0.0])*cm, 3*cm, 4*cm, 5*cm)
+call triangleDraw(vector([6.5,0.0])*cm, 3*cm, 3*cm, 3*cm)
 set display ; refresh
 # END
 

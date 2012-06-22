@@ -315,9 +315,10 @@ void ppl_directive_local(ppl_context *c, parserLine *pl, parserOutput *in, int i
 
 void ppl_directive_print(ppl_context *c, parserLine *pl, parserOutput *in)
  {
-  pplObj *stk = in->stk;
-  int     pos = PARSE_print_0print_list;
-  int     i   = 0;
+  pplObj *stk      = in->stk;
+  int     pos      = PARSE_print_0print_list;
+  int     i        = 0;
+  int     gotItems = 0;
   c->errcontext.tempErrStr[i] = '\0';
 
   while (stk[pos].objType == PPLOBJ_NUM)
@@ -327,8 +328,28 @@ void ppl_directive_print(ppl_context *c, parserLine *pl, parserOutput *in)
     pplObjPrint(c,stk+pos+PARSE_print_expression_0print_list,NULL,c->errcontext.tempErrStr+i,LSTR_LENGTH-i,0,0);
     c->errcontext.tempErrStr[LSTR_LENGTH-1] = '\0';
     i += strlen(c->errcontext.tempErrStr+i);
+    gotItems=1;
    }
   ppl_report(&c->errcontext, NULL);
+
+  // set ans
+  if (gotItems)
+   {
+    pplObj *optr, dummyTemp;
+    int     am, rc;
+    ppl_contextGetVarPointer(c, "ans", &optr, &dummyTemp);
+    dummyTemp.amMalloced=0;
+    ppl_garbageObject(&dummyTemp);
+    am = optr->amMalloced;
+    rc = optr->refCount;
+    optr->amMalloced = 0;
+    ppl_garbageObject(optr);
+    pplObjCpy(optr,stk+pos+PARSE_print_expression_0print_list,0,0,1);
+    optr->amMalloced = am;
+    optr->refCount   = rc;
+    optr->self_lval  = NULL;
+    optr->self_this  = NULL;
+   }
   return;
  }
 

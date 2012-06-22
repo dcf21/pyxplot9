@@ -50,21 +50,21 @@ used, which may be any of the options listed in Table~\ref{tab:output_terminals}
 \index{X11 terminal}
 
 Three output terminal produce immediate previews to the screen: {\tt
-X11\_\-Single\-Window}, {\tt X11\_\-Persist}, {\tt X11\_\-Multi\-Window}.  The
+X11\_\-single\-Window}, {\tt X11\_\-persist}, {\tt X11\_\-multi\-Window}.  The
 default of these options -- i.e.\ the default terminal when PyXPlot is started
-up in interactive mode -- is {\tt X11\_\-Single\-Window}.  In this terminal,
+up in interactive mode -- is {\tt X11\_\-single\-Window}.  In this terminal,
 each time a new plot is generated, if the previous plot is still open on the
 display, the old plot is replaced with the new one. This way, only one plot
 window is open at any one time. This behaviour is intended to prevent the
 desktop from becoming flooded with plot windows.
 
-The alternative {\tt X11\_\-Multi\-Window} terminal is similar in all respects
+The alternative {\tt X11\_\-multi\-Window} terminal is similar in all respects
 except that each new plot is generated in a new window, regardless of whether
 any previous plots are still open on the display. This is especially useful
 when multiple plots are to be compared side-by-side:\index{multiple windows}
 
 \begin{verbatim}
-set terminal X11_SingleWindow
+set terminal X11_singleWindow
 plot 'data1.dat'
 plot 'data2.dat'  <-- first plot window disappears
 \end{verbatim}
@@ -72,13 +72,13 @@ plot 'data2.dat'  <-- first plot window disappears
 \noindent c.f.:
 
 \begin{verbatim}
-set terminal X11_MultiWindow
+set terminal X11_multiWindow
 plot 'data1.dat'
 plot 'data2.dat'  <-- first plot window remains
 \end{verbatim}
 
-The third of these terminals, {\tt X11\_\-Persist}, is similar to {\tt
-X11\_\-Multi\-Window} but keeps plot windows open after PyXPlot terminates in
+The third of these terminals, {\tt X11\_\-persist}, is similar to {\tt
+X11\_\-multi\-Window} but keeps plot windows open after PyXPlot terminates in
 distinction from the above two terminals, which close all plot windows upon
 exit.
 
@@ -110,10 +110,10 @@ be produced, the \indcmdt{set terminal} takes many options for fine-tuning the
 behaviours of particular terminals. Its complete syntax is:
 
 \begin{verbatim}
-set terminal ( X11_SingleWindow | X11_MultiWindow | X11_Persist |
+set terminal ( X11_singleWindow | X11_multiWindow | X11_persist |
                bmp | eps | gif | jpeg | pdf | png | postscript |
                svg | tiff )
-             ( color | color | monochrome )
+             ( color | colour | monochrome )
              ( dpi <value> )
              ( portrait | landscape )
              ( invert | noinvert )
@@ -125,9 +125,9 @@ set terminal ( X11_SingleWindow | X11_MultiWindow | X11_Persist |
 The following table lists the effects which each of these settings has:
 
 \begin{longtable}{p{3cm}p{9cm}}
-{\tt X11\_SingleWindow} & Displays plots on the screen (in X11 windows, using \ghostview or other viewing application selected using the \indcmdt{set viewer}). Each time a new plot is generated, it replaces the old one, to prevent the desktop from becoming flooded with old plots.\footnote{The authors are aware of a bug, that this terminal can occasionally go blank when a new plot is generated. This is a known bug in \ghostview, and can be worked around by selecting File $\to$ Reload within the \ghostview\ window.} {\bf [default when running interactively; see below]}\\
-{\tt X11\_MultiWindow} & As above, but each new plot appears in a new window, and the old plots remain visible. As many plots as may be desired can be left on the desktop simultaneously.\\
-{\tt X11\_Persist} & As above, but plot windows remain open after PyXPlot closes.\\
+{\tt X11\_singleWindow} & Displays plots on the screen (in X11 windows, using \ghostview or other viewing application selected using the \indcmdt{set viewer}). Each time a new plot is generated, it replaces the old one, to prevent the desktop from becoming flooded with old plots.\footnote{The authors are aware of a bug, that this terminal can occasionally go blank when a new plot is generated. This is a known bug in \ghostview, and can be worked around by selecting File $\to$ Reload within the \ghostview\ window.} {\bf [default when running interactively; see below]}\\
+{\tt X11\_multiWindow} & As above, but each new plot appears in a new window, and the old plots remain visible. As many plots as may be desired can be left on the desktop simultaneously.\\
+{\tt X11\_persist} & As above, but plot windows remain open after PyXPlot closes.\\
 {\tt bmp} & Sends output to a Windows bitmap ({\tt .bmp}) file. The filename for this file should be set using {\tt set output}. This is a bitmap graphics terminal. \index{bmp output}\\
 {\tt eps} & As above, but produces Encapsulated PostScript.\index{Encapsulated PostScript}\index{PostScript!Encapsulated}\\
 {\tt gif} & As above, but produces a gif image. This is a bitmap graphics terminal.\index{gif output}\\
@@ -155,22 +155,14 @@ The following table lists the effects which each of these settings has:
 
 \section{The default terminal}
 
-The default terminal is normally {\tt X11\_SingleWindow}, except when PyXPlot
-is used non-interactively -- i.e.\ one or more command scripts are specified on
-the command line, and PyXPlot exits as soon as it finishes executing them. In
-this case, the {\tt X11\_SingleWindow} would not be a very sensible terminal to
-use as any plot window would close as soon as PyXPlot exited. The default
-terminal in this case changes to {\tt eps}.
-
-This rule does not apply when the special `--' filename is specified in a list
-of command scripts on the command line, where an interactive terminal will
-operate between running a series of scripts. In this case, PyXPlot detects that
-the session will be interactive, and defaults to the usual {\tt
-X11\_SingleWindow} terminal. Conversely, on machines where the {\tt DISPLAY}
-environment variable\index{display environment variable@{\tt DISPLAY}
-environment variable} is not set, PyXPlot detects that it has access to no
-X-terminal on which to display plots, and defaults to the {\tt eps}
-terminal.
+The default terminal is normally {\tt X11\_singleWindow}. There are two
+exceptions to this.  When PyXPlot is not called from within an X11
+session\footnote{i.e.\ the environment variable {\tt DISPLAY} is not set.}, and
+it therefore cannot open graphical display windows, the default terminal
+changes to {\tt eps}.  When PyXPlot is used non-interactively -- i.e.\ one or
+more command scripts are specified on the command line, and PyXPlot exits as
+soon as it finishes executing them -- the {\tt X11\_persist} terminal becomes
+default, since it does not close plot windows when PyXPlot exits.
 
 \section{PostScript output}
 

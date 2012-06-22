@@ -1,2 +1,3 @@
-set unit preferred miles/year
 print phy.c
+set unit preferred miles/year
+print ans
