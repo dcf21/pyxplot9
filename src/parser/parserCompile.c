@@ -1167,7 +1167,7 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
   for (i=0; ((line[i]>='\0')&&(line[i]<=' ')); i++);
   if      ((line[i]>='a')&&(line[i]<='z')) cln=(int)(line[i]-'a');
   else if ((line[i]>='A')&&(line[i]<='Z')) cln=(int)(line[i]-'A');
-  else                                     cln=-1;
+  else                                     cln=26;
 
   // Cycle through possible command matches
   cmdIter = ppl_listIterateInit(pplParserCmdList[cln]);

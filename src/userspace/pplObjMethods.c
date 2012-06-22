@@ -222,6 +222,75 @@ static void pplmethod_strLower(ppl_context *c, pplObj *in, int nArgs, int *statu
   pplObjStr(&OUTPUT,0,1,tmp);
  }
 
+static void pplmethod_strSplit(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *t = in[-1].self_this;
+  char   *instr = (char *)t->auxil;
+  int     i,j;
+  list   *lst;
+  if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  lst = (list *)OUTPUT.auxil;
+  for (i=0,j=0 ; ; i++)
+   if ((instr[i]<=' ')&&(instr[i]>='\0'))
+    {
+     if (j<i)
+      {
+       pplObj  v;
+       char   *s = (char *)malloc(i-j+1);
+       if (s==NULL) break;
+       memcpy(s, instr+j, i-j);
+       s[i-j]='\0';
+       pplObjStr(&v,1,1,s);
+       v.refCount=1;
+       ppl_listAppendCpy(lst, &v, sizeof(v));
+      }
+     j=i+1;
+     if (instr[i]=='\0') break;
+    }
+ }
+
+static void pplmethod_strSplitOn(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *t = in[-1].self_this;
+  char   *instr = (char *)t->auxil;
+  int     i,j;
+  list   *lst;
+  for (i=0; i<nArgs; i++)
+   if (in[i].objType!=PPLOBJ_STR) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The splitOn() method requires all its arguments to be strings; argument %d has type <%s>.",i+1,pplObjTypeNames[in[i].objType]); return; }
+  if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  lst = (list *)OUTPUT.auxil;
+  for (i=0,j=0 ; ; i++)
+   {
+    int breaking = (instr[i]=='\0');
+    int k,l=0;
+    for (k=0; ((k<nArgs)&&(!breaking)); k++)
+     {
+      char *cmp=(char *)in[k].auxil;
+      for (l=0; cmp[l]!='\0'; l++)
+       {
+        if (instr[i+l]=='\0') break;
+        if (instr[i+l]!=cmp[l]) break;
+       }
+      if (cmp[l]=='\0') breaking=1;
+      else              l=0;
+     }
+    if (breaking)
+     {
+      pplObj  v;
+      char   *s = (char *)malloc(i-j+1);
+      if (s==NULL) break;
+      memcpy(s, instr+j, i-j);
+      s[i-j]='\0';
+      pplObjStr(&v,1,1,s);
+      v.refCount=1;
+      ppl_listAppendCpy(lst, &v, sizeof(v));
+      j=i+l;
+      i=ppl_max(i,j-1);
+     }
+    if (instr[i]=='\0') break;
+   }
+ }
+
 static void pplmethod_strStrip(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   int     i,j;
@@ -376,7 +445,7 @@ static void pplmethod_strFindAll(ppl_context *c, pplObj *in, int nArgs, int *sta
   pmax   = il-cl;
   for (p=0; p<=pmax; p++)
    if (strncmp(instr+p,cmpstr,cl)==0)
-    { pplObjNum(&v,0,p,0); ppl_listAppendCpy(l, &v, sizeof(v)); }
+    { pplObjNum(&v,1,p,0); ppl_listAppendCpy(l, &v, sizeof(v)); }
  }
 
 static void pplmethod_strLen(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -1353,6 +1422,8 @@ void pplObjMethodsInit(ppl_context *c)
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"isdigit"   ,0,0,1,1,1,1,(void *)&pplmethod_strisdigit   , "isdigit()", "\\mathrm{isdigit}@<@>", "isdigit() returns a boolean indicating whether all of the characters of a string are numeric");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"len"       ,0,0,1,1,1,1,(void *)&pplmethod_strLen       , "len()", "\\mathrm{len}@<@>", "len() returns the length of a string");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"lower"     ,0,0,1,1,1,1,(void *)&pplmethod_strLower     , "lower()", "\\mathrm{lower}@<@>", "lower() converts a string to lowercase");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"split"     ,0,0,1,1,1,1,(void *)&pplmethod_strSplit     , "split()", "\\mathrm{split}@<@>", "split() returns a list of all the whitespace-separated words in a string");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"splitOn"   ,1,1e3,0,0,0,0,(void *)&pplmethod_strSplitOn , "splitOn(x,...)", "\\mathrm{splitOn}@<@0@>", "splitOn(x,...) splits a string whenever it encounters any of the substrings supplied as arguments, and returns a list of the split string segments");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"lstrip"    ,0,0,1,1,1,1,(void *)&pplmethod_strLStrip    , "lstrip()", "\\mathrm{lstrip}@<@>", "lstrip() strips whitespace off the beginning of a string");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"strip"     ,0,0,1,1,1,1,(void *)&pplmethod_strStrip     , "strip()", "\\mathrm{strip}@<@>", "strip() strips whitespace off the beginning and end of a string");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"rstrip"    ,0,0,1,1,1,1,(void *)&pplmethod_strRStrip    , "rstrip()", "\\mathrm{rstrip}@<@>", "rstrip() strips whitespace off the end of a string");
