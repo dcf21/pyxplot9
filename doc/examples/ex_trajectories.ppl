@@ -36,8 +36,8 @@ deg = unit(deg) # Convert degrees to radians
 h(x,theta,v) = x*tan(theta*deg) - 0.5*g*x**2/(v**2*cos(theta*deg)**2)
 
 # Plot configuration
-set xlabel r"$x/{\rm m}$"
-set ylabel r"$h/{\rm m}$"
+set xlabel r"$x$"
+set ylabel r"$h$"
 set xrange [unit(0*m):unit(20*m)]
 set yrange [unit(0*m):]
 set key below
