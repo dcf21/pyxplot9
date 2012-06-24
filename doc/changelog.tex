@@ -26,33 +26,35 @@
 
 \subsection*{2012 Sep 1: PyXPlot 0.9.0}
 
-Version 0.9 is a major update. Many new data types have been introduced, each of which has methods which can be called in an object-orientated fashion. As well as numbers and strings, other data types include:
+Version 0.9 is a major update. Many new data types have been introduced, each
+of which has methods which can be called in an object-orientated fashion. These
+include:
 
 \begin{itemize}
-\item Colors, which can now be stored in variables for subsequent use in vector graphics commands. The addition and subtraction operators act on colors to allow color mixing.
-\item Dates, which can be imported from calendar dates, unix times or Julian dates. Dates can be subtracted to give time intervals.
-\item Lists and dictionaries, which can be iterated over, or used to feed calculated data into the {\tt plot} command.
-\item Vectors and matrices, which permit matrix algebra. Vectors interface cleanly with PyXPlot's vector graphics commands, allowing positions to be specified as vector expressions.
-\item File handles, which allow PyXPlot to read data from files, or write data or logs to files.
-\item Modules and classes, which allow object-orientated programming.
+\item {\bf Colors}, which can be stored in variables for subsequent use in vector graphics commands. The addition and subtraction operators act on colors to allow color mixing.
+\item {\bf Dates}, which can be imported from calendar dates, unix times or Julian dates. Dates can be subtracted to give time intervals.
+\item {\bf Lists} and {\bf dictionaries}, which can be iterated over, or used to feed calculated data into the {\tt plot} and {\tt tabulate} commands.
+\item {\bf Vectors} and {\bf matrices}, which allow matrix algebra. These types interface cleanly with PyXPlot's vector-graphics commands, allowing positions to be specified as vector expressions.
+\item {\bf File handles}, which allow PyXPlot to read data from files, or write data or logs to files.
+\item {\bf Modules} and {\bf classes}, which allow object-orientated programming.
 \end{itemize}
 
 In addition, PyXPlot's range of operators has been extended to include most of those in the C programming language, allowing expressions such as
 
 \vspace{3mm}
-\input{fragments/tex/fs_print3.tex}
+\input{fragments/tex/fs_operators.tex}
 \vspace{3mm}
 
 \noindent to be written.
 
 \subsubsection*{Incompatibilities with PyXPlot 0.8}
 
-The extensions to PyXPlot in version 0.9 mean that some small changes to syntax have been necessary. These include:
+The extensions to PyXPlot in version 0.9 mean that some minor changes to syntax have been necessary. These include:
 
 \begin{itemize}
-\item Variables with names beginning {\tt phy\_} now live in a module called {\tt phy}. They may be accessed as, for example, {\tt phy.c}. Similarly, random number generating functions now live in a module called {\tt random}, statistics functions in a module called {\tt stats}, time-handling functions in {\tt time}, operating system functions in {\tt os}, and astronomy functions in {\tt ast}.
+\item Variables with names beginning {\tt phy\_} now live in a module called {\tt phy}. They may be accessed as, for example, {\tt phy.c}. Similarly, random number generating functions now live in a module called {\tt random}; statistics functions in a module called {\tt stats}; time-handling functions in {\tt time}; operating system functions in {\tt os}; and astronomy functions in {\tt ast}.
 \item Colors, which used to be specified as {\tt rgb0.2:0.3:0.4} should now be specified using the {\tt rgb(r,g,b)} functions, as {\tt rgb(0.2,0.3,0.4)}.
-\item The range of escape characters have been increased, so that, for example, {\tt $\backslash$n} is a newline and {\tt $\backslash$t} a tab. Where these escape sequenced appear in \LaTeX\ command string, the easiest approach is the prepend the string with the character {\tt r} to disable escape character expansion, as in {\tt r'2 $\backslash$times 3'}.
+\item The range of escape characters have been increased, so that, for example, {\tt $\backslash$n} is a newline and {\tt $\backslash$t} a tab. Where these escape sequenced appear in \LaTeX\ command strings, the easiest approach is the prepend the string with the character {\tt r} to disable escape character expansion, as in {\tt r'2 $\backslash$times 3'}.
 \item The PyXPlot 0.8 syntax {\tt foreach i in (1,2,3)} should now be written {\tt foreach i in [1,2,3]}. Square brackets are used to delimit lists.
 \end{itemize}
 

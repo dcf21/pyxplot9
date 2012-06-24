@@ -1,0 +1,439 @@
+2012 Sep  1: PyXPlot 0.9.0
+   - Version 0.9 is a major update. Many new data types have been introduced,
+     each of which has methods which can be called in an object-orientated
+     fashion. These include:
+
+      - Colors, which can be stored in variables for subsequent use in vector
+        graphics commands. The addition and subtraction operators act on colors
+        to allow color mixing.
+
+      - Dates, which can be imported from calendar dates, unix times or Julian
+        dates. Dates can be subtracted to give time intervals.
+
+      - Lists and dictionaries, which can be iterated over, or used to feed
+        calculated data into the plot and tabulate commands.
+
+      - Vectors and matrices, which allow matrix algebra. These types interface
+        cleanly with PyXPlot’s vector-graphics commands, allowing positions to
+        be specified as vector expressions.
+
+      - File handles, which allow PyXPlot to read data from files, or write
+        data or logs to files.
+
+      - Modules and classes, which allow object-orientated programming.
+
+   - In addition, PyXPlot’s range of operators has been extended to include
+     most of those in the C programming language, allowing expressions such as
+
+     pyxplot> print (a=3)+(b=2)
+     5
+     pyxplot> print a>0?"yes":"no"
+     yes
+     pyxplot> print "%s %s"%(++a,b++)
+     4 2
+     pyxplot> print (a+=10 , b+=10 , a+b)
+     27
+
+     to be written.
+
+   - Incompatibilities with PyXPlot 0.8. The extensions to PyXPlot in version
+     0.9 mean that some minor changes to syntax have been necessary. These
+     include:
+
+      - Variables with names beginning phy now live in a module called phy.
+        They may be accessed as, for example, phy.c. Similarly, random number
+        generating functions now live in a module called random; statistics
+        functions in a module called stats; time-handling functions in time;
+        operating system functions in os; and astronomy functions in ast.
+
+      - Colors, which used to be specified as rgb0.2:0.3:0.4 should now be
+        specified using the rgb(r,g,b) functions, as rgb(0.2,0.3,0.4).
+
+      - The range of escape characters have been increased, so that, for
+        example, \n is a newline and \t a tab. Where these escape sequenced
+        appear in latex command strings, the easiest approach is the prepend
+        the string with the character r to disable escape character expansion,
+        as in r’2 \times 3’.
+
+      - The PyXPlot 0.8 syntax foreach i in (1,2,3) should now be written
+        foreach i in [1,2,3]. Square brackets are used to delimit lists.
+
+2011 Jan  7: PyXPlot 0.8.4
+   - Two-dimensional parametric grid plotting implemented.
+   - Bugfix to the dots plot style; filled triangles replaces with filled
+     circles.
+   - Bugfix to linewidths used when drawing line icons on graph legends.
+   - Bugfix to Makefile to ensure libraries link correctly under Red Hat and
+     SUSE.
+   - Code cleanup to ensure correct compilation with -O2 optimisation.
+2010 Sep 15: PyXPlot 0.8.3
+   - @ macro expansion operator implemented.
+   - assert command implemented.
+   - for command behaviour changed such that "for i=1 to 10" includes a final
+     iteration with i=10.
+   - Point types rearranged into a more logical order.
+   - Improved support for newer Windows bitmap images.
+   - Bugfix to the 'set unit preferred' command.
+   - Binary not operator bugfixed.
+   - Bugfix to handling of comma-separated horizontal datafiles.
+   - Mathematical function finite() added.
+2010 Aug  4: PyxPlot 0.8.2
+   - 3D plotting implemented.
+   - New plot styles colourmap, contourmap and surface added.
+   - Interpolation of 2D datagrids and bitmap images implemented.
+   - Stepwise interpolation mode added.
+   - Dependency on libkpathsea relaxed to make installation under MacOS easier;
+     linking to the library is still strongly recommended on systems where it
+     is readily available.
+   - Mathematical functions fractal_julia(), fractal_mandelbrot() and prime()
+     added.
+   - Many bug fixes, especially to the ticking of axes.
+2010 Jun  1: PyXPlot 0.8.1
+   - Mathematical functions time_fromunix(), time_unix(), zernike() and
+     zernikeR() added.
+   - Bug fix to the ticking of linked axes.
+   - Bug fix to the ticking of axes with blank axis tick labels.
+   - Makefile and configure script improved for portability.
+2010 May 19: PyXPlot 0.8.0
+   - The handling of large datafiles has been streamlined to require around an
+     order-of-magnitude less time and memory.
+   - PyXPlot's mathematical environment has been extended to handle complex
+     numbers and quantities with physical units.
+   - The range of mathematical functions built into PyXPlot has been massively
+     extended.
+   - The solve command has been added to allow the solution of systems of
+     equations.
+   - The maximise and minimise commands have been added to allow searches for
+     local extrema of functions.
+   - An fft command has been added for performing Fourier transforms on data.
+   - New plot styles -- filledregion and yerrorshaded -- have been added for
+     plotting filled error regions.
+   - The configuration of linked axes has been entirely redesigned.
+   - Parametric function plotting has been implemented.
+   - Colours can now be specified by RGB, HSB or CMYK components, as well as by
+     name.
+   - Several commands, e.g. box, circle, ellipse, etc., have been added to
+     allow vector graphics to be produced in PyXPlot's multiplot environment.
+   - The jpeg command has been generalised to allow the incorporation of not
+     only jpeg images, but also bmp, gif and png images, onto multiplot
+     canvases. The command has been renamed image in recognition of its wider
+     applicability. Image transparency is now supported in gif and png images.
+   - The spline command, now renamed the interpolate command, has been extended
+     up provide many types of interpolation between datapoints.
+   - A wide range of conditional and flow control structures have been added to
+     PyXPlot's command language -- these are the do, for, foreach, if and while
+     commands and the conditionalS and conditionalN mathematical functions.
+   - Input filters have been introduced as a mechanism by which datafiles in
+     arbitrary formats can be read.
+   - PyXPlot's commandline interface now supports tab completion.
+   - The show command has been reworked to produce pastable output.
+   - Many minor bugs have been fixed.
+2009 Nov 17: PyXPlot 0.7.1
+   - Bug fix to the xyerrorrange plot style.
+   - Bug fix to the exec command.
+   - Bug fix to remove deprecation error messgaes when run on python 2.6.
+2008 Oct 14: PyXPlot 0.7.0
+   - Supplying filename '-' to plot causes data to be read from stdin.
+   - Required version of PyX upgraded 0.9 -> 0.10.
+   - exec command implemented.
+   - use of string variables introduced. pythonesque "%s"%string syntax
+     implemented. perlesque regular expressions implemented.
+   - function evaluation routines overhauled and optimised.
+   - datafile reading routines optimised to drastically improve memory/cpu
+     efficiency.
+   - histogram command implemented.
+   - tabulate command implemented.
+   - list command implemented.
+   - set label with colour implemented.
+   - text with colour implemented.
+
+2007 Mar 15: PyXPlot 0.6.3.1
+   - Minor bugfix so that gv will work with -watch.
+
+2007 Feb 26: PyXPlot 0.6.3
+   - Manual updated
+   - Some minor bugfixes
+
+2007 Jan 19: PyXPlot 0.6.2
+   - 'enlarge' terminal option implemented.
+   - pdf terminal implemented.
+   - set preamble command implemented.
+   - LaTeX preambles bugfixed, so that the '\usepackage' command can now be
+     used.
+   - 'X11_persist' terminal bugfixed to work correctly from non-interactive
+     sessions.
+   - Large number of minor bugfixes.
+
+2006 Dec 27: PyXPlot 0.6.1
+   - Major bug-fixes to the set and unset commands.
+   - Command reference chapter added to User Manual.
+   - Command syntax references added to the help command system.
+   - 'text' and 'set label' commands extended to allow rotation of text
+     through arbitrary angles.
+   - Semi-functional 'jpeg' and 'eps' commands added. Left undocumented
+     because they're unstable and need a bit of work.
+
+2006 Nov 12: PyXPlot 0.6.0
+   - New more-reliable command parser implemented, with improved syntax
+     errors.
+   - delete_arrow, delete_text, undelete_arrow, undelete_text and move_text
+     commands removed from API. The move, delete and undelete commands now act
+     on all kinds of multiplot object.
+   - set terminal command no longer recognised enhanced and noenhanced
+     keywords. The postscript and eps terminal keywords should now be used in
+     their place.
+   - Automatic ticking of axes overhauled, and the set xtics and set mxtics
+     commands implemented for those who do not like the default ticking
+     schemes.
+   - set log and set nolog command now allow axes to work with log bases other
+     than 10.
+   - The select modifier after the plot, fit, replot and spline commands can
+     now only be used once; to specify multiple select criteria, use the and
+     logical operator.
+   - X11_persist terminal implemented.
+   - Requirement on python 2.4 eased to python 2.3.
+   - Requirements on scipy and readline eased; PyXPlot will now work in
+     reduced form without them.
+   - Requirements on dvips and gs are dropped; postscript handling now done by
+     PyXPlot itself.
+
+2006 Sep 09: PyXPlot 0.5.8
+   - Many bugfixes to error trapping and reporting.
+
+2006 Aug 26: PyXPlot 0.5.7
+   - set display command implemented.
+   - set keycolumns command implemented.
+   - CTRL-C behaviour changed; no longer quits PyXPlot.
+   - plot '*.dat' now arranges files alphabetically.
+   - Escaping of LaTeX < and > symbols fixed.
+   - Major bugfix to fit command's error estimation.
+   - Major bugfix to the positioning of legends in the "outside" and "below"
+     positions to avoid overlapping with axes.
+   - help command text substantially revised.
+
+2006 Aug 18: PyXPlot 0.5.6
+   - Ability to unset variables via "a=" implemented.
+   - Handling on scipy error messages in the int_dx and spline commands
+     improved.
+   - Colour-highlighted terminal added.
+   - The inline help system made much more complete.
+   - select modifier implemented.
+   - set texthalign and set textvalign implemented.
+   - set xticdir command implemented.
+   - Support for CSV input datafiles implemented.
+   - pyxplot_watch quiet mode added. Also, behaviour changed to allow the
+     watching of files, even when they do not initially exist.
+   - Labels can now be placed on "nolabels", "nolabelstics" and "invisible"
+     axes. Example 10 changed to demonstrate this.
+   - set log, when issued on its own, now applies to all axes, rather than
+     throwing an error.
+
+2006 Jul 25: PyXPlot 0.5.5
+   - pyxplot_watch implemented.
+   - fit command now gives error estimates, as well as correlation matrices.
+   - Many new pointtypes added, including upper and lower limit symbols.
+   - Handling of SIGINT improved; now exits current command in interactive
+     mode, and exits PyXPlot when running a script.
+   - Quote characters can now be escaped in LaTeX strings, to allow strings
+     with both ' and " characters to be rendered.
+   - Installer no longer creates any files belonging to root in the user's
+     homespace.
+   - show xlabel and show xrange implemented.
+   - Bug fix: cd command no longer crashes if target directory doesn't exist.
+   - Bug fix: some commands, e.g. plot, which previously didn't work when
+     capitalised, now do.
+   - Major bug fix to int_dx and diff_dx functions.
+
+2006 Jul 3: PyXPlot 0.5.4
+   - edit command implemented.
+   - Numerical integration and differentiation functions implemented.
+   - New makefile installer added.
+   - man page added.
+   - Brief tour of gnuplot syntax added to documentation.
+   - Many minor bug fixes.
+
+2006 Jun 27: PyXPlot 0.5.3
+   - set bar and set palette implemented.
+   - Stacked barcharts implemented.
+   - Command history files and the save command implemented.
+   - Plotting of functions with errorbars implemented.
+   - Ability to define a LaTeX preamble implemented.
+   - Bug fix to smoothed splines, to ensure that smoothing is always applied
+     to a sensible degree by default.
+   - Bug fix to the autoscaling of bar charts, histograms and errorbars, to
+     ensure that their full extent is contained within the plot area.
+   - Bug fix to arrow plotting, to prevent PyX from crashing if arrows of zero
+     lengths are plotting (they have no direction...)
+
+2006 Jun 14: PyXPlot 0.5.2
+   - spline command, and csplines/acsplines plot styles implemented.
+   - Syntax plot[0:1], with no space, now allowed.
+   - Automatic names of datasets in legends no longer have full paths, but
+     only the path in the form that the user specified it.
+   - Bug fix to the handling of LaTeX special characters in the automatic
+     names of datasets, e.g. file paths containing underscores.
+   - Error messages now sent to stderr, rather than stdout.
+   - multiplot mode now plots items in the order that they are plotted;
+     previously all arrows and text labels had been plotted in front of plots.
+   - set backup command implemented, for keeping backups of overwritten files.
+   - Bug fix, enabling the use of axis x5 without axis x3, and likewise for y.
+   - unset axis command implemented, for removing axes from plots.
+   - 'invisible', 'nolabels', and 'nolabelsticks' axis title implemented, for
+     producing axes without text labels.
+   - plot 'every' modifier re-implemented, to use the same syntax as gnuplot.
+   - fit command re-implemented to work with functions of > 1 variable.
+   - plot with pointlines defined as alias for 'linespoints'.
+   - plot using rows syntax implemented, for plotting horizontally-arranged
+     datafiles.
+   - Bug fix to replot command in multiplot mode, to take account of any move
+     commands applied to the last plot.
+   - Bug fix to errorbar pointsizes. pointsize modifier now produces sensible
+     output with all errorbar plot styles.
+   - show command re-implemented to accept any word that the set command will.
+
+2006 Jun 2: PyXPlot 0.5.1
+   - Pling and cd commands implemented; ` ` shell command substitution
+     implemented.
+   - Arrows (both from set arrow and the arrow command) can now have linetypes
+     and colours set.
+   - Colours can now be specified as either palette indices or PyX colour
+     names in all contexts -- e.g. 'plot with colour red'.
+   - Function plotting fixed to allow plotting of functions which are not
+     valid across the whole range of the x-axis.
+   - Transparent terminals now have anti-aliasing disabled.
+   - Warnings now issued when too many columns are specified in plot command;
+     duplicate errors filtered out in two-pass plotting.
+   - Function splicing implemented.
+   - Documentation: sections on barcharts, function splicing, and datafile
+     globbing added.
+
+2006 May 27: PyXPlot 0.5.0
+   - Name changed to PyXPlot.
+   - Change to distribution format: PyX Version 0.9 now ships with package.
+   - Safety installer added; checks for required packages.
+   - 'errorrange' plot styles added; allow errorbars to be given as min/max
+     values, rather than as a standard deviation.
+   - 'boxes', 'wboxes', 'steps', 'fsteps', 'histeps' and 'impulses' plot
+     styles implemented -- allow the production of histograms and bar charts.
+   - plot with fillcolour implemented, to allow coloured bar charts.
+   - Handling of broken datafiles sanitised: now warns for each broken line.
+   - gridlines on multiple axes, e.g. 'set grid x1x2x3' now allowed.
+   - Major bugfix to the way autoscaling works: linked axes share information
+     and scale intelligently between plots.
+   - --help and --version commandline options implemented.
+   - 'using' specifiers for datafiles can now include expressions, such as
+     $(2+x).
+   - eps terminal fixed to produce encapsulated postscript.
+   - datafile names now glob, so that plot '*' will plot many datafiles.
+   - Documentation: examples 6,7 and 8 added.
+
+2006 May 18: GnuPlot+ 0.4.3
+   - text and arrow commands now accept expressions rather than just floats
+     for positional coordinates.
+   - clear command major bug-fixed.
+   - 'plot with' clause bugfixed; state variable was not resetting.
+   - Automatical key titles for datafile datasets made more informative.
+   - Autoscaling of multiple axes bugfixed.
+   - Autoscaling of inverted axes fixed.
+   - set grid command fixed to only produce x/y gridlines when requested.
+   - X11_singlewindow changed to use gv --watch.
+   - landscape terminal postscript header detection bugfixed.
+   - noenhanced terminal changed to produce proper postscript.
+   - Plotting of single column datafiles without using specifier fixed.
+
+2006 May 4: GnuPlot+ 0.4.2
+   - Autoscaling redesigned, no longer uses PyX for this.
+   - Numerical expression handling fixed in set title, set origin and set
+     label.
+   - Handling of children fixed, to prevent zombies from lingering around.
+   - arrow command implemented.
+   - set textcolour, set axescolour, set gridmajcolour, set gridmincolour
+     and set fontsize implemented.
+   - Colour palette can now be set in configuration file.
+   - Ranges for axes other then x1/y1 can now be set in the plot command.
+   - Postscript noenhanced can now produce plots almost as big as an A4 sheet.
+   - Plotting of one column datafiles, against datapoint number, implemented.
+   - Negative errorbars error trapped.
+   - Comment lines now allowed in command files.
+
+2006 May 1: GnuPlot+ 0.4.1
+   - Documentation converted from ASCII to LaTeX.
+   - ChangeLog added.
+   - Configuration files now supported.
+   - Prevention of temporary files in /tmp overwriting pre-existing files.
+   - set term enhanced / noenhanced / landscape / portrait / png / gif / jpeg
+     / transparent / solid / invert / noinvert implemented.
+   - set dpi implemented, to allow user to choose quality of gif/jpg/png
+     output.
+   - `set grid' command now allows user to specify which axes grid attaches
+     to. (extended API)
+   - Support introduced for plotting gzipped datafiles. Filenames ending in
+     '.gz' are assumed to be gzipped.
+   - load command implemented.
+   - move command implemented.
+   - Long lines can now be split using '\' linesplit character at the end of a
+     line. Any whitespace at the beginning of the next is omitted.
+   - text / delete_text / undelete_text / move_text commands implemented.
+   - refresh command implemented. (extended API)
+   - point types, line styles, and colours now start at 1, for gnuplot
+     compatibility.
+   - default terminal changed to postscript for non-interactive sessions.
+
+2006 Apr 27: GnuPlot+ 0.4.0
+   - Bug fix: now looks for input scripts in the user's cwd, not in /tmp.
+   - 'set logscale' is now valid syntax (as in gnuplot), as well as 'set log'.
+   - multiplot implemented, including linked axes, though with some brokenness
+     if linked axes are allowed to autoscale.
+   - 'dots' plotting style implemented.
+   - Bug fix: can now include a plot 'with' clause after an 'axes' clause;
+     could not previously without an error message arising.
+   - Pointstyles now increment between plotted datasets, even in a colour
+     terminal where the colours also increment.
+   - garbage collection of .eps files from the X11 terminal added. Previously
+     they were left to fester in /tmp.
+   - pointlinewidth added as a plot style, specifying the linewidth to be used
+     in plotting points. 'set plw' and 'set lw' both added (extended API).
+   - delete, clear and undelete commands added to the multiplot environment.
+   - unset command implemented.
+   - set notitle implemented.
+
+2006 Apr 14: GnuPlot+ 0.3.2
+   - The autoscaling of logarithmic axes made more trust-worthy: error checks
+     to ensure that they do not try to cover negative ordinates.
+   - Error checks put in place to prevent empty keys being plotted, which made
+     PyX crash previously. Now can plot empty graphs happily.
+   - Datasets with blank titles removed from the key, to allow users to plot
+     some datasets to be omitted from the key. This is not possible in gnuplot.
+   - Bug fix to prevent PyX's texrunner from crashing irreparably upon
+     receiving bad LaTeX. Now uses a spanner to attempt to return it to working
+     order for the next plot.
+   - Bug fix to the autoscaling of axes with no range of data -- previous did
+     not work for negative ordinates. Now displays an axes with a range of +/-
+     1.0 around the data.
+
+2006 Apr 12: GnuPlot+ 0.3.1
+   - Plotting of functions fixed: plot command will now plot any algebraic
+     expression, not just functions of the form f(x).
+   - Space added after command prompt.
+
+2006 Apr 12: GnuPlot+ 0.3.0
+   - X11_singlewindow and X11_multiwindow terminals implemented, as distinct
+     from just standard X11.
+   - Key positioning allowed to be xcentre, ycentre, below and outside, as
+     well as in the corners of the plot. Key allowed to be offseted in position.
+   - Datasets colours can be set via 'plot with colour <n>'
+   - Datasets are split when there is a blank line in the datafile; lines are
+     not joined up between the two segments.
+   - set size implemented; can now change aspect ratio of plots.
+   - working directory of GnuPlot+ changed to /tmp, so that LaTeX's temporary
+     files are stored there rather than in the user's cwd.
+
+2006 Mar 30: GnuPlot+ 0.2.0
+   - Standard GnuPlot dual axes improved upon, allowing users to add x3, x4
+     axes, etc, up to any number of axes that may be desired.
+   - Autocomplete mechanism for commandline substantially cleaned up and
+     debugged.
+   - Bug fixes to the plotting of arrows/labels. Now appear *above* gridlines,
+     not below.
+
+2006 Feb 26: GnuPlot+ 0.1.0

@@ -322,9 +322,10 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
           pplObj *obj = (pplObj *)ppl_dictLookup(context->namespaces[i] , key);
           if ((obj==NULL)&&(!context->namespaces[i]->immutable))
            {
-            pplObjZom(stk , 0); // Create a temporary zombie for now
+            pplObjZom(stk , 1); // Create a temporary zombie for now
             stk->refCount=1;
             ppl_dictAppendCpy(context->namespaces[i] , key , stk , sizeof(pplObj));
+            stk->amMalloced=0;
             obj = (pplObj *)ppl_dictLookup(context->namespaces[i] , key);
             if (obj==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY); goto cleanup_on_error; }
            }

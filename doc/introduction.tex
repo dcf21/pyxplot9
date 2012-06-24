@@ -351,27 +351,28 @@ spelt \texttt{neighbour}; etc.
 \section{Acknowledgments}
 
 PyXPlot builds on ideas from several pre-existing open-source software
-projects.  We admire \gnuplot's simple and intuitive interface, and PyXPlot's
+projects. We like \gnuplot's simple and intuitive interface, and PyXPlot's
 command syntax is intentionally very similar, to the point of backwards
-compatibility in many cases. In design PyXPlot's extensions to \gnuplot's
-syntax, we have followed the latter's preference for short simple command line
-syntax.  In designing, PyXPlot's graphical output engine, we borrowed many
-ideas from the PyX\index{PyX} graphics library for Python.
+compatibility in many cases. Even when designing the entirely new parts of
+PyXPlot's syntax, we have followed \gnuplot's preference for short simple
+command-line syntax. In designing PyXPlot's graphical output engine, we
+borrowed many ideas from the PyX\index{PyX} graphics library for Python.
 
-Several individuals deserve credit for their contributions to PyXPlot's
-development. Michael Rutter shared his public domain code to converting bitmap
-images into PostScript, which we used in the implementation of the {\tt image}
-command and the {\tt colormap} plot style. Matthew Smith provided C
-implementations of the Airy functions and the Riemann zeta function for general
-complex inputs and helped to test PyXPlot's mathematical environment. Zolt\'an
-V\"or\"os worked on our development team from 2010 until 2011.
+Several people have contributed code to PyXPlot. Michael Rutter provided us 
+with a copy of his public domain code for converting bitmap images into
+PostScript, which we used in the implementation of the {\tt image} command and
+the {\tt colormap} plot style. Matthew Smith provided C implementations of the
+Airy functions and the Riemann zeta function for general complex inputs, and
+helped to test PyXPlot's mathematical environment. Zolt\'an V\"or\"os worked on
+our development team from 2010 until 2011.  John Walker has published public
+domain code implementing RGB rendering of the electromagnetic spectrum, which
+we use in the {\tt colors.\-wave\-length()} function.
 
-We would also like to thank the users who have got in touch with us by email
-since PyXPlot was first released on the web in~2006. Your feedback and
+We would also like to thank all the users who have got in touch with us by
+email since PyXPlot was first released on the web in~2006. Your feedback and
 suggestions have been gratefully received.
 
 Final thanks go to our team of alpha testers, without whose work PyXPlot would
 doubtless still contain many more bugs.  Especial thanks go to Rachel Holdforth
-and Stuart Prescott. Of course, the authors remain solely responsible for any
-bugs which remain.
+and Stuart Prescott.
 

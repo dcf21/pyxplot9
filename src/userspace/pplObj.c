@@ -385,6 +385,8 @@ pplObj *pplObjZom(pplObj *in, unsigned char amMalloced)
  {
   in->objType      = PPLOBJ_ZOM;
   in->objPrototype = &pplObjPrototypes[PPLOBJ_ZOM];
+  in->self_lval    = NULL; in->self_dval = NULL;
+  in->self_this    = NULL;
   in->amMalloced   = amMalloced;
   in->immutable    = 0;
   return in;
