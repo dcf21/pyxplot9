@@ -114,12 +114,14 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].multiplier = 1e-9;
   unit_pos++;
 
-  unit_database[unit_pos].nameAs     = "m"; // Metre
+  unit_database[unit_pos].nameAs     = "m"; // Meter
   unit_database[unit_pos].nameAp     = "m";
   unit_database[unit_pos].nameLs     = unit_database[unit_pos].nameAs;
   unit_database[unit_pos].nameLp     = unit_database[unit_pos].nameAp;
-  unit_database[unit_pos].nameFs     = "metre";
-  unit_database[unit_pos].nameFp     = "metres";
+  unit_database[unit_pos].nameFs     = "meter";
+  unit_database[unit_pos].nameFp     = "meters";
+  unit_database[unit_pos].alt1       = "metre";
+  unit_database[unit_pos].alt2       = "metres";
   unit_database[unit_pos].quantity   = "length";
   unit_database[unit_pos].si         = 1;
   unit_database[unit_pos].minPrefix  = -24;
@@ -127,24 +129,28 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].exponent[UNIT_LENGTH]=1;
   unit_pos++;
 
-  unit_database[unit_pos].nameAs     = "cm"; // Centimetre
+  unit_database[unit_pos].nameAs     = "cm"; // Centimeter
   unit_database[unit_pos].nameAp     = "cm";
   unit_database[unit_pos].nameLs     = unit_database[unit_pos].nameAs;
   unit_database[unit_pos].nameLp     = unit_database[unit_pos].nameAp;
-  unit_database[unit_pos].nameFs     = "centimetre";
-  unit_database[unit_pos].nameFp     = "centimetres";
+  unit_database[unit_pos].nameFs     = "centimeter";
+  unit_database[unit_pos].nameFp     = "centimeters";
+  unit_database[unit_pos].alt1       = "centimetre";
+  unit_database[unit_pos].alt2       = "centimetres";
   unit_database[unit_pos].quantity   = "length";
   unit_database[unit_pos].multiplier = 0.01;
   unit_database[unit_pos].cgs        = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH]=1;
   unit_pos++;
 
-  unit_database[unit_pos].nameAs     = "dm"; // Decimetre
+  unit_database[unit_pos].nameAs     = "dm"; // Decimeter
   unit_database[unit_pos].nameAp     = "dm";
   unit_database[unit_pos].nameLs     = unit_database[unit_pos].nameAs;
   unit_database[unit_pos].nameLp     = unit_database[unit_pos].nameAp;
-  unit_database[unit_pos].nameFs     = "decimetre";
-  unit_database[unit_pos].nameFp     = "decimetres";
+  unit_database[unit_pos].nameFs     = "decimeter";
+  unit_database[unit_pos].nameFp     = "decimeters";
+  unit_database[unit_pos].alt1       = "decimetre";
+  unit_database[unit_pos].alt2       = "decimetres";
   unit_database[unit_pos].quantity   = "length";
   unit_database[unit_pos].multiplier = 0.1;
   unit_database[unit_pos].exponent[UNIT_LENGTH]=1;
@@ -365,6 +371,17 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFp     = "poles";
   unit_database[unit_pos].quantity   = "length";
   unit_database[unit_pos].multiplier = 5.02920;
+  unit_database[unit_pos].exponent[UNIT_LENGTH]=1;
+  unit_pos++;
+
+  unit_database[unit_pos].nameAs     = "barleycorn"; // Barleycorn
+  unit_database[unit_pos].nameAp     = "barleycorns";
+  unit_database[unit_pos].nameLs     = unit_database[unit_pos].nameAs;
+  unit_database[unit_pos].nameLp     = unit_database[unit_pos].nameAp;
+  unit_database[unit_pos].nameFs     = "barleycorn";
+  unit_database[unit_pos].nameFp     = "barleycorns";
+  unit_database[unit_pos].quantity   = "length";
+  unit_database[unit_pos].multiplier = GSL_CONST_MKSA_INCH/3;
   unit_database[unit_pos].exponent[UNIT_LENGTH]=1;
   unit_pos++;
 
@@ -907,7 +924,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].multiplier = 1.0/683;
   unit_database[unit_pos].minPrefix  = -24;
   unit_database[unit_pos].maxPrefix  =  24;
-  unit_database[unit_pos].si = 1;
+  unit_database[unit_pos].si = 1.0/683; // 1 candela = 1/683 watt per steradian
   unit_database[unit_pos].exponent[UNIT_MASS]   = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH] = 2;
   unit_database[unit_pos].exponent[UNIT_TIME]   =-3;
@@ -921,7 +938,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFs     = "candlepower";
   unit_database[unit_pos].nameFp     = "candlepower";
   unit_database[unit_pos].quantity   = "light_intensity";
-  unit_database[unit_pos].multiplier = 1.0/683/0.981;
+  unit_database[unit_pos].multiplier = 1.0/683 * 0.981;
   unit_database[unit_pos].imperial = unit_database[unit_pos].us = unit_database[unit_pos].ancient    = 1;
   unit_database[unit_pos].exponent[UNIT_MASS]   = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH] = 2;
@@ -936,7 +953,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFs     = "lumen";
   unit_database[unit_pos].nameFp     = "lumens";
   unit_database[unit_pos].quantity   = "power";
-  unit_database[unit_pos].multiplier = GSL_CONST_MKSA_LUMEN;
+  unit_database[unit_pos].multiplier = 1.0/683;
   unit_database[unit_pos].minPrefix  = -24;
   unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].exponent[UNIT_MASS]   = 1;
@@ -951,7 +968,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].nameFs     = "lux";
   unit_database[unit_pos].nameFp     = "luxs";
   unit_database[unit_pos].quantity   = "power";
-  unit_database[unit_pos].multiplier = GSL_CONST_MKSA_LUX;
+  unit_database[unit_pos].multiplier = 1.0/683;
   unit_database[unit_pos].minPrefix  = -24;
   unit_database[unit_pos].maxPrefix  =  24;
   unit_database[unit_pos].exponent[UNIT_MASS]   = 1;
@@ -968,7 +985,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].multiplier = 1e-26;
   unit_database[unit_pos].minPrefix  = -24;
   unit_database[unit_pos].maxPrefix  =  24;
-  unit_database[unit_pos].exponent[UNIT_MASS]   = 1; // Watt per square metre per Hz (NOT per steradian!)
+  unit_database[unit_pos].exponent[UNIT_MASS]   = 1; // Watt per square meter per Hz (NOT per steradian!)
   unit_database[unit_pos].exponent[UNIT_TIME]   =-2;
   unit_pos++;
 
@@ -1153,36 +1170,42 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].exponent[UNIT_LENGTH]=2;
   unit_pos++;
 
-  unit_database[unit_pos].nameAs     = "sq_km"; // square kilometre
+  unit_database[unit_pos].nameAs     = "sq_km"; // square kilometer
   unit_database[unit_pos].nameAp     = "sq_km";
   unit_database[unit_pos].nameLs     = "sq\\_km";
   unit_database[unit_pos].nameLp     = "sq\\_km";
-  unit_database[unit_pos].nameFs     = "square_kilometre";
-  unit_database[unit_pos].nameFp     = "square_kilometres";
+  unit_database[unit_pos].nameFs     = "square_kilometer";
+  unit_database[unit_pos].nameFp     = "square_kilometers";
+  unit_database[unit_pos].alt1       = "square_kilometre";
+  unit_database[unit_pos].alt2       = "square_kilometres";
   unit_database[unit_pos].quantity   = "area";
   unit_database[unit_pos].multiplier = 1e6;
   //unit_database[unit_pos].si         = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH]=2;
   unit_pos++;
 
-  unit_database[unit_pos].nameAs     = "sq_m"; // square metre
+  unit_database[unit_pos].nameAs     = "sq_m"; // square meter
   unit_database[unit_pos].nameAp     = "sq_m";
   unit_database[unit_pos].nameLs     = "sq\\_m";
   unit_database[unit_pos].nameLp     = "sq\\_m";
-  unit_database[unit_pos].nameFs     = "square_metre";
-  unit_database[unit_pos].nameFp     = "square_metres";
+  unit_database[unit_pos].nameFs     = "square_meter";
+  unit_database[unit_pos].nameFp     = "square_meters";
+  unit_database[unit_pos].alt1       = "square_metre";
+  unit_database[unit_pos].alt2       = "square_metres";
   unit_database[unit_pos].quantity   = "area";
   unit_database[unit_pos].multiplier = 1;
   //unit_database[unit_pos].si         = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH]=2;
   unit_pos++;
 
-  unit_database[unit_pos].nameAs     = "sq_cm"; // square centimetre
+  unit_database[unit_pos].nameAs     = "sq_cm"; // square centimeter
   unit_database[unit_pos].nameAp     = "sq_cm";
   unit_database[unit_pos].nameLs     = "sq\\_cm";
   unit_database[unit_pos].nameLp     = "sq\\_cm";
-  unit_database[unit_pos].nameFs     = "square_centimetre";
-  unit_database[unit_pos].nameFp     = "square_centimetres";
+  unit_database[unit_pos].nameFs     = "square_centimeter";
+  unit_database[unit_pos].nameFp     = "square_centimeters";
+  unit_database[unit_pos].alt1       = "square_centimetre";
+  unit_database[unit_pos].alt2       = "square_centimetres";
   unit_database[unit_pos].quantity   = "area";
   unit_database[unit_pos].multiplier = 1e-4;
   //unit_database[unit_pos].cgs        = 1;
@@ -1213,24 +1236,28 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].exponent[UNIT_LENGTH]=2;
   unit_pos++;
 
-  unit_database[unit_pos].nameAs     = "cubic_m"; // cubic metre
+  unit_database[unit_pos].nameAs     = "cubic_m"; // cubic meter
   unit_database[unit_pos].nameAp     = "cubic_m";
   unit_database[unit_pos].nameLs     = "cubic\\_m";
   unit_database[unit_pos].nameLp     = "cubic\\_m";
-  unit_database[unit_pos].nameFs     = "cubic_metre";
-  unit_database[unit_pos].nameFp     = "cubic_metres";
+  unit_database[unit_pos].nameFs     = "cubic_meter";
+  unit_database[unit_pos].nameFp     = "cubic_meters";
+  unit_database[unit_pos].alt1       = "cubic_metre";
+  unit_database[unit_pos].alt2       = "cubic_metres";
   unit_database[unit_pos].quantity   = "volume";
   unit_database[unit_pos].multiplier = 1;
   //unit_database[unit_pos].si         = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH]=3;
   unit_pos++;
 
-  unit_database[unit_pos].nameAs     = "cubic_cm"; // cubic centimetre
+  unit_database[unit_pos].nameAs     = "cubic_cm"; // cubic centimeter
   unit_database[unit_pos].nameAp     = "cubic_cm";
   unit_database[unit_pos].nameLs     = "cubic\\_cm";
   unit_database[unit_pos].nameLp     = "cubic\\_cm";
-  unit_database[unit_pos].nameFs     = "cubic_centimetre";
-  unit_database[unit_pos].nameFp     = "cubic_centimetres";
+  unit_database[unit_pos].nameFs     = "cubic_centimeter";
+  unit_database[unit_pos].nameFp     = "cubic_centimeters";
+  unit_database[unit_pos].alt1       = "cubic_centimetre";
+  unit_database[unit_pos].alt2       = "cubic_centimetres";
   unit_database[unit_pos].quantity   = "volume";
   unit_database[unit_pos].multiplier = 1e-6;
   //unit_database[unit_pos].cgs        = 1;

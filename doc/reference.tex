@@ -31,17 +31,43 @@ parentheses {\tt ()} are used to indicate mutually-exclusive options which are
 separated by vertical lines {\tt |}, square brackets {\tt []} are used to
 indicate optional items, and braces {\tt \{\}} are used to indicate items which
 may be repeated. Dots {\tt ...} are used to indicate arbitrary strings of text.
-Where any of these punctuation marks appear as a part of PyXPlot's syntax, they
-are placed in double quotes, as in {\tt "\{"}. Strings, such as filenames,
-which should be placed in quotes are shown in single quotes, as in {\tt
-'<filename>'}, though in practice, double and single quotes can always be used
-interchangeably. In cases where there is likely to be any ambiguity, worked
-examples are usually shown beneath the syntax specification.
+
+Replaceable tokens labelled {\tt <length>} may be specified either as a number
+with physical dimensions of length, e.g.\ {\tt 2*unit(m)}, or as a
+dimensionless number taken as a number of centimeters. Replaceable tokens
+labelled {\tt <angle>} may be specified either with physical dimensions of
+angle, e.g.\ {\tt 0.25*unit(rev), or as a dimensionless number of degrees, e.g.
+{\tt 90}.
+
+Replaceable tokens labelled {\tt <vector>} represent a physical position on the
+vector-graphics canvas, and can be specified either as two comma-separated
+co-ordinates, or as a two-component vector. In either case, the co-ordinates
+may either have physical demensions of length, or be a dimensionless number of
+centimeters.
+
+Replaceable tokens labelled {\tt <graph\_vector>} are similar, but represent a
+position on a graph. They may be specified either as comma-separated
+co-ordinates, or as a vector object. In either case, there may be either two or
+three components, although the third component will be ignored except on
+three-dimensional plots. The components should share the physical units of the
+axes they are plotted against.
+
+In flow control commands, tokens labelled {\tt <code>} should be replaced by a
+series of PyXPlot commands enclosed by braces \tt \{\}}. The closing brace must
+be placed on a new line.
+
+Where braces \tt \{\}} are used to indicate items which may be repeated, commas
+or semicolons are often used to separate items. This is specified in the text
+below the syntax specification.
+
+Where keywords differ between US and British English, both variants are
+accepted. For example, {\tt color} may be spelt {\tt colour}, {\tt gray} may be
+spelt {\tt grey}, etc.
 
 \section{?}\indcmd{?}
 
 \begin{verbatim}
-? [<topic> {<sub-topic>} ]
+? [ <topic> { <sub-topic> } ]
 \end{verbatim}
 
 The {\tt ?} symbol is a shortcut to the {\tt help} command.
@@ -79,8 +105,8 @@ set xlabel '`ls`'
 \section{arc}\indcmd{arc}
 
 \begin{verbatim}
-arc [ item <id> ] [at] <x>, <y> radius <r>
-    from <start> to <finish> [ with {<option>} ]
+arc [ item <id> ] [at] <vector> radius <length>
+    from <angle> to <angle> [ with { <option> } ]
 \end{verbatim}
 
 Arcs (curves with constant radius of curvature, that is, segments of circles)
@@ -109,8 +135,8 @@ commands respectively.
 \section{arrow}\indcmd{arrow}
 
 \begin{verbatim}
-arrow [ item <id> ] [from] <x>, <y> [to] <x>, <y>
-                  [ with {<option>} ]
+arrow [ item <id> ] [from] <vector> to <vector>
+                  [ with { <option> } ]
 \end{verbatim}
 
 Arrows may be drawn on multiplot canvases using the \indcmdt{arrow}. The style
@@ -140,7 +166,7 @@ commands respectively.
 
 \begin{verbatim}
 assert ( <expression> | version ( >= | < ) <version> )
-       [<error message>]
+       [ <error message> ]
 \end{verbatim}
 
 The \indcmdt{assert} can be used to assert that a logical expression, such as
@@ -168,11 +194,11 @@ assert version <  0.8  "This script is designed for PyXPlot 0.7"
 \section{box}\indcmd{box}
 
 \begin{verbatim}
-box [ item <id> ] at <x>, <y> width <w> height <h>
-         [ rotate <r> ] [ with {<option>} ]
+box [ item <id> ] at <vector> width <length> height <length>
+         [ rotate <angle> ] [ with { <option> } ]
 
-box [ item <id> ] from <x1>, <y1> to <x2>, <y2>
-         [ rotate <r> ] [ with {<option>} ]
+box [ item <id> ] from <vector> to <vector>
+         [ rotate <angle> ] [ with { <option> } ]
 \end{verbatim}
 
 The \indcmdt{box} is used to draw and fill rectangular boxes on multiplot
@@ -205,7 +231,7 @@ commands respectively.
 \section{break}\indcmd{break}
 
 \begin{verbatim}
-break [<loopname>]
+break [ <loopname> ]
 \end{verbatim}
 
 The \indcmdt{break} terminates execution of {\tt do}, {\tt while}, {\tt for}
@@ -244,6 +270,17 @@ to act upon loops other than the innermost one.
 See also the {\tt continue} command.
 
 
+\section{call}\indcmd{call}
+
+\begin{verbatim}
+call <expression>
+\end{verbatim}
+
+The \indcmdt{call} evaluates a function or subroutine call, and discards the
+result. Whereas entering {\tt f(x)} on the commandline alone will print the
+result of the function call, {\tt call f(x)} quietly discards the function
+evaluation.
+
 \section{cd}\indcmd{cd}
 
 \begin{verbatim}
@@ -262,8 +299,8 @@ cd foo
 \section{circle}\indcmd{circle}
 
 \begin{verbatim}
-circle [ item <id> ] [at] <x>, <y> radius <r>
-       [ with {<option>} ]
+circle [ item <id> ] [at] <vector> radius <length>
+       [ with { <option> } ]
 \end{verbatim}
 
 The \indcmdt{circle} is used to draw circles on multiplot canvases.  The
@@ -300,7 +337,7 @@ especially useful; it removes the current plot to leave a blank canvas.  The
 \section{continue}\indcmd{continue}
 
 \begin{verbatim}
-continue [<loopname>]
+continue [ <loopname> ]
 \end{verbatim}
 
 The \indcmdt{continue} terminates execution of the current iteration of {\tt
@@ -343,7 +380,7 @@ See also the {\tt break} command.
 \section{delete}\indcmd{delete}
 
 \begin{verbatim}
-delete <item number> {, <item number>}
+delete { <item number> }
 \end{verbatim}
 
 The \indcmdt{delete} removes vector graphics objects such as plots, arrows or
@@ -366,10 +403,9 @@ command.
 \section{do}\indcmd{do}
 
 \begin{verbatim}
-do [loopname <loopname>]
- "{"
-  ...
- "}" while <condition>
+do [ loopname <loopname> ]
+ <code>
+while <condition>
 \end{verbatim}
 
 The \indcmdt{do} executes a block of commands repeatedly, checking the
@@ -435,6 +471,12 @@ ellipse centre 0,0 majoraxis 4 minoraxis 4
 \end{verbatim}
 \end{enumerate}
 
+Optionally, an arc of an ellipse may be drawn by adding the following modified:
+
+\begin{verbatim}
+arc from <angle> to <angle>
+\end{verbatim}
+
 The line type, line width, and color of line with which the outlines of
 ellipses are drawn may be specified after the keyword {\tt with}, as in the
 {\tt box} and {\tt circle} commands above. Likewise, ellipses may be filled in
@@ -456,8 +498,9 @@ statement, of which it forms part.
 \section{eps}\indcmd{eps}
 
 \begin{verbatim}
-eps [ item <id> ] '<filename>' [at <x>, <y>] [rotate <angle>]
-                            [width <width>] [height <height>]
+eps [ item <id> ] <filename> [ at <vector> ] [rotate <angle>]
+                           [width <length>] [height <length>]
+                                        [ clip ] [ calcbbox ]
 \end{verbatim}
 
 The \indcmdt{eps} allows Encapsulated PostScript (EPS) images to be inserted
@@ -466,11 +509,16 @@ the bottom-left corner of the image should be placed; if it is not, then the
 image is placed at the origin. The {\tt rotate} modifier can be used to rotate
 the image by any angle, measured in degrees counter-clockwise.  The {\tt width}
 or {\tt height} modifiers can be used to specify the width or height with which
-the image should be rendered; both should be specified in centimetres. If
+the image should be rendered; both should be specified in centimeters. If
 neither is specified then the image will be rendered with the native dimensions
 specified within the PostScript.  The {\tt eps} command is often useful in
 multiplot mode, allowing PostScript images to be combined with plots, text
 labels, etc.
+
+The {\tt clip} modifier causes PyXPlot to clip an eps image to its stated
+bounding box. The {\tt calcbbox} modifier causes PyXPlot to ignore the bounding
+box stated in the eps file and calculate its own when working out how to scale
+the image to the specified width and height.
 
 All vector graphics objects placed on multiplot canvases receive unique
 identification numbers which count sequentially from one, and which may be
@@ -516,13 +564,13 @@ When running a script, CTRL-C terminates execution of the script.
 \section{fft}\indcmd{fft}
 
 \begin{verbatim}
-fft {<range>} <function>"()"
-    of ( '<filename>' | <function>"()" )
-    [using <expression> {:<expression>} ]
+fft { <range> } <function name>()
+    of ( <filename> | <function name>() )
+    [ using { <expression> } ]
 
-ifft {<range>} <function>"()"
-    of ( '<filename>' | <function>"()" )
-    [using <expression> {:<expression>} ]
+ifft { <range> } <function name>()
+    of ( <filename> | <function name>() )
+    [ using { <expression> } ]
 \end{verbatim}
 
 The \indcmdt{fft} calculates Fourier transforms of \datafile s or functions.
@@ -555,13 +603,14 @@ command.
 The {\tt ifft} command calculates inverse Fourier transforms; it has the same
 syntax as the {\tt fft} command.
 
+
 \section{fit}\indcmd{fit}
 
 \begin{verbatim}
-fit [{<range>}] <function>"()" [withouterrors] '<datafile>'
-    [index <value>]
-    [using <expression> {:<expression>} ]
-    via <variable> {, <variable>}
+fit [ { <range> } ] <function name>() [ withouterrors ]
+    ( <filename> | { <expression> } | { <vector obj> } )
+    [ index <value> ] [ using { <expression> } ]
+    via { <variable> }
 \end{verbatim}
 
 The \indcmdt{fit} can be used to fit arbitrary functional forms to \datapoint s
@@ -620,18 +669,23 @@ More details can be found in Section~\ref{sec:fit_command}.
 \begin{verbatim}
 for <variable> = <start> to <end> [step <step>]
                           [loopname <loopname>]
- "{"
-  ...
- "}"
+  <code>
+
+for (<initialise>; <criterion>; <step>)
+  <code>
 \end{verbatim}
 
-The \indcmdt{for} executes a set of commands repeatedly, with a specified
-variable taking a different value on each iteration. The variable takes the
-value {\tt start} on the first iteration, and increases by a fixed value {\tt
-step} on each iteration; {\tt step} may be negative if {\tt end} $<$ {\tt
-start}. If {\tt step} is not specified then a value of unity is assumed. The
-loop terminates when the variable exceeds {\tt end}.  The following example
-prints the squares of the first five natural numbers:
+The \indcmdt{for} executes a set of commands repeatedly.  PyXPlot allows {\tt
+for} loops to follow either the syntax of the BASIC programming language, or
+the C syntax.
+
+In the BASIC variant, a specified variable takes a different value on each
+iteration. The variable takes the value {\tt start} on the first iteration, and
+increases by a fixed value {\tt step} on each iteration; {\tt step} may be
+negative if {\tt end} $<$ {\tt start}. If {\tt step} is not specified then a
+value of unity is assumed. The loop terminates when the variable exceeds {\tt
+end}.  The following example prints the squares of the first five natural
+numbers:
 
 \begin{verbatim}
 for i = 1 to 5
@@ -640,16 +694,22 @@ for i = 1 to 5
  }
 \end{verbatim}
 
+In the C variant, three expressions are provided, which are evaluated (a) when the loop initialises, (b) as a boolean test of whether the loop should
+continue iterating, and (c) on each loop to increment/decrement variables as
+required. For example:
+
+\begin{verbatim}
+for (i=1,j=1; i<=256; i*=2,j++) { print "%3d %3d"%(j,i); }
+\end{verbatim}
+
 
 \section{foreach}\indcmd{foreach}
 
 \begin{verbatim}
-foreach <variable> in ( <filename expression> |
-                         "("<value> {, <value>}")" )
-                      [loopname <loopname>]
- "{"
-  ...
- "}"
+foreach <variable> in ( <filename wildcard> |
+                        <list> )
+                      [ loopname <loopname> ]
+  <code>
 \end{verbatim}
 
 The \indcmdt{foreach} can be used to run a block of commands repeatedly, once
@@ -681,10 +741,39 @@ foreach sigma in (1, 2, 3)
 \end{verbatim}
 
 
+\section{foreach datum}\indcmd{foreach datum}
+
+\begin{verbatim}
+foreach { <variable> } in [ { <range> } ]
+    ( <filename> | { <expression> } | { <vector obj> } )
+    [ every { <expression> } ]
+    [ index <value> ] [ select <expression> ]
+    [ using { <expression> } ]
+  <code>
+\end{verbatim}
+
+The \indcmdt{foreach datum} executes a series of commands for each \datapoint
+read from a \datafile or function.  It takes a similar set of modifiers to the
+{\tt plot} command; the list of variables to be read from the supplied data on
+each iteration should be comma separated.
+
+
+\section{global}\indcmd{global}
+
+\begin{verbatim}
+global { <variable name> }
+\end{verbatim}
+
+The \indcmdt{global} command may be used within subroutines, which have their
+own private variable namespaces, to specify that the named variables should
+refer to the global namespace. If multiple variables are specified, their names
+should be comma separated.
+
+
 \section{help}\indcmd{help}
 
 \begin{verbatim}
-help [<topic> {<sub-topic>} ]
+help [ <topic> { <sub-topic> } ]
 \end{verbatim}
 
 The \indcmdt{help} provides an hierarchical source of information which is
@@ -715,13 +804,14 @@ To exit any help page, press the {\tt q} key.
 \section{histogram}\indcmd{histogram}
 
 \begin{verbatim}
-histogram [<range>] <function name>"()" '<datafile>'
-     [every <expression> {:<expression>} ]
-     [index <value>]
-     [select <expression>]
-     [using <expression> {:<expression>} ]
-     ( [binwidth <value>] [binorigin <value>] |
-       [bins (x1, x2, ...)] )
+histogram [ <range> ] <function name>()
+     ( <filename> | { <expression> } | { <vector obj> } )
+     [ every { <expression> } ]
+     [ index <value> ]
+     [ select <expression> ]
+     [ using { <expression> } ]
+     ( [ binwidth <value> ] [ binorigin <value> ] |
+       [ bins (x1, x2, ...) ] )
 \end{verbatim}
 
 The \indcmdt{histogram} takes a single column of data from a file and produces
@@ -797,7 +887,7 @@ drawn to coincide with the bins into which the data were sorted.
 \section{history}\indcmd{history}
 
 \begin{verbatim}
-history [<number of items>]
+history [ <number of items> ]
 \end{verbatim}
 
 The \indcmdt{history} prints a list of the most recently executed commands on
@@ -808,16 +898,9 @@ latest $N$ commands to be displayed.
 \section{if}\indcmd{if}\indcmd{else if}\indcmd{else}
 
 \begin{verbatim}
-if <criterion>
- "{"
-    ...
- "}" { else if <criterion>
- "{"
-    ...
- "}" } [ else
- "{"
-    ...
- "}" ]
+if <criterion> <code>
+{ else if <criterion> <code> }
+[ else                <code> ]
 \end{verbatim}
 
 The \indcmdt{if} allows conditional execution of blocks of commands.  The code
@@ -849,9 +932,9 @@ if (x==2)
 \section{ifft}\indcmd{ifft}
 
 \begin{verbatim}
-ifft {<range>} <function>"()"
-    of ( '<filename>' | <function>"()" )
-    [using <expression> {:<expression>} ]
+ifft { <range> } <function name>()
+    of ( <filename> | <function name>() )
+    [using { <expression> } ]
 \end{verbatim}
 
 See {\tt fft}.
@@ -860,9 +943,10 @@ See {\tt fft}.
 \section{image}\indcmd{image}
 
 \begin{verbatim}
-image [ item <id> ] '<filename>' [at <x>, <y>] [rotate <angle>]
-                     [width <width>] [height <height>] [smooth]
-                   [notransparent] [transparent rgb<r>:<g>:<b>]
+image [ item <id> ] <filename> [ at <vector> ]
+         [ rotate <angle> ] [ width <length> ]
+         [ height <length>] [ smooth ]
+         [ notransparent ] [ transparent rgb <r>:<g>:<b> ]
 \end{verbatim}
 
 The \indcmdt{image} allows graphical images to be inserted onto the current
@@ -874,7 +958,7 @@ corner of the image is placed at the origin. The {\tt rotate} modifier can be
 used to rotate images by any angle, measured in degrees counter-clockwise.  The
 {\tt width} or {\tt height} modifiers can be used to specify the width or
 height with which images should be rendered; both should be specified in
-centimetres. If neither is specified then images are rendered with the native
+centimeters. If neither is specified then images are rendered with the native
 dimensions specified within the metadata present in the image file (if any). If
 both are specified, then the aspect ratio of the image is changed.
 
@@ -900,13 +984,13 @@ commands respectively.
 \begin{verbatim}
 interpolate ( akima | linear | loglinear | polynomial |
               spline | stepwise |
-              2d [( bmp_r | bmp_g | bmp_b )] )
-            [<range specification>] <function name>"()"
-            '<filename>'
-            [ every <expression> {:<expression} ]
+              2d [ ( bmp_r | bmp_g | bmp_b ) ] )
+            [ <range specification> ] <function name>()
+            <filename>
+            [ every { <expression> } ]
             [ index <value> ]
             [ select <expression> ]
-            [ using <expression> {:<expression} ]
+            [ using { <expression> } ]
 \end{verbatim}
 
 The \indcmdt{interpolate} can be used to generate a special function within
@@ -982,9 +1066,10 @@ interpolate spline f() 'data1.dat'
 \section{jpeg}\indcmd{jpeg}
 
 \begin{verbatim}
-jpeg [ item <id> ] '<filename>' [at <x>, <y>] [rotate <angle>]
-                    [width <width>] [height <height>] [smooth]
-                  [notransparent] [transparent rgb<r>:<g>:<b>]
+jpeg [ item <id> ] <filename> [ at <vector> ]
+         [ rotate <angle> ] [ width <length> ]
+         [ height <length>] [ smooth ]
+         [ notransparent ] [ transparent rgb <r>:<g>:<b> ]
 \end{verbatim}
 
 See {\tt image}.
@@ -993,10 +1078,10 @@ See {\tt image}.
 \section{let}\indcmd{let}
 
 \begin{verbatim}
-let <varname> = <value>
+let <variable name> = <value>
 \end{verbatim}
 
-The \indcmdt{let} sets the variable {\tt varname} to equal {\tt value}.
+The \indcmdt{let} sets the named variable to equal {\tt value}.
 
 
 \section{list}\indcmd{list}
@@ -1027,7 +1112,7 @@ Item {\tt 1} has been deleted.
 \section{load}\indcmd{load}
 
 \begin{verbatim}
-load '<filename>'
+load <filename>
 \end{verbatim}
 
 The \indcmdt{load} executes a PyXPlot command script file, just as if its
@@ -1047,10 +1132,23 @@ load '*.script'
 \end{verbatim}
 
 
+\section{local}\indcmd{local}
+
+\begin{verbatim}
+local { <variable name> }
+\end{verbatim}
+
+The \indcmdt{global} command may be used within subroutines, which have their
+own private variable namespaces. It specifies that the named variables should,
+from now on, refer to the local namespace, even if the \indcmdt{global} command
+has previously been used to reference the global namespace. If multiple
+variables are specified, their names should be comma separated.
+
+
 \section{maximize}\indcmd{maximize}
 
 \begin{verbatim}
-maximize <expression> via <variable> {, variable}
+maximize <expression> via { <variable> }
 \end{verbatim}
 
 The \indcmdt{maximize} can be used to find the maxima of algebraic expressions.
@@ -1087,7 +1185,7 @@ returned agree with common sense.
 \section{minimize}\indcmd{minimize}
 
 \begin{verbatim}
-minimize <expression> via <variable> {, variable}
+minimize <expression> via { <variable> }
 \end{verbatim}
 
 The \indcmdt{minimize} can be used to find the minima of algebraic expressions.
@@ -1125,7 +1223,7 @@ returned agree with common sense.
 \section{move}\indcmd{move}
 
 \begin{verbatim}
-move <item number> to <x>, <y>
+move <item number> to <vector> [ rotate <angle> ]
 \end{verbatim}
 
 The \indcmdt{move} allows vector graphics objects to be moved around on the
@@ -1138,20 +1236,24 @@ should be specified using its identification number. The example
 move 23 to 8,8
 \end{verbatim}
 
-\noindent would move multiplot item~23 to position $(8,8)$ centimetres. If this
+\noindent would move multiplot item~23 to position $(8,8)$ centimeters. If this
 item were a plot, the end result would be the same as if the command {\tt set
 origin 8,8} had been executed before it had originally been plotted.
+
+
+\section{piechart}\indcmd{piechart}
 
 
 \section{plot}\indcmd{plot}
 
 \begin{verbatim}
-plot [3d] [item <id>] [{<range>}] ( '<filename>' | <function> )
-     [axes <axes>] [every <expression> {:<expression>}]
-     [index <value>] [select <expression>]
-     [label <string expression>]
-     [title <string>] [using <expression> {:<expression>}]
-     [with {<option>}]
+plot [ 3d ] [ item <id> ] [ { <range> } ]
+     ( <filename> | { <expression> } | { <vector obj> } )
+     [ axes <axes>] [ every { <expression> } ]
+     [ index <value>] [ select <expression> ]
+     [ label <string expression> ]
+     [ title <string> ] [ using { <expression> } ]
+     [ with { <option> } ]
 \end{verbatim}
 
 The \indcmdt{plot} is used to produce graphs. The following simple example
@@ -1281,15 +1383,15 @@ would use twice the default width of line.
 The following is a complete list of all of PyXPlot's plot styles -- i.e.\ all
 of the words which may be used in place of {\tt lines}: {\tt arrows\_\-head},
 {\tt arrows\_\-no\-head}, {\tt arrows\_\-two\-head}, {\tt boxes}, {\tt
-Colour\-Map}, {\tt Contour\-Map}, {\tt dots}, {\tt Filled\-Region}, {\tt
-fsteps}, {\tt histeps}, {\tt impulses}, {\tt lines}, {\tt Lines\-Points}, {\tt
-Lower\-Limits}, {\tt points}, {\tt stars}, {\tt steps}, {\tt surface}, {\tt
-Upper\-Limits}, {\tt wbox\-es}, {\tt X\-Error\-Bars}, {\tt X\-Error\-Range},
-{\tt XY\-Error\-Bars}, {\tt XY\-Error\-Range}, {\tt XYZ\-Error\-Bars}, {\tt
-XYZ\-Error\-Range}, {\tt XZ\-Error\-Bars}, {\tt XZ\-Error\-Range}, {\tt
-Y\-Error\-Bars}, {\tt Y\-Error\-Range}, {\tt Y\-Error\-Shaded}, {\tt
-YZ\-Error\-Bars}, {\tt YZ\-Error\-Range}, {\tt Z\-Error\-Bars}, {\tt
-Z\-Error\-Range}. In addition, {\tt lp} and {\tt pl} are recognised as
+color\-map}, {\tt contour\-map}, {\tt dots}, {\tt filled\-Region}, {\tt
+fsteps}, {\tt histeps}, {\tt impulses}, {\tt lines}, {\tt lines\-Points}, {\tt
+lower\-Limits}, {\tt points}, {\tt stars}, {\tt steps}, {\tt surface}, {\tt
+upper\-Limits}, {\tt wbox\-es}, {\tt x\-Error\-Bars}, {\tt x\-Error\-Range},
+{\tt XY\-Error\-Bars}, {\tt xy\-Error\-Range}, {\tt xyz\-Error\-Bars}, {\tt
+XYZ\-Error\-Range}, {\tt xz\-Error\-Bars}, {\tt xz\-Error\-Range}, {\tt
+y\-Error\-Bars}, {\tt y\-Error\-Range}, {\tt y\-Error\-Shaded}, {\tt
+yz\-Error\-Bars}, {\tt yz\-Error\-Range}, {\tt z\-Error\-Bars}, {\tt
+z\-Error\-Range}. In addition, {\tt lp} and {\tt pl} are recognised as
 abbreviations for {\tt lines\-points}; {\tt error\-bars} is recognised as an
 abbreviation for {\tt y\-error\-bars}; {\tt error\-range} is recognised as an
 abbreviation for {\tt y\-error\-range}; and {\tt arrows\_\-two\-way} is
@@ -1299,7 +1401,7 @@ As well as the names of these plot styles, the {\tt with} modifier can also be
 followed by style modifiers such as {\tt line\-width} which alter the exact
 appearance of various plot styles. A complete list of these is as follows:
 \begin{itemize}
-\item \indmodt{color} -- used to select the color in which each dataset is to be plotted. It should be followed either by an integer, to set a color from the present palette (see Section~\ref{sec:palette}), or by a recognised color name, a complete list of which can be found in Section~\ref{sec:color_names}. Alternatively, arbitrary colors may be specified by using one of the forms {\tt rgb0.1:\-0.2:\-0.3}, {\tt hsb0.1:\-0.2:\-0.3} or {\tt cmyk0.4:\-0.3:\-0.2:\-0.1}, where the colon-separated values indicate the RGB, HSB or CMYK components of the desired color in the range~0 to~1. This modifier may also be spelt {\tt color}.\index{colors!setting for datasets}
+\item \indmodt{color} -- used to select the color in which each dataset is to be plotted. It should be followed either by an integer, to set a color from the present palette (see Section~\ref{sec:palette}), by a recognised color name, or by an object of type {\tt color}. This modifier may also be spelt {\tt colour}.\index{colors!setting for datasets}
 \item \indmodt{fillcolor} -- used to select the color in which each dataset is filled. The color may be specified using any of the styles listed for {\tt color}. May also be spelt {\tt fillcolor}.
 \item \indmodt{linetype} -- used to numerically select the type of line -- for example, solid, dotted, dashed, etc.\ -- which should be used in line-based plot styles. A complete list of PyXPlot's numbered line types can be found in Chapter~\ref{ch:linetypes_table}. May be abbreviated {\tt lt}.
 \item \indmodt{linewidth} -- used to select the width of line which should be used in line-based plot styles, where unity represents the default width. May be abbreviated {\tt lw}.
@@ -1328,10 +1430,31 @@ plot 'datafile' using 1:2 with points pointsize $3
 \end{verbatim}
 
 
+\section{point}\indcmd{point}
+
+\begin{verbatim}
+point [ item <id> ] [at] <vector> [ label <string> ]
+                    [ with { <option> } ]
+\end{verbatim}
+
+The \indcmdt{point} allows a single point to be plotted on the current
+multiplot canvas independently of any graph.  It is equivalent to plotting a
+\datafile\ containing a single datum and with invisible axes.  If an optional
+{\tt label} is specified then the text string provided is rendered next to the
+point.  The {\tt with} modifier allows the style of the point to be specified
+using similar options to those accepted by the {\tt plot} command.
+
+All vector graphics objects placed on multiplot canvases receive unique
+identification numbers which count sequentially from one, and which may be
+listed using the {\tt list} command.  By reference to these numbers, they can
+be deleted and subsequently restored with the {\tt delete} and {\tt undelete}
+commands respectively.
+
+
 \section{print}\indcmd{print}
 
 \begin{verbatim}
-print <expression> {, <expression>}
+print { <expression> }
 \end{verbatim}
 
 The \indcmdt{print} displays a string or the value of a mathematical expression to the
@@ -1373,11 +1496,12 @@ details.
 \section{rectangle}\indcmd{rectangle}
 
 \begin{verbatim}
-rectangle [ item <id> ] at <x>, <y> width <w> height <h>
-               [ rotate <r> ] [ with {<option>} ]
+rectangle [ item <id> ] at <vector>
+         width <length> height <length>
+         [ rotate <angle> ] [ with { <option> } ]
 
-rectangle [ item <id> ] from <x1>, <y1> to <x2>, <y2>
-               [ rotate <r> ] [ with {<option>} ]
+rectangle [ item <id> ] from <vector> to <vector>
+         [ rotate <angle> ] [ with { <option> } ]
 \end{verbatim}
 
 See {\tt box}.
@@ -1394,27 +1518,6 @@ useful, for example, after changing the terminal type, to produce a second copy
 of a plot in a different graphic format. It differs from the {\tt replot}
 command in that it doesn't replot anything; use of the {\tt set} command since
 the previous {\tt plot} command has no effect on the output.
-
-
-\section{point}\indcmd{point}
-
-\begin{verbatim}
-point [ item <id> ] [at] <x>, <y> [ label <string> ]
-                    [ with {<option>} ]
-\end{verbatim}
-
-The \indcmdt{point} allows a single point to be plotted on the current
-multiplot canvas independently of any graph.  It is equivalent to plotting a
-\datafile\ containing a single datum and with invisible axes.  If an optional
-{\tt label} is specified then the text string provided is rendered next to the
-point.  The {\tt with} modifier allows the style of the point to be specified
-using similar options to those accepted by the {\tt plot} command.
-
-All vector graphics objects placed on multiplot canvases receive unique
-identification numbers which count sequentially from one, and which may be
-listed using the {\tt list} command.  By reference to these numbers, they can
-be deleted and subsequently restored with the {\tt delete} and {\tt undelete}
-commands respectively.
 
 
 \section{replot}\indcmd{replot}
@@ -1486,7 +1589,7 @@ current multiplot canvas.
 \section{save}\indcmd{save}
 
 \begin{verbatim}
-save '<filename>'
+save <filename>
 \end{verbatim}
 
 The \indcmdt{save} saves a list of all of the commands which have been executed
@@ -1574,7 +1677,7 @@ set arrow 1 from first 0, second 0 to axis3 1, axis4 1
 \noindent The name of the coordinate system to be used precedes the position
 value in that system. The coordinate system {\tt first}, the default, measures
 the graph using the {\tt x}- and {\tt y}-axes. {\tt second} uses the {\tt x2}-
-and {\tt y2}-axes.  {\tt screen} and {\tt graph} both measure in centimetres
+and {\tt y2}-axes.  {\tt screen} and {\tt graph} both measure in centimeters
 from the origin of the graph.  The syntax {\tt axis<n>} may also be used, to
 use the $n$th horizontal or vertical axis; for example, {\tt axis3} above.
 
@@ -1923,37 +2026,33 @@ and {\tt outside} is an alias for {\tt right}.
 \subsection{colormap}\indcmd{set colormap}
 
 \begin{verbatim}
-set colormap ( rgb<r>:<g>:<b> |
-                hsb<h>:<s>:<b> |
-                cmyk<c>:<m>:<y>:<k> )
-              [ mask <expr> ]
+set colormap <color expression> [ mask <expr> ]
 \end{verbatim}
 
 The setting {\tt colormap} is used to specify the mapping between ordinate
-values and colors used by the \indpst{colormap} plot style. As elsewhere in
-PyXPlot, the color components should be numerical expressions which evaluate
-to a value in the range zero to one. Within these expressions, the variables
-{\tt c1}, {\tt c2}, {\tt c3} and {\tt c4} refer quantities calculated from the
-third through sixth columns of data supplied to the \indpst{colormap} plot
-style in a way determined by the {\tt c<n>range} setting.  Thus, the following
-color mapping, which is the default, produces a greyscale color mapping of
-the third column of data supplied to the \indpst{colormap} plot style; further
-columns of data, if supplied, are not used:
+values and colors used by the \indpst{colormap} plot style.  Within the color
+expression, the variables {\tt c1}, {\tt c2}, {\tt c3} and {\tt c4} refer
+quantities calculated from the third through sixth columns of data supplied to
+the \indpst{colormap} plot style in a way determined by the {\tt c<n>range}
+setting.  Thus, the following color mapping, which is the default, produces a
+greyscale color mapping of the third column of data supplied to the
+\indpst{colormap} plot style; further columns of data, if supplied, are not
+used:
 
 \begin{verbatim}
 set c1range [*:*] renormalise
-set colormap rgb(c1):(c1):(c1)
+set colormap rgb(c1,c1,c1)
 \end{verbatim}
 
 If a mask expression is supplied, then any areas in a color map where this
-expression evaluates to zero (i.e.\ false) are made transparent.
+expression evaluates to false (or zero) are made transparent.
 
 
 \subsection{contours}\indcmd{set contours}
 
 \begin{verbatim}
 set contours [ ( <number> |
-               \( <value> {, <value>} \) ) ]
+               "(" { <value> } ")" ) ]
              [ (label | nolabel) ]
 \end{verbatim}
 
@@ -2000,15 +2099,15 @@ scaled to fit the range of the data supplied.
 \subsubsection{Colour Maps}
 
 The color of each pixel in a color map is determined by the {\tt colormap}
-setting, which should contain an expression of the form {\tt
-rgb(c1):(c2):(c3)}, specifying the components of a color in either RGB, HSB or
-CMYK space, as a function of the variables {\tt c1}, {\tt c2}, {\tt c3} and
-{\tt c4}. The {\tt colormap} plot style should be supplied with between three
-and six columns of data, the first two of which contain the $x$- and
-$y$-positions of points, and the remainder of which are used to set the values
-of the variables {\tt c1}, {\tt c2}, {\tt c3} and {\tt c4} when calculating the
-color with which that point should be represented. If fewer than six columns
-of data are supplied, then not all of these variables will be set.
+setting. This should contain an expression that evaluates to a color object,
+e.g.\ {\tt rgb(c1,c2,c3)}, and which may take the variables {\tt c1}, {\tt c2},
+{\tt c3} and {\tt c4} as parameters. The {\tt colormap} plot style should be
+supplied with between three and six columns of data, the first two of which
+contain the $x$- and $y$-positions of points, and the remainder of which are
+used to set the values of the variables {\tt c1}, {\tt c2}, {\tt c3} and {\tt
+c4} when calculating the color with which that point should be represented. If
+fewer than six columns of data are supplied, then not all of these variables
+will be set.
 
 The {\tt set c<n>range} command is used to determine how the raw data values
 are mapped to the values of the variables {\tt c1}--{\tt c4}. If the {\tt
@@ -2222,7 +2321,7 @@ addition, if none of these options quite achieve the desired position, a
 horizontal and vertical offset may be specified as a comma-separated pair after
 any of the positional keywords above.  The first value is assumed to be the
 horizontal offset, and the second the vertical offset, both measured in
-centimetres.  The example
+centimeters.  The example
 
 \begin{verbatim}
 set key bottom left 0.0, -0.5
@@ -2286,7 +2385,7 @@ set label 1 'Hello' first 0, second 0
 \noindent The name of the coordinate system to be used precedes the position
 value in that system. The coordinate system {\tt first}, the default, measures
 the graph using the {\tt x}- and {\tt y}-axes. {\tt second} uses the {\tt x2}-
-and {\tt y2}-axes.  {\tt screen} and {\tt graph} both measure in centimetres
+and {\tt y2}-axes.  {\tt screen} and {\tt graph} both measure in centimeters
 from the origin of the graph.  The syntax {\tt axis<n>} may also be used, to
 use the $n\,$th horizontal or vertical axis; for example, {\tt axis3}:
 
@@ -2691,7 +2790,7 @@ set origin 3,5
 \end{verbatim}
 
 \noindent would cause the next graph to be plotted with its bottom-left corner
-at position $(3,5)$ centimetres on the multiplot canvas. Alternatively, either
+at position $(3,5)$ centimeters on the multiplot canvas. Alternatively, either
 of the coordinates may be specified as quantities with physical units of
 length, such as {\tt unit(35*mm)}.  The {\tt set origin} command is of little
 use outside of multiplot mode.
@@ -2763,7 +2862,7 @@ postscript} terminal, and whenever the {\tt enlarge} terminal option is set
 (see the {\tt set terminal} command). This can take the form of either a
 recognised paper size name -- a list of these is given in
 Appendix~\ref{ch:paper_sizes} -- or as a (height, width) pair of values, both
-measured in millimetres. The following examples demonstrate these
+measured in millimeters. The following examples demonstrate these
 possibilities:
 
 \begin{verbatim}
@@ -2895,7 +2994,7 @@ set size [<width>]
 
 The setting {\tt size} is used to set the width or aspect ratio of the next
 graph to be generated. If a width is specified, then it may either take the
-form of a dimensionless number implicitly measured in centimetres, or a
+form of a dimensionless number implicitly measured in centimeters, or a
 quantity with physical dimensions of length such as {\tt unit(50*mm)}.
 
 When the keyword {\tt ratio} is specified, it should be followed by the ratio
@@ -3331,7 +3430,7 @@ configuration option, allowing one of several {\it units
 schemes}\index{units!unit schemes} to be selected, each of which comprises a
 list of units which are deemed to be members of that particular scheme. For
 example, in the CGS unit scheme\index{CGS units}\index{units!CGS}, all lengths
-are displayed in centimetres, all masses are displayed in grammes, all energies
+are displayed in centimeters, all masses are displayed in grammes, all energies
 are displayed in ergs, and so forth.  In the imperial unit
 scheme\index{imperial units}\index{units!imperial}, quantities are displayed in
 British imperial units -- inches, pounds, pints, and so forth -- and in the US
@@ -3470,7 +3569,7 @@ set width <value>
 
 The setting {\tt width} is used to set the width of the next graph to be
 generated. The width is specified either as a dimensionless number
-implicitly measured in centimetres, or as a quantity with physical dimensions
+implicitly measured in centimeters, or as a quantity with physical dimensions
 of length such as {\tt unit(50*mm)}.
 
 
@@ -3725,8 +3824,7 @@ finally, {\tt show functions} lists all of the current user-defined functions.
 \section{solve}\indcmd{solve}
 
 \begin{verbatim}
-solve <equation> {, <equation>}
-    via <variable> {, <variable>}
+solve { <equation> } via { <variable> }
 \end{verbatim}
 
 The \indcmdt{solve} can be used to solve simple systems of one or more
@@ -3790,11 +3888,12 @@ the following example:
 \section{spline}\indcmd{spline}
 
 \begin{verbatim}
-spline [ <range> ] <function name>"()" '<filename>'
-       [ every <expression> {:<expression>} ]
+spline [ <range> ] <function name>()
+       ( <filename> | { <expression> } | { <vector obj> } )
+       [ every { <expression> } ]
        [ index <value> ]
        [ select <expression> ]
-       [ using <expression>  {:<expression>} ]
+       [ using { <expression> } ]
 \end{verbatim}
 
 The \indcmdt{spline} is an alias for the {\tt interpolate spline} command.
@@ -3828,12 +3927,13 @@ swap 3 5
 \section{tabulate}\indcmd{tabulate}
 
 \begin{verbatim}
-tabulate [ <range> ] ( <expression> | <filename> )
-       [ every <expression> {:<expression>} ]
+tabulate [ <range> ]
+       ( <filename> | { <expression> } | { <vector obj> } )
+       [ every { <expression> } ]
        [ index <value> ]
        [ select <expression> ]
        [ sortby <expression> ]
-       [ using <expression>  {:<expression>} ]
+       [ using { <expression> } ]
        [ with <output format> ]
 \end{verbatim}
 
@@ -3923,8 +4023,8 @@ smallest value of the expression to the largest.
 \section{text}\indcmd{text}
 
 \begin{verbatim}
-text [ item <id> ] '<text string>' [ at <x>, <y> ]
-     [ rotate <angle> ] [ gap <gap> ]
+text [ item <id> ] <text string> [ at <vector> ]
+     [ rotate <angle> ] [ gap <length> ]
      [ halign <alignment> ] [ valign <alignment> ]
      [ with color <color> ]
 \end{verbatim}
@@ -3937,14 +4037,14 @@ text 'Hello World!' at 0,2
 \end{verbatim}
 
 \noindent would render the text `Hello World!' at position $(0,2)$, measured in
-centimetres. The alignment of the text item with respect to this position can
+centimeters. The alignment of the text item with respect to this position can
 be set using the {\tt set texthalign} and {\tt set textvalign} commands, or
 using the {\tt halign} and {\tt valign} modifiers supplied to the {\tt text}
 command itself.
 
 A gap may be specified, which should either have dimensions of length, or be
 dimensionless, in which case it is interpreted as being measured in
-centimetres. If a gap is specified, then the text string is slightly displaced
+centimeters. If a gap is specified, then the text string is slightly displaced
 from the specified position, in the direction in which it is being aligned.
 
 A rotation angle may optionally be specified after the keyword {\tt rotate}
@@ -3980,7 +4080,7 @@ commands respectively.
 \section{undelete}\indcmd{undelete}
 
 \begin{verbatim}
-undelete <item number> { , <item number> }
+undelete { <item number> }
 \end{verbatim}
 
 The \indcmdt{undelete} allows vector graphics objects which have previously
@@ -4019,10 +4119,8 @@ be found under the {\tt set} command.
 \section{while}\indcmd{while}
 
 \begin{verbatim}
-while <condition> [loopname <loopname>]
- "{"
-    ...
- "}"
+while <condition> [ loopname <loopname> ]
+  <code>
 \end{verbatim}
 
 The \indcmdt{while} executes a block of commands repeatedly, checking the

@@ -28,7 +28,8 @@
 The following table lists all of the physical units which PyXPlot recognises by
 default. Each unit may be referred to by either a long or an abbreviated name,
 and both of these have singular and plural forms. Some units also have further
-alternative names.
+alternative names: for example, units such as the {\tt meter} which are spelt
+differently in British English may be spelt in either way.
 
 \begin{landscape}
 \begin{center}
@@ -48,6 +49,7 @@ alternative names.
 {\tt\footnotesize astronomical\_unit} & {\tt\footnotesize astronomical\_units} & {\tt\footnotesize AU} & {\tt\footnotesize AU} & length \\
 {\tt\footnotesize atmosphere} & {\tt\footnotesize atmospheres} & {\tt\footnotesize atm} & {\tt\footnotesize atms} & pressure \\
 {\tt\footnotesize bar} & {\tt\footnotesize bars} & {\tt\footnotesize bar} & {\tt\footnotesize bars} & pressure \\
+{\tt\footnotesize barleycorn} & {\tt\footnotesize barleycorns} & {\tt\footnotesize barleycorn} & {\tt\footnotesize barleycorns} & length \\
 {\tt\footnotesize barn} & {\tt\footnotesize barns} & {\tt\footnotesize barn} & {\tt\footnotesize barns} & area \\
 {\tt\footnotesize barye} & {\tt\footnotesize baryes} & {\tt\footnotesize Ba} & {\tt\footnotesize Ba} & pressure \\
 {\tt\footnotesize bath} & {\tt\footnotesize baths} & {\tt\footnotesize bath} & {\tt\footnotesize baths} & volume \\
@@ -275,13 +277,13 @@ alternative names.
 \noindent the {\tt bit}, the {\tt byte}, the {\tt gibibit}, the {\tt gibibyte}, the {\tt kibibit}, the {\tt kibibyte}, the {\tt mebibit} and the {\tt mebibyte}.\vspace{5mm}
 
 \noindent The following units of {\bf length} are recognised:\newline
-\noindent the {\tt angstrom}, the {\tt astronomical\_\-unit}, the {\tt cable}, the {\tt centimetre}, the {\tt chain}, the {\tt cubit}, the {\tt decimetre}, the {\tt earth\_\-radius}, the {\tt fathom}, the {\tt foot}, the {\tt furlong}, the {\tt inch}, the {\tt jupiter\_\-radius}, the {\tt light\_\-year}, the {\tt link}, the {\tt lunar\_\-distance}, the {\tt metre}, the {\tt mile}, the {\tt nautical\_\-mile}, the {\tt parsec}, the {\tt perch}, the {\tt pica}, the {\tt planck\_\-length}, the {\tt point}, the {\tt pole}, the {\tt rod}, the {\tt roman\_\-league}, the {\tt roman\_\-mile}, the {\tt solar\_\-radius} and the {\tt yard}.\vspace{5mm}
+\noindent the {\tt angstrom}, the {\tt astronomical\_\-unit}, the {\tt barleycorn}, the {\tt cable}, the {\tt centimetre}, the {\tt chain}, the {\tt cubit}, the {\tt decimetre}, the {\tt earth\_\-radius}, the {\tt fathom}, the {\tt foot}, the {\tt furlong}, the {\tt inch}, the {\tt jupiter\_\-radius}, the {\tt light\_\-year}, the {\tt link}, the {\tt lunar\_\-distance}, the {\tt metre}, the {\tt mile}, the {\tt nautical\_\-mile}, the {\tt parsec}, the {\tt perch}, the {\tt pica}, the {\tt planck\_\-length}, the {\tt point}, the {\tt pole}, the {\tt rod}, the {\tt roman\_\-league}, the {\tt roman\_\-mile}, the {\tt solar\_\-radius} and the {\tt yard}.\vspace{5mm}
 
 \noindent The following units of {\bf lens power} are recognised:\newline
 \noindent the {\tt dioptre}.\vspace{5mm}
 
 \noindent The following units of {\bf light intensity} are recognised:\newline
-\noindent the {\tt candela} and the {\tt candlepower}.\vspace{5mm}
+\noindent the {\tt candela\footnote{In the SI system, the candela is a base unit. However, its definition is 1/683\,W/sterad, and since PyXPlot recognises the radian as a base unit, the candela is implemented as a derived unit.} and the {\tt candlepower}.\vspace{5mm}
 
 \noindent The following units of {\bf magnetic field} are recognised:\newline
 \noindent the {\tt gauss} and the {\tt tesla}.\vspace{5mm}

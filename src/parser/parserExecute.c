@@ -236,6 +236,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, char *dirName, int intera
               passed=(p>0);
               break;
             case 'E':
+            case 'F':
               passed=0;
               break;
             case 'f':

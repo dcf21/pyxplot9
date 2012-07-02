@@ -478,8 +478,9 @@ finished_looking_for_tabcomp:
        {
         pplExpr *expr;
         int      explen=0, errPos=-1, errType;
-        int      dollarAllowed = ((node->matchString[1]=='E') || (node->matchString[2]=='E'));
+        int      dollarAllowed = ((node->matchString[1]=='E') || (node->matchString[2]=='E') || (node->matchString[1]=='F'));
         int      equalsAllowed = (node->matchString[1]!='g');
+        int      commaAllowed  = (node->matchString[1]=='F');
         int      vectorAllowed = (node->matchString[1]=='P')||(node->matchString[1]=='p');
         int      vectorLength  = (node->matchString[1]=='P')?3:2;
         int      vectorCount   = 0;
@@ -574,7 +575,7 @@ finished_looking_for_tabcomp:
              }
             default:
              {
-              ppl_expCompile(c,srcLineN,srcId,srcFname,line+*linepos,&explen,dollarAllowed,equalsAllowed,0,&expr,&errPos,&errType,c->errStat.errBuff);
+              ppl_expCompile(c,srcLineN,srcId,srcFname,line+*linepos,&explen,dollarAllowed,equalsAllowed,commaAllowed,&expr,&errPos,&errType,c->errStat.errBuff);
               if (errPos>=0)
                {
                 pplExpr_free(expr);
@@ -588,7 +589,7 @@ finished_looking_for_tabcomp:
                 if (line[*linepos+explen]==',') { explen++; gotComma=1; } // vector with another comma-separated component
                }
               if ((s==NULL)||(!writeOut)) pplExpr_free(expr);
-              else if ((node->matchString[1]!='e') && (node->matchString[1]!='E') && (node->matchString[1]!='g'))
+              else if ((node->matchString[1]!='e') && (node->matchString[1]!='E') && (node->matchString[1]!='F') && (node->matchString[1]!='g'))
                {
                 char *t = node->matchString+1;
                 if (gotComma || (vectorCount>0)) t="D"; // not a vector, rather comma separated distances
@@ -642,6 +643,7 @@ item_cleanup:
               case 'D': sprintf(s->expectingList+s->eLPos, "a distance%s", varname); break;
               case 'e': sprintf(s->expectingList+s->eLPos, "an algebraic expression%s", varname); break;
               case 'E': sprintf(s->expectingList+s->eLPos, "an algebraic expression%s", varname); break;
+              case 'F': sprintf(s->expectingList+s->eLPos, "an algebraic expression%s", varname); break;
               case 'g': sprintf(s->expectingList+s->eLPos, "an algebraic expression%s", varname); break;
               case 'f': sprintf(s->expectingList+s->eLPos, "a real, dimensionless number%s", varname); break;
               case 'o': sprintf(s->expectingList+s->eLPos, "an expression%s", varname); break;
