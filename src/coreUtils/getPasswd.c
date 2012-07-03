@@ -46,8 +46,18 @@ struct passwd *UnixGetPwEntry(pplerr_context *context)
 char *ppl_unixGetHomeDir(pplerr_context *context)
  {
   struct passwd *ptr;
+  static char   *failover=NULL;
   ptr = UnixGetPwEntry(context);
-  if (ptr==NULL) ppl_fatal(context,__FILE__,__LINE__,"Could not find user's entry in /etc/passwd file.");
+  if (ptr==NULL)
+   {
+    if (failover != NULL) return failover;
+    failover = malloc(FNAME_LENGTH);
+    if (failover==NULL) ppl_fatal(context,__FILE__,__LINE__,"Could not find user's entry in output of getpwent()");
+    sprintf(failover,"/home/%s", getlogin());
+    sprintf(context->tempErrStr, "Could not find user's entry in output of getpwent(). Guessing that home directory is <%s>.", failover);
+    ppl_warning(context, ERR_GENERIC, NULL);
+    return failover;
+   }
   return ptr->pw_dir;
  }
 
@@ -67,7 +77,7 @@ char *ppl_unixGetIRLName(pplerr_context *context)
   struct passwd *ptr;
   int i;
   ptr = UnixGetPwEntry(context);
-  if (ptr==NULL) ppl_fatal(context,__FILE__,__LINE__,"Could not find user's entry in /etc/passwd file.");
+  if (ptr==NULL) return getlogin(); // In case of failure, return user's login.
   strcpy(context->tempErrStr, ptr->pw_gecos);
   for (i=0; context->tempErrStr[i]!='\0'; i++) if (context->tempErrStr[i]==',') context->tempErrStr[i]='\0'; // Remove commas from in-real-life name
   return context->tempErrStr;
