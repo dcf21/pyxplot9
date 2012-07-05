@@ -95,26 +95,31 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
      }
     case PPLOBJ_DICT:
      {
+      const int     expand = (modIterDepth<8);
       int           i=0, first=1, prevMod=0;
       dictIterator *iter = ppl_dictIterateInit((dict *)o->auxil);
       char         *key;
       pplObj       *item;
-      out[i++]='{';
-      while ((item = (pplObj *)ppl_dictIterate(&iter, &key))!=NULL)
+      if (!expand) strcpy(out+i,"{ ... }");
+      else
        {
-        if ((item->objType==PPLOBJ_GLOB) || (item->objType==PPLOBJ_ZOM)) continue; // Hide globals and zombies
-        if (!first) { out[i++]=','; if (prevMod) { out[i++]='\n'; } out[i++]=' '; }
-        ppl_strEscapify(key, out+i);
-        i+=strlen(out+i);
-        sprintf(out+i,":");
-        i+=strlen(out+i);
-        pplObjPrint(c, item, NULL, out+i, outlen-i, 1, modIterDepth+1);
-        i+=strlen(out+i);
-        if (i>outlen-100) { strncpy(out+i,", ...",outlen-i); i+=strlen(out+i); break; }
-        first=0;
-        prevMod = item->objType == PPLOBJ_MOD;
+        out[i++]='{';
+        while ((item = (pplObj *)ppl_dictIterate(&iter, &key))!=NULL)
+         {
+          if ((item->objType==PPLOBJ_GLOB) || (item->objType==PPLOBJ_ZOM)) continue; // Hide globals and zombies
+          if (!first) { out[i++]=','; if (prevMod) { out[i++]='\n'; } out[i++]=' '; }
+          ppl_strEscapify(key, out+i);
+          i+=strlen(out+i);
+          sprintf(out+i,":");
+          i+=strlen(out+i);
+          pplObjPrint(c, item, NULL, out+i, outlen-i, 1, modIterDepth+1);
+          i+=strlen(out+i);
+          if (i>outlen-400) { strncpy(out+i,", ...",outlen-i); i+=strlen(out+i); break; }
+          first=0;
+          prevMod = item->objType == PPLOBJ_MOD;
+         }
+        strncpy(out+i,"}",outlen-i);
        }
-      strncpy(out+i,"}",outlen-i);
       break;
      }
     case PPLOBJ_USER:
@@ -144,7 +149,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
           pplObjPrint(c, item, key, out+i, outlen-i, 1, modIterDepth+1);
           i+=strlen(out+i);
           out[i++]='\n';
-          if (i>outlen-100) { strncpy(out+i,"  ...\n",outlen-i); i+=strlen(out+i); break; }
+          if (i>outlen-400) { strncpy(out+i,"  ...\n",outlen-i); i+=strlen(out+i); break; }
          }
         if (i<outlen) out[i++]=' ';
         for (k=0; ((k<modIterDepth)&&(i<outlen-2)); k++) { out[i++]=' '; out[i++]=' '; }
@@ -154,20 +159,25 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
      }
     case PPLOBJ_LIST:
      {
+      const int     expand = (modIterDepth<8);
       int           i=0, first=1, prevMod=0;
       listIterator *iter = ppl_listIterateInit((list *)o->auxil);
       pplObj       *item;
-      out[i++]='[';
-      while ((item = (pplObj *)ppl_listIterate(&iter))!=NULL)
+      if (!expand) strcpy(out+i,"[ ... ]");
+      else
        {
-        if (!first) { out[i++]=','; if (prevMod) { out[i++]='\n'; } out[i++]=' '; }
-        pplObjPrint(c, item, NULL, out+i, outlen-i, 1, 0);
-        i+=strlen(out+i);
-        if (i>outlen-100) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
-        first=0;
-        prevMod = item->objType == PPLOBJ_MOD;
+        out[i++]='[';
+        while ((item = (pplObj *)ppl_listIterate(&iter))!=NULL)
+         {
+          if (!first) { out[i++]=','; if (prevMod) { out[i++]='\n'; } out[i++]=' '; }
+          pplObjPrint(c, item, NULL, out+i, outlen-i, 1, modIterDepth+1);
+          i+=strlen(out+i);
+          if (i>outlen-400) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
+          first=0;
+          prevMod = item->objType == PPLOBJ_MOD;
+         }
+        strcpy(out+i,"]");
        }
-      strcpy(out+i,"]");
       break;
      }
     case PPLOBJ_VEC:
@@ -186,7 +196,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
         if (j>0) { out[i++]=','; out[i++]=' '; }
         strcpy(out+i,ppl_numericDisplay(gsl_vector_get(v,j)*real, c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L)));
         i+=strlen(out+i);
-        if (i>outlen-100) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
+        if (i>outlen-400) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
        }
       strcpy(out+i,")");
       i+=strlen(out+i);
@@ -215,10 +225,10 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
             if (k>0) { out[i++]=','; out[i++]=' '; }
             strcpy(out+i,ppl_numericDisplay(gsl_matrix_get(m,j,k)*real, c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L)));
             i+=strlen(out+i);
-            if (i>outlen-100) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
+            if (i>outlen-400) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
            }
           strcpy(out+i,"]"); i+=strlen(out+i);
-          if (i>outlen-100) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
+          if (i>outlen-400) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
          }
         strcpy(out+i,")");
         i+=strlen(out+i);
@@ -235,12 +245,12 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
             if (k>0) { out[i++]=','; out[i++]=' '; }
             strcpy(out+i,ppl_numericDisplay(gsl_matrix_get(m,j,k)*real, c->numdispBuff[0], NSigFigs, (typeable==SW_DISPLAY_L)));
             i+=strlen(out+i);
-            if (i>outlen-100) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
+            if (i>outlen-400) { strcpy(out+i,", ..."); i+=strlen(out+i); break; }
            }
           if ((j!=unitLine)||(o->dimensionless)) strcpy (out+i,")\n");
           else                                   sprintf(out+i,") %s\n",unit);
           i+=strlen(out+i);
-          if (i>outlen-100) { strcpy(out+i,"...\n"); i+=strlen(out+i); break; }
+          if (i>outlen-400) { strcpy(out+i,"...\n"); i+=strlen(out+i); break; }
          }
        }
       break;
