@@ -315,23 +315,32 @@ else           { ; print "x is negative" ; }
 \end{verbatim}
 
 \section{For loops}
+\indcmd{for}
 
-For loops may be used to execute a series of commands multiple times. PyXPlot's
-\indcmdt{for} has the syntax:
+For loops may be used to execute a series of commands multiple times. PyXPlot
+allows {\tt for} loops to follow either the syntax of the BASIC programming
+language, or the C syntax:
 
 \begin{verbatim}
-for <variable> = <start> to <end> {step <step>} {loopname <name>}
- {
-  ....
- }
+for <variable> = <start> to <end> [step <step>]
+                          [loopname <loopname>]
+  <code>
+
+for (<initialise>; <criterion>; <step>)
+  <code>
 \end{verbatim}
 
-\noindent The first time that the script block is executed, the variable named
-at the start of the {\tt for} statement has the value given for {\tt start}.
-Upon each iteration of the loop, this is incremented by amount {\tt step}. The
-loop finishes when the value exceeds {\tt end}. If {\tt step} is negative, then
-{\tt end} is required to be less than or equal to {\tt start}. A step size of
-zero is considered to be an error.  The iterator variable can have any physical
+\noindent Here, {\tt <code>} may be substituted by any block on PyXPlot command
+enclosed in braces \{\}. The closing brace must be on a new line after the last
+command of the block.
+
+The first form is similar to how the \indcmdt{for} works in BASIC.  The first
+time that the script block is executed, the variable named at the start of the
+{\tt for} statement has the value given for {\tt start}.  Upon each iteration
+of the loop, this is incremented by amount {\tt step}. The loop finishes when
+the value exceeds {\tt end}. If {\tt step} is negative, then {\tt end} is
+required to be less than or equal to {\tt start}. A step size of zero is
+considered to be an error.  The iterator variable can have any physical
 dimensions, so long as {\tt start}, {\tt end} and {\tt step} all have the same
 dimensions, but the iterator variable must always be a real number. If no step
 size is given then a step size of unity is assumed.  As an example, the
@@ -344,8 +353,26 @@ for x = 0 to 10 step 2
  }
 \end{verbatim}
 
-\noindent The same rules concerning the placement of brace characters apply to
-the \indcmdt{for} as to the {\tt if} command.
+In the C form of the \indcmdt{for}, three expressions are provided, separated
+by semicolons. These are evaluated (a) when the loop initialises, (b) as a
+boolean test of whether the loop should continue iterating, and (c) on each
+loop to increment/decrement variables as required. For example:
+
+\begin{verbatim}
+for (i=1,j=1; i<=256; i*=2,j++) { print "%3d %3d"%(j,i); }
+\end{verbatim}
+
+The syntax
+
+\begin{verbatim}
+for (a; b; c) { ... ; }
+\end{verbatim}
+
+is equivalent to
+
+\begin{verbatim}
+a; while (b) { ... ; c ; }
+\end{verbatim}
 
 The optional {\tt loopname} which can be specified in the {\tt for} statement
 is used in conjunction with the {\tt break} and {\tt continue} statements which
@@ -356,12 +383,11 @@ will be introduced in Section~\ref{sec:breakcontinue}.
 \index{wildcards}
 
 Foreach loops may be used to run a script block once for each item in a list.
-The list may either take the form of an explicit bracketed comma-separated list
-of items, or the form of one or more filename wildcards, as in the following
-examples:
+The list may either take the form of a list object, or a filename wildcard, as
+in the following examples:
 
 \begin{verbatim}
-foreach x in (-1,pi,10)
+foreach x in [-1,pi,10]
  {
   print x
  }
@@ -386,14 +412,10 @@ typing:
 !ls *.dat
 \end{verbatim}
 
-The quotes around each supplied search string are compulsory if any of the
-characters in the search string are alphanumeric, but optional otherwise. Since
-both of the wildcard characters {\tt *} and {\tt ?} are non-alphanumeric, the
-quotes are compulsory in most useful cases.  An error is returned if there are
-no files in the present directory which match the supplied wildcard. The
-following example would produce plots of all of the \datafile s in the current
-directory with filenames {\tt foo\_*.dat} or {\tt bar\_*.dat} as {\tt eps}
-files with matching filenames:
+An error is returned if there are no files in the present directory which match
+the supplied wildcard. The following example would produce plots of all of the
+\datafile s in the current directory with filenames {\tt foo\_*.dat} or {\tt
+bar\_*.dat} as {\tt eps} files with matching filenames:
 
 \begin{verbatim}
 set terminal eps
@@ -411,26 +433,30 @@ foreach x in "foo_*.dat" "bar_*.dat"
 
 Foreach datum loops are similar to foreach loops in that they run a script
 block once for each item in a list.  In this case, however, the list in
-question is the list of \datapoint s in a file. The syntax of the
-\indcmdt{foreach datum} is similar to that of the commands met in the previous
-chapter for acting upon \datafile s: the standard modifiers {\tt every}, {\tt
-index}, {\tt select} and {\tt using} can be used to select which columns of the
-\datafile, and which subset of the datapoints, should be used:
+question is the list of \datapoint s in a \datafile, samples of a function, or
+values in a vector. The syntax of the \indcmdt{foreach datum} is similar to
+that of the commands met in the previous chapter for acting upon \datafile s:
+the standard modifiers {\tt every}, {\tt index}, {\tt select} and {\tt using}
+can be used to select which columns of the \datafile, and which subset of the
+datapoints, should be used:
 
 \begin{verbatim}
 foreach datum i,j,name in "data.dat" using 1:2:"%s"%($3)
- {
-  ...
- }
+  <code>
+
+foreach datum x,y,z in sin(x):cos(x)
+  <code>
+
+foreach datum a,b in vector_a:vector_b
+  <code>
 \end{verbatim}
 
 The \indcmdt{foreach datum} is followed by a comma-separated list of the
-variable(s) which are to be read from the \datafile\ on each iteration of the
+variable(s) which are to be read from the input data on each iteration of the
 loop. The {\tt using} modifier specifies the columns or rows of data which are
-to be used to set the values of each variable. In this example, the third
-variable, {\tt name}, is set using a quoted string, indicating that it will be
-set to equal whatever string of text is found in the third column of the
-\datafile.
+to be used to set the values of each variable. In the first example above, the
+third variable, {\tt name}, is set as a string, indicating that it will be set
+to equal whatever string of text is found in the third column of the \datafile.
 
 \example{ex:meansd}{Calculating the mean and standard deviation of data}{
 The following PyXPlot script calculates the mean and standard deviation of a

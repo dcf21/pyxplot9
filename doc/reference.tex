@@ -505,15 +505,19 @@ eps [ item <id> ] <filename> [ at <vector> ] [rotate <angle>]
 
 The \indcmdt{eps} allows Encapsulated PostScript (EPS) images to be inserted
 onto multiplot canvases.  The {\tt at} modifier can be used to specify where
-the bottom-left corner of the image should be placed; if it is not, then the
-image is placed at the origin. The {\tt rotate} modifier can be used to rotate
-the image by any angle, measured in degrees counter-clockwise.  The {\tt width}
-or {\tt height} modifiers can be used to specify the width or height with which
-the image should be rendered; both should be specified in centimeters. If
-neither is specified then the image will be rendered with the native dimensions
-specified within the PostScript.  The {\tt eps} command is often useful in
-multiplot mode, allowing PostScript images to be combined with plots, text
-labels, etc.
+the image should be placed on the vector graphics canvas; if it is not, then
+the image is placed at the origin. The settings {\tt texthalign} and {\tt
+textvalign} determined how the image is aligned relatively to this reference
+point -- for example, whether its bottom left corner or its centre is placed at
+the reference point.
+
+The {\tt rotate} modifier can be used to rotate the image by any angle,
+measured in degrees counter-clockwise.  The {\tt width} or {\tt height}
+modifiers can be used to specify the width or height with which the image
+should be rendered; both should be specified in centimeters. If neither is
+specified then the image will be rendered with the native dimensions specified
+within the PostScript.  The {\tt eps} command is often useful in multiplot
+mode, allowing PostScript images to be combined with plots, text labels, etc.
 
 The {\tt clip} modifier causes PyXPlot to clip an eps image to its stated
 bounding box. The {\tt calcbbox} modifier causes PyXPlot to ignore the bounding
@@ -952,15 +956,19 @@ image [ item <id> ] <filename> [ at <vector> ]
 The \indcmdt{image} allows graphical images to be inserted onto the current
 multiplot canvas from files on disk. Input graphical images may be in bitmap,
 gif, jpeg or png formats; the file type of each image is automatically
-detected. The {\tt at} modifier can be used to specify where the bottom-left
-corner of each image should be placed; if no position is specified then this
-corner of the image is placed at the origin. The {\tt rotate} modifier can be
-used to rotate images by any angle, measured in degrees counter-clockwise.  The
-{\tt width} or {\tt height} modifiers can be used to specify the width or
-height with which images should be rendered; both should be specified in
-centimeters. If neither is specified then images are rendered with the native
-dimensions specified within the metadata present in the image file (if any). If
-both are specified, then the aspect ratio of the image is changed.
+detected.  The {\tt at} modifier can be used to specify where the image should
+be placed on the vector graphics canvas; if it is not, then the image is placed
+at the origin. The settings {\tt texthalign} and {\tt textvalign} determined
+how the image is aligned relatively to this reference point -- for example,
+whether its bottom left corner or its centre is placed at the reference point.
+
+The {\tt rotate} modifier can be used to rotate images by any angle, measured
+in degrees counter-clockwise.  The {\tt width} or {\tt height} modifiers can be
+used to specify the width or height with which images should be rendered; both
+should be specified in centimeters. If neither is specified then images are
+rendered with the native dimensions specified within the metadata present in
+the image file (if any). If both are specified, then the aspect ratio of the
+image is changed.
 
 The keyword {\tt smooth} may optionally be supplied to cause the pixels of
 images to be interpolated\footnote{Many commonly-used PostScript display
@@ -1646,9 +1654,9 @@ commonly used settings can be saved into a configuration file.
 
 \begin{verbatim}
 set arrow <arrow number>
-      from [<system>] <x>, [<system>] <y>
-      to   [<system>] <x>, [<system>] <y>
-      [ with {<option>} ]
+  from [ <system> ] <x>, [ <system> ] <y>, [ [ <system> ] <z> ]
+  to   [ <system> ] <x>, [ <system> ] <y>, [ [ <system> ] <z> ]
+  [ with { <option> } ]
 \end{verbatim}
 
 \noindent where {\tt <system>} may take any of the values
@@ -1697,7 +1705,7 @@ set arrow 2 from first 0, second 2.5 to axis3 0,
 \subsection{autoscale}\indcmd{set autoscale}
 
 \begin{verbatim}
-set autoscale {<axis>}
+set autoscale { <axis> }
 \end{verbatim}
 
 The \indcmdt{set autoscale} causes PyXPlot to choose the scaling for an axis
@@ -1732,7 +1740,7 @@ set axescolor blue
 \end{verbatim}
 
 \noindent would specify that graph axes should be drawn in blue. Any of the
-recognised color names listed in Section~\ref{sec:color_names} can be used.
+recognised color names listed in Section~\ref{sec:color_names} can be used, or a numbered color from the present palette, or an object of type {\tt color}.
 
 
 \subsection{axis}\indcmd{set axis}
@@ -1743,7 +1751,7 @@ set axis <axis> [ ( visible | invisible ) ]
   [ ( atzero | notatzero ) ]
   [ ( automirrored | mirrored | fullmirrored ) ]
   [ ( noarrow | arrow | reversearrow | twowayarrow ) ]
-  [ linked [item <number>] <axis> [using <expression>] ]
+  [ linked [ item <number> ] <axis> [ using <expression> ] ]
 \end{verbatim}
 
 The \indcmdt{set axis} is used to add additional axes to plots and to
@@ -1928,7 +1936,7 @@ units, but must be real and finite.
 \subsection{c1format}\indcmd{set x1format}
 
 \begin{verbatim}
-set c1format ( auto | '<format>' )
+set c1format ( auto | <format> )
       ( horizontal | vertical | rotate <angle> )
 \end{verbatim}
 
@@ -1940,7 +1948,7 @@ make use of the \indpst{colormap} plot style. It has similar syntax to the
 \subsection{c1label}\indcmd{set c1label}
 
 \begin{verbatim}
-set c1label '<text>' [ rotate <angle> ]
+set c1label <text> [ rotate <angle> ]
 \end{verbatim}
 
 The setting {\tt c1label} sets the label which should be written alongside the
@@ -1982,7 +1990,7 @@ command.
 \subsection{colorkey}\indcmd{set colorkey}
 
 \begin{verbatim}
-set colorkey [<position>]
+set colorkey [ <position> ]
 \end{verbatim}
 
 The setting {\tt colorkey} determines whether color scales are drawn along
@@ -2096,7 +2104,7 @@ c1range} command.  If an asterisk ({\tt *}) is supplied in place of either the
 minimum and/or the maximum, then the range of values used is automatically
 scaled to fit the range of the data supplied.
 
-\subsubsection{Colour Maps}
+\subsubsection{Color Maps}
 
 The color of each pixel in a color map is determined by the {\tt colormap}
 setting. This should contain an expression that evaluates to a color object,
@@ -2155,7 +2163,7 @@ refresh
 \subsection{filter}\indcmd{set filter}
 
 \begin{verbatim}
-set filter '<filename wildcard>' '<filter command>'
+set filter <filename wildcard> <filter command>
 \end{verbatim}
 
 The \indcmdt{set filter} allows input filter programs to be specified to allow
@@ -2205,7 +2213,7 @@ See {\tt set style function}.
 \subsection{grid}\indcmd{set grid}
 
 \begin{verbatim}
-set [no]grid {<axis>}
+set [no]grid { <axis> }
 \end{verbatim}
 
 The setting {\tt grid} controls whether a grid is placed behind graphs or not.
@@ -2255,7 +2263,7 @@ set gridmajcolor purple
 \end{verbatim}
 
 \noindent would cause the major gridlines to be drawn in purple. Any of the
-recognised color names listed in Section~\ref{sec:color_names} can be used.
+recognised color names listed in Section~\ref{sec:color_names} can be used, or a numbered color from the present palette, or an object of type {\tt color}.
 
 See also the {\tt set gridmincolor} command.
 
@@ -2275,7 +2283,7 @@ set gridmincolor purple
 \end{verbatim}
 
 \noindent would cause the minor gridlines to be drawn in purple. Any of the
-recognised color names listed in Section~\ref{sec:color_names} can be used.
+recognised color names listed in Section~\ref{sec:color_names} can be used, or a numbered color from the present palette, or an object of type {\tt color}.
 
 See also the {\tt set gridmajcolor} command.
 
@@ -2283,7 +2291,7 @@ See also the {\tt set gridmajcolor} command.
 \subsection{key}\indcmd{set key}
 
 \begin{verbatim}
-set key <position> [<xoffset>, <yoffset>]
+set key <position> [ <vector> ]
 \end{verbatim}
 
 The setting {\tt key} determines whether legends are drawn on graphs, and if
@@ -2352,10 +2360,10 @@ set keycolumns 3
 \subsection{label}\indcmd{set label}
 
 \begin{verbatim}
-set label <label number> '<text>'
-      [<system>] <x>, [<system>] <y>
-      [ rotate <angle> ]
-      [ with color <color> ]
+set label <label number> <text>
+  [ <system> ] <x>, [ <system> ] <y>, [ [ <system> ] <z> ]
+  [ rotate <angle> ]
+  [ with { ( color <color> | fontsize <size> ) } ]
 \end{verbatim}
 
 \noindent where {\tt <system>} may take any of the values
@@ -2436,7 +2444,7 @@ line width is manually specified.
 \subsection{logscale}\indcmd{set logscale}
 
 \begin{verbatim}
-set logscale {<axis>} [<base>]
+set logscale { <axis> } [ <base> ]
 \end{verbatim}
 
 The setting {\tt logscale} causes an axis to be laid out with logarithmically,
@@ -2533,7 +2541,7 @@ See {\tt set ztics}.
 \subsection{noarrow}\indcmd{set noarrow}
 
 \begin{verbatim}
-set noarrow [<arrow number>]
+set noarrow [ { <arrow number> } ]
 \end{verbatim}
 
 Issuing the command
@@ -2556,7 +2564,7 @@ to be removed when it was initially specified with the {\tt set arrow} command.
 \subsection{noaxis}\indcmd{set noaxis}
 
 \begin{verbatim}
-set noaxis [ <axis> {, <axis> } ]
+set noaxis [ { <axis> } ]
 \end{verbatim}
 
 The {\tt set noaxis} command is used to remove axes from graphs; it achieves
@@ -2594,7 +2602,7 @@ See {\tt display}.
 \subsection{nogrid}\indcmd{set nogrid}
 
 \begin{verbatim}
-set nogrid {<axis>}
+set nogrid { <axis> }
 \end{verbatim}
 
 Issuing the command {\tt set nogrid} removes gridlines from the current plot. On
@@ -2621,7 +2629,7 @@ See the {\tt set key} command for more details.
 \subsection{nolabel}\indcmd{set nolabel}
 
 \begin{verbatim}
-set nolabel {<label number>}
+set nolabel { <label number> }
 \end{verbatim}
 
 Issuing the command
@@ -2644,7 +2652,7 @@ to be removed when it was initially set using the {\tt set label} command.
 \subsection{nologscale}\indcmd{set nologscale}
 
 \begin{verbatim}
-set nologscale {<axis>}
+set nologscale { <axis> }
 \end{verbatim}
 
 The setting {\tt nologscale} causes an axis to be laid out with linearly,
@@ -2778,7 +2786,7 @@ precision, accurate to around~16 significant figures.
 \subsection{origin}\indcmd{set origin}
 
 \begin{verbatim}
-set origin <x>, <y>
+set origin <vector>
 \end{verbatim}
 
 The \indcmdt{set origin} is used to set the location of the bottom-left corner
@@ -2799,7 +2807,7 @@ use outside of multiplot mode.
 \subsection{output}\indcmd{set output}
 
 \begin{verbatim}
-set output '<filename>'
+set output <filename>
 \end{verbatim}
 
 The setting {\tt output} controls the name of the file that is produced for
@@ -2816,7 +2824,7 @@ set output 'myplot.eps'
 \subsection{palette}\indcmd{set palette}
 
 \begin{verbatim}
-set palette <color> {, <color>}
+set palette { <color> }
 \end{verbatim}
 
 PyXPlot has a palette of colors which it assigns sequentially to datasets when
@@ -2848,7 +2856,7 @@ the third in blue. Upon reaching the fourth, the palette would cycle back to
 red.
 
 Any of the recognised color names listed in Section~\ref{sec:color_names} can
-be used.
+be used, or a numbered color from the present palette, or an object of type {\tt color}.
 
 
 \subsection{papersize}\indcmd{set papersize}
@@ -3102,7 +3110,7 @@ functions using lines with the first defined line style.
 \subsection{terminal}\indcmd{set terminal}
 
 \begin{verbatim}
-set terminal ( X11_SingleWindow | X11_MultiWindow | X11_Persist |
+set terminal ( X11_singleWindow | X11_multiWindow | X11_persist |
                bmp | eps | gif | jpeg | pdf | png | postscript |
                svg | tiff )
              ( color | color | monochrome )
@@ -3120,8 +3128,8 @@ output plots to files or display them in a window on the screen. Various
 options can also be set within many of the graphical formats which PyXPlot
 supports using this command.
 
-The following graphical formats are supported:  {\tt X11\_\-Single\-Window},
-{\tt X11\_\-Multi\-Window}, {\tt X11\_\-Persist}, {\tt bmp}, {\tt eps}, {\tt
+The following graphical formats are supported:  {\tt X11\_\-single\-Window},
+{\tt X11\_\-multi\-Window}, {\tt X11\_\-persist}, {\tt bmp}, {\tt eps}, {\tt
 gif}, {\tt jpeg}, {\tt pdf}, {\tt png}, {\tt postscript}, {\tt
 svg}\footnote{The {\tt svg} output terminal is experimental and may be
 unstable. It relies upon the use of the {\tt svg} output device in Ghostscript,
@@ -3301,7 +3309,7 @@ The {\tt transparent} terminal option causes the {\tt gif} and {\tt png}
 terminals to produce output with a transparent background.
 
 
-\subsubsection{X11\_multiwindow}\index{set terminal command!X11\_multiwindow modifier@{\tt X11\_multiwindow} modifier}
+\subsubsection{X11\_multiWindow}\index{set terminal command!X11\_multiWindow modifier@{\tt X11\_multiWindow} modifier}
 
 The {\tt X11\_multiwindow} terminal displays plots on the screen in X11
 windows. Each time a new plot is generated it appears in a new window, and the
@@ -3317,7 +3325,7 @@ Each time a new plot is generated it appears in a new window, and the old plots
 remain visible.  When PyXPlot is exited the windows remain in place until they
 are closed manually.
 
-\subsubsection{X11\_singlewindow}\index{set terminal command!X11\_singlewindow modifier@{\tt X11\_singlewindow} modifier}
+\subsubsection{X11\_singleWindow}\index{set terminal command!X11\_singleWindow modifier@{\tt X11\_singleWindow} modifier}
 
 The {\tt X11\_singlewindow} terminal displays plots on the screen in X11
 windows. Each time a new plot is generated it replaces the old one, preventing
@@ -3340,8 +3348,7 @@ set textcolor red
 
 \noindent causes all text labels, including the labels on graph axes and
 legends, etc.\ to be rendered in red. Any of the recognised color names listed
-in Section~\ref{sec:color_names} can be used; colors can also be referred to
-numerically with reference to the current palette.
+in Section~\ref{sec:color_names} can be used, or a numbered color from the present palette, or an object of type {\tt color}.
 
 
 \subsection{texthalign}\indcmd{set texthalign}
@@ -3383,7 +3390,7 @@ set textvalign top
 \subsection{title}\indcmd{set title}
 
 \begin{verbatim}
-set title '<title>'
+set title <title>
 \end{verbatim}
 
 The setting {\tt title} can be used to set a title for a plot, to be displayed
@@ -3404,7 +3411,7 @@ set notitle
 \subsection{trange}\indcmd{set trange}
 
 \begin{verbatim}
-set trange [<range>] [reverse]
+set trange [ <range> ] [reverse]
 \end{verbatim}
 
 The {\tt set trange} command changes the range of the free parameter {\tt t}
@@ -3488,7 +3495,7 @@ set unit display noprefix
 \subsection{urange}\indcmd{set urange}
 
 \begin{verbatim}
-set urange [<range>] [reverse]
+set urange [ <range> ] [reverse]
 \end{verbatim}
 
 The {\tt set urange} command changes the range of the free parameter {\tt u}
@@ -3555,7 +3562,7 @@ set viewer gv --grayscale
 \subsection{vrange}\indcmd{set vrange}
 
 \begin{verbatim}
-set vrange [<range>] [reverse]
+set vrange [ <range> ] [reverse]
 \end{verbatim}
 
 See the {\tt set urange} command.
@@ -3576,7 +3583,7 @@ of length such as {\tt unit(50*mm)}.
 \subsection{xformat}\indcmd{set xformat}
 
 \begin{verbatim}
-set <axis>format ( auto | '<format>' )
+set <axis>format ( auto | <format> )
       ( horizontal | vertical | rotate <angle> )
 \end{verbatim}
 
@@ -3630,7 +3637,7 @@ strings.
 \subsection{xlabel}\indcmd{set xlabel}
 
 \begin{verbatim}
-set <axis>label '<text>' [ rotate <angle> ]
+set <axis>label <text> [ rotate <angle> ]
 \end{verbatim}
 
 The setting {\tt xlabel} sets the label which should be written along the {\tt
@@ -3704,7 +3711,7 @@ set [m]<axis>tics
     [ ( axis | border | inward | outward | both ) ]
     [ ( autofreq
           | [<minimum>,] <increment> [, <maximum>]
-          | \( { '<label>' <position> } \)
+          | "(" { [ <label> ] <position> } ")"
          ] )
 \end{verbatim}
 
