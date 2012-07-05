@@ -54,7 +54,7 @@
 
 #define GAMMA_FUDGE 0.45
 
-struct colourSystem
+struct colorSystem
  {
   char *name;             // Colour system name
   double xRed, yRed,      // Red x, y
@@ -71,7 +71,7 @@ struct colourSystem
 
 #define GAMMA_REC709 0  // Rec. 709
 
-static struct colourSystem
+static struct colorSystem
                   // Name                  xRed    yRed    xGreen  yGreen  xBlue  yBlue    White point        Gamma
 //  NTSCsystem  =  { "NTSC",               0.67,   0.33,   0.21,   0.71,   0.14,   0.08,   IlluminantC,    GAMMA_REC709 },
 //  EBUsystem   =  { "EBU (PAL/SECAM)",    0.64,   0.33,   0.29,   0.60,   0.15,   0.06,   IlluminantD65,  GAMMA_REC709 },
@@ -84,7 +84,7 @@ static struct colourSystem
 #define CIE_WLEN_STEPSIZE   5
 #define N_CIE_STEPS        81
 
-static double cie_colour_match[N_CIE_STEPS][3] =
+static double cie_color_match[N_CIE_STEPS][3] =
  {
     {0.0014,0.0000,0.0065}, {0.0022,0.0001,0.0105}, {0.0042,0.0001,0.0201},
     {0.0076,0.0002,0.0362}, {0.0143,0.0004,0.0679}, {0.0232,0.0006,0.1102},
@@ -116,7 +116,7 @@ static double cie_colour_match[N_CIE_STEPS][3] =
  };
 
 
-static void xyz_to_rgb(struct colourSystem *cs, double xc, double yc, double zc, double *r, double *g, double *b)
+static void xyz_to_rgb(struct colorSystem *cs, double xc, double yc, double zc, double *r, double *g, double *b)
  {
   double xr, yr, zr, xg, yg, zg, xb, yb, zb;
   double xw, yw, zw;
@@ -197,9 +197,9 @@ void pplfunc_colWavelen (ppl_context *c, pplObj *in, int nArgs, int *status, int
   wi   = (j-p0); if (wi<0) wi=0; if (wi>1) wi=1;
   wj   = 1-wi;
 
-  x    = cie_colour_match[i][0]*wi + cie_colour_match[j][0]*wj;
-  y    = cie_colour_match[i][1]*wi + cie_colour_match[j][1]*wj;
-  z    = cie_colour_match[i][2]*wi + cie_colour_match[j][2]*wj;
+  x    = cie_color_match[i][0]*wi + cie_color_match[j][0]*wj;
+  y    = cie_color_match[i][1]*wi + cie_color_match[j][1]*wj;
+  z    = cie_color_match[i][2]*wi + cie_color_match[j][2]*wj;
 
   // Fudge to brightness of spectrum
   {
@@ -238,7 +238,6 @@ void pplfunc_colSpectrum(ppl_context *c, pplObj *in, int nArgs, int *status, int
   if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s function requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
   fi = (pplFunc *)in[0].auxil;
   if ((fi==NULL)||(fi->functionType==PPL_FUNC_MAGIC)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s function requires a function object as its first argument. Integration and differentiation operators are not suitable functions.", FunctionDescription); return; }
-  CHECK_DIMLESS_OR_HAS_UNIT(in[0], "first", "a wavelength", UNIT_LENGTH, 1);
   if (!in[1].dimensionless) { *status=1; *errType=ERR_UNIT; sprintf(errText, "The %s function requires a dimensionless renormalisation constant as its second argument. Supplied value has dimensions of <%s>.", FunctionDescription, ppl_printUnit(c, &in[1], NULL, NULL, 0, 1, 0)); return; }
   pplObjColor(&OUTPUT,0,SW_COLSPACE_RGB,0,0,0,0);
 
@@ -257,7 +256,7 @@ void pplfunc_colSpectrum(ppl_context *c, pplObj *in, int nArgs, int *status, int
     dummy.srcLineN = 0;
     dummy.srcId    = 0;
     dummy.srcFname = "<dummy>";
-    dummy.ascii    = NULL;
+    dummy.ascii    = "<colors.spectrum() function call>";
 
     // Push function object
     pplObjCpy(&c->stack[c->stackPtr], &in[0], 1, 0, 1);
@@ -293,9 +292,9 @@ void pplfunc_colSpectrum(ppl_context *c, pplObj *in, int nArgs, int *status, int
     while (c->stackPtr>stkLevelOld) { STACK_POP; }
 
     // Add color to accumulators
-    x += cie_colour_match[i][0]*w;
-    y += cie_colour_match[i][1]*w;
-    z += cie_colour_match[i][2]*w;
+    x += cie_color_match[i][0]*w;
+    y += cie_color_match[i][1]*w;
+    z += cie_color_match[i][2]*w;
    }
 
   // Fudge to brightness of spectrum

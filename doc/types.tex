@@ -164,6 +164,8 @@ Objects of type \texttt{function} have no methods other than those common to all
 \methdef{pop()}{returns the last item in a list, and removes it from the list.}
 \methdef{reverse()}{reverses the order of the members of a list, and returns the new list.}
 \methdef{sort()}{sorts the members of a list into ascending order, and returns the new list.}
+\methdef{sortOn($f$)}{sorts the members of a list using the user-supplied function $f(a,b)$ to determine the sort order. $f$ should return $1$, $0$ or $-1$ depending whether $a>b$, $a=b$ or $a<b$.}
+\methdef{sortOnElement($n$)}{sorts a list of lists on the $n$th element of each sublist.}
 \methdef{vector()}{returns the elements in a list as a vector.}
 
 \section{The \texttt{matrix} type}

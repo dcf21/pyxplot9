@@ -208,7 +208,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
             gsl_vector *v;
             long i,len;
             if (!args[0].dimensionless) { sprintf(context->errStat.errBuff,"Specified length of vector should be dimensionless; supplied length has units of <%s>.", ppl_printUnit(context, &args[0], NULL, NULL, 0, 1, 0)); TBADD(ERR_TYPE); goto cleanup; }
-            if (args[0].flagComplex) { sprintf(context->errStat.errBuff,"Specified length of vector should be real; supplied length is complex number."); TBADD(ERR_TYPE); goto cleanup; }
+            if (args[0].flagComplex) { sprintf(context->errStat.errBuff,"Specified length of vector should be real; supplied length is complex number."); TBADD(ERR_NUMERICAL); goto cleanup; }
             if ((args[0].real<1)||(args[0].real>INT_MAX)) { sprintf(context->errStat.errBuff,"Specified length of vector should be in the range 1<len<%d.",INT_MAX); TBADD(ERR_RANGE); goto cleanup; }
             len = floor(args[0].real);
             if (pplObjVector(out,0,1,len)==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY); goto cleanup; }
@@ -223,7 +223,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
             listIterator *li = ppl_listIterateInit(listin);
             const long len = listin->length;
             gsl_vector *v;
-            if (len==0) { sprintf(context->errStat.errBuff,"Cannot create a vector of length zero."); TBADD(ERR_MEMORY); goto cleanup; }
+            if (len==0) { sprintf(context->errStat.errBuff,"Cannot create a vector of length zero."); TBADD(ERR_RANGE); goto cleanup; }
             if (pplObjVector(out,0,1,len)==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY); goto cleanup; }
             v = ((pplVector *)out->auxil)->v;
             if (len>0)

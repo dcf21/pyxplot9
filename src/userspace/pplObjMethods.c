@@ -41,6 +41,9 @@
 #include "defaultObjs/defaultFuncs.h"
 #include "defaultObjs/defaultFuncsMacros.h"
 
+#include "expressions/traceback_fns.h"
+#include "expressions/fnCall.h"
+
 #include "mathsTools/dcfmath.h"
 
 #include "userspace/calendars.h"
@@ -63,6 +66,16 @@ dict **pplObjMethods;
   if (X==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; } \
   strcpy(X, Y); \
  }
+
+#define STACK_POP_LISTMETHOD \
+   { \
+    c->stackPtr--; \
+    ppl_garbageObject(&c->stack[c->stackPtr]); \
+    if (c->stack[c->stackPtr].refCount != 0) { fprintf(stderr,"Stack forward reference detected."); } \
+   }
+
+#define TBADD_LISTMETHOD(et) ppl_tbAdd(c,dummy.srcLineN,dummy.srcId,dummy.srcFname,0,et,0,dummy.ascii,"")
+
 
 // Universal methods of all objects
 
@@ -1016,6 +1029,166 @@ static void pplmethod_listSort(ppl_context *c, pplObj *in, int nArgs, int *statu
   free(items);
  }
 
+static pplObj      *pplmethod_listSortOnCustom_fn      = NULL;
+static ppl_context *pplmethod_listSortOnCustom_context = NULL;
+static int          pplmethod_listSortOnCustom_errFlag = 0;
+
+static int pplmethod_listSortOnCustom_slave(const void *a, const void *b)
+ {
+  ppl_context *c = pplmethod_listSortOnCustom_context;
+  pplExpr      dummy;
+  int          stkLevelOld;
+  int          out = 0;
+  pplObj     **ao  = (pplObj **)a;
+  pplObj     **bo  = (pplObj **)b;
+  if (pplmethod_listSortOnCustom_errFlag) return 0;
+  if ((c==NULL)||(a==NULL)||(b==NULL)) return 0;
+  stkLevelOld = c->stackPtr;
+
+  // Dummy expression object with dummy line number information
+  dummy.srcLineN = 0;
+  dummy.srcId    = 0;
+  dummy.srcFname = "<dummy>";
+  dummy.ascii    = "<sortOn(f) method>";
+
+  // Push function object
+  pplObjCpy(&c->stack[c->stackPtr], pplmethod_listSortOnCustom_fn, 1, 0, 1);
+  c->stack[c->stackPtr].refCount=1;
+  c->stackPtr++;
+
+  // Push a
+  pplObjCpy(&c->stack[c->stackPtr], *ao, 1, 0, 1);
+  c->stack[c->stackPtr].refCount=1;
+  c->stackPtr++;
+
+  // Push b
+  pplObjCpy(&c->stack[c->stackPtr], *bo, 1, 0, 1);
+  c->stack[c->stackPtr].refCount=1;
+  c->stackPtr++;
+
+  // Call function
+  c->errStat.errMsgExpr[0]='\0';
+  ppl_fnCall(c, &dummy, 0, 2, 1, 1);
+
+  // Propagate error if function failed
+  if (c->errStat.status) { pplmethod_listSortOnCustom_errFlag=1; return 0; }
+
+  // Return error if function didn't return a number
+  if (c->stack[c->stackPtr-1].objType!=PPLOBJ_NUM) { sprintf(c->errStat.errBuff, "The sortOn(f) function requires a comparison function that returns a number. Supplied function returned an object of type <%s>.", pplObjTypeNames[c->stack[c->stackPtr-1].objType]); TBADD_LISTMETHOD(ERR_TYPE); pplmethod_listSortOnCustom_errFlag=1; return 0; }
+
+  // Get number back and clean stack
+  if      (c->stack[c->stackPtr-1].real < 0) out=-1;
+  else if (c->stack[c->stackPtr-1].real > 0) out= 1;
+  else                                       out= 0;
+  while (c->stackPtr>stkLevelOld) { STACK_POP_LISTMETHOD; }
+
+  return out;
+ }
+
+static void pplmethod_listSortOnCustom(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char    *FunctionDescription = "sortOn(f)";
+  long     i;
+  pplObj  *st = in[-1].self_this;
+  list    *l  = (list *)st->auxil;
+  long     n  = l->length;
+  pplObj **items;
+  pplFunc *fi;
+  int      fail;
+  listIterator *li = ppl_listIterateInit(l);
+
+  if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
+  fi = (pplFunc *)in[0].auxil;
+  if ((fi==NULL)||(fi->functionType==PPL_FUNC_MAGIC)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Integration and differentiation operators are not suitable functions.", FunctionDescription); return; }
+  pplObjCpy(&OUTPUT,st,0,0,1);
+  if (n<2) return;
+  items = (pplObj **)malloc(n * sizeof(pplObj *));
+  if (items==NULL) { *status=1; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); return; }
+  i=0; while (li!=NULL) { items[i++]=(pplObj*)li->data; ppl_listIterate(&li); }
+  pplmethod_listSortOnCustom_fn = &in[0]; pplmethod_listSortOnCustom_errFlag = 0; pplmethod_listSortOnCustom_context = c;
+  qsort(items, n, sizeof(pplObj*), pplmethod_listSortOnCustom_slave);
+  fail = pplmethod_listSortOnCustom_errFlag;
+  pplmethod_listSortOnCustom_fn = NULL; pplmethod_listSortOnCustom_errFlag = 0; pplmethod_listSortOnCustom_context = NULL;
+  if (fail) { *status=1; *errType=ERR_GENERIC; strcpy(errText, "Failure of user-supplied comparison function."); return; }
+  li = ppl_listIterateInit(l);
+  i=0; while (li!=NULL) { li->data=(void*)items[i++]; ppl_listIterate(&li); }
+  free(items);
+ }
+
+static void pplmethod_listSortOnElement(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  long     i;
+  pplObj  *st = in[-1].self_this;
+  list    *l  = (list *)st->auxil;
+  long     n  = l->length;
+  pplObj **items;
+  int      eNum = (int)floor(in[0].real);
+  listIterator *li = ppl_listIterateInit(l);
+  i=0; while (li!=NULL) { pplObj *o=(pplObj*)li->data; ppl_listIterate(&li); i++; if (o->objType!=PPLOBJ_LIST) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The sortOnElement() method expects to be sorting a list of lists. Element %ld of list is not a list, but has type <%s>.",i,pplObjTypeNames[o->objType]); return; } }
+  li = ppl_listIterateInit(l);
+  i=0; while (li!=NULL) { list *o=(list *)((pplObj*)li->data)->auxil; ppl_listIterate(&li); i++; if ((eNum>=o->length)||(eNum<-o->length)) { *status=1; *errType=ERR_RANGE; sprintf(errText,"The sortOnElement() method is sorting on element number %d of each sublist. However, sublist %ld only has elements 0-%d.", eNum, i, o->length-1); return; } }
+  pplObjCpy(&OUTPUT,st,0,0,1);
+  if (n<2) return;
+  items = (pplObj **)malloc(n * 2 * sizeof(pplObj *));
+  if (items==NULL) { *status=1; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); return; }
+  li = ppl_listIterateInit(l);
+  i=0;
+  while (li!=NULL)
+   {
+    pplObj *o=(pplObj*)li->data;
+    list *l=(list *)o->auxil;
+    items[i++]=ppl_listGetItem(l , (eNum>=0) ? eNum : (l->length+eNum));
+    items[i++]=(pplObj*)li->data;
+    ppl_listIterate(&li);
+   }
+  qsort(items, n, 2*sizeof(pplObj*), pplObjCmpQuiet);
+  li = ppl_listIterateInit(l);
+  i=0; while (li!=NULL) { i++; li->data=(void*)items[i++]; ppl_listIterate(&li); }
+  free(items);
+ }
+
+static void pplmethod_listVector(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  long     i       = 0;
+  pplObj  *st      = in[-1].self_this;
+  list    *listin  = (list *)st->auxil;
+  listIterator *li = ppl_listIterateInit(listin);
+  const long len   = listin->length;
+  gsl_vector *v;
+  if (len==0) { *errType = ERR_MEMORY; sprintf(errText,"Cannot create a vector of length zero."); *status=1; return; }
+  if (pplObjVector(&OUTPUT,0,1,len)==NULL) { *status=1; sprintf(errText,"Out of memory."); *errType=ERR_MEMORY; return; }
+  v = ((pplVector *)OUTPUT.auxil)->v;
+  if (len>0)
+   {
+    pplObj *item = (pplObj*)ppl_listIterate(&li);
+    if (item->objType!=PPLOBJ_NUM) { *status=1; sprintf(errText,"Vectors can only hold numeric values. Attempt to add object of type <%s> to vector.", pplObjTypeNames[item->objType]); *errType=ERR_TYPE; return; }
+    if (item->flagComplex) { *status=1; sprintf(errText,"Vectors can only hold real numeric values. Attempt to add a complex number."); *errType=ERR_TYPE; return; }
+    ppl_unitsDimCpy(&OUTPUT,item);
+    gsl_vector_set(v,i,item->real);
+   }
+  for (i=1; i<len; i++)
+   {
+    pplObj *item = (pplObj*)ppl_listIterate(&li);
+    if (item->objType!=PPLOBJ_NUM) { *status=1; sprintf(errText,"Vectors can only hold numeric values. Attempt to add object of type <%s> to vector.", pplObjTypeNames[item->objType]); *errType=ERR_TYPE; return; }
+    if (item->flagComplex) { *status=1; sprintf(errText,"Vectors can only hold real numeric values. Attempt to add a complex number."); *errType=ERR_TYPE; return; }
+    if (!ppl_unitsDimEqual(item, &OUTPUT))
+     {
+      if (OUTPUT.dimensionless)
+       { sprintf(errText, "Attempt to append a number (argument %ld) to a vector with conflicting dimensions: vector is dimensionless, but number has units of <%s>.", i+1, ppl_printUnit(c, item, NULL, NULL, 1, 1, 0) ); }
+      else if (item->dimensionless)
+       { sprintf(errText, "Attempt to append a number (argument %ld) to a vector with conflicting dimensions: vector has units of <%s>, while number is dimensionless.", i+1, ppl_printUnit(c, &OUTPUT, NULL, NULL, 0, 1, 0) ); }
+      else
+       { sprintf(errText, "Attempt to append a number (argument %ld) to a vector with conflicting dimensions: vector has units of <%s>, while number has units of <%s>.", i+1, ppl_printUnit(c, &OUTPUT, NULL, NULL, 0, 1, 0), ppl_printUnit(c, item, NULL, NULL, 1, 1, 0) ); }
+      *status  = 1;
+      *errType = ERR_UNIT;
+      return;
+     }
+    gsl_vector_set(v,i,item->real);
+   }
+  return;
+ }
+
+
 // Dictionary methods
 
 static void pplmethod_dictHasKey(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -1472,6 +1645,9 @@ void pplObjMethodsInit(ppl_context *c)
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"pop",0,1,1,1,1,1,(void *)pplmethod_listPop, "pop()", "\\mathrm{pop}@<@0@>", "pop(n) removes the nth item from a list and returns it. If n is not specified, the last list item is popped");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"reverse",0,0,1,1,1,1,(void *)pplmethod_listReverse, "reverse()", "\\mathrm{reverse}@<@>", "reverse() reverses the order of the members of a list");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"sort",0,0,1,1,1,1,(void *)pplmethod_listSort, "sort()", "\\mathrm{sort}@<@>", "sort() sorts the members of a list");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"sortOn",1,1,0,0,0,0,(void *)pplmethod_listSortOnCustom, "sortOn(f)", "\\mathrm{sortOn}@<@0@>", "sortOn(f) sorts the members of a list using the user-supplied function f(a,b) to determine the sort order. f should return 1, 0 or -1 depending whether a>b, a==b or a<b");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"sortOnElement",1,1,1,1,1,1,(void *)pplmethod_listSortOnElement, "sortOnElement(n)", "\\mathrm{sortOnElement}@<@1@>", "sortOnElement(n) sorts a list of lists on the nth element of each sublist");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"vector",0,0,1,1,1,1,(void *)pplmethod_listVector, "vector()", "\\mathrm{vector}@<@>", "vector() turns a list into a vector, providing all the list elements are numbers with the same physical dimensions");
 
   // Dictionary methods
   for (i=0 ;i<3; i++)
