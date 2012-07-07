@@ -1574,7 +1574,7 @@ void pplObjMethodsInit(ppl_context *c)
   if (pplObjMethods==NULL) ppl_fatal(&c->errcontext,__FILE__,__LINE__,"Out of memory.");
   for (i=0; i<n; i++)
    {
-    dict *d = pplObjMethods[i] = ppl_dictInit(HASHSIZE_LARGE,1);
+    dict *d = pplObjMethods[i] = ppl_dictInit(1);
     if (d==NULL) ppl_fatal(&c->errcontext,__FILE__,__LINE__,"Out of memory.");
     ppl_addSystemFunc(d,"class"   ,0,0,1,1,1,1,(void *)&pplmethod_class   , "class()", "\\mathrm{class}@<@>", "class() returns the class prototype of an object");
     ppl_addSystemFunc(d,"contents",0,0,1,1,1,1,(void *)&pplmethod_contents, "contents()", "\\mathrm{contents}@<@>", "contents() returns a list of all the methods and internal variables of an object");

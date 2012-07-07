@@ -23,12 +23,8 @@
 
 \chapter{Programming: flow control}
 
-In this chapter we describe the facilities which PyXPlot has for automating
-repetitive tasks. We begin by introducing string variables, which can be useful
-for auto-generating titles and labels for graphs which are being produced in
-batch jobs. We then discuss the loop constructs which make it possible to run
-such batch jobs, producing similar plots of many different \datafile s or
-performing calculations in an iterative fashion. Finally, we turn to PyXPlot's
+This chapter describes PyXPlot's facilities for automating
+repetitive tasks by using loops. At the end, we turn to PyXPlot's
 interaction with the shell and filing system in which it operates, introducing
 a simple framework for automatically re-executing PyXPlot scripts whenever they
 change, allowing plots to be automatically regenerated whenever the scripts
@@ -369,6 +365,7 @@ statements may be followed by the name of the loop to be broken out of,
 allowing the user to act upon loops other than the innermost one.
 
 \section{The conditional operator}
+\label{sec:conditional_operator}
 
 The conditional operator provides a compact means of inserting conditional
 expressions.  Following the syntax of C, it takes three arguments and is

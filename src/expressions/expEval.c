@@ -442,7 +442,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
        {
         int k;
         int len = *(int *)(in+j);
-        dict *d = ppl_dictInit(HASHSIZE_LARGE,1);
+        dict *d = ppl_dictInit(1);
         *lastOpAssign=0;
         if (d==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_INTERNAL); goto cleanup_on_error; }
         if (context->stackPtr<2*len) { sprintf(context->errStat.errBuff,"Attempt to make dictionary with too few items on the stack."); TBADD(ERR_INTERNAL); goto cleanup_on_error; }

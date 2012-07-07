@@ -24,8 +24,12 @@
 #ifndef _LT_DICT_H
 #define _LT_DICT_H 1
 
-#define HASHSIZE_SMALL   128
-#define HASHSIZE_LARGE 16384
+typedef struct dictHashS
+ {
+  int               hash;
+  struct dictItemS *item;
+  struct dictHashS *prev, *next;
+ } dictHash;
 
 typedef struct dictItemS
  {
@@ -42,16 +46,16 @@ typedef struct dictS
   struct dictItemS  *last;
   int                length, refCount;
   unsigned char      immutable;
-  int                hashSize;
-  struct dictItemS **hashTable;
+  struct dictHashS  *hashTree;
   int                useMalloc;
   int                memory_context;
  } dict;
 
 typedef dictItem dictIterator;
 
-dict         *ppl_dictInit         (int HashSize, int useMalloc);
-int           ppl_dictHash         (const char *str, const int strLen, const int HashSize);
+dict         *ppl_dictInit         (int useMalloc);
+int           ppl_dictHash         (const char *str, const int strLen);
+void          ppl_dictFreeTree     (dictHash *i);
 int           ppl_dictFree         (dict *in);
 int           ppl_dictLen          (dict *in);
 int           ppl_dictAppend       (dict *in, const char *key, void *item);

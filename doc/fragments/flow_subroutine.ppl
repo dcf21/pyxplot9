@@ -1,0 +1,4 @@
+subroutine f(x,y) { print "%s - %s = %s"%(x,y,x-y) ; }
+
+call f(2,1)
+call f(5*unit(inch), 10*unit(mm))

@@ -320,7 +320,7 @@ void pplset_makedefault(ppl_context *context)
 
   // Set up list of input filters
   tempval.refCount=1;
-  s->filters = ppl_dictInit(HASHSIZE_SMALL,1);
+  s->filters = ppl_dictInit(1);
   #ifdef HAVE_FITSIO
   pplObjStr(&tempval,0,0,FITSHELPER);
   ppl_dictAppend(s->filters, "*.fits", pplObjCpy(NULL,&tempval,0,1,1));

@@ -53,9 +53,19 @@ no value -- using syntax of the form:
 
 \begin{verbatim} a = \end{verbatim}
 
+Variables can also hold non-numeric data, such as strings, colors, dates, lists and dictionaries. The syntax for defining many of these data structures is similar to that used by python, for example:
+
+\begin{verbatim}
+myList = [8,2,1,7]
+myDict = {'john':27 , 'fred':14, 'lisa':myList}
+myDate = time.fromCalendar(2012,7,1,14,30,0)
+\end{verbatim}
+
+\noindent More information about PyXPlot's data types can be found in Chapter~\ref{chap:progDataTypes}.
+
 A list of all of the variables which are currently defined can be obtained by
-typing {\tt show variables}\indcmd{show variables}. By default, an extensive
-list is returned, as many physical constants are pre-defined by PyXPlot. In
+typing {\tt show variables}\indcmd{show variables}. By default, a long
+list is returned, as some constants are pre-defined by PyXPlot. In
 Section~\ref{sec:stringvars}, we will see that variables can also be set to
 hold string values -- i.e.\ to hold pieces of text -- and that such variables
 can have great power in allowing the user to auto-generate titles and labels
@@ -65,32 +75,79 @@ for graphs.
 constants}\index{constants}
 
 A wide range of mathematical and physical constants are pre-defined by default.
-A complete list of these can be obtained by typing {\tt show variables}; they
-are also listed in Chapter~\ref{ch:constants}. Some of these, for example, {\tt
-e}, {\tt pi} and {\tt goldenRatio} are standard mathematical constants, the
-last of these being the default aspect ratio of plots produced by PyXPlot. Many
-of the others are physical constants, which are prefixed with {\tt phy\_} to
-minimize clashes between their names and those of variables which the user may
-wish to define.  Nonetheless, pre-defined constants are no different from any
-other variables in PyXPlot, and the user can freely re-define them.
+A complete list of these can be found Chapter~\ref{ch:constants}.  Some of
+these, for example, {\tt e}, {\tt pi} and {\tt goldenRatio} are standard
+mathematical constants which are accessible in the user's default namespace:
 
-Most of the pre-defined physical constants are not dimensionless quantities,
-and make use of PyXPlot's native ability to keep track of the physical units of
-quantities and to convert them between different unit systems -- for example,
-between inches and centimetres.  This will be explained in more detail in
+\vspace{3mm}
+\input{fragments/tex/calc_pi.tex}
+\vspace{3mm}
+
+\noindent Others, such as physical constants, are of more specialist interest and are
+definted in modules. For example, the speed of light is defined in the module
+{\tt phy}:
+
+\vspace{3mm}
+\input{fragments/tex/calc_c.tex}
+\vspace{3mm}
+
+Most of the pre-defined physical constants, such as this one, make use of
+PyXPlot's native ability to keep track of the physical units of quantities and
+to convert them between different unit systems -- for example, between inches
+and centimetres.  This will be explained in more detail in
 Section~\ref{sec:units}.
+
+To list all of the functions and variables defined in a module such as {\tt phy}, type
+
+\begin{verbatim}
+print phy
+\end{verbatim}
+
+\noindent or simply
+
+\begin{verbatim}
+phy
+\end{verbatim}
+
 
 \section{Functions} \label{sec:functions}
 
-A large number of standard functions are pre-defined within PyXPlot's
-mathematical environment, ranging from trigonometric functions to very
+Many standard functions are pre-defined within PyXPlot's
+mathematical environment, ranging from trigonometric functions to
 specialised functions such as the phase of the Moon on any given day or the
-size of the Universe in the $\Uplambda_\mathrm{CDM}$ cosmological model. A
-complete list of these can be obtained by typing {\tt show
-functions}\indcmd{show functions} or by consulting
-Chapter~\ref{ch:function_list}. In addition, the user can define his own
-functions to equal any algebraic expressions using a similar syntax to that
-used to declare new variables, as in the examples:
+size of the Universe in the $\Uplambda_\mathrm{CDM}$ cosmological model. As with constants, common functions
+are defined in the user's default namespace, for example
+
+\vspace{3mm}
+\input{fragments/tex/calc_exp.tex}
+\vspace{3mm}
+
+\noindent whilst others live in modules, for example
+
+\begin{verbatim}
+print ast.moonPhase( time.now() )
+\end{verbatim}
+
+\noindent which returns the present phase of the Moon in radians.
+
+A complete list of these can be found in Chapter~\ref{ch:function_list}.
+Another quick way to find out more information about a function is the print
+the function object, for example:
+
+\vspace{3mm}
+\input{fragments/tex/calc_log.tex}
+\vspace{3mm}
+
+\noindent All, of PyXPlot's built-in constants, functions and modules are
+contained in the module {\tt defaults}, which can also be printed to view its
+contents:
+
+\begin{verbatim}
+print defaults
+\end{verbatim}
+
+The user can define his own functions to equal any algebraic expressions using
+a similar syntax to that used to declare new variables, as in the examples:
 
 \begin{verbatim}
 f()    = pi
@@ -98,16 +155,18 @@ g(x)   = x*sin(x)
 h(x,y) = x*y
 \end{verbatim}
 
-A list of all of the user-defined functions which have been set can be found at
-the end of the output of the \indcmdt{show functions}, or can be obtained
-without the list of system-defined functions by typing {\tt show
-userfunctions}\indcmd{show userfunctions}. Unlike in the case of pre-defined
-variables, system-defined functions may not be over-written; trying to define a
-function with the name {\tt sin(x)}, for example, will result in an error.
-Once defined, user-defined functions can be undefined by typing, for example:
+\noindent Function objects are just like any other variables, and can even be
+used as arguments to other functions:
+
+\vspace{3mm}
+\input{fragments/tex/calc_funcnest.tex}
+\vspace{3mm}
+
+User-defined functions can be undefined in the same way as any other variable,
+for example by typing:
 
 \begin{verbatim}
-f() =
+f =
 \end{verbatim}
 
 Where the logic required to define a particular function is greater than can be
@@ -186,6 +245,13 @@ Heaviside function:
 \begin{verbatim}
 f(x) = 0
 f(x)[0:] = 1
+\end{verbatim}
+
+Similar effects may also be achieved using the terniary conditional {\tt ?:}
+operator (see Section~\ref{sec:conditional_operator}), for example:
+
+\begin{verbatim}
+f(x) = (x>0) ? 1 : 0
 \end{verbatim}
 
 \example{ex:funcsplice2}{Modelling a physics problem using a spliced function}{
@@ -476,7 +542,7 @@ x = \exp(a+i\theta),
 \end{displaymath}
 which would otherwise have to be written as, for example,
 \begin{displaymath}
-d=2\pi\left(\frac{\theta}{2\pi\,\mathrm{rad}}\right) r=\left(\frac{\theta}{\mathrm{rad}}\right)
+d=2\pi\left(\frac{\theta}{2\pi\,\mathrm{rad}}\right) r=\left(\frac{\theta}{\mathrm{rad}}\right) r
 \end{displaymath}
 in order to be strictly dimensionally correct.
 
@@ -485,26 +551,34 @@ fluxes per steradian are measured per unit angle or per unit solid angle, and
 the SI system traditionally\footnote{Radians are sometimes treated in the SI
 system as {\it supplementary} or derived units.} offers no way to dimensionally
 distinguish these from one another or from quantities with no angular
-dependence. Thus, in some branches of science, it is very useful to be able to
-keep track of dimensions of angle in a way incompatible with a system in which
-angles are fundamentally dimensionless.
+dependence.  In addition, many of PyXPlot's vector graphics commands take
+rotation angles as inputs, and it is useful to express these in units of angle.
 
-In order to be useful in both mathematical and physical contexts, PyXPlot
-provides a switch which can be changed using the commands:
+In most cases, the user is free to decide whether angles should have units. All
+of the following print statements are equivalent:
+
+\begin{verbatim}
+print sin(pi)
+print sin(180*unit(deg))
+print sin(pi *unit(rad))
+print sin(0.5*unit(rev))
+\end{verbatim}
+
+However, it is useful to be able to define whether inverse trigonometric
+functions such as {\tt asin(x)} and {\tt atan(x)} return results with units of
+angle, or which are dimensionless. By default, these functions return
+dimensionless results, but this may be changed using the commands:
+
 \begin{verbatim}
 set unit angle dimensionless
 set unit angle nodimensionless
 \end{verbatim}
-By default, angles are treated as being dimensionless, and expressions such as
-$a+i\theta$ are considered to be dimensionally correct. Inverse trigonometric
-functions such as {\tt asin} return dimensionless numbers measured in radians.
-The unit of the degree is equal to the dimensionless constant $\pi/180$.
-However, when angles are set to have physical dimensions, the inverse
-trigonometric functions return values with dimensions of angle, and the above
-expression must be written as $a+i\theta/\mathrm{rad}$ in order to be
-dimensionally correct.  Nonetheless, the $\exp()$ function and all of the
-trigonometric functions continue to accept not only quantities with dimensions
-of angles, but also dimensionless numbers, as inputs.
+
+\noindent Note that even when inverse trigonometric functions are set to return
+dimensionless outputs, expressions such as {\tt unit(rad)+1} are still
+dimensionally incorrect. Functions such as {\tt sin(x)} and {\tt exp(x)}, which
+can always accept inputs which are either dimensionless, or have units of
+angle.
 
 \subsection{Converting between different temperature scales}
 \index{temperature conversions}\index{units!temperature}

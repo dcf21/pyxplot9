@@ -55,7 +55,7 @@ void ppl_makeDefaultVars(ppl_context *out)
   out->ns_ptr    = 1;
   out->ns_branch = 0;
   out->namespaces[0] = NULL; // Will be defaults namespace
-  out->namespaces[1] = ppl_dictInit(HASHSIZE_LARGE,1); // Will be root namespace
+  out->namespaces[1] = ppl_dictInit(1); // Will be root namespace
 
   // Default variables
    {

@@ -47,7 +47,7 @@ void ppl_garbageNamespace(dict *n)
     free(ptr);
     ptr = ptrnext;
    }
-  free(n->hashTable);
+  ppl_dictFreeTree(n->hashTree);
   free(n);
   return;
  }

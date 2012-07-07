@@ -1,0 +1,3 @@
+twister="seven silver soda syphons"
+twister =~ s/s/th/
+print twister

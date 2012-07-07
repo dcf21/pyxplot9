@@ -1,0 +1,4 @@
+f(x) = (x>0)?x:0
+print "%s %s %s %s %s"%(f(-2),f(-1),f(0),f(1),f(2))
+x = 2
+print "x is %s"%(x>0)?"positive":"negative"

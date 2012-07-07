@@ -156,7 +156,7 @@ pplObj *pplObjColor(pplObj *in, unsigned char amMalloced, int scheme, double c1,
 pplObj *pplObjDict(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, dict *d)
  {
   in->objType = PPLOBJ_ZOM;
-  if (d==NULL) in->auxil = (void *)ppl_dictInit(HASHSIZE_LARGE,auxilMalloced);
+  if (d==NULL) in->auxil = (void *)ppl_dictInit(auxilMalloced);
   else         in->auxil = (void *)d;
   if (in->auxil==NULL) return NULL;
   in->auxilMalloced = auxilMalloced;
@@ -173,7 +173,7 @@ pplObj *pplObjDict(pplObj *in, unsigned char amMalloced, unsigned char auxilMall
 pplObj *pplObjModule(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, unsigned char frozen)
  {
   in->objType = PPLOBJ_ZOM;
-  in->auxil = (void *)ppl_dictInit(HASHSIZE_LARGE,auxilMalloced);
+  in->auxil = (void *)ppl_dictInit(auxilMalloced);
   ((dict *)in->auxil)->immutable = frozen;
   if (in->auxil==NULL) return NULL;
   in->auxilMalloced = auxilMalloced;
@@ -395,7 +395,7 @@ pplObj *pplObjZom(pplObj *in, unsigned char amMalloced)
 pplObj *pplObjUser(pplObj *in, unsigned char amMalloced, unsigned char auxilMalloced, pplObj *prototype)
  {
   in->objType = PPLOBJ_ZOM;
-  in->auxil = (void *)ppl_dictInit(HASHSIZE_LARGE,auxilMalloced);
+  in->auxil = (void *)ppl_dictInit(auxilMalloced);
   if (in->auxil==NULL) return NULL;
   in->auxilMalloced = auxilMalloced;
   in->auxilLen = 0;
@@ -529,7 +529,7 @@ pplObj *pplObjDeepCpy(pplObj *out, pplObj *in, int deep, unsigned char outMalloc
       out->self_dval  = NULL;
       out->self_this  = NULL;
       out->amMalloced = outMalloced;
-      out->auxil      = (void *)(d = ppl_dictInit(HASHSIZE_LARGE,useMalloc));
+      out->auxil      = (void *)(d = ppl_dictInit(useMalloc));
       if (out->auxil==NULL) return NULL;
       while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
        {

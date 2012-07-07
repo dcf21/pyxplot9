@@ -33,7 +33,7 @@
 
 void _ppl_dictRemoveEngine(dict *in, dictItem *ptr);
 
-dict *ppl_dictInit(int hashSize, int useMalloc)
+dict *ppl_dictInit(int useMalloc)
  {
   dict *out;
   if (useMalloc) out = (dict *)malloc(sizeof(dict));
@@ -44,14 +44,19 @@ dict *ppl_dictInit(int hashSize, int useMalloc)
   out->length    = 0;
   out->refCount  = 1;
   out->immutable = 0;
-  out->hashSize  = hashSize;
-  if (useMalloc) out->hashTable = (dictItem **)malloc(hashSize * sizeof(dictItem *));
-  else           out->hashTable = (dictItem **)ppl_memAlloc(hashSize * sizeof(dictItem *));
-  if (out->hashTable==NULL) { if (useMalloc) free(out); return NULL; }
-  memset(out->hashTable, 0, hashSize * sizeof(dictItem *));
+  out->hashTree  = NULL;
   out->useMalloc = useMalloc;
   out->memory_context = ppl_memAlloc_GetMemContext();
   return out;
+ }
+
+void ppl_dictFreeTree(dictHash *i)
+ {
+  if (i==NULL) return;
+  ppl_dictFreeTree(i->next);
+  ppl_dictFreeTree(i->prev);
+  free(i);
+  return;
  }
 
 int ppl_dictFree(dict *in)
@@ -67,18 +72,97 @@ int ppl_dictFree(dict *in)
     free(ptr);
     ptr = ptrnext;
    }
-  free(in->hashTable);
+  ppl_dictFreeTree(in->hashTree);
   free(in);
   return 0;
  }
 
-int ppl_dictHash(const char *str, const int strLen, const int hashSize)
+int ppl_dictHash(const char *str, const int strLen)
  {
   unsigned int hash = 5381;
   int c, i=0;
   if (strLen<0) while (               (c = *str++) ) hash = ((hash << 5) + hash) + c;
   else          while ((i++<strLen)&&((c = *str++))) hash = ((hash << 5) + hash) + c;
-  return hash % hashSize;
+  return hash;
+ }
+
+#define alloc(X) ( in->useMalloc ? malloc(X) : ppl_memAlloc_incontext(X, in->memory_context) )
+
+static void ppl_dictHashAdd(dict *in, const char *str, const int hash, dictItem *item)
+ {
+  dictHash **ptr = &in->hashTree;
+
+  while ((*ptr)!=NULL)
+   {
+    if      ((*ptr)->hash < hash) ptr = &((*ptr)->prev);
+    else if ((*ptr)->hash > hash) ptr = &((*ptr)->next);
+    else
+     {
+      if (strcmp((*ptr)->item->key , str)==0) { (*ptr)->item=item; return; } // Overwriting a pre-existing item
+      else return; // Genuine clash. Nothing we can do.
+     }
+   }
+
+  *ptr = alloc(sizeof(dictHash));
+  if (*ptr==NULL) return;
+  (*ptr)->hash = hash;
+  (*ptr)->item = item;
+  (*ptr)->prev = NULL;
+  (*ptr)->next = NULL;
+ }
+
+static dictItem *ppl_dictHashLookup(dict *in, const char *str, int slen, const int hash, int *clash)
+ {
+  dictHash **ptr = &in->hashTree;
+ 
+  if (slen<=0) slen=strlen(str);
+  *clash=0;
+  while ((*ptr)!=NULL)
+   {
+    if      ((*ptr)->hash < hash) ptr = &((*ptr)->prev);
+    else if ((*ptr)->hash > hash) ptr = &((*ptr)->next);
+    else 
+     {
+      if (strncmp((*ptr)->item->key , str , slen)==0) return (*ptr)->item; // Found it
+      *clash=1;
+      return NULL;
+     }
+   }
+  return NULL;
+ }
+
+static dictItem *ppl_dictHashRemove(dict *in, const char *str, const int hash, int *clash)
+ {
+  dictHash **ptr = &in->hashTree;
+
+  *clash=0;
+  while ((*ptr)!=NULL)
+   {
+    if      ((*ptr)->hash < hash) ptr = &((*ptr)->prev);
+    else if ((*ptr)->hash > hash) ptr = &((*ptr)->next);
+    else
+     {
+      if (strcmp((*ptr)->item->key , str)==0) // Found it
+       {
+        dictHash  *old = *ptr;
+        dictHash **near=  ptr, *nearEntry;
+        dictItem  *out = (*ptr)->item;
+        if (old->prev==NULL) { *ptr=old->next; if (in->useMalloc) free(old); return out; }
+        if (old->next==NULL) { *ptr=old->prev; if (in->useMalloc) free(old); return out; }
+        if (hash & 1)        { while ((*near)->prev!=NULL) near=&((*near)->prev); nearEntry=*near; *near=(*near)->next; }
+        else                 { while ((*near)->next!=NULL) near=&((*near)->next); nearEntry=*near; *near=(*near)->prev; }
+        *ptr=nearEntry;
+        if (in->useMalloc) free(old);
+        return out;
+       }
+      else
+       {
+        *clash=1;
+        return NULL; // Genuine clash. Nothing we can do.
+       }
+     }
+   }
+  return NULL;
  }
 
 int ppl_dictLen(dict *in)
@@ -86,8 +170,6 @@ int ppl_dictLen(dict *in)
   if (in==NULL) return 0;
   return in->length;
  }
-
-#define alloc(X) ( in->useMalloc ? malloc(X) : ppl_memAlloc_incontext(X, in->memory_context) )
 
 int ppl_dictAppend(dict *in, const char *key, void *item)
  {
@@ -120,8 +202,8 @@ int ppl_dictAppend(dict *in, const char *key, void *item)
     if (ptr  == NULL) in->last  = ptrnew; else ptr ->prev = ptrnew;
     in->length++;
 
-    hash = ppl_dictHash(key, -1, in->hashSize);
-    in->hashTable[hash] = ptrnew;
+    hash = ppl_dictHash(key, -1);
+    ppl_dictHashAdd(in, key, hash, ptrnew);
    }
   return 0;
  }
@@ -164,37 +246,35 @@ int ppl_dictAppendCpy(dict *in, const char *key, void *item, int size)
     if (ptr  == NULL) in->last  = ptrnew; else ptr ->prev = ptrnew;
     in->length++;
 
-    hash = ppl_dictHash(key, -1, in->hashSize);
-    in->hashTable[hash] = ptrnew;
+    hash = ppl_dictHash(key, -1);
+    ppl_dictHashAdd(in, key, hash, ptrnew);
    }
   return 0;
  }
 
 void *ppl_dictLookup(dict *in, const char *key)
  {
-  int hash = ppl_dictHash(key, -1, in->hashSize);
+  int hash = ppl_dictHash(key, -1);
   return ppl_dictLookupHash(in, key, hash);
  }
 
 void *ppl_dictLookupHash(dict *in, const char *key, int hash)
  {
+  int       clash;
   dictItem *ptr;
 
   if (in==NULL) { return NULL; }
 
-#define DICTLOOKUP_TEST \
-   if (strcmp(ptr->key, key) == 0) return ptr->data; \
-
   // Check hash table
-  ptr  = in->hashTable[hash];
-  if (ptr==NULL) { return NULL; }
-  DICTLOOKUP_TEST;
+  ptr  = ppl_dictHashLookup(in, key, -1, hash, &clash);
+  if (ptr==NULL) return NULL;
+  if (!clash) return ptr->data;
 
   // Hash table clash; need to exhaustively search dictionary
   ptr = in->first;
   while (ptr != NULL)
    {
-    DICTLOOKUP_TEST
+    if (strcmp(ptr->key, key) == 0) return ptr->data;
     else if (ppl_strCmpNoCase(ptr->key, key) > 0) break;
     ptr = ptr->next;
    }
@@ -203,7 +283,7 @@ void *ppl_dictLookupHash(dict *in, const char *key, int hash)
 
 void ppl_dictLookupWithWildcard(dict *in, char *key, char *SubsString, int SubsMaxLen, dictItem **ptrout)
  {
-  int       hash, i, k, keylen;
+  int       hash, clash, i, k, keylen;
   char     *magicFns[] = { "diff_d", "int_d" , NULL };
   dictItem *ptr;
 
@@ -213,14 +293,11 @@ void ppl_dictLookupWithWildcard(dict *in, char *key, char *SubsString, int SubsM
   // Check hash table
   for (k=0; (isalnum(key[k]) || (key[k]=='_')); k++);
   keylen=k;
-  hash = ppl_dictHash(key, keylen, in->hashSize);
-  ptr  = in->hashTable[hash];
-  if (ptr!=NULL)
+  hash = ppl_dictHash(key, keylen);
+  ptr  = ppl_dictHashLookup(in, key, keylen, hash, &clash);
+  if (ptr!=NULL) { *ptrout=ptr; return; }
+  if (clash)
    {
-    for (k=0; ((ptr->key[k]>' ')&&(ptr->key[k]==key[k])); k++);
-    if ((ptr->key[k]=='\0')&&(!(isalnum(key[k])||(key[k]=='_')))) { *ptrout=ptr; return; }
-
-    // Hash table clash; need to exhaustively search dictionary
     ptr = in->first;
     while (ptr != NULL)
      {
@@ -260,15 +337,14 @@ void ppl_dictLookupWithWildcard(dict *in, char *key, char *SubsString, int SubsM
 
 int ppl_dictContains(dict *in, const char *key)
  {
-  int hash;
+  int hash, clash;
   dictItem *ptr;
   if (in==NULL) return 0;
 
   // Check hash table
-  hash = ppl_dictHash(key, -1, in->hashSize);
-  ptr  = in->hashTable[hash];
-  if (ptr==NULL) return 0;
-  if (strcmp(ptr->key, key)==0) return 1;
+  hash = ppl_dictHash(key, -1);
+  ptr  = ppl_dictHashLookup(in, key, -1, hash, &clash);
+  if (!clash) return (ptr!=NULL);
 
   // Hash table clash; need to exhaustively search dictionary
   ptr = in->first;
@@ -282,16 +358,16 @@ int ppl_dictContains(dict *in, const char *key)
 
 int ppl_dictRemoveKey(dict *in, const char *key)
  {
-  int hash;
+  int hash, clash;
   dictItem *ptr;
 
   if (in==NULL) return 1;
 
   // Check hash table
-  hash = ppl_dictHash(key, -1, in->hashSize);
-  ptr  = in->hashTable[hash];
+  hash = ppl_dictHash(key, -1);
+  ptr  = ppl_dictHashRemove(in, key, hash, &clash);
   if (ptr==NULL) return 1;
-  if (strcmp(ptr->key, key)==0) { _ppl_dictRemoveEngine(in, ptr); return 0; }
+  if (!clash) { _ppl_dictRemoveEngine(in, ptr); return 0; }
 
   // Hash table clash; need to exhaustively search dictionary
   ptr = in->first;
@@ -311,7 +387,7 @@ int ppl_dictRemove(dict *in, void *item)
   ptr = in->first;
   while (ptr != NULL)
    {
-    if (ptr->data == item) { _ppl_dictRemoveEngine(in, ptr); return 0; }
+    if (ptr->data == item) { return ppl_dictRemoveKey(in,ptr->key); }
     ptr = ptr->next;
    }
   return 1;
@@ -319,15 +395,10 @@ int ppl_dictRemove(dict *in, void *item)
 
 void _ppl_dictRemoveEngine(dict *in, dictItem *ptr)
  {
-  int hash;
   dictItem *ptrnext;
 
   if (in ==NULL) return;
   if (ptr==NULL) return;
-
-  // Remove hash table entry
-  hash = ppl_dictHash(ptr->key, -1, in->hashSize);
-  if (in->hashTable[hash]==ptr) in->hashTable[hash]=NULL;
 
   if (in->useMalloc) { free(ptr->data); free(ptr->key); }
 

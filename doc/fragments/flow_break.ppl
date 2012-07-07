@@ -1,0 +1,10 @@
+for i=0 to 4
+ {
+  if (i==2) { break ; }
+  print i
+ }
+for i=0 to 4
+ {
+  if (i==2) { continue ; }
+  print i
+ }

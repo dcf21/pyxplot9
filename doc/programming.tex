@@ -22,28 +22,77 @@
 % LaTeX source for the PyXPlot Users' Guide
 
 \chapter{Programming: PyXPlot's data types}
+\label{chap:progDataTypes}
 
-In this chapter we describe the facilities which PyXPlot has for automating
-repetitive tasks. We begin by introducing string variables, which can be useful
-for auto-generating titles and labels for graphs which are being produced in
-batch jobs. We then discuss the loop constructs which make it possible to run
-such batch jobs, producing similar plots of many different \datafile s or
-performing calculations in an iterative fashion. Finally, we turn to PyXPlot's
-interaction with the shell and filing system in which it operates, introducing
-a simple framework for automatically re-executing PyXPlot scripts whenever they
-change, allowing plots to be automatically regenerated whenever the scripts
-used to produce them are modified.
+This chapter describes PyXPlot's data types such as lists, dictionaries,
+vectors, matrices and file handles.  In each case, we illustrate how each data
+type interfaces with PyXPlot's graph plotting and vector graphics environment.
 
 \section{Strings}
 \label{sec:stringvars}
 \index{variables!string}
 
-Variables may hold not only numerical quantities, but also strings of text.  In
-the course of this chapter, we will see several examples where string variables
-are used either to generate automatic labels for graphs plotted in batch jobs,
-or to read strings of text from columns of \datafile s. String variables can be
-assigned in a analogous manner to numeric variables, and can subsequently be
-used anywhere where a quoted string could have been used, as in the example:
+Strings can be enclosed either in single ({\tt '}) or double ({\tt "}) quotes.
+Strings may also be enclosed by three quote characters in a row: either {\tt
+'''} or {\tt """}. Special care needs to be taken when using apostrophes or
+quotes in single-quote delimited strings, as these characters may be
+misinterpreted as string delimiters, as in the example:
+
+\begin{dontdo}
+'Robert's data'
+\end{dontdo}
+
+\noindent This easiest way to avoid such problems is to use three quotes:
+
+\begin{dodo}
+'''Robert's data'''
+\end{dodo}
+
+Special characters such as tabs and newlines can be inserted into strings using
+escape codes such as {\tt $\backslash$t} and {\tt $\backslash$n}; see
+Table~\ref{tab:escape_sequences2} for a list of these. The following string is
+split over three lines:
+
+\vspace{3mm}
+\input{fragments/tex/fs_print4.tex}
+\vspace{3mm}
+
+Sometimes these escape codes can be rather annoying, especially when entering
+\LaTeX control codes, which all begin with backslash characters. Rather than
+having to escape every backslash, it is generally easier to prefix the string
+with the character {\tt r}, which turns off all escape codes:
+
+\vspace{3mm}
+\input{fragments/tex/fs_print5.tex}
+\vspace{3mm}
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|>{\columncolor{LightGrey}}l>{\columncolor{LightGrey}}l|}
+\hline
+{\bf Escape sequence} & {\bf Description} \\
+\hline
+{\tt $\backslash$?} & Question mark \\
+{\tt $\backslash$'} & Apostrophe \\
+{\tt $\backslash$"} & Double quote \\
+{\tt $\backslash\backslash$} & Literal backslash \\
+{\tt $\backslash$a} & Bell character \\
+{\tt $\backslash$b} & Backspace \\
+{\tt $\backslash$f} & Formfeed \\
+{\tt $\backslash$n} & Newline \\
+{\tt $\backslash$r} & Carriage return \\
+{\tt $\backslash$t} & Horizontal tab \\
+{\tt $\backslash$v} & Vertical tab \\
+\hline
+\end{tabular}
+\end{center}
+\caption{A complete list of PyXPlot's string escape sequences. These are a subset of those available in C.}
+\label{tab:escape_sequences2}
+\end{table}
+
+Once defined, a string variable can be used anywhere in PyXPlot where a quoted
+string could have been used, for example in the {\tt set title} command:
+
 \begin{verbatim}
 plotname = "Insert title here"
 set title plotname
@@ -53,18 +102,18 @@ set title plotname
 \label{sec:stringsubop}
 
 Most string manipulations are performed using the string substitution operator,
-{\tt \%}\index{\% operator@{\tt \%} operator}. This operator should be
-preceded by a format string, such as {\tt x=\%f}, in which tokens such as {\tt
-\%f} mark places where numbers and strings should be substituted. The
-substitution operator is followed by a bracketed list of the quantities which
-should be substituted in place of these tokens in the format string. This
-behaviour is similar to that of the Python programming language's \%
-operator\footnote{Unlike in Python, the brackets are obligatory; {\tt '\%d'\%2}
-is {\it not} valid in PyXPlot, and should be written as {\tt '\%d'\%(2)}.} and
-of the {\tt printf} statement in C.  For example, to concatenate the two
-strings contained in the variables {\tt a} and {\tt b} into a single string
-variable {\tt c}, one would issue the command:\index{string
-operators!concatenation}
+{\tt \%}\index{\% operator@{\tt \%} operator}. This operator should be preceded
+by a format string, such as {\tt x=\%f}, in which tokens such as {\tt \%f} mark
+places where numbers and strings should be substituted. The substitution
+operator is followed by a bracketed list of the quantities which should be
+substituted in place of these tokens in the format string. This behaviour is
+similar to that of the Python programming language's \% operator\footnote{As in
+Python, the brackets are optional when only one item is being substituted. For
+example, {\tt '\%d'\%2} is equivalent to {\tt '\%d'\%(2)}.} and of the {\tt
+printf} statement in C.  For example, to concatenate the two strings contained
+in the variables {\tt a} and {\tt b} into a single string variable {\tt c}, one
+would issue the command:\index{string operators!concatenation}
+
 \begin{verbatim}
 c = "%s%s"%(a,b)
 \end{verbatim}
@@ -73,7 +122,7 @@ One application of this operator might be to label plots with the title of the
 \datafile\ being plotted, as in the following example:
 \begin{verbatim}
 filename="data_file.dat"
-title="A plot of the data in {\tt %s}."%(filename)
+title=r"A plot of the data in {\tt %s}."%(filename)
 set title title
 plot filename
 \end{verbatim}
@@ -126,6 +175,37 @@ to be substituted, as happens in C's {\tt printf} command:
 
 \vspace{3mm}
 \input{fragments/tex/prog_stringsub.tex}
+\vspace{3mm}
+
+\subsection{Slicing strings}
+
+
+
+\subsection{String methods}
+
+All objects in PyXPlot have {\tt methods}, which may be called, as in most object-orientated programming languages, by following the name of the object to be acted upon by a dot:
+
+\begin{verbatim}
+print "hello".upper()
+print "hello".methods()
+\end{verbatim}
+
+\noindent All objects in PyXPlot have a method called {\tt methods()}, which returns a list of the names of all of that objects methods. Methods are like functions in that printing them returns brief documentation about them:
+
+\vspace{3mm}
+\input{fragments/tex/prog_methods.tex}
+\vspace{3mm}
+
+\noindent Descriptions of all of the methods of string objects can be found in Section~\ref{sec:string_methods}; in addition, a list of the methods that are common to all PyXPlot objects can be found in Section~\ref{sec:common_methods}.
+
+The following simple examples demonstrate the use of some of them:
+
+\vspace{3mm}
+\input{fragments/tex/prog_stringmethods.tex}
+\vspace{3mm}
+
+\vspace{3mm}
+\input{fragments/tex/prog_stringmethods2.tex}
 \vspace{3mm}
 
 \subsection{Regular expressions}
@@ -183,31 +263,6 @@ recognised by the =$\sim$ operator.
 \label{tab:re_flags}
 \end{table}
 
-\subsection{String manipulation methods}
-
-The following functions are provided for performing simple manipulations upon
-strings:
-
-\noindent
-\begin{itemize}
-\item {\tt strcmp(s1,s2)}\indfun{strcmp($s1,s2$)} returns zero if the strings {\tt s1} and {\tt s2} are the same, one if {\tt s1} should be placed after {\tt s2} in alphabetical sequence, minus one if {\tt s1} should be placed before {\tt s2} in alphabetical sequence.
-\item {\tt strlen(s)}\indfun{strlen($s$)} returns the integer length of the string variable {\tt s}. An error is returned if {\tt s} is not a string variable.
-\item {\tt strlower(s)}\indfun{strlower($s$)} returns a version of the string {\tt s} in which all uppercase alphabetical characters are converted to lowercase characters.
-\item {\tt strrange(s,i,j)}\indfun{strrange($s,i,j$)} returns a slice of the string $s$, containing only the $i$th through until the $j$th characters of the string. If either $i$ or $j$ are negative, they are counted from the end of the string; for example, $-1$ refers to the last character of the string.
-\item {\tt strupper(s)}\indfun{strupper($s$)} returns a version of the string {\tt s} in which all lowercase alphabetical characters are converted to uppercase characters.
-\end{itemize}
-
-\noindent
-The following simple examples demonstrate the use of these functions:
-
-\vspace{3mm}
-\input{fragments/tex/prog_stringmethods.tex}
-\vspace{3mm}
-
-\vspace{3mm}
-\input{fragments/tex/prog_stringmethods2.tex}
-\vspace{3mm}
-
 \section{Lists}
 
 \section{Dictionaries}
@@ -219,3 +274,6 @@ The following simple examples demonstrate the use of these functions:
 \section{Dates}
 
 \section{Modules and classes}
+
+\section{File handles}
+

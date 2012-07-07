@@ -1551,33 +1551,12 @@ Color maps provide a graphical means of producing two-dimensional
 representations of $(x,y,z)$ surfaces, or equivalently of producing maps of the
 values $z(x,y)$ of functions of two variables. Each point in the $(x,y)$ plane
 is assigned a color which indicates the value $z$ associated with that point.
-In the following Section, we refer to the third coordinate as $c$ rather than
+In this section, we refer to the third coordinate as $c$ rather than
 $z$, to distinguish it from the third axes of three-dimensional
 plots\footnote{When color maps are plotted on three-dimensional graphs, they
 appear in a flat plane on one of the back faces of the plot selected using the
 {\tt axes} modifier to the {\tt plot} command, and the {\tt c}-axes associated
 with each are entirely independent of the plot's {\tt z}-axis.}.
-
-The default mapping used between values of $c$ and color is a greyscale
-mapping, such that the smallest value of $c$ in any given color map
-corresponds to black, and largest value corresponds to white. More generally,
-however, the user can supply any algebraic expressions for the RGB, HSB or CMYK
-components of the colors to be used, and even specify a mask such that some
-parts of the color map appear transparent. Moreover, these custom color
-mappings need not be one-parameter mappings depending only upon a single
-variable $c$, but can depend on up to four quantities $c_1$, $c_2$, $c_3$ and
-$c_4$.
-
-PyXPlot's \indpst{colormap} plot style takes between three and seven columns
-of data, which may be supplied either from one or more function(s), or from a
-\datafile. If data is read from a \datafile, then the first two columns of
-output data are assumed to contain the respective positions of each datapoint
-along the $x$-axis and the $y$-axis. The next column contains the value $c_1$,
-and may be followed by up to three further optional values $c_2$, $c_3$ and
-$c_4$. In the case where one or more function(s) are supplied, they are assumed
-to be functions of both $x$ and $y$, and are sampled at a grid of points in the
-$(x,y)$ plane; the first supplied function returns the value $c_1$, and may be
-followed by up to three further optional functions.
 
 In the following simple example, a color map of the complex argument of the
 Riemann zeta function $\zeta(z)$ is produced, taking the $(x,y)$ plane to be an
@@ -1589,10 +1568,10 @@ the real axis, and $y$ being the imaginary axis:
 \vspace{2mm}
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_zeta_arg}}
 
-The command \indcmdt{set samples grid} sets the dimensions of the grid of
-samples -- or pixels -- taken of the input functions. If either value is
-replaced with an asterisk ({\tt *}) then the current number of samples set in
-the {\tt set samples} command is substituted.
+The \indcmdt{set samples grid} sets the dimensions of the grid of samples -- or
+pixels -- used to render the color map. If either value is replaced with an
+asterisk ({\tt *}) then the current number of samples set in the {\tt set
+samples} command is substituted.
 
 If a \datafile\ is supplied to the {\tt colormap} plot style, then the
 datapoints need not lie on the specified regular grid, but are first re-sampled
@@ -1616,30 +1595,46 @@ input datapoints:
 
 \subsection{Custom color mappings}
 
-The color mapping used by the {\tt colormap} plot style is set using the
-\indcmdt{set colormap}, which takes algebraic expressions for the RGB, HSB or
-CMYK components of the color to use as a function of the variables {\tt c1},
-{\tt c2}, {\tt c3} and {\tt c4}. As elsewhere in PyXPlot, these color
-components should take values in the range zero to one; values outside of this
-range are clipped.  The syntax of the \indcmdt{set colormap} is as follows:
+The default mapping used between values of $c$ and color is a grayscale
+mapping. This is scaled such that the smallest value of $c$ in the map
+corresponds to black, and largest value corresponds to white. More generally,
+however, the user can supply any algebraic expressions for converting values of
+$c$ into colors.  Moreover, these custom color mappings need not be
+one-parameter mappings depending only upon a single variable $c$, but can
+depend on up to four quantities $c_1$, $c_2$, $c_3$ and $c_4$. This makes it
+possible, for example, to represent both the amplitude and complex phase of a
+quantity in a single color map.
+
+PyXPlot's \indpst{colormap} plot style takes between three and seven columns
+of data, which may be supplied either from one or more function(s), or from a
+\datafile. If data is read from a \datafile, then the first two columns of
+output data are assumed to contain the respective positions of each datapoint
+along the $x$-axis and the $y$-axis. The next column contains the value $c_1$,
+and may be followed by up to three further optional values $c_2$, $c_3$ and
+$c_4$. In the case where one or more function(s) are supplied, they are assumed
+to be functions of both $x$ and $y$, and are sampled at a grid of points in the
+$(x,y)$ plane; the first supplied function returns the value $c_1$, and may be
+followed by up to three further optional functions.
+
+The color mapping is set using the \indcmdt{set colormap}, which takes an
+algebraic expression which should be a function of the variables {\tt c1}, {\tt
+c2}, {\tt c3} and {\tt c4}. This should evaluate either to a color object or a
+number (in which case a color is drawn from the current palette).
 
 \begin{verbatim}
-set colormap ( rgb<r>:<g>:<b> |
-                hsb<h>:<s>:<b> |
-                cmyk<c>:<m>:<y>:<k> )
-              [ mask <expr> ]
+set colormap <expr> [ mask <expr> ]
 \end{verbatim}
 
 \noindent If the optional mask expression is supplied, then any areas in a
-color map where this expression evaluates to zero (i.e.\ false) are made
+color map where this expression evaluates to false (e.g.\ zero) are made
 transparent. The following color mapping, which is the default, produces a
-greyscale color mapping of the third column of data supplied to the
+grayscale color mapping of the third column of data supplied to the
 \indpst{colormap} plot style; further columns of data, if supplied, are not
 used:
 
 \begin{verbatim}
 set c1range [*:*] renormalise noreverse
-set colormap rgb(c1):(c1):(c1)
+set colormap gray(c1)
 \end{verbatim}
 
 The \indcmdt{set c<n>range} command specifies how the values of $c_n$ are
@@ -1654,17 +1649,18 @@ set c<n>range [ <range> ]
 
 \noindent If the {\tt renor\-malise} option is specified, then the values of
 $c_n$ at each point in the data grid are first scaled into the range zero to
-one. This is generally useful, since the color components themselves must be
-in this range; in the example given above, the lowest value of $c_1$
-corresponds to black (i.e.\ brightness 0), and the highest value corresponds to
-white (i.e.\ brightness 1). If an explicit range is specified to the {\tt set
+one. This is often useful, since the color components passed to the {\tt
+rgb()}, {\tt gray()}, {\tt hsb()} and {\tt cmyk()} functions must be in this
+range.  Thus, in the example given above, the lowest value of $c_1$ corresponds
+to black (i.e.\ brightness 0), and the highest value corresponds to white
+(i.e.\ brightness 1). If an explicit range is specified to the {\tt set
 c<n>range} command, then the upper limit of this range maps to the value one,
 and the lower limit maps to the value zero. An asterisk ({\tt *}) means that
-the lowest or highest value is substituted. The mapping is inverted if the {\tt
-reverse} option is specified, such that the upper limit maps to zero, and the
-lower limit maps to one.  Intermediate values are scaled either linearly or
-logarithmically, and these behaviours can be selected with the following
-commands:
+the lowest or highest value found in the map is substituted. The mapping is
+inverted if the {\tt reverse} option is specified, such that the upper limit
+maps to zero, and the lower limit maps to one.  Intermediate values are scaled
+either linearly or logarithmically, and these behaviours can be selected with
+the following commands:
 \begin{verbatim}
 set logscale c1
 set linearscale c1
@@ -1678,6 +1674,41 @@ complex argument of $f(z)$:
 \input{examples/tex/ex_branch_cuts_1.tex}
 \vspace{2mm}
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_branch_cuts}}
+
+In the next example, three circular pools of red, green, and blue illumination are overlapped to show how colors mix together:
+
+\vspace{2mm}
+\input{examples/tex/ex_spectrum_colmix1_1.tex}
+\vspace{2mm}
+\centerline{\includegraphics[width=8cm]{examples/eps/ex_spectrum_colmix1}}
+
+The same is possible with CMYK colors, to demonstrate how substractive color mixing works:
+
+\vspace{2mm}
+\input{examples/tex/ex_spectrum_colmix2_1.tex}
+\vspace{2mm}
+\centerline{\includegraphics[width=8cm]{examples/eps/ex_spectrum_colmix2}}
+
+The function {\tt colors.wavelength(wlen,normalisation)} provides a color representation of any given wavelength of light, useful for producing representations of the electromagnetic spectrum:
+
+\vspace{2mm}
+\input{examples/tex/ex_spectrum_1_1.tex}
+\vspace{2mm}
+\centerline{\includegraphics[width=8cm]{examples/eps/ex_spectrum_1}}
+
+The function {\tt colors.spectrum(spectrum,normalisation)} takes a function as its first input, which should return a spectral energy distribution (in arbitrary units) as a function of wavelength. In this example, we show the colors of blackbodies of different temperatures. We renormalise their brightnesses by $T^{-4}$ to avoid saturating hot blackbodies to white:
+
+\vspace{2mm}
+\input{examples/tex/ex_spectrum_bbcol_1.tex}
+\vspace{2mm}
+\centerline{\includegraphics[width=8cm]{examples/eps/ex_spectrum_bbcol}}
+
+As a final example, we use this function to plot the interference pattern seen when a wedge of stressed plastic, a birefrigent material, is viewed between crossed polars:
+
+\vspace{2mm}
+\input{examples/tex/ex_spectrum_biref_1.tex}
+\vspace{2mm}
+\centerline{\includegraphics[width=8cm]{examples/eps/ex_spectrum_biref}}
 
 \subsection{Color scale bars}
 

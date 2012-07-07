@@ -209,3 +209,16 @@ set nobackup
 When this switch is turned on, pre-existing files will be renamed with a tilde
 ($\sim$) appended to their filenames, rather than being overwritten.
 
+\section{Changing font}
+\index{font!changing}\index{sans-serif}
+
+The font used by PyXPlot can be changed using the \indcmdt{set preamble}.  In
+latex, fonts are changed by adding a header to a document, and the \indcmdt{set
+preamble} specifies text that should be passed to latex before rendering any of
+the text labels on the present canvas.  For example, the following command
+changes the default font to sans-serif:
+
+\begin{verbatim}
+set preamble r"\renewcommand{\familydefault}{\sfdefault}"
+\end{verbatim}
+

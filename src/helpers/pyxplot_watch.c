@@ -89,7 +89,7 @@ int main(int argc, char **argv)
 
   if (DEBUG) ppl_log(context,"Initialising PyXPlot Watch.");
   ppl_memAlloc_MemoryInit(context, &ppl_error, &ppl_log);
-  StatInfodict = ppl_dictInit(HASHSIZE_SMALL, 1);
+  StatInfodict = ppl_dictInit(1);
 
   // Set up default session settings
   context->session_default.splash    = SW_ONOFF_ON;

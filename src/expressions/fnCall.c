@@ -691,7 +691,7 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
         if (context->ns_ptr > CONTEXT_DEPTH-2) { strcpy(context->errStat.errBuff,"Stack overflow."); TBADD(ERR_MEMORY); goto cleanup; }
 
         // Enter a new namespace
-        d = ppl_dictInit(HASHSIZE_LARGE , 1);
+        d = ppl_dictInit(1);
         if (d==NULL) { strcpy(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY); goto cleanup; }
         context->namespaces[++context->ns_ptr] = d;
 
