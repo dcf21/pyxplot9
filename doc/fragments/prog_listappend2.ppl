@@ -1,0 +1,5 @@
+a = [1,2,3]
+call a.append(4)
+call a.insert(0,"zero")
+call a.insert(-2,"foo")
+print a

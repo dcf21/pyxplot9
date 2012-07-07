@@ -265,15 +265,155 @@ recognised by the =$\sim$ operator.
 
 \section{Lists}
 
+List objects hold ordered sequencies of other PyXPlot objects, which may
+include lists and dictionaries to create hierarchical data structures. They are
+created by enclosing a comma-separated list of objects by square brackets:
+
+\begin{verbatim}
+a = [1,2,3,"fourth item"]
+\end{verbatim}
+
+Once created, more items can be added to a list using its {\tt append(item)}
+and {\tt insert(n,item)} methods, where the latter inserts an item at position
+$n$:
+
+\vspace{3mm}
+\input{fragments/tex/prog_listappend.tex}
+\vspace{3mm}
+
+\noindent
+A complete list of the methods available on lists (itself a list of strings)
+can be found by calling the method {\tt [].methods()}; they are also listed in
+Section~\ref{sec:list_methods}. As with string methods, documentation of list
+methods is returned if the method object is printed:
+
+\vspace{3mm}
+\input{fragments/tex/prog_listmethods.tex}
+\vspace{3mm}
+
+Most methods that operate on lists, for example, append, extend and sort
+operations, return the list as their output. Unless this is stored in a
+variable, PyXPlot prints this return value to the terminal. In some cases this
+is useful: in the example above, it allowed us to see how the list was changing
+when we called its {\tt append()} and {\tt insert()} methods. Often, however,
+this terminal spam is unwanted. The \indcmdt{call} allows methods to be called
+without printing their output, which is discarded:
+
+\vspace{3mm}
+\input{fragments/tex/prog_listappend2.tex}
+\vspace{3mm}
+
+The following example demonstrates the use of a list as a stack; note that the
+last item added to the stack is the first one to be popped:
+
+\vspace{3mm}
+\input{fragments/tex/prog_liststack.tex}
+\vspace{3mm}
+
+Methods are provided for sorting data in lists. The {\tt sort()} method simply
+sorts the members of a list into order of ascending value\footnote{Non-numeric
+items are assigned arbitrary but consistent values for the purposes of sorting.
+Booleans are always lower-valued than numbers, but numbers are lower-valued
+than lists. Longer lists are always higher valued than shorter lists; larger
+dictionaries are always higher-valued than smaller dictionaries.} The {\tt
+sortOnElement(n)} method sorts a list of lists on the $n$th sub-element of each
+sublist.
+
+\vspace{3mm}
+\input{fragments/tex/prog_listsort.tex}
+\vspace{3mm}
+
+The \indcmdt{foreach} command can be used to loop over the members of a list.
+Data from lists can also be plotted onto graphs, but the list must first be
+converted into a vector. See~\ref{sec:vectors} for more information.
+
 \section{Dictionaries}
 
 \section{Vectors and matrices}
+\label{sec:vectors}
 
 \section{Colors}
+
+Most of PyXPlot's graph plotting and vector graphics commands have settings for
+specifying colors. A selection of widely-used colors may be specified by name,
+for example {\tt red} and {\tt blue}. However, greater freedom in choice of
+color is available by passing these commands objects of type {\tt color}.
+
+Several functions are available for making color objects:
+
+\begin{itemize}
+\item {\tt gray(x)} returns a shade of gray. The argument $x$ should be in the range 0--1. If $x=0$, black is returned; if $x=1$, white is returned.
+\item {\tt rgb(r,g,b)} returns a color with the specified RGB components, which should be in the range 0--1.
+\item {\tt cmyk(c,m,y,k)} returns a color with the specified CMYK components, which should be in the range 0--1.
+\item {\tt hsb(h,s,b)} returns a color with the specified coordinates in hue--saturation--brightness color space, which should be in the range 0--1.
+\end{itemize}
+
+\noindent In addition, color objects corresponding to all of PyXPlot's built-in
+named colors can be found in the {\tt colors} module.
+
+\begin{verbatim}
+a = colors.red
+b = rgb(0,0.5,0)
+box from 0,0 to 3,3 with color a fillcolor b lw 5
+\end{verbatim}
+
+Once a color object has been made, various operations are supported.
+Multiplying or dividing a color by a number changes the brightness of the
+color. When two colors are compared, brighter colors are greater than darker
+colors. When two colors are added together, they are additively mixed in RGB
+space, so that adding red and green together produces yellow. When one color is
+subtracted from another, the opposite happens, so that yellow minus green is
+red.
+
+\noindent The methods available on {\tt color} objects are listed in
+Section~\ref{sec:color_methods}.
+
+\subsection{Color representations of the electromagnetic spectrum}
+
+Two functions, in the {\tt colors} module, provide color objects which
+approximate the color of particular wavelengths of light, or of electromagnetic
+spectra.
+
+\funcdef{colors.wavelength($\lambda$,$norm$)}{returns a color representation of monochromatic light at wavelength $\lambda$, normalised to brightness $norm$. A value of $norm=1$ is recommended for plotting the complete span of the electromagnetic spectrum without colors clipping to white.}
+\funcdef{colors.spectrum($spec,norm$)}{returns a color representation of the spectrum $spec$, normalised to brightness $norm$. $spec$ should be a function object that takes a single input (wavelength) with units of length, and may return an output with arbitrary units.}
+
+\noindent For an example of the use of these functions, see
+Section~\ref{sec:colormaps}.
 
 \section{Dates}
 
 \section{Modules and classes}
 
 \section{File handles}
+
+File handles provide a means of reading data directly from text files in
+PyXPlot scripts, or of writing data to files. Files are opened using the {\tt
+open()} function:
+
+\vspace{2mm}
+\funcdef{open($x$[,$y$])}{opens the file $x$ with string access mode $y$, and returns a file handle object.}
+\vspace{4mm}
+
+\noindent The most commonly used access modes are {\tt "r"}, to open a file read-only, {\tt "w"}, to open a file for writing, erasing any pre-existing file of the same filename, and {\tt "a"}, to append data to the end of a file.
+
+Alternatively, if what is wanted is a temporary scratch space, the {\tt os.tmpfile()} function should be used:
+
+\vspace{2mm}
+\funcdef{os.tmpfile()}{returns a file handle for a temporary file.}
+\vspace{4mm}
+
+\noindent The resulting file handle is open for both reading and writing.
+
+The following methods are defined for file handles:
+
+\methdef{close()}{closes a file handle.}
+\methdef{eof()}{returns a boolean flag to indicate whether the end of a file has been reached.}
+\methdef{flush()}{flushes any buffered data which has not yet physically been written to a file.}
+\methdef{getPos()}{returns a file handle's current position in a file.}
+\methdef{isOpen()}{returns a boolean flag indicating whether a file is open.}
+\methdef{read()}{returns the contents of a file as a string.}
+\methdef{readline()}{returns a single line of a file as a string.}
+\methdef{readlines()}{returns the lines of a file as a list of strings.}
+\methdef{setPos($x$)}{sets a file handle's current position in a file.}
+\methdef{write($x$)}{writes the string $x$ to a file.}
 

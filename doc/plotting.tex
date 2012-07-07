@@ -24,14 +24,14 @@
 \chapter{Plotting: a complete guide}
 \label{ch:plotting}
 
-This part of the manual returns to the subject of how PyXPlot may be used to
-produce graphs and other vector graphics. In this chapter, a systematic survey
-of how the appearance of plots can be configured is provided, continuing from
-the brief overview of the \indcmdt{plot} given in Chapter~\ref{ch:first_steps}.
-In the subsequent chapters, we will describe how to produce graphical output in
-a range of image formats (Chapter~\ref{ch:image_formats}) and how to produce
-galleries of multiple plots side-by-side, together with more sophisticated
-vector graphics (Chapter~\ref{ch:vector_graphics}).
+This part of the manual provides a complete description of PyXPlot's commands
+for producing graphs and vector graphics. This chapter provides a systematic
+survey of how the appearance of plots can be configured, extending the brief
+overview of the \indcmdt{plot} given in Chapter~\ref{ch:first_steps}.
+Subsequent chapters describe how to produce graphical output in a range of
+image formats (Chapter~\ref{ch:image_formats}), how to produce galleries of
+multiple plots side-by-side, and how to produce more sophisticated vector
+graphics (Chapter~\ref{ch:vector_graphics}).
 
 \section{The {\tt with} modifier}
 \label{sec:with_modifier}
@@ -60,8 +60,8 @@ given. In this section, we list all of the modifiers such as {\tt line\-width}
 which may be used to alter the exact appearance of these plot styles, which are
 as follows:
 \begin{itemize}
-\item \indmodt{color} -- used to select the color in which the dataset is to be plotted. It should be followed either by an integer, to select a color from the present palette (see Section~\ref{sec:palette}), or by a recognised color name, a complete list of which can be found in Section~\ref{sec:color_names}. Alternatively, arbitrary colors may be specified by using one of the forms {\tt rgb<r>:\-<g>:\-<b>}, {\tt hsb<h>:\-<s>:\-<b>} or {\tt cmyk<c>:\-<m>:\-<y>:\-<k>}, where the colon-separated values indicate the RGB, HSB or CMYK components of the desired color in the range~0 to~1. This modifier may also be spelt {\tt color}.\index{colors!setting for datasets}
-\item \indmodt{fillcolor} -- used to select the color in which the dataset is filled. The color may be specified using any of the styles listed for {\tt color}. May also be spelt {\tt fillcolor}.
+\item \indmodt{color} -- used to select the color in which the dataset is to be plotted. It should be followed either by a number, to select a color from the present palette (see Section~\ref{sec:palette}), by a recognised color name, a complete list of which can be found in Section~\ref{sec:color_names}, or by a color object, such as may be created by the functions {\tt gray(g)}, {\tt rgb(r,g,b)}, {\tt cmyk(c,m,y,k)} or {\tt hsb(h,s,b)}. This modifier may also be spelt {\tt colour}.\index{colors!setting for datasets}
+\item \indmodt{fillcolor} -- used to select the color in which the dataset is filled. The color may be specified using any of the styles listed for {\tt color}. May also be spelt {\tt fillcolour}.
 \item \indmodt{linetype} -- used to numerically select the type of line -- for example, solid, dotted, dashed, etc.\ -- which should be used by line-based plot styles. A complete list of PyXPlot's numbered line types can be found in Chapter~\ref{ch:linetypes_table}. May be abbreviated {\tt lt}.
 \item \indmodt{linewidth} -- used to select the width of line which should be used by line-based plot styles, where unity represents the default width. May be abbreviated {\tt lw}.
 \item \indmodt{pointlinewidth} -- used to select the width of line which should be used to stroke points in point-based plot styles, where unity represents the default width. May be abbreviated {\tt plw}.
@@ -103,12 +103,24 @@ plot styles.
 
 \subsection{The palette}
 \label{sec:palette}
+\index{palette}\index{colors!setting the palette}
 
-\index{palette}\index{colors!setting the palette} As indicated above, colors
-may be referred to either specifically by name, by RGB, HSB or CMYK components,
-or by their positions in the current palette. By default, PyXPlot's palette
-contains a series of visually distinctive colors which are, insofar as
-possible, also distinctive to users with most common forms of color blindness.
+Wherever PyXPlot takes a color as an input to a command, the user has three
+options for how it may be specified.  A selection of widely-used colors may be
+specified by name, for example {\tt red} and {\tt blue}. A complete list of
+such colors may be found in Section~\ref{sec:color_names}. Alternatively, an
+object of type {\tt color} may be provided, such as {\tt rgb(0,1,0)}, {\tt
+hsb(0.5,0.5,0.5)}, {\tt gray(0.2)}, {\tt colors.green + colors.red}, {\tt
+colors.yellow - colors.green}.
+
+The third option is a specified a numbered color from PyXPlot's {\it palette}.
+By default, this contains a series of visually distinctive colors which are,
+insofar as possible, also distinctive to users with most common forms of color
+blindness.  The first color is number~1, the second number~2, and so forth. As
+well as being accessible by number, these colors also form the default series
+which PyXPlot chooses for successive datasets when their colors are not
+individually specified.
+
 The current palette may be queried using the \indcmdt{show palette}, and
 changed using the \indcmdt{set palette}, which takes a comma-separated list of
 colors, as in the example:
@@ -118,11 +130,22 @@ set palette brickRed, limeGreen, cadetBlue
 \end{verbatim}
 
 \noindent The palette is treated as a cyclic list, and so in the above example,
-color number~4 would map to {\tt BrickRed}, as would color number~0. A list
-of all of the named colors which PyXPlot recognises is given in
-Section~\ref{sec:color_names}. The default palette which PyXPlot uses upon
-startup may be changed by setting up a configuration file, as described in
-Chapter~\ref{ch:configuration}.
+color number~4 would map to {\tt brickRed}, as would color numbers~1 and~8. The
+default palette which PyXPlot uses upon startup may be changed by setting up a
+configuration file, as described in Chapter~\ref{ch:configuration}.
+
+If a non-integer color is requested from the palette, for example color~1.5,
+then a color is returned which is half-way in between colors~1 and~2 in RGB
+space; in this case, brown. This can be used to produce custom color gradients,
+as the following example demonstrates (the {\tt colormap} plot style will be
+described in Section~\ref{sec:colormaps}):
+
+\vspace{2mm}
+\input{examples/tex/ex_colgradient_1.tex}
+\vspace{2mm}
+
+\centerline{\includegraphics[width=10cm]{examples/eps/ex_colgradient}}
+
 
 \subsection{Default settings}
 
@@ -718,10 +741,12 @@ which specifies that~20 different values of $u$ and~50 different values of $v$
 should be used, yielding a total of~1000 datapoints. The following example uses
 the {\tt lines} plot style to generate a sequence of cross-sections through a
 two-dimensional Gaussian surface:
+
 \vspace{2mm}
 \input{examples/tex/ex_datagrid_1.tex}
 \vspace{2mm}
-\centerline{\includegraphics[width=5cm]{examples/eps/ex_datagrid}}
+
+\centerline{\includegraphics[width=8cm]{examples/eps/ex_datagrid}}
 
 The ranges of values to use for $u$ and $v$ may alternatively be specified on a dataset-by-dataset
 basis within the plot command, as in the example
@@ -1566,6 +1591,7 @@ the real axis, and $y$ being the imaginary axis:
 \vspace{2mm}
 \input{examples/tex/ex_zeta_arg_1.tex}
 \vspace{2mm}
+
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_zeta_arg}}
 
 The \indcmdt{set samples grid} sets the dimensions of the grid of samples -- or
@@ -1591,6 +1617,7 @@ input datapoints:
 \vspace{2mm}
 \input{examples/tex/ex_quadrupole_1.tex}
 \vspace{2mm}
+
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_quadrupole}}
 
 \subsection{Custom color mappings}
@@ -1673,6 +1700,7 @@ complex argument of $f(z)$:
 \vspace{2mm}
 \input{examples/tex/ex_branch_cuts_1.tex}
 \vspace{2mm}
+
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_branch_cuts}}
 
 In the next example, three circular pools of red, green, and blue illumination are overlapped to show how colors mix together:
@@ -1680,6 +1708,7 @@ In the next example, three circular pools of red, green, and blue illumination a
 \vspace{2mm}
 \input{examples/tex/ex_spectrum_colmix1_1.tex}
 \vspace{2mm}
+
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_spectrum_colmix1}}
 
 The same is possible with CMYK colors, to demonstrate how substractive color mixing works:
@@ -1687,6 +1716,7 @@ The same is possible with CMYK colors, to demonstrate how substractive color mix
 \vspace{2mm}
 \input{examples/tex/ex_spectrum_colmix2_1.tex}
 \vspace{2mm}
+
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_spectrum_colmix2}}
 
 The function {\tt colors.wavelength(wlen,normalisation)} provides a color representation of any given wavelength of light, useful for producing representations of the electromagnetic spectrum:
@@ -1694,6 +1724,7 @@ The function {\tt colors.wavelength(wlen,normalisation)} provides a color repres
 \vspace{2mm}
 \input{examples/tex/ex_spectrum_1_1.tex}
 \vspace{2mm}
+
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_spectrum_1}}
 
 The function {\tt colors.spectrum(spectrum,normalisation)} takes a function as its first input, which should return a spectral energy distribution (in arbitrary units) as a function of wavelength. In this example, we show the colors of blackbodies of different temperatures. We renormalise their brightnesses by $T^{-4}$ to avoid saturating hot blackbodies to white:
@@ -1701,6 +1732,7 @@ The function {\tt colors.spectrum(spectrum,normalisation)} takes a function as i
 \vspace{2mm}
 \input{examples/tex/ex_spectrum_bbcol_1.tex}
 \vspace{2mm}
+
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_spectrum_bbcol}}
 
 As a final example, we use this function to plot the interference pattern seen when a wedge of stressed plastic, a birefrigent material, is viewed between crossed polars:
@@ -1708,6 +1740,7 @@ As a final example, we use this function to plot the interference pattern seen w
 \vspace{2mm}
 \input{examples/tex/ex_spectrum_biref_1.tex}
 \vspace{2mm}
+
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_spectrum_biref}}
 
 \subsection{Color scale bars}
@@ -1832,6 +1865,7 @@ the function $x^3/20+y^2$:
 \vspace{2mm}
 \input{examples/tex/ex_contourmap_1.tex}
 \vspace{2mm}
+
 \centerline{\includegraphics[width=10cm]{examples/eps/ex_contourmap}}
 \vspace{2mm}
 
@@ -1860,6 +1894,7 @@ simple example which draws a helix:
 \vspace{2mm}
 \input{examples/tex/ex_3d_helix_1.tex}
 \vspace{2mm}
+
 \centerline{\includegraphics[width=10cm]{examples/eps/ex_3d_helix}}
 \vspace{2mm}
 
@@ -1918,6 +1953,7 @@ part of $\log(x+iy)$:
 \vspace{2mm}
 \input{examples/tex/ex_surface_log_1.tex}
 \vspace{2mm}
+
 \centerline{\includegraphics[width=10cm]{examples/eps/ex_surface_log}}
 \vspace{2mm}
 

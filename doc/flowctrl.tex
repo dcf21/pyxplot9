@@ -579,6 +579,31 @@ assert version <  0.8  "This script is designed for PyXPlot 0.7"
 \end{verbatim}
 
 
+\section{Raising exceptions}
+
+PyXPlot's {\tt raise(e,s)} function is used to raise exceptions when error
+conditions are met.  Its first argument {\tt e} specifies the type of
+exception, and should be an object of type {\tt exception}. The second argument
+should be an error message string.  PyXPlot has a range of default exception
+types, which can be found as {\tt exception} objects in the module {\tt
+exceptions}. Alternatively, the object {\tt types.exception} may be called with
+a single string argument to make a new exception type. For example:
+
+\begin{verbatim}
+raise(exceptions.syntax , "Input could not be parsed")
+
+a=types.exception("user error")
+raise(a, "The user made a mistake")
+\end{verbatim}
+
+Alternatively, {\tt exception} objects have a method {\tt raise(s)} which can be called as follows:
+
+\begin{verbatim}
+a=types.exception("user error")
+a.raise("The user made a mistake")
+\end{verbatim}
+
+
 \section{Shell commands}
 
 Shell commands\index{shell commands!executing} may be executed directly from

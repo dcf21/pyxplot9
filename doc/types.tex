@@ -67,19 +67,6 @@ object.methodName(arguments)
 \section{Methods common to all data types}
 \label{sec:common_methods}
 
-\newcommand{\methdef}[2]{
-\vspace{5mm}
-\begin{samepage}
-\noindent
-{\large \bf #1}
-\newline
-\noindent
-The #1 method #2
-\indfun{#1}
-\end{samepage}
-
-}
-
 \methdef{class()}{returns the class prototype of an object.}
 \methdef{contents()}{returns a list of all the methods and internal variables of an object.}
 \methdef{data()}{returns a list of all the internal variables (not methods) of an object.}
@@ -88,11 +75,13 @@ The #1 method #2
 \methdef{type()}{returns the type of an object.}
 
 \section{The \texttt{boolean} type}
+\label{sec:boolean_methods}
 
 The \texttt{boolean} type has no methods other than those common to all types.
 Objects of type \texttt{boolean} have no methods other than those common to all types.
 
 \section{The \texttt{color} type}
+\label{sec:color_methods}
 
 \methdef{componentsCMYK()}{returns a vector CMYK representation of a color.}
 \methdef{componentsHSB()}{returns a vector HSB representation of a color.}
@@ -102,6 +91,7 @@ Objects of type \texttt{boolean} have no methods other than those common to all 
 \methdef{toRGB()}{returns color object containing an RGB representation of a color.}
 
 \section{The \texttt{date} type}
+\label{sec:date_methods}
 
 \methdef{toDayOfMonth()}{returns the day of the month of a date object in the current calendar.}
 \methdef{toDayWeekName()}{returns the name of the day of the week of a date object.}
@@ -118,6 +108,7 @@ Objects of type \texttt{boolean} have no methods other than those common to all 
 \methdef{toYear()}{returns the year in which a date object falls in the current calendar.}
 
 \section{The \texttt{dictionary} type}
+\label{sec:dictionary_methods}
 
 \methdef{hasKey($x$)}{returns a boolean indicating whether the key $x$ exists in the dictionary.}
 \methdef{items()}{returns a list of the [key,value] pairs in a dictionary.}
@@ -126,10 +117,12 @@ Objects of type \texttt{boolean} have no methods other than those common to all 
 \methdef{values()}{returns a list of the values in a dictionary.}
 
 \section{The \texttt{exception} type}
+\label{sec:exception_methods}
 
 \methdef{raise($x$)}{raises an exception with error message string $x$.}
 
 \section{The \texttt{fileHandle} type}
+\label{sec:fileHandle_methods}
 
 \methdef{close()}{closes a file handle.}
 \methdef{eof()}{returns a boolean flag to indicate whether the end of a file has been reached.}
@@ -155,6 +148,7 @@ Objects of type \texttt{function} have no methods other than those common to all
 \methdef{values()}{returns a list of the values in a instance.}
 
 \section{The \texttt{list} type}
+\label{sec:list_methods}
 
 \methdef{append($x$)}{appends the object $x$ to a list and returns the new list.}
 \methdef{extend($x$)}{appends the members of a list or vector $x$ to the operand and returns the new list.}
@@ -170,6 +164,7 @@ Objects of type \texttt{function} have no methods other than those common to all
 \methdef{vector()}{returns the elements in a list as a vector.}
 
 \section{The \texttt{matrix} type}
+\label{sec:matrix_methods}
 
 \methdef{det()}{returns the determinant of a square matrix.}
 \methdef{diagonal()}{returns a boolean indicating whether a matrix is diagonal.}
@@ -221,6 +216,7 @@ Objects of type \texttt{number} have no methods other than those common to all t
 Objects of type \texttt{type} have no methods other than those common to all types.
 
 \section{The \texttt{vector} type}
+\label{sec:vector_methods}
 
 \methdef{append($x$)}{appends the number $x$ to a vector and returns the new vector.}
 \methdef{extend($x$)}{appends the members of a list or vector $x$ to the operand and returns the new vector.}

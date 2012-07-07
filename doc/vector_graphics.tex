@@ -24,21 +24,18 @@
 \chapter{Producing vector graphics}
 \label{ch:vector_graphics}
 
-In the previous two chapters, we have seen how the \indcmdt{plot} may be used
-to produce single graphs of functions and \datafile s, how the \indcmdt{set
-terminal} can be used to produce graphical output in a wide range of different
-image formats (see Section~\ref{sec:set_terminal}), and how the \indcmdt{set
-papersize} can be used to produce PostScript output to fit on different sizes
-of paper (see Section~\ref{sec:set_papersize}). Often, however, there is a need
-to produce more sophisticated vector graphics.  For example, several plots may
-be wanted side-by-side, or some line-art annotations may be wanted on top of a
-graph. Additionally, PyXPlot can also produce technical diagrams as well as
-graphs. In this chapter, we turn our attention to such cases.
+This chapter provides a systematic description of how PyXPlot can be used to
+produce general-purpose vector graphics.  It also describes how to produce
+galleries of multiple graphs side-by-side, together with how graphs may be
+annotated with text or arrows. For more information about how to produce
+graphical output in various image formats, see Section~\ref{sec:set_terminal}.
+For more information about graph plotting, see Chapter~\ref{ch:plotting}.
 
 \section{Adding other vector graphics objects}
 
-In addition to graphs, a range of other objects can be placed on multiplot
-canvases:
+In addition to graphs, a range of other objects can be placed on graphics
+canvas:
+
 \begin{itemize}
 \item Rectangular boxes (the \indcmdt{box}).
 \item Circles and arcs (the {\tt arc} and \indcmdt{circle}s).
@@ -51,8 +48,29 @@ canvases:
 \item Text labels (the \indcmdt{text}).
 \end{itemize}
 Put together, these commands can be used to produce a wide range of vector
-graphics. In the remainder of this chapter, we describe these commands in turn,
-providing a variety of examples of their use.
+graphics. The remainder of this chapter describes each of these commands in
+turn, providing a variety of examples of their use.
+
+These commands all interface with PyXPlot's maths environment in common ways.
+For example, vector positions on the graphics canvas may be specified in three
+ways:
+
+\begin{itemize}
+\item Two comma-separated dimensionless numbers, taken to be in centimetres, e.g.\ {\tt 4,5}.
+\item Two comma-separated numbers with dimensions of length, e.g.\ {\tt 45*unit(mm), 13*unit(cm)}.
+\item As a vector, either dimensionless, or with units of length, e.g.\ {\tt vector(4,5)} or {\tt vector(13,25)*unit(mm)}.
+\end{itemize}
+
+Many of these commands take rotation angles as inputs: these may be specified either as dimensionless numbers, taken to be in degrees,
+or as values with physical units of angle, e.g.\ {\tt 0.25*unit(rev)}.
+
+Where these commands take colors as inputs, as elsewhere in PyXPlot, the color may be specified in one of three ways:
+
+\begin{itemize}
+\item As a number, referred to a color from a present palette; see Section~\ref{sec:palette}.
+\item As a recognised named color, e.g.\ {\tt red}; see Section~\ref{sec:color_names} for a list of these.
+\item As an object of type color, for example, {\tt rgb(0,1,0)}, {\tt hsb(0.5,0.5,0.5)}, {\tt gray(0.2)}, {\tt colors.green + colors.red}, {\tt colors.yellow - colors.green}.
+\end{itemize}
 
 \section{Multiplot mode}
 \label{sec:multiplot}

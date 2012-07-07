@@ -1,0 +1,8 @@
+a = [8,4,7,3,6,2]
+print a.sort()
+print a.reverse()
+b = []
+for i=1 to 4 { b.append([i,ordinal(i)]) ; }
+print b
+print b.sortOnElement(1)
+print b.sortOnElement(0)
