@@ -1,0 +1,4 @@
+print "hello".upper
+print "hello".upper()
+print "hello".methods
+

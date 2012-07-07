@@ -1,0 +1,4 @@
+f = sin
+print f
+g(x,y) = x(x(y))
+print g(f,1)
