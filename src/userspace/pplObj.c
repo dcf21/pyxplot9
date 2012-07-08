@@ -519,7 +519,7 @@ pplObj *pplObjDeepCpy(pplObj *out, pplObj *in, int deep, unsigned char outMalloc
     case PPLOBJ_MOD:
     case PPLOBJ_USER:
      {
-      pplObj       *item, v;
+      pplObj       *item;
       char         *key;
       dict         *d;
       dictIterator *di = ppl_dictIterateInit((dict *)in->auxil);
@@ -533,6 +533,7 @@ pplObj *pplObjDeepCpy(pplObj *out, pplObj *in, int deep, unsigned char outMalloc
       if (out->auxil==NULL) return NULL;
       while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
        {
+        pplObj v; v.refCount=1;
         if (!deep) pplObjCpy(&v,item,0,useMalloc,useMalloc);
         else       pplObjDeepCpy(&v,item,1,useMalloc,useMalloc);
         ppl_dictAppendCpy(d,key,&v,sizeof(pplObj));
@@ -542,7 +543,7 @@ pplObj *pplObjDeepCpy(pplObj *out, pplObj *in, int deep, unsigned char outMalloc
      }
     case PPLOBJ_LIST:
      {
-      pplObj       *item, v;
+      pplObj       *item;
       list         *l;
       listIterator *li = ppl_listIterateInit((list *)in->auxil);
       memcpy(out, in, sizeof(pplObj));
@@ -555,6 +556,7 @@ pplObj *pplObjDeepCpy(pplObj *out, pplObj *in, int deep, unsigned char outMalloc
       if (out->auxil==NULL) return NULL;
       while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
        {
+        pplObj v; v.refCount=1;
         if (!deep) pplObjCpy(&v,item,0,useMalloc,useMalloc);
         else       pplObjDeepCpy(&v,item,1,useMalloc,useMalloc);
         ppl_listAppendCpy(l,&v,sizeof(pplObj));

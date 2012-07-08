@@ -1057,12 +1057,12 @@ static int pplmethod_listSortOnCustom_slave(const void *a, const void *b)
   c->stackPtr++;
 
   // Push a
-  pplObjCpy(&c->stack[c->stackPtr], *ao, 1, 0, 1);
+  pplObjCpy(&c->stack[c->stackPtr], *ao, 0, 0, 1);
   c->stack[c->stackPtr].refCount=1;
   c->stackPtr++;
 
   // Push b
-  pplObjCpy(&c->stack[c->stackPtr], *bo, 1, 0, 1);
+  pplObjCpy(&c->stack[c->stackPtr], *bo, 0, 0, 1);
   c->stack[c->stackPtr].refCount=1;
   c->stackPtr++;
 
