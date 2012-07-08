@@ -30,6 +30,7 @@
 #include "gsl/gsl_blas.h"
 #include "gsl/gsl_eigen.h"
 #include "gsl/gsl_linalg.h"
+#include "gsl/gsl_math.h"
 #include "gsl/gsl_matrix.h"
 #include "gsl/gsl_permutation.h"
 #include "gsl/gsl_vector.h"
@@ -41,6 +42,7 @@
 #include "defaultObjs/defaultFuncs.h"
 #include "defaultObjs/defaultFuncsMacros.h"
 
+#include "expressions/expEval.h"
 #include "expressions/traceback_fns.h"
 #include "expressions/fnCall.h"
 
@@ -775,6 +777,77 @@ static void pplmethod_vectorExtend(ppl_context *c, pplObj *in, int nArgs, int *s
    }
  }
 
+static void pplmethod_vectorFilter(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  ppl_context *context = c;
+  char        *FunctionDescription = "filter(f)";
+  pplObj      *st = in[-1].self_this;
+  gsl_vector  *va = ((pplVector *)st->auxil)->v;
+  gsl_vector  *vo;
+  double      *ovec;
+  int          ovlen=0, i=0;
+  pplObj       v;
+  pplFunc     *fi;
+  pplExpr      dummy;
+  
+  if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
+  fi = (pplFunc *)in[0].auxil;
+  if ((fi==NULL)||(fi->functionType==PPL_FUNC_MAGIC)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Integration and differentiation operators are not suitable functions.", FunctionDescription); return; }
+
+  ovec = (double *)malloc(va->size * sizeof(double));
+  if (ovec==NULL) { *status=1; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); return; }
+
+  // Dummy expression object with dummy line number information
+  dummy.srcLineN = 0;
+  dummy.srcId    = 0;
+  dummy.srcFname = "<dummy>";
+  dummy.ascii    = "<filter(f) function>";
+
+  pplObjNum(&v,0,0,0);
+  v.refCount = 1;
+  ppl_unitsDimCpy(&v, st);
+
+  for (i=0; i<va->size; i++)
+   {
+    const int stkLevelOld = c->stackPtr;
+
+    // Push function object
+    pplObjCpy(&c->stack[c->stackPtr], &in[0], 0, 0, 1);
+    c->stack[c->stackPtr].refCount=1;
+    c->stackPtr++;
+
+    // Push a
+    v.real = gsl_vector_get(va,i);
+    pplObjCpy(&c->stack[c->stackPtr], &v, 0, 0, 1);
+    c->stack[c->stackPtr].refCount=1;
+    c->stackPtr++;
+
+    // Call function
+    c->errStat.errMsgExpr[0]='\0';
+    ppl_fnCall(c, &dummy, 0, 1, 1, 1);
+
+    // Propagate error if function failed
+    if (c->errStat.status)
+     {
+      *status=1;
+      *errType=ERR_TYPE;
+      sprintf(errText, "Error inside function supplied to the %s function: %s", FunctionDescription, c->errStat.errMsgExpr);
+      free(ovec);
+      return;
+     }
+
+    CAST_TO_BOOL(&c->stack[c->stackPtr-1]);
+    if (c->stack[c->stackPtr-1].real) ovec[ovlen++] = v.real;
+    while (c->stackPtr>stkLevelOld) { STACK_POP_LISTMETHOD; }
+   }
+
+  if (pplObjVector(&OUTPUT,0,1,ovlen)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); free(ovec); return; }
+  vo = ((pplVector *)(OUTPUT.auxil))->v;
+  for (i=0; i<ovlen; i++) gsl_vector_set(vo , i , ovec[i]);
+  ppl_unitsDimCpy(&OUTPUT,st); 
+  return;
+ }
+
 static void pplmethod_vectorInsert(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   long    p,i;
@@ -837,12 +910,170 @@ static void pplmethod_vectorList(ppl_context *c, pplObj *in, int nArgs, int *sta
   for (i=0; i<l; i++) { v.real = gsl_vector_get(vec,i); ppl_listAppendCpy(lo, &v, sizeof(pplObj)); }
  }
 
+static void pplmethod_vectorMap(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char       *FunctionDescription = "map(f)";
+  pplObj     *st = in[-1].self_this;
+  gsl_vector *vec = ((pplVector *)st->auxil)->v;
+  int         i;
+  gsl_vector *ovec;
+  pplObj      v, val2;
+  pplFunc    *fi;
+  pplExpr     dummy;
+  
+  if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
+  fi = (pplFunc *)in[0].auxil;
+  if ((fi==NULL)||(fi->functionType==PPL_FUNC_MAGIC)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Integration and differentiation operators are not suitable functions.", FunctionDescription); return; }
+  if (pplObjVector(&OUTPUT,0,1,vec->size)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  ovec = ((pplVector *)OUTPUT.auxil)->v;
+
+  // Dummy expression object with dummy line number information
+  dummy.srcLineN = 0;
+  dummy.srcId    = 0;
+  dummy.srcFname = "<dummy>";
+  dummy.ascii    = "<filter(f) function>";
+
+  pplObjNum(&v,0,0,0);
+  v.refCount = 1;
+  ppl_unitsDimCpy(&v, st);
+
+  for (i=0; i<vec->size; i++)
+   {
+    const int stkLevelOld = c->stackPtr;
+
+    // Push function object
+    pplObjCpy(&c->stack[c->stackPtr], &in[0], 0, 0, 1);
+    c->stack[c->stackPtr].refCount=1;
+    c->stackPtr++;
+
+    // Push a
+    v.real = gsl_vector_get(vec, i);
+    pplObjCpy(&c->stack[c->stackPtr], &v, 0, 0, 1);
+    c->stack[c->stackPtr].refCount=1;
+    c->stackPtr++;
+
+    // Call function
+    c->errStat.errMsgExpr[0]='\0';
+    ppl_fnCall(c, &dummy, 0, 1, 1, 1);
+
+    // Propagate error if function failed
+    if (c->errStat.status)
+     {
+      *status=1;
+      *errType=ERR_TYPE;
+      sprintf(errText, "Error inside function supplied to the %s function: %s", FunctionDescription, c->errStat.errMsgExpr);
+      return;
+     }
+
+    if (c->stack[c->stackPtr-1].objType != PPLOBJ_NUM)
+     {
+      *status=1;
+      *errType=ERR_TYPE;
+      sprintf(errText, "Error inside function supplied to the %s function: function should have returned number, but returned object of type <%s> for element %d.", FunctionDescription, pplObjTypeNames[c->stack[c->stackPtr-1].objType], i);
+      return;
+     }
+
+    if (i==0) memcpy(&val2, &c->stack[c->stackPtr-1], sizeof(pplObj));
+    else if (!ppl_unitsDimEqual(&val2, &c->stack[c->stackPtr-1]))
+     {
+      *status=1;
+      *errType=ERR_UNIT;
+      sprintf(errText, "Error inside function supplied to the %s function: function returned values with inconsistent units of <%s> and <%s>. All of the elements of a vector must have matching dimensions.", FunctionDescription, ppl_printUnit(c, &val2, NULL, NULL, 0, 1, 0), ppl_printUnit(c, &c->stack[c->stackPtr-1], NULL, NULL, 1, 1, 0));
+      return;
+     }
+
+    if (c->stack[c->stackPtr-1].flagComplex)
+     {
+      *status=1;
+      *errType=ERR_NUMERICAL;
+      sprintf(errText, "Error inside function supplied to the %s function: function returned a complex number for element %d; vectors can only hold real numbers.", FunctionDescription, i);
+      return;
+     }
+
+    gsl_vector_set(ovec, i, c->stack[c->stackPtr-1].real);
+    while (c->stackPtr>stkLevelOld) { STACK_POP_LISTMETHOD; }
+   }
+
+  return;
+ }
+
 static void pplmethod_vectorNorm(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   pplObj *st = in[-1].self_this;
   gsl_vector *v = ((pplVector *)st->auxil)->v;
   pplObjNum(&OUTPUT,0,gsl_blas_dnrm2(v),0);
   ppl_unitsDimCpy(&OUTPUT, st);
+ }
+
+static void pplmethod_vectorReduce(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char       *FunctionDescription = "reduce(f)";
+  const int   stkLevelOld = c->stackPtr;
+  int         i;
+  pplExpr     dummy;
+  pplObj     *st = in[-1].self_this;
+  gsl_vector *v = ((pplVector *)st->auxil)->v;
+  pplObj      val, val2;
+  pplFunc    *fi;
+  
+  if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
+  fi = (pplFunc *)in[0].auxil;
+  if ((fi==NULL)||(fi->functionType==PPL_FUNC_MAGIC)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Integration and differentiation operators are not suitable functions.", FunctionDescription); return; }
+  if (v->size < 2) { *status=1; *errType=ERR_RANGE; sprintf(errText, "The %s method cannot be called on vectors containing fewer than two elements. Supplied vector has %d element.", FunctionDescription, (int)v->size); return; }
+
+  // Dummy expression object with dummy line number information
+  dummy.srcLineN = 0;
+  dummy.srcId    = 0;
+  dummy.srcFname = "<dummy>";
+  dummy.ascii    = "<reduce(f) function>";
+
+  // Fetch first item from vector
+  pplObjNum(&val,0,gsl_vector_get(v,0),0);
+  val.refCount = 1;
+  ppl_unitsDimCpy(&val, st);
+  memcpy(&val2, &val, sizeof(pplObj));
+
+  for (i=1; i<v->size; i++)
+   {
+    // Push function object
+    pplObjCpy(&c->stack[c->stackPtr], &in[0], 0, 0, 1);
+    c->stack[c->stackPtr].refCount=1;
+    c->stackPtr++;
+
+    // Push old value
+    pplObjCpy(&c->stack[c->stackPtr], &val, 0, 0, 1);
+    c->stack[c->stackPtr].refCount=1;
+    c->stackPtr++;
+
+    // Push next value
+    val2.real = gsl_vector_get(v,i);
+    pplObjCpy(&c->stack[c->stackPtr], &val2, 0, 0, 1);
+    c->stack[c->stackPtr].refCount=1;
+    c->stackPtr++;
+
+    // Call function
+    c->errStat.errMsgExpr[0]='\0';
+    ppl_fnCall(c, &dummy, 0, 2, 1, 1);
+
+    // Garbage collect val
+    ppl_garbageObject(&val);
+
+    // Propagate error if function failed
+    if (c->errStat.status)
+     {
+      *status=1;
+      *errType=ERR_TYPE;
+      sprintf(errText, "Error inside function supplied to the %s function: %s", FunctionDescription, c->errStat.errMsgExpr);
+      return;
+     }
+
+    pplObjCpy(&val, &c->stack[c->stackPtr-1], 0, 0, 1);
+    val.refCount=1;
+    while (c->stackPtr>stkLevelOld) { STACK_POP_LISTMETHOD; }
+   }
+  pplObjCpy(&OUTPUT, &val, 0, 0, 1);
+  ppl_garbageObject(&val);
+  return;
  }
 
 static void pplmethod_vectorReverse(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -916,6 +1147,71 @@ static void pplmethod_listExtend(ppl_context *c, pplObj *in, int nArgs, int *sta
   pplObjCpy(&OUTPUT,st,0,0,1);
  }
 
+static void pplmethod_listFilter(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  ppl_context *context = c;
+  char    *FunctionDescription = "filter(f)";
+  pplObj  *st = in[-1].self_this;
+  list    *l  = (list *)st->auxil;
+  list    *ol;
+  pplObj  *item;
+  pplFunc *fi;
+  listIterator *li = ppl_listIterateInit(l);
+  pplExpr  dummy;
+  
+  if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
+  fi = (pplFunc *)in[0].auxil;
+  if ((fi==NULL)||(fi->functionType==PPL_FUNC_MAGIC)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Integration and differentiation operators are not suitable functions.", FunctionDescription); return; }
+  if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  ol = (list *)OUTPUT.auxil;
+
+  // Dummy expression object with dummy line number information
+  dummy.srcLineN = 0;
+  dummy.srcId    = 0;
+  dummy.srcFname = "<dummy>";
+  dummy.ascii    = "<filter(f) function>";
+
+  while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
+   {
+    const int stkLevelOld = c->stackPtr;
+
+    // Push function object
+    pplObjCpy(&c->stack[c->stackPtr], &in[0], 0, 0, 1);
+    c->stack[c->stackPtr].refCount=1;
+    c->stackPtr++;
+
+    // Push a
+    pplObjCpy(&c->stack[c->stackPtr], item, 0, 0, 1);
+    c->stack[c->stackPtr].refCount=1;
+    c->stackPtr++;
+
+    // Call function
+    c->errStat.errMsgExpr[0]='\0';
+    ppl_fnCall(c, &dummy, 0, 1, 1, 1);
+
+    // Propagate error if function failed
+    if (c->errStat.status)
+     {
+      *status=1;
+      *errType=ERR_TYPE;
+      sprintf(errText, "Error inside function supplied to the %s function: %s", FunctionDescription, c->errStat.errMsgExpr);
+      return;
+     }
+
+    CAST_TO_BOOL(&c->stack[c->stackPtr-1]);
+    if (c->stack[c->stackPtr-1].real)
+     {
+      pplObj v;
+      pplObjCpy(&v, item, 0, 1, 1);
+      v.refCount=1;
+      ppl_listAppendCpy(ol, &v, sizeof(v));
+     }
+    while (c->stackPtr>stkLevelOld) { STACK_POP_LISTMETHOD; }
+   }
+
+  return;
+ }
+
 static void pplmethod_listInsert(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   long    p;
@@ -938,6 +1234,68 @@ static void pplmethod_listLen(ppl_context *c, pplObj *in, int nArgs, int *status
  {
   list *l = (list *)in[-1].self_this->auxil;
   pplObjNum(&OUTPUT,0,l->length,0);
+ }
+
+static void pplmethod_listMap(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char    *FunctionDescription = "map(f)";
+  pplObj  *st = in[-1].self_this;
+  list    *l  = (list *)st->auxil;
+  list    *ol;
+  pplObj  *item;
+  pplFunc *fi;
+  pplExpr  dummy;
+  listIterator *li = ppl_listIterateInit(l);
+  
+  if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
+  fi = (pplFunc *)in[0].auxil;
+  if ((fi==NULL)||(fi->functionType==PPL_FUNC_MAGIC)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Integration and differentiation operators are not suitable functions.", FunctionDescription); return; }
+  if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  ol = (list *)OUTPUT.auxil;
+
+  // Dummy expression object with dummy line number information
+  dummy.srcLineN = 0;
+  dummy.srcId    = 0;
+  dummy.srcFname = "<dummy>";
+  dummy.ascii    = "<map(f) function>";
+
+  while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
+   {
+    const int stkLevelOld = c->stackPtr;
+
+    // Push function object
+    pplObjCpy(&c->stack[c->stackPtr], &in[0], 0, 0, 1);
+    c->stack[c->stackPtr].refCount=1;
+    c->stackPtr++;
+
+    // Push a
+    pplObjCpy(&c->stack[c->stackPtr], item, 0, 0, 1);
+    c->stack[c->stackPtr].refCount=1;
+    c->stackPtr++;
+
+    // Call function
+    c->errStat.errMsgExpr[0]='\0';
+    ppl_fnCall(c, &dummy, 0, 1, 1, 1);
+
+    // Propagate error if function failed
+    if (c->errStat.status)
+     {
+      *status=1;
+      *errType=ERR_TYPE;
+      sprintf(errText, "Error inside function supplied to the %s function: %s", FunctionDescription, c->errStat.errMsgExpr);
+      return;
+     }
+
+    {
+     pplObj v;
+     pplObjCpy(&v, &c->stack[c->stackPtr-1], 0, 1, 1);
+     v.refCount=1;
+     ppl_listAppendCpy(ol, &v, sizeof(v));
+    }
+    while (c->stackPtr>stkLevelOld) { STACK_POP_LISTMETHOD; }
+   }
+
+  return;
  }
 
 static void pplmethod_listMax(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -990,6 +1348,75 @@ static void pplmethod_listPop(ppl_context *c, pplObj *in, int nArgs, int *status
    }
   pplObjCpy(&OUTPUT,obj,0,0,1);
   ppl_garbageObject(obj);
+ }
+
+static void pplmethod_listReduce(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char     *FunctionDescription = "reduce(f)";
+  const int stkLevelOld = c->stackPtr;
+  pplExpr   dummy;
+  pplObj   *st = in[-1].self_this;
+  list     *l  = (list *)st->auxil;
+  pplObj   *item, v;
+  pplFunc  *fi;
+  listIterator *li = ppl_listIterateInit(l);
+  
+  if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
+  fi = (pplFunc *)in[0].auxil;
+  if ((fi==NULL)||(fi->functionType==PPL_FUNC_MAGIC)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Integration and differentiation operators are not suitable functions.", FunctionDescription); return; }
+  if (l->length < 2) { *status=1; *errType=ERR_RANGE; sprintf(errText, "The %s method cannot be called on lists containing fewer than two items. Supplied list has length %d.", FunctionDescription, l->length); return; }
+
+  // Dummy expression object with dummy line number information
+  dummy.srcLineN = 0;
+  dummy.srcId    = 0;
+  dummy.srcFname = "<dummy>";
+  dummy.ascii    = "<reduce(f) function>";
+
+  // Fetch first item from list
+  item = (pplObj *)ppl_listIterate(&li);
+  pplObjCpy(&v, item, 0, 0, 1);
+  v.refCount = 1;
+
+  while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
+   {
+    // Push function object
+    pplObjCpy(&c->stack[c->stackPtr], &in[0], 0, 0, 1);
+    c->stack[c->stackPtr].refCount=1;
+    c->stackPtr++;
+
+    // Push old value
+    pplObjCpy(&c->stack[c->stackPtr], &v, 0, 0, 1);
+    c->stack[c->stackPtr].refCount=1;
+    c->stackPtr++;
+
+    // Push next value
+    pplObjCpy(&c->stack[c->stackPtr], item, 0, 0, 1);
+    c->stack[c->stackPtr].refCount=1;
+    c->stackPtr++;
+
+    // Call function
+    c->errStat.errMsgExpr[0]='\0';
+    ppl_fnCall(c, &dummy, 0, 2, 1, 1);
+
+    // Garbage collect v
+    ppl_garbageObject(&v);
+
+    // Propagate error if function failed
+    if (c->errStat.status)
+     {
+      *status=1;
+      *errType=ERR_TYPE;
+      sprintf(errText, "Error inside function supplied to the %s function: %s", FunctionDescription, c->errStat.errMsgExpr);
+      return;
+     }
+
+    pplObjCpy(&v, &c->stack[c->stackPtr-1], 0, 0, 1);
+    v.refCount=1;
+    while (c->stackPtr>stkLevelOld) { STACK_POP_LISTMETHOD; }
+   }
+  pplObjCpy(&OUTPUT, &v, 0, 0, 1);
+  ppl_garbageObject(&v);
+  return;
  }
 
 static void pplmethod_listReverse(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -1628,21 +2055,27 @@ void pplObjMethodsInit(ppl_context *c)
   // Vector methods
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"append",1,1,1,1,1,0,(void *)pplmethod_vectorAppend, "append(x)", "\\mathrm{append}@<@0@>", "append(x) appends the object x to a vector");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"extend",1,1,0,0,0,0,(void *)pplmethod_vectorExtend, "extend(x)", "\\mathrm{extend}@<@0@>", "extend(x) appends the members of the list x to the end of a vector");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"filter",1,1,0,0,0,0,(void *)pplmethod_vectorFilter, "filter(f)", "\\mathrm{filter}@<@0}@>", "filter(f) takes a pointer to a function of one argument, f(a). It calls the function for every element of the vector, and returns a new vector of those elements for which f(a) tests true");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"insert",2,2,0,0,0,0,(void *)pplmethod_vectorInsert, "insert(n,x)", "\\mathrm{insert}@<@0@>", "insert(n,x) inserts the object x into a vector at position n");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"len",0,0,1,1,1,1,(void *)pplmethod_vectorLen, "len()", "\\mathrm{len}@<@>", "len() returns the number of dimensions of a vector");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"list",0,0,1,1,1,1,(void *)pplmethod_vectorList, "list()", "\\mathrm{list}@<@>", "list() returns a list representation of a vector");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"map",1,1,0,0,0,0,(void *)pplmethod_vectorMap, "map(f)", "\\mathrm{map}@<@0}@>", "map(f) takes a pointer to a function of one argument, f(a). It calls the function for every element of the vector, and returns a vector of the results");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"norm",0,0,1,1,1,1,(void *)pplmethod_vectorNorm, "norm()", "\\mathrm{norm}@<@>", "norm() returns the norm (quadrature sum) of a vector's elements");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"reduce",1,1,0,0,0,0,(void *)pplmethod_vectorReduce, "reduce(f)", "\\mathrm{reduce}@<@0}@>", "reduce(f) takes a pointer to a function of two arguments. It first calls f(a,b) on the first two elements of the vector, and then continues through the vector calling f(a,b) on the result and the next item in the vector. The final result is returned");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"reverse",0,0,1,1,1,1,(void *)pplmethod_vectorReverse, "reverse()", "\\mathrm{reverse}@<@>", "reverse() reverses the order of the elements of a vector");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"sort",0,0,1,1,1,1,(void *)pplmethod_vectorSort, "sort()", "\\mathrm{sort}@<@>", "sort() sorts the members of a vector");
 
   // List methods
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"append",1,1,0,0,0,0,(void *)pplmethod_listAppend, "append(x)", "\\mathrm{append}@<@0}@>", "append(x) appends the object x to a list");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"extend",1,1,0,0,0,0,(void *)pplmethod_listExtend, "extend(x)", "\\mathrm{extend}@<@0}@>", "extend(x) appends the members of the list x to the end of a list");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"filter",1,1,0,0,0,0,(void *)pplmethod_listFilter, "filter(f)", "\\mathrm{filter}@<@0}@>", "filter(f) takes a pointer to a function of one argument, f(a). It calls the function for every element of the list, and returns a new list of those elements for which f(a) tests true");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"insert",2,2,0,0,0,0,(void *)pplmethod_listInsert, "insert(n,x)", "\\mathrm{insert}@<@0@>", "insert(n,x) inserts the object x into a list at position n");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"len",0,0,1,1,1,1,(void *)pplmethod_listLen, "len()", "\\mathrm{len}@<@>", "len() returns the length of a list");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"map",1,1,0,0,0,0,(void *)pplmethod_listMap, "map(f)", "\\mathrm{map}@<@0}@>", "map(f) takes a pointer to a function of one argument, f(a). It calls the function for every element of the list, and returns a list of the results");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"max",0,0,1,1,1,1,(void *)pplmethod_listMax, "max()", "\\mathrm{max}@<@>", "max() returns the highest-valued item in a list");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"min",0,0,1,1,1,1,(void *)pplmethod_listMin, "min()", "\\mathrm{min}@<@>", "min() returns the lowest-valued item in a list");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"pop",0,1,1,1,1,1,(void *)pplmethod_listPop, "pop()", "\\mathrm{pop}@<@0@>", "pop(n) removes the nth item from a list and returns it. If n is not specified, the last list item is popped");
+  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"reduce",1,1,0,0,0,0,(void *)pplmethod_listReduce, "reduce(f)", "\\mathrm{reduce}@<@0}@>", "reduce(f) takes a pointer to a function of two arguments. It first calls f(a,b) on the first two elements of the list, and then continues through the list calling f(a,b) on the result and the next item in the list. The final result is returned");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"reverse",0,0,1,1,1,1,(void *)pplmethod_listReverse, "reverse()", "\\mathrm{reverse}@<@>", "reverse() reverses the order of the members of a list");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"sort",0,0,1,1,1,1,(void *)pplmethod_listSort, "sort()", "\\mathrm{sort}@<@>", "sort() sorts the members of a list");
   ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"sortOn",1,1,0,0,0,0,(void *)pplmethod_listSortOnCustom, "sortOn(f)", "\\mathrm{sortOn}@<@0@>", "sortOn(f) sorts the members of a list using the user-supplied function f(a,b) to determine the sort order. f should return 1, 0 or -1 depending whether a>b, a==b or a<b");

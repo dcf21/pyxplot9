@@ -1066,7 +1066,7 @@ void ppldata_fromFuncs(ppl_context *c, dataTable **out, pplExpr **fnlist, int fn
     expectedNrows = (*out)->Nrows+1;
     if (!(*status))
      {
-      ppldata_ApplyUsingList(c, *out, usingExprs, labelExpr, selectExpr, continuity, &discontinuity2, NULL, colData, fnlist_len+offset, buffer, 0, NULL, i, 0, 0, DATAFILE_COL, NULL, 0, NULL, 0, status, errtext, errCount, iterDepth);
+      ppldata_ApplyUsingList(c, *out, usingExprs, labelExpr, selectExpr, continuity, &discontinuity2, NULL, colData, fnlist_len+offset-1, buffer, 0, NULL, i, 0, 0, DATAFILE_COL, NULL, 0, NULL, 0, status, errtext, errCount, iterDepth);
      } else {
       if (!sampleGrid) discontinuity2 = 1;
      }
@@ -1115,7 +1115,9 @@ void ppldata_fromVectors(ppl_context *c, dataTable **out, pplObj *objList, int o
     autoUsingExprs=1;
     if ((*status=ppldata_autoUsingList(c, usingExprs, Ncols=objListLen, errtext))) return;
    }
-  for (i=0; i<objListLen; i++) v[i] = ((pplVector *)objList[0].auxil)->v;
+  for (i=0; i<objListLen; i++) v[i] = ((pplVector *)objList[i].auxil)->v;
+  for (i=0; i<objListLen; i++) pplObjNum(colData+i+1,0,0,0);
+  for (i=0; i<objListLen; i++) colData[i+1].refCount=1;
   for (i=0; i<objListLen; i++) ppl_unitsDimCpy(colData+i+1, objList+i);
 
   // If sortBy is not null, add it to using list
@@ -1138,7 +1140,7 @@ void ppldata_fromVectors(ppl_context *c, dataTable **out, pplObj *objList, int o
     if (cancellationFlag) break;
     pplObjNum(colData+0,0,i,0);
     for (j=0; j<objListLen; j++) colData[j+1].real = gsl_vector_get(v[j],i);
-    ppldata_ApplyUsingList(c, *out, usingExprs, labelExpr, selectExpr, continuity, &discontinuity, NULL, colData, objListLen+1, buffer, 0, NULL, i, 0, 0, DATAFILE_COL, NULL, 0, NULL, 0, status, errtext, errCount, iterDepth);
+    ppldata_ApplyUsingList(c, *out, usingExprs, labelExpr, selectExpr, continuity, &discontinuity, NULL, colData, objListLen, buffer, 0, NULL, i, 0, 0, DATAFILE_COL, NULL, 0, NULL, 0, status, errtext, errCount, iterDepth);
    }
 
   // If data is to be sorted, sort it now
@@ -1510,10 +1512,11 @@ void ppldata_fromCmd(ppl_context *c, dataTable **out, parserLine *pl, parserOutp
          int l2;
          pplObj *obj = ppl_expEval(c, exprList[i], &j, 0, iterDepth);
          if (c->errStat.status) { *status=1; sprintf(errtext, "Could not evaluate vector expressions."); for (j=0; j<i; j++) ppl_garbageObject(vecs+j); STACK_CLEAN; if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
-         if (obj->objType==PPLOBJ_VEC) { *status=1; sprintf(errtext, "Vector data supplied to other columns, but columns %d evaluated to an object of type <%s>.", i+1, pplObjTypeNames[obj->objType]); for (j=0; j<i; j++) ppl_garbageObject(vecs+j); STACK_CLEAN; if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
+         if (obj->objType!=PPLOBJ_VEC) { *status=1; sprintf(errtext, "Vector data supplied to other columns, but columns %d evaluated to an object of type <%s>.", i+1, pplObjTypeNames[obj->objType]); for (j=0; j<i; j++) ppl_garbageObject(vecs+j); STACK_CLEAN; if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
          l2 = ((pplVector *)first->auxil)->v->size;
          if (l!=l2) { *status=1; sprintf(errtext, "Data supplied as a list of vectors, but they have varying lengths, including %d (vector %d) and %d (vector %d).", l, 1, l2, i+1); for (j=0; j<i; j++) ppl_garbageObject(vecs+j); STACK_CLEAN; if (DEBUG) ppl_log(&c->errcontext, errtext); return; }
          pplObjCpy(vecs+i,obj,0,0,1);
+         vecs[i].refCount = 1;
          STACK_CLEAN;
         }
        if (wildcardMatchNumber<=0) ppldata_fromVectors(c, out, vecs, Nexprs, usingExprs, autoUsingList, Ncols, NusingObjs, labelExpr, selectExpr, sortBy, continuity, status, errtext, errCount, iterDepth);

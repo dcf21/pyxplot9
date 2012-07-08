@@ -413,18 +413,9 @@ char *ppl_canvas_item_textify(ppl_context *c, canvas_item *ptr, char *output)
      {
       if (!pd->function)
        {
-        if (pd->filename != NULL)
+        if ( (pd->filename != NULL) || (pd->vectors != NULL) )
          {
           output[i++]=' '; ppl_strEscapify(pd->filename, output+i); i+=strlen(output+i); // Filename of datafile we are plotting
-         }
-        else if (pd->vectors != NULL)
-         {
-          for (j=0; j<pd->NFunctions; j++) // Print out the list of functions which we are plotting
-           {
-            output[i++]=(j!=0)?':':' ';
-            pplObjPrint(c,&pd->vectors[j],NULL,output+i,ppl_min(250,LSTR_LENGTH-i),0,0);
-            i+=strlen(output+i);
-           }
          }
        }
       else
@@ -495,20 +486,11 @@ char *ppl_canvas_item_textify(ppl_context *c, canvas_item *ptr, char *output)
       if (pd->parametric) { sprintf(output+i, " parametric"); i+=strlen(output+i); }
       if (pd->TRangeSet)  { sprintf(output+i, " [%s:%s]", ppl_unitsNumericDisplay(c,&pd->Tmin,0,0,0), ppl_unitsNumericDisplay(c,&pd->Tmax,1,0,0)); i+=strlen(output+i); }
       if (pd->VRangeSet)  { sprintf(output+i, " [%s:%s]", ppl_unitsNumericDisplay(c,&pd->Vmin,0,0,0), ppl_unitsNumericDisplay(c,&pd->Vmax,1,0,0)); i+=strlen(output+i); }
-      if (!pd->function)
+      if ( (!pd->function) || (pd->vectors != NULL) )
        {
         if (pd->filename != NULL)
          {
           output[i++]=' '; ppl_strEscapify(pd->filename, output+i); i+=strlen(output+i); // Filename of datafile we are plotting
-         }
-        else if (pd->vectors != NULL)
-         {
-          for (j=0; j<pd->NFunctions; j++) // Print out the list of functions which we are plotting
-           {
-            output[i++]=(j!=0)?':':' ';
-            pplObjPrint(c,&pd->vectors[j],NULL,output+i,ppl_min(250,LSTR_LENGTH-i),0,0);
-            i+=strlen(output+i);
-           }
          }
        }
       else
@@ -1527,10 +1509,11 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
          int l2;
          pplObj *obj = ppl_expEval(c, exprList[i], &j, 0, iterDepth);
          if (c->errStat.status) { sprintf(c->errStat.errBuff,"Could not evaluate vector expressions."); TBADDP; ppl_tbWrite(c); ppl_tbClear(c); for (j=0; j<i; j++) ppl_garbageObject(vecs+j); STACK_CLEANP; free(new); return 1; }
-         if (obj->objType==PPLOBJ_VEC) { sprintf(c->errcontext.tempErrStr,"Vector data supplied to other columns, but columns %d evaluated to an object of type <%s>.", i+1, pplObjTypeNames[obj->objType]); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); for (j=0; j<i; j++) ppl_garbageObject(vecs+j); STACK_CLEANP; free(new); return 1; }
+         if (obj->objType!=PPLOBJ_VEC) { sprintf(c->errcontext.tempErrStr,"Vector data supplied to other columns, but columns %d evaluated to an object of type <%s>.", i+1, pplObjTypeNames[obj->objType]); ppl_error(&c->errcontext, ERR_TYPE, -1, -1, NULL); for (j=0; j<i; j++) ppl_garbageObject(vecs+j); STACK_CLEANP; free(new); return 1; }
          l2 = ((pplVector *)first->auxil)->v->size;
          if (l!=l2) { sprintf(c->errcontext.tempErrStr,"Data supplied as a list of vectors, but they have varying lengths, including %d (vector %d) and %d (vector %d).", l, 1, l2, i+1); ppl_error(&c->errcontext, ERR_NUMERICAL, -1, -1, NULL); for (j=0; j<i; j++) ppl_garbageObject(vecs+j); STACK_CLEANP; free(new); return 1; }
          pplObjCpy(vecs+i,obj,0,0,1);
+         vecs[i].refCount = 1;
          STACK_CLEANP;
         }
        if (wildcardMatchNumber<=0)
@@ -1538,9 +1521,11 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
          new->function   = 0;
          new->NFunctions = Nexprs;
          new->vectors    = (pplObj *)malloc(Nexprs*sizeof(pplObj));
-         new->functions  = NULL;
-         if (new->vectors==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory (U)."); for (i=0; i<Nexprs; i++) ppl_garbageObject(vecs+i); free(new); return 1; }
+         new->functions  = (pplExpr **)malloc(Nexprs*sizeof(pplExpr *));
+         if ( (new->vectors==NULL) || (new->functions==NULL) )
+           { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory (U)."); for (i=0; i<Nexprs; i++) ppl_garbageObject(vecs+i); free(new); return 1; }
          memcpy(new->vectors, vecs, Nexprs*sizeof(pplObj));
+         for (i=0; i<Nexprs; i++) new->functions[i] = pplExpr_cpy(exprList[i]);
         }
        else
         {

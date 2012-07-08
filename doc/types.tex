@@ -152,11 +152,14 @@ Objects of type \texttt{function} have no methods other than those common to all
 
 \methdef{append($x$)}{appends the object $x$ to a list and returns the new list.}
 \methdef{extend($x$)}{appends the members of a list or vector $x$ to the operand and returns the new list.}
+\methdef{filter($f$)}{takes a pointer to a function of one argument, $f(a)$. It calls the function for every element of the list, and returns a new list of those elements for which $f(a)$ tests true.}
 \methdef{insert$n,x$)}{inserts the number $x$ into a list at position $n$, and returns the new list.}
 \methdef{len()}{returns the number of elements in a list.}
+\methdef{map($f$)}{takes a pointer to a function of one argument, $f(a)$. It calls the function for every element of the list, and returns a list of the results.}
 \methdef{max()}{returns the highest-valued item in a list.}
 \methdef{min()}{returns the lowest-valued item in a list.}
 \methdef{pop()}{returns the last item in a list, and removes it from the list.}
+\methdef{reduce($f$)}{takes a pointer to a function of two arguments. It first calls $f(a,b)$ on the first two elements of the list, and then continues through the list calling $f(a,b)$ on the result and the next item in the list. The final result is returned.}
 \methdef{reverse()}{reverses the order of the members of a list, and returns the new list.}
 \methdef{sort()}{sorts the members of a list into ascending order, and returns the new list.}
 \methdef{sortOn($f$)}{sorts the members of a list using the user-supplied function $f(a,b)$ to determine the sort order. $f$ should return $1$, $0$ or $-1$ depending whether $a>b$, $a=b$ or $a<b$.}
@@ -220,10 +223,13 @@ Objects of type \texttt{type} have no methods other than those common to all typ
 
 \methdef{append($x$)}{appends the number $x$ to a vector and returns the new vector.}
 \methdef{extend($x$)}{appends the members of a list or vector $x$ to the operand and returns the new vector.}
+\methdef{filter($f$)}{takes a pointer to a function of one argument, $f(a)$. It calls the function for every element of the vector, and returns a new vector of those elements for which $f(a)$ tests true.}
 \methdef{insert($n,x$)}{inserts the number $x$ into a vector at position $n$, and returns the new vector.}
 \methdef{len()}{returns the number of elements in a vector.}
 \methdef{list()}{returns the elements in a vector as a list.}
+\methdef{map($f$)}{takes a pointer to a function of one argument, $f(a)$. It calls the function for every element of the vector, and returns a vector of the results.}
 \methdef{norm()}{returns the quadrature sum of the elements in a vector.}
+\methdef{reduce($f$)}{takes a pointer to a function of two arguments. It first calls $f(a,b)$ on the first two elements of the vector, and then continues through the vector calling $f(a,b)$ on the result and the next item in the vector. The final result is returned.}
 \methdef{reverse()}{reverses the order of the elements of a vector, and returns the new vector.}
 \methdef{sort()}{sorts the elements of a vector into ascending order, and returns the new vector.}
 
