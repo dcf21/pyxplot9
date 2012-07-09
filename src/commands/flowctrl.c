@@ -357,6 +357,28 @@ void ppl_directive_foreach(ppl_context *c, parserLine *pl, parserOutput *in, int
       if ((c->shellBroken)||(c->shellContinued)||(c->shellReturned)||(c->shellExiting)) break;
      }
    }
+  else if ((iter->objType == PPLOBJ_DICT) || (iter->objType == PPLOBJ_MOD) || (iter->objType == PPLOBJ_USER)) // Iterate over dictionary
+   {
+    dict         *din = (dict *)iter->auxil;
+    dictIterator *di  = ppl_dictIterateInit(din);
+    pplObj       *obj;
+    char         *key, *cpy;
+    while (((obj=(pplObj*)ppl_dictIterate(&di,&key))!=NULL) && !FOREACH_STOP)
+     {
+      pplObj *varObj, vartmp;
+      ppl_contextGetVarPointer(c, varname, &varObj, &vartmp);
+      cpy = (char *)malloc(strlen(key)+1);
+      if (cpy==NULL) { ppl_contextRestoreVarPointer(c, varname, &vartmp); break; }
+      strcpy(cpy, key);
+      pplObjStr(varObj, varObj->amMalloced, 1, cpy);
+      ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
+      ppl_contextRestoreVarPointer(c, varname, &vartmp);
+      if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"foreach loop"); }
+      while (c->stackPtr>stkLevelOld) { STACK_POP; }
+      if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; continue; }
+      if ((c->shellBroken)||(c->shellContinued)||(c->shellReturned)||(c->shellExiting)) break;
+     }
+   }
   else
    {
     sprintf(c->errStat.errBuff,"Cannot iterate over an object of type <%s>.",pplObjTypeNames[iter->objType]);
