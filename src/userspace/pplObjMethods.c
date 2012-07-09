@@ -789,7 +789,9 @@ static void pplmethod_vectorFilter(ppl_context *c, pplObj *in, int nArgs, int *s
   pplObj       v;
   pplFunc     *fi;
   pplExpr      dummy;
-  
+
+  if (c->stackPtr > ALGEBRA_STACK-4) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
+
   if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
   fi = (pplFunc *)in[0].auxil;
   if ((fi==NULL)||(fi->functionType==PPL_FUNC_MAGIC)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Integration and differentiation operators are not suitable functions.", FunctionDescription); return; }
@@ -844,7 +846,7 @@ static void pplmethod_vectorFilter(ppl_context *c, pplObj *in, int nArgs, int *s
   if (pplObjVector(&OUTPUT,0,1,ovlen)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); free(ovec); return; }
   vo = ((pplVector *)(OUTPUT.auxil))->v;
   for (i=0; i<ovlen; i++) gsl_vector_set(vo , i , ovec[i]);
-  ppl_unitsDimCpy(&OUTPUT,st); 
+  ppl_unitsDimCpy(&OUTPUT,st);
   return;
  }
 
@@ -920,7 +922,9 @@ static void pplmethod_vectorMap(ppl_context *c, pplObj *in, int nArgs, int *stat
   pplObj      v, val2;
   pplFunc    *fi;
   pplExpr     dummy;
-  
+
+  if (c->stackPtr > ALGEBRA_STACK-4) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
+
   if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
   fi = (pplFunc *)in[0].auxil;
   if ((fi==NULL)||(fi->functionType==PPL_FUNC_MAGIC)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Integration and differentiation operators are not suitable functions.", FunctionDescription); return; }
@@ -1015,7 +1019,9 @@ static void pplmethod_vectorReduce(ppl_context *c, pplObj *in, int nArgs, int *s
   gsl_vector *v = ((pplVector *)st->auxil)->v;
   pplObj      val, val2;
   pplFunc    *fi;
-  
+
+  if (c->stackPtr > ALGEBRA_STACK-4) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
+
   if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
   fi = (pplFunc *)in[0].auxil;
   if ((fi==NULL)||(fi->functionType==PPL_FUNC_MAGIC)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Integration and differentiation operators are not suitable functions.", FunctionDescription); return; }
@@ -1158,7 +1164,9 @@ static void pplmethod_listFilter(ppl_context *c, pplObj *in, int nArgs, int *sta
   pplFunc *fi;
   listIterator *li = ppl_listIterateInit(l);
   pplExpr  dummy;
-  
+
+  if (c->stackPtr > ALGEBRA_STACK-4) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
+
   if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
   fi = (pplFunc *)in[0].auxil;
   if ((fi==NULL)||(fi->functionType==PPL_FUNC_MAGIC)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Integration and differentiation operators are not suitable functions.", FunctionDescription); return; }
@@ -1246,7 +1254,9 @@ static void pplmethod_listMap(ppl_context *c, pplObj *in, int nArgs, int *status
   pplFunc *fi;
   pplExpr  dummy;
   listIterator *li = ppl_listIterateInit(l);
-  
+
+  if (c->stackPtr > ALGEBRA_STACK-4) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
+
   if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
   fi = (pplFunc *)in[0].auxil;
   if ((fi==NULL)||(fi->functionType==PPL_FUNC_MAGIC)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Integration and differentiation operators are not suitable functions.", FunctionDescription); return; }
@@ -1360,7 +1370,9 @@ static void pplmethod_listReduce(ppl_context *c, pplObj *in, int nArgs, int *sta
   pplObj   *item, v;
   pplFunc  *fi;
   listIterator *li = ppl_listIterateInit(l);
-  
+
+  if (c->stackPtr > ALGEBRA_STACK-4) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
+
   if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
   fi = (pplFunc *)in[0].auxil;
   if ((fi==NULL)||(fi->functionType==PPL_FUNC_MAGIC)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Integration and differentiation operators are not suitable functions.", FunctionDescription); return; }
@@ -1523,6 +1535,8 @@ static void pplmethod_listSortOnCustom(ppl_context *c, pplObj *in, int nArgs, in
   pplFunc *fi;
   int      fail;
   listIterator *li = ppl_listIterateInit(l);
+
+  if (c->stackPtr > ALGEBRA_STACK-4) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
 
   if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
   fi = (pplFunc *)in[0].auxil;
@@ -2003,84 +2017,84 @@ void pplObjMethodsInit(ppl_context *c)
    {
     dict *d = pplObjMethods[i] = ppl_dictInit(1);
     if (d==NULL) ppl_fatal(&c->errcontext,__FILE__,__LINE__,"Out of memory.");
-    ppl_addSystemFunc(d,"class"   ,0,0,1,1,1,1,(void *)&pplmethod_class   , "class()", "\\mathrm{class}@<@>", "class() returns the class prototype of an object");
-    ppl_addSystemFunc(d,"contents",0,0,1,1,1,1,(void *)&pplmethod_contents, "contents()", "\\mathrm{contents}@<@>", "contents() returns a list of all the methods and internal variables of an object");
-    ppl_addSystemFunc(d,"data"    ,0,0,1,1,1,1,(void *)&pplmethod_data    , "data()", "\\mathrm{data}@<@>", "data() returns a list of all the internal variables (not methods) of an object");
-    ppl_addSystemFunc(d,"methods" ,0,0,1,1,1,1,(void *)&pplmethod_methods , "methods()", "\\mathrm{methods}@<@>", "methods() returns a list of the methods of an object");
-    ppl_addSystemFunc(d,"str"     ,0,0,1,1,1,1,(void *)&pplmethod_str     , "str()", "\\mathrm{str}@<@>", "str() returns a string representation of an object");
-    ppl_addSystemFunc(d,"type"    ,0,0,1,1,1,1,(void *)&pplmethod_type    , "type()", "\\mathrm{type}@<@>", "type() returns the type of an object");
+    ppl_addSystemMethod(d,"class"   ,0,0,1,1,1,1,(void *)&pplmethod_class   , "class()", "\\mathrm{class}@<@>", "class() returns the class prototype of an object");
+    ppl_addSystemMethod(d,"contents",0,0,1,1,1,1,(void *)&pplmethod_contents, "contents()", "\\mathrm{contents}@<@>", "contents() returns a list of all the methods and internal variables of an object");
+    ppl_addSystemMethod(d,"data"    ,0,0,1,1,1,1,(void *)&pplmethod_data    , "data()", "\\mathrm{data}@<@>", "data() returns a list of all the internal variables (not methods) of an object");
+    ppl_addSystemMethod(d,"methods" ,0,0,1,1,1,1,(void *)&pplmethod_methods , "methods()", "\\mathrm{methods}@<@>", "methods() returns a list of the methods of an object");
+    ppl_addSystemMethod(d,"str"     ,0,0,1,1,1,1,(void *)&pplmethod_str     , "str()", "\\mathrm{str}@<@>", "str() returns a string representation of an object");
+    ppl_addSystemMethod(d,"type"    ,0,0,1,1,1,1,(void *)&pplmethod_type    , "type()", "\\mathrm{type}@<@>", "type() returns the type of an object");
    }
 
   // String methods
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"append"    ,1,1,0,0,0,0,(void *)&pplmethod_strAppend    , "append(x)", "\\mathrm{append}@<@1@>", "append(x) appends the string x to the end of a string");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"beginsWith",1,1,0,0,0,0,(void *)&pplmethod_strBeginsWith, "beginsWith(x)", "\\mathrm{beginsWith}@<@1@>", "beginsWith(x) returns a boolean indicating whether a string begins with the substring x");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"endsWith"  ,1,1,0,0,0,0,(void *)&pplmethod_strEndsWith  , "endsWith(x)", "\\mathrm{endsWith}@<@1@>", "endsWith(x) returns a boolean indicating whether a string ends with the substring x");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"find"      ,1,1,0,0,0,0,(void *)&pplmethod_strFind      , "find(x)", "\\mathrm{find}@<@1@>", "find(x) returns the position of the first occurrence of x in a string, or -1 if it is not found");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"findAll"   ,1,1,0,0,0,0,(void *)&pplmethod_strFindAll   , "findAll(x)", "\\mathrm{findAll}@<@1@>", "findAll(x) returns a list of the positions where the substring x occurs in a string");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"isalnum"   ,0,0,1,1,1,1,(void *)&pplmethod_strisalnum   , "isalnum()", "\\mathrm{isalnum}@<@>", "isalnum() returns a boolean indicating whether all of the characters of a string are alphanumeric");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"isalpha"   ,0,0,1,1,1,1,(void *)&pplmethod_strisalpha   , "isalpha()", "\\mathrm{isalpha}@<@>", "isalpha() returns a boolean indicating whether all of the characters of a string are alphabetic");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"isdigit"   ,0,0,1,1,1,1,(void *)&pplmethod_strisdigit   , "isdigit()", "\\mathrm{isdigit}@<@>", "isdigit() returns a boolean indicating whether all of the characters of a string are numeric");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"len"       ,0,0,1,1,1,1,(void *)&pplmethod_strLen       , "len()", "\\mathrm{len}@<@>", "len() returns the length of a string");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"lower"     ,0,0,1,1,1,1,(void *)&pplmethod_strLower     , "lower()", "\\mathrm{lower}@<@>", "lower() converts a string to lowercase");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"split"     ,0,0,1,1,1,1,(void *)&pplmethod_strSplit     , "split()", "\\mathrm{split}@<@>", "split() returns a list of all the whitespace-separated words in a string");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"splitOn"   ,1,1e3,0,0,0,0,(void *)&pplmethod_strSplitOn , "splitOn(x,...)", "\\mathrm{splitOn}@<@0@>", "splitOn(x,...) splits a string whenever it encounters any of the substrings supplied as arguments, and returns a list of the split string segments");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"lstrip"    ,0,0,1,1,1,1,(void *)&pplmethod_strLStrip    , "lstrip()", "\\mathrm{lstrip}@<@>", "lstrip() strips whitespace off the beginning of a string");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"strip"     ,0,0,1,1,1,1,(void *)&pplmethod_strStrip     , "strip()", "\\mathrm{strip}@<@>", "strip() strips whitespace off the beginning and end of a string");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"rstrip"    ,0,0,1,1,1,1,(void *)&pplmethod_strRStrip    , "rstrip()", "\\mathrm{rstrip}@<@>", "rstrip() strips whitespace off the end of a string");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_STR],"upper"     ,0,0,1,1,1,1,(void *)&pplmethod_strUpper     , "upper()", "\\mathrm{upper}@<@>", "upper() converts a string to uppercase");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"append"    ,1,1,0,0,0,0,(void *)&pplmethod_strAppend    , "append(x)", "\\mathrm{append}@<@1@>", "append(x) appends the string x to the end of a string");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"beginsWith",1,1,0,0,0,0,(void *)&pplmethod_strBeginsWith, "beginsWith(x)", "\\mathrm{beginsWith}@<@1@>", "beginsWith(x) returns a boolean indicating whether a string begins with the substring x");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"endsWith"  ,1,1,0,0,0,0,(void *)&pplmethod_strEndsWith  , "endsWith(x)", "\\mathrm{endsWith}@<@1@>", "endsWith(x) returns a boolean indicating whether a string ends with the substring x");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"find"      ,1,1,0,0,0,0,(void *)&pplmethod_strFind      , "find(x)", "\\mathrm{find}@<@1@>", "find(x) returns the position of the first occurrence of x in a string, or -1 if it is not found");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"findAll"   ,1,1,0,0,0,0,(void *)&pplmethod_strFindAll   , "findAll(x)", "\\mathrm{findAll}@<@1@>", "findAll(x) returns a list of the positions where the substring x occurs in a string");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"isalnum"   ,0,0,1,1,1,1,(void *)&pplmethod_strisalnum   , "isalnum()", "\\mathrm{isalnum}@<@>", "isalnum() returns a boolean indicating whether all of the characters of a string are alphanumeric");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"isalpha"   ,0,0,1,1,1,1,(void *)&pplmethod_strisalpha   , "isalpha()", "\\mathrm{isalpha}@<@>", "isalpha() returns a boolean indicating whether all of the characters of a string are alphabetic");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"isdigit"   ,0,0,1,1,1,1,(void *)&pplmethod_strisdigit   , "isdigit()", "\\mathrm{isdigit}@<@>", "isdigit() returns a boolean indicating whether all of the characters of a string are numeric");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"len"       ,0,0,1,1,1,1,(void *)&pplmethod_strLen       , "len()", "\\mathrm{len}@<@>", "len() returns the length of a string");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"lower"     ,0,0,1,1,1,1,(void *)&pplmethod_strLower     , "lower()", "\\mathrm{lower}@<@>", "lower() converts a string to lowercase");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"split"     ,0,0,1,1,1,1,(void *)&pplmethod_strSplit     , "split()", "\\mathrm{split}@<@>", "split() returns a list of all the whitespace-separated words in a string");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"splitOn"   ,1,1e3,0,0,0,0,(void *)&pplmethod_strSplitOn , "splitOn(x,...)", "\\mathrm{splitOn}@<@0@>", "splitOn(x,...) splits a string whenever it encounters any of the substrings supplied as arguments, and returns a list of the split string segments");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"lstrip"    ,0,0,1,1,1,1,(void *)&pplmethod_strLStrip    , "lstrip()", "\\mathrm{lstrip}@<@>", "lstrip() strips whitespace off the beginning of a string");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"strip"     ,0,0,1,1,1,1,(void *)&pplmethod_strStrip     , "strip()", "\\mathrm{strip}@<@>", "strip() strips whitespace off the beginning and end of a string");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"rstrip"    ,0,0,1,1,1,1,(void *)&pplmethod_strRStrip    , "rstrip()", "\\mathrm{rstrip}@<@>", "rstrip() strips whitespace off the end of a string");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"upper"     ,0,0,1,1,1,1,(void *)&pplmethod_strUpper     , "upper()", "\\mathrm{upper}@<@>", "upper() converts a string to uppercase");
 
   // Date methods
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DATE],"toDayOfMonth",0,0,1,1,1,1,(void *)pplmethod_dateToDayOfMonth, "toDayOfMonth()", "\\mathrm{toDayOfMonth}@<@>", "toDayOfMonth() returns the day of the month of a date object in the current calendar");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DATE],"toDayWeekName",0,0,1,1,1,1,(void *)pplmethod_dateToDayWeekName, "toDayWeekName()", "\\mathrm{toDayWeekName}@<@>", "toDayWeekName() returns the name of the day of the week of a date object");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DATE],"toDayWeekNum",0,0,1,1,1,1,(void *)pplmethod_dateToDayWeekNum, "toDayWeekNum()", "\\mathrm{toDayWeekNum}@<@>", "toDayWeekNum() returns the day of the week (1-7) of a date object");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DATE],"toHour",0,0,1,1,1,1,(void *)pplmethod_dateToHour, "toHour()", "\\mathrm{toHour}@<@>", "toHour() returns the integer hour component (0-23) of a date object");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DATE],"toJD",0,0,1,1,1,1,(void *)pplmethod_dateToJD, "toJD()", "\\mathrm{toJD}@<@>", "toJD() converts a date object to a numerical Julian date");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DATE],"toMinute",0,0,1,1,1,1,(void *)pplmethod_dateToMinute, "toMinute()", "\\mathrm{toMinute}@<@>", "toMinute() returns the integer minute component (0-59) of a date object");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DATE],"toMJD",0,0,1,1,1,1,(void *)pplmethod_dateToMJD, "toMJD()", "\\mathrm{toMJD}@<@>", "toMJD() converts a date object to a modified Julian date");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DATE],"toMonthName",0,0,1,1,1,1,(void *)pplmethod_dateToMonthName, "toMonthName()", "\\mathrm{toMonthName}@<@>", "toMonthName() returns the name of the month in which a date object falls");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DATE],"toMonthNum",0,0,1,1,1,1,(void *)pplmethod_dateToMonthNum, "toMonthNum()", "\\mathrm{toMonthNum}@<@>", "toMonthNum() returns the number (1-12) of the month in which a date object falls");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DATE],"toSecond",0,0,1,1,1,1,(void *)pplmethod_dateToSecond, "toSecond()", "\\mathrm{toSecond}@<@>", "toSecond() returns the seconds component (0.0-60.0) of a date object");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DATE],"str",0,1,0,0,0,0,(void *)pplmethod_dateToStr, "str(<s>)", "\\mathrm{str}@<@0@>", "str(<s>) converts a date object to a string with an optional format string");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DATE],"toUnix",0,0,1,1,1,1,(void *)pplmethod_dateToUnix, "toUnix()", "\\mathrm{toUnix}@<@>", "toUnix() converts a date object to a Unix time");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_DATE],"toYear",0,0,1,1,1,1,(void *)pplmethod_dateToYear, "toYear()", "\\mathrm{toYear}@<@>", "toYear() returns the year in which a date object falls in the current calendar");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toDayOfMonth",0,0,1,1,1,1,(void *)pplmethod_dateToDayOfMonth, "toDayOfMonth()", "\\mathrm{toDayOfMonth}@<@>", "toDayOfMonth() returns the day of the month of a date object in the current calendar");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toDayWeekName",0,0,1,1,1,1,(void *)pplmethod_dateToDayWeekName, "toDayWeekName()", "\\mathrm{toDayWeekName}@<@>", "toDayWeekName() returns the name of the day of the week of a date object");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toDayWeekNum",0,0,1,1,1,1,(void *)pplmethod_dateToDayWeekNum, "toDayWeekNum()", "\\mathrm{toDayWeekNum}@<@>", "toDayWeekNum() returns the day of the week (1-7) of a date object");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toHour",0,0,1,1,1,1,(void *)pplmethod_dateToHour, "toHour()", "\\mathrm{toHour}@<@>", "toHour() returns the integer hour component (0-23) of a date object");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toJD",0,0,1,1,1,1,(void *)pplmethod_dateToJD, "toJD()", "\\mathrm{toJD}@<@>", "toJD() converts a date object to a numerical Julian date");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toMinute",0,0,1,1,1,1,(void *)pplmethod_dateToMinute, "toMinute()", "\\mathrm{toMinute}@<@>", "toMinute() returns the integer minute component (0-59) of a date object");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toMJD",0,0,1,1,1,1,(void *)pplmethod_dateToMJD, "toMJD()", "\\mathrm{toMJD}@<@>", "toMJD() converts a date object to a modified Julian date");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toMonthName",0,0,1,1,1,1,(void *)pplmethod_dateToMonthName, "toMonthName()", "\\mathrm{toMonthName}@<@>", "toMonthName() returns the name of the month in which a date object falls");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toMonthNum",0,0,1,1,1,1,(void *)pplmethod_dateToMonthNum, "toMonthNum()", "\\mathrm{toMonthNum}@<@>", "toMonthNum() returns the number (1-12) of the month in which a date object falls");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toSecond",0,0,1,1,1,1,(void *)pplmethod_dateToSecond, "toSecond()", "\\mathrm{toSecond}@<@>", "toSecond() returns the seconds component (0.0-60.0) of a date object");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"str",0,1,0,0,0,0,(void *)pplmethod_dateToStr, "str(<s>)", "\\mathrm{str}@<@0@>", "str(<s>) converts a date object to a string with an optional format string");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toUnix",0,0,1,1,1,1,(void *)pplmethod_dateToUnix, "toUnix()", "\\mathrm{toUnix}@<@>", "toUnix() converts a date object to a Unix time");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toYear",0,0,1,1,1,1,(void *)pplmethod_dateToYear, "toYear()", "\\mathrm{toYear}@<@>", "toYear() returns the year in which a date object falls in the current calendar");
 
   // Color methods
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"componentsCMYK",0,0,1,1,1,1,(void *)pplmethod_colCompCMYK, "componentsCMYK()", "\\mathrm{componentsCMYK}@<@>", "componentsCMYK() returns a vector CMYK representation of a color");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"componentsHSB",0,0,1,1,1,1,(void *)pplmethod_colCompHSB, "componentsHSB()", "\\mathrm{componentsHSB}@<@>", "componentsHSB() returns a vector HSB representation of a color");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"componentsRGB",0,0,1,1,1,1,(void *)pplmethod_colCompRGB, "componentsRGB()", "\\mathrm{componentsRGB}@<@>", "componentsRGB() returns a vector RGB representation of a color");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"toCMYK",0,0,1,1,1,1,(void *)pplmethod_colToCMYK, "toCMYK()", "\\mathrm{toCMYK}@<@>", "toCMYK() returns a CMYK representation of a color");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"toHSB",0,0,1,1,1,1,(void *)pplmethod_colToHSB, "toHSB()", "\\mathrm{toHSB}@<@>", "toHSB() returns an HSB representation of a color");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_COL],"toRGB",0,0,1,1,1,1,(void *)pplmethod_colToRGB, "toRGB()", "\\mathrm{toRGB}@<@>", "toRGB() returns an RGB representation of a color");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_COL],"componentsCMYK",0,0,1,1,1,1,(void *)pplmethod_colCompCMYK, "componentsCMYK()", "\\mathrm{componentsCMYK}@<@>", "componentsCMYK() returns a vector CMYK representation of a color");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_COL],"componentsHSB",0,0,1,1,1,1,(void *)pplmethod_colCompHSB, "componentsHSB()", "\\mathrm{componentsHSB}@<@>", "componentsHSB() returns a vector HSB representation of a color");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_COL],"componentsRGB",0,0,1,1,1,1,(void *)pplmethod_colCompRGB, "componentsRGB()", "\\mathrm{componentsRGB}@<@>", "componentsRGB() returns a vector RGB representation of a color");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_COL],"toCMYK",0,0,1,1,1,1,(void *)pplmethod_colToCMYK, "toCMYK()", "\\mathrm{toCMYK}@<@>", "toCMYK() returns a CMYK representation of a color");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_COL],"toHSB",0,0,1,1,1,1,(void *)pplmethod_colToHSB, "toHSB()", "\\mathrm{toHSB}@<@>", "toHSB() returns an HSB representation of a color");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_COL],"toRGB",0,0,1,1,1,1,(void *)pplmethod_colToRGB, "toRGB()", "\\mathrm{toRGB}@<@>", "toRGB() returns an RGB representation of a color");
 
   // Vector methods
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"append",1,1,1,1,1,0,(void *)pplmethod_vectorAppend, "append(x)", "\\mathrm{append}@<@0@>", "append(x) appends the object x to a vector");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"extend",1,1,0,0,0,0,(void *)pplmethod_vectorExtend, "extend(x)", "\\mathrm{extend}@<@0@>", "extend(x) appends the members of the list x to the end of a vector");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"filter",1,1,0,0,0,0,(void *)pplmethod_vectorFilter, "filter(f)", "\\mathrm{filter}@<@0}@>", "filter(f) takes a pointer to a function of one argument, f(a). It calls the function for every element of the vector, and returns a new vector of those elements for which f(a) tests true");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"insert",2,2,0,0,0,0,(void *)pplmethod_vectorInsert, "insert(n,x)", "\\mathrm{insert}@<@0@>", "insert(n,x) inserts the object x into a vector at position n");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"len",0,0,1,1,1,1,(void *)pplmethod_vectorLen, "len()", "\\mathrm{len}@<@>", "len() returns the number of dimensions of a vector");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"list",0,0,1,1,1,1,(void *)pplmethod_vectorList, "list()", "\\mathrm{list}@<@>", "list() returns a list representation of a vector");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"map",1,1,0,0,0,0,(void *)pplmethod_vectorMap, "map(f)", "\\mathrm{map}@<@0}@>", "map(f) takes a pointer to a function of one argument, f(a). It calls the function for every element of the vector, and returns a vector of the results");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"norm",0,0,1,1,1,1,(void *)pplmethod_vectorNorm, "norm()", "\\mathrm{norm}@<@>", "norm() returns the norm (quadrature sum) of a vector's elements");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"reduce",1,1,0,0,0,0,(void *)pplmethod_vectorReduce, "reduce(f)", "\\mathrm{reduce}@<@0}@>", "reduce(f) takes a pointer to a function of two arguments. It first calls f(a,b) on the first two elements of the vector, and then continues through the vector calling f(a,b) on the result and the next item in the vector. The final result is returned");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"reverse",0,0,1,1,1,1,(void *)pplmethod_vectorReverse, "reverse()", "\\mathrm{reverse}@<@>", "reverse() reverses the order of the elements of a vector");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_VEC],"sort",0,0,1,1,1,1,(void *)pplmethod_vectorSort, "sort()", "\\mathrm{sort}@<@>", "sort() sorts the members of a vector");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_VEC],"append",1,1,1,1,1,0,(void *)pplmethod_vectorAppend, "append(x)", "\\mathrm{append}@<@0@>", "append(x) appends the object x to a vector");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_VEC],"extend",1,1,0,0,0,0,(void *)pplmethod_vectorExtend, "extend(x)", "\\mathrm{extend}@<@0@>", "extend(x) appends the members of the list x to the end of a vector");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_VEC],"filter",1,1,0,0,0,0,(void *)pplmethod_vectorFilter, "filter(f)", "\\mathrm{filter}@<@0}@>", "filter(f) takes a pointer to a function of one argument, f(a). It calls the function for every element of the vector, and returns a new vector of those elements for which f(a) tests true");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_VEC],"insert",2,2,0,0,0,0,(void *)pplmethod_vectorInsert, "insert(n,x)", "\\mathrm{insert}@<@0@>", "insert(n,x) inserts the object x into a vector at position n");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_VEC],"len",0,0,1,1,1,1,(void *)pplmethod_vectorLen, "len()", "\\mathrm{len}@<@>", "len() returns the number of dimensions of a vector");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_VEC],"list",0,0,1,1,1,1,(void *)pplmethod_vectorList, "list()", "\\mathrm{list}@<@>", "list() returns a list representation of a vector");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_VEC],"map",1,1,0,0,0,0,(void *)pplmethod_vectorMap, "map(f)", "\\mathrm{map}@<@0}@>", "map(f) takes a pointer to a function of one argument, f(a). It calls the function for every element of the vector, and returns a vector of the results");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_VEC],"norm",0,0,1,1,1,1,(void *)pplmethod_vectorNorm, "norm()", "\\mathrm{norm}@<@>", "norm() returns the norm (quadrature sum) of a vector's elements");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_VEC],"reduce",1,1,0,0,0,0,(void *)pplmethod_vectorReduce, "reduce(f)", "\\mathrm{reduce}@<@0}@>", "reduce(f) takes a pointer to a function of two arguments. It first calls f(a,b) on the first two elements of the vector, and then continues through the vector calling f(a,b) on the result and the next item in the vector. The final result is returned");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_VEC],"reverse",0,0,1,1,1,1,(void *)pplmethod_vectorReverse, "reverse()", "\\mathrm{reverse}@<@>", "reverse() reverses the order of the elements of a vector");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_VEC],"sort",0,0,1,1,1,1,(void *)pplmethod_vectorSort, "sort()", "\\mathrm{sort}@<@>", "sort() sorts the members of a vector");
 
   // List methods
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"append",1,1,0,0,0,0,(void *)pplmethod_listAppend, "append(x)", "\\mathrm{append}@<@0}@>", "append(x) appends the object x to a list");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"extend",1,1,0,0,0,0,(void *)pplmethod_listExtend, "extend(x)", "\\mathrm{extend}@<@0}@>", "extend(x) appends the members of the list x to the end of a list");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"filter",1,1,0,0,0,0,(void *)pplmethod_listFilter, "filter(f)", "\\mathrm{filter}@<@0}@>", "filter(f) takes a pointer to a function of one argument, f(a). It calls the function for every element of the list, and returns a new list of those elements for which f(a) tests true");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"insert",2,2,0,0,0,0,(void *)pplmethod_listInsert, "insert(n,x)", "\\mathrm{insert}@<@0@>", "insert(n,x) inserts the object x into a list at position n");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"len",0,0,1,1,1,1,(void *)pplmethod_listLen, "len()", "\\mathrm{len}@<@>", "len() returns the length of a list");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"map",1,1,0,0,0,0,(void *)pplmethod_listMap, "map(f)", "\\mathrm{map}@<@0}@>", "map(f) takes a pointer to a function of one argument, f(a). It calls the function for every element of the list, and returns a list of the results");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"max",0,0,1,1,1,1,(void *)pplmethod_listMax, "max()", "\\mathrm{max}@<@>", "max() returns the highest-valued item in a list");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"min",0,0,1,1,1,1,(void *)pplmethod_listMin, "min()", "\\mathrm{min}@<@>", "min() returns the lowest-valued item in a list");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"pop",0,1,1,1,1,1,(void *)pplmethod_listPop, "pop()", "\\mathrm{pop}@<@0@>", "pop(n) removes the nth item from a list and returns it. If n is not specified, the last list item is popped");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"reduce",1,1,0,0,0,0,(void *)pplmethod_listReduce, "reduce(f)", "\\mathrm{reduce}@<@0}@>", "reduce(f) takes a pointer to a function of two arguments. It first calls f(a,b) on the first two elements of the list, and then continues through the list calling f(a,b) on the result and the next item in the list. The final result is returned");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"reverse",0,0,1,1,1,1,(void *)pplmethod_listReverse, "reverse()", "\\mathrm{reverse}@<@>", "reverse() reverses the order of the members of a list");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"sort",0,0,1,1,1,1,(void *)pplmethod_listSort, "sort()", "\\mathrm{sort}@<@>", "sort() sorts the members of a list");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"sortOn",1,1,0,0,0,0,(void *)pplmethod_listSortOnCustom, "sortOn(f)", "\\mathrm{sortOn}@<@0@>", "sortOn(f) sorts the members of a list using the user-supplied function f(a,b) to determine the sort order. f should return 1, 0 or -1 depending whether a>b, a==b or a<b");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"sortOnElement",1,1,1,1,1,1,(void *)pplmethod_listSortOnElement, "sortOnElement(n)", "\\mathrm{sortOnElement}@<@1@>", "sortOnElement(n) sorts a list of lists on the nth element of each sublist");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_LIST],"vector",0,0,1,1,1,1,(void *)pplmethod_listVector, "vector()", "\\mathrm{vector}@<@>", "vector() turns a list into a vector, providing all the list elements are numbers with the same physical dimensions");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"append",1,1,0,0,0,0,(void *)pplmethod_listAppend, "append(x)", "\\mathrm{append}@<@0}@>", "append(x) appends the object x to a list");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"extend",1,1,0,0,0,0,(void *)pplmethod_listExtend, "extend(x)", "\\mathrm{extend}@<@0}@>", "extend(x) appends the members of the list x to the end of a list");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"filter",1,1,0,0,0,0,(void *)pplmethod_listFilter, "filter(f)", "\\mathrm{filter}@<@0}@>", "filter(f) takes a pointer to a function of one argument, f(a). It calls the function for every element of the list, and returns a new list of those elements for which f(a) tests true");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"insert",2,2,0,0,0,0,(void *)pplmethod_listInsert, "insert(n,x)", "\\mathrm{insert}@<@0@>", "insert(n,x) inserts the object x into a list at position n");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"len",0,0,1,1,1,1,(void *)pplmethod_listLen, "len()", "\\mathrm{len}@<@>", "len() returns the length of a list");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"map",1,1,0,0,0,0,(void *)pplmethod_listMap, "map(f)", "\\mathrm{map}@<@0}@>", "map(f) takes a pointer to a function of one argument, f(a). It calls the function for every element of the list, and returns a list of the results");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"max",0,0,1,1,1,1,(void *)pplmethod_listMax, "max()", "\\mathrm{max}@<@>", "max() returns the highest-valued item in a list");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"min",0,0,1,1,1,1,(void *)pplmethod_listMin, "min()", "\\mathrm{min}@<@>", "min() returns the lowest-valued item in a list");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"pop",0,1,1,1,1,1,(void *)pplmethod_listPop, "pop()", "\\mathrm{pop}@<@0@>", "pop(n) removes the nth item from a list and returns it. If n is not specified, the last list item is popped");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"reduce",1,1,0,0,0,0,(void *)pplmethod_listReduce, "reduce(f)", "\\mathrm{reduce}@<@0}@>", "reduce(f) takes a pointer to a function of two arguments. It first calls f(a,b) on the first two elements of the list, and then continues through the list calling f(a,b) on the result and the next item in the list. The final result is returned");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"reverse",0,0,1,1,1,1,(void *)pplmethod_listReverse, "reverse()", "\\mathrm{reverse}@<@>", "reverse() reverses the order of the members of a list");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"sort",0,0,1,1,1,1,(void *)pplmethod_listSort, "sort()", "\\mathrm{sort}@<@>", "sort() sorts the members of a list");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"sortOn",1,1,0,0,0,0,(void *)pplmethod_listSortOnCustom, "sortOn(f)", "\\mathrm{sortOn}@<@0@>", "sortOn(f) sorts the members of a list using the user-supplied function f(a,b) to determine the sort order. f should return 1, 0 or -1 depending whether a>b, a==b or a<b");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"sortOnElement",1,1,1,1,1,1,(void *)pplmethod_listSortOnElement, "sortOnElement(n)", "\\mathrm{sortOnElement}@<@1@>", "sortOnElement(n) sorts a list of lists on the nth element of each sublist");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"vector",0,0,1,1,1,1,(void *)pplmethod_listVector, "vector()", "\\mathrm{vector}@<@>", "vector() turns a list into a vector, providing all the list elements are numbers with the same physical dimensions");
 
   // Dictionary methods
   for (i=0 ;i<3; i++)
@@ -2090,37 +2104,37 @@ void pplObjMethodsInit(ppl_context *c)
     else if (i==1) pplobj = PPLOBJ_MOD;
     else           pplobj = PPLOBJ_USER;
 
-    ppl_addSystemFunc(pplObjMethods[pplobj],"hasKey",1,1,0,0,0,0,(void *)pplmethod_dictHasKey, "hasKey()", "\\mathrm{hasKey}@<@1@>", "hasKey(x) returns a boolean indicating whether the key x exists in the dictionary");
-    ppl_addSystemFunc(pplObjMethods[pplobj],"items" ,0,0,1,1,1,1,(void *)pplmethod_dictItems , "items()", "\\mathrm{items}@<@>", "items() returns a list of the [key,value] pairs in a dictionary");
-    ppl_addSystemFunc(pplObjMethods[pplobj],"keys"  ,0,0,1,1,1,1,(void *)pplmethod_dictKeys  , "keys()", "\\mathrm{keys}@<@>", "keys() returns a list of the keys defined in a dictionary");
-    ppl_addSystemFunc(pplObjMethods[pplobj],"len"   ,0,0,1,1,1,1,(void *)pplmethod_dictLen   , "len()", "\\mathrm{len}@<@>", "len() returns the number of entries in a dictionary");
-    ppl_addSystemFunc(pplObjMethods[pplobj],"values",0,0,1,1,1,1,(void *)pplmethod_dictValues, "values()", "\\mathrm{values}@<@>", "values() returns a list of the values in a dictionary");
+    ppl_addSystemMethod(pplObjMethods[pplobj],"hasKey",1,1,0,0,0,0,(void *)pplmethod_dictHasKey, "hasKey()", "\\mathrm{hasKey}@<@1@>", "hasKey(x) returns a boolean indicating whether the key x exists in the dictionary");
+    ppl_addSystemMethod(pplObjMethods[pplobj],"items" ,0,0,1,1,1,1,(void *)pplmethod_dictItems , "items()", "\\mathrm{items}@<@>", "items() returns a list of the [key,value] pairs in a dictionary");
+    ppl_addSystemMethod(pplObjMethods[pplobj],"keys"  ,0,0,1,1,1,1,(void *)pplmethod_dictKeys  , "keys()", "\\mathrm{keys}@<@>", "keys() returns a list of the keys defined in a dictionary");
+    ppl_addSystemMethod(pplObjMethods[pplobj],"len"   ,0,0,1,1,1,1,(void *)pplmethod_dictLen   , "len()", "\\mathrm{len}@<@>", "len() returns the number of entries in a dictionary");
+    ppl_addSystemMethod(pplObjMethods[pplobj],"values",0,0,1,1,1,1,(void *)pplmethod_dictValues, "values()", "\\mathrm{values}@<@>", "values() returns a list of the values in a dictionary");
    }
 
   // Matrix methods
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"det" ,0,0,1,1,1,1,(void *)pplmethod_matrixDet,"det()", "\\mathrm{det}@<@>", "det() returns the determinant of a square matrix");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"diagonal",0,0,1,1,1,1,(void *)pplmethod_matrixDiagonal,"diagonal()", "\\mathrm{diagonal}@<@>", "diagonal() returns a boolean indicating whether a matrix is diagonal");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"eigenvalues",0,0,1,1,1,1,(void *)pplmethod_matrixEigenvalues,"eigenvalues()", "\\mathrm{eigenvalues}@<@>", "eigenvalues() returns a vector containing the eigenvalues of a square symmetric matrix");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"eigenvectors",0,0,1,1,1,1,(void *)pplmethod_matrixEigenvectors,"eigenvectors()", "\\mathrm{eigenvectors}@<@>", "eigenvectors() returns a list of the eigenvectors of a square symmetric matrix");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"inv" ,0,0,1,1,1,1,(void *)pplmethod_matrixInv,"inv()", "\\mathrm{inv}@<@>", "inv() returns the inverse of a square matrix");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"size",0,0,1,1,1,1,(void *)pplmethod_matrixSize, "size()", "\\mathrm{size}@<@>", "size() returns the dimensions of a matrix");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"symmetric",0,0,1,1,1,1,(void *)pplmethod_matrixSymmetric, "symmetric()", "\\mathrm{symmetric}@<@>", "symmetric() returns a boolean indicating whether a matrix is symmetric");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_MAT],"transpose",0,0,1,1,1,1,(void *)pplmethod_matrixTrans, "transpose()", "\\mathrm{transpose}@<@>", "transpose() returns the transpose of a matrix");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_MAT],"det" ,0,0,1,1,1,1,(void *)pplmethod_matrixDet,"det()", "\\mathrm{det}@<@>", "det() returns the determinant of a square matrix");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_MAT],"diagonal",0,0,1,1,1,1,(void *)pplmethod_matrixDiagonal,"diagonal()", "\\mathrm{diagonal}@<@>", "diagonal() returns a boolean indicating whether a matrix is diagonal");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_MAT],"eigenvalues",0,0,1,1,1,1,(void *)pplmethod_matrixEigenvalues,"eigenvalues()", "\\mathrm{eigenvalues}@<@>", "eigenvalues() returns a vector containing the eigenvalues of a square symmetric matrix");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_MAT],"eigenvectors",0,0,1,1,1,1,(void *)pplmethod_matrixEigenvectors,"eigenvectors()", "\\mathrm{eigenvectors}@<@>", "eigenvectors() returns a list of the eigenvectors of a square symmetric matrix");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_MAT],"inv" ,0,0,1,1,1,1,(void *)pplmethod_matrixInv,"inv()", "\\mathrm{inv}@<@>", "inv() returns the inverse of a square matrix");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_MAT],"size",0,0,1,1,1,1,(void *)pplmethod_matrixSize, "size()", "\\mathrm{size}@<@>", "size() returns the dimensions of a matrix");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_MAT],"symmetric",0,0,1,1,1,1,(void *)pplmethod_matrixSymmetric, "symmetric()", "\\mathrm{symmetric}@<@>", "symmetric() returns a boolean indicating whether a matrix is symmetric");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_MAT],"transpose",0,0,1,1,1,1,(void *)pplmethod_matrixTrans, "transpose()", "\\mathrm{transpose}@<@>", "transpose() returns the transpose of a matrix");
 
   // File methods
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"close",0,0,1,1,1,1,(void *)pplmethod_fileClose,"close()", "\\mathrm{close}@<@>", "close() closes a file handle");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"eof",0,0,1,1,1,1,(void *)pplmethod_fileEof,"eof()", "\\mathrm{eof}@<@>", "eof() returns a boolean flag to indicate whether the end of a file has been reached");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"flush",0,0,1,1,1,1,(void *)pplmethod_fileFlush,"flush()", "\\mathrm{flush}@<@>", "flush() flushes any buffered data which has not yet physically been written to a file");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"getPos",0,0,1,1,1,1,(void *)pplmethod_fileGetpos,"getPos()", "\\mathrm{getPos}@<@>", "getPos() returns a file handle's current position in a file");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"isOpen",0,0,1,1,1,1,(void *)pplmethod_fileIsOpen,"isOpen()", "\\mathrm{isOpen}@<@>", "isOpen() returns a boolean flag indicating whether a file is open");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"read",0,0,1,1,1,1,(void *)pplmethod_fileRead,"read()", "\\mathrm{read}@<@>", "read() returns the contents of a file as a string");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"readline",0,0,1,1,1,1,(void *)pplmethod_fileReadline,"readline()", "\\mathrm{readline}@<@>", "readline() returns a single line of a file as a string");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"readlines",0,0,1,1,1,1,(void *)pplmethod_fileReadlines,"readlines()", "\\mathrm{readlines}@<@>", "readlines() returns the lines of a file as a list of strings");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"setPos",1,1,1,1,1,1,(void *)pplmethod_fileSetpos,"setPos(x)", "\\mathrm{setPos}@<@>", "setPos(x) sets a file handle's current position in a file");
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_FILE],"write",1,1,0,0,0,0,(void *)pplmethod_fileWrite,"write(x)", "\\mathrm{write}@<@0@>", "write(x) writes the string x to a file");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"close",0,0,1,1,1,1,(void *)pplmethod_fileClose,"close()", "\\mathrm{close}@<@>", "close() closes a file handle");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"eof",0,0,1,1,1,1,(void *)pplmethod_fileEof,"eof()", "\\mathrm{eof}@<@>", "eof() returns a boolean flag to indicate whether the end of a file has been reached");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"flush",0,0,1,1,1,1,(void *)pplmethod_fileFlush,"flush()", "\\mathrm{flush}@<@>", "flush() flushes any buffered data which has not yet physically been written to a file");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"getPos",0,0,1,1,1,1,(void *)pplmethod_fileGetpos,"getPos()", "\\mathrm{getPos}@<@>", "getPos() returns a file handle's current position in a file");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"isOpen",0,0,1,1,1,1,(void *)pplmethod_fileIsOpen,"isOpen()", "\\mathrm{isOpen}@<@>", "isOpen() returns a boolean flag indicating whether a file is open");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"read",0,0,1,1,1,1,(void *)pplmethod_fileRead,"read()", "\\mathrm{read}@<@>", "read() returns the contents of a file as a string");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"readline",0,0,1,1,1,1,(void *)pplmethod_fileReadline,"readline()", "\\mathrm{readline}@<@>", "readline() returns a single line of a file as a string");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"readlines",0,0,1,1,1,1,(void *)pplmethod_fileReadlines,"readlines()", "\\mathrm{readlines}@<@>", "readlines() returns the lines of a file as a list of strings");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"setPos",1,1,1,1,1,1,(void *)pplmethod_fileSetpos,"setPos(x)", "\\mathrm{setPos}@<@>", "setPos(x) sets a file handle's current position in a file");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"write",1,1,0,0,0,0,(void *)pplmethod_fileWrite,"write(x)", "\\mathrm{write}@<@0@>", "write(x) writes the string x to a file");
 
   // Exception methods
-  ppl_addSystemFunc(pplObjMethods[PPLOBJ_EXC],"raise",1,1,0,0,0,0,(void *)pplmethod_excRaise,"raise(s)", "\\mathrm{raise}@<@0@>", "raise(s) raises an exception with error string s");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_EXC],"raise",1,1,0,0,0,0,(void *)pplmethod_excRaise,"raise(s)", "\\mathrm{raise}@<@0@>", "raise(s) raises an exception with error string s");
 
   return;
  }

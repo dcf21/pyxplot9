@@ -26,9 +26,12 @@
 #include "settings/settings.h"
 #include "userspace/context.h"
 #include "userspace/pplObj.h"
+#include "userspace/pplObjFunc.h"
 
-void ppl_addMagicFunction(dict *n, char *name, int id, char *shortdesc, char *latex, char *desc);
-void ppl_addSystemFunc   (dict *n, char *name, int minArgs, int maxArgs, int numOnly, int notNan, int realOnly, int dimlessOnly, void *fn, char *shortdesc, char *latex, char *desc);
+void     ppl_addMagicFunction(dict *n, char *name, int id, char *shortdesc, char *latex, char *desc);
+pplFunc *ppl_addSystemFunc   (dict *n, char *name, int minArgs, int maxArgs, int numOnly, int notNan, int realOnly, int dimlessOnly, void *fn, char *shortdesc, char *latex, char *desc);
+void     ppl_addSystemMethod (dict *n, char *name, int minArgs, int maxArgs, int numOnly, int notNan, int realOnly, int dimlessOnly, void *fn, char *shortdesc, char *latex, char *desc);
+
 void pplfunc_abs         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_acos        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_acosh       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
@@ -57,6 +60,7 @@ void pplfunc_besselK     (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_bessely     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_besselY     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_beta        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_call        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_ceil        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_chr         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_classOf     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);

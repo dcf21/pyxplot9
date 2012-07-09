@@ -340,6 +340,7 @@ void ppl_directive_histogram(ppl_context *c, parserLine *pl, parserOutput *in, i
   funcPtr->realOnly        = 1;
   funcPtr->numOnly         = 1;
   funcPtr->dimlessOnly     = 0;
+  funcPtr->needSelfThis    = 0;
   funcPtr->functionPtr     = (void *)output;
   funcPtr->argList         = NULL;
   funcPtr->min             = funcPtr->max       = NULL;

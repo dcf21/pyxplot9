@@ -52,6 +52,8 @@
 #include "expressions/expCompile_fns.h"
 #include "expressions/expEval.h"
 #include "expressions/expEvalOps.h"
+#include "expressions/fnCall.h"
+#include "expressions/traceback_fns.h"
 #include "userspace/garbageCollector.h"
 #include "userspace/pplObj_fns.h"
 #include "userspace/pplObjCmp.h"
@@ -64,6 +66,13 @@
 #include "defaultObjs/zetaRiemann.h"
 
 #include "texify.h"
+
+#define STACK_POP \
+   { \
+    c->stackPtr--; \
+    ppl_garbageObject(&c->stack[c->stackPtr]); \
+    if (c->stack[c->stackPtr].refCount != 0) { fprintf(stderr,"Stack forward reference detected."); } \
+   }
 
 void ppl_addMagicFunction(dict *n, char *name, int id, char *shortdesc, char *latex, char *desc)
  {
@@ -86,16 +95,17 @@ void ppl_addMagicFunction(dict *n, char *name, int id, char *shortdesc, char *la
   f->LaTeX        = latex;
   f->descriptionShort = shortdesc;
   f->description  = desc;
+  f->needSelfThis = 0;
   v.refCount      = 1;
   if (pplObjFunc(&v,1,1,f)!=NULL) ppl_dictAppendCpy(n , name , (void *)&v , sizeof(v));
   return;
  }
 
-void ppl_addSystemFunc(dict *n, char *name, int minArgs, int maxArgs, int numOnly, int notNan, int realOnly, int dimlessOnly, void *fn, char *shortdesc, char *latex, char *desc)
+pplFunc *ppl_addSystemFunc(dict *n, char *name, int minArgs, int maxArgs, int numOnly, int notNan, int realOnly, int dimlessOnly, void *fn, char *shortdesc, char *latex, char *desc)
  {
   pplObj   v;
   pplFunc *f = malloc(sizeof(pplFunc));
-  if (f==NULL) return;
+  if (f==NULL) return NULL;
   f->functionType = PPL_FUNC_SYSTEM;
   f->refCount     = 1;
   f->minArgs      = minArgs;
@@ -112,9 +122,16 @@ void ppl_addSystemFunc(dict *n, char *name, int minArgs, int maxArgs, int numOnl
   f->LaTeX        = latex;
   f->descriptionShort = shortdesc;
   f->description  = desc;
+  f->needSelfThis = 0;
   v.refCount      = 1;
   if (pplObjFunc(&v,1,1,f)!=NULL) ppl_dictAppendCpy(n , name , (void *)&v , sizeof(v));
-  return;
+  return f;
+ }
+
+void ppl_addSystemMethod(dict *n, char *name, int minArgs, int maxArgs, int numOnly, int notNan, int realOnly, int dimlessOnly, void *fn, char *shortdesc, char *latex, char *desc)
+ {
+  pplFunc *f = ppl_addSystemFunc(n, name, minArgs, maxArgs, numOnly, notNan, realOnly, dimlessOnly, fn, shortdesc, latex, desc);
+  f->needSelfThis = 1;
  }
 
 void pplfunc_abs         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
@@ -384,6 +401,63 @@ void pplfunc_beta        (ppl_context *c, pplObj *in, int nArgs, int *status, in
   char *FunctionDescription = "beta(a,b)";
   OUTPUT.real = gsl_sf_beta(in[0].real, in[1].real);
   CHECK_OUTPUT_OKAY;
+ }
+
+void pplfunc_call        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char         *FunctionDescription = "call(f,a)";
+  const int     stkLevelOld = c->stackPtr;
+  list         *argList;
+  pplExpr       dummy;
+  pplFunc      *fi;
+  pplObj       *item;
+  listIterator *li;
+
+  if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s function requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
+  fi = (pplFunc *)in[0].auxil;
+  if ((fi==NULL)||(fi->functionType==PPL_FUNC_MAGIC)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s function requires a function object as its first argument. Integration and differentiation operators are not suitable functions.", FunctionDescription); return; }
+
+  if (in[1].objType != PPLOBJ_LIST) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s function requires a list object as its second argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[1].objType]); return; }
+  argList = (list *)in[1].auxil;
+  li      = ppl_listIterateInit(argList);
+
+  if (c->stackPtr > ALGEBRA_STACK-4-argList->length) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
+
+  // Dummy expression object with dummy line number information
+  dummy.srcLineN = 0;
+  dummy.srcId    = 0;
+  dummy.srcFname = "<dummy>";
+  dummy.ascii    = "<call(f,a) function>";
+
+  // Push function object
+  pplObjCpy(&c->stack[c->stackPtr], &in[0], 0, 0, 1);
+  c->stack[c->stackPtr].refCount=1;
+  c->stackPtr++;
+
+  // Push arguments
+  while ((item = (pplObj *)ppl_listIterate(&li))!=NULL)
+   {
+    pplObjCpy(&c->stack[c->stackPtr], item, 0, 0, 1);
+    c->stack[c->stackPtr].refCount=1;
+    c->stackPtr++;
+   }
+
+  // Call function
+  c->errStat.errMsgExpr[0]='\0';
+  ppl_fnCall(c, &dummy, 0, argList->length, 1, 1);
+
+  // Propagate error if function failed
+  if (c->errStat.status)
+   {
+    *status=1;
+    *errType=ERR_TYPE;
+    sprintf(errText, "Error inside function supplied to the %s function: %s", FunctionDescription, c->errStat.errMsgExpr);
+    return;
+   }
+
+  pplObjCpy(&OUTPUT, &c->stack[c->stackPtr-1], 0, 0, 1);
+  while (c->stackPtr>stkLevelOld) { STACK_POP; }
+  return;
  }
 
 void pplfunc_ceil        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)

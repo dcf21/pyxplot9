@@ -528,6 +528,12 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
         else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; goto cleanup; }
        }
 
+    if ((fn->functionType==PPL_FUNC_SYSTEM) && (fn->needSelfThis) && (called.self_this==NULL))
+     {
+      if (context->set->term_current.ExplicitErrors == SW_ONOFF_ON) { sprintf(context->errStat.errBuff,"Function is a method which has been detached from the object that owns it."); TBADD(ERR_TYPE); goto cleanup; }
+      else                                                          { context->stack[context->stackPtr-1-nArgs].real = GSL_NAN; goto cleanup; }
+     }
+
     switch (fn->functionType)
      {
       case PPL_FUNC_SYSTEM:

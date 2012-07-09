@@ -54,7 +54,7 @@ typedef struct functionDescriptor
   void   *functionPtr; // Can be any of the structures below
   char   *argList;
   pplObj *min, *max; // Range of values over which this function definition can be used; used in function splicing
-  unsigned char *minActive, *maxActive, numOnly, notNan, realOnly, dimlessOnly;
+  unsigned char *minActive, *maxActive, numOnly, notNan, realOnly, dimlessOnly, needSelfThis;
   struct functionDescriptor *next; // A linked list of spliced alternative function definitions
   char   *LaTeX;
   char   *description, *descriptionShort;

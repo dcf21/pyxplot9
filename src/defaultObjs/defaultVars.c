@@ -264,7 +264,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     pplObjFile(&v, 1, 1, stdout, 2);
     ppl_dictAppendCpy(d2 , "stdout"    , (void *)&v , sizeof(v)); // stdout
 
-    // Default maths functions
+    // Default functions (default namespace)
     ppl_addSystemFunc(d,"abs"           ,1,1,1,1,0,0,(void *)&pplfunc_abs         , "abs(z)", "\\mathrm{abs}@<@1@>", "abs(z) returns the absolute magnitude of z");
     ppl_addSystemFunc(d,"acos"          ,1,1,1,1,0,1,(void *)&pplfunc_acos        , "acos(z)", "\\mathrm{acos}@<@1@>", "acos(z) returns the arccosine of z");
     ppl_addSystemFunc(d,"acosh"         ,1,1,1,1,0,1,(void *)&pplfunc_acosh       , "acosh(z)", "\\mathrm{acosh}@<@1@>", "acosh(z) returns the hyperbolic arccosine of z");
@@ -295,6 +295,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"bessely"       ,2,2,1,1,1,1,(void *)&pplfunc_bessely     , "bessely(l,x)", "\\mathrm{bessely}@<@1,@2@>", "bessely(l,x) evaluates the lth irregular spherical Bessel function at x");
     ppl_addSystemFunc(d,"besselY"       ,2,2,1,1,1,1,(void *)&pplfunc_besselY     , "besselY(l,x)", "\\mathrm{besselY}@<@1,@2@>", "besselY(l,x) evaluates the lth irregular cylindrical Bessel function at x");
     ppl_addSystemFunc(d,"beta"          ,2,2,1,1,1,1,(void *)&pplfunc_beta        , "beta(a,b)", "\\mathrm{B}@<@1,@2@>", "beta(a,b) evaluates the beta function B(a,b)");
+    ppl_addSystemFunc(d,"call"          ,2,2,0,0,0,0,(void *)&pplfunc_call        , "call(f,a)", "\\mathrm{call}@<@1,@2@>", "call(f,a) calls the function f with the arguments contained in the list a");
     ppl_addSystemFunc(d,"ceil"          ,1,1,1,1,1,1,(void *)&pplfunc_ceil        , "ceil(x)", "\\mathrm{ceil}@<@1@>", "ceil(x) returns the smallest integer value greater than or equal to x");
     ppl_addSystemFunc(d,"chr"           ,1,1,1,1,1,1,(void *)&pplfunc_chr         , "chr(x)", "\\mathrm{chr}@<@1@>", "chr(x) returns the character with ASCII code x");
     ppl_addSystemFunc(d,"classOf"       ,1,1,0,0,0,0,(void *)&pplfunc_classOf     , "classOf(x)", "\\mathrm{classOf}@<@1@>", "classOf(x) returns the class prototype of the object x");

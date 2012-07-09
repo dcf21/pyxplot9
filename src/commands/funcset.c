@@ -95,6 +95,7 @@ void ppl_directive_funcset(ppl_context *c, parserLine *pl, parserOutput *in, int
   f->notNan       = 0;
   f->realOnly     = 0;
   f->dimlessOnly  = 0;
+  f->needSelfThis = 0;
   f->next         = NULL;
   f->LaTeX        = NULL;
   f->description  = NULL;
