@@ -1,6 +1,6 @@
 % first_steps.tex
 %
-% The documentation in this file is part of PyXPlot
+% The documentation in this file is part of Pyxplot
 % <http://www.pyxplot.org.uk>
 %
 % Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,63 +8,63 @@
 %
 % $Id$
 %
-% PyXPlot is free software; you can redistribute it and/or modify it under the
+% Pyxplot is free software; you can redistribute it and/or modify it under the
 % terms of the GNU General Public License as published by the Free Software
 % Foundation; either version 2 of the License, or (at your option) any later
 % version.
 %
 % You should have received a copy of the GNU General Public License along with
-% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 % Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 % ----------------------------------------------------------------------------
 
-% LaTeX source for the PyXPlot Users' Guide
+% LaTeX source for the Pyxplot Users' Guide
 
-\chapter{First steps with PyXPlot}
+\chapter{First steps with Pyxplot}
 \label{ch:first_steps}
 
 This chapter provides an overview of the commands used to produce simple plots
-in PyXPlot. The commands it covers have very similar syntax to \gnuplot's
+in Pyxplot. The commands it covers have very similar syntax to \gnuplot's
 plotting commands, and have already used the latter you may find that you can
 skim over this chapter. An approximate list of those features of \gnuplot\
 which are either not supported, or which are substantially different in
-PyXPlot, can be found in Appendix~\ref{ch:gnuplot_diffs}.
+Pyxplot, can be found in Appendix~\ref{ch:gnuplot_diffs}.
 
 Chapter~\ref{ch:plotting} will extend the material of this chapter to provide a
-complete guide to PyXPlot's plot styles.
+complete guide to Pyxplot's plot styles.
 
 \section{Getting started}
 
-The simplest way to start PyXPlot is to type {\tt pyxplot} at a shell prompt.
-This starts an interactive session, and a PyXPlot command-line prompt into
-which commands can be typed will appear. PyXPlot can be exited either by typing
+The simplest way to start Pyxplot is to type {\tt pyxplot} at a shell prompt.
+This starts an interactive session, and a Pyxplot command-line prompt into
+which commands can be typed will appear. Pyxplot can be exited either by typing
 \indcmdts{exit} or \indcmdts{quit}, or by pressing CTRL-D. Various switches can
-be specified on the shell command line to modify PyXPlot's behaviour; these are
+be specified on the shell command line to modify Pyxplot's behaviour; these are
 listed in Box~\ref{box:CommandSwitches}.  Of especial interest may be the
 switches {\tt -c} and {\tt -m}, which change between the use of
 color-highlighted (default) and non-colored text.
 
 Typing commands into interactive terminals will probably be a sufficient way to
-drive PyXPlot to begin with, but as the number of commands required to set up
+drive Pyxplot to begin with, but as the number of commands required to set up
 plots grows with the complexity of the task, it is likely to become rapidly
 more preferable to store these commands in text files called scripts.  Once
 such a script has been written, it can be executed automatically by passing the
-filename of the command script to PyXPlot on the shell command line, for
+filename of the command script to Pyxplot on the shell command line, for
 example:\index{command-line syntax}
 
 \begin{verbatim}
 pyxplot foo.ppl
 \end{verbatim}
 
-\boxout{A list of the command line options accepted by PyXPlot.}{box:CommandSwitches}{
-From the shell command line, PyXPlot accepts the following switches which
+\boxout{A list of the command line options accepted by Pyxplot.}{box:CommandSwitches}{
+From the shell command line, Pyxplot accepts the following switches which
 modify its behaviour:\index{command line syntax}
 \vspace{0.5cm}
 
 \begin{tabular}{p{3.0cm}p{8.3cm}}
 {\tt -h --help} & Display a short help message listing the available command-line switches.\\
-{\tt -v --version} & Display the current version number of PyXPlot.\\
+{\tt -v --version} & Display the current version number of Pyxplot.\\
 {\tt -q --quiet} & Turn off the display of the welcome message on startup. \\
 {\tt -V --verbose} & Display the welcome message on startup, as happens by default. \\
 {\tt -c --color} & Use color highlighting\footnote{This will only function on terminals which support color output.}, as is the default behaviour, to display output in green, warning messages in amber, and error messages in red.\footnote{The authors apologise to those members of the population who are red/green color blind, but draw their attention to the following sentence.} These colors can be changed in the {\tt terminal} section of the configuration file; see Section~\ref{sec:configfile_terminal} for more details. \\
@@ -72,22 +72,22 @@ modify its behaviour:\index{command line syntax}
 \end{tabular}
 }
 
-\noindent In this case, PyXPlot would execute the commands in the file {\tt
+\noindent In this case, Pyxplot would execute the commands in the file {\tt
 foo.ppl} and then exit. By convention, we choose to affix the suffix {\tt
-.ppl} to the filenames of all PyXPlot command scripts. This is not strictly
-necessary, but allows PyXPlot scripts to be easily distinguished from other
+.ppl} to the filenames of all Pyxplot command scripts. This is not strictly
+necessary, but allows Pyxplot scripts to be easily distinguished from other
 text files in a filing system. The filenames of several command scripts may be
-passed to PyXPlot on a single command line, indicating that they should be
+passed to Pyxplot on a single command line, indicating that they should be
 executed in sequence, as in the example:
 
 \begin{verbatim}
 pyxplot foo1.ppl foo2.ppl foo3.ppl
 \end{verbatim}
 
-It is also possible to have a single PyXPlot session alternate between running
+It is also possible to have a single Pyxplot session alternate between running
 command scripts autonomously and allowing the user to enter commands
 interactively between the running of the scripts. There are two ways of doing
-this.  PyXPlot can be passed the magic filename {\tt --} on the command line,
+this.  Pyxplot can be passed the magic filename {\tt --} on the command line,
 as in the example
 
 \begin{verbatim}
@@ -97,7 +97,7 @@ pyxplot foo1.ppl -- foo2.ppl
 \noindent where the {\tt --} represents an interactive session which commences
 after the execution of {\tt foo1.ppl} and should be terminated by the user in
 the usual way, using either the \indcmdts{exit} or \indcmdts{quit} commands.
-After the interactive session is finished, PyXPlot will automatically execute
+After the interactive session is finished, Pyxplot will automatically execute
 the command script {\tt foo2.ppl}.
 
 From within an interactive session, it is possible to run a command script
@@ -110,17 +110,17 @@ using the \indcmdt{load}, as in the example:
 \noindent This example would have the same effect as typing the contents of the
 file {\tt foo.ppl} into the present interactive terminal.
 
-The \indcmdt{save} may assist in producing PyXPlot command scripts: it stores a
+The \indcmdt{save} may assist in producing Pyxplot command scripts: it stores a
 history of the commands which have been typed into the present interactive
 session to file.
 
-\boxout{The storage of command histories in PyXPlot.}{box:CommandHistory}{
-When PyXPlot is used interactively, its command-line environment is based upon
+\boxout{The storage of command histories in Pyxplot.}{box:CommandHistory}{
+When Pyxplot is used interactively, its command-line environment is based upon
 the GNU Readline Library. This means that the up- and down-arrow keys can be
 used to repeat or modify previously executed commands. Each user's command
 history is stored in his homespace in a history file called {\tt
-.pyxplot\_history}; this file is used by PyXPlot to remember command histories
-between sessions. PyXPlot's \indcmdt{save} allows the user to save to a text
+.pyxplot\_history}; this file is used by Pyxplot to remember command histories
+between sessions. Pyxplot's \indcmdt{save} allows the user to save to a text
 file a list of the commands which have been typed into the present session, as
 in the following example:\vspace{3mm}
 
@@ -138,7 +138,7 @@ only displays the last $n$ commands, e.g.:\vspace{3mm}
 \section{First plots}
 \label{sec:first_plots}
 
-The core graph-plotting command of PyXPlot is the \indcmdt{plot}. The following
+The core graph-plotting command of Pyxplot is the \indcmdt{plot}. The following
 simple example would plot the trigonometric function $\sin(x)$:
 
 \begin{verbatim}
@@ -150,7 +150,7 @@ plot sin(x)
 \end{center}
 
 \noindent This is one of a large number of mathematical functions which are
-built into PyXPlot; a complete alphabetical list of them can be found in
+built into Pyxplot; a complete alphabetical list of them can be found in
 Chapter~\ref{ch:function_list}.
 
 As well as plotting functions, it is also possible to plot data stored in
@@ -192,11 +192,11 @@ plot f(x)
 \includegraphics[width=8cm]{examples/eps/ex_intro_func}
 \end{center}
 
-PyXPlot supports almost all of the same mathematical operators as the C
+Pyxplot supports almost all of the same mathematical operators as the C
 programming language; a complete list of them can be found in
 Table~\ref{tab:operators_table}.\index{functions!pre-defined}\index{operators}
 If you have experience of similar tricks in C, it is quite possible to write
-the following expressions in PyXPlot (but don't worry if this is a little over
+the following expressions in Pyxplot (but don't worry if this is a little over
 your head):
 
 \vspace{3mm}
@@ -261,7 +261,7 @@ only the value of the final comma-separated expression.
 \hline
 \end{tabular}
 \end{center}
-\caption{A list of mathematical operators which PyXPlot recognises, in order of
+\caption{A list of mathematical operators which Pyxplot recognises, in order of
 descending precedence. Items separated by horizontal rules are of differing
 precedence; those not separated by horizontal rules are of equivalent
 precedence. The third column indicates whether strings of operators are
@@ -277,7 +277,7 @@ example, the expression {\tt x**y**z} is evaluated as {\tt (x**(y**z))}.}
 \section{Comments}
 
 As in any programming language, it is good practice to include comments in
-PyXPlot command scripts to explain what each command or block of commands is
+Pyxplot command scripts to explain what each command or block of commands is
 doing. Comment lines should begin with a hash character, as in the
 example\index{comment lines}\index{command scripts!comment lines}
 
@@ -310,7 +310,7 @@ command lines are longer than the width of the page.
 
 \section{Printing text}
 
-PyXPlot's \indcmdt{print} can be used to display strings and the results of
+Pyxplot's \indcmdt{print} can be used to display strings and the results of
 calculations on the terminal, as in the following examples:
 
 \vspace{3mm}
@@ -396,7 +396,7 @@ Section~\ref{sec:stringsubop}.
 \hline
 \end{tabular}
 \end{center}
-\caption{A complete list of PyXPlot's string escape sequences. These are a subset of those available in C.}
+\caption{A complete list of Pyxplot's string escape sequences. These are a subset of those available in C.}
 \label{tab:escape_sequences}
 \end{table}
 
@@ -419,7 +419,7 @@ plot
 \end{center}
 
 \noindent These labels and title -- in fact, all text labels which are ever
-produced by PyXPlot -- are rendered using the \LaTeX\ typesetting system, and
+produced by Pyxplot -- are rendered using the \LaTeX\ typesetting system, and
 so any \LaTeX\ commands can be used to produce custom formatting. This allows
 great flexibility, but means that care needs to be taken to escape any of
 \LaTeX's reserved characters -- i.e. $\backslash$~\&~\%~\#~\{~\}~\$~\_~\^{} or
@@ -459,7 +459,7 @@ set xlabel 'My plot's X axis'
 set xlabel "J$\backslash$"org's data"
 \end{dontdo}
 
-\noindent the backslash before the " character will be interpreted as a PyXPlot escape character; it will not be passed to \LaTeX, and a \LaTeX error will result. There are similar problems with
+\noindent the backslash before the " character will be interpreted as a Pyxplot escape character; it will not be passed to \LaTeX, and a \LaTeX error will result. There are similar problems with
 
 \begin{dontdo}
 set xlabel "2 $\backslash$times 3"
@@ -533,9 +533,9 @@ Table~\ref{tab:show_keywords}.
 {\bf Query} & {\bf Description} \\ \hline
 {\tt all} & Lists all settings.\\
 {\tt axes} & Lists all of the currently configured axes.\\
-{\tt functions} & Lists all currently defined mathematical functions, both those which are built into PyXPlot and those which the user has defined.\\
+{\tt functions} & Lists all currently defined mathematical functions, both those which are built into Pyxplot and those which the user has defined.\\
 {\tt settings} & Lists the current values of all settings which can be set with the {\tt set} command.\\
-{\tt units} & Lists all of the physical units which PyXPlot is currently set up to recognise.\\
+{\tt units} & Lists all of the physical units which Pyxplot is currently set up to recognise.\\
 {\tt userfunctions} & Lists all current user-defined mathematical functions and subroutines.\\
 {\tt variables} & Lists the values of all currently-defined variables.\\
 \hline
@@ -548,14 +548,14 @@ Table~\ref{tab:show_keywords}.
 Generally, the \indcmdt{show} displays each setting in the form of a
 \indcmdt{set} which could be used to set that setting, together with a comment
 to briefly explain what effect the setting has. This means that the output can
-be pasted directly into another PyXPlot terminal to copy settings from one
+be pasted directly into another Pyxplot terminal to copy settings from one
 session to another. However, it should be noted that some settings, such as
 {\tt papersize} are only pastable once the \indcmdt{set numerics typeable} has
 been issued, for reasons which will be explained in Section~\ref{sec:pastable}.
 
 When a color-highlighted interactive session is used, settings which have been
 changed are highlighted in yellow, whilst those settings which are unchanged
-from PyXPlot's default configuration, or from a user-supplied configuration
+from Pyxplot's default configuration, or from a user-supplied configuration
 file, are shown in green.
 
 \section{Plotting \datafile s}
@@ -596,7 +596,7 @@ plot 'data.dat' using (3):$($2)
 \end{verbatim}
 
 It is also possible to plot data from only selected lines within a \datafile.
-When PyXPlot reads a \datafile, it looks for any blank lines in the file. It
+When Pyxplot reads a \datafile, it looks for any blank lines in the file. It
 divides the \datafile\ up into {\it data blocks}, each being separated from the
 next by a single blank line. The first data block is numbered~0, the next~1, and
 so on.  \index{datafile format}
@@ -629,7 +629,7 @@ Figure~\ref{fig:sample_datafile}.
 \hline
 \end{tabular}
 \end{center}
-\caption{An example PyXPlot \datafile\ -- the \datafile\ is shown in the two left-hand columns, and commands are shown to the right.}
+\caption{An example Pyxplot \datafile\ -- the \datafile\ is shown in the two left-hand columns, and commands are shown to the right.}
 \label{fig:sample_datafile}
 \end{figure}
 
@@ -676,11 +676,11 @@ data block; the second from the third line onwards within each data block.
 
 \index{comment lines!in datafiles}
 Comment lines may be included in \datafile s by prefixing them with a hash
-character. Such lines are completely ignored by PyXPlot and do not count
+character. Such lines are completely ignored by Pyxplot and do not count
 towards the one or two blank lines required to separate blocks and index
 blocks.  It is usually good practice to include comment lines at the top of
 \datafile s to indicate their date and source. In
-Section~\ref{sec:special_comments} we will see that PyXPlot can read metadata
+Section~\ref{sec:special_comments} we will see that Pyxplot can read metadata
 from some comment lines which follow particular syntax.
 
 \section{Plotting many \datafile s at once}
@@ -718,7 +718,7 @@ plot '*.dat' using 1:2, '' using 2:3
 modifier@{\tt using rows} modifier}\index{using columns modifier@{\tt using
 columns} modifier}
 
-PyXPlot also allows rows of data to be plotted against one another. To do so,
+Pyxplot also allows rows of data to be plotted against one another. To do so,
 the keyword \indkeyt{rows} is placed after the {\tt using} modifier:
 
 \begin{verbatim}
@@ -767,7 +767,7 @@ plot sin(x) select (($1>0) and ($2>0))
 
 \noindent In the second example, two selection criteria are given, combined
 with the logical {\tt and} operator. A full list of all of the operators
-recognised by PyXPlot, including logical operators, was given in
+recognised by Pyxplot, including logical operators, was given in
 Table~\ref{tab:operators_table}.
 
 When plotting using \indpst{lines} to connect the \datapoint s (see
@@ -810,11 +810,11 @@ replot [0:1][0:1]
 \section{Directing where output goes}
 \label{sec:directing_output}
 
-By default, when PyXPlot is used interactively, all plots are displayed on the
+By default, when Pyxplot is used interactively, all plots are displayed on the
 screen. It is also possible to produce PostScript output, to be read into other
 programs or embedded into \LaTeX\ documents, as well as a variety of other
 graphical formats. The \indcmdt{set terminal}\footnote{Gnuplot users should
-note that the syntax of the {\tt set terminal} command in PyXPlot is somewhat
+note that the syntax of the {\tt set terminal} command in Pyxplot is somewhat
 different from that used by Gnuplot; see Section~\ref{sec:set_terminal}.} is
 used to specify the output format that is required, and the \indcmdt{set
 output} is used to specify the file to which output should be directed. For
@@ -909,7 +909,7 @@ for example, would produce plots three times as high as they are wide:
 set size ratio 3.0
 \end{verbatim}
 
-\noindent The command {\tt set size noratio} returns to PyXPlot's default
+\noindent The command {\tt set size noratio} returns to Pyxplot's default
 aspect ratio of the golden ratio, i.e.\ $\left((1+\sqrt{5})/2\right)^{-1}$. The
 special command {\tt set size square}\indcmd{set size square} sets the aspect
 ratio to unity.
@@ -957,7 +957,7 @@ modifier can be used:
 plot 'data.dat' using 2:3:7 with yerrorbars
 \end{verbatim}
 
-Other plot styles supported by PyXPlot are listed in
+Other plot styles supported by Pyxplot are listed in
 Section~\ref{sec:list_of_plotstyles}.  More details of the {\tt errorbars} plot
 style can be found in Section~\ref{sec:errorbars}. Bar charts will be discussed
 in Section~\ref{sec:barcharts}.
@@ -985,7 +985,7 @@ style used when functions are plotted.
 \section{Setting axis ranges}
 \label{sec:plot_ranges}
 
-By default, PyXPlot automatically scales axes to some sensible range which
+By default, Pyxplot automatically scales axes to some sensible range which
 contains all of the plotted data. However, it is possible for the user to
 override this and set his own range.\index{axes!setting ranges} This can be
 done directly from the plot command, by following the word {\tt plot} with the
@@ -1103,7 +1103,7 @@ $\theta$.
 
 \section{Interactive help}
 
-In addition to this {\it Users' Guide}, PyXPlot also has a \indcmdt{help},
+In addition to this {\it Users' Guide}, Pyxplot also has a \indcmdt{help},
 which provides a hierarchical source of information. Typing {\tt help} alone
 gives a brief introduction to the help system, as well as a list of topics on
 which help is available. To display help on any given topic, type {\tt help}
@@ -1113,7 +1113,7 @@ followed by the name of the topic. For example,
 help datafile
 \end{verbatim}
 
-\noindent provides information on the format in which PyXPlot expects to read
+\noindent provides information on the format in which Pyxplot expects to read
 \datafile s and
 
 \begin{verbatim}

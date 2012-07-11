@@ -1,6 +1,6 @@
 # manpage_pyxplot.py
 #
-# The code in this file is part of PyXPlot
+# The code in this file is part of Pyxplot
 # <http://www.pyxplot.org.uk>
 #
 # Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,18 +8,18 @@
 #
 # $Id$
 #
-# PyXPlot is free software; you can redistribute it and/or modify it under the
+# Pyxplot is free software; you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation; either version 2 of the License, or (at your option) any later
 # version.
 #
 # You should have received a copy of the GNU General Public License along with
-# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 # ----------------------------------------------------------------------------
 
-# Generate manpage for PyXPlot
+# Generate manpage for Pyxplot
 
 import sys
 
@@ -37,7 +37,7 @@ for line in f.readlines():
 sys.stdout.write(r"""
 .\" pyxplot.1
 .\"
-.\" The manpage in this file is part of PyXPlot
+.\" The manpage in this file is part of Pyxplot
 .\" <http://www.pyxplot.org.uk>
 .\"
 .\" Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -45,13 +45,13 @@ sys.stdout.write(r"""
 .\"
 .\" $Id$
 .\"
-.\" PyXPlot is free software; you can redistribute it and/or modify it under the
+.\" Pyxplot is free software; you can redistribute it and/or modify it under the
 .\" terms of the GNU General Public License as published by the Free Software
 .\" Foundation; either version 2 of the License, or (at your option) any later
 .\" version.
 .\"
 .\" You should have received a copy of the GNU General Public License along with
-.\" PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+.\" Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 .\" Street, Fifth Floor, Boston, MA  02110-1301, USA
 .\"
 .\" ----------------------------------------------------------------------------
@@ -79,7 +79,7 @@ Full documentation can be found in:
 %s.
 .SH CREDITS
 Matthew Smith, Michael Rutter, Zoltan Voros and John Walker have all
-contributed code to PyXPlot.  We welcome bug reports, which can be submitted to
+contributed code to Pyxplot.  We welcome bug reports, which can be submitted to
 our project page on Sourceforge, and thank the many testers who have already
 made significant contributions to the project by helping us to track down bugs.
 .SH "SEE ALSO"

@@ -1,6 +1,6 @@
 // defaultVars.c
 //
-// The code in this file is part of PyXPlot
+// The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,13 +8,13 @@
 //
 // $Id$
 //
-// PyXPlot is free software; you can redistribute it and/or modify it under the
+// Pyxplot is free software; you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation; either version 2 of the License, or (at your option) any later
 // version.
 //
 // You should have received a copy of the GNU General Public License along with
-// PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+// Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 // Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 // ----------------------------------------------------------------------------
@@ -87,7 +87,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_dictAppendCpy(d  , "false"     , (void *)&v , sizeof(v)); // False
 
     pplObjStr(&v,1,0,VERSION);
-    ppl_dictAppendCpy(d  , "version"   , (void *)&v , sizeof(v)); // PyXPlot version string
+    ppl_dictAppendCpy(d  , "version"   , (void *)&v , sizeof(v)); // Pyxplot version string
 
     // types module
     ppl_dictAppendCpy(d  , "types"     , pplObjModule(&m,1,1,1) , sizeof(v));
@@ -231,13 +231,13 @@ void ppl_makeDefaultVars(ppl_context *out)
     d2 = (dict *)m.auxil;
     ppl_addSystemFunc(d2,"chdir"         ,1,1,0,0,0,0,(void *)&pplfunc_osChdir   , "chdir(x)", "\\mathrm{chdir}@<@1@>", "chdir(x) changes working directory to x");
     ppl_addSystemFunc(d2,"getcwd"        ,0,0,1,1,1,1,(void *)&pplfunc_osGetCwd  , "getcwd()", "\\mathrm{getcwd}@<@>", "getcwd() returns the path of the current working directory");
-    ppl_addSystemFunc(d2,"getegid"       ,0,0,1,1,1,1,(void *)&pplfunc_osGetEgid , "getegid()" , "\\mathrm{getegid}@<@>", "getegid() returns the effective group id of the PyXPlot process");
-    ppl_addSystemFunc(d2,"geteuid"       ,0,0,1,1,1,1,(void *)&pplfunc_osGetEuid , "geteuid()" , "\\mathrm{geteuid}@<@>", "geteuid() returns the effective user id of the PyXPlot process");
-    ppl_addSystemFunc(d2,"getgid"        ,0,0,1,1,1,1,(void *)&pplfunc_osGetGid  , "getgid()"  , "\\mathrm{getgid}@<@>", "getgid() returns the group id of the PyXPlot process");
-    ppl_addSystemFunc(d2,"getpid"        ,0,0,1,1,1,1,(void *)&pplfunc_osGetPid  , "getpid()"  , "\\mathrm{getpid}@<@>", "getpid() returns the process id of the PyXPlot process");
-    ppl_addSystemFunc(d2,"getpgrp"       ,0,0,1,1,1,1,(void *)&pplfunc_osGetPgrp , "getpgrp()" , "\\mathrm{getpgrp}@<@>", "getpgrp() returns the process group id of the PyXPlot process");
-    ppl_addSystemFunc(d2,"getppid"       ,0,0,1,1,1,1,(void *)&pplfunc_osGetPpid , "getppid()" , "\\mathrm{getppid}@<@>", "getpid() returns the parent process id of the PyXPlot process");
-    ppl_addSystemFunc(d2,"getuid"        ,0,0,1,1,1,1,(void *)&pplfunc_osGetUid  , "getuid()"  , "\\mathrm{getuid}@<@>", "getuid() returns the user id of the PyXPlot process");
+    ppl_addSystemFunc(d2,"getegid"       ,0,0,1,1,1,1,(void *)&pplfunc_osGetEgid , "getegid()" , "\\mathrm{getegid}@<@>", "getegid() returns the effective group id of the Pyxplot process");
+    ppl_addSystemFunc(d2,"geteuid"       ,0,0,1,1,1,1,(void *)&pplfunc_osGetEuid , "geteuid()" , "\\mathrm{geteuid}@<@>", "geteuid() returns the effective user id of the Pyxplot process");
+    ppl_addSystemFunc(d2,"getgid"        ,0,0,1,1,1,1,(void *)&pplfunc_osGetGid  , "getgid()"  , "\\mathrm{getgid}@<@>", "getgid() returns the group id of the Pyxplot process");
+    ppl_addSystemFunc(d2,"getpid"        ,0,0,1,1,1,1,(void *)&pplfunc_osGetPid  , "getpid()"  , "\\mathrm{getpid}@<@>", "getpid() returns the process id of the Pyxplot process");
+    ppl_addSystemFunc(d2,"getpgrp"       ,0,0,1,1,1,1,(void *)&pplfunc_osGetPgrp , "getpgrp()" , "\\mathrm{getpgrp}@<@>", "getpgrp() returns the process group id of the Pyxplot process");
+    ppl_addSystemFunc(d2,"getppid"       ,0,0,1,1,1,1,(void *)&pplfunc_osGetPpid , "getppid()" , "\\mathrm{getppid}@<@>", "getpid() returns the parent process id of the Pyxplot process");
+    ppl_addSystemFunc(d2,"getuid"        ,0,0,1,1,1,1,(void *)&pplfunc_osGetUid  , "getuid()"  , "\\mathrm{getuid}@<@>", "getuid() returns the user id of the Pyxplot process");
     ppl_addSystemFunc(d2,"gethomedir"    ,0,0,1,1,1,1,(void *)&pplfunc_osGetHome , "gethomedir()" , "\\mathrm{gethomedir}@<@>", "gethomedir() returns the path of the user's home directory");
     ppl_addSystemFunc(d2,"gethostname"   ,0,0,1,1,1,1,(void *)&pplfunc_osGetHost , "gethostname()", "\\mathrm{gethostname}@<@>", "gethostname() returns the system's host name");
     ppl_addSystemFunc(d2,"getlogin"      ,0,0,1,1,1,1,(void *)&pplfunc_osGetLogin, "getlogin()", "\\mathrm{getlogin}@<@>", "getlogin() returns the system login of the user");

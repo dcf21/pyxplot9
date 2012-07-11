@@ -1,6 +1,6 @@
 // pyxplot.c
 //
-// The code in this file is part of PyXPlot
+// The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,13 +8,13 @@
 //
 // $Id$
 //
-// PyXPlot is free software; you can redistribute it and/or modify it under the
+// Pyxplot is free software; you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation; either version 2 of the License, or (at your option) any later
 // version.
 //
 // You should have received a copy of the GNU General Public License along with
-// PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+// Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 // Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 // ----------------------------------------------------------------------------
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
   // Initialise sub-modules
   ppl_PaperSizeInit();
   context = ppl_contextInit();
-  if (DEBUG) ppl_log(&context->errcontext,"Initialising PyXPlot.");
+  if (DEBUG) ppl_log(&context->errcontext,"Initialising Pyxplot.");
   ppl_memAlloc_MemoryInit(&context->errcontext, &ppl_error, &ppl_log);
   if (!ppl_inputInit(context)) ppl_fatal(&context->errcontext, __FILE__, __LINE__, "Out of memory." );
   ppltxt_init();
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
   // Initialise GNU Readline
 #ifdef HAVE_READLINE
   ppl_parseAutocompleteSetContext(context);              // Tab completer needs to be able to access root-level context, even though rl doesn't pass it
-  rl_readline_name = "PyXPlot";                          // Allow conditional parsing of the ~/.inputrc file.
+  rl_readline_name = "Pyxplot";                          // Allow conditional parsing of the ~/.inputrc file.
   rl_attempted_completion_function = ppl_rl_completion;  // Tell the completer that we want a crack first.
 #endif
 

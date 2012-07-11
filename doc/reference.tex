@@ -1,6 +1,6 @@
 % reference.tex
 %
-% The documentation in this file is part of PyXPlot
+% The documentation in this file is part of Pyxplot
 % <http://www.pyxplot.org.uk>
 %
 % Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,23 +8,23 @@
 %
 % $Id$
 %
-% PyXPlot is free software; you can redistribute it and/or modify it under the
+% Pyxplot is free software; you can redistribute it and/or modify it under the
 % terms of the GNU General Public License as published by the Free Software
 % Foundation; either version 2 of the License, or (at your option) any later
 % version.
 %
 % You should have received a copy of the GNU General Public License along with
-% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 % Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 % ----------------------------------------------------------------------------
 
-% LaTeX source for the PyXPlot Users' Guide
+% LaTeX source for the Pyxplot Users' Guide
 
 \chapter{Command reference}
 \label{ch:reference}
 
-This chapter contains an alphabetically ordered list of all of PyXPlot's
+This chapter contains an alphabetically ordered list of all of Pyxplot's
 commands. The syntax of each is specified in a variant of Backus-Naur notation,
 in which angle brackets {\tt <>} are used to indicate replaceable tokens,
 parentheses {\tt ()} are used to indicate mutually-exclusive options which are
@@ -53,7 +53,7 @@ three-dimensional plots. The components should share the physical units of the
 axes they are plotted against.
 
 In flow control commands, tokens labelled {\tt <code>} should be replaced by a
-series of PyXPlot commands enclosed by braces {\tt \{\}}. The closing brace
+series of Pyxplot commands enclosed by braces {\tt \{\}}. The closing brace
 must be placed on a new line.
 
 Where braces {\tt \{\}} are used to indicate items which may be repeated,
@@ -80,7 +80,7 @@ The {\tt ?} symbol is a shortcut to the {\tt help} command.
 ... `<shell command>` ...
 \end{verbatim}
 
-Shell commands can be executed within PyXPlot by prefixing them with
+Shell commands can be executed within Pyxplot by prefixing them with
 pling (!) characters, as in the example:
 
 \begin{verbatim}
@@ -88,7 +88,7 @@ pling (!) characters, as in the example:
 \end{verbatim}
 
 \noindent As an alternative, back-quotes (`) can be used to substitute the
-output of a shell command into a PyXPlot command, as in the example:
+output of a shell command into a Pyxplot command, as in the example:
 
 \begin{verbatim}
 set xlabel `echo "'" ; ls ; echo "'"`
@@ -179,7 +179,7 @@ assert x>0
 assert y<0 "y must be less than zero."
 \end{verbatim}
 
-The \indcmdt{assert} can also be used to test the version number of PyXPlot. It
+The \indcmdt{assert} can also be used to test the version number of Pyxplot. It
 is possible to test either that the version is newer than or equal to a
 specific version, using the {\tt $>$=} operator, or that it is older than a
 specific version, using the {\tt $<$} operator, as demonstrated in the
@@ -187,7 +187,7 @@ following examples:
 
 \begin{verbatim}
 assert version >= 0.8.2
-assert version <  0.8  "This script is designed for PyXPlot 0.7"
+assert version <  0.8  "This script is designed for Pyxplot 0.7"
 \end{verbatim}
 
 
@@ -211,7 +211,7 @@ negative. If a rotation angle is specified then the box is rotated about the
 specified corner.  The {\tt with} modifier allows the style of the box to be
 specified using similar options to those accepted by the {\tt plot} command.
 
-The second syntax allows two pairs of coordinates to be specified.  PyXPlot
+The second syntax allows two pairs of coordinates to be specified.  Pyxplot
 will then draw a rectangular box with opposing corners at the specified
 locations.  If an angle is specified the box will be rotated about its centre.
 Hence the following two commands both draw a square box centred on the origin:
@@ -287,7 +287,7 @@ evaluation.
 cd <directory>
 \end{verbatim}
 
-PyXPlot's \indcmdt{cd} is very similar to the shell {\tt cd} command; it
+Pyxplot's \indcmdt{cd} is very similar to the shell {\tt cd} command; it
 changes the current working directory. The following example would enter the
 subdirectory {\tt foo}:
 
@@ -519,8 +519,8 @@ specified then the image will be rendered with the native dimensions specified
 within the PostScript.  The {\tt eps} command is often useful in multiplot
 mode, allowing PostScript images to be combined with plots, text labels, etc.
 
-The {\tt clip} modifier causes PyXPlot to clip an eps image to its stated
-bounding box. The {\tt calcbbox} modifier causes PyXPlot to ignore the bounding
+The {\tt clip} modifier causes Pyxplot to clip an eps image to its stated
+bounding box. The {\tt calcbbox} modifier causes Pyxplot to ignore the bounding
 box stated in the eps file and calculate its own when working out how to scale
 the image to the specified width and height.
 
@@ -537,7 +537,7 @@ commands respectively.
 exec <command>
 \end{verbatim}
 
-The \indcmdt{exec} can be used to execute PyXPlot commands contained within
+The \indcmdt{exec} can be used to execute Pyxplot commands contained within
 string variables, as in the following example:
 
 \begin{verbatim}
@@ -545,7 +545,7 @@ terminal="eps"
 exec "set terminal %s"%(terminal)
 \end{verbatim}
 
-\noindent It can also be used to write obfuscated PyXPlot scripts, and its use
+\noindent It can also be used to write obfuscated Pyxplot scripts, and its use
 should be minimized wherever possible.
 
 
@@ -555,12 +555,12 @@ should be minimized wherever possible.
 exit
 \end{verbatim}
 
-The \indcmdt{exit} can be used to quit PyXPlot. If multiple command files,
+The \indcmdt{exit} can be used to quit Pyxplot. If multiple command files,
 or a mixture of command files and interactive sessions, were specified on
-PyXPlot's command line, then PyXPlot moves onto the next command-line item
+Pyxplot's command line, then Pyxplot moves onto the next command-line item
 after receiving the {\tt exit} command.
 
-PyXPlot may also be quit be pressing CTRL-D or using the {\tt quit} command. In
+Pyxplot may also be quit be pressing CTRL-D or using the {\tt quit} command. In
 interactive mode, CTRL-C terminates the current command, if one is running.
 When running a script, CTRL-C terminates execution of the script.
 
@@ -679,7 +679,7 @@ for (<initialise>; <criterion>; <step>)
   <code>
 \end{verbatim}
 
-The \indcmdt{for} executes a set of commands repeatedly.  PyXPlot allows {\tt
+The \indcmdt{for} executes a set of commands repeatedly.  Pyxplot allows {\tt
 for} loops to follow either the syntax of the BASIC programming language, or
 the C syntax.
 
@@ -789,7 +789,7 @@ example
 help commands
 \end{verbatim}
 
-\noindent which provides information on PyXPlot's commands. Some topics have
+\noindent which provides information on Pyxplot's commands. Some topics have
 sub-topics; these are listed at the end of each help page. To view them, add
 further words to the end of the help request, as in the example:
 
@@ -797,8 +797,8 @@ further words to the end of the help request, as in the example:
 help commands help
 \end{verbatim}
 
-Information is arranged with general information about PyXPlot under the
-heading {\tt about} and information about PyXPlot's commands under {\tt
+Information is arranged with general information about Pyxplot under the
+heading {\tt about} and information about Pyxplot's commands under {\tt
 commands}.  Information about the format that input \datafile s should take can
 be found under {\tt datafile}.  Other categories are self-explanatory.
 
@@ -1002,7 +1002,7 @@ interpolate ( akima | linear | loglinear | polynomial |
 \end{verbatim}
 
 The \indcmdt{interpolate} can be used to generate a special function within
-PyXPlot's mathematical environment which interpolates a set of \datapoint s
+Pyxplot's mathematical environment which interpolates a set of \datapoint s
 supplied from a \datafile. Either one- or two-dimensional interpolation is
 possible.
 
@@ -1015,7 +1015,7 @@ interpolation with large datasets is strongly discouraged, as polynomial fits
 tend to show severe oscillations between \datapoint s.  Except in the case of
 stepwise interpolation, extrapolation is not permitted; if an attempt is made
 to evaluate an interpolated function beyond the limits of the \datapoint s
-which it interpolates, PyXPlot returns an error or value of not-a-number.
+which it interpolates, Pyxplot returns an error or value of not-a-number.
 
 In the case of two-dimensional interpolation, the type of interpolation to be
 used is set using the {\tt interpolate} modifier to the \indcmdt{set samples},
@@ -1123,7 +1123,7 @@ Item {\tt 1} has been deleted.
 load <filename>
 \end{verbatim}
 
-The \indcmdt{load} executes a PyXPlot command script file, just as if its
+The \indcmdt{load} executes a Pyxplot command script file, just as if its
 contents had been typed into the current terminal. For example:
 
 \begin{verbatim}
@@ -1182,7 +1182,7 @@ common sense.
 
 These commands can often find solutions to equations when these solutions are
 either very large or very small, but they usually work best when the solution
-they are looking for is roughly of order unity.  PyXPlot does have mechanisms
+they are looking for is roughly of order unity.  Pyxplot does have mechanisms
 which attempt to correct cases where the supplied initial guess turns out to be
 many orders of magnitude different from the true solution, but it cannot be
 guaranteed not to wildly overshoot and produce unexpected results in such
@@ -1220,7 +1220,7 @@ common sense.
 
 These commands can often find solutions to equations when these solutions are
 either very large or very small, but they usually work best when the solution
-they are looking for is roughly of order unity.  PyXPlot does have mechanisms
+they are looking for is roughly of order unity.  Pyxplot does have mechanisms
 which attempt to correct cases where the supplied initial guess turns out to be
 many orders of magnitude different from the true solution, but it cannot be
 guaranteed not to wildly overshoot and produce unexpected results in such
@@ -1291,7 +1291,7 @@ plot 'data.dat' with points
 
 \noindent which would plot data from the file {\tt data.dat}.
 Section~\ref{sec:plot_datafiles} provides further details of the format that
-input \datafile s should take and how PyXPlot may be directed to plot only
+input \datafile s should take and how Pyxplot may be directed to plot only
 certain portions of \datafile s.
 
 Multiple datasets can be plotted on a single graph by specifying them in a
@@ -1344,7 +1344,7 @@ plot 'datafile' using 1:2 label "%s"%($3)
 \noindent Note that if a particular column of a \datafile\ contains strings
 which are to be used as labels, as in the second example above, syntax such as 
 {\tt "\%s"\%(\$3)} must be used to explicitly read the data as strings rather
-than as numerical quantities.  As PyXPlot treats any whitespace as separating
+than as numerical quantities.  As Pyxplot treats any whitespace as separating
 columns of data, such labels cannot contain spaces, though \LaTeX's {\tt
 $\sim$} character can be used to achieve a space.
 
@@ -1359,7 +1359,7 @@ associated.
 
 \subsection{title}\indcmd{plot title}
 
-By default, PyXPlot generates its own entry in the legend of a plot for each
+By default, Pyxplot generates its own entry in the legend of a plot for each
 dataset plotted.  This default behaviour can be overridden using the {\tt
 title} modifier. The following example labels a dataset as `Dataset~1':
 
@@ -1388,7 +1388,7 @@ plot "data.dat" with lines linewidth 2.0
 \end{verbatim}
 would use twice the default width of line.
 
-The following is a complete list of all of PyXPlot's plot styles -- i.e.\ all
+The following is a complete list of all of Pyxplot's plot styles -- i.e.\ all
 of the words which may be used in place of {\tt lines}: {\tt arrows\_\-head},
 {\tt arrows\_\-no\-head}, {\tt arrows\_\-two\-head}, {\tt boxes}, {\tt
 color\-map}, {\tt contour\-map}, {\tt dots}, {\tt filled\-Region}, {\tt
@@ -1411,11 +1411,11 @@ appearance of various plot styles. A complete list of these is as follows:
 \begin{itemize}
 \item \indmodt{color} -- used to select the color in which each dataset is to be plotted. It should be followed either by an integer, to set a color from the present palette (see Section~\ref{sec:palette}), by a recognised color name, or by an object of type {\tt color}. This modifier may also be spelt {\tt colour}.\index{colors!setting for datasets}
 \item \indmodt{fillcolor} -- used to select the color in which each dataset is filled. The color may be specified using any of the styles listed for {\tt color}. May also be spelt {\tt fillcolor}.
-\item \indmodt{linetype} -- used to numerically select the type of line -- for example, solid, dotted, dashed, etc.\ -- which should be used in line-based plot styles. A complete list of PyXPlot's numbered line types can be found in Chapter~\ref{ch:linetypes_table}. May be abbreviated {\tt lt}.
+\item \indmodt{linetype} -- used to numerically select the type of line -- for example, solid, dotted, dashed, etc.\ -- which should be used in line-based plot styles. A complete list of Pyxplot's numbered line types can be found in Chapter~\ref{ch:linetypes_table}. May be abbreviated {\tt lt}.
 \item \indmodt{linewidth} -- used to select the width of line which should be used in line-based plot styles, where unity represents the default width. May be abbreviated {\tt lw}.
 \item \indmodt{pointlinewidth} -- used to select the width of line which should be used to stroke points in point-based plot styles, where unity represents the default width. May be abbreviated {\tt plw}.
 \item \indmodt{pointsize} -- used to select the size of drawn points, where unity represents the default size. May be abbreviated {\tt ps}.
-\item \indmodt{pointtype} -- used to numerically select the type of point -- for example, crosses, circles, etc.\ -- used by point-based plot styles. A complete list of PyXPlot's numbered point types can be found in Chapter~\ref{ch:linetypes_table}. May be abbreviated {\tt pt}.
+\item \indmodt{pointtype} -- used to numerically select the type of point -- for example, crosses, circles, etc.\ -- used by point-based plot styles. A complete list of Pyxplot's numbered point types can be found in Chapter~\ref{ch:linetypes_table}. May be abbreviated {\tt pt}.
 \end{itemize}
 
 Any number of these modifiers may be placed sequentially after the keyword {\tt
@@ -1467,7 +1467,7 @@ print { <expression> }
 
 The \indcmdt{print} displays a string or the value of a mathematical expression to the
 terminal. It is most often used to find the value of a variable, though it can
-also be used to produce formatted textual output from a PyXPlot script. For example,
+also be used to produce formatted textual output from a Pyxplot script. For example,
 
 \begin{verbatim}
 print a
@@ -1497,7 +1497,7 @@ The \indcmdt{pwd} prints the location of the current working directory.
 quit
 \end{verbatim}
 
-The \indcmdt{quit} can be used to exit PyXPlot. See {\tt exit} for more
+The \indcmdt{quit} can be used to exit Pyxplot. See {\tt exit} for more
 details.
 
 
@@ -1601,7 +1601,7 @@ save <filename>
 \end{verbatim}
 
 The \indcmdt{save} saves a list of all of the commands which have been executed
-in the current interactive PyXPlot session into a file. The filename to be used
+in the current interactive Pyxplot session into a file. The filename to be used
 for the output should be placed in quotes, as in the example:
 
 \begin{verbatim}
@@ -1618,14 +1618,14 @@ set <option> <value>
 \end{verbatim}
 
 The \indcmdt{set} is used to configure the values of a wide range of parameters
-within PyXPlot which control its behaviour and the style of the output which it
+within Pyxplot which control its behaviour and the style of the output which it
 produces.  For example:
 
 \begin{verbatim}
 set pointsize 2
 \end{verbatim}
 
-\noindent would set the size of points plotted by PyXPlot to be twice the
+\noindent would set the size of points plotted by Pyxplot to be twice the
 default. In the majority of cases, the syntax follows that above: the {\tt set}
 command should be followed by a keyword which specifies which parameter
 should be set, followed by the value to which that parameter should be
@@ -1708,7 +1708,7 @@ set arrow 2 from first 0, second 2.5 to axis3 0,
 set autoscale { <axis> }
 \end{verbatim}
 
-The \indcmdt{set autoscale} causes PyXPlot to choose the scaling for an axis
+The \indcmdt{set autoscale} causes Pyxplot to choose the scaling for an axis
 automatically based on the data and/or functions to be plotted against it. The
 example
 
@@ -1828,7 +1828,7 @@ leave the quantity dimensionless.
 set backup
 \end{verbatim}
 
-The setting {\tt backup} changes PyXPlot's behaviour when it detects that a
+The setting {\tt backup} changes Pyxplot's behaviour when it detects that a
 file which it is about to write is going to overwrite an existing file. Whereas
 by default the existing file would be overwritten by the new one, when the
 setting {\tt backup} is turned on, it is renamed, placing a tilde at the end of
@@ -1892,7 +1892,7 @@ set boxfrom <value>
 \end{verbatim}
 
 The setting {\tt boxfrom} alters the vertical line from which bars are drawn
-when PyXPlot draws bar charts.  By default, bars all originate from the line
+when Pyxplot draws bar charts.  By default, bars all originate from the line
 $y=0$, but the example
 
 \begin{verbatim}
@@ -1911,7 +1911,7 @@ finite.
 set boxwidth <width>
 \end{verbatim}
 
-The setting {\tt boxwidth} alters PyXPlot's behaviour when plotting bar charts.
+The setting {\tt boxwidth} alters Pyxplot's behaviour when plotting bar charts.
 It sets the default width of the boxes used, in ordinate axis units.  If the
 specified width is negative then, as happens by default, the boxes have
 automatically selected widths, such that the interfaces between them occur at
@@ -1965,8 +1965,8 @@ angle.
 set calendar [ ( input | output ) ] <calendar>
 \end{verbatim}
 
-The \indcmdt{set calendar} sets the calendar that PyXPlot uses to convert dates
-between calendar dates and Julian Day numbers. PyXPlot uses two separate
+The \indcmdt{set calendar} sets the calendar that Pyxplot uses to convert dates
+between calendar dates and Julian Day numbers. Pyxplot uses two separate
 calendars which may be different: an input calendar for processing dates that
 the user inputs as calendar dates, and an output calendar that controls how
 dates are displayed or written on plots.  The available calendars are {\tt
@@ -1982,7 +1982,7 @@ an alias for {\tt Islamic}.
 set clip
 \end{verbatim}
 
-The \indcmdt{set clip} causes PyXPlot to clip points which extend over the edge
+The \indcmdt{set clip} causes Pyxplot to clip points which extend over the edge
 of plots. The opposite effect is achieved using the {\tt set noclip}
 command.
 
@@ -2018,7 +2018,7 @@ set nocolorkey
 unset colorkey
 \end{verbatim}
 
-\noindent causes PyXPlot to revert to its default behaviour, as specified in a
+\noindent causes Pyxplot to revert to its default behaviour, as specified in a
 configuration file, if present. A position for the key may optionally be
 specified after the {\tt set colorkey} command, as in the example:
 
@@ -2147,7 +2147,7 @@ By default, whenever an item is added to a multiplot canvas, or an existing
 item is moved or replotted, the whole multiplot is redrawn to reflect the
 change.  This can be a time-consuming process when constructing large and
 complex multiplot canvases, as fresh output is produced at each step. For this
-reason, the {\tt set nodisplay} command is provided, which stops PyXPlot from
+reason, the {\tt set nodisplay} command is provided, which stops Pyxplot from
 producing any graphical output. The {\tt set display} command can subsequently
 be issued to return to normal behaviour. Scripts which produces large and
 complex multiplot canvases are typically wrapped as follows:
@@ -2167,15 +2167,15 @@ set filter <filename wildcard> <filter command>
 \end{verbatim}
 
 The \indcmdt{set filter} allows input filter programs to be specified to allow
-PyXPlot to deal with file types that are not in the plaintext format which it
+Pyxplot to deal with file types that are not in the plaintext format which it
 ordinarily expects.  Firstly the pattern used to recognise the filenames of the
 \datafile s to which the filter should apply to must be specified; the standard
 wildcard characters {\tt *} and {\tt ?} may be used.  Then a filter program
 should be specified, along with any necessary command-line switches which should
 be passed to it.  This program should take the name of the file to be filtered
 as the final option on its command line, immediately following any command-line
-switches specified above.  It should output a suitable PyXPlot \datafile on its
-standard output stream for PyXPlot to read.  For example, to filter all files
+switches specified above.  It should output a suitable Pyxplot \datafile on its
+standard output stream for Pyxplot to read.  For example, to filter all files
 that end in {\tt .foo} through the a program called {\tt defoo} using the {\tt
 --text} option one would type:
 
@@ -2315,7 +2315,7 @@ set nokey
 unset key
 \end{verbatim}
 
-\noindent causes PyXPlot to revert to its default behaviour, as specified in a
+\noindent causes Pyxplot to revert to its default behaviour, as specified in a
 configuration file, if present. A position for the key may optionally be
 specified after the {\tt set key} command, as in the example:
 
@@ -2518,7 +2518,7 @@ Issuing the command
 set multiplot
 \end{verbatim}
 
-\noindent causes PyXPlot to enter multiplot mode, which allows many graphs to
+\noindent causes Pyxplot to enter multiplot mode, which allows many graphs to
 be plotted together and displayed side-by-side. See Section~\ref{sec:multiplot}
 for a full discussion of multiplot mode.
 
@@ -2682,7 +2682,7 @@ scaled linearly.
 set nomultiplot
 \end{verbatim}
 
-The \indcmdt{set nomultiplot} causes PyXPlot to leave multiplot mode; outside
+The \indcmdt{set nomultiplot} causes Pyxplot to leave multiplot mode; outside
 of multiplot mode, only single graphs and vector graphics objects are displayed
 at any one time, whereas in multiplot mode, galleries of plots and vector
 graphics can be placed alongside one another.  See Section~\ref{sec:multiplot}
@@ -2750,7 +2750,7 @@ carried out and numerical quantities are displayed:
 
 \begin{itemize}
 
-\item The option {\tt complex} causes PyXPlot to switch from performing real
+\item The option {\tt complex} causes Pyxplot to switch from performing real
 arithmetic (default) to performing complex arithmetic. The option {\tt real}
 causes any calculations which return results with finite imaginary components
 to generate errors.
@@ -2764,19 +2764,19 @@ calculations to silently generate a {\tt nan} (not a number) result. The latter
 is especially useful when, for example, plotting an expression with the
 ordinate axis range set to extend outside the domain in which that expression
 returns a well-defined real result; it suppresses the error messages which
-might otherwise result from PyXPlot's attempts to evaluate the expression in
+might otherwise result from Pyxplot's attempts to evaluate the expression in
 those domains where its result is undefined. The option {\tt nan} is a synonym
 for {\tt quiet}.
 
 \item The setting {\tt display} changes the format in which numbers are
 displayed on the terminal.  Setting the option to {\tt typeable} causes the
-numbers to be printed in a form suitable for pasting back into PyXPlot
+numbers to be printed in a form suitable for pasting back into Pyxplot
 commands.  The setting {\tt latex} causes \LaTeX-compatible output to be
 generated.  The setting {\tt natural} generates concise, human-readable output
 which has neither of the above properties.
 
 \item The setting {\tt sigfig} changes the number of significant figures to
-which numbers are displayed on the PyXPlot terminal.  Regardless of the value
+which numbers are displayed on the Pyxplot terminal.  Regardless of the value
 set, all calculations are internally carried out and stored at double
 precision, accurate to around~16 significant figures.
 
@@ -2827,7 +2827,7 @@ set output 'myplot.eps'
 set palette { <color> }
 \end{verbatim}
 
-PyXPlot has a palette of colors which it assigns sequentially to datasets when
+Pyxplot has a palette of colors which it assigns sequentially to datasets when
 colors are not manually assigned. This is also the palette to which reference
 is made if the user issues a command such as
 
@@ -2938,7 +2938,7 @@ set preamble \def\degrees{$^\circ$}
 %\end{verbatim}
 %
 %The {\tt set projection} command will change between different projections of
-%plots in a future version of PyXPlot.  Currently only the {\tt flat} option is
+%plots in a future version of Pyxplot.  Currently only the {\tt flat} option is
 %supported.
 
 
@@ -2988,7 +2988,7 @@ set seed <value>
 The \indcmdt{set seed} sets the seed used by all of those mathematical
 functions which generate random samples from probability distributions.  This
 allows repeatable sequences of pseudo-random numbers to be generated.  Upon
-initialisation, PyXPlot returns the sequence of random numbers obtained after
+initialisation, Pyxplot returns the sequence of random numbers obtained after
 issuing the command {\tt set seed~0}.
 
 
@@ -3029,7 +3029,7 @@ Executing the command
 set size noratio
 \end{verbatim}
 
-\noindent resets PyXPlot to produce plots with its default aspect ratio, which
+\noindent resets Pyxplot to produce plots with its default aspect ratio, which
 is the golden ratio. Other aspect ratios can be set with the {\tt set size
 ratio} command.
 
@@ -3040,7 +3040,7 @@ ratio} command.
 set size ratio <ratio>
 \end{verbatim}
 
-This command sets the aspect ratio of plots produced by PyXPlot.  The height of
+This command sets the aspect ratio of plots produced by Pyxplot.  The height of
 resulting plots will equal the plot width, as set by the {\tt set width}
 command, multiplied by this aspect ratio.  For example,
 
@@ -3048,8 +3048,8 @@ command, multiplied by this aspect ratio.  For example,
 set size ratio 2.0
 \end{verbatim}
 
-\noindent would cause PyXPlot to produce plots that are twice as high as they
-are wide.  The default aspect ratio which PyXPlot uses is a golden ratio of
+\noindent would cause Pyxplot to produce plots that are twice as high as they
+are wide.  The default aspect ratio which Pyxplot uses is a golden ratio of
 $2/(1+\sqrt{5})$.
 
 
@@ -3059,7 +3059,7 @@ $2/(1+\sqrt{5})$.
 set size square
 \end{verbatim}
 
-This command sets PyXPlot to produce square plots, i.e.\ with unit aspect
+This command sets Pyxplot to produce square plots, i.e.\ with unit aspect
 ratio. Other aspect ratios can be set with the {\tt set size ratio} command.
 
 
@@ -3122,10 +3122,10 @@ set terminal ( X11_singleWindow | X11_multiWindow | X11_persist |
              ( enlarge | noenlarge )
 \end{verbatim}
 
-The \indcmdt{set terminal} controls the graphical format in which PyXPlot
+The \indcmdt{set terminal} controls the graphical format in which Pyxplot
 renders plots and multiplot canvases, for example configuring whether it should
 output plots to files or display them in a window on the screen. Various
-options can also be set within many of the graphical formats which PyXPlot
+options can also be set within many of the graphical formats which Pyxplot
 supports using this command.
 
 The following graphical formats are supported:  {\tt X11\_\-single\-Window},
@@ -3172,7 +3172,7 @@ The {\tt color} terminal option is the US-English equivalent of {\tt color}.
 
 \subsubsection{dpi}\index{set terminal command!dpi modifier@{\tt dpi} modifier}
 
-When PyXPlot is set to produce bitmap graphics output, using the {\tt bmp},
+When Pyxplot is set to produce bitmap graphics output, using the {\tt bmp},
 {\tt gif}, {\tt jpg} or {\tt png} terminals, the setting {\tt dpi} changes the
 number of dots per inch with which these graphical images are produced. That is
 to say, it changes the image resolution of the output images. For example,
@@ -3229,7 +3229,7 @@ image with inverted colors.
 
 \subsubsection{landscape}\index{set terminal command!landscape modifier@{\tt landscape} modifier}
 
-The {\tt landscape} terminal option causes PyXPlot's output to be displayed in
+The {\tt landscape} terminal option causes Pyxplot's output to be displayed in
 rotated orientation.  This can be useful for fitting graphs onto sheets of
 paper, but is generally less useful for plotting things on screen.
 
@@ -3283,7 +3283,7 @@ with inverted colors.
 
 \subsubsection{portrait}\index{set terminal command!portrait modifier@{\tt portrait} modifier}
 
-The {\tt portrait} terminal option causes PyXPlot's output to be displayed in
+The {\tt portrait} terminal option causes Pyxplot's output to be displayed in
 upright (normal) orientation; it is the converse of the {\tt landscape} option.
 
 
@@ -3314,7 +3314,7 @@ terminals to produce output with a transparent background.
 The {\tt X11\_multiwindow} terminal displays plots on the screen in X11
 windows. Each time a new plot is generated it appears in a new window, and the
 old plots remain visible.  As many plots as may be desired can be left on the
-desktop simultaneously. When PyXPlot exits, however, all of the windows are
+desktop simultaneously. When Pyxplot exits, however, all of the windows are
 closed.
 
 \subsubsection{X11\_persist}\index{set terminal command!X11\_persist
@@ -3322,7 +3322,7 @@ modifier@{\tt X11\_persist} modifier}
 
 The {\tt X11\_persist} terminal displays plots on the screen in X11 windows.
 Each time a new plot is generated it appears in a new window, and the old plots
-remain visible.  When PyXPlot is exited the windows remain in place until they
+remain visible.  When Pyxplot is exited the windows remain in place until they
 are closed manually.
 
 \subsubsection{X11\_singleWindow}\index{set terminal command!X11\_singleWindow modifier@{\tt X11\_singleWindow} modifier}
@@ -3432,7 +3432,7 @@ set unit [ angle ( dimensionless | nodimensionless ) ]
 \end{verbatim}
 
 The \indcmdt{set unit} controls how quantities with physical units are
-displayed by PyXPlot. The \indcmdt{set unit scheme} provides the most general
+displayed by Pyxplot. The \indcmdt{set unit scheme} provides the most general
 configuration option, allowing one of several {\it units
 schemes}\index{units!unit schemes} to be selected, each of which comprises a
 list of units which are deemed to be members of that particular scheme. For
@@ -3466,7 +3466,7 @@ set unit preferred N*m
 The latter two examples are particularly useful when working with spectral
 densities (powers per unit frequency) or torques (forces multiplied by
 distances). Unfortunately, both of these units are dimensionally equal to
-energies, and so are displayed by PyXPlot in Joules by default. The above
+energies, and so are displayed by Pyxplot in Joules by default. The above
 statement overrides such behaviour. Having set a particular unit to be
 preferred, this can be unset as in the following example:
 \begin{verbatim}
@@ -3539,7 +3539,7 @@ set viewer ( auto | <command> )
 \end{verbatim}
 
 The \indcmdt{set viewer} is used to select which external PostScript viewing
-application is used to display PyXPlot output on screen in the {\tt X11}
+application is used to display Pyxplot output on screen in the {\tt X11}
 terminals. If the option {\tt auto} is selected, then either \ghostview\ or
 {\tt ggv} is used, if installed. Alternatively, any other application such as
 {\tt evince} or {\tt okular} can be selected by name, providing it is installed
@@ -3627,7 +3627,7 @@ set xformat "%s$\pi$"%(x/pi)
 plot [-pi:2*pi] sin(x)
 \end{verbatim}
 
-Note that where possible, PyXPlot intelligently changes the positions along
+Note that where possible, Pyxplot intelligently changes the positions along
 axes where it places the ticks to reflect significant points in the chosen
 labelling system.  The extent to which this is possible depends upon the format
 string supplied. It is generally easier when continuous-varying numerical
@@ -3715,7 +3715,7 @@ set [m]<axis>tics
          ] )
 \end{verbatim}
 
-By default, PyXPlot places a series of tick marks at significant points along
+By default, Pyxplot places a series of tick marks at significant points along
 each axis, with the most significant points being labelled.  Labelled tick
 marks are termed {\it major} ticks, and unlabelled tick marks are termed {\it
 minor} ticks.  The position and appearance of the major ticks along the {\tt
@@ -3821,7 +3821,7 @@ Details of the various parameters which can be queried can be found under the
 follow the {\tt show} command.
 
 In addition, {\tt show all} shows a complete list of the present values of all
-of PyXPlot's configurable parameters.  The command {\tt show settings} shows
+of Pyxplot's configurable parameters.  The command {\tt show settings} shows
 all of these parameters, but does not list the currently-configured variables,
 functions and axes. {\tt show axes} shows the configuration states of all graph
 axes. {\tt show variables} lists all of the currently defined variables. And
@@ -3874,7 +3874,7 @@ solve x=y via x
 The {\tt solve} command works by minimising the squares of the residuals of all
 of the equations supplied, and so even when no exact solution can be found, the
 best compromise is returned. The following example has no solution -- a system
-of three equations with two variables is over-constrained -- but PyXPlot
+of three equations with two variables is over-constrained -- but Pyxplot
 nonetheless finds a compromise solution:
 
 \vspace{3mm}
@@ -3944,7 +3944,7 @@ tabulate [ <range> ]
        [ with <output format> ]
 \end{verbatim}
 
-PyXPlot's \indcmdt{tabulate} is similar to its {\tt plot} command, but instead
+Pyxplot's \indcmdt{tabulate} is similar to its {\tt plot} command, but instead
 of plotting a series of \datapoint s onto a graph, it outputs them to \datafile
 s. This can be used to produce text files containing samples of functions, to
 rearrange/filter the columns in \datafile s, to change the units in which data

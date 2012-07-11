@@ -1,4 +1,4 @@
-2012 Aug  1: PyXPlot 0.9.0
+2012 Aug  1: Pyxplot 0.9.0
    - Version 0.9 is a major update. Many new data types have been introduced,
      each of which has methods which can be called in an object-orientated
      fashion. These include:
@@ -14,15 +14,15 @@
         calculated data into the plot and tabulate commands.
 
       - Vectors and matrices, which allow matrix algebra. These types interface
-        cleanly with PyXPlot’s vector-graphics commands, allowing positions to
+        cleanly with Pyxplot’s vector-graphics commands, allowing positions to
         be specified as vector expressions.
 
-      - File handles, which allow PyXPlot to read data from files, or write
+      - File handles, which allow Pyxplot to read data from files, or write
         data or logs to files.
 
       - Modules and classes, which allow object-orientated programming.
 
-   - In addition, PyXPlot’s range of operators has been extended to include
+   - In addition, Pyxplot’s range of operators has been extended to include
      most of those in the C programming language, allowing expressions such as
 
      pyxplot> print (a=3)+(b=2)
@@ -36,7 +36,7 @@
 
      to be written.
 
-   - Incompatibilities with PyXPlot 0.8. The extensions to PyXPlot in version
+   - Incompatibilities with Pyxplot 0.8. The extensions to Pyxplot in version
      0.9 mean that some minor changes to syntax have been necessary. These
      include:
 
@@ -55,10 +55,10 @@
         the string with the character r to disable escape character expansion,
         as in r’2 \times 3’.
 
-      - The PyXPlot 0.8 syntax foreach i in (1,2,3) should now be written
+      - The Pyxplot 0.8 syntax foreach i in (1,2,3) should now be written
         foreach i in [1,2,3]. Square brackets are used to delimit lists.
 
-2011 Jan  7: PyXPlot 0.8.4
+2011 Jan  7: Pyxplot 0.8.4
    - Two-dimensional parametric grid plotting implemented.
    - Bugfix to the dots plot style; filled triangles replaces with filled
      circles.
@@ -66,7 +66,7 @@
    - Bugfix to Makefile to ensure libraries link correctly under Red Hat and
      SUSE.
    - Code cleanup to ensure correct compilation with -O2 optimisation.
-2010 Sep 15: PyXPlot 0.8.3
+2010 Sep 15: Pyxplot 0.8.3
    - @ macro expansion operator implemented.
    - assert command implemented.
    - for command behaviour changed such that "for i=1 to 10" includes a final
@@ -88,18 +88,18 @@
    - Mathematical functions fractal_julia(), fractal_mandelbrot() and prime()
      added.
    - Many bug fixes, especially to the ticking of axes.
-2010 Jun  1: PyXPlot 0.8.1
+2010 Jun  1: Pyxplot 0.8.1
    - Mathematical functions time_fromunix(), time_unix(), zernike() and
      zernikeR() added.
    - Bug fix to the ticking of linked axes.
    - Bug fix to the ticking of axes with blank axis tick labels.
    - Makefile and configure script improved for portability.
-2010 May 19: PyXPlot 0.8.0
+2010 May 19: Pyxplot 0.8.0
    - The handling of large datafiles has been streamlined to require around an
      order-of-magnitude less time and memory.
-   - PyXPlot's mathematical environment has been extended to handle complex
+   - Pyxplot's mathematical environment has been extended to handle complex
      numbers and quantities with physical units.
-   - The range of mathematical functions built into PyXPlot has been massively
+   - The range of mathematical functions built into Pyxplot has been massively
      extended.
    - The solve command has been added to allow the solution of systems of
      equations.
@@ -113,7 +113,7 @@
    - Colours can now be specified by RGB, HSB or CMYK components, as well as by
      name.
    - Several commands, e.g. box, circle, ellipse, etc., have been added to
-     allow vector graphics to be produced in PyXPlot's multiplot environment.
+     allow vector graphics to be produced in Pyxplot's multiplot environment.
    - The jpeg command has been generalised to allow the incorporation of not
      only jpeg images, but also bmp, gif and png images, onto multiplot
      canvases. The command has been renamed image in recognition of its wider
@@ -121,18 +121,18 @@
    - The spline command, now renamed the interpolate command, has been extended
      up provide many types of interpolation between datapoints.
    - A wide range of conditional and flow control structures have been added to
-     PyXPlot's command language -- these are the do, for, foreach, if and while
+     Pyxplot's command language -- these are the do, for, foreach, if and while
      commands and the conditionalS and conditionalN mathematical functions.
    - Input filters have been introduced as a mechanism by which datafiles in
      arbitrary formats can be read.
-   - PyXPlot's commandline interface now supports tab completion.
+   - Pyxplot's commandline interface now supports tab completion.
    - The show command has been reworked to produce pastable output.
    - Many minor bugs have been fixed.
-2009 Nov 17: PyXPlot 0.7.1
+2009 Nov 17: Pyxplot 0.7.1
    - Bug fix to the xyerrorrange plot style.
    - Bug fix to the exec command.
    - Bug fix to remove deprecation error messgaes when run on python 2.6.
-2008 Oct 14: PyXPlot 0.7.0
+2008 Oct 14: Pyxplot 0.7.0
    - Supplying filename '-' to plot causes data to be read from stdin.
    - Required version of PyX upgraded 0.9 -> 0.10.
    - exec command implemented.
@@ -147,14 +147,14 @@
    - set label with colour implemented.
    - text with colour implemented.
 
-2007 Mar 15: PyXPlot 0.6.3.1
+2007 Mar 15: Pyxplot 0.6.3.1
    - Minor bugfix so that gv will work with -watch.
 
-2007 Feb 26: PyXPlot 0.6.3
+2007 Feb 26: Pyxplot 0.6.3
    - Manual updated
    - Some minor bugfixes
 
-2007 Jan 19: PyXPlot 0.6.2
+2007 Jan 19: Pyxplot 0.6.2
    - 'enlarge' terminal option implemented.
    - pdf terminal implemented.
    - set preamble command implemented.
@@ -164,7 +164,7 @@
      sessions.
    - Large number of minor bugfixes.
 
-2006 Dec 27: PyXPlot 0.6.1
+2006 Dec 27: Pyxplot 0.6.1
    - Major bug-fixes to the set and unset commands.
    - Command reference chapter added to User Manual.
    - Command syntax references added to the help command system.
@@ -173,7 +173,7 @@
    - Semi-functional 'jpeg' and 'eps' commands added. Left undocumented
      because they're unstable and need a bit of work.
 
-2006 Nov 12: PyXPlot 0.6.0
+2006 Nov 12: Pyxplot 0.6.0
    - New more-reliable command parser implemented, with improved syntax
      errors.
    - delete_arrow, delete_text, undelete_arrow, undelete_text and move_text
@@ -192,18 +192,18 @@
      logical operator.
    - X11_persist terminal implemented.
    - Requirement on python 2.4 eased to python 2.3.
-   - Requirements on scipy and readline eased; PyXPlot will now work in
+   - Requirements on scipy and readline eased; Pyxplot will now work in
      reduced form without them.
    - Requirements on dvips and gs are dropped; postscript handling now done by
-     PyXPlot itself.
+     Pyxplot itself.
 
-2006 Sep 09: PyXPlot 0.5.8
+2006 Sep 09: Pyxplot 0.5.8
    - Many bugfixes to error trapping and reporting.
 
-2006 Aug 26: PyXPlot 0.5.7
+2006 Aug 26: Pyxplot 0.5.7
    - set display command implemented.
    - set keycolumns command implemented.
-   - CTRL-C behaviour changed; no longer quits PyXPlot.
+   - CTRL-C behaviour changed; no longer quits Pyxplot.
    - plot '*.dat' now arranges files alphabetically.
    - Escaping of LaTeX < and > symbols fixed.
    - Major bugfix to fit command's error estimation.
@@ -211,7 +211,7 @@
      positions to avoid overlapping with axes.
    - help command text substantially revised.
 
-2006 Aug 18: PyXPlot 0.5.6
+2006 Aug 18: Pyxplot 0.5.6
    - Ability to unset variables via "a=" implemented.
    - Handling on scipy error messages in the int_dx and spline commands
      improved.
@@ -228,12 +228,12 @@
    - set log, when issued on its own, now applies to all axes, rather than
      throwing an error.
 
-2006 Jul 25: PyXPlot 0.5.5
+2006 Jul 25: Pyxplot 0.5.5
    - pyxplot_watch implemented.
    - fit command now gives error estimates, as well as correlation matrices.
    - Many new pointtypes added, including upper and lower limit symbols.
    - Handling of SIGINT improved; now exits current command in interactive
-     mode, and exits PyXPlot when running a script.
+     mode, and exits Pyxplot when running a script.
    - Quote characters can now be escaped in LaTeX strings, to allow strings
      with both ' and " characters to be rendered.
    - Installer no longer creates any files belonging to root in the user's
@@ -244,7 +244,7 @@
      capitalised, now do.
    - Major bug fix to int_dx and diff_dx functions.
 
-2006 Jul 3: PyXPlot 0.5.4
+2006 Jul 3: Pyxplot 0.5.4
    - edit command implemented.
    - Numerical integration and differentiation functions implemented.
    - New makefile installer added.
@@ -252,7 +252,7 @@
    - Brief tour of gnuplot syntax added to documentation.
    - Many minor bug fixes.
 
-2006 Jun 27: PyXPlot 0.5.3
+2006 Jun 27: Pyxplot 0.5.3
    - set bar and set palette implemented.
    - Stacked barcharts implemented.
    - Command history files and the save command implemented.
@@ -265,7 +265,7 @@
    - Bug fix to arrow plotting, to prevent PyX from crashing if arrows of zero
      lengths are plotting (they have no direction...)
 
-2006 Jun 14: PyXPlot 0.5.2
+2006 Jun 14: Pyxplot 0.5.2
    - spline command, and csplines/acsplines plot styles implemented.
    - Syntax plot[0:1], with no space, now allowed.
    - Automatic names of datasets in legends no longer have full paths, but
@@ -291,7 +291,7 @@
      output with all errorbar plot styles.
    - show command re-implemented to accept any word that the set command will.
 
-2006 Jun 2: PyXPlot 0.5.1
+2006 Jun 2: Pyxplot 0.5.1
    - Pling and cd commands implemented; ` ` shell command substitution
      implemented.
    - Arrows (both from set arrow and the arrow command) can now have linetypes
@@ -307,8 +307,8 @@
    - Documentation: sections on barcharts, function splicing, and datafile
      globbing added.
 
-2006 May 27: PyXPlot 0.5.0
-   - Name changed to PyXPlot.
+2006 May 27: Pyxplot 0.5.0
+   - Name changed to Pyxplot.
    - Change to distribution format: PyX Version 0.9 now ships with package.
    - Safety installer added; checks for required packages.
    - 'errorrange' plot styles added; allow errorbars to be given as min/max

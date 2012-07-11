@@ -1,6 +1,6 @@
 // core.c
 //
-// The code in this file is part of PyXPlot
+// The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,13 +8,13 @@
 //
 // $Id$
 //
-// PyXPlot is free software; you can redistribute it and/or modify it under the
+// Pyxplot is free software; you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation; either version 2 of the License, or (at your option) any later
 // version.
 //
 // You should have received a copy of the GNU General Public License along with
-// PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+// Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 // Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 // ----------------------------------------------------------------------------
@@ -100,7 +100,7 @@ void ppl_directive_assert(ppl_context *c, parserLine *pl, parserOutput *in)
    {
     int i=0,j=0,sgn,pass=0;
     char txtauto[64];
-    sprintf(txtauto, "This script requires a%s version of PyXPlot (%s %s)", (!lt)?" newer":"n older", (!lt)?">=":"<", version);
+    sprintf(txtauto, "This script requires a%s version of Pyxplot (%s %s)", (!lt)?" newer":"n older", (!lt)?">=":"<", version);
 #define VERSION_FAIL { snprintf(c->errStat.errBuff, LSTR_LENGTH, "%s", txt); TBADD(ERR_ASSERT,in->stkCharPos[PARSE_assert_version]); return; }
 #define VERSION_MALF { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Malformed version string."); TBADD(ERR_SYNTAX,in->stkCharPos[PARSE_assert_version]); return; }
     if (txt==NULL) txt=txtauto;
@@ -249,7 +249,7 @@ void ppl_directive_history(ppl_context *c, parserLine *pl, parserOutput *in)
   for (k=start; k<endpos; k++) ppl_report(&c->errcontext,history_data[k]->line);
   return;
 #else
-  snprintf(c->errStat.errBuff, LSTR_LENGTH, "The 'history' command is not available as the GNU readline library was not linked to when PyXPlot was installed.");
+  snprintf(c->errStat.errBuff, LSTR_LENGTH, "The 'history' command is not available as the GNU readline library was not linked to when Pyxplot was installed.");
   TBADD(ERR_GENERIC,0);
   return;
 #endif
@@ -371,7 +371,7 @@ void ppl_directive_save(ppl_context *c, parserLine *pl, parserOutput *in)
     outfile = fopen(outfname , "w");
    }
   if (outfile == NULL) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "The save command could not open output file '%s' for writing.", outfname); TBADD(ERR_FILE,in->stkCharPos[pos]); return; }
-  fprintf(outfile, "# Command script saved by PyXPlot %s\n# Timestamp: %s\n", VERSION, ppl_strStrip(ppl_friendlyTimestring(),c->errcontext.tempErrStr));
+  fprintf(outfile, "# Command script saved by Pyxplot %s\n# Timestamp: %s\n", VERSION, ppl_strStrip(ppl_friendlyTimestring(),c->errcontext.tempErrStr));
   fprintf(outfile, "# User: %s\n\n", ppl_unixGetIRLName(&c->errcontext));
 
   endpos       = history_length;
@@ -385,7 +385,7 @@ void ppl_directive_save(ppl_context *c, parserLine *pl, parserOutput *in)
   fclose(outfile);
   return;
 #else
-  snprintf(c->errStat.errBuff, LSTR_LENGTH, "The 'save' command is not available as the GNU readline library was not linked to when PyXPlot was installed.");
+  snprintf(c->errStat.errBuff, LSTR_LENGTH, "The 'save' command is not available as the GNU readline library was not linked to when Pyxplot was installed.");
   TBADD(ERR_GENERIC,0);
   return;
 #endif

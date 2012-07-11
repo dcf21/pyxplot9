@@ -1,6 +1,6 @@
 % other_apps.tex
 %
-% The documentation in this file is part of PyXPlot
+% The documentation in this file is part of Pyxplot
 % <http://www.pyxplot.org.uk>
 %
 % Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,23 +8,23 @@
 %
 % $Id$
 %
-% PyXPlot is free software; you can redistribute it and/or modify it under the
+% Pyxplot is free software; you can redistribute it and/or modify it under the
 % terms of the GNU General Public License as published by the Free Software
 % Foundation; either version 2 of the License, or (at your option) any later
 % version.
 %
 % You should have received a copy of the GNU General Public License along with
-% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 % Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 % ----------------------------------------------------------------------------
 
-% LaTeX source for the PyXPlot Users' Guide
+% LaTeX source for the Pyxplot Users' Guide
 
-\chapter{Other applications of PyXPlot}
+\chapter{Other applications of Pyxplot}
 
 In this chapter we present a short cookbook describing a few common yet
-miscellaneous tasks for which PyXPlot may prove useful.
+miscellaneous tasks for which Pyxplot may prove useful.
 
 \section{Conversion of jpeg images to PostScript}
 \index{jpeg images}
@@ -37,7 +37,7 @@ number of graphics packages provide facilities for making such conversions,
 including ImageMagick\index{ImageMagick}'s {\tt convert} command, but these
 almost invariable produce excessively large PostScript files on account of
 their failure to use PostScript's native facilities for image compression.
-PyXPlot's \indcmdt{image} can in many cases perform much more efficient
+Pyxplot's \indcmdt{image} can in many cases perform much more efficient
 conversion:
 
 \begin{verbatim}
@@ -60,7 +60,7 @@ equation-centric disciplines.
 
 It is possible to import graphic images into {\it Powerpoint}, but it cannot
 read images in PostScript format, the format in which \LaTeX\ usually produces
-its output.  PyXPlot's {\tt gif} and {\tt png} terminals provide a fix for this
+its output.  Pyxplot's {\tt gif} and {\tt png} terminals provide a fix for this
 problem, as the following example demonstrates:
 
 \begin{verbatim}
@@ -80,9 +80,9 @@ The result is a {\tt gif} image of the desired equation, with yellow text on a
 transparent background. This can readily be imported into {\it Powerpoint} and
 re-scaled to the desired size.
 
-\section{Delivering talks in PyXPlot}
+\section{Delivering talks in Pyxplot}
 
-Going one step further, PyXPlot can be used as a stand-alone tool for designing
+Going one step further, Pyxplot can be used as a stand-alone tool for designing
 slides for talks; it has several advantages over other presentation tools.  All
 of the text which is placed on slides is rendered neatly in \LaTeX.  Images can
 be placed on slides using the \indcmdts{jpeg} and \indcmdts{eps} commands, and
@@ -96,12 +96,12 @@ around text to create colourful slides which will keep an audience attentive.
 As an additional advantage, graphs can be plotted within the scripts describing
 each slide, directly from \datafile s in your local filesystem. If you receive
 new data shortly before giving a talk, it is a simple matter to re-run the
-PyXPlot scripts and your slides will automatically pick up the new \datafile s.
+Pyxplot scripts and your slides will automatically pick up the new \datafile s.
 
-Below, we outline our recipe for designing slides in PyXPlot. There are many
+Below, we outline our recipe for designing slides in Pyxplot. There are many
 steps, but they do not take much time; many simply involve pasting text into
 various files. Readers of the printed version of the manual may find it easier
-to copy these files from the HTML version of this manual on the PyXPlot
+to copy these files from the HTML version of this manual on the Pyxplot
 website.
 
 \subsection{Setting up the infrastructure}
@@ -116,7 +116,7 @@ talk.
 mkdir my_talk
 cd my_talk
 \end{verbatim}
-\item Make a directory into which you will put the PyXPlot scripts for your
+\item Make a directory into which you will put the Pyxplot scripts for your
 individual slides:
 \begin{verbatim}
 mkdir scripts
@@ -126,7 +126,7 @@ want to put into your talk to make it look pretty:
 \begin{verbatim}
 mkdir images
 \end{verbatim}
-\item Make a directory into which PyXPlot will put graphic images of your
+\item Make a directory into which Pyxplot will put graphic images of your
 slides:
 \begin{verbatim}
 mkdir slides
@@ -137,9 +137,9 @@ it with colour. My preference tends to be for a blue colour gradient, running
 from bright blue at the top to dark blue at the bottom, but you may be more
 inventive than me. You may wish to add institutional and/or project logos in
 the corners. Alternatively, you can download a ready-made background image from
-the PyXPlot website: \url{http://foo}. You should store this image as {\tt
+the Pyxplot website: \url{http://foo}. You should store this image as {\tt
 images/background.jpg}.
-\item We need a simple PyXPlot script to set up a slide template. Paste the
+\item We need a simple Pyxplot script to set up a slide template. Paste the
 following text into the file {\tt scripts/slide\_init}; there's a bit of black
 magic in the {\tt arrow} commands in this script which it isn't necessary to
 understand at this stage:\label{stp:presentation_magic}
@@ -157,14 +157,14 @@ arrow -x* 25, y*125 to  x*125, y*125 with nohead
 arrow  x*125, y*125 to  x*125,-y* 25 with nohead
 arrow  x*125,-y* 25 to -x* 25,-y* 25 with nohead
 \end{verbatim}
-\item We also need a simple PyXPlot script to round off each slide. Paste the
+\item We also need a simple Pyxplot script to round off each slide. Paste the
 following text into the file {\tt scripts/slide\_finish}:
 \begin{verbatim}
 set display ; refresh
 \end{verbatim}
 \item Paste the following text into the file {\tt compile}. This is a simple
 shell script which instructs {\tt pyxplot\_watch} to compile your slides using
-PyXPlot every time you edit any of the them:
+Pyxplot every time you edit any of the them:
 \begin{verbatim}
 #!/bin/bash
 pyxplot_watch --verbose scripts/0\*
@@ -194,7 +194,7 @@ designing slides. We will now design an example talk with three slides.
 
 \begin{enumerate}
 \item Run the script {\tt compile} and leave it running in the background.
-PyXPlot will then re-run the scripts describing your slides whenever you edit
+Pyxplot will then re-run the scripts describing your slides whenever you edit
 them.
 \item As an example, we will now make a title slide. Paste the following script
 into the file {\tt scripts/0001}:
@@ -203,7 +203,7 @@ set output 'slides/0001.gif'
 load 'scripts/slide_init'
 
 text '\parbox[t]{10cm}{\center \LARGE \bf \
-  A Tutorial in the use of PyXPlot \\ \
+  A Tutorial in the use of Pyxplot \\ \
   to present Talks \
 } ' at x*50, y*75
 text '\Large \bf Prof A.N.\ Other' at x*50, y*45

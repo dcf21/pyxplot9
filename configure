@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# Installation script for PyXPlot version 0.9.0
+# Installation script for Pyxplot version 0.9.0
 #
-# The code in this file is part of PyXPlot
+# The code in this file is part of Pyxplot
 # <http://www.pyxplot.org.uk>
 #
 # Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -10,13 +10,13 @@
 #
 # $Id$
 #
-# PyXPlot is free software; you can redistribute it and/or modify it under the
+# Pyxplot is free software; you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation; either version 2 of the License, or (at your option) any later
 # version.
 #
 # You should have received a copy of the GNU General Public License along with
-# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 # ----------------------------------------------------------------------------
@@ -87,7 +87,7 @@ if test "$whichout" != "" ; then
 else
  echo "NO"
  echo "GUNZIP_COMMAND=" >> Makefile
- echo "WARNING: Gunzip could not be found. Installation will proceed, but PyXPlot will not be able to plot .gz files." >&2
+ echo "WARNING: Gunzip could not be found. Installation will proceed, but Pyxplot will not be able to plot .gz files." >&2
 fi
 
 # 6. CHECK FOR WGET
@@ -102,7 +102,7 @@ if test "$whichout" != "" ; then
 else
  echo "NO"
  echo "WGET_COMMAND=" >> Makefile
- echo "WARNING: wget could not be found. Installation will proceed, but PyXPlot will not be able to plot files directly from URLs." >&2
+ echo "WARNING: wget could not be found. Installation will proceed, but Pyxplot will not be able to plot files directly from URLs." >&2
 fi
 
 # 7. CHECK FOR GHOSTSCRIPT
@@ -243,7 +243,7 @@ then
 else
  rm -f conf.*
  echo "NO"
- echo "ERROR: PyXPlot requires a version of gsl >= 1.10. Installed version is `gsl-config --version`." >&2
+ echo "ERROR: Pyxplot requires a version of gsl >= 1.10. Installed version is `gsl-config --version`." >&2
  exit
 fi
 

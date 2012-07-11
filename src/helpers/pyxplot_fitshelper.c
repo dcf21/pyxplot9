@@ -1,6 +1,6 @@
 // pyxplot_fitshelper.c
 //
-// The code in this file is part of PyXPlot
+// The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,13 +8,13 @@
 //
 // $Id$
 //
-// PyXPlot is free software; you can redistribute it and/or modify it under the
+// Pyxplot is free software; you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation; either version 2 of the License, or (at your option) any later
 // version.
 //
 // You should have received a copy of the GNU General Public License along with
-// PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+// Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 // Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 // ----------------------------------------------------------------------------
@@ -47,17 +47,17 @@ int main(int argc, char **argv)
 #endif
 
 #ifndef HAVE_FITSIO
-strcpy(warntext,"*** WARNING ***\nAs the cfitsio library was not installed on this computer when PyXPlot was\n\
-installed, PyXPlot has been compiled with no support for fits files. This\n\
+strcpy(warntext,"*** WARNING ***\nAs the cfitsio library was not installed on this computer when Pyxplot was\n\
+installed, Pyxplot has been compiled with no support for fits files. This\n\
 application is a dummy filter which does nothing.\n\n");
 #else
 strcpy(warntext,"");
 #endif
 
   // Make help and version strings
-  sprintf(version_string, "\nPyXPlot Fits Helper %s\n\n", VERSION);
+  sprintf(version_string, "\nPyxplot Fits Helper %s\n\n", VERSION);
 
-  sprintf(help_string   , "\nPyXPlot Fits Helper %s\n\
+  sprintf(help_string   , "\nPyxplot Fits Helper %s\n\
 %s\n\
 \n\
 %sUsage: pyxplot_fitshelper <filename>\n\
@@ -65,15 +65,15 @@ strcpy(warntext,"");
   -v, --version:    Display version number.\n\
 \n\
 This application is used as in input filter to convert tables of data in FITS\n\
-format into ASCII for reading into PyXPlot. It is the filter which PyXPlot uses\n\
+format into ASCII for reading into Pyxplot. It is the filter which Pyxplot uses\n\
 when asked to plot a .fits file, but is also generally useful whenever it is\n\
 desired to convert data from FITS format into plain text.\n\
 \n\
-A brief introduction to PyXPlot can be obtained by typing 'man pyxplot'; the\n\
+A brief introduction to Pyxplot can be obtained by typing 'man pyxplot'; the\n\
 full Users' Guide can be found in the file:\n\
 %s%spyxplot.pdf\n\
 \n\
-For the latest information on PyXPlot development, see the project website:\n\
+For the latest information on Pyxplot development, see the project website:\n\
 <http://www.pyxplot.org.uk>\n\n", VERSION, ppl_strUnderline(version_string, version_string_underline), warntext, DOCDIR, PATHLINK);
 
   // Scan command-line options for any switches
@@ -116,11 +116,11 @@ For the latest information on PyXPlot development, see the project website:\n\
    }
 
 #ifndef HAVE_FITSIO
-  fprintf(stderr, "\nThe cfitsio library was not installed on this computer when PyXPlot was\n\
-installed, and consequently PyXPlot was compiled with no support for fits\n\
+  fprintf(stderr, "\nThe cfitsio library was not installed on this computer when Pyxplot was\n\
+installed, and consequently Pyxplot was compiled with no support for fits\n\
 files. The fits helper application which you are using is a dummy which does\n\
 nothing. To plot this datafile, you need to install libcfitsio and then\n\
-recompile PyXPlot.\n\n");
+recompile Pyxplot.\n\n");
   exit(1);
 #else
   if (fits_open_file(&fptr, filename, READONLY, &status) != 0) { fits_report_error(stderr, status); exit(1); }

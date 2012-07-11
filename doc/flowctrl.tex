@@ -1,6 +1,6 @@
 % flowctrl.tex
 %
-% The documentation in this file is part of PyXPlot
+% The documentation in this file is part of Pyxplot
 % <http://www.pyxplot.org.uk>
 %
 % Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,25 +8,25 @@
 %
 % $Id$
 %
-% PyXPlot is free software; you can redistribute it and/or modify it under the
+% Pyxplot is free software; you can redistribute it and/or modify it under the
 % terms of the GNU General Public License as published by the Free Software
 % Foundation; either version 2 of the License, or (at your option) any later
 % version.
 %
 % You should have received a copy of the GNU General Public License along with
-% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 % Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 % ----------------------------------------------------------------------------
 
-% LaTeX source for the PyXPlot Users' Guide
+% LaTeX source for the Pyxplot Users' Guide
 
 \chapter{Programming: flow control}
 
-This chapter describes PyXPlot's facilities for automating
-repetitive tasks by using loops. At the end, we turn to PyXPlot's
+This chapter describes Pyxplot's facilities for automating
+repetitive tasks by using loops. At the end, we turn to Pyxplot's
 interaction with the shell and filing system in which it operates, introducing
-a simple framework for automatically re-executing PyXPlot scripts whenever they
+a simple framework for automatically re-executing Pyxplot scripts whenever they
 change, allowing plots to be automatically regenerated whenever the scripts
 used to produce them are modified.
 
@@ -108,7 +108,7 @@ if} statements must always be placed on the same line as the closing brace of
 the preceding script block.
 
 The precise way in which a string of {\tt else if} statements are arranged in a
-PyXPlot script is a matter of taste: the following is a more compact but
+Pyxplot script is a matter of taste: the following is a more compact but
 equivalent version of the example given above:
 
 \begin{verbatim}
@@ -120,7 +120,7 @@ else           { print "x is negative" ; }
 \section{For loops}
 \indcmd{for}
 
-For loops may be used to execute a series of commands multiple times. PyXPlot
+For loops may be used to execute a series of commands multiple times. Pyxplot
 allows {\tt for} loops to follow either the syntax of the BASIC programming
 language, or the C syntax:
 
@@ -133,7 +133,7 @@ for (<initialise>; <criterion>; <step>)
   <code>
 \end{verbatim}
 
-\noindent Here, {\tt <code>} may be substituted by any block on PyXPlot command
+\noindent Here, {\tt <code>} may be substituted by any block on Pyxplot command
 enclosed in braces \{\}. The closing brace must be on a new line after the last
 command of the block.
 
@@ -262,7 +262,7 @@ third variable, {\tt name}, is set as a string, indicating that it will be set
 to equal whatever string of text is found in the third column of the \datafile.
 
 \example{ex:meansd}{Calculating the mean and standard deviation of data}{
-The following PyXPlot script calculates the mean and standard deviation of a
+The following Pyxplot script calculates the mean and standard deviation of a
 set of \datapoint s using the \indcmdt{foreach datum}:
 \nlscf
 \noindent{\tt N\_data = 0}\newline
@@ -336,7 +336,7 @@ while (1)
 
 The {\tt break} and {\tt continue} statements may be placed within loop
 structures to interrupt their iteration. The {\tt break} statement terminates
-execution of the smallest loop currently being executed, and PyXPlot resumes
+execution of the smallest loop currently being executed, and Pyxplot resumes
 execution at the next statement after the closing brace which marks the end of
 that loop structure. The {\tt continue} statement terminates execution of the
 {\it current iteration} of the smallest loop currently being executed, and
@@ -385,7 +385,7 @@ Subroutines are similar to mathematical functions (see
 Section~\ref{sec:functions}), and once defined, can be used anywhere in
 algebraic expressions, just as functions can be.  However, instead of being
 defined by a single algebraic expression, whenever a subroutine is evaluated, a
-block of PyXPlot commands of arbitrary length is executed. This gives much
+block of Pyxplot commands of arbitrary length is executed. This gives much
 greater flexibility for implementing complex algorithms. Subroutines are
 defined using the following syntax:
 \begin{verbatim}
@@ -446,7 +446,7 @@ colored red, green or blue to represent convergence towards the three roots.
 \nlnp
 If $c$ is close to one of the roots, then convergence towards that particular
 root is guaranteed, but further afield the map develops a fractal structure. In
-this example, we define a PyXPlot subroutine to produce such a map as a
+this example, we define a Pyxplot subroutine to produce such a map as a
 function of $c=x+iy$, and then plot the resulting map using the {\tt colormap}
 plot style (see Section~\ref{sec:colormaps}).  To make the fractal prettier --
 it contains, after all, only three colors as strictly defined -- we vary the
@@ -488,7 +488,7 @@ done analytically, but the solution can be written in the form
 where $\mathrm{sn}(u,m)$ is a Jacobi elliptic function and
 $k=\sin\left(\omega/2\right)$.  The Jacobi elliptic function cannot be
 analytically computed, but can be numerically approximated using the {\tt
-jacobi\_\-sn(u,m)} function in PyXPlot.
+jacobi\_\-sn(u,m)} function in Pyxplot.
 \nlnp
 Below, we produce a plot of Equations~(\ref{eq:pendulum_approx}) and
 (\ref{eq:pendulum_exact}).  The horizontal axis is demarked in units of the
@@ -543,7 +543,7 @@ the end result is 150; {\tt 50*3} is passed to the command line interpreter.
 
 \section{The \indcmdt{exec}}
 
-The \indcmdt{exec} can be used to execute PyXPlot commands contained within
+The \indcmdt{exec} can be used to execute Pyxplot commands contained within
 string variables. For example:
 
 \begin{verbatim}
@@ -551,7 +551,7 @@ terminal="eps"
 exec "set terminal %s"%(terminal)
 \end{verbatim}
 
-\noindent It can also be used to write obfuscated PyXPlot scripts, and its use
+\noindent It can also be used to write obfuscated Pyxplot scripts, and its use
 should be minimized wherever possible.
 
 \section{Assertions}
@@ -567,7 +567,7 @@ assert x>0
 assert y<0 "y must be less than zero."
 \end{verbatim}
 
-The \indcmdt{assert} can also be used to test the version number of PyXPlot. It
+The \indcmdt{assert} can also be used to test the version number of Pyxplot. It
 is possible to test either that the version is newer than or equal to a
 specific version, using the {\tt $>$=} operator, or that it is older than a
 specific version, using the {\tt $<$} operator, as demonstrated in the
@@ -575,16 +575,16 @@ following examples:
 
 \begin{verbatim}
 assert version >= 0.8.2
-assert version <  0.8  "This script is designed for PyXPlot 0.7"
+assert version <  0.8  "This script is designed for Pyxplot 0.7"
 \end{verbatim}
 
 
 \section{Raising exceptions}
 
-PyXPlot's {\tt raise(e,s)} function is used to raise exceptions when error
+Pyxplot's {\tt raise(e,s)} function is used to raise exceptions when error
 conditions are met.  Its first argument {\tt e} specifies the type of
 exception, and should be an object of type {\tt exception}. The second argument
-should be an error message string.  PyXPlot has a range of default exception
+should be an error message string.  Pyxplot has a range of default exception
 types, which can be found as {\tt exception} objects in the module {\tt
 exceptions}. Alternatively, the object {\tt types.exception} may be called with
 a single string argument to make a new exception type. For example:
@@ -607,28 +607,28 @@ a.raise("The user made a mistake")
 \section{Shell commands}
 
 Shell commands\index{shell commands!executing} may be executed directly from
-within PyXPlot by prefixing them with an \indcmdts{!} character. The
+within Pyxplot by prefixing them with an \indcmdts{!} character. The
 remainder of the line is sent directly to the shell, for example:
 
 \begin{verbatim}
 !ls -l
 \end{verbatim}
 
-\noindent Semi-colons cannot be used to place further PyXPlot commands after a
+\noindent Semi-colons cannot be used to place further Pyxplot commands after a
 shell command on the same line.
 
 \begin{dontdo}
 !ls -l ; set key top left
 \end{dontdo}
 
-It is also possible to substitute the output of a shell command into a PyXPlot
+It is also possible to substitute the output of a shell command into a Pyxplot
 command. To do this, the shell command should be enclosed in back-quotes (`),
 as in the following example:\index{backquote character}\index{shell
 commands!substituting}
 
 \begin{verbatim}
 a=`ls -l *.ppl | wc -l`
-print "The current directory contains %d PyXPlot scripts."%(a)
+print "The current directory contains %d Pyxplot scripts."%(a)
 \end{verbatim}
 
 It should be noted that back-quotes can only be used outside quotes. For
@@ -652,7 +652,7 @@ directory of the shell in which the single command is executed:
 !cd ..
 \end{dontdo}
 
-\noindent PyXPlot has its own \indcmdt{cd} for this purpose, as well as its own
+\noindent Pyxplot has its own \indcmdt{cd} for this purpose, as well as its own
 \indcmdt{pwd}:
 
 \begin{dodo}
@@ -661,13 +661,13 @@ cd ..
 
 \section{Script watching: pyxplot\_watch}
 
-PyXPlot includes a simple tool for watching command script files and executing
+Pyxplot includes a simple tool for watching command script files and executing
 them whenever they are modified. This may be useful when developing a command
 script, if one wants to make small modifications to it and see the results in a
 semi-live fashion. This tool is invoked by calling the {\tt
 pyxplot\_watch}\index{pyxplot\_watch}\index{watching scripts} command from a
 shell prompt. The command-line syntax of {\tt pyxplot\_watch} is similar to
-that of PyXPlot itself, for example:
+that of Pyxplot itself, for example:
 
 \begin{verbatim}
 pyxplot_watch script.ppl
@@ -676,7 +676,7 @@ pyxplot_watch script.ppl
 \noindent would set {\tt pyxplot\_watch} to watch the command script file
 {\tt script.ppl}. One difference, however, is that if multiple script files are
 specified on the command line, they are watched and executed independently,
-\textit{not} sequentially, as PyXPlot itself would do. Wildcard characters can
+\textit{not} sequentially, as Pyxplot itself would do. Wildcard characters can
 also be used to set {\tt pyxplot\_watch} to watch multiple
 files.\footnote{Note that {\tt pyxplot\_watch *.script} and
 {\tt pyxplot\_watch $\backslash$*.script} will behave differently in most

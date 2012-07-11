@@ -1,6 +1,6 @@
 % vector_graphics.tex
 %
-% The documentation in this file is part of PyXPlot
+% The documentation in this file is part of Pyxplot
 % <http://www.pyxplot.org.uk>
 %
 % Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,23 +8,23 @@
 %
 % $Id$
 %
-% PyXPlot is free software; you can redistribute it and/or modify it under the
+% Pyxplot is free software; you can redistribute it and/or modify it under the
 % terms of the GNU General Public License as published by the Free Software
 % Foundation; either version 2 of the License, or (at your option) any later
 % version.
 %
 % You should have received a copy of the GNU General Public License along with
-% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 % Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 % ----------------------------------------------------------------------------
 
-% LaTeX source for the PyXPlot Users' Guide
+% LaTeX source for the Pyxplot Users' Guide
 
 \chapter{Producing vector graphics}
 \label{ch:vector_graphics}
 
-This chapter provides a systematic description of how PyXPlot can be used to
+This chapter provides a systematic description of how Pyxplot can be used to
 produce general-purpose vector graphics.  It also describes how to produce
 galleries of multiple graphs side-by-side, together with how graphs may be
 annotated with text or arrows. For more information about how to produce
@@ -51,7 +51,7 @@ Put together, these commands can be used to produce a wide range of vector
 graphics. The remainder of this chapter describes each of these commands in
 turn, providing a variety of examples of their use.
 
-These commands all interface with PyXPlot's maths environment in common ways.
+These commands all interface with Pyxplot's maths environment in common ways.
 For example, vector positions on the graphics canvas may be specified in three
 ways:
 
@@ -64,7 +64,7 @@ ways:
 Many of these commands take rotation angles as inputs: these may be specified either as dimensionless numbers, taken to be in degrees,
 or as values with physical units of angle, e.g.\ {\tt 0.25*unit(rev)}.
 
-Where these commands take colors as inputs, as elsewhere in PyXPlot, the color may be specified in one of three ways:
+Where these commands take colors as inputs, as elsewhere in Pyxplot, the color may be specified in one of three ways:
 
 \begin{itemize}
 \item As a number, referred to a color from a present palette; see Section~\ref{sec:palette}.
@@ -76,7 +76,7 @@ Where these commands take colors as inputs, as elsewhere in PyXPlot, the color m
 \label{sec:multiplot}
 \index{multiplot}
 
-PyXPlot has two modes in which it can produce graphical output. In {\it
+Pyxplot has two modes in which it can produce graphical output. In {\it
 singleplot} mode, the default, each time the {\tt plot} command is issued, the
 canvas is wiped clean and the new plot is placed alone on a blank page. In {\it
 multiplot} mode, vector graphics objects accumulate on the canvas. Each time
@@ -176,7 +176,7 @@ The \indcmdt{arrow} has a twin, the \indcmdt{line}, which has the same syntax
 but with a different style setting of {\tt nohead}.
 
 \example{ex:notice}{A simple notice generated with the {\tt text} and {\tt arrow} commands}{
-In this example script, we use PyXPlot's {\tt arrow} and {\tt text} commands to
+In this example script, we use Pyxplot's {\tt arrow} and {\tt text} commands to
 produce a simple notice advertising that a lecture has moved to a different
 seminar room:
 \nlscf
@@ -230,7 +230,7 @@ move 23 to 8*unit(in), 8*unit(in)
 \subsection{Settings associated with multiplot items}
 
 Of the settings which can be set with the \indcmdt{set}, some refer to
-PyXPlot's global environment and whole multiplot canvases. Others, such as {\tt
+Pyxplot's global environment and whole multiplot canvases. Others, such as {\tt
 set width} and {\tt set origin} refer specifically to individual graphs and
 vector graphics items. For this reason, whenever a new multiplot graphics item
 is produced, it takes a copy of the settings which are specific to it, allowing
@@ -302,7 +302,7 @@ swap 3 5
 By default, whenever an item is added to a multiplot, or an existing item moved
 or replotted, the whole multiplot is replotted to show the change. This can be
 a time consuming process on large and complex multiplots. For this reason, the
-\indcmdt{set nodisplay} is provided, which stops PyXPlot from producing any
+\indcmdt{set nodisplay} is provided, which stops Pyxplot from producing any
 output. The \indcmdt{set display} can subsequently be issued to return to
 normal behaviour.
 
@@ -319,7 +319,7 @@ refresh
 \end{verbatim}
 
 \example{ex:euclid}{A diagram from Euclid's {\it Elements}}{
-In this more extended example script, we use PyXPlot's {\tt arrow} and {\tt
+In this more extended example script, we use Pyxplot's {\tt arrow} and {\tt
 text} commands to reproduce a diagram illustrating the 47th Proposition from
 Euclid's First Book of {\it Elements}, better known as Pythagoras' Theorem. A
 full text of the proof which accompanies this diagram can be found at
@@ -333,7 +333,7 @@ full text of the proof which accompanies this diagram can be found at
 \example{ex:nanotubes}{A diagram of the conductivity of nanotubes}{
 In this example we produce a diagram of the {\it irreducible wedge} of possible
 carbon nanotube configurations, highlighting those configurations which are
-electrically conductive. We use PyXPlot's loop constructs to automate the
+electrically conductive. We use Pyxplot's loop constructs to automate the
 production of the hexagonal grid which forms the basis of the diagram.
 \nlscf
 \input{examples/tex/ex_nanotubes_1.tex}
@@ -398,7 +398,7 @@ upon the most recent plot to have been added to the multiplot canvas.
 \section{The {\tt polygon} command}
 
 \example{ex:polygon1}{A simple polygon}{
-In this simple example, we use PyXPlot's {\tt polygon} command to generate a
+In this simple example, we use Pyxplot's {\tt polygon} command to generate a
 geometric shape from a list of points.
 \nlscf
 \input{examples/tex/ex_polygon1_1.tex}
@@ -407,7 +407,7 @@ geometric shape from a list of points.
 }
 
 \example{ex:polygon2}{The first eight regular polygons}{
-This example uses PyXPlot's flow control commands, together with its list
+This example uses Pyxplot's flow control commands, together with its list
 methods and the {\tt polygon} command, to generate a diagram of the first eight
 regular polygons.
 \nlscf
@@ -420,7 +420,7 @@ regular polygons.
 
 Graphical images in {\tt bmp}, {\tt gif}, {\tt jpeg} or {\tt png} format may be
 placed on multiplot canvases using the \indcmdt{image}\footnote{To maintain
-compatibility with historic versions of PyXPlot, the {\tt image} command may
+compatibility with historic versions of Pyxplot, the {\tt image} command may
 also be spelt {\tt jpeg}, with the identical syntax thereafter.}. In its
 simplest form, this has the syntax:
 \begin{verbatim}
@@ -507,7 +507,7 @@ circle at 0,0 radius 5 with lw 10 color red fillcolor yellow
 \end{verbatim}
 
 \example{ex:noentry}{A simple no-entry sign}{
-In this example script, we use PyXPlot's {\tt box} and {\tt circle} commands to
+In this example script, we use Pyxplot's {\tt box} and {\tt circle} commands to
 produce a no-entry sign warning passers by that code monkeys can turn nasty
 when interrupted from their work.
 \nlscf
@@ -543,9 +543,9 @@ In this example, we make a subroutine to draw labelled diagrams of the interior
 angles of triangles, taking as its inputs the lengths of the three sides of the
 triangle to be drawn and the position of its lower-left corner. The subroutine
 calculates the positions of the three vertices of the triangle and then labels
-them. We use PyXPlot's automatic handling of physical units to generate the
+them. We use Pyxplot's automatic handling of physical units to generate the
 \LaTeX\ strings required to label the side lengths in centimetres and the
-angles in degrees. We use PyXPlot's {\tt arc} command to draw angle symbols in
+angles in degrees. We use Pyxplot's {\tt arc} command to draw angle symbols in
 the three corners of a triangle.
 \nlscf
 \input{examples/tex/ex_triangle_1.tex}
@@ -635,7 +635,7 @@ the same manner.
 
 \example{ex:ellipse}{A labelled diagram of an ellipse}{
 In this example script, we illustrate the text of Section~\ref{sec:ellipse} by
-using PyXPlot's {\tt ellipse} command, together with arrows and text labels, to
+using Pyxplot's {\tt ellipse} command, together with arrows and text labels, to
 produce a labelled diagram of an ellipse. We label the semi-major axis $a$, the
 semi-minor axis $b$, the semi-latus rectum $L$, and the distance between the
 centre of the ellipse and one of its foci with the length $ae$, where $e$ is
@@ -698,7 +698,7 @@ The {\tt with} modifier may be followed by the keywords {\tt color}, {\tt
 linewidth}, {\tt style}, which all apply to the lines drawn around the
 circumference of the piechart and between its wedges. The fill color of the
 wedges themselves are taken sequentially from the current palette, as set by
-the {\tt set palette} command. Note that PyXPlot's default palette is optimised
+the {\tt set palette} command. Note that Pyxplot's default palette is optimised
 more for producing plots with datasets in different and distinct colors than
 for producing piecharts in aesthetically pleasing shades, where a little more
 subtly may be desirable. A suitable call to the {\tt set palette} command is
@@ -710,7 +710,7 @@ determines where the centre of the piechart is positioned; the latter
 determines its diameter.
 
 \example{ex:piechart}{A piechart of the composition of the Universe}{
-In this example, we use PyXPlot's {\tt piechart} command to produce a diagram
+In this example, we use Pyxplot's {\tt piechart} command to produce a diagram
 of the composition of the Universe, showing that of the mass in the Universe,
 only 4\% is in the form of the baryonic matter; of the rest, 22\% is in the
 form of dark matter and 74\% in the form of dark energy:
@@ -730,7 +730,7 @@ are too narrow for this.
 \centerline{\includegraphics{examples/eps/ex_piechart2}}
 }
 
-\section{LaTeX and PyXPlot}
+\section{LaTeX and Pyxplot}
 
 The \indcmdt{text} can straightforwardly be used to render simple one-line
 \LaTeX\index{latex} strings, but sometimes the need arises to place more

@@ -1,6 +1,6 @@
 % data.tex
 %
-% The documentation in this file is part of PyXPlot
+% The documentation in this file is part of Pyxplot
 % <http://www.pyxplot.org.uk>
 %
 % Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,23 +8,23 @@
 %
 % $Id$
 %
-% PyXPlot is free software; you can redistribute it and/or modify it under the
+% Pyxplot is free software; you can redistribute it and/or modify it under the
 % terms of the GNU General Public License as published by the Free Software
 % Foundation; either version 2 of the License, or (at your option) any later
 % version.
 %
 % You should have received a copy of the GNU General Public License along with
-% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 % Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 % ----------------------------------------------------------------------------
 
-% LaTeX source for the PyXPlot Users' Guide
+% LaTeX source for the Pyxplot Users' Guide
 
 \chapter{Working with data}
 \label{ch:numerics}
 
-In this chapter, we return to PyXPlot's commands for acting upon data stored in
+In this chapter, we return to Pyxplot's commands for acting upon data stored in
 files. First, we review some of the features which are common to all of the
 commands which act upon \datafile s, and then we move on to introduce each
 command in turn. We leave the {\tt plot} command, which was introduced in
@@ -34,12 +34,12 @@ Chapter~\ref{ch:plotting}.
 \section{Input filters}
 \label{sec:filters}
 
-By default, PyXPlot expects \datafile s to be in a simple plaintext format
+By default, Pyxplot expects \datafile s to be in a simple plaintext format
 which is described in Section~\ref{sec:plot_datafiles}. Input filters provide a
-mechanism by which \datafile s in arbitrary formats can be read into PyXPlot.
+mechanism by which \datafile s in arbitrary formats can be read into Pyxplot.
 For each filter, a filename wildcard is supplied, and the filter is then applied to
 all \datafile s whose filenames match this wildcard. For example, by default
-PyXPlot has five input filters installed, as the {\tt show filters} command
+Pyxplot has five input filters installed, as the {\tt show filters} command
 reveals:
 
 \begin{verbatim}
@@ -50,34 +50,34 @@ set filter "ftp://*"  "/usr/bin/wget -O -"
 set filter "http://*" "/usr/bin/wget -O -"
 \end{verbatim}
 
-Each filter takes the form of a program which is launched by PyXPlot whenever a
+Each filter takes the form of a program which is launched by Pyxplot whenever a
 \datafile\ with matching filename is read. The program is passed the filename of
 the \datafile\ as a command line argument immediately following any arguments
 specified in the filter's definition. It is then expected to return the data
-contained in the file to PyXPlot in plaintext format using its {\tt stdout}
+contained in the file to Pyxplot in plaintext format using its {\tt stdout}
 stream. Any errors which such a program returns to {\tt stderr} are passed to
 the user as error messages.
 
-The above set of filters allows PyXPlot to read data from gzipped plaintext
+The above set of filters allows Pyxplot to read data from gzipped plaintext
 \datafile s, data tables in FITS format\index{FITS format}, and from \datafile
 s available over the web via HTTP\index{HTTP} or FTP\index{FTP}. Finally, a
 filter is provided for converting textual dates in log files into numbers
 representing days, months and years. To add to this list of filters, it is
 necessary to write a short program or shell script, and the simple filters
-provided in PyXPlot's source code for {\tt .log} and {.fits} files may provide
+provided in Pyxplot's source code for {\tt .log} and {.fits} files may provide
 a useful model.
 
 \section{Reading data from a pipe}
 
-PyXPlot usually reads data from files, but it is also possible to read data
-from pipes from other processes if these are directed to PyXPlot's standard
+Pyxplot usually reads data from files, but it is also possible to read data
+from pipes from other processes if these are directed to Pyxplot's standard
 input stream.  To do this, one uses the magic filename {\tt -}:
 
 \begin{verbatim}
 plot '-' with lines
 \end{verbatim}
 
-This makes it possible to call PyXPlot from within another program and pass it
+This makes it possible to call Pyxplot from within another program and pass it
 data to plot without ever storing the data on disk. Whilst this facility has
 great power, the authors would urge caution in this practice.  Whilst it is
 tempting to write programs which both perform calculations and plot the results
@@ -89,9 +89,9 @@ simple \datafile\ is quite straightforward to plot time and again.
 
 \section{Including data within command scripts}
 
-It is also possible to embed data directly within PyXPlot scripts, which may be
+It is also possible to embed data directly within Pyxplot scripts, which may be
 useful when a small number of markers are wanted at particular pre-defined
-positions on a graph, or when it is desirable to roll a PyXPlot script and the
+positions on a graph, or when it is desirable to roll a Pyxplot script and the
 data it takes into a single file for easy storage or transmission. To do this,
 one uses the magic filename {\tt --} and terminates the data with the string
 {\tt END}:
@@ -103,7 +103,7 @@ plot '--' with lines
 2 0
 3 1
 END
-print "More PyXPlot commands can be placed after END"
+print "More Pyxplot commands can be placed after END"
 \end{verbatim}
 
 \section{Special comment lines in \datafile s}
@@ -111,7 +111,7 @@ print "More PyXPlot commands can be placed after END"
 \index{comment lines!in datafiles}
 
 Whilst most comment lines in \datafile s -- those lines which begin with a hash
-character -- are ignored by PyXPlot, lines which begin with any of the
+character -- are ignored by Pyxplot, lines which begin with any of the
 following four strings are parsed:
 \begin{verbatim}
 # Columns:
@@ -120,12 +120,12 @@ following four strings are parsed:
 # Rows:
 # RowUnits:
 \end{verbatim}
-The first pair of special comments affect the behaviour of PyXPlot when
+The first pair of special comments affect the behaviour of Pyxplot when
 plotting {\tt using columns}, while the second pair affect the behaviour of
-PyXPlot when plotting {\tt using rows} (see
+Pyxplot when plotting {\tt using rows} (see
 Section~\ref{sec:horizontal_datafiles}). Within each pair, the first may be
-used to tell PyXPlot the names of each of the columns/rows in the \datafile,
-while the second may be used to tell PyXPlot the physical units of the values
+used to tell Pyxplot the names of each of the columns/rows in the \datafile,
+while the second may be used to tell Pyxplot the physical units of the values
 in each of the columns/rows. These special comments may appear multiple times
 throughout a single \datafile\ to indicate changes to the format of the data.
 
@@ -150,7 +150,7 @@ Section~\ref{sec:set_axisunitstyle}).
 \section{Tabulating functions and slicing \datafile s}
 \label{sec:tabulate}
 
-PyXPlot's \indcmdt{tabulate} is similar to its {\tt plot} command, but instead
+Pyxplot's \indcmdt{tabulate} is similar to its {\tt plot} command, but instead
 of plotting a series of \datapoint s onto a graph, it writes them to \datafile
 s. This can be used to produce text files containing samples of functions, to
 rearrange/filter the columns in \datafile s, to change the units in which data
@@ -347,7 +347,7 @@ fit f() 'data.dat' via a
 \index{best fit lines}
 
 The \indcmdt{interpolate} can be used to generate a special function within
-PyXPlot's mathematical environment which interpolates a set of \datapoint s
+Pyxplot's mathematical environment which interpolates a set of \datapoint s
 supplied from a \datafile. Either one- or two-dimensional interpolation is
 possible.
 
@@ -360,7 +360,7 @@ interpolation with large datasets is strongly discouraged, as polynomial fits
 tend to show severe oscillations between \datapoint s.  Except in the case of
 stepwise interpolation, extrapolation is not permitted; if an attempt is made
 to evaluate an interpolated function beyond the limits of the \datapoint s
-which it interpolates, PyXPlot returns an error or value of not-a-number.
+which it interpolates, Pyxplot returns an error or value of not-a-number.
 
 In the case of two-dimensional interpolation, the type of interpolation to be
 used is set using the {\tt interpolate} modifier to the \indcmdt{set samples},
@@ -567,7 +567,7 @@ F(\omega) & = & \int_0^\infty f(x) \exp \left(-2\pi ix\omega\right) \,\mathrm{d}
 \nlnp
 In this example, we demonstrate this numerically by taking the Fourier
 transform of such a step function, and comparing the result against the
-function {\tt sinc(x)} which is pre-defined within PyXPlot:
+function {\tt sinc(x)} which is pre-defined within Pyxplot:
 \nlscf
 \noindent{\tt set numerics complex}\newline
 \noindent{\tt step(x) = tophat(x,0.5)}\newline
@@ -731,7 +731,7 @@ drawn to coincide with the bins into which the data were sorted.
 
 \section{Random data generation}
 
-PyXPlot has a range of mathematical functions which draw random samples from a
+Pyxplot has a range of mathematical functions which draw random samples from a
 variety of probability distributions. These are:
 
 \begin{itemize}
@@ -756,7 +756,7 @@ generator, whose seed may be set using the \indcmdt{set seed}, which should be
 followed by any integer.
 
 \example{ex:random}{Using random numbers to estimate the value of $\pi$}{
-PyXPlot's functions for generating random numbers are most commonly used for
+Pyxplot's functions for generating random numbers are most commonly used for
 adding noise to artificially-generated data. In this example, however, we use
 them to implement a rather inefficient algorithm for estimating the value of
 the mathematical constant $\pi$.  The algorithm works by spreading
@@ -776,7 +776,7 @@ counting how many lie within the unit circle.
 \input{examples/tex/ex_pi_estimation_1.tex}
 \nlfcf
 On the author's machine, this script returns a value of $3.1352$ when executed
-using the random samples which are returned immediately after starting PyXPlot.
+using the random samples which are returned immediately after starting Pyxplot.
 This method of estimating $\pi$ is well modelled as a Poisson process, and the
 uncertainty in this result can be estimated from the Poisson distribution to be
 $1/\sqrt{N}$. In this case, the uncertainty is $0.01$, in close agreement with
@@ -786,7 +786,7 @@ $\pi$.
 With a little modification, this script can be adapted to produce a diagram of
 the datapoints used in its calculation. Below is a modified version of the
 second half of the script, which loops over the \datapoint s stored in the
-\datafile\ {\tt random.dat}. It uses PyXPlot's vector graphics commands, which
+\datafile\ {\tt random.dat}. It uses Pyxplot's vector graphics commands, which
 will be introduced in Chapter~\ref{ch:vector_graphics}, to produce such a
 diagram:
 

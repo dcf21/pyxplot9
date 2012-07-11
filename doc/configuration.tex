@@ -1,6 +1,6 @@
 % configuration.newst
 %
-% The documentation in this file is part of PyXPlot
+% The documentation in this file is part of Pyxplot
 % <http://www.pyxplot.org.uk>
 %
 % Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,44 +8,44 @@
 %
 % $Id$
 %
-% PyXPlot is free software; you can redistribute it and/or modify it under the
+% Pyxplot is free software; you can redistribute it and/or modify it under the
 % terms of the GNU General Public License as published by the Free Software
 % Foundation; either version 2 of the License, or (at your option) any later
 % version.
 %
 % You should have received a copy of the GNU General Public License along with
-% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 % Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 % ----------------------------------------------------------------------------
 
-% LaTeX source for the PyXPlot Users' Guide
+% LaTeX source for the Pyxplot Users' Guide
 
-\chapter{Configuring PyXPlot}
+\chapter{Configuring Pyxplot}
 \label{ch:configuration}
 
 \renewcommand{\arraystretch}{1.80}
 
-In Parts~I and~II, we encountered numerous configuration options within PyXPlot
+In Parts~I and~II, we encountered numerous configuration options within Pyxplot
 which can controlled using the \indcmdt{set}. There are times, however, when
 many plots are wanted in a homogeneous style, or when a single plot is
 repeatedly generated, when it is desirable to change the default set of
-configuration options with which PyXPlot starts up, in order to avoid having to
+configuration options with which Pyxplot starts up, in order to avoid having to
 repeated enter a large number of {\tt set} commands. In this chapter, we
-describe the use of configuration files to program PyXPlot's default state.
+describe the use of configuration files to program Pyxplot's default state.
 
 \section{Configuration files}
 
-Configuration files for PyXPlot have the filename {\tt .pyxplotrc}, and may be
+Configuration files for Pyxplot have the filename {\tt .pyxplotrc}, and may be
 placed either in a user's home directory, in which case they globally affect
-all of that user's PyXPlot sessions, or in particular directories, in which
-case they only affect PyXPlot sessions which are instantiated with that
+all of that user's Pyxplot sessions, or in particular directories, in which
+case they only affect Pyxplot sessions which are instantiated with that
 particular directory as the current working directory.  When configuration
 files are present in both locations, both are read; settings found in the {\tt
 .pyxplotrc} file in the current working directory take precedence over those
 found in the user's home directory. Configuration files are read only once,
 upon startup, and subsequent changes to the configuration files do not affect
-copies of PyXPlot which are already running.
+copies of Pyxplot which are already running.
 
 Changes to settings made in configuration files affect not only the values that
 these settings have upon startup; they also changes the values to which the
@@ -80,13 +80,13 @@ any given file, and they may appear in any order:
 \begin{itemize}
 \item {\tt colors} -- contains a single setting {\tt palette}, which should be
 set to a comma-separated list of colors which should make up the palette used
-to plot datasets. The first will be called color~1 in PyXPlot, the second
+to plot datasets. The first will be called color~1 in Pyxplot, the second
 color~2, etc. A list of recognised color names is given in
 Section~\ref{sec:color_names}.
 \item {\tt filters} -- can be used to define input filters which should be used
 for certain file types (see Section~\ref{sec:filters}).
 \item {\tt functions} -- contains user-defined function definitions which
-become predefined in PyXPlot's mathematical environment, for example
+become predefined in Pyxplot's mathematical environment, for example
 \begin{verbatim}
 sinc(x) = sin(x)/(x)
 \end{verbatim}
@@ -97,30 +97,30 @@ prefixed to the beginning of all \LaTeX\ text items, before the {\tt
 includepackage\{\}} command.  The preamble can be also changed using the
 \indcmdt{set preamble}.
 \item {\tt script} -- can contain a list of \indcmdt{set}s, using the same
-syntax which would be used to enter them at a PyXPlot command prompt. This
+syntax which would be used to enter them at a Pyxplot command prompt. This
 section provides an alternative and more general way of controlling the
 settings which can be changed in the {\tt settings} section. Note that this
-section may only contain instances of the \indcmdt{set}; other PyXPlot
+section may only contain instances of the \indcmdt{set}; other Pyxplot
 commands may not be used. The \indcmdt{set}'s {\tt item} modifier may not be
 used.
 \item {\tt settings} -- contains settings similar to those which can be set
 with the \indcmdt{set}. A complete list is given in
 Section~\ref{sec:configfile_settings} below.
 \item {\tt styling} -- contains settings which control various detailed aspects
-of the graphical output which PyXPlot produces. These settings cannot be
+of the graphical output which Pyxplot produces. These settings cannot be
 accessed by any other means.
 \item {\tt terminal} -- contains settings for altering the behaviour and
-appearance of PyXPlot's interactive terminal. These cannot be changed with the
+appearance of Pyxplot's interactive terminal. These cannot be changed with the
 \indcmdt{set}, and can only be controlled via configuration files. A complete
 list of the available settings is given in
 Section~\ref{sec:configfile_terminal}.
 \item {\tt units} -- can be used to define new physical units for use in
-PyXPlot's mathematical environment.
+Pyxplot's mathematical environment.
 \item {\tt variables} -- contains variable definitions, in the format
 \begin{verbatim}
 variable = value
 \end{verbatim}
-Any variables defined in this section will be pre-defined in PyXPlot's
+Any variables defined in this section will be pre-defined in Pyxplot's
 mathematical environment upon startup.
 
 \end{itemize}
@@ -128,7 +128,7 @@ mathematical environment upon startup.
 \section{An example configuration file}
 \index{configuration files}
 
-\noindent The following configuration file represents PyXPlot's default
+\noindent The following configuration file represents Pyxplot's default
 configuration, and provides a useful index to all of the settings which are
 available. In subsequent sections, we describe the effect of each setting in
 detail.
@@ -582,7 +582,7 @@ The {\tt settings} section can contain any of the following settings in any orde
 
                {\bf Analogous set command:} \indcmdts{set numerics}
 
-               Sets whether numerical results are displayed in a natural human-readable way, e.g.\ $2\,\mathrm{m}$, in LaTeX, e.g.\ {\tt \$$2\backslash$,$\backslash$mathrm\{m\}\$}, or in a way which may be pasted back into PyXPlot, e.g.\ {\tt 2*unit(m)}.
+               Sets whether numerical results are displayed in a natural human-readable way, e.g.\ $2\,\mathrm{m}$, in LaTeX, e.g.\ {\tt \$$2\backslash$,$\backslash$mathrm\{m\}\$}, or in a way which may be pasted back into Pyxplot, e.g.\ {\tt 2*unit(m)}.
                \\
 {\tt numErr} & {\bf Possible values:} {\tt on}, {\tt off}.
 
@@ -867,7 +867,7 @@ The {\tt styling} section can contain any of the following settings in any order
                \\
 {\tt arrow\_headSize} & {\bf Possible values:} Any floating-point number.
 
-               Sets the size of all arrow heads. A value of 1.0 corresponds to PyXPlot's default size.
+               Sets the size of all arrow heads. A value of 1.0 corresponds to Pyxplot's default size.
                \\
 {\tt arrow\_headBackIndent} & {\bf Possible values:} Any floating-point number.
 
@@ -879,27 +879,27 @@ The {\tt styling} section can contain any of the following settings in any order
                \\
 {\tt axes\_majTickLen} & {\bf Possible values:} Any floating-point number.
 
-               Sets the length of major axis ticks. A value of 1.0 corresponds to PyXPlot's default length of $1.2\,\mathrm{mm}$; other values differ from this multiplicatively.
+               Sets the length of major axis ticks. A value of 1.0 corresponds to Pyxplot's default length of $1.2\,\mathrm{mm}$; other values differ from this multiplicatively.
                \\
 {\tt axes\_minTickLen} & {\bf Possible values:} Any floating-point number.
 
-               Sets the length of minor axis ticks. A value of 1.0 corresponds to PyXPlot's default length of $0.85\,\mathrm{mm}$; other values differ from this multiplicatively.
+               Sets the length of minor axis ticks. A value of 1.0 corresponds to Pyxplot's default length of $0.85\,\mathrm{mm}$; other values differ from this multiplicatively.
                \\
 {\tt axes\_separation} & {\bf Possible values:} Any floating-point number.
 
-               Sets the separation between parallel axes on graphs, less the width of any text labels associated with the axes. A value of 1.0 corresponds to PyXPlot's default spacing of $8\,\mathrm{mm}$; other values differ from this multiplicatively.
+               Sets the separation between parallel axes on graphs, less the width of any text labels associated with the axes. A value of 1.0 corresponds to Pyxplot's default spacing of $8\,\mathrm{mm}$; other values differ from this multiplicatively.
                \\
 {\tt axes\_textGap} & {\bf Possible values:} Any floating-point number.
 
-               Sets the separation between axes and the text labels which are associated with them. A value of 1.0 corresponds to PyXPlot's default spacing of $3\,\mathrm{mm}$; other values differ from this multiplicatively.
+               Sets the separation between axes and the text labels which are associated with them. A value of 1.0 corresponds to Pyxplot's default spacing of $3\,\mathrm{mm}$; other values differ from this multiplicatively.
                \\
 {\tt colorScale\_margin} & {\bf Possible values:} Any floating-point number.
 
-               Sets the separation left between the axes of plots drawn using the {\tt colormap} plot style, and of the color scales drawn alongside them. A value of 1.0 corresponds to PyXPlot's default spacing; other values differ from this multiplicatively.
+               Sets the separation left between the axes of plots drawn using the {\tt colormap} plot style, and of the color scales drawn alongside them. A value of 1.0 corresponds to Pyxplot's default spacing; other values differ from this multiplicatively.
                \\
 {\tt colorScale\_width} & {\bf Possible values:} Any floating-point number.
 
-               Sets the width of the color scale bars drawn alonside plots drawn using the {\tt colormap} plot style. A value of 1.0 corresponds to PyXPlot's width; other values differ from this multiplicatively.
+               Sets the width of the color scale bars drawn alonside plots drawn using the {\tt colormap} plot style. A value of 1.0 corresponds to Pyxplot's width; other values differ from this multiplicatively.
                \\
 {\tt grid\_majLineWidth} & {\bf Possible values:} Any floating-point number.
 
@@ -911,11 +911,11 @@ The {\tt styling} section can contain any of the following settings in any order
                \\
 {\tt baseline\_lineWidth} & {\bf Possible values:} Any floating-point number.
 
-               Sets the PostScript line width which corresponds to a {\tt linewidth} of 1.0. A value of 1.0 corresponds to PyXPlot's default line width of $0.2\,\mathrm{mm}$; other values differ from this multiplicatively.
+               Sets the PostScript line width which corresponds to a {\tt linewidth} of 1.0. A value of 1.0 corresponds to Pyxplot's default line width of $0.2\,\mathrm{mm}$; other values differ from this multiplicatively.
                \\
 {\tt baseline\_pointSize} & {\bf Possible values:} Any floating-point number.
 
-               Sets the baseline point size which corresponds to a {\tt pointsize} of 1.0. A value of 1.0 corresponds to PyXPlot's default; other values differ from this multiplicatively.
+               Sets the baseline point size which corresponds to a {\tt pointsize} of 1.0. A value of 1.0 corresponds to Pyxplot's default; other values differ from this multiplicatively.
                \\
 \end{longtable}
 
@@ -935,19 +935,19 @@ The {\tt terminal} section can contain any of the following settings in any orde
 
                {\bf Analogous command-line switches:} None.
 
-               Sets the color in which error messages are displayed when color highlighting is used. Note that the list of recognised color names differs from that used in PyXPlot; a list is given at the end of this section.
+               Sets the color in which error messages are displayed when color highlighting is used. Note that the list of recognised color names differs from that used in Pyxplot; a list is given at the end of this section.
                \\
 {\tt color\_rep} & {\bf Possible values:} Any recognised terminal color (see below).
 
                {\bf Analogous command-line switches:} None.
 
-               As above, but sets the color in which PyXPlot displays its non-error-related output.
+               As above, but sets the color in which Pyxplot displays its non-error-related output.
                \\
 {\tt color\_wrn} & {\bf Possible values:} Any recognised terminal color (see below).
 
                {\bf Analogous command-line switches:} None.
 
-               As above, but sets the color in which PyXPlot displays its warning messages.
+               As above, but sets the color in which Pyxplot displays its warning messages.
                \\
 {\tt splash} & {\bf Possible values:} {\tt on}, {\tt off}.
 
@@ -968,7 +968,7 @@ default foreground color of the terminal.
 \label{sec:configfile_units}
 
 The {\tt units} section can be used to define new physical units for use within
-PyXPlot's mathematical environment. Each line should take the format of
+Pyxplot's mathematical environment. Each line should take the format of
 \begin{verbatim}
 <l_sing> \[ / <s_sing> \] \[ / <lt_sing> \]
    \[ / <l_plur> \] \[ / <s_plur> \] \[ / <lt_plur> \]
@@ -984,7 +984,7 @@ where
 {\tt lt\_plur} & is the plural name of the unit to be used in \LaTeX.\\
 {\tt quantity\_name} & is the physical quantity which the unit measures, e.g.\ {\tt length}.\\
 {\tt definition} & is a definition of the unit in terms of other units which
-PyXPlot already recognises, e.g.\ {\tt 0.001*km}. The syntax used is identical
+Pyxplot already recognises, e.g.\ {\tt 0.001*km}. The syntax used is identical
 to that used in the {\tt unit()} function.\\
 \end{longtable}
 For example, a definition of the metre would look like
@@ -1002,7 +1002,7 @@ units.
 \section{Recognised color names}
 \label{sec:color_names}
 
-The following is a complete list of the color names which PyXPlot recognises
+The following is a complete list of the color names which Pyxplot recognises
 in the {\tt set textcolor}, {\tt set axescolor} commands, and in the {\tt
 colors} section of its configuration file.  A color chart of these can be
 found in Appendix~\ref{ch:color_charts}.  All color names are case

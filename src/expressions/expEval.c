@@ -1,6 +1,6 @@
 // expEval.c
 //
-// The code in this file is part of PyXPlot
+// The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,13 +8,13 @@
 //
 // $Id$
 //
-// PyXPlot is free software; you can redistribute it and/or modify it under the
+// Pyxplot is free software; you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation; either version 2 of the License, or (at your option) any later
 // version.
 //
 // You should have received a copy of the GNU General Public License along with
-// PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+// Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 // Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 // ----------------------------------------------------------------------------
@@ -133,82 +133,7 @@ static void expEval_stringSubs(ppl_context *context, pplExpr *inExpr, int charpo
         if ((!gsl_finite(o->real)) || ((context->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && (o->flagComplex!=0))) { strcpy(out+outP, "nan"); }
         else
          {
-          if      ((allowedFormats[l]=='d') || (allowedFormats[l]=='i') || (allowedFormats[l]=='o') || (allowedFormats[l]=='x') || (allowedFormats[l]=='X'))
-           {
-            if      ((o->real>INT_MAX)||(o->imag>INT_MAX)) { strcpy(out+outP,  "inf"); }
-            else if ((o->real<INT_MIN)||(o->imag<INT_MIN)) { strcpy(out+outP, "-inf"); }
-            else if (o->flagComplex == 0) // Print a real integer
-             {
-              int arg3i = (int)o->real; // sprintf will expect to be passed an int
-              if (requiredArgs==1) snprintf(out+outP, outlen-outP, formatToken, arg3i); // Print an integer variable
-              if (requiredArgs==2) snprintf(out+outP, outlen-outP, formatToken, arg1i, arg3i);
-              if (requiredArgs==3) snprintf(out+outP, outlen-outP, formatToken, arg1i, arg2i, arg3i);
-             }
-            else // Print a complex integer
-             {
-              int arg3i = (int)o->real; // sprintf will expect to be passed an int real part, and an int imag part
-              int arg4i = (int)o->imag;
-              if (requiredArgs==1) snprintf(out+outP, outlen-outP, formatToken, arg3i); // Print an integer real part
-              if (requiredArgs==2) snprintf(out+outP, outlen-outP, formatToken, arg1i, arg3i);
-              if (requiredArgs==3) snprintf(out+outP, outlen-outP, formatToken, arg1i, arg2i, arg3i);
-              outP += strlen(out+outP);
-              out[outP++]='+';
-              if (requiredArgs==1) snprintf(out+outP, outlen-outP, formatToken, arg4i); // Print an integer imag part
-              if (requiredArgs==2) snprintf(out+outP, outlen-outP, formatToken, arg1i, arg4i);
-              if (requiredArgs==3) snprintf(out+outP, outlen-outP, formatToken, arg1i, arg2i, arg4i);
-              outP += strlen(out+outP);
-              strcpy(out+outP,"i");
-             }
-           }
-          else if ((allowedFormats[l]=='x') || (allowedFormats[l]=='X'))
-           {
-            if      ((o->real>UINT_MAX)||(o->imag>UINT_MAX)) { strcpy(out+outP,  "inf"); }
-            else if ((o->real<0       )||(o->imag<0       )) { strcpy(out+outP, "-inf"); }
-            else if (o->flagComplex == 0) // Print a real unsigned integer
-             {
-              unsigned int arg3u = (unsigned int)o->real; // sprintf will expect to be passed an unsigned int
-              if (requiredArgs==1) snprintf(out+outP, outlen-outP, formatToken, arg3u); // Print an integer variable
-              if (requiredArgs==2) snprintf(out+outP, outlen-outP, formatToken, arg1i, arg3u);
-              if (requiredArgs==3) snprintf(out+outP, outlen-outP, formatToken, arg1i, arg2i, arg3u);
-             }
-            else // Print a complex unsigned integer
-             {
-              unsigned int arg3u = (unsigned int)o->real; // sprintf will expect to be passed an int real part, and an int imag part
-              unsigned int arg4u = (unsigned int)o->imag;
-              if (requiredArgs==1) snprintf(out+outP, outlen-outP, formatToken, arg3u); // Print an integer real part
-              if (requiredArgs==2) snprintf(out+outP, outlen-outP, formatToken, arg1i, arg3u);
-              if (requiredArgs==3) snprintf(out+outP, outlen-outP, formatToken, arg1i, arg2i, arg3u);
-              outP += strlen(out+outP);
-              out[outP++]='+';
-              if (requiredArgs==1) snprintf(out+outP, outlen-outP, formatToken, arg4u); // Print an integer imag part
-              if (requiredArgs==2) snprintf(out+outP, outlen-outP, formatToken, arg1i, arg4u);
-              if (requiredArgs==3) snprintf(out+outP, outlen-outP, formatToken, arg1i, arg2i, arg4u);
-              outP += strlen(out+outP);
-              strcpy(out+outP,"i");
-             }
-           }
-          else // otherwise, sprintf will expect a double
-           {
-            if (requiredArgs==1) snprintf(out+outP, outlen-outP, formatToken, o->real); // Print a double (real part)
-            if (requiredArgs==2) snprintf(out+outP, outlen-outP, formatToken, arg1i, o->real);
-            if (requiredArgs==3) snprintf(out+outP, outlen-outP, formatToken, arg1i, arg2i, o->real);
-            if (o->flagComplex != 0) // Print a complex double
-             {
-              outP += strlen(out+outP);
-              out[outP++]='+';
-              if (requiredArgs==1) snprintf(out+outP, outlen-outP, formatToken, o->imag); // Print the imaginary part
-              if (requiredArgs==2) snprintf(out+outP, outlen-outP, formatToken, arg1i, o->imag);
-              if (requiredArgs==3) snprintf(out+outP, outlen-outP, formatToken, arg1i, arg2i, o->imag);
-              outP += strlen(out+outP);
-              strcpy(out+outP,"i");
-             }
-           }
-          if (!o->dimensionless)
-           {
-            outP += strlen(out+outP);
-            snprintf(out+outP, outlen-outP, " %s", ppl_printUnit(context,o,&o->real,&o->imag,0,1,0)); // Print dimensions of this value
-            out[outlen-1]='\0';
-           }
+          strcpy(out+outP, ppl_unitsNumericDisplayWithFormat(context, o, 0, formatToken, allowedFormats[l], outlen-outP, requiredArgs, arg1i, arg2i));
          }
        }
       argP++;

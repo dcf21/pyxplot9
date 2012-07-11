@@ -1,6 +1,6 @@
 % plotting.tex
 %
-% The documentation in this file is part of PyXPlot
+% The documentation in this file is part of Pyxplot
 % <http://www.pyxplot.org.uk>
 %
 % Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,23 +8,23 @@
 %
 % $Id$
 %
-% PyXPlot is free software; you can redistribute it and/or modify it under the
+% Pyxplot is free software; you can redistribute it and/or modify it under the
 % terms of the GNU General Public License as published by the Free Software
 % Foundation; either version 2 of the License, or (at your option) any later
 % version.
 %
 % You should have received a copy of the GNU General Public License along with
-% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 % Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 % ----------------------------------------------------------------------------
 
-% LaTeX source for the PyXPlot Users' Guide
+% LaTeX source for the Pyxplot Users' Guide
 
 \chapter{Plotting: a complete guide}
 \label{ch:plotting}
 
-This part of the manual provides a complete description of PyXPlot's commands
+This part of the manual provides a complete description of Pyxplot's commands
 for producing graphs and vector graphics. This chapter provides a systematic
 survey of how the appearance of plots can be configured, extending the brief
 overview of the \indcmdt{plot} given in Chapter~\ref{ch:first_steps}.
@@ -54,7 +54,7 @@ plot "data.dat" with lines linewidth 2.0
 \end{verbatim}
 would use twice the default width of line.
 
-In the following section, a complete list of all of PyXPlot's plot styles --
+In the following section, a complete list of all of Pyxplot's plot styles --
 i.e.\ all of the words which may be used in place of {\tt lines} -- will be
 given. In this section, we list all of the modifiers such as {\tt line\-width}
 which may be used to alter the exact appearance of these plot styles, which are
@@ -62,11 +62,11 @@ as follows:
 \begin{itemize}
 \item \indmodt{color} -- used to select the color in which the dataset is to be plotted. It should be followed either by a number, to select a color from the present palette (see Section~\ref{sec:palette}), by a recognised color name, a complete list of which can be found in Section~\ref{sec:color_names}, or by a color object, such as may be created by the functions {\tt gray(g)}, {\tt rgb(r,g,b)}, {\tt cmyk(c,m,y,k)} or {\tt hsb(h,s,b)}. This modifier may also be spelt {\tt colour}.\index{colors!setting for datasets}
 \item \indmodt{fillcolor} -- used to select the color in which the dataset is filled. The color may be specified using any of the styles listed for {\tt color}. May also be spelt {\tt fillcolour}.
-\item \indmodt{linetype} -- used to numerically select the type of line -- for example, solid, dotted, dashed, etc.\ -- which should be used by line-based plot styles. A complete list of PyXPlot's numbered line types can be found in Chapter~\ref{ch:linetypes_table}. May be abbreviated {\tt lt}.
+\item \indmodt{linetype} -- used to numerically select the type of line -- for example, solid, dotted, dashed, etc.\ -- which should be used by line-based plot styles. A complete list of Pyxplot's numbered line types can be found in Chapter~\ref{ch:linetypes_table}. May be abbreviated {\tt lt}.
 \item \indmodt{linewidth} -- used to select the width of line which should be used by line-based plot styles, where unity represents the default width. May be abbreviated {\tt lw}.
 \item \indmodt{pointlinewidth} -- used to select the width of line which should be used to stroke points in point-based plot styles, where unity represents the default width. May be abbreviated {\tt plw}.
 \item \indmodt{pointsize} -- used to select the size of drawn points, where unity represents the default size. May be abbreviated {\tt ps}.
-\item \indmodt{pointtype} -- used to numerically select the type of point -- for example, crosses, circles, etc.\ -- used by point-based plot styles. A complete list of PyXPlot's numbered point types can be found in Chapter~\ref{ch:linetypes_table}. May be abbreviated {\tt pt}.
+\item \indmodt{pointtype} -- used to numerically select the type of point -- for example, crosses, circles, etc.\ -- used by point-based plot styles. A complete list of Pyxplot's numbered point types can be found in Chapter~\ref{ch:linetypes_table}. May be abbreviated {\tt pt}.
 \end{itemize}
 
 Any number of these modifiers may be placed sequentially after the keyword {\tt
@@ -88,7 +88,7 @@ supplied \datafile\ and the size of each point from the third column:
 plot 'datafile' using 1:2 with points pointsize $3
 \end{verbatim}
 
-Not all of these modifiers are applicable to all of PyXPlot's plot styles. For
+Not all of these modifiers are applicable to all of Pyxplot's plot styles. For
 example, the {\tt line\-width} modifier has no effect on plot styles which do
 not draw lines between datapoints. Where modifiers are applied to plot styles
 for which they have no defined effect, the modifier has no effect, but no error
@@ -105,7 +105,7 @@ plot styles.
 \label{sec:palette}
 \index{palette}\index{colors!setting the palette}
 
-Wherever PyXPlot takes a color as an input to a command, the user has three
+Wherever Pyxplot takes a color as an input to a command, the user has three
 options for how it may be specified.  A selection of widely-used colors may be
 specified by name, for example {\tt red} and {\tt blue}. A complete list of
 such colors may be found in Section~\ref{sec:color_names}. Alternatively, an
@@ -113,12 +113,12 @@ object of type {\tt color} may be provided, such as {\tt rgb(0,1,0)}, {\tt
 hsb(0.5,0.5,0.5)}, {\tt gray(0.2)}, {\tt colors.green + colors.red}, {\tt
 colors.yellow - colors.green}.
 
-The third option is a specified a numbered color from PyXPlot's {\it palette}.
+The third option is a specified a numbered color from Pyxplot's {\it palette}.
 By default, this contains a series of visually distinctive colors which are,
 insofar as possible, also distinctive to users with most common forms of color
 blindness.  The first color is number~1, the second number~2, and so forth. As
 well as being accessible by number, these colors also form the default series
-which PyXPlot chooses for successive datasets when their colors are not
+which Pyxplot chooses for successive datasets when their colors are not
 individually specified.
 
 The current palette may be queried using the \indcmdt{show palette}, and
@@ -131,7 +131,7 @@ set palette brickRed, limeGreen, cadetBlue
 
 \noindent The palette is treated as a cyclic list, and so in the above example,
 color number~4 would map to {\tt brickRed}, as would color numbers~1 and~8. The
-default palette which PyXPlot uses upon startup may be changed by setting up a
+default palette which Pyxplot uses upon startup may be changed by setting up a
 configuration file, as described in Chapter~\ref{ch:configuration}.
 
 If a non-integer color is requested from the palette, for example color~1.5,
@@ -165,10 +165,10 @@ monochrome output (see Chapter~\ref{sec:set_terminal}). In the former case
 (color output), the colors of each of the comma-separated datasets plotted on
 a graph are drawn sequentially from the currently-selected palette, all lines
 are drawn as solid lines ({\tt line\-type~1}), and the symbols used to draw
-each dataset are drawn sequentially from PyXPlot's available point types. In
+each dataset are drawn sequentially from Pyxplot's available point types. In
 the latter case (monochrome output), all datasets are plotted in black and
 both the line types and point types used to draw each dataset are drawn
-sequentially from PyXPlot's available options. The following simple example
+sequentially from Pyxplot's available options. The following simple example
 demonstrates this:
 \begin{verbatim}
 set terminal color
@@ -178,10 +178,10 @@ replot
 \end{verbatim}
 \centerline{\includegraphics[width=\textwidth]{examples/eps/ex_col_vs_mono}}
 
-\section{PyXPlot's plot styles}
+\section{Pyxplot's plot styles}
 \label{sec:list_of_plotstyles}
 
-This section provides an exhaustive list of all of PyXPlot's {\it plot styles},
+This section provides an exhaustive list of all of Pyxplot's {\it plot styles},
 which we place into a series of groups for clarity.
 Table~\ref{tab:plot_style_columns} summarises the columns of data expected by
 each of the plot styles when used on two- and three-dimensional plots.
@@ -229,13 +229,13 @@ each of the plot styles when used on two- and three-dimensional plots.
 {\tt ZErrorRange} & $(x,y,z,z_\mathrm{min},z_\mathrm{max})$ & $(x,y,z,z_\mathrm{min},z_\mathrm{max})$ \\
 \hline
 \end{tabular}
-\caption{A summary of the columns of data expected by each of PyXPlot's plot styles when used on two- and three-dimensional plots.}
+\caption{A summary of the columns of data expected by each of Pyxplot's plot styles when used on two- and three-dimensional plots.}
 \label{tab:plot_style_columns}
 \end{table}
 
 \subsection{Lines and points}
 
-The following is a list of PyXPlot's simplest plot styles, all of which take
+The following is a list of Pyxplot's simplest plot styles, all of which take
 two (or three) columns of input data on 2D (or 3D) plots, representing the
 $x$-, $y$- (and $z$-)coordinates of the positions of each point:
 \begin{itemize}
@@ -265,7 +265,7 @@ The Hipparcos catalogue can be downloaded for free from
 \url{ftp://cdsarc.u-strasbg.fr/pub/cats/I/239/hip_main.dat.gz}; a description
 of the catalogue can be found at
 \url{http://cdsarc.u-strasbg.fr/viz-bin/Cat?I/239}. In summary, though the data
-is arranged in a non-standard format which PyXPlot cannot read without a
+is arranged in a non-standard format which Pyxplot cannot read without a
 special input filter, the following Python script generates a text file with
 four columns containing the magnitudes $m$, $B-V$ colors and parallaxes $p$ of
 the stars, together with the uncertainties in the parallaxes. From these
@@ -284,7 +284,7 @@ milli-arcseconds:
 \noindent{\tt \phantom{x}except ValueError: pass}
 \nlscf
 The resultant four columns of data can then be plotted in the {\tt dots} style
-using the following PyXPlot script. Because the catalogue is very large, and
+using the following Pyxplot script. Because the catalogue is very large, and
 many of the parallax datapoints have large errorbars producing large
 uncertainties in their vertical positions on the plot, we use the {\tt select}
 statement to pick out those datapoints with parallax signal-to-noise ratios of
@@ -390,10 +390,10 @@ between them, or they may overlap, as seen in Figure~\ref{fig:ex_barchart2}(b).
 \begin{center}
 \includegraphics[width=\textwidth]{examples/eps/ex_barchart2}
 \end{center}
-\caption[A gallery of the various bar chart styles which PyXPlot can produce]
-{A gallery of the various bar chart styles which PyXPlot can produce.
+\caption[A gallery of the various bar chart styles which Pyxplot can produce]
+{A gallery of the various bar chart styles which Pyxplot can produce.
 See the text for more details.  The script and data file used to produce this
-image are available on the PyXPlot website at
+image are available on the Pyxplot website at
 \protect\url{http://www.pyxplot.org.uk/examples/Manual/04barchart2/}.}
 \label{fig:ex_barchart2}
 \end{figure}
@@ -429,11 +429,11 @@ chart with the boxes starting from their default position of $y=0$.
 \begin{center}
 \includegraphics[width=\textwidth]{examples/eps/ex_barchart1}
 \end{center}
-\caption[A second gallery of the various bar chart styles which PyXPlot can
+\caption[A second gallery of the various bar chart styles which Pyxplot can
 produce]
-{A second gallery of the various bar chart styles which PyXPlot can
+{A second gallery of the various bar chart styles which Pyxplot can
 produce. See the text for more details.  The script and data file used to
-produce this image are available on the PyXPlot website at
+produce this image are available on the Pyxplot website at
 \protect\url{http://www.pyxplot.org.uk/examples/Manual/03barchart1/}.}
 \label{fig:ex_barchart1}
 \end{figure}
@@ -536,7 +536,7 @@ the four columns:
 \noindent{\tt \phantom{xx}vx = v * -sin(theta)}\newline
 \noindent{\tt \phantom{xx}print "\%7.3f \%7.3f \%7.3f \%7.3f"\%(x,y,vx,vy)}
 \nlscf
-This data can then be plotted using the following PyXPlot script:
+This data can then be plotted using the following Pyxplot script:
 \nlscf
 \input{examples/tex/ex_vortex_1.tex}
 \nlscf
@@ -573,7 +573,7 @@ plot 'datafile' using 1:2 label "%s"%($3)
 \noindent Note that if a particular column of a \datafile\ contains strings
 which are to be used as labels, as in the second example above, syntax such as
 {\tt "\%s"\%(\$3)} must be used to explicitly read the data as strings rather
-than as numerical quantities.  As PyXPlot treats any whitespace as separating
+than as numerical quantities.  As Pyxplot treats any whitespace as separating
 columns of data, such labels cannot contain spaces, though \LaTeX's {\tt
 $\sim$} character can be used to achieve a space.
 
@@ -636,7 +636,7 @@ plot f(x):g(x) using 2:3
 sensible because the range of values of $x$ substituting into these expressions
 would correspond to the range of the plot's horizontal axis. The result might
 be particularly unexpected if the above were attempted with an autoscaling
-horizontal axis -- PyXPlot would find itself autoscaling the {\tt x}-axis range
+horizontal axis -- Pyxplot would find itself autoscaling the {\tt x}-axis range
 to the spread of values of $f(x)$, but find that this itself changed depending
 upon the range of the {\tt x}-axis. In this case, the user should have used the
 {\tt parametric} plot option described in the next section.
@@ -651,7 +651,7 @@ y & = & r \cos(t) ,
 \end{eqnarray*}
 where separate expressions are supplied for the ordinate and abscissa values as
 a function of some free parameter $t$. The above example is a parametric
-representation of a circle of radius $r$. Before PyXPlot can usefully plot
+representation of a circle of radius $r$. Before Pyxplot can usefully plot
 parametric functions, it is generally necessary to stipulate the range of
 values of $t$ over which the function should be sampled. This may be done using
 the \indcmdt{set trange}, as in the example
@@ -716,7 +716,7 @@ intricate patterns.
 
 \subsection{Two-dimensional parametric surfaces}
 
-PyXPlot can also plot datasets which can be parameterised in terms of two free
+Pyxplot can also plot datasets which can be parameterised in terms of two free
 parameters $u$ and $v$. This is most often useful in conjunction with the {\tt
 surface} plot style, allowing any $(u,v)$-surface to be plotted. However, it
 also works in conjunction with any other plot style, allowing, for example,
@@ -725,7 +725,7 @@ $(u,v)$-grids of points to be constructed.
 As in the case of parametric lines above, the range of values that each free
 parameter should take must be specified. This can be done using the \indcmd{set
 urange}{\tt set urange} and \indcmd{set vrange}{\tt set vrange} commands. These
-commands also act to switch PyXPlot between one- and two-dimensional parametric
+commands also act to switch Pyxplot between one- and two-dimensional parametric
 function evaluation; whilst the {\tt set trange} command indicates that the
 next parametric function should be evaluated along a single raster of values of
 $t$, the {\tt set urange} and {\tt set vrange} commands indicate that a grid of
@@ -813,7 +813,7 @@ plot sin(x) title 'A sine wave'
 plot cos(x) title ''
 \end{verbatim}
 
-In the latter case a blank title is specified, which indicates to PyXPlot that
+In the latter case a blank title is specified, which indicates to Pyxplot that
 no entry should be made for the dataset in the legend. This allows for legends
 which contain only a subset of the datasets on a plot. Alternatively, the
 production of the legend can be completely turned off for all datasets using
@@ -951,7 +951,7 @@ set unit angle nodimensionless ; plot [0:1] asin(x)
 \end{verbatim}
 the axis is set to share the particular physical dimensions of that unit, and
 thereafter no data with any other physical dimensions may be plotted against
-that axis. When the axis comes to be drawn, PyXPlot makes a decision about
+that axis. When the axis comes to be drawn, Pyxplot makes a decision about
 which physical unit should be used to label the axis. For example, in the
 default SI system and with no preferred unit of length set, axes with units of
 length might be displayed in millimetres, metres or kilometres depending upon
@@ -969,7 +969,7 @@ with units of momentum. In each case, the axis label was set simply using
 \begin{verbatim}
 set xlabel "Momentum"
 \end{verbatim}
-and the subsequent text was appended automatically by PyXPlot:
+and the subsequent text was appended automatically by Pyxplot:
 
 \vspace{3mm}
 \centerline{\includegraphics[width=10cm]{examples/eps/ex_axisunits}}
@@ -1062,7 +1062,7 @@ be used.
 
 \subsection{Specifying where ticks should appear along axes}
 
-By default, PyXPlot places a series of tick marks at significant points along
+By default, Pyxplot places a series of tick marks at significant points along
 each axis, with the most significant points being labelled.  Labelled tick
 marks are termed {\it major} ticks, and unlabelled tick marks are termed {\it
 minor} ticks.  The position and appearance of the major ticks along the {\tt
@@ -1179,7 +1179,7 @@ plot [-pi:2*pi] sin(x)
 
 \noindent\centerline{\includegraphics[width=8cm]{examples/eps/ex_axistics2}}
 
-Note that where possible, PyXPlot intelligently changes the positions along
+Note that where possible, Pyxplot intelligently changes the positions along
 axes where it places the ticks to reflect significant points in the chosen
 labelling system.  The extent to which this is possible depends upon the format
 string supplied. It is generally easier when continuous-varying numerical
@@ -1287,7 +1287,7 @@ data plotted against both itself and the {\tt x2}-axis. Similarly, if the {\tt
 x2}-axis is linked to the {\tt x}-axis by means of some algebraic expression,
 the {\tt x}-axis will attempt to autoscale to include the data plotted against
 the {\tt x2}-axis, though in some cases -- especially with non-monotonic
-linking functions -- this may prove too difficult. Where PyXPlot detects that
+linking functions -- this may prove too difficult. Where Pyxplot detects that
 it has failed, a warning is issued recommending that a hard range be set for --
 in this example -- the {\tt x}-axis.
 
@@ -1297,7 +1297,7 @@ temperatures $T$, using the Planck formula
 \begin{displaymath}
 B_\nu(\nu,T)=\left(\frac{2h^3}{c^2}\right)\frac{\nu^3}{\exp(h\nu/kT)-1}
 \end{displaymath}
-which is evaluated in PyXPlot by the system-defined mathematical function {\tt
+which is evaluated in Pyxplot by the system-defined mathematical function {\tt
 Bv(nu,T)}. We use the axis linkage commands listed as an example in the text of
 Section~\ref{sec:linked_axes} to produce three parallel horizontal axes showing
 wavelength of light, frequency of light and photon energy.
@@ -1463,7 +1463,7 @@ set arrow 1 from first  x0, first  y0 \
 \subsection{Text labels}
 
 Text labels may be placed on plots using the \indcmdt{set label}. As with all
-textual labels in PyXPlot, these are rendered in \LaTeX:
+textual labels in Pyxplot, these are rendered in \LaTeX:
 
 \begin{verbatim}
 set label 1 'Hello World' at 0,0
@@ -1534,7 +1534,7 @@ The wavelengths of the spectral lines of atomic hydrogen are given by the Rydber
 \frac{1}{\lambda} = R_\mathrm{H}\left(\frac{1}{n^2}-\frac{1}{m^2}\right),
 \end{displaymath}
 where $\lambda$ is wavelength, $R_\mathrm{H}$ is the Rydberg constant,
-predefined in PyXPlot as the variable {\tt phy\_Ry}, and {\tt n} and {\tt m}
+predefined in Pyxplot as the variable {\tt phy\_Ry}, and {\tt n} and {\tt m}
 are positive non-zero integers such that {\tt m>n}. The first few series are
 called the Lyman series ({\tt n}$=1$), the Balmer series ({\tt n}$=2$), the
 Paschen series ({\tt n}$=3$) and the Brackett series ({\tt n}$=4$). Within each
@@ -1556,10 +1556,10 @@ Princeton, 1998).
 
 \newpage
 \example{ex:australia}{A map of Australia}{
-In this example, we use PyXPlot to plot a map of Australia, using a coastal
+In this example, we use Pyxplot to plot a map of Australia, using a coastal
 outline obtained from \protect\url{http://www.maproom.psu.edu/dcw/}. We use the
 {\tt set label} command to label the states and major cities. The files {\tt
-ex\_\-map\_\-1.dat.gz} and {\tt ex\_\-map\_\-2.dat} can be found in the PyXPlot
+ex\_\-map\_\-1.dat.gz} and {\tt ex\_\-map\_\-2.dat} can be found in the Pyxplot
 installation tarball in the directory {\tt doc/\-examples/}.
 \nlscf
 \input{examples/tex/ex_map_1.tex}
@@ -1632,7 +1632,7 @@ depend on up to four quantities $c_1$, $c_2$, $c_3$ and $c_4$. This makes it
 possible, for example, to represent both the amplitude and complex phase of a
 quantity in a single color map.
 
-PyXPlot's \indpst{colormap} plot style takes between three and seven columns
+Pyxplot's \indpst{colormap} plot style takes between three and seven columns
 of data, which may be supplied either from one or more function(s), or from a
 \datafile. If data is read from a \datafile, then the first two columns of
 output data are assumed to contain the respective positions of each datapoint
@@ -1768,7 +1768,7 @@ set nocolorkey
 unset colorkey
 \end{verbatim}
 
-\noindent causes PyXPlot to revert to its default behaviour, as specified in a
+\noindent causes Pyxplot to revert to its default behaviour, as specified in a
 configuration file, if present. A position for the key may optionally be
 specified after the {\tt set colorkey} command, as in the example:
 
@@ -1803,7 +1803,7 @@ it can be shown that $|z_{n+1}|>|z_n|$ and that divergence is guaranteed. In
 numerical implementations of the above iteration, in the absence of any better
 way to prove that the iteration remains bounded for a certain value of $c$,
 some maximum number of iterations $m$ is chosen, and the series is deemed to
-have remained bounded if $|z_m|<2$.  This is implemented in PyXPlot by the
+have remained bounded if $|z_m|<2$.  This is implemented in Pyxplot by the
 built-in mathematical function {\tt
 fractal\_\-mandel\-brot(z,m)}\indfun{fractal\_mandelbrot($z$,$m$)}, which
 returns an integer in the range $0\leq i\leq m$.

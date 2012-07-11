@@ -1,6 +1,6 @@
 % programming.tex
 %
-% The documentation in this file is part of PyXPlot
+% The documentation in this file is part of Pyxplot
 % <http://www.pyxplot.org.uk>
 %
 % Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,25 +8,25 @@
 %
 % $Id$
 %
-% PyXPlot is free software; you can redistribute it and/or modify it under the
+% Pyxplot is free software; you can redistribute it and/or modify it under the
 % terms of the GNU General Public License as published by the Free Software
 % Foundation; either version 2 of the License, or (at your option) any later
 % version.
 %
 % You should have received a copy of the GNU General Public License along with
-% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 % Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 % ----------------------------------------------------------------------------
 
-% LaTeX source for the PyXPlot Users' Guide
+% LaTeX source for the Pyxplot Users' Guide
 
-\chapter{Programming: PyXPlot's data types}
+\chapter{Programming: Pyxplot's data types}
 \label{chap:progDataTypes}
 
-This chapter describes PyXPlot's data types such as lists, dictionaries,
+This chapter describes Pyxplot's data types such as lists, dictionaries,
 vectors, matrices and file handles.  In each case, we illustrate how each data
-type interfaces with PyXPlot's graph plotting and vector graphics environment.
+type interfaces with Pyxplot's graph plotting and vector graphics environment.
 
 \section{Strings}
 \label{sec:stringvars}
@@ -86,11 +86,11 @@ with the character {\tt r}, which turns off all escape codes:
 \hline
 \end{tabular}
 \end{center}
-\caption{A complete list of PyXPlot's string escape sequences. These are a subset of those available in C.}
+\caption{A complete list of Pyxplot's string escape sequences. These are a subset of those available in C.}
 \label{tab:escape_sequences2}
 \end{table}
 
-Once defined, a string variable can be used anywhere in PyXPlot where a quoted
+Once defined, a string variable can be used anywhere in Pyxplot where a quoted
 string could have been used, for example in the {\tt set title} command:
 
 \begin{verbatim}
@@ -183,20 +183,20 @@ to be substituted, as happens in C's {\tt printf} command:
 
 \subsection{String methods}
 
-All objects in PyXPlot have {\tt methods}, which may be called, as in most object-orientated programming languages, by following the name of the object to be acted upon by a dot:
+All objects in Pyxplot have {\tt methods}, which may be called, as in most object-orientated programming languages, by following the name of the object to be acted upon by a dot:
 
 \begin{verbatim}
 print "hello".upper()
 print "hello".methods()
 \end{verbatim}
 
-\noindent All objects in PyXPlot have a method called {\tt methods()}, which returns a list of the names of all of that objects methods. Methods are like functions in that printing them returns brief documentation about them:
+\noindent All objects in Pyxplot have a method called {\tt methods()}, which returns a list of the names of all of that objects methods. Methods are like functions in that printing them returns brief documentation about them:
 
 \vspace{3mm}
 \input{fragments/tex/prog_methods.tex}
 \vspace{3mm}
 
-\noindent Descriptions of all of the methods of string objects can be found in Section~\ref{sec:string_methods}; in addition, a list of the methods that are common to all PyXPlot objects can be found in Section~\ref{sec:common_methods}.
+\noindent Descriptions of all of the methods of string objects can be found in Section~\ref{sec:string_methods}; in addition, a list of the methods that are common to all Pyxplot objects can be found in Section~\ref{sec:common_methods}.
 
 The following simple examples demonstrate the use of some of them:
 
@@ -227,7 +227,7 @@ the string variable {\tt twister} is replaced with the letters {\tt th}:
 \vspace{3mm}
 
 Note that only the {\tt s} (substitute) command of {\tt sed} is implemented in
-PyXPlot. Any character can be used in place of the {\tt /} characters in the
+Pyxplot. Any character can be used in place of the {\tt /} characters in the
 above example, for example:
 
 \begin{verbatim}
@@ -265,7 +265,7 @@ recognised by the =$\sim$ operator.
 
 \section{Lists}
 
-List objects hold ordered sequencies of other PyXPlot objects, which may
+List objects hold ordered sequencies of other Pyxplot objects, which may
 include lists and dictionaries to create hierarchical data structures. They are
 created by enclosing a comma-separated list of objects by square brackets:
 
@@ -293,7 +293,7 @@ methods is returned if the method object is printed:
 
 Most methods that operate on lists, for example, append, extend and sort
 operations, return the list as their output. Unless this is stored in a
-variable, PyXPlot prints this return value to the terminal. In some cases this
+variable, Pyxplot prints this return value to the terminal. In some cases this
 is useful: in the example above, it allowed us to see how the list was changing
 when we called its {\tt append()} and {\tt insert()} methods. Often, however,
 this terminal spam is unwanted. The \indcmdt{call} allows methods to be called
@@ -334,7 +334,7 @@ converted into a vector. See~\ref{sec:vectors} for more information.
 
 \section{Colors}
 
-Most of PyXPlot's graph plotting and vector graphics commands have settings for
+Most of Pyxplot's graph plotting and vector graphics commands have settings for
 specifying colors. A selection of widely-used colors may be specified by name,
 for example {\tt red} and {\tt blue}. However, greater freedom in choice of
 color is available by passing these commands objects of type {\tt color}.
@@ -348,7 +348,7 @@ Several functions are available for making color objects:
 \item {\tt hsb(h,s,b)} returns a color with the specified coordinates in hue--saturation--brightness color space, which should be in the range 0--1.
 \end{itemize}
 
-\noindent In addition, color objects corresponding to all of PyXPlot's built-in
+\noindent In addition, color objects corresponding to all of Pyxplot's built-in
 named colors can be found in the {\tt colors} module.
 
 \begin{verbatim}
@@ -387,7 +387,7 @@ Section~\ref{sec:colormaps}.
 \section{File handles}
 
 File handles provide a means of reading data directly from text files in
-PyXPlot scripts, or of writing data to files. Files are opened using the {\tt
+Pyxplot scripts, or of writing data to files. Files are opened using the {\tt
 open()} function:
 
 \vspace{2mm}

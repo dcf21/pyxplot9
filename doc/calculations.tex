@@ -1,36 +1,36 @@
 % calculations.tex
 %
-% The documentation in this file is part of PyXPlot <http://www.pyxplot.org.uk>
+% The documentation in this file is part of Pyxplot <http://www.pyxplot.org.uk>
 %
 % Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
 %               2008-2012 Ross Church
 %
 % $Id$
 %
-% PyXPlot is free software; you can redistribute it and/or modify it under the
+% Pyxplot is free software; you can redistribute it and/or modify it under the
 % terms of the GNU General Public License as published by the Free Software
 % Foundation; either version 2 of the License, or (at your option) any later
 % version.
 %
 % You should have received a copy of the GNU General Public License along with
-% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 % Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 % ----------------------------------------------------------------------------
 
-% LaTeX source for the PyXPlot Users' Guide
+% LaTeX source for the Pyxplot Users' Guide
 
 \chapter{Performing calculations}
 
-The previous chapter described how PyXPlot can be used to plot data directly
+The previous chapter described how Pyxplot can be used to plot data directly
 from \datafile s onto graphs. Often, however, calculations need to be performed
 on data before they are plotted. This chapter describes the mathematical
-environment which PyXPlot provides for performing calculations either upon
+environment which Pyxplot provides for performing calculations either upon
 single numerical values or upon whole datasets.  For simplicity, most of the
 examples in this chapter will act upon single numerical values, displaying the
-results using the {\tt print} command, thus using PyXPlot essentially as a
+results using the {\tt print} command, thus using Pyxplot essentially as a
 desktop calculator. In subsequent chapters, more examples will be given of the
-use of PyXPlot's mathematical environment to analyse whole datasets and produce
+use of Pyxplot's mathematical environment to analyse whole datasets and produce
 plots.
 
 \section{Variables}
@@ -61,11 +61,11 @@ myDict = {'john':27 , 'fred':14, 'lisa':myList}
 myDate = time.fromCalendar(2012,7,1,14,30,0)
 \end{verbatim}
 
-\noindent More information about PyXPlot's data types can be found in Chapter~\ref{chap:progDataTypes}.
+\noindent More information about Pyxplot's data types can be found in Chapter~\ref{chap:progDataTypes}.
 
 A list of all of the variables which are currently defined can be obtained by
 typing {\tt show variables}\indcmd{show variables}. By default, a long
-list is returned, as some constants are pre-defined by PyXPlot. In
+list is returned, as some constants are pre-defined by Pyxplot. In
 Section~\ref{sec:stringvars}, we will see that variables can also be set to
 hold string values -- i.e.\ to hold pieces of text -- and that such variables
 can have great power in allowing the user to auto-generate titles and labels
@@ -92,7 +92,7 @@ definted in modules. For example, the speed of light is defined in the module
 \vspace{3mm}
 
 Most of the pre-defined physical constants, such as this one, make use of
-PyXPlot's native ability to keep track of the physical units of quantities and
+Pyxplot's native ability to keep track of the physical units of quantities and
 to convert them between different unit systems -- for example, between inches
 and centimetres.  This will be explained in more detail in
 Section~\ref{sec:units}.
@@ -112,7 +112,7 @@ phy
 
 \section{Functions} \label{sec:functions}
 
-Many standard functions are pre-defined within PyXPlot's
+Many standard functions are pre-defined within Pyxplot's
 mathematical environment, ranging from trigonometric functions to
 specialised functions such as the phase of the Moon on any given day or the
 size of the Universe in the $\Uplambda_\mathrm{CDM}$ cosmological model. As with constants, common functions
@@ -138,7 +138,7 @@ the function object, for example:
 \input{fragments/tex/calc_log.tex}
 \vspace{3mm}
 
-\noindent All, of PyXPlot's built-in constants, functions and modules are
+\noindent All, of Pyxplot's built-in constants, functions and modules are
 contained in the module {\tt defaults}, which can also be printed to view its
 contents:
 
@@ -172,7 +172,7 @@ f =
 Where the logic required to define a particular function is greater than can be
 contained in a single algebraic expression, a subroutine should be used (see
 Section~\ref{sec:subroutines}); these allow an arbitrary numbers of lines of
-PyXPlot code to be executed whenever a function is evaluated.
+Pyxplot code to be executed whenever a function is evaluated.
 
 \subsection{Spliced functions} \index{function splicing} \index{splicing
 functions}
@@ -224,7 +224,7 @@ Where functions have been spliced together, the {\tt show functions} command
 will show all of the definitions of the spliced function, together with the
 regions of parameter space in which they are used. This is indicated using the
 same syntax that is used for defining spliced functions, such that the output can
-be stored and pasted into a future PyXPlot session to redefine exactly the same
+be stored and pasted into a future Pyxplot session to redefine exactly the same
 spliced function.
 
 When a function takes more than one argument, multiple ranges can be specified,
@@ -269,7 +269,7 @@ right-hand string exerts a force. When $x>l$, the converse is true: only the
 left-hand string exerts a force. The case $|x|>2l$ is not possible, as the bead
 would have to penetrate the hard walls. It is left as an exercise for the
 reader to use Hooke's Law to derive the following expression, but in summary,
-the force on the bead can be defined in PyXPlot as:
+the force on the bead can be defined in Pyxplot as:
 \nlscf
 \input{examples/tex/ex_funcsplice2_1.tex}
 \nlscf
@@ -362,7 +362,7 @@ set numeric errors explicit
 \index{complex numbers}
 
 In all of the examples given thus far, algebraic expressions have only been
-allowed to return real numbers: PyXPlot has not been handling any complex
+allowed to return real numbers: Pyxplot has not been handling any complex
 numbers. Since there are many circumstances in which the data being analysed
 may be known for certain to be real, complex arithmetic is disabled by default.
 Expressions such as {\tt sqrt(-1)} will return either an error or {\tt NaN}.
@@ -388,7 +388,7 @@ set numeric complex
 set numeric real
 \end{verbatim}
 
-\noindent Once complex arithmetic is enabled, many of PyXPlot's built-in
+\noindent Once complex arithmetic is enabled, many of Pyxplot's built-in
 mathematical functions accept complex input arguments, including the logarithm
 function, all of the trigonometric functions, and the exponential function.  A
 complete list of functions which accept complex inputs can be found in
@@ -432,13 +432,13 @@ these functions:
 \label{sec:units}
 \index{physical units}\index{units}
 
-PyXPlot has extensive facilities for handling data with a range of physical
+Pyxplot has extensive facilities for handling data with a range of physical
 units. These features make it a powerful desktop tool for converting
 measurements between different systems of units -- for example, between
 imperial and metric units -- and for doing simple back-of-the-envelope
 calculations.
 
-All numerical variables in PyXPlot have not only a magnitude, but also a
+All numerical variables in Pyxplot have not only a magnitude, but also a
 physical unit associated with them. In the case of a pure number such as~2, the
 quantity is said to be dimensionless. The special function \indfunt{unit()} is
 used to specify the physical unit associated with a quantity. For example, the
@@ -476,7 +476,7 @@ passed a string of units either multiplied together with the {\tt *} operator,
 or divided using the {\tt /} operator. Units may be raised to powers with the
 {\tt **} operator\footnote{The {\tt \^{}} character may be used as an alias for
 the {\tt **} operator, though this notation is arguably confusing, since the
-same character is used for the binary exclusive or operator in PyXPlot's normal
+same character is used for the binary exclusive or operator in Pyxplot's normal
 arithmetic.}, as in the example:
 
 \vspace{3mm}
@@ -485,7 +485,7 @@ arithmetic.}, as in the example:
 
 \noindent As these examples also demonstrate, units may be referred to by either
 their abbreviated or full names, and each of these may be used in either their
-singular or plural forms.  A complete list of all of the units which PyXPlot
+singular or plural forms.  A complete list of all of the units which Pyxplot
 recognises by default, together with all of their recognised names can be found
 in Appendix~\ref{ch:unit_list}.
 
@@ -499,7 +499,7 @@ a = 2*unit(micrometres)
 \end{verbatim}
 
 When quantities with physical units are substituted into algebraic expressions,
-PyXPlot automatically checks that the expression is dimensionally correct
+Pyxplot automatically checks that the expression is dimensionally correct
 before evaluating it. For example, the following expression is not
 dimensionally correct and would return an error because the first term in the
 sum has dimensions of velocity, whereas the second term is a length:
@@ -511,21 +511,21 @@ b = 4*unit(s)\newline
 print a/b + a
 \end{dontdo}
 
-\noindent PyXPlot continues to throw an error in this case, even when explicit
+\noindent Pyxplot continues to throw an error in this case, even when explicit
 numerical errors are turned off with the \indcmdt{set numeric errors quiet},
 since it is deemed a serious error: the above expression would never be correct
 for any values of {\tt a} and {\tt b} given their dimensions.
 
-A large number of units are pre-defined in PyXPlot by default, a complete list
+A large number of units are pre-defined in Pyxplot by default, a complete list
 of which can be found in Appendix~\ref{ch:unit_list}.  However, the need may
 occasionally arise to define new units. It is not possible to do this from an
-interactive PyXPlot terminal, but it is possible to do so from a configuration
-script which PyXPlot runs upon start-up. Such configuration scripts will be
+interactive Pyxplot terminal, but it is possible to do so from a configuration
+script which Pyxplot runs upon start-up. Such configuration scripts will be
 discussed in Chapter~\ref{ch:configuration}. New units may either be derived
 from existing SI units, alternative measures of existing quantities, or
 entirely new base units such as numbers of CPU cycles or man-hours of labour.
 
-\subsection{Treatment of angles in PyXPlot}
+\subsection{Treatment of angles in Pyxplot}
 \label{sec:angles}
 \index{units!angle}\index{angles, handling of}
 
@@ -551,7 +551,7 @@ fluxes per steradian are measured per unit angle or per unit solid angle, and
 the SI system traditionally\footnote{Radians are sometimes treated in the SI
 system as {\it supplementary} or derived units.} offers no way to dimensionally
 distinguish these from one another or from quantities with no angular
-dependence.  In addition, many of PyXPlot's vector graphics commands take
+dependence.  In addition, many of Pyxplot's vector graphics commands take
 rotation angles as inputs, and it is useful to express these in units of angle.
 
 In most cases, the user is free to decide whether angles should have units. All
@@ -583,7 +583,7 @@ angle.
 \subsection{Converting between different temperature scales}
 \index{temperature conversions}\index{units!temperature}
 
-PyXPlot's facilities for converting quantities between different physical units
+Pyxplot's facilities for converting quantities between different physical units
 include the ability to convert temperatures between different temperature
 scales, for example, between $^\circ\mathrm{C}$, $^\circ\mathrm{F}$ and K.
 However, these conversions have some subtleties, unique to temperature
@@ -605,7 +605,7 @@ units other than temperatures is that there exists such a thing as absolute
 temperature. Distances, for example, are very rarely absolute: they measure
 relative distance gaps between points. Occasionally people might choose to
 express all their displacements relative to a particular origin, but they
-wouldn't expect PyXPlot to be able to convert these into displacements from
+wouldn't expect Pyxplot to be able to convert these into displacements from
 another origin. But they might expect it to be able to convert temperatures
 between Celsius and Fahrenheit, even though the problem of doing so is
 equivalent.
@@ -614,10 +614,10 @@ Times are occasionally expressed as absolute quantities: the year
 {\footnotesize AD}\,1453, for example, implicitly corresponds to a period of
 1453 years after the Christian epoch, and so similar problems would arise in
 trying to convert such a year into the Muslim calendar, which counts from the
-year {\footnotesize AD}\,622.\footnote{PyXPlot can, incidentally, make this
+year {\footnotesize AD}\,622.\footnote{Pyxplot can, incidentally, make this
 conversion, as will be seen in Section~\ref{sec:time_series}.}
 
-As PyXPlot cannot distinguish between absolute and relative temperatures, it
+As Pyxplot cannot distinguish between absolute and relative temperatures, it
 takes a safe approach of performing algebra consistently with any unit of
 temperature, never performing automatic conversions between different
 temperature scales. A calculation based on temperatures measured in
@@ -639,7 +639,7 @@ print 98*unit(oF / oC)
 \end{dontdo}
 
 Note that such a conversion always assumes that the temperatures supplied are
-{\it absolute} temperatures. PyXPlot has no facility for converting relative
+{\it absolute} temperatures. Pyxplot has no facility for converting relative
 temperatures between different scales. This must be done manually.
 
 The conversion of derived units of temperature, such as $\mathrm{J}/\mathrm{K}$ or
@@ -653,7 +653,7 @@ The moral of this story is: pick what unit of temperature you want to work in,
 convert all of your temperatures to that scale, and then stick to it.
 
 \example{ex:temperature}{Creating a simple temperature conversion scale}{
-In this example, we use PyXPlot's automatic conversion of physical units to
+In this example, we use Pyxplot's automatic conversion of physical units to
 create a temperature conversion scale.
 \nlscf
 \input{examples/tex/ex_tempscale_1.tex}
@@ -668,7 +668,7 @@ create a temperature conversion scale.
 
 \subsection{Units}
 
-Before quantities which are not dimensionless are displayed, PyXPlot searches
+Before quantities which are not dimensionless are displayed, Pyxplot searches
 through its database of physical units looking for the most appropriate unit,
 or combination of units, in which to represent them.  By default, SI units, or
 combinations of SI units, are chosen for preference, and SI prefixes such as
@@ -690,7 +690,7 @@ changed using the \indcmdt{set unit scheme}:
 \input{fragments/tex/calc_numdisp.tex}
 \vspace{3mm}
 
-\noindent A complete list of PyXPlot's unit schemes can be found in
+\noindent A complete list of Pyxplot's unit schemes can be found in
 Table~\ref{tab:unit_schemes}.\index{natural units}\index{units!natural}
 
 \begin{table}
@@ -708,7 +708,7 @@ Table~\ref{tab:unit_schemes}.\index{natural units}\index{units!natural}
 \hline
 \end{tabular}
 \end{center}
-\caption{A list of PyXPlot's unit schemes.}
+\caption{A list of Pyxplot's unit schemes.}
 \label{tab:unit_schemes}
 \end{table}
 
@@ -729,7 +729,7 @@ set unit of length parsec
 
 An astronomer wishing to express masses in Pluto masses would need to first
 define the Pluto mass as a user-defined unit, since it is not pre-defined unit
-within PyXPlot. In Chapter~\ref{ch:configuration}, we shall see how to define
+within Pyxplot. In Chapter~\ref{ch:configuration}, we shall see how to define
 new units in a configuration script. Having done so, the following syntax would
 be allowed:
 \begin{verbatim}
@@ -749,7 +749,7 @@ set unit preferred N*m
 The latter two examples are particularly useful when working with spectral
 densities (powers per unit frequency) or torques (forces multiplied by
 distances). Unfortunately, both of these units are dimensionally equal to
-energies, and so are displayed by PyXPlot in Joules by default. The above
+energies, and so are displayed by Pyxplot in Joules by default. The above
 statement overrides such behaviour. Having set a particular unit to be
 preferred, this can be unset as in the following example:
 \begin{verbatim}
@@ -780,7 +780,7 @@ By default, when numbers are displayed, they are printed accurate to eight
 significant figures, although fewer figures may actually be displayed if the
 final digits are zeros or nines.
 
-This is generally a helpful convention: PyXPlot's internal arithmetic is
+This is generally a helpful convention: Pyxplot's internal arithmetic is
 generally accurate to around 16 significant figures, and so it is quite
 conceivable that a calculation which is supposed to return, say $1$, may in
 fact return 0.999\,999\,999\,999\,999\,9. Likewise, when complex arithmetic is
@@ -812,7 +812,7 @@ displayed on a one-by-one basis, as in the examples:
 \subsection{Creating pastable text}
 \label{sec:pastable}
 
-PyXPlot's default convention of displaying numbers in a format such as
+Pyxplot's default convention of displaying numbers in a format such as
 
 \begin{verbatim}
 (2+3i) metres
@@ -820,7 +820,7 @@ PyXPlot's default convention of displaying numbers in a format such as
 
 \noindent is well-suited for creating text which is readable by human users, but
 is less well-suited for creating text which can be copied and pasted into
-another calculation in another PyXPlot terminal, or for creating text which
+another calculation in another Pyxplot terminal, or for creating text which
 could be used in a \LaTeX\ text label on a plot. For this reason, the
 \indcmdt{set numerics display} allows the user to choose between three
 different ways in which numbers can be displayed:
@@ -829,9 +829,9 @@ different ways in which numbers can be displayed:
 \input{fragments/tex/calc_numtype.tex}
 \vspace{3mm}
 
-The first case is the default way in which PyXPlot displays numbers. The second
+The first case is the default way in which Pyxplot displays numbers. The second
 case produces text which forms a valid algebraic expression which could be
-pasted into another PyXPlot calculation. The final case produces a string of
+pasted into another Pyxplot calculation. The final case produces a string of
 \LaTeX\ text which could be used as a label on a plot.
 
 \section{Numerical integration and differentiation}
@@ -860,7 +860,7 @@ by the numerical value $x$ of the dummy variable at the point where the
 expression is to be differentiated. This value may have any physical
 dimensions, and may be a complex number if complex arithmetic is enabled. The
 final, optional, parameter to the {\tt diff\_dx()} function is an approximate
-step size, which indicates the range of argument values over which PyXPlot
+step size, which indicates the range of argument values over which Pyxplot
 should take samples to determine the gradient. If no value is supplied, a value
 of $10^{-6}x$ is used, replaced by $10^{-6}$ if $x=0$.  The following example
 would evaluate the differential of the function $\cos(x)$ with respect to $x$
@@ -870,7 +870,7 @@ at $x=1.0$:
 print diff\_dx('cos(x)', 1.0)
 \end{dodo}
 
-When complex arithmetic is enabled, PyXPlot checks that the function being
+When complex arithmetic is enabled, Pyxplot checks that the function being
 differentiated satisfies the Cauchy-Riemann equations, and returns an error if
 it does not, to indicate that it is not differentiable.  The following is an
 example of a function which is not differentiable, and which throws an error
@@ -885,7 +885,7 @@ Advanced users may be interested to know that \indfunt{int\_dx()} function is
 implemented using the {\tt gsl\_\-integration\_\-qags()} function of the Gnu
 Scientific Library\index{GSL} (GSL), and the \indfunt{diff\_dx()} function is
 implemented using the {\tt gsl\_\-deriv\_\-central()} function of the same library.
-Any caveats which apply to the use of these routines also apply to PyXPlot's
+Any caveats which apply to the use of these routines also apply to Pyxplot's
 numerical calculus.
 
 \example{ex:calculus}{Integrating the function $\mathrm{sinc}(x)$}{
@@ -893,7 +893,7 @@ The function $\mathrm{sinc}(x)$ cannot be integrated analytically, but it can be
 \begin{displaymath}
 \int_0^{\pm\infty} \mathrm{sinc}(x)\,\mathrm{d}x = \pm\pi/2 .
 \end{displaymath}
-In the following script, we use PyXPlot's facilities for numerical integration to produce a plot of
+In the following script, we use Pyxplot's facilities for numerical integration to produce a plot of
 \begin{displaymath}
 y=\int_0^{x} \mathrm{sinc}(x)\,\mathrm{d}x .
 \end{displaymath}
@@ -959,7 +959,7 @@ solve x=y via x
 The \indcmdt{solve} works by minimising the squares of the residuals of all of the
 equations supplied, and so even when no exact solution can be found, the best
 compromise is returned. The following example has no solution -- a system of
-three equations with two variables is over-constrained -- but PyXPlot
+three equations with two variables is over-constrained -- but Pyxplot
 nonetheless finds a compromise solution:
 
 \vspace{3mm}
@@ -1003,7 +1003,7 @@ agree with common sense.
 
 These commands can often find solutions to equations when these solutions are
 either very large or very small, but they usually work best when the solution
-they are looking for is roughly of order unity.  PyXPlot does have mechanisms
+they are looking for is roughly of order unity.  Pyxplot does have mechanisms
 which attempt to correct cases where the supplied initial guess turns out to be
 many orders of magnitude different from the true solution, but it cannot be
 guaranteed not to wildly overshoot and produce unexpected results in such
@@ -1022,7 +1022,7 @@ The visible surface of the Sun has a temperature of approximately
 $5800\,\mathrm{K}$ and radiates in such a fashion. In this example, we use the
 {\tt solve}, {\tt minimize} and {\tt maximize} commands to locate the frequency
 of light at which it emits the most energy per unit frequency interval.  This
-task is simplified as PyXPlot has a system-defined mathematical function {\tt
+task is simplified as Pyxplot has a system-defined mathematical function {\tt
 Bv(nu,T)} which evaluates the expression given above.
 \nlnp
 Below, a plot is shown of the Planck Law for $T=5800\,\mathrm{K}$ to aid in
@@ -1047,7 +1047,7 @@ This can be done as follows:
 \nlscf
 \input{fragments/tex/calc_min3.tex}
 \nlnp
-Finally, this maximum could also be found using PyXPlot's built-in function {\tt Bvmax(T)}:\vspace{2mm}\newline
+Finally, this maximum could also be found using Pyxplot's built-in function {\tt Bvmax(T)}:\vspace{2mm}\newline
 \input{fragments/tex/calc_min4.tex}
 }
 
@@ -1070,7 +1070,7 @@ Calendar. The time of day is represented as the fractional part of the Julian
 Day number. For example, midnight on 1st~January 2000 (Gregorian calendar) was
 JD~$2451544.5$, and noon on the same day was JD~$2451545.0$.
 
-PyXPlot provides a range of pre-defined functions, all prefixed {\tt time\_}
+Pyxplot provides a range of pre-defined functions, all prefixed {\tt time\_}
 for converting between calendar dates and Julian Day numbers. The function {\tt
 time\_julianday()}\indfun{time\_\-julianday({\it year},\-{\it month},\-{\it
 day},\-{\it hour},\-{\it min},\-{\it sec})} is used to convert from a calendar
@@ -1291,13 +1291,13 @@ Token & Substitution value \\
 \vspace{3mm}
 
 \example{ex:timeseries}{A plot of the rate of downloads from an Apache webserver}{
-In this example, we use PyXPlot's facilities for handling dates and times to
+In this example, we use Pyxplot's facilities for handling dates and times to
 produce a plot of the rate of downloads from an Apache webserver based upon the
 download log which it stores in the file {\tt /var/log/apache2/access.log}.
 This file contain a line of the following form for each page or file requested
 from the webserver:
 \vspace{3mm}\newline\noindent{\tt\footnotesize 127.0.0.1 - - [14/Jun/2012:16:43:18 +0100] "GET / HTTP/1.1" 200 484 "-" "Mozilla/5.0 (X11; Linux x86\_64) AppleWebKit/535.19 (KHTML, like Gecko) Ubuntu/12.04 Chromium/18.0.1025.151 Chrome/18.0.1025.151 Safari/535.19"}\vspace{3mm}\newline
-However, PyXPlot's default input filter for {\tt .log} files (see Section~\ref{sec:filters}) manipulates the dates in strings such as these into the form
+However, Pyxplot's default input filter for {\tt .log} files (see Section~\ref{sec:filters}) manipulates the dates in strings such as these into the form
 \vspace{3mm}\newline\noindent{\tt\footnotesize 127.0.0.1 - -~~[~14~~6~~2012~16~43~18~+0100~]~~"GET~~~HTTP 1.1" 200 484 "-" "Mozilla/5.0 (X11; Linux x86\_64) AppleWebKit/535.19 (KHTML, like Gecko) Ubuntu/12.04 Chromium/18.0.1025.151 Chrome/18.0.1025.151 Safari/535.19"}\vspace{3mm}\newline
 such that the day, month, year, hour, minute and second components of the date
 are contained in the 5th to 10th white-space-separated columns respectively.
@@ -1322,7 +1322,7 @@ placed along the axis every quarter day, i.e.\ every six hours.
 \input{examples/tex/ex_apachelog_2.tex}
 \nlscf
 The plot below shows the graph which results on a moderately busy webserver
-which hosts, among many other sites, the PyXPlot website:
+which hosts, among many other sites, the Pyxplot website:
 \nlscf
 \centerline{\includegraphics[width=\textwidth]{examples/eps/ex_apachelog}}
 }

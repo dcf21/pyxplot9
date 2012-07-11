@@ -1,6 +1,6 @@
 // parserInit.c
 //
-// The code in this file is part of PyXPlot
+// The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,13 +8,13 @@
 //
 // $Id$
 //
-// PyXPlot is free software; you can redistribute it and/or modify it under the
+// Pyxplot is free software; you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation; either version 2 of the License, or (at your option) any later
 // version.
 //
 // You should have received a copy of the GNU General Public License along with
-// PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+// Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 // Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 // ----------------------------------------------------------------------------
@@ -102,7 +102,7 @@ static void ppl_parserRollBack(pplerr_context *c, parserNode **stk, int *i, int 
     if (varNameStart > -1)
      {
       stk[(*i)-1]->varName = (char *)malloc((varNameEnd-varNameStart+1)*sizeof(char));
-      if (stk[(*i)-1]->varName == NULL) { ppl_fatal(c,__FILE__,__LINE__,"Out of memory whilst setting up PyXPlot's command line parser."); exit(1); }
+      if (stk[(*i)-1]->varName == NULL) { ppl_fatal(c,__FILE__,__LINE__,"Out of memory whilst setting up Pyxplot's command line parser."); exit(1); }
       strncpy( stk[(*i)-1]->varName , cmdText+varNameStart , varNameEnd-varNameStart );
       stk[(*i)-1]->varName[varNameEnd - varNameStart] = '\0';
      }
@@ -188,14 +188,14 @@ int ppl_parserInit(ppl_context *c)
         inPos++;
         if (defnStack[stackPos-1]->type != PN_TYPE_SEQ) ppl_parserStartNode(e, defnStack, &stackPos, PN_TYPE_SEQ); // Match words have to go in sequences, not, e.g. "ora" structures
 
-        if ((newNode = (parserNode *)malloc(sizeof(parserNode)))==NULL) { ppl_fatal(e,__FILE__,__LINE__,"Out of memory whilst setting up PyXPlot's command line parser."); exit(1); }
+        if ((newNode = (parserNode *)malloc(sizeof(parserNode)))==NULL) { ppl_fatal(e,__FILE__,__LINE__,"Out of memory whilst setting up Pyxplot's command line parser."); exit(1); }
         newNode->type = PN_TYPE_ITEM;
         newNode->firstChild  = newNode->nextSibling = NULL;
 
         strStart = inPos;
         while ((ppl_cmdList[inPos]>' ')&&(ppl_cmdList[inPos]!='@')) inPos++; // FFW over match string
         newNode->matchString = (char *)malloc((inPos-strStart+1)*sizeof(char));
-        if (newNode->matchString == NULL) { ppl_fatal(e,__FILE__,__LINE__,"Out of memory whilst setting up PyXPlot's command line parser."); exit(1); }
+        if (newNode->matchString == NULL) { ppl_fatal(e,__FILE__,__LINE__,"Out of memory whilst setting up Pyxplot's command line parser."); exit(1); }
         strncpy( newNode->matchString , ppl_cmdList+strStart , inPos-strStart );
         newNode->matchString[inPos - strStart] = '\0';
         if (strcmp(newNode->matchString, "DATABLOCK")==0) newNode->type = PN_TYPE_DATABLK;
@@ -205,7 +205,7 @@ int ppl_parserInit(ppl_context *c)
         strStart = inPos;
         while ((ppl_cmdList[inPos]>' ')&&(ppl_cmdList[inPos]!='@')) inPos++; // FFW over variable name
         newNode->varName = (char *)malloc((inPos-strStart+1)*sizeof(char));
-        if (newNode->varName == NULL) { ppl_fatal(e,__FILE__,__LINE__,"Out of memory whilst setting up PyXPlot's command line parser."); exit(1); }
+        if (newNode->varName == NULL) { ppl_fatal(e,__FILE__,__LINE__,"Out of memory whilst setting up Pyxplot's command line parser."); exit(1); }
         strncpy( newNode->varName , ppl_cmdList+strStart , inPos-strStart );
         newNode->varName[inPos - strStart] = '\0';
         if (ppl_cmdList[inPos++]!='@') { sprintf(e->tempErrStr, "Syntax error: expecting @ after @matchstr@varname..."); ppl_fatal(e,__FILE__,__LINE__, NULL); }
@@ -219,7 +219,7 @@ int ppl_parserInit(ppl_context *c)
         else
          {
           newNode->outString = (char *)malloc((inPos-strStart+1)*sizeof(char));
-          if (newNode->outString == NULL) { ppl_fatal(e,__FILE__,__LINE__,"Out of memory whilst setting up PyXPlot's command line parser."); exit(1); }
+          if (newNode->outString == NULL) { ppl_fatal(e,__FILE__,__LINE__,"Out of memory whilst setting up Pyxplot's command line parser."); exit(1); }
           strncpy( newNode->outString , ppl_cmdList+strStart , inPos-strStart );
           newNode->outString[inPos - strStart] = '\0';
          }
@@ -242,7 +242,7 @@ int ppl_parserInit(ppl_context *c)
       else if (ppl_cmdList[inPos]=='=')
        {
         parserNode *newNode, **target;
-        if ((newNode = (parserNode *)calloc(1,sizeof(parserNode)))==NULL) { ppl_fatal(e,__FILE__,__LINE__,"Out of memory whilst setting up PyXPlot's command line parser."); exit(1); }
+        if ((newNode = (parserNode *)calloc(1,sizeof(parserNode)))==NULL) { ppl_fatal(e,__FILE__,__LINE__,"Out of memory whilst setting up Pyxplot's command line parser."); exit(1); }
         newNode->type = PN_TYPE_CONFIRM;
         target = &(defnStack[stackPos-1]->firstChild); // Pointer to where first child of parent is linked
         while (*target != NULL) target = &((*target)->nextSibling); // If not first child of parent, traverse linked list to end

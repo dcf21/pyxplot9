@@ -1,6 +1,6 @@
 # parser_data.dat
 #
-# The code in this file is part of PyXPlot
+# The code in this file is part of Pyxplot
 # <http://www.pyxplot.org.uk>
 #
 # Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,13 +8,13 @@
 #
 # $Id$
 #
-# PyXPlot is free software; you can redistribute it and/or modify it under the
+# Pyxplot is free software; you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation; either version 2 of the License, or (at your option) any later
 # version.
 #
 # You should have received a copy of the GNU General Public License along with
-# PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+# Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 # ----------------------------------------------------------------------------
@@ -50,7 +50,7 @@
 # CODEBLOCK              Match a { }-enclosed block of code
 # DATABLOCK              Match one datablock for every filename of '--'
 
-# List of commands recognised by PyXPlot
+# List of commands recognised by Pyxplot
 
 { < let@3 > = } [ %v:varname ]:varnames. < =~@n:directive:var_set = s@n %r:regex | =@n:directive:var_set = { %o:value } >
 [ %v:function_name ]:function_names. (@n [ %v:argument_name ]:0argument_list, )@n [ [@n { { < %u:min | *@n:minauto > } < :@n | to@n > { < %u:max | *@n:maxauto > } } ]@n ]:0range_list =@n:directive:func_set = { %E:definition }

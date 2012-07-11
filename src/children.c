@@ -1,6 +1,6 @@
 // children.c
 //
-// The code in this file is part of PyXPlot
+// The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,13 +8,13 @@
 //
 // $Id$
 //
-// PyXPlot is free software; you can redistribute it and/or modify it under the
+// Pyxplot is free software; you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation; either version 2 of the License, or (at your option) any later
 // version.
 //
 // You should have received a copy of the GNU General Public License along with
-// PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+// Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 // Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 // ----------------------------------------------------------------------------
@@ -40,7 +40,7 @@
 
 #include "children.h"
 
-// Pipes for communication between the main PyXPlot process and the CSP
+// Pipes for communication between the main Pyxplot process and the CSP
 
 int PipeCSP2MAIN[2]={0,0};
 int PipeMAIN2CSP[2]={0,0};
@@ -55,13 +55,13 @@ static ppl_context *static_context;
 
 #define PTABLE_LISTLEN 4096
 
-static int  *GhostViews;                    // A list of X11_multiwindow and X11_singlewindow sessions which we kill on PyXPlot exit
+static int  *GhostViews;                    // A list of X11_multiwindow and X11_singlewindow sessions which we kill on Pyxplot exit
 static int  *GhostView_Persists;            // A list of X11_persist sessions for which we leave our temporary directory until they quit
-static int  *HelperPIDs;                    // A list of helper processes forked by the main PyXPlot process
+static int  *HelperPIDs;                    // A list of helper processes forked by the main Pyxplot process
 static int   GhostView_pid = 0;             // pid of any running gv process launched under X11_singlewindow
-static int   PyXPlotRunning = 1;            // Flag which we drop in the CSP when the main process stops running
+static int   PyxplotRunning = 1;            // Flag which we drop in the CSP when the main process stops running
 
-// Functions to be called from main PyXPlot process
+// Functions to be called from main Pyxplot process
 
 void  pplcsp_init(ppl_context *context)
  {
@@ -182,16 +182,16 @@ void  pplcsp_main(ppl_context *context)
    {
     struct timespec waitperiod, waitedperiod;
     waitperiod.tv_sec  = 0;
-    waitperiod.tv_nsec = PyXPlotRunning ? 100000000 : 1000000000; // After pyxplot has quit, reduce polling rate to once a second. Why not?
+    waitperiod.tv_nsec = PyxplotRunning ? 100000000 : 1000000000; // After pyxplot has quit, reduce polling rate to once a second. Why not?
     nanosleep(&waitperiod,&waitedperiod); // Wake up every 100ms
-    pplcsp_checkForNewCommands(context); // Check for orders from PyXPlot
-    if (PyXPlotRunning && (getppid()==1)) // We've been orphaned and adopted by init
+    pplcsp_checkForNewCommands(context); // Check for orders from Pyxplot
+    if (PyxplotRunning && (getppid()==1)) // We've been orphaned and adopted by init
      {
-      PyXPlotRunning=0;
+      PyxplotRunning=0;
       if (DEBUG) ppl_log(&context->errcontext,"CSP has detected that it has been orphaned.");
      }
     gotPersists=0;
-    if (PyXPlotRunning)   gotPersists=1;
+    if (PyxplotRunning)   gotPersists=1;
     else                { int i; for (i=0; i<PTABLE_LISTLEN; i++) if (GhostView_Persists[i]!=0) { gotPersists=1; break; } }
    }
   return;
@@ -272,11 +272,11 @@ void pplcsp_processCommand(ppl_context *context, char *in)
     if (DEBUG) ppl_log(&context->errcontext,"Received request to clear display.");
     pplcsp_killLatestSinglewindow(context);
    }
-  else if (in[0]=='B')                                 // PyXPlot quit
+  else if (in[0]=='B')                                 // Pyxplot quit
    {
-    if (DEBUG) ppl_log(&context->errcontext,"Received notice that PyXPlot is quitting.");
+    if (DEBUG) ppl_log(&context->errcontext,"Received notice that Pyxplot is quitting.");
     pplcsp_killAllGvs(context);
-    PyXPlotRunning=0;
+    PyxplotRunning=0;
    }
   else if (in[0]=='0')                                // gv_singlewindow
    {
@@ -416,7 +416,7 @@ void pplcsp_killLatestSinglewindow(ppl_context *context)
   return;
  }
 
-// Facilities for forking helper processes with pipes from the main PyXPlot process
+// Facilities for forking helper processes with pipes from the main Pyxplot process
 
 void pplcsp_checkForHelperExits(int signo)
  {

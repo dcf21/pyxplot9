@@ -1,6 +1,6 @@
 // unitsDisp.c
 //
-// The code in this file is part of PyXPlot
+// The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,13 +8,13 @@
 //
 // $Id$
 //
-// PyXPlot is free software; you can redistribute it and/or modify it under the
+// Pyxplot is free software; you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation; either version 2 of the License, or (at your option) any later
 // version.
 //
 // You should have received a copy of the GNU General Public License along with
-// PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+// Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 // Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 // ----------------------------------------------------------------------------
@@ -46,6 +46,95 @@ const char *SIprefixes_abbrev[] = {"y","z","a","f","p","n","u","m","","k","M","G
 const char *SIprefixes_latex [] = {"y","z","a","f","p","n","\\upmu ","m","","k","M","G","T","P","E","Z","Y"};
 
 // NB: The LaTeX upmu character is defined by the {upgreek} package
+
+// Display a value with units and format string
+char *ppl_unitsNumericDisplayWithFormat(ppl_context *c, pplObj *in, int N, char *formatString, char formatChar, int maxLen, int requiredArgs, int arg1i, int arg2i)
+ {
+  double numberOutReal, numberOutImag;
+  char  *output, *unitstr;
+  int    i=0, done=0, intArg=0;
+  if (N==0) output = c->udNumDispA;
+  else      output = c->udNumDispB;
+
+  if ((c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && (in->flagComplex!=0))
+   {
+    strcpy(output, "nan");
+    return output;
+   }
+
+  unitstr = ppl_printUnit(c, in, &numberOutReal, &numberOutImag, N, 1, 0);
+
+  if      ((formatChar=='d') || (formatChar=='i') || (formatChar=='o'))
+   {
+    if      ((numberOutReal>INT_MAX)||(numberOutImag>INT_MAX)) { strcpy(output+i,  "inf"); done=1; }
+    else if ((numberOutReal<INT_MIN)||(numberOutImag<INT_MIN)) { strcpy(output+i, "-inf"); done=1; }
+    intArg=1;
+   }
+  else if ((formatChar=='x') || (formatChar=='X'))
+   {
+    if      ((numberOutReal>UINT_MAX)||(numberOutImag>UINT_MAX)) { strcpy(output+i,  "inf"); done=1; }
+    else if ((numberOutReal<0       )||(numberOutImag<0       )) { strcpy(output+i, "-inf"); done=1; }
+    intArg=2;
+   }
+
+  if (done)
+   {
+    i+=strlen(output+i);
+   }
+  else if (((c->set->term_current.ComplexNumbers == SW_ONOFF_OFF) && (in->flagComplex!=0)) || (!gsl_finite(numberOutReal)) || (!gsl_finite(numberOutImag)))
+   {
+    strcpy(output+i, "nan");
+    i+=strlen(output+i);
+   }
+  else
+   {
+    if (in->flagComplex) output[i++] = '('; // open brackets on complex number
+
+#define PRINTFORM(X) \
+   { \
+    if (intArg==0) \
+     { \
+      if (requiredArgs==1) snprintf(output+i, maxLen-i-4, formatString, X); /* Print a double (real part) */ \
+      if (requiredArgs==2) snprintf(output+i, maxLen-i-4, formatString, arg1i, X); \
+      if (requiredArgs==3) snprintf(output+i, maxLen-i-4, formatString, arg1i, arg2i, X); \
+     } \
+    else if (intArg==1) \
+     { \
+      int xi = (int)X; \
+      if (requiredArgs==1) snprintf(output+i, maxLen-i-4, formatString, xi); /* Print an integer */ \
+      if (requiredArgs==2) snprintf(output+i, maxLen-i-4, formatString, arg1i, xi); \
+      if (requiredArgs==3) snprintf(output+i, maxLen-i-4, formatString, arg1i, arg2i, xi); \
+     } \
+    else if (intArg==2) \
+     { \
+      unsigned int xi = (unsigned int)X; \
+      if (requiredArgs==1) snprintf(output+i, maxLen-i-4, formatString, xi); /* Print an unsigned integer */ \
+      if (requiredArgs==2) snprintf(output+i, maxLen-i-4, formatString, arg1i, xi); \
+      if (requiredArgs==3) snprintf(output+i, maxLen-i-4, formatString, arg1i, arg2i, xi); \
+     } \
+   }
+
+    PRINTFORM(numberOutReal);
+    i+=strlen(output+i);
+    if (in->flagComplex)
+     {
+      output[i++] = '+';
+      PRINTFORM(numberOutImag);
+      i+=strlen(output+i);
+      output[i++] = 'i';
+      output[i++] = ')'; // close brackets on complex number
+     }
+   }
+
+  if (unitstr[0]!='\0')
+   {
+    snprintf(output+i, maxLen-i, " %s", unitstr);
+    i+=strlen(output+i); // Add unit string as required
+   }
+
+  output[i++] = '\0'; // null terminate string
+  return output;
+ }
 
 // Display a value with units
 char *ppl_unitsNumericDisplay(ppl_context *c, pplObj *in, int N, int typeable, int NSigFigs)

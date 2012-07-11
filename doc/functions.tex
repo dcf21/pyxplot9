@@ -1,6 +1,6 @@
 % functions.tex
 %
-% The documentation in this file is part of PyXPlot
+% The documentation in this file is part of Pyxplot
 % <http://www.pyxplot.org.uk>
 %
 % Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,28 +8,28 @@
 %
 % $Id$
 %
-% PyXPlot is free software; you can redistribute it and/or modify it under the
+% Pyxplot is free software; you can redistribute it and/or modify it under the
 % terms of the GNU General Public License as published by the Free Software
 % Foundation; either version 2 of the License, or (at your option) any later
 % version.
 %
 % You should have received a copy of the GNU General Public License along with
-% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 % Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 % ----------------------------------------------------------------------------
 
-% LaTeX source for the PyXPlot Users' Guide
+% LaTeX source for the Pyxplot Users' Guide
 
 \chapter{List of in-built functions}
 \label{ch:function_list}
 
 The following is a complete list of the default functions which are built into
-PyXPlot. Except where stated otherwise, functions may be assumed to expect
+Pyxplot. Except where stated otherwise, functions may be assumed to expect
 numerical arguments. Where arguments are represented by the letter $x$, they
 must usually be real numbers. Where arguments are represented by the letter
 $z$, they are usually permitted to be complex numbers.  Functions which are
-defined within PyXPlot's default modules, but which are not in its default
+defined within Pyxplot's default modules, but which are not in its default
 namespace, are listed in subsections below.
 
 \funcdef{abs($z$)}{returns the absolute magnitude of $z$, where $z$ may be any general complex number. The output shares the physical dimensions of $z$, if any.}
@@ -175,7 +175,7 @@ The \texttt{ast} module contains specialist functions for astronomy and cosmolog
 
 \subsection{The \texttt{colors} module}
 
-The \texttt{colors} module contains color objects representing all of PyXPlot's default colors. It also contains the following functions:
+The \texttt{colors} module contains color objects representing all of Pyxplot's default colors. It also contains the following functions:
 
 \funcdef{colors.spectrum($spec,norm$)}{returns a color representation of the spectrum $spec$, normalised to brightness $norm$. $spec$ should be a function object that takes a single input (wavelength) with units of length, and may return an output with arbitrary units.}
 \funcdef{colors.wavelength($\lambda$,$norm$)}{returns a color representation of monochromatic light at wavelength $\lambda$, normalised to brightness $norm$. A value of $norm=1$ is recommended for plotting the complete span of the electromagnetic spectrum without colors clipping to white.}
@@ -212,23 +212,23 @@ To raise an exception with one of these types, the {\tt raise} function should b
 
 \funcdef{os.chdir($x$)}{changes working directory to $x$, which should be a string.}
 \funcdef{os.getcwd()}{returns the path of the current working directory.}
-\funcdef{os.getegid()}{returns the effective group id of the PyXPlot process.}
-\funcdef{os.geteuid()}{returns the effective user id of the PyXPlot process.}
-\funcdef{os.getgid()}{returns the group id of the PyXPlot process.}
+\funcdef{os.getegid()}{returns the effective group id of the Pyxplot process.}
+\funcdef{os.geteuid()}{returns the effective user id of the Pyxplot process.}
+\funcdef{os.getgid()}{returns the group id of the Pyxplot process.}
 \funcdef{os.gethomedir()}{returns the path of the user's home directory.}
 \funcdef{os.gethostname()}{returns the system's host name.}
 \funcdef{os.getlogin()}{returns the system login of the user.}
-\funcdef{os.getpgrp()}{returns the process group id of the PyXPlot process.}
-\funcdef{os.getpid()}{returns the process id of the PyXPlot process.}
-\funcdef{os.getppid()}{returns the parent process id of the PyXPlot process.}
+\funcdef{os.getpgrp()}{returns the process group id of the Pyxplot process.}
+\funcdef{os.getpid()}{returns the process id of the Pyxplot process.}
+\funcdef{os.getppid()}{returns the parent process id of the Pyxplot process.}
 \funcdef{os.getrealname()}{returns the user's real name.}
-\funcdef{os.getuid()}{returns the user id of the PyXPlot process.}
+\funcdef{os.getuid()}{returns the user id of the Pyxplot process.}
 \funcdef{os.glob($x$)}{returns a list of files which match the supplied wildcard $x$, which should be a string.}
 \funcdef{os.popen($x$,[$y$])}{opens a pipe to the command $x$ with string access mode $y$, and returns a file handle object.}
 \funcdef{os.stat($x$)}{returns a dictionary of information about the file x, which should be a string filename.}
-\funcdef{os.stderr}{is a file handle for the PyXPlot process's \texttt{stderr} stream.}
-\funcdef{os.stdin}{is a file handle for the PyXPlot process's \texttt{stdin} stream.}
-\funcdef{os.stdout}{is a file handle for the PyXPlot process's \texttt{stdout} stream.}
+\funcdef{os.stderr}{is a file handle for the Pyxplot process's \texttt{stderr} stream.}
+\funcdef{os.stdin}{is a file handle for the Pyxplot process's \texttt{stdin} stream.}
+\funcdef{os.stdout}{is a file handle for the Pyxplot process's \texttt{stdout} stream.}
 \funcdef{os.system($x$)}{executes a command in a subshell.}
 \funcdef{os.tmpfile()}{returns a file handle for a temporary file.}
 \funcdef{os.uname()}{returns a dictionary of information about the operating system.}
@@ -356,7 +356,7 @@ The #1 prototype takes any of the following combinations of arguments:
 
 }
 
-The \texttt{types} module contains prototype objects for each of PyXPlot's data types. Each may be called like a function to create a new object of the specified type:
+The \texttt{types} module contains prototype objects for each of Pyxplot's data types. Each may be called like a function to create a new object of the specified type:
 
 
 \protdef{types.boolean(...)}{{\bf none} -- returns false. \item {\bf any object} -- returns false for zero, an empty string, a null object, or an empty data structure. Otherwise returns true.}

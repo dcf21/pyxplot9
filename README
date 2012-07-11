@@ -1,18 +1,17 @@
- ____       __  ______  _       _      PYXPLOT
-|  _ \ _   _\ \/ /  _ \| | ___ | |_    Version 0.9.0
-| |_) | | | |\  /| |_) | |/ _ \| __|   01/08/2012
-|  __/| |_| |/  \|  __/| | (_) | |_
-|_|    \__, /_/\_\_|   |_|\___/ \__|   Copyright (C) 2006-2012 Dominic Ford
-       |___/                                         2008-2012 Ross Church
+                        _       _      PYXPLOT
+ _ __  _   ___  ___ __ | | ___ | |_    Version 0.9.0
+| '_ \| | | \ \/ / '_ \| |/ _ \| __|   01/08/2012
+| |_) | |_| |>  <| |_) | | (_) | |_ 
+| .__/ \__, /_/\_\ .__/|_|\___/ \__|   Copyright (C) 2006-2012 Dominic Ford
+|_|    |___/     |_|                                 2008-2012 Ross Church
 
-Send comments, bug reports, feature requests and coffee supplies to:
-<coders@pyxplot.org.uk>
+For documentation and more information, see <http://www.pyxplot.org.uk>.
 
 -----
 
 1. INTRODUCTION
 
-PyXPlot is a multi-purpose scientific scripting language, graph plotting tool,
+Pyxplot is a multi-purpose scientific scripting language, graph plotting tool,
 vector graphics suite, and data processing package.  Its interface is designed
 so that common tasks -- e.g., plotting labelled graphs of data -- should be
 accessible via short, simple and intuitive commands. At the same time, these
@@ -23,10 +22,10 @@ reports, talks or academic journals.
 A scientific scripting language
 -------------------------------
 
-PyXPlot has all the features of a scripting language: string manipulation, 
+Pyxplot has all the features of a scripting language: string manipulation, 
 modules and classes. Numbers have physical units, and calculations
 automatically return results in appropriate units. Datafiles can
-straightforwardly be converted between physical units. PyXPlot natively handles
+straightforwardly be converted between physical units. Pyxplot natively handles
 dictionaries, lists, dates and file handles. It also supports vector and matrix
 algebra, can integrate or differentiate expressions, and numerically solve 
 systems of equations.
@@ -36,26 +35,26 @@ A vector graphics suite
 
 The graphical canvas isn't just for plotting graphs. Circles, polygons and 
 ellipses can be drawn using simple commands. Colors are a native type of object
-for easy customisation. For the mathematically minded, PyXPlot's canvas
+for easy customisation. For the mathematically minded, Pyxplot's canvas
 interfaces cleanly to its vector math environment, making geometric
 construction easy.
 
 A data processing package
 -------------------------
 
-PyXPlot can interpolate data, find best fit lines, and compile histograms. It
+Pyxplot can interpolate data, find best fit lines, and compile histograms. It
 can Fourier transform data, calculate statistics, and output results to new
 datafiles. Where fine control is needed, custom code can be used to process
 every data point in a file.
 
 
-Examples of the graphical output produced by PyXPlot can be found on the
-PyXPlot website: <http://www.pyxplot.org.uk/>.
+Examples of the graphical output produced by Pyxplot can be found on the
+Pyxplot website: <http://www.pyxplot.org.uk/>.
 
 
 2. SYSTEM REQUIREMENTS
 
-PyXPlot works on most UNIX-like operating systems. We have tested it under
+Pyxplot works on most UNIX-like operating systems. We have tested it under
 Linux, Solaris and MacOS X, and believe that it should work on other similar
 POSIX systems. We regret that it is not available for Microsoft Windows, and
 have no plans for porting it at this time.
@@ -75,18 +74,18 @@ It requires that the following software packages (not included) be installed:
 It is also strongly recommended that the following software packages be
 installed:
 
-- cfitsio -- required for PyXPlot to be able to plot datafiles in FITS format.
-- Ghostview (or ggv) -- required for PyXPlot to be able to display plots live
-  on the screen; PyXPlot remains able to generate image files on disk without
-  it. Alternatively, the set viewer within PyXPlot allows a different
+- cfitsio -- required for Pyxplot to be able to plot datafiles in FITS format.
+- Ghostview (or ggv) -- required for Pyxplot to be able to display plots live
+  on the screen; Pyxplot remains able to generate image files on disk without
+  it. Alternatively, the set viewer within Pyxplot allows a different
   postscript viewer to be used.
-- gunzip -- required for PyXPlot to be able to plot compressed datafiles in .gz
+- gunzip -- required for Pyxplot to be able to plot compressed datafiles in .gz
   format.
-- The Gnu Readline Library (version 5+) -- required for PyXPlot to be able to
-  provide tab completion and command histories in PyXPlot's interactive
+- The Gnu Readline Library (version 5+) -- required for Pyxplot to be able to
+  provide tab completion and command histories in Pyxplot's interactive
   command-line interface.
 - libkpathsea -- required to efficiently find the fonts used by LaTeX.
-- wget -- required for PyXPlot to be able to plot datafiles directly from the
+- wget -- required for Pyxplot to be able to plot datafiles directly from the
   Internet.
 
 Debian and Ubuntu users can find the above software in the following packages:
@@ -116,7 +115,7 @@ before running the configure script below.
 3. INSTALLATION FROM SOURCE ARCHIVE
 
 First, download the required archive can be downloaded from the front page of
-PyXPlot website -- <http://www.pyxplot.org.uk>. It is assumed that the packages
+Pyxplot website -- <http://www.pyxplot.org.uk>. It is assumed that the packages
 listed above have already been installed; if they are not, you will need to
 either install them yourself, if you have superuser access to your machine, or
 contact your system administrator.
@@ -131,24 +130,24 @@ cd pyxplot
 ./configure
 make
 
-* Finally, start PyXPlot:
+* Finally, start Pyxplot:
 
 ./bin/pyxplot
 
 
 3A. SYSTEM-WIDE INSTALLATION
 
-Having completed the steps described above, PyXPlot may be installed
+Having completed the steps described above, Pyxplot may be installed
 system-wide by a superuser with the following additional step:
 
 sudo make install
 
-By default, the PyXPlot executable installs to /usr/local/bin/pyxplot.  If
+By default, the Pyxplot executable installs to /usr/local/bin/pyxplot.  If
 desired, this installation path may be modified in the file Makefile.skel, by
 changing the variable USRDIR in the first line to an alternative desired
 installation location.
 
-PyXPlot may now be started by any system user, simply by typing:
+Pyxplot may now be started by any system user, simply by typing:
 
 pyxplot
 
@@ -157,7 +156,7 @@ pyxplot
 4. FURTHER INFORMATION
 
 Full documentation can be found in doc/pyxplot.tex , or in doc/pyxplot.pdf
-after installation. This document is alternatively available from the PyXPlot
+after installation. This document is alternatively available from the Pyxplot
 website: <http://www.pyxplot.org.uk/>.
 
 ----

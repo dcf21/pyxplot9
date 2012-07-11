@@ -1,6 +1,6 @@
 // bmp_jpegread.c
 //
-// The code in this file is part of PyXPlot
+// The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -10,18 +10,18 @@
 //
 // $Id$
 //
-// PyXPlot is free software; you can redistribute it and/or modify it under the
+// Pyxplot is free software; you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation; either version 2 of the License, or (at your option) any later
 // version.
 //
 // You should have received a copy of the GNU General Public License along with
-// PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+// Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 // Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 // ----------------------------------------------------------------------------
 
-// This file is edited from code which was kindly contributed to PyXPlot by
+// This file is edited from code which was kindly contributed to Pyxplot by
 // Michael Rutter. It reads in data from JPEG files without performing any
 // decompression, since the DCT-compressed data can be rewritten straight out
 // to postscript for decompression by the postscript rasterising engine.
@@ -156,7 +156,7 @@ void ppl_bmp_jpegread(pplerr_context *ec, FILE *jpeg, bitmap_data *image)
       if (DEBUG) ppl_log(ec, "Encoding: extended sequential, Huffman JPEG");
       break;
     case 0xc2:
-      ppl_error(ec, ERR_FILE, -1, -1, "JPEG image detected to have progressive encoding, which PyXPlot does not support. Please convert to baseline JPEG and try again.");
+      ppl_error(ec, ERR_FILE, -1, -1, "JPEG image detected to have progressive encoding, which Pyxplot does not support. Please convert to baseline JPEG and try again.");
       return;
     default:
       sprintf(ec->tempErrStr, "JPEG image detected to have unsupported compression type SOF%d. Please convert to baseline JPEG and try again.",((int)comp)&0xf);
@@ -164,7 +164,7 @@ void ppl_bmp_jpegread(pplerr_context *ec, FILE *jpeg, bitmap_data *image)
       return;
    }
 
-  if ((comps!=3) && (comps!=1)) { sprintf(ec->tempErrStr,"JPEG image contains %d colour components; PyXPlot only supports JPEG images with one (greyscale) or three (RGB) components", comps); ppl_error(ec, ERR_FILE, -1, -1, NULL); return; }
+  if ((comps!=3) && (comps!=1)) { sprintf(ec->tempErrStr,"JPEG image contains %d colour components; Pyxplot only supports JPEG images with one (greyscale) or three (RGB) components", comps); ppl_error(ec, ERR_FILE, -1, -1, NULL); return; }
 
   if (comps ==3 )
    {

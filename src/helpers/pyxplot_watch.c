@@ -1,6 +1,6 @@
 // pyxplot_watch.c
 //
-// The code in this file is part of PyXPlot
+// The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,13 +8,13 @@
 //
 // $Id$
 //
-// PyXPlot is free software; you can redistribute it and/or modify it under the
+// Pyxplot is free software; you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation; either version 2 of the License, or (at your option) any later
 // version.
 //
 // You should have received a copy of the GNU General Public License along with
-// PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+// Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 // Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 // ----------------------------------------------------------------------------
@@ -39,7 +39,7 @@
 
 int cancellationFlag=0;
 
-void RunPyXPlotOnFile(pplerr_context *context, char *fname)
+void RunPyxplotOnFile(pplerr_context *context, char *fname)
  {
   char         LineBuffer[LSTR_LENGTH];
   int          interactive, status;
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
   context->error_input_filename[0] = '\0';
   strcpy(context->error_source,"main     ");
 
-  if (DEBUG) ppl_log(context,"Initialising PyXPlot Watch.");
+  if (DEBUG) ppl_log(context,"Initialising Pyxplot Watch.");
   ppl_memAlloc_MemoryInit(context, &ppl_error, &ppl_log);
   StatInfodict = ppl_dictInit(1);
 
@@ -99,7 +99,7 @@ int main(int argc, char **argv)
   context->session_default.color_err= SW_TERMCOL_RED;
 
   // Make help and version strings
-  sprintf(version_string, "\nPyXPlot Watch %s\n", VERSION);
+  sprintf(version_string, "\nPyxplot Watch %s\n", VERSION);
 
   sprintf(help_string   , "%s\
 %s\n\
@@ -112,24 +112,22 @@ Usage: pyxplot_watch <options> <filelist>\n\
   -c, --color:     Use colored highlighting of output.\n\
   -m, --monochrome: Turn off colored highlighting.\n\
 \n\
-A brief introduction to PyXPlot can be obtained by typing 'man pyxplot'; the\n\
+A brief introduction to Pyxplot can be obtained by typing 'man pyxplot'; the\n\
 full Users' Guide can be found in the file:\n\
 %s%spyxplot.pdf\n\
 \n\
-For the latest information on PyXPlot development, see the project website:\n\
+For the latest information on Pyxplot development, see the project website:\n\
 <http://www.pyxplot.org.uk>\n", version_string, ppl_strUnderline(version_string, version_string_underline), DOCDIR, PATHLINK);
 
 sprintf(init_string, "\n\
- ____       __  ______  _       _      PYXPLOT WATCH\n\
-|  _ \\ _   _\\ \\/ /  _ \\| | ___ | |_    Version %s\n\
-| |_) | | | |\\  /| |_) | |/ _ \\| __|   %s\n\
-|  __/| |_| |/  \\|  __/| | (_) | |_ \n\
-|_|    \\__, /_/\\_\\_|   |_|\\___/ \\__|   Copyright (C) 2006-2012 Dominic Ford\n\
-       |___/                                         2008-2011 Ross Church\n\
-                                                     2010-2011 Zoltan Voros\n\
+                        _       _      PYXPLOT WATCH\n\
+ _ __  _   ___  ___ __ | | ___ | |_    Version %s\n\
+| '_ \\| | | \\ \\/ / '_ \\| |/ _ \\| __|   %s\n\
+| |_) | |_| |>  <| |_) | | (_) | |_\n\
+| .__/ \\__, /_/\\_\\ .__/|_|\\___/ \\__|   Copyright (C) 2006-2012 Dominic Ford\n\
+|_|    |___/     |_|                                 2008-2012 Ross Church\n\
 \n\
-Send comments, bug reports, feature requests and coffee supplies to:\n\
-<coders@pyxplot.org.uk>\n\
+For documentation and more information, see <http://www.pyxplot.org.uk>.\n\
 ", VERSION, DATE);
 
   // Scan command-line options for any switches
@@ -188,7 +186,7 @@ Send comments, bug reports, feature requests and coffee supplies to:\n\
   // Check that we have some filenames to watch
   if (!HaveFilenames)
    {
-    ppl_error(context,ERR_PREFORMED, -1, -1, "No filenames were supplied to watch. PyXPlot Watch's command-line syntax is:\n\npyxplot_watch [options] filename_list\n\nAs PyXPlot Watch has no work to do, it is exiting...");
+    ppl_error(context,ERR_PREFORMED, -1, -1, "No filenames were supplied to watch. Pyxplot Watch's command-line syntax is:\n\npyxplot_watch [options] filename_list\n\nAs Pyxplot Watch has no work to do, it is exiting...");
     exit(1);
    }
 
@@ -208,7 +206,7 @@ Send comments, bug reports, feature requests and coffee supplies to:\n\
         if ((StatInfoPtr != NULL) && (StatInfoPtr->st_mtime >= StatInfo.st_mtime)) continue; // This file has not been modified lately
         ppl_dictAppendCpy(StatInfodict, GlobData.gl_pathv[j], (void *)&StatInfo, sizeof(struct stat));
         DoneWork = 1;
-        RunPyXPlotOnFile(context, GlobData.gl_pathv[j]);
+        RunPyxplotOnFile(context, GlobData.gl_pathv[j]);
         waitperiod.tv_sec  = 0;
         waitperiod.tv_nsec = 100000000;
         nanosleep(&waitperiod,&waitedperiod);

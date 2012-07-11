@@ -1,6 +1,6 @@
 % terminals.tex
 %
-% The documentation in this file is part of PyXPlot
+% The documentation in this file is part of Pyxplot
 % <http://www.pyxplot.org.uk>
 %
 % Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,23 +8,23 @@
 %
 % $Id$
 %
-% PyXPlot is free software; you can redistribute it and/or modify it under the
+% Pyxplot is free software; you can redistribute it and/or modify it under the
 % terms of the GNU General Public License as published by the Free Software
 % Foundation; either version 2 of the License, or (at your option) any later
 % version.
 %
 % You should have received a copy of the GNU General Public License along with
-% PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+% Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 % Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 % ----------------------------------------------------------------------------
 
-% LaTeX source for the PyXPlot Users' Guide
+% LaTeX source for the Pyxplot Users' Guide
 
 \chapter{Producing image files}
 \label{ch:image_formats}
 
-PyXPlot is able to produce graphical output in a wide range of image formats,
+Pyxplot is able to produce graphical output in a wide range of image formats,
 including both vector graphic formats such as PostScript and scalable vector
 graphics ({\tt svg}), and rasterised formats such as bitmap ({\tt bmp}) and
 jpeg. Additionally, it can produce graphical output for immediate preview on
@@ -42,7 +42,7 @@ used, which may be any of the options listed in Table~\ref{tab:output_terminals}
 
 \begin{table}
 \centerline{\includegraphics[width=9cm]{examples/eps/ex_set_terminal}}
-\caption{A list of the properties of the graphical output formats supported by PyXPlot.}
+\caption{A list of the properties of the graphical output formats supported by Pyxplot.}
 \label{tab:output_terminals}
 \end{table}
 
@@ -51,7 +51,7 @@ used, which may be any of the options listed in Table~\ref{tab:output_terminals}
 
 Three output terminal produce immediate previews to the screen: {\tt
 X11\_\-single\-Window}, {\tt X11\_\-persist}, {\tt X11\_\-multi\-Window}.  The
-default of these options -- i.e.\ the default terminal when PyXPlot is started
+default of these options -- i.e.\ the default terminal when Pyxplot is started
 up in interactive mode -- is {\tt X11\_\-single\-Window}.  In this terminal,
 each time a new plot is generated, if the previous plot is still open on the
 display, the old plot is replaced with the new one. This way, only one plot
@@ -78,7 +78,7 @@ plot 'data2.dat'  <-- first plot window remains
 \end{verbatim}
 
 The third of these terminals, {\tt X11\_\-persist}, is similar to {\tt
-X11\_\-multi\-Window} but keeps plot windows open after PyXPlot terminates in
+X11\_\-multi\-Window} but keeps plot windows open after Pyxplot terminates in
 distinction from the above two terminals, which close all plot windows upon
 exit.
 
@@ -127,7 +127,7 @@ The following table lists the effects which each of these settings has:
 \begin{longtable}{p{3cm}p{9cm}}
 {\tt X11\_singleWindow} & Displays plots on the screen (in X11 windows, using \ghostview or other viewing application selected using the \indcmdt{set viewer}). Each time a new plot is generated, it replaces the old one, to prevent the desktop from becoming flooded with old plots.\footnote{The authors are aware of a bug, that this terminal can occasionally go blank when a new plot is generated. This is a known bug in \ghostview, and can be worked around by selecting File $\to$ Reload within the \ghostview\ window.} {\bf [default when running interactively; see below]}\\
 {\tt X11\_multiWindow} & As above, but each new plot appears in a new window, and the old plots remain visible. As many plots as may be desired can be left on the desktop simultaneously.\\
-{\tt X11\_persist} & As above, but plot windows remain open after PyXPlot closes.\\
+{\tt X11\_persist} & As above, but plot windows remain open after Pyxplot closes.\\
 {\tt bmp} & Sends output to a Windows bitmap ({\tt .bmp}) file. The filename for this file should be set using {\tt set output}. This is a bitmap graphics terminal. \index{bmp output}\\
 {\tt eps} & As above, but produces Encapsulated PostScript.\index{Encapsulated PostScript}\index{PostScript!Encapsulated}\\
 {\tt gif} & As above, but produces a gif image. This is a bitmap graphics terminal.\index{gif output}\\
@@ -156,13 +156,13 @@ The following table lists the effects which each of these settings has:
 \section{The default terminal}
 
 The default terminal is normally {\tt X11\_singleWindow}. There are two
-exceptions to this.  When PyXPlot is not called from within an X11
+exceptions to this.  When Pyxplot is not called from within an X11
 session\footnote{i.e.\ the environment variable {\tt DISPLAY} is not set.}, and
 it therefore cannot open graphical display windows, the default terminal
-changes to {\tt eps}.  When PyXPlot is used non-interactively -- i.e.\ one or
-more command scripts are specified on the command line, and PyXPlot exits as
+changes to {\tt eps}.  When Pyxplot is used non-interactively -- i.e.\ one or
+more command scripts are specified on the command line, and Pyxplot exits as
 soon as it finishes executing them -- the {\tt X11\_persist} terminal becomes
-default, since it does not close plot windows when PyXPlot exits.
+default, since it does not close plot windows when Pyxplot exits.
 
 \section{PostScript output}
 
@@ -198,7 +198,7 @@ Marcus}\index{paper sizes}
 
 By default, when graphical output is sent to a file -- i.e.\ a PostScript file
 or a bitmap image -- any pre-existing file is overwritten if its filename
-matches that of the file which PyXPlot generates. This behaviour may be changed
+matches that of the file which Pyxplot generates. This behaviour may be changed
 with the \indcmdt{set backup}, which has the syntax:
 
 \begin{verbatim}
@@ -212,7 +212,7 @@ When this switch is turned on, pre-existing files will be renamed with a tilde
 \section{Changing font}
 \index{font!changing}\index{sans-serif}
 
-The font used by PyXPlot can be changed using the \indcmdt{set preamble}.  In
+The font used by Pyxplot can be changed using the \indcmdt{set preamble}.  In
 latex, fonts are changed by adding a header to a document, and the \indcmdt{set
 preamble} specifies text that should be passed to latex before rendering any of
 the text labels on the present canvas.  For example, the following command

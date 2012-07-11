@@ -1,6 +1,6 @@
 // set.c
 //
-// The code in this file is part of PyXPlot
+// The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,13 +8,13 @@
 //
 // $Id$
 //
-// PyXPlot is free software; you can redistribute it and/or modify it under the
+// Pyxplot is free software; you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation; either version 2 of the License, or (at your option) any later
 // version.
 //
 // You should have received a copy of the GNU General Public License along with
-// PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+// Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 // Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 // ----------------------------------------------------------------------------
@@ -976,7 +976,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
     if (sl && (command[PARSE_set_logscale_base].objType==PPLOBJ_NUM))
      {
       b = (int)round(command[PARSE_set_logscale_base].real);
-      if ((b<2)||(b>1024)) { sprintf(c->errcontext.tempErrStr, "Attempt to use log axis with base %d. PyXPlot only supports bases in the range 2 - 1024. Defaulting to base 10.", b); ppl_warning(&c->errcontext, ERR_GENERIC, NULL); b=10; }
+      if ((b<2)||(b>1024)) { sprintf(c->errcontext.tempErrStr, "Attempt to use log axis with base %d. Pyxplot only supports bases in the range 2 - 1024. Defaulting to base 10.", b); ppl_warning(&c->errcontext, ERR_GENERIC, NULL); b=10; }
      }
 
     if (!setAll)
@@ -1205,7 +1205,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
      {
       int tempint = (int)round(command[PARSE_set_numerics_number_significant_figures].real);
       if (tempint <  1) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "Numbers cannot be displayed to fewer than one significant figure."); return; }
-      if (tempint > 30) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "It is not sensible to try to display numbers to more than 30 significant figures. Calculations in PyXPlot are only accurate to double precision."); return; }
+      if (tempint > 30) { ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "It is not sensible to try to display numbers to more than 30 significant figures. Calculations in Pyxplot are only accurate to double precision."); return; }
       c->set->term_current.SignificantFigures = tempint;
      }
 
@@ -2136,7 +2136,7 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
    }
   else
    {
-    sprintf(c->errcontext.tempErrStr, "PyXPlot's set command could not find handler for the set option <%s>.", setoption);
+    sprintf(c->errcontext.tempErrStr, "Pyxplot's set command could not find handler for the set option <%s>.", setoption);
     ppl_error(&c->errcontext, ERR_INTERNAL, -1, -1, NULL);
    }
 

@@ -1,6 +1,6 @@
 // canvasDraw.c
 //
-// The code in this file is part of PyXPlot
+// The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,13 +8,13 @@
 //
 // $Id$
 //
-// PyXPlot is free software; you can redistribute it and/or modify it under the
+// Pyxplot is free software; you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation; either version 2 of the License, or (at your option) any later
 // version.
 //
 // You should have received a copy of the GNU General Public License along with
-// PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+// Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 // Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 // ----------------------------------------------------------------------------
@@ -221,7 +221,7 @@ void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops, int iterDe
     if ((termtype==SW_TERMTYPE_X11S) || (termtype==SW_TERMTYPE_X11M) || (termtype==SW_TERMTYPE_X11P))
      {
       comm.title    = TitleTemp; // In X11 terminals, we give eps files numbered titles
-      sprintf(TitleTemp, "PyXPlot Output %ld", TempFile_counter);
+      sprintf(TitleTemp, "Pyxplot Output %ld", TempFile_counter);
      } else {
       comm.title = comm.FinalFilename; // In other terminals, we give eps files filename titles, with path cut off front
       for (i=0; comm.title[i]!='\0'; i++) if ((comm.title[i]==PATHLINK[0])&&((i==0)||(comm.title[i-1]!='\\'))) { comm.title += i; i=0; }
@@ -313,7 +313,7 @@ void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops, int iterDe
     EnvDisplay = getenv("DISPLAY"); // Check whether the environment variable DISPLAY is set
     if (c->set->term_current.viewer==SW_VIEWER_NULL)
      {
-      ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "An attempt is being made to use an X11 terminal for output, but the required package 'ghostview' could not be found when PyXPlot was installed. If you have recently install ghostview, please reconfigure and recompile PyXPlot.");
+      ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, "An attempt is being made to use an X11 terminal for output, but the required package 'ghostview' could not be found when Pyxplot was installed. If you have recently install ghostview, please reconfigure and recompile Pyxplot.");
      }
     else if ((EnvDisplay==NULL) || (EnvDisplay[0]=='\0'))
      {
@@ -325,7 +325,7 @@ void ppl_canvas_draw(ppl_context *c, unsigned char *unsuccessful_ops, int iterDe
        {
         if (termtype!=SW_TERMTYPE_X11P)
          {
-          sprintf(c->errcontext.tempErrStr, "An attempt is being made to use the %s terminal in a non-interactive PyXPlot session. This won't work, as the window will close as soon as PyXPlot exits. Reverting to the X11_persist terminal instead.", *(char **)ppl_fetchSettingName(&c->errcontext, termtype, SW_TERMTYPE_INT, (void *)SW_TERMTYPE_STR, sizeof(char *)));
+          sprintf(c->errcontext.tempErrStr, "An attempt is being made to use the %s terminal in a non-interactive Pyxplot session. This won't work, as the window will close as soon as Pyxplot exits. Reverting to the X11_persist terminal instead.", *(char **)ppl_fetchSettingName(&c->errcontext, termtype, SW_TERMTYPE_INT, (void *)SW_TERMTYPE_STR, sizeof(char *)));
           ppl_error(&c->errcontext, ERR_GENERIC, -1, -1, NULL);
          }
         CSPCommand = 2;
@@ -584,7 +584,7 @@ void canvas_CallLaTeX(EPSComm *x)
         for (ptr = ((canvas_itemlist *)x->c->canvas_items)->first; ((ptr!=NULL)&&(ptr->id!=SuspectTextItem->CanvasMultiplotID)); ptr = ptr->next);
         if (ptr!=NULL)
          {
-          sprintf(x->c->errcontext.tempErrStr, "\nInput PyXPlot command was:\n\n"); // Now tell the user what PyXPlot command produced the culprit
+          sprintf(x->c->errcontext.tempErrStr, "\nInput Pyxplot command was:\n\n"); // Now tell the user what Pyxplot command produced the culprit
           i  = strlen(x->c->errcontext.tempErrStr);
           ppl_canvas_item_textify(x->c, ptr, x->c->errcontext.tempErrStr+i);
           i += strlen(x->c->errcontext.tempErrStr+i);
@@ -681,7 +681,7 @@ void canvas_EPSWrite(EPSComm *x)
     fprintf(epsout, "%%%%BoundingBox: %d %d %d %d\n", (int)floor(margin_left), (int)floor(margin_bottom), (int)ceil(x->bb_right-x->bb_left+margin_left), (int)ceil(x->bb_top-x->bb_bottom+margin_bottom));
     fprintf(epsout, "%%%%HiResBoundingBox: %f %f %f %f\n", margin_left, margin_bottom, x->bb_right-x->bb_left+margin_left, x->bb_top-x->bb_bottom+margin_bottom);
    }
-  fprintf(epsout, "%%%%Creator: (PyXPlot %s)\n", VERSION);
+  fprintf(epsout, "%%%%Creator: (Pyxplot %s)\n", VERSION);
   fprintf(epsout, "%%%%Title: (%s)\n", x->title);
   fprintf(epsout, "%%%%CreationDate: (%s)\n", ppl_strStrip(ppl_friendlyTimestring(), x->c->errcontext.tempErrStr));
   if (x->c->set->term_current.TermType == SW_TERMTYPE_PS) fprintf(epsout, "%%%%Pages: 1\n");
@@ -739,7 +739,7 @@ void canvas_EPSWrite(EPSComm *x)
    }
   if (chdir(x->c->errcontext.session_default.cwd) < 0) { ppl_fatal(&x->c->errcontext, __FILE__,__LINE__,"chdir into cwd failed."); }
 
-  // Output macros which PyXPlot needs
+  // Output macros which Pyxplot needs
   if (x->c->set->term_current.TermType == SW_TERMTYPE_PS) fprintf(epsout, "%s", PS_PROLOG_TEXT);
   fprintf(epsout, "%s", EPS_PROLOG_TEXT);
   fprintf(epsout, "/ps { 1 } def\n/ps75 { ps .75 mul } def\n"); // Pointsize variables

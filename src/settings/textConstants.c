@@ -1,6 +1,6 @@
 // textConstants.c
 //
-// The code in this file is part of PyXPlot
+// The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,13 +8,13 @@
 //
 // $Id$
 //
-// PyXPlot is free software; you can redistribute it and/or modify it under the
+// Pyxplot is free software; you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation; either version 2 of the License, or (at your option) any later
 // version.
 //
 // You should have received a copy of the GNU General Public License along with
-// PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+// Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 // Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 // ----------------------------------------------------------------------------
@@ -44,7 +44,7 @@ char ppltxt_show               [LSTR_LENGTH];
 
 void ppltxt_init()
 {
-sprintf(ppltxt_version, "PyXPlot %s", VERSION);
+sprintf(ppltxt_version, "Pyxplot %s", VERSION);
 
 sprintf(ppltxt_help   , "%s\n\
 %s\n\
@@ -57,7 +57,7 @@ Usage: pyxplot <options> <filelist>\n\
   -c, --color:      Use colored highlighting of output.\n\
   -m, --monochrome: Turn off colored highlighting.\n\
 \n\
-A brief introduction to PyXPlot can be obtained by typing 'man pyxplot'; the\n\
+A brief introduction to Pyxplot can be obtained by typing 'man pyxplot'; the\n\
 full Users' Guide can be found in the file:\n\
 %s%spyxplot.pdf\n\
 \n\
@@ -65,12 +65,12 @@ Extensive documentation is also available at <http://www.pyxplot.org.uk>, which\
 also provides contact information for bug reports.\n", ppltxt_version, ppl_strUnderline(ppltxt_version, ppltxt_version_underline), DOCDIR, PATHLINK);
 
 sprintf(ppltxt_welcome, "\n\
- ____       __  ______  _       _      PYXPLOT\n\
-|  _ \\ _   _\\ \\/ /  _ \\| | ___ | |_    Version %s\n\
-| |_) | | | |\\  /| |_) | |/ _ \\| __|   %s\n\
-|  __/| |_| |/  \\|  __/| | (_) | |_ \n\
-|_|    \\__, /_/\\_\\_|   |_|\\___/ \\__|   Copyright (C) 2006-2012 Dominic Ford\n\
-       |___/                                         2008-2012 Ross Church\n\
+                        _       _      PYXPLOT\n\
+ _ __  _   ___  ___ __ | | ___ | |_    Version %s\n\
+| '_ \\| | | \\ \\/ / '_ \\| |/ _ \\| __|   %s\n\
+| |_) | |_| |>  <| |_) | | (_) | |_\n\
+| .__/ \\__, /_/\\_\\ .__/|_|\\___/ \\__|   Copyright (C) 2006-2012 Dominic Ford\n\
+|_|    |___/     |_|                                 2008-2012 Ross Church\n\
 \n\
 For documentation and more information, see <http://www.pyxplot.org.uk>.\n\
 ", VERSION, DATE);
@@ -99,12 +99,12 @@ sprintf(ppltxt_valid_set_options, "\n\
 ");
 
 sprintf(ppltxt_set_noword, "\n\
-Set options which PyXPlot recognises are: [] = choose one, <> = optional\n\
+Set options which Pyxplot recognises are: [] = choose one, <> = optional\n\
 %s\n\
 ", ppltxt_valid_set_options);
 
 sprintf(ppltxt_unset_noword, "\n\
-Unset options which PyXPlot recognises are: [] = choose one, <> = optional\n\
+Unset options which Pyxplot recognises are: [] = choose one, <> = optional\n\
 \n\
 'arrow', 'autoscale', 'axescolor', 'axis', 'axisunitstyle', 'backup', 'bar',\n\
 'binorigin', 'binwidth', 'boxfrom', 'boxwidth', 'c1format', 'c1label',\n\

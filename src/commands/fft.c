@@ -1,6 +1,6 @@
 // fft.c
 //
-// The code in this file is part of PyXPlot
+// The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
 // Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
@@ -8,13 +8,13 @@
 //
 // $Id$
 //
-// PyXPlot is free software; you can redistribute it and/or modify it under the
+// Pyxplot is free software; you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation; either version 2 of the License, or (at your option) any later
 // version.
 //
 // You should have received a copy of the GNU General Public License along with
-// PyXPlot; if not, write to the Free Software Foundation, Inc., 51 Franklin
+// Pyxplot; if not, write to the Free Software Foundation, Inc., 51 Franklin
 // Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 // ----------------------------------------------------------------------------
@@ -170,7 +170,7 @@ void ppl_directive_fft(ppl_context *c, parserLine *pl, parserOutput *in, int int
        step[nr]= stk[pos+o3].real;
        tempDbl = 1.0 + floor((max[nr]-min[nr]) / step[nr] + 0.5); // Add one because this is a fencepost problem
        if (tempDbl<2.0) { sprintf(c->errStat.errBuff, "The number of samples produced by the range and step size specified for dimension %d to the fft command is fewer than two; a single data sample cannot be FFTed.", nr+1); TBADD2(ERR_RANGE,in->stkCharPos[pos+PARSE_ifft_step_range_list]); return; }
-       if ((!gsl_finite(tempDbl)||(tempDbl>1e8))) { sprintf(c->errStat.errBuff, "The number of samples produced by the range and step size specified for dimension %d to the fft command is in excess of 1e8; PyXPlot is not the right tool to do this FFT in.", nr+1); TBADD2(ERR_RANGE,in->stkCharPos[pos+PARSE_ifft_step_range_list]); return; }
+       if ((!gsl_finite(tempDbl)||(tempDbl>1e8))) { sprintf(c->errStat.errBuff, "The number of samples produced by the range and step size specified for dimension %d to the fft command is in excess of 1e8; Pyxplot is not the right tool to do this FFT in.", nr+1); TBADD2(ERR_RANGE,in->stkCharPos[pos+PARSE_ifft_step_range_list]); return; }
        Nsteps[nr] = (int)tempDbl;
       }
      else
@@ -187,7 +187,7 @@ void ppl_directive_fft(ppl_context *c, parserLine *pl, parserOutput *in, int int
   {
   double tempDbl = 1.0;
   for (i=0; i<Ndims; i++) tempDbl *= Nsteps[i];
-  if (tempDbl > 1e8) { sprintf(c->errStat.errBuff, "The total number of samples in the requested %d-dimensional FFT is in excess of 1e8; PyXPlot is not the right tool to do this FFT in.", Ndims); TBADD2(ERR_NUMERICAL,0); return; }
+  if (tempDbl > 1e8) { sprintf(c->errStat.errBuff, "The total number of samples in the requested %d-dimensional FFT is in excess of 1e8; Pyxplot is not the right tool to do this FFT in.", Ndims); TBADD2(ERR_NUMERICAL,0); return; }
   Nsamples = (int)tempDbl;
   }
 
