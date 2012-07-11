@@ -1041,6 +1041,7 @@ int showMinor = 0;
       SHOW_DEHIGHLIGHT;
       for (ai=*al; ai!=NULL; ai=ai->next)
        {
+        if (i > outLen-1024) { sprintf(out+i, "...\n"); i+=strlen(out+i); break; }
         while ((ai_default != NULL) && (ai_default->id <= ai->id))
          {
           if (ai_default->id < ai->id)
@@ -1083,6 +1084,7 @@ int showMinor = 0;
       SHOW_DEHIGHLIGHT;
       for (li=*ll; li!=NULL; li=li->next)
        {
+        if (i > outLen-1024) { sprintf(out+i, "...\n"); i+=strlen(out+i); break; }
         while ((li_default != NULL) && (li_default->id <= li->id))
          {
           if (li_default->id < li->id)
@@ -1121,6 +1123,7 @@ int showMinor = 0;
     for (j=0; j<MAX_PLOTSTYLES; j++)
      {
       if (ppl_withWordsCmp_zero(c,&(c->set->plot_styles[j]))) continue;
+      if (i > outLen-1024) { sprintf(out+i, "...\n"); i+=strlen(out+i); break; }
       ppl_withWordsPrint(c,&(c->set->plot_styles[j]),buf);
       sprintf(buf2, "style %4d", j);
       ppl_directive_show3(c, out+i, itemSet, 0, interactive, buf2, buf, !ppl_withWordsCmp(c,&(c->set->plot_styles[j]),&(c->set->plot_styles_default[j])), buf2);
@@ -1148,10 +1151,11 @@ int showMinor = 0;
       while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
        {
         if ((item->objType==PPLOBJ_ZOM) || (item->objType==PPLOBJ_GLOB) || (item->objType==PPLOBJ_FUNC)) continue;
+        if (i > outLen-1024) { sprintf(out+i, "...\n"); i+=strlen(out+i); break; }
         SHOW_HIGHLIGHT((l==0));
         sprintf(out+i, "%s = ", key);
         i+=strlen(out+i);
-        pplObjPrint(c,item,key,out+i,outLen-i,0,1);
+        pplObjPrint(c,item,key,out+i,600,0,1);
         i+=strlen(out+i);
         sprintf(out+i, "\n");
         i+=strlen(out+i);
@@ -1172,8 +1176,9 @@ int showMinor = 0;
     while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
      {
       if (item->objType!=PPLOBJ_FUNC) continue;
+      if (i > outLen-1024) { sprintf(out+i, "...\n"); i+=strlen(out+i); break; }
       SHOW_HIGHLIGHT(1);
-      pplObjPrint(c,item,key,out+i,outLen-i,0,1);
+      pplObjPrint(c,item,key,out+i,600,0,1);
       i+=strlen(out+i);
       sprintf(out+i, "\n");
       i+=strlen(out+i);
@@ -1198,8 +1203,9 @@ int showMinor = 0;
       while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
        {
         if (item->objType!=PPLOBJ_FUNC) continue;
+        if (i > outLen-1024) { sprintf(out+i, "...\n"); i+=strlen(out+i); break; }
         SHOW_HIGHLIGHT(0);
-        pplObjPrint(c,item,key,out+i,outLen-i,0,1);
+        pplObjPrint(c,item,key,out+i,600,0,1);
         i+=strlen(out+i);
         sprintf(out+i, "\n");
         i+=strlen(out+i);
