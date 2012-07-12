@@ -123,15 +123,17 @@ int pplObjCmpQuiet(const void *a, const void *b)
  {
   const pplObj *pa = *(pplObj **)a;
   const pplObj *pb = *(pplObj **)b;
-  return pplObjCmp(NULL, pa, pb, NULL, NULL, NULL);
+  return pplObjCmp(NULL, pa, pb, NULL, NULL, NULL, 0);
  }
 
-int pplObjCmp(ppl_context *c, const pplObj *a, const pplObj *b, int *status, int *errType, char *errText)
+int pplObjCmp(ppl_context *c, const pplObj *a, const pplObj *b, int *status, int *errType, char *errText, int iterDepth)
  {
   int t1  = a->objType;
   int t2  = b->objType;
   int t1o = pplObjTypeOrder[t1];
   int t2o = pplObjTypeOrder[t2];
+  if (cancellationFlag) return 0;
+  if (iterDepth>250) return 0;
   if (t1o < t2o) return -1;
   if (t1o > t2o) return  1;
   if  (t1o==0) return -2; // 0 - nulls are never equal
@@ -226,7 +228,7 @@ int pplObjCmp(ppl_context *c, const pplObj *a, const pplObj *b, int *status, int
     lia = ppl_listIterateInit(la);
     lib = ppl_listIterateInit(lb);
     out = 0;
-    while ( ((oba=ppl_listIterate(&lia))!=NULL) && ((obb=ppl_listIterate(&lib))!=NULL) && ((out=pplObjCmpQuiet((void*)&oba,(void*)&obb))==0) );
+    while ( ((oba=ppl_listIterate(&lia))!=NULL) && ((obb=ppl_listIterate(&lib))!=NULL) && ((out=pplObjCmp(NULL,oba,obb,NULL,NULL,NULL,iterDepth+1))==0) );
     return out;
    }
   else if (t1o==8) // 8 - matrix
@@ -264,7 +266,7 @@ int pplObjCmp(ppl_context *c, const pplObj *a, const pplObj *b, int *status, int
     while ( ((oba=ppl_dictIterate(&dia,&keya))!=NULL) &&
             ((obb=ppl_dictIterate(&dib,&keyb))!=NULL) &&
             ((out=SGN(strcmp(keya,keyb)))==0) &&
-            ((out=pplObjCmpQuiet((void*)&oba,(void*)&obb))==0) );
+            ((out=pplObjCmp(NULL,oba,obb,NULL,NULL,NULL,iterDepth+1))==0) );
     return out;
    }
   else if ((t1o==12)||(t1o==13)) // 12 - function; 13 - file handle

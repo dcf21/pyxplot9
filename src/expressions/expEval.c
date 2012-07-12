@@ -557,7 +557,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
           case 0x55: // ==
           case 0x56: // !=
            {
-            int stat=0 , errType=-1 , cmp = pplObjCmp(context, stk-2, stk-1, &stat, &errType, context->errStat.errBuff);
+            int stat=0 , errType=-1 , cmp = pplObjCmp(context, stk-2, stk-1, &stat, &errType, context->errStat.errBuff, 0);
             if (stat) { TBADD(errType); goto cleanup_on_error; }
             if      (t==0x51) stat = (cmp == -1);
             else if (t==0x52) stat = (cmp == -1) || (cmp==0);
