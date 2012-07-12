@@ -1055,38 +1055,34 @@ Finally, this maximum could also be found using Pyxplot's built-in function {\tt
 \label{sec:time_series}
 
 Time-series data often need special consideration when intervals of days or
-months are spanned. Given a series of times and calendar dates, it is not
-straightforward to calculate the elapsed times between the datapoints since
-the non-uniform lengths of the months must be accounted for, as well as the
-occurrence of leap years. Similarly, given datapoints spread over a period of
-days from some start point, it may be desirable to label a time axis with
-calendar dates. But working out what calendar date comes $N$ days after some
-start point requires considerable effort.
+months are spanned. It is not straightforward to convert a series of calendar
+dates into elapsed times between the datapoints.  Months have non-uniform
+lengths of the months, and some years have an extra leap day.
 
-Astronomers usually get around such issues by expressing dates and times as
-Julian Day (JD) numbers\index{Julian Day numbers}, which count the number of
-days elapsed since noon on 1st~January 4713\,{\footnotesize BC} in the Julian
-Calendar. The time of day is represented as the fractional part of the Julian
-Day number. For example, midnight on 1st~January 2000 (Gregorian calendar) was
-JD~$2451544.5$, and noon on the same day was JD~$2451545.0$.
+To simplify the process of working with dates and times, Pyxplot has a {\tt
+date} object type.  Pyxplot provides a range of pre-defined functions, in the
+{\tt time} module, for creating and manipulating {\tt date} objects. The
+functions for creating {\tt date} objects are as follows:
 
-Pyxplot provides a range of pre-defined functions, all prefixed {\tt time\_}
-for converting between calendar dates and Julian Day numbers. The function {\tt
-time\_julianday()}\indfun{time\_\-julianday({\it year},\-{\it month},\-{\it
-day},\-{\it hour},\-{\it min},\-{\it sec})} is used to convert from a calendar
-date to a Julian Day number. It takes six inputs: the year, the month number
-(1--12), the day of the month (1--31), the hour of day (0--24), the number of
-minutes (0--59), and the number of seconds (0--59). To enter dates before
-{\footnotesize AD}\,1, a year of~$0$ should be passed to indicate
+\funcdef{time.fromCalendar($year,month,day,hour,min,sec$)}{creates a date
+object from the specified calendar date. It takes six inputs: the year, the
+month number (1--12), the day of the month (1--31), the hour of day (0--24),
+the number of minutes (0--59), and the number of seconds (0--59). To enter
+dates before {\footnotesize AD}\,1, a year of~$0$ should be passed to indicate
 1\,{\footnotesize BC}, $-1$ should be passed to indicate the year
-2\,{\footnotesize BC}, and so forth. The following example returns the Julian
-Day number at midnight on 1st~January 2000:
+2\,{\footnotesize BC}, and so forth. The \texttt{set calendar} command is used
+to change the current calendar.}
+\funcdef{time.fromJD($t$)}{creates a date object from the specified numerical Julian date.}
+\funcdef{time.fromMJD($t$)}{creates a date object from the specified numerical modified Julian date.}
+\funcdef{time.fromUnix($t$)}{creates a date object from the specified numerical Unix time.}
+
+The following example creates a date object representing midnight on 1st January 2000:
 
 \vspace{3mm}
 \input{fragments/tex/calc_date1.tex}
 \vspace{3mm}
 
-By default, the {\tt time\_julianday()} function makes a transition from the
+By default, the {\tt time.fromCalendar} function makes a transition from the
 Julian calendar to the Gregorian calendar at midnight on 14th~September 1752
 (Gregorian calendar), when Britain and the British Empire switched calendars.
 Thus, dates between 2nd~September and 14th~September 1752 are not valid input
@@ -1130,24 +1126,26 @@ used to convert dates between calendar dates and Julian Day numbers.}
 \label{tab:calendars}
 \end{table}
 
-Several functions are provided for converting dates back from Julian Day
-numbers to calendar dates. For producing string representations of calendar
-dates, the function {\tt time\_string()}\indfun{time\_\-string({\it JD},\-{\it
-format})} should be used, which takes two inputs, the second of which is
-optional. The first is the Julian Day number to be converted, and the second is
-a string which controls the format of the output.  If no format string is
-provided, then the format\vspace{3mm}\newline
-\noindent {\tt "\%a \%Y \%b \%d \%H:\%M:\%S"}\vspace{3mm}\newline
-\noindent is used.  Table~\ref{tab:time_string_subs} lists the tokens which are
-substituted for various parts of the date. The following examples demonstrate
-the use of the {\tt time\_string()} function for three dates:
+Once created, it is possible to add and subtract numeric objects from dates,
+as in the following example:
 
-\begin{table}
-\begin{center}
-\begin{tabular}{|>{\columncolor{LightGrey}}l|>{\columncolor{LightGrey}}l|}
+\vspace{3mm}
+\input{fragments/tex/calc_date3.tex}
+\vspace{3mm}
+
+As in these examples, standard string representations of calendar dates can be
+produced with the {\tt print} command.  It is also possible to use the string
+substitution operator, as in {\tt "\%s"\%(date)}, or the {\tt str} method of
+{\tt date} objects, as in {\tt date.str()}.
+
+In addition
+
+\funcdef{time.string($t,format$)}{returns a string representation of the specified date object $t$. The second input is optional, and may be used to control the format of the output. If no format string is provided, then the format \newline\noindent{\tt "\%a \%Y \%b \%d \%H:\%M:\%S"}\newline\noindent is used. In such format strings, the following tokens are substituted for various parts of the date:
+\begin{longtable}{|>{\columncolor{LightGrey}}l|>{\columncolor{LightGrey}}l|}
+\hline \endfoot
 \hline
-Token & Substitution value \\
-\hline
+Token & Value \\
+\hline \endhead
 {\tt \%\%} & A literal \% sign.\\
 {\tt \%a} & Three-letter abbreviated weekday name.\\
 {\tt \%A} & Full weekday name.\\
@@ -1165,48 +1163,34 @@ Token & Substitution value \\
 {\tt \%S} & Second, in range~00-59.\\
 {\tt \%y} & Last two digits of year number.\\
 {\tt \%Y} & Year number.\\
-\hline
-\end{tabular}
-\end{center}
-\caption{Tokens which are substituted for various components of the date by the {\tt time\_string} function.}
-\label{tab:time_string_subs}
-\end{table}
+\end{longtable}}
+
+
+Several functions are provided for converting {\tt date} objects back into various numerical forms of timekeeping and components of calendar dates:
+
+\methdef{toDayOfMonth()}{returns the day of the month of a date object in the current calendar.}
+\methdef{toDayWeekName()}{returns the name of the day of the week of a date object.}
+\methdef{toDayWeekNum()}{returns the day of the week (1--7) of a date object.}
+\methdef{toHour()}{returns the integer hour component (0--23) of a date object.}
+\methdef{toJD()}{converts a date object to a numerical Julian date.}
+\methdef{toMinute()}{returns the integer minute component (0--59) of a date object.}
+\methdef{toMJD()}{converts a date object to a modified Julian date.}
+\methdef{toMonthName()}{returns the name of the month in which a date object falls.}
+\methdef{toMonthNum()}{returns the number (1--12) of the month in which a date object falls.}
+\methdef{toSecond()}{returns the seconds component (0--60) of a date object, including the non-integer component.}
+\methdef{toUnix()}{converts a date object to a Unix time.}
+\methdef{toYear()}{returns the year in which a date object falls in the current calendar.}
+
+For example:
 
 \vspace{3mm}
 \input{fragments/tex/calc_date2.tex}
 \vspace{3mm}
 
-Several functions are provided for numerically returning the various parts of
-the calendar date associated with any given Julian Day number. All of these
-functions, with the exception of {\tt time\_\-dayweekname()} and {\tt
-time\_\-monthname()} take a single input, which should be a Julian Day number:
-
-\begin{itemize}
-\item {\tt time\_daymonth()}     -- returns the day of the calendar month.
-\indfun{time\_\-daymonth({\it JD})}
-\item {\tt time\_dayweekname()}  -- takes two arguments, the first of which should be a Julian Day number, and the second of which should be a number $l$ indicating the number of characters to return. Returns the name, truncated to $l$ characters, of the day of the week. If $l<1$, the full name is returned.
-\indfun{time\_\-dayweekname({\it JD})}
-\item {\tt time\_dayweeknum()}   -- returns the number (1=Monday--7=Sunday) of the day of the week.
-\indfun{time\_\-dayweeknum({\it JD})}
-\item {\tt time\_hour()}         -- returns the hour of the day.
-\indfun{time\_\-hour({\it JD})}
-\item {\tt time\_min()}          -- returns the minutes component of the time.
-\indfun{time\_\-min({\it JD})}
-\item {\tt time\_monthname()}    -- takes two arguments, the first of which should be a Julian Day number, and the second of which should be a number $l$ indicating the number of characters to return. Returns the name, truncated to $l$ characters, of the calendar month. If $l<1$, the full name is returned.
-\indfun{time\_\-monthname({\it JD})}
-\item {\tt time\_monthnum()}     -- returns the number (1-12) of the calendar month.
-\indfun{time\_\-monthnum({\it JD})}
-\item {\tt time\_sec()}          -- returns the seconds component of the time.
-\indfun{time\_\-sec({\it JD})}
-\item {\tt time\_year()}         -- returns the calendar year number.
-\indfun{time\_\-year({\it JD})}
-\end{itemize}
-
 Optionally, the \indcmdt{set calendar} can be used to set different calendars
-to use when reading calendar dates in and converting them to Julian Day
-numbers, and when converting Julian Day numbers to calendar dates. This is
-useful when converting data from one calendar to another. The syntax used to do
-this is as follows:
+to use when converting calendar dates into {\tt date} objects, and when
+converting in the opposite direction. This is useful when converting data from
+one calendar to another. The syntax used to do this is as follows:
 \begin{verbatim}
 set calendar in Julian      # only applies to time_julianday()
 set calendar out Gregorian  # does not apply to time_julianday()
@@ -1214,8 +1198,8 @@ set calendar in Julian out Gregorian      # change both
 show calendar               # show calendars currently being used
 \end{verbatim}
 
-Finally, the function {\tt time\_now()}\indfun{time\_\-now()}, which takes no
-arguments, returns the Julian Day number corresponding to the current system
+Finally, the function {\tt time.now()}\indfun{time.now()}, which takes no
+arguments, returns a {\tt date} object corresponding to the current system
 clock time, as in the following example:
 
 \vspace{3mm}

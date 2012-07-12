@@ -93,6 +93,7 @@ Objects of type \texttt{boolean} have no methods other than those common to all 
 \section{The \texttt{date} type}
 \label{sec:date_methods}
 
+\methdef{str(...)}{converts a date object to a string with an optional format string supplied as an argument (see the {\tt time.string()} function).}
 \methdef{toDayOfMonth()}{returns the day of the month of a date object in the current calendar.}
 \methdef{toDayWeekName()}{returns the name of the day of the week of a date object.}
 \methdef{toDayWeekNum()}{returns the day of the week (1--7) of a date object.}
@@ -103,7 +104,6 @@ Objects of type \texttt{boolean} have no methods other than those common to all 
 \methdef{toMonthName()}{returns the name of the month in which a date object falls.}
 \methdef{toMonthNum()}{returns the number (1--12) of the month in which a date object falls.}
 \methdef{toSecond()}{returns the seconds component (0--60) of a date object, including the non-integer component.}
-\methdef{str(...)}{converts a date object to a string with an optional format string supplied as an argument (see the {\tt time.string()} function).}
 \methdef{toUnix()}{converts a date object to a Unix time.}
 \methdef{toYear()}{returns the year in which a date object falls in the current calendar.}
 
