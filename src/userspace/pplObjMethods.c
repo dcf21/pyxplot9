@@ -1115,6 +1115,23 @@ static void pplmethod_listAppend(ppl_context *c, pplObj *in, int nArgs, int *sta
   pplObjCpy(&OUTPUT,st,0,0,1);
  }
 
+static void pplmethod_listCount(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *st    = in[-1].self_this;
+  list   *l     = (list *)st->auxil;
+  int     count = 0;
+  listIterator *li = ppl_listIterateInit(l);
+  pplObj *item;
+  while ((item = (pplObj*)ppl_listIterate(&li))!=NULL)
+   {
+    pplObj *a = item;
+    pplObj *b = &in[0];
+    if (pplObjCmpQuiet(&a,&b)==0) count++;
+   }
+  OUTPUT.real = count;
+  return;
+ }
+
 static void pplmethod_listExtend(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   pplObj  v;
@@ -1217,6 +1234,24 @@ static void pplmethod_listFilter(ppl_context *c, pplObj *in, int nArgs, int *sta
     while (c->stackPtr>stkLevelOld) { STACK_POP_LISTMETHOD; }
    }
 
+  return;
+ }
+
+static void pplmethod_listIndex(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *st    = in[-1].self_this;
+  list   *l     = (list *)st->auxil;
+  int     i     = 0;
+  listIterator *li = ppl_listIterateInit(l);
+  pplObj *item;
+  while ((item = (pplObj*)ppl_listIterate(&li))!=NULL)
+   {
+    pplObj *a = item;
+    pplObj *b = &in[0];
+    if (pplObjCmpQuiet(&a,&b)==0) { OUTPUT.real=i; return; }
+    i++;
+   }
+  OUTPUT.real = -1;
   return;
  }
 
@@ -1632,17 +1667,33 @@ static void pplmethod_listVector(ppl_context *c, pplObj *in, int nArgs, int *sta
 
 // Dictionary methods
 
+static void pplmethod_dictDelete(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObj *item;
+  pplObj *st = in[-1].self_this;
+  dict   *di = (dict *)st->auxil;
+  char   *instr;
+  if ((nArgs!=1)&&(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The method delete(x) requires a string as its argument; supplied argument had type <%s>.", pplObjTypeNames[in[0].objType]); return; }
+  if (in[-1].self_this->immutable) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The method delete(x) cannot be called on an immutable object."); return; }
+  instr = (char *)in[0].auxil;
+  item  = ppl_dictLookup(di, instr);
+  if (item==NULL) return;
+  if (item->immutable) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The method delete(x) cannot be called on an immutable object."); return; }
+  item->amMalloced = 0;
+  ppl_garbageObject(item);
+  ppl_dictRemoveKey(di, instr);
+  pplObjCpy(&OUTPUT,st,0,0,1);
+  return;
+ }
+
 static void pplmethod_dictHasKey(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  char         *key;
-  pplObj       *item;
-  dictIterator *di = ppl_dictIterateInit((dict *)in[-1].self_this->auxil);
-  char         *instr;
-  if ((nArgs!=1)&&(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The function hasKey() requires a string as its argument; supplied argument had type <%s>.", pplObjTypeNames[in[0].objType]); return; }
+  pplObj  *st = in[-1].self_this;
+  dict    *di = (dict *)st->auxil;
+  char    *instr;
+  if ((nArgs!=1)&&(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The method hasKey() requires a string as its argument; supplied argument had type <%s>.", pplObjTypeNames[in[0].objType]); return; }
   instr = (char *)in[0].auxil;
-  while ((item = (pplObj *)ppl_dictIterate(&di,&key))!=NULL)
-   { if (strcmp(instr,key)==0) { pplObjBool(&OUTPUT,0,1); return; } }
-  pplObjBool(&OUTPUT,0,0);
+  pplObjBool(&OUTPUT,0,ppl_dictContains(di, instr));
   return;
  }
 
@@ -2081,8 +2132,10 @@ void pplObjMethodsInit(ppl_context *c)
 
   // List methods
   ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"append",1,1,0,0,0,0,(void *)pplmethod_listAppend, "append(x)", "\\mathrm{append}@<@0}@>", "append(x) appends the object x to a list");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"count",1,1,0,0,0,0,(void *)pplmethod_listCount, "count(x)", "\\mathrm{count}@<@0}@>", "count(x) returns the number of items in a list that equal x");
   ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"extend",1,1,0,0,0,0,(void *)pplmethod_listExtend, "extend(x)", "\\mathrm{extend}@<@0}@>", "extend(x) appends the members of the list x to the end of a list");
   ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"filter",1,1,0,0,0,0,(void *)pplmethod_listFilter, "filter(f)", "\\mathrm{filter}@<@0}@>", "filter(f) takes a pointer to a function of one argument, f(a). It calls the function for every element of the list, and returns a new list of those elements for which f(a) tests true");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"index",1,1,0,0,0,0,(void *)pplmethod_listIndex, "index(x)", "\\mathrm{index}@<@0}@>", "index(x) returns the index of the first element of a list that equals x, or -1 if no elements match");
   ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"insert",2,2,0,0,0,0,(void *)pplmethod_listInsert, "insert(n,x)", "\\mathrm{insert}@<@0@>", "insert(n,x) inserts the object x into a list at position n");
   ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"len",0,0,1,1,1,1,(void *)pplmethod_listLen, "len()", "\\mathrm{len}@<@>", "len() returns the length of a list");
   ppl_addSystemMethod(pplObjMethods[PPLOBJ_LIST],"map",1,1,0,0,0,0,(void *)pplmethod_listMap, "map(f)", "\\mathrm{map}@<@0}@>", "map(f) takes a pointer to a function of one argument, f(a). It calls the function for every element of the list, and returns a list of the results");
@@ -2104,7 +2157,8 @@ void pplObjMethodsInit(ppl_context *c)
     else if (i==1) pplobj = PPLOBJ_MOD;
     else           pplobj = PPLOBJ_USER;
 
-    ppl_addSystemMethod(pplObjMethods[pplobj],"hasKey",1,1,0,0,0,0,(void *)pplmethod_dictHasKey, "hasKey()", "\\mathrm{hasKey}@<@1@>", "hasKey(x) returns a boolean indicating whether the key x exists in the dictionary");
+    ppl_addSystemMethod(pplObjMethods[pplobj],"delete",1,1,0,0,0,0,(void *)pplmethod_dictDelete, "delete(x)", "\\mathrm{delete}@<@1@>", "delete(x) deletes the key x from the dictionary, if it exists");
+    ppl_addSystemMethod(pplObjMethods[pplobj],"hasKey",1,1,0,0,0,0,(void *)pplmethod_dictHasKey, "hasKey(x)", "\\mathrm{hasKey}@<@1@>", "hasKey(x) returns a boolean indicating whether the key x exists in the dictionary");
     ppl_addSystemMethod(pplObjMethods[pplobj],"items" ,0,0,1,1,1,1,(void *)pplmethod_dictItems , "items()", "\\mathrm{items}@<@>", "items() returns a list of the [key,value] pairs in a dictionary");
     ppl_addSystemMethod(pplObjMethods[pplobj],"keys"  ,0,0,1,1,1,1,(void *)pplmethod_dictKeys  , "keys()", "\\mathrm{keys}@<@>", "keys() returns a list of the keys defined in a dictionary");
     ppl_addSystemMethod(pplObjMethods[pplobj],"len"   ,0,0,1,1,1,1,(void *)pplmethod_dictLen   , "len()", "\\mathrm{len}@<@>", "len() returns the number of entries in a dictionary");

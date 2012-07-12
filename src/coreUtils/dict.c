@@ -398,38 +398,16 @@ int ppl_dictRemove(dict *in, void *item)
 
 void _ppl_dictRemoveEngine(dict *in, dictItem *ptr)
  {
-  dictItem *ptrnext;
-
   if (in ==NULL) return;
   if (ptr==NULL) return;
 
   if (in->useMalloc) { free(ptr->data); free(ptr->key); }
 
-  if (ptr->next != NULL) // We are not the last item in the list
-   {
-    ptrnext       = ptr->next;
-    ptr->key      = ptrnext->key;
-    ptr->data     = ptrnext->data;
-    ptr->next     = ptrnext->next;
-    if (in->last == ptrnext) in->last = ptr;
-    else ptrnext->next->prev = ptr;
-    if (in->useMalloc) free(ptrnext);
-   }
-  else if (ptr->prev != NULL) // We are the last item in the list, but not the first item
-   {
-    ptrnext       = ptr->prev;
-    ptr->key      = ptrnext->key;
-    ptr->data     = ptrnext->data;
-    ptr->prev     = ptrnext->prev;
-    if (in->first == ptrnext) in->first = ptr;
-    else ptrnext->prev->next = ptr;
-    if (in->useMalloc) free(ptrnext);
-   }
-  else // We are the only item in the list
-   {
-    in->first = NULL;
-    in->last  = NULL;
-   }
+  if (ptr->next != NULL) ptr->next->prev = ptr->prev; // We are not the last item in the list
+  if (ptr->prev != NULL) ptr->prev->next = ptr->next; // We are the last item in the list, but not the first item
+  if (in->last  == ptr) in->last  = ptr->prev;
+  if (in->first == ptr) in->first = ptr->next;
+  if (in->useMalloc) free(ptr);
   in->length--;
 
   return;
