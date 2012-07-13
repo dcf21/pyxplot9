@@ -1126,19 +1126,18 @@ used to convert dates between calendar dates and Julian Day numbers.}
 \label{tab:calendars}
 \end{table}
 
-Once created, it is possible to add and subtract numeric objects from dates,
-as in the following example:
+Once created, it is possible to add numbers with physical units of time to
+dates, as in the following example:
 
 \vspace{3mm}
 \input{fragments/tex/calc_date3.tex}
 \vspace{3mm}
 
-As in these examples, standard string representations of calendar dates can be
-produced with the {\tt print} command.  It is also possible to use the string
-substitution operator, as in {\tt "\%s"\%(date)}, or the {\tt str} method of
-{\tt date} objects, as in {\tt date.str()}.
-
-In addition
+Standard string representations of calendar dates can be produced with the {\tt
+print} command.  It is also possible to use the string substitution operator,
+as in {\tt "\%s"\%(date)}, or the {\tt str} method of {\tt date} objects, as in
+{\tt date.str()}.  In addition, the {\tt time.string} function can be used to
+choose a custom display format for the date:
 
 \funcdef{time.string($t,format$)}{returns a string representation of the specified date object $t$. The second input is optional, and may be used to control the format of the output. If no format string is provided, then the format \newline\noindent{\tt "\%a \%Y \%b \%d \%H:\%M:\%S"}\newline\noindent is used. In such format strings, the following tokens are substituted for various parts of the date:
 \begin{longtable}{|>{\columncolor{LightGrey}}l|>{\columncolor{LightGrey}}l|}
@@ -1217,32 +1216,33 @@ in the Western calendar?
 
 \subsection{Time intervals}
 
-Two functions are provided for measuring the time intervals elapsed between
-pairs of Julian Day numbers.  These are useful when an experiment is started at
-some time $x$, and datapoints are to be labelled with the times elapsed since
-the beginning of the experiment. The {\tt time\_diff()}
-function\indfun{time\_\-diff({\it JD}$_1$,\-{\it JD}$_2$)} returns the time
-interval, with physical dimensions of time, between two Julian Day numbers.
-This function is actually very simple, and is entirely equivalent to the
-algebraic expression {\tt (y-x)*unit(day)}. The following example, demonstrates
-its use to calculate the time elapsed between the traditional date for the
-foundation of Rome by Romulus and Remus in 753\,{\footnotesize BC} and that of
-the deposition of the last Emperor of the Western Empire in {\footnotesize
-AD}\,476:
+The time interval between two date objects can be found by subtracting the two
+objects, as demonstrated in the following example which calculates the interval
+between Albert Einstein's birth and death. The result is returned as a
+numerical object with physical dimensions of time:
+
+\vspace{3mm}
+\input{fragments/tex/calc_date4.tex}
+\vspace{3mm}
+
+The function {\tt time.interval(t1,t2)} has the same effect.  The next example
+calculate the time elapsed between the traditional date for the foundation of
+Rome by Romulus and Remus in 753\,{\footnotesize BC} and that of the deposition
+of the last Emperor of the Western Empire in {\footnotesize AD}\,476:
 
 \vspace{3mm}
 \input{fragments/tex/calc_interval.tex}
 \vspace{3mm}
 
-The function {\tt time\_diff\_string()}\indfun{time\_\-diff\_\-string({\it
-JD}$_1$,\-{\it JD}$_2$,\-{\it format})} is similar, but returns a
-textual representation of the time interval, and is useful for producing
-textual axis labels representing the time elapsed since the beginning of an
-experiment. As with the {\tt time\_string()} function, it takes an optional
-third parameter which specifies the textual format in which the time interval
-should be represented. If no format is supplied, then the following verbose
-format is used:\vspace{3mm}\newline
-\noindent {\tt "\%Y years \%d days \%h hours \%m minutes and \%s seconds"}\vspace{3mm}\newline
+The function {\tt time.intervalStr()}\indfun{time.intervalStr({\it
+t}$_1$,\-{\it t}$_2$,\-{\it format})} is similar, but returns a textual
+representation of the time interval.  It takes an optional third parameter
+which specifies the textual format in which the time interval should be
+represented. If no format is supplied, then the following verbose format is
+used:
+\vspace{3mm}\newline
+\noindent {\tt "\%Y years \%d days \%h hours \%m minutes and \%s seconds"}
+\vspace{3mm}\newline
 Table~\ref{tab:time_diff_string_subs} lists the tokens which are substituted
 for various parts of the time interval. The following examples demonstrate the
 use of the function:

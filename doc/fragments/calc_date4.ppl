@@ -1,0 +1,3 @@
+myDate1 = time.fromCalendar(1879,3,14,0,0,0)
+myDate2 = time.fromCalendar(1955,4,18,0,0,0)
+print myDate2 - myDate1

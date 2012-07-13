@@ -134,6 +134,12 @@ int pplObjCmp(ppl_context *c, const pplObj *a, const pplObj *b, int *status, int
   int t2o = pplObjTypeOrder[t2];
   if (cancellationFlag) return 0;
   if (iterDepth>250) return 0;
+  if ((c!=NULL)&&(t1o!=t2o))
+   {
+    *status=1; *errType=ERR_TYPE;
+    sprintf(errText, "Attempt to compare an object of type <%s> with an object of type <%s>.", pplObjTypeNames[t1], pplObjTypeNames[t2]);
+    return -2;
+   }
   if (t1o < t2o) return -1;
   if (t1o > t2o) return  1;
   if  (t1o==0) return -2; // 0 - nulls are never equal

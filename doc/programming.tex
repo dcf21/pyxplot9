@@ -177,6 +177,10 @@ to be substituted, as happens in C's {\tt printf} command:
 \input{fragments/tex/prog_stringsub.tex}
 \vspace{3mm}
 
+\subsection{Converting strings to numbers}
+
+{\tt types.number()}
+
 \subsection{Slicing strings}
 
 
@@ -303,12 +307,18 @@ without printing their output, which is discarded:
 \input{fragments/tex/prog_listappend2.tex}
 \vspace{3mm}
 
+\subsection{Using lists as stacks}
+
 The following example demonstrates the use of a list as a stack; note that the
 last item added to the stack is the first one to be popped:
 
 \vspace{3mm}
 \input{fragments/tex/prog_liststack.tex}
 \vspace{3mm}
+
+\subsection{Using lists as buffers}
+
+\subsection{Sorting lists}
 
 Methods are provided for sorting data in lists. The {\tt sort()} method simply
 sorts the members of a list into order of ascending value\footnote{Non-numeric
@@ -327,10 +337,34 @@ The \indcmdt{foreach} command can be used to loop over the members of a list.
 Data from lists can also be plotted onto graphs, but the list must first be
 converted into a vector. See~\ref{sec:vectors} for more information.
 
+\subsubsection{Custom sorting}
+
+\subsubsection{Sorting lists of lists}
+
+\subsection{Calling functions with lists of arguments}
+
+\subsection{List mapping and filtering}
+
+\subsection{Vectors versus lists}
+
+common units. stored more efficiently.
+
+\subsection{Plotting data from lists}
+
 \section{Dictionaries}
 
 \section{Vectors and matrices}
 \label{sec:vectors}
+
+\subsection{Lists versus vectors}
+
+\subsection{Vector and matrix algebra}
+
+\subsection{Dot and cross products}
+
+\subsection{Vector positions on the graphics canvas}
+
+\subsection{Plotting data from vectors}
 
 \section{Colors}
 

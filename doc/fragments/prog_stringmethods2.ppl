@@ -1,4 +1,4 @@
 x="    text"
-x.methods()
+x.methods
 x.lstrip
 x.lstrip()
