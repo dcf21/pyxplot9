@@ -1,4 +1,5 @@
-f = sin
+f = sum
 print f
+f = sin
 g(x,y) = x(x(y))
 print g(f,1)

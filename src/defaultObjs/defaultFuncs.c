@@ -484,6 +484,13 @@ void pplfunc_classOf     (ppl_context *c, pplObj *in, int nArgs, int *status, in
   pplObjCpy(&OUTPUT,in[0].objPrototype,0,0,1);
  }
 
+void pplfunc_cmp         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  void *a = &in[0];
+  void *b = &in[1];
+  OUTPUT.real = pplObjCmpQuiet(&a,&b);
+ }
+
 void pplfunc_cmyk        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   pplObjColor(&OUTPUT,0,SW_COLSPACE_CMYK,in[0].real,in[1].real,in[2].real,in[3].real);
@@ -1120,7 +1127,7 @@ void pplfunc_ordinal     (ppl_context *c, pplObj *in, int nArgs, int *status, in
   if (n>64) in[0].real=GSL_NAN;
   CHECK_NEEDINT(in[0], "n", "function's input must be an integer");
   out = (char *)malloc(n + 8);
-  if (out==NULL) { *status=1; sprintf(errText,"Out of memory."); return; }
+  if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   if      (((i%100)<21) && ((i%100)>3)) sprintf(out, "%dth", i);
   else if  ((i% 10)==1)                 sprintf(out, "%dst", i);
   else if  ((i% 10)==2)                 sprintf(out, "%dnd", i);
@@ -1251,6 +1258,27 @@ void pplfunc_real        (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_rgb         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   pplObjColor(&OUTPUT,0,SW_COLSPACE_RGB,in[0].real,in[1].real,in[2].real,0);
+ }
+
+void pplfunc_romanNum    (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *FunctionDescription = "romanNumeral(n)";
+  char *h[] = {"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
+  char *t[] = {"", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
+  char *o[] = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
+  char *out;
+  int   n, p=0;
+  CHECK_NEEDINT(in[0], "n", "function's input must be an integer");
+  if ((in[0].real<1) || (in[0].real>10000)) { *status=1; *errType=ERR_RANGE; sprintf(errText, "Argument to %s must be in the range 0<n<=10000.", FunctionDescription); return; }
+  out = (char *)malloc(32);
+  if (out==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
+  n = (int)in[0].real;
+  while (n >= 1000) { out[p++]='M'; n-=1000; }
+  strcpy(out+p, h[n/100]); p += strlen(out+p); n = n % 100;
+  strcpy(out+p, t[n/10] ); p += strlen(out+p); n = n % 10;
+  strcpy(out+p, o[n]    ); p += strlen(out+p);
+  out[p] = '\0';
+  pplObjStr(&OUTPUT,0,1,out);
  }
 
 void pplfunc_root        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)

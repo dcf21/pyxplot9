@@ -24,9 +24,63 @@
 \chapter{Programming: Pyxplot's data types}
 \label{chap:progDataTypes}
 
-This chapter describes Pyxplot's data types such as lists, dictionaries,
-vectors, matrices and file handles.  In each case, we illustrate how each data
-type interfaces with Pyxplot's graph plotting and vector graphics environment.
+This chapter describes Pyxplot's built-in object types, which include lists,
+dictionaries, vectors, matrices and file handles. A comprehensive list of all
+of Pyxplot's object types can be found in Chapter~\ref{ch:types_list}, which
+also lists the methods available in each object type.
+
+All objects in Pyxplot, including numbers, have {\it methods}, which act on or
+return information about the object.  Some methods are common to all objects:
+for example, the {\tt str()} method which returns a string representation of
+the object (as used by the {\tt print} command). All objects have a method
+called {\tt methods()}, which returns a list of the names of all of methods of
+that object:
+
+\begin{verbatim}
+print pi.str()
+print "My son, it's a wisp of fog.".methods()
+\end{verbatim}
+
+\noindent Methods are like functions in that printing them returns brief
+documentation about them:
+
+\vspace{3mm}
+\input{fragments/tex/prog_methods.tex}
+\vspace{3mm}
+
+\section{Instantiating objects}
+
+A list of all of Pyxplot's built-in object types can be found in the {\tt
+types} module, which contains the {\tt object prototypes} for each type:
+
+\vspace{3mm}
+\input{fragments/tex/prog_types.tex}
+\vspace{3mm}
+
+\noindent These object prototypes can be called like functions to produce an
+instance of each data type. Each prototype can take various different kinds of
+argument; for example, the {\tt number} prototype can take a {\tt number}, {\tt
+boolean} or a {\tt string} from which to create a number:
+
+\vspace{3mm}
+\input{fragments/tex/prog_types2.tex}
+\vspace{3mm}
+
+\noindent Full documentation of the types of inputs supported by each prototype
+are listed in Section~\ref{sec:functions_types}.
+
+In many cases there are much more succinct ways of creating objects of each type. For example, lists can be creating by enclosing a comma-separated list of elements in square brackets:
+
+\vspace{3mm}
+\input{fragments/tex/prog_types3.tex}
+\vspace{3mm}
+
+\noindent Dictionaries can be can be creating by enclosing key--value pairs in curly brackets:
+
+\vspace{3mm}
+\input{fragments/tex/prog_types4.tex}
+\vspace{3mm}
+
 
 \section{Strings}
 \label{sec:stringvars}
@@ -97,6 +151,12 @@ string could have been used, for example in the {\tt set title} command:
 plotname = "Insert title here"
 set title plotname
 \end{verbatim}
+
+Strings can be concatenated together using the {\tt +} operator:
+
+\vspace{3mm}
+\input{fragments/tex/fs_print6.tex}
+\vspace{3mm}
 
 \subsection{The string substitution operator}
 \label{sec:stringsubop}
@@ -179,30 +239,51 @@ to be substituted, as happens in C's {\tt printf} command:
 
 \subsection{Converting strings to numbers}
 
-{\tt types.number()}
+Strings which contain numerical data can be converted to numbers by passing
+them to the object {\tt types.number()}, as in the example:
+
+\vspace{3mm}
+\input{fragments/tex/prog_stringnum.tex}
+\vspace{3mm}
+
+\noindent It is an error to try to convert a string to a number if it does not contain a correctly-formatted number:
+
+\begin{dontdo}
+types.number("this is not a number")
+\end{dontdo}
 
 \subsection{Slicing strings}
 
+Segments of strings can be cut out by using square brackets to slice the string:
 
+\vspace{3mm}
+\input{fragments/tex/prog_stringslice.tex}
+\vspace{3mm}
+
+\noindent If a single number is placed in the square brackets, and single
+character is taken out of the string. If two colon-separated numbers are
+specified, {\tt [x:y]} then the substring from character position {\tt x} up to
+but not including {\tt y} is returned. If either {\tt x} or {\tt y} are
+omitted, then the start or end of the string is used respectively. If either
+number of negative, then it counts from the end of the string, $-1$ being the
+last character in the string.
 
 \subsection{String methods}
 
-All objects in Pyxplot have {\tt methods}, which may be called, as in most object-orientated programming languages, by following the name of the object to be acted upon by a dot:
-
-\begin{verbatim}
-print "hello".upper()
-print "hello".methods()
-\end{verbatim}
-
-\noindent All objects in Pyxplot have a method called {\tt methods()}, which returns a list of the names of all of that objects methods. Methods are like functions in that printing them returns brief documentation about them:
+Strings have many methods for performing simple string manipulations. Here we
+list their names using the {\tt foreach} command, which will be introduced in
+the next chapter:
 
 \vspace{3mm}
-\input{fragments/tex/prog_methods.tex}
+\input{fragments/tex/prog_stringmethodlist.tex}
 \vspace{3mm}
 
-\noindent Descriptions of all of the methods of string objects can be found in Section~\ref{sec:string_methods}; in addition, a list of the methods that are common to all Pyxplot objects can be found in Section~\ref{sec:common_methods}.
-
-The following simple examples demonstrate the use of some of them:
+\noindent Full documentation of them can be found in
+Section~\ref{sec:string_methods}. As in {\tt python}, the {\tt strip()} method
+removes whitespace characters from the beginning and end of strings, and the
+{\tt split()} method splits a string up into whitespace-separated words. The
+{\tt splitOn(x)} method splits a string on all occurances of the sub-string
+{\tt x}.  The following simple examples demonstrate the use of some of them:
 
 \vspace{3mm}
 \input{fragments/tex/prog_stringmethods.tex}
@@ -274,7 +355,7 @@ include lists and dictionaries to create hierarchical data structures. They are
 created by enclosing a comma-separated list of objects by square brackets:
 
 \begin{verbatim}
-a = [1,2,3,"fourth item"]
+a = [10,colors.green,"bottles"]
 \end{verbatim}
 
 Once created, more items can be added to a list using its {\tt append(item)}
@@ -318,30 +399,92 @@ last item added to the stack is the first one to be popped:
 
 \subsection{Using lists as buffers}
 
+The following example demonstrates the use of a list as a buffer in which the
+first item added to the stack is the first one to be popped:
+
+\vspace{3mm}
+\input{fragments/tex/prog_listbuffer.tex}
+\vspace{3mm}
+
+\noindent In the final line, we make use of the fact that a list tests true if
+it contains any items, or false if it is empty.
+
 \subsection{Sorting lists}
 
-Methods are provided for sorting data in lists. The {\tt sort()} method simply
-sorts the members of a list into order of ascending value\footnote{Non-numeric
-items are assigned arbitrary but consistent values for the purposes of sorting.
-Booleans are always lower-valued than numbers, but numbers are lower-valued
-than lists. Longer lists are always higher valued than shorter lists; larger
-dictionaries are always higher-valued than smaller dictionaries.} The {\tt
-sortOnElement(n)} method sorts a list of lists on the $n$th sub-element of each
-sublist.
+Methods are provided for sorting data in lists. The simplest of these is the
+{\tt sort()} method, which sorts the members of a list into order of ascending
+value.\footnote{Non-numeric items are assigned arbitrary but consistent values
+for the purposes of sorting.  Booleans are always lower-valued than numbers,
+but numbers are lower-valued than lists. Longer lists are always higher valued
+than shorter lists; larger dictionaries are always higher-valued than smaller
+dictionaries.} The {\tt reverse()} method can be used to invert the order of
+the list afterwards if descending order is wanted.
 
 \vspace{3mm}
 \input{fragments/tex/prog_listsort.tex}
 \vspace{3mm}
 
-The \indcmdt{foreach} command can be used to loop over the members of a list.
-Data from lists can also be plotted onto graphs, but the list must first be
-converted into a vector. See~\ref{sec:vectors} for more information.
-
 \subsubsection{Custom sorting}
+
+Often, however, a custom ordering is wanted. The {\tt sortOn(f)} method takes a
+function of two arguments as its input. The function {\tt f(a,b)} should return
+$-1$ if {\tt a} is to be placed before {\tt b} in the sorted list, $1$ if {\tt
+a} is to be placed after {\tt b} in the sorted list, and zero if the two
+elements have equal ranking.
+
+\noindent The {\tt cmp(a,b)} function is often useful in making comparison
+functions for use with the {\tt sortOn(f)} method: it returns either $-1$, $0$
+or $1$ depending on Pyxplot's default way of comparing two objects. In the
+example below, we pass it the magnitude of {\tt a} and {\tt b} to sort a list
+in order of magnitude.
+
+\vspace{3mm}
+\input{fragments/tex/prog_listsort2.tex}
+\vspace{3mm}
+
+In this example, the {\tt range(start,end,step)} function is used to generate a
+raster of values between $-8$ and $8$. It outputs a vector, which is converted
+into a list using the vector's {\tt list()} method. More information about
+vectors is in Section~\ref{sec:vectors}.
+
+The subroutine command, which is often used to implement more complicated
+sorting functions, will be covered in Section~\ref{sec:subroutines}. For
+example, the function used above could have been written:
+
+\begin{verbatim}
+subroutine absCmp(a,b)
+ {
+  return cmp(abs(a),abs(b))
+ }
+\end{verbatim}
 
 \subsubsection{Sorting lists of lists}
 
+The {\tt sortOnElement(n)} method can be used to sort a list of lists on the
+$n$th sub-element of each sublist.
+
+\vspace{3mm}
+\input{fragments/tex/prog_listsort3.tex}
+\vspace{3mm}
+
+\subsection{Iterating over lists}
+
+The \indcmdt{foreach} can be used to iterate over the members of a list; it
+will be covered in more detail in Section~\ref{sec:foreach}. The following
+example iterates over the words in a sentence:
+
+\vspace{3mm}
+\input{fragments/tex/prog_listiter.tex}
+\vspace{3mm}
+
 \subsection{Calling functions with lists of arguments}
+
+The \indfunt{call($f,a$)} function can be used to call a function with an
+arbitrary list of arguments:
+
+\vspace{3mm}
+\input{fragments/tex/prog_listcall.tex}
+\vspace{3mm}
 
 \subsection{List mapping and filtering}
 
@@ -350,6 +493,9 @@ converted into a vector. See~\ref{sec:vectors} for more information.
 common units. stored more efficiently.
 
 \subsection{Plotting data from lists}
+
+Data from lists can also be plotted onto graphs, but the list must first be
+converted into a vector. See~\ref{sec:vectors} for more information.
 
 \section{Dictionaries}
 
@@ -416,7 +562,110 @@ Section~\ref{sec:colormaps}.
 
 \section{Dates}
 
+Pyxplot has a {\tt date} object type which simplifies the process of working
+with dates and times.  Pyxplot provides a range of pre-defined functions, in
+the {\tt time} module, for creating and manipulating {\tt date} objects. The
+functions for creating {\tt date} objects are as follows:
+
+\funcdef{time.fromCalendar($year,month,day,hour,min,sec$)}{creates a date
+object from the specified calendar date. It takes six inputs: the year, the
+month number (1--12), the day of the month (1--31), the hour of day (0--24),
+the number of minutes (0--59), and the number of seconds (0--59). To enter
+dates before {\footnotesize AD}\,1, a year of~$0$ should be passed to indicate
+1\,{\footnotesize BC}, $-1$ should be passed to indicate the year
+2\,{\footnotesize BC}, and so forth. The \texttt{set calendar} command is used
+to change the current calendar.}
+\funcdef{time.fromJD($t$)}{creates a date object from the specified numerical Julian date.}
+\funcdef{time.fromMJD($t$)}{creates a date object from the specified numerical modified Julian date.}
+\funcdef{time.fromUnix($t$)}{creates a date object from the specified numerical Unix time.}
+\funcdef{time.now()}{creates a date object representing the present time.}
+
+The following example creates a date object representing midnight on 1st January 2000:
+
+\vspace{3mm}
+\input{fragments/tex/calc_date1.tex}
+\vspace{3mm}
+
+Once created, it is possible to add numbers with physical units of time to
+dates, as in the following example:
+
+\vspace{3mm}
+\input{fragments/tex/calc_date3.tex}
+\vspace{3mm}
+
+\noindent In addition, if one date is subtracted from
+another date, the time interval between the two dates is returned as a number
+with physical dimensions of time:
+
+\vspace{3mm}
+\input{fragments/tex/calc_interval.tex}
+\vspace{3mm}
+
+Standard string representations of calendar dates can be produced with the {\tt
+print} command.  It is also possible to use the string substitution operator,
+as in {\tt "\%s"\%(date)}, or the {\tt str} method of {\tt date} objects, as in
+{\tt date.str()}.  In addition, the {\tt time.string} function can be used to
+choose a custom display format for the date; for more information, see
+Section~\ref{sec:time_series}.
+
+Several functions are provided for converting {\tt date} objects back into various numerical forms of timekeeping and components of calendar dates:
+
+\methdef{toDayOfMonth()}{returns the day of the month of a date object in the current calendar.}
+\methdef{toDayWeekName()}{returns the name of the day of the week of a date object.}
+\methdef{toDayWeekNum()}{returns the day of the week (1--7) of a date object.}
+\methdef{toHour()}{returns the integer hour component (0--23) of a date object.}
+\methdef{toJD()}{converts a date object to a numerical Julian date.}
+\methdef{toMinute()}{returns the integer minute component (0--59) of a date object.}
+\methdef{toMJD()}{converts a date object to a modified Julian date.}
+\methdef{toMonthName()}{returns the name of the month in which a date object falls.}
+\methdef{toMonthNum()}{returns the number (1--12) of the month in which a date object falls.}
+\methdef{toSecond()}{returns the seconds component (0--60) of a date object, including the non-integer component.}
+\methdef{toUnix()}{converts a date object to a Unix time.}
+\methdef{toYear()}{returns the year in which a date object falls in the current calendar.}
+
+For example:
+
+\vspace{3mm}
+\input{fragments/tex/calc_date2.tex}
+\vspace{3mm}
+
+More information on the manipulation of {\tt date} objects can be found in Section~\ref{sec:time_series}.
+
 \section{Modules and classes}
+
+Modules provide a convenient way to group functions and variables together,
+just as Pyxplot's built-in functions are grouped into modules such as {\tt os}
+and {\tt random}.  New modules can be created by calling the {\tt module}
+object, which is a synonym for {\tt types.module}. Once created, a module is
+like a dictionary, except that its elements can be accessed both as {\tt
+module[item]} and more commonly as {\tt module.item}:
+
+\vspace{3mm}
+\input{fragments/tex/prog_mod1.tex}
+\vspace{3mm}
+
+Modules can also serve as class prototypes. If a module is called like a
+function, the return value is an {\it instance} of the module:
+
+\vspace{3mm}
+\input{fragments/tex/prog_mod2.tex}
+\vspace{3mm}
+
+The module {\it instance} inherits all of the functions and variables of its
+parent object, but may also contain its own additional functions and variables,
+some of which may supersede those in the parent object if they have the same
+name. When functions or subroutines of a module instance are called, the
+special variable {\tt self} is defined to equal the module instance object.
+This allows the function to store private data in the module instance, or to
+call other methods on the instance.
+
+\vspace{3mm}
+\input{fragments/tex/prog_mod3.tex}
+\vspace{3mm}
+
+As this example demonstrates, it is also possible to hierarchically instantiate
+modules: {\tt tiddles} is an instance of {\tt cat}, which is itself an instance
+of {\tt animal}.
 
 \section{File handles}
 

@@ -1,4 +1,4 @@
-a = [1,2,3]
-a.append(4)
-a.insert(0,"zero")
-a.insert(-2,"foo")
+theFive = ["Cui","Mussorgsky"]
+theFive.append("Borodin")
+theFive.insert(0,"Balakirev")
+theFive.insert(-2,"Rimsky-Korsakov")

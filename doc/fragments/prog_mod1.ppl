@@ -1,0 +1,6 @@
+myFuncs = module()
+myFuncs.squared(x) = x**2
+myFuncs.cubed(x) = x**3
+print myFuncs
+print myFuncs.squared(4)
+print myFuncs['cubed'](2)

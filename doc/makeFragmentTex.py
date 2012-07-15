@@ -28,7 +28,7 @@ os.system("mkdir  fragments/tex")
 if len(sys.argv)>=2: pyxplot = sys.argv[1]
 else               : pyxplot = "../bin/pyxplot"
 
-def line_texify(line):
+def line_texify(line,userInput):
   line = re.sub(r'[\\]', r'gpzywxqqq', line) # LaTeX does not like backslashs
   line = re.sub(r'[_]', r'\\_', line) # LaTeX does not like underscores....
   line = re.sub(r'[&]', r'\\&', line) # LaTeX does not like ampersands....
@@ -36,13 +36,18 @@ def line_texify(line):
   line = re.sub(r'[$]', r'\\$', line) # LaTeX does not like $s....
   line = re.sub(r'[{]', r'\\{', line) # LaTeX does not like {s....
   line = re.sub(r'[}]', r'\\}', line) # LaTeX does not like }s....
-  line = re.sub(r'[#]', r'\\#', line) # LaTeX does not like #s....
   line = re.sub(r'[\^]', r'\\^{}', line) # LaTeX does not like carets....
   line = re.sub(r'[~]', r'$\\sim$', line) # LaTeX does not like tildas....
   line = re.sub(r'[<]', r'$<$', line) # LaTeX does not like < outside of mathmode....
   line = re.sub(r'[>]', r'$>$', line) # LaTeX does not like > outside of mathmode....
   line = re.sub(r'gpzywxqqq', r'$\\backslash$', line) # LaTeX does not like backslashs
   line = re.sub(r' ', r'~', line)
+  if not userInput:
+    line = re.sub(r'[#]', r'\\#', line) # LaTeX does not like #s....
+  else:
+    hashPos = line.find("#")
+    if hashPos<0: return line
+    line = r"%s}}{{\it \#%s"%(line[:hashPos] , line[hashPos+1:])
   return line
 
 files = glob.glob("fragments/*.ppl")
@@ -59,7 +64,7 @@ for fname in files:
     if (len(lines[i].strip())<1): continue
     if (not first): out.write("\\newline\n")
     first = False
-    out.write(r"\noindent\texttt{%s> \textbf{%s}}"%(prompt,line_texify(lines[i].rstrip())))
+    out.write(r"\noindent\texttt{%s> \textbf{%s}}"%(prompt,line_texify(lines[i].rstrip(),1)))
     if lines[i].strip()[-1]=="\\":
       prompt = "......."
       continue
@@ -75,6 +80,6 @@ for fname in files:
     linecount = linecountNew
     for line in olines:
       if (len(line.strip())<1): continue
-      out.write("\\newline\n\\noindent\\texttt{%s}"%line_texify(line))
+      out.write("\\newline\n\\noindent\\texttt{%s}"%line_texify(line,0))
   out.write("\n")
   out.close()

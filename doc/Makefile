@@ -27,6 +27,7 @@ EX_EPSDIR  = $(EXAMPLEDIR)/eps
 EX_TEXDIR  = $(EXAMPLEDIR)/tex
 EX_FRAGDIR = $(FRAGDIR)/tex
 FIGFILES   = $(wildcard $(EXAMPLEDIR)/*.ppl)
+FRAGFILES  = $(wildcard $(FRAGDIR)/*.ppl)
 SOURCES    = $(wildcard *.tex)
 
 all: $(EX_EPSDIR)/timestamp $(EX_TEXDIR)/timestamp $(EX_FRAGDIR)/timestamp \

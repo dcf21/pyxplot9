@@ -299,6 +299,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"ceil"          ,1,1,1,1,1,1,(void *)&pplfunc_ceil        , "ceil(x)", "\\mathrm{ceil}@<@1@>", "ceil(x) returns the smallest integer value greater than or equal to x");
     ppl_addSystemFunc(d,"chr"           ,1,1,1,1,1,1,(void *)&pplfunc_chr         , "chr(x)", "\\mathrm{chr}@<@1@>", "chr(x) returns the character with ASCII code x");
     ppl_addSystemFunc(d,"classOf"       ,1,1,0,0,0,0,(void *)&pplfunc_classOf     , "classOf(x)", "\\mathrm{classOf}@<@1@>", "classOf(x) returns the class prototype of the object x");
+    ppl_addSystemFunc(d,"cmp"           ,2,2,0,0,0,0,(void *)&pplfunc_cmp         , "cmp(a,b)", "\\mathrm{cmp}@<@1,@2@>", "cmp(a,b) returns 1 if a>b, -1 if a<b and zero if a=b");
     ppl_addSystemFunc(d,"cmyk"          ,4,4,1,1,1,1,(void *)&pplfunc_cmyk        , "cmyk(c,m,y,k)", "\\mathrm{cmyk}@<@1,@2,@3,@4@>", "cmyk(c,m,y,k) returns a color with specified CMYK components in the range 0-1");
     ppl_addSystemFunc(d,"conjugate"     ,1,1,1,1,0,0,(void *)&pplfunc_conjugate   , "conjugate(z)", "\\mathrm{conjugate}@<@1@>", "conjugate(z) returns the complex conjugate of z");
     ppl_addSystemFunc(d,"copy"          ,1,1,0,0,0,0,(void *)&pplfunc_copy        , "copy(x)", "\\mathrm{copy}@<@1@>", "copy(x) returns a copy of the data structure x. Nested data structures are not copied; see deepcopy(x) for this");
@@ -369,6 +370,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"range"         ,1,3,1,1,1,0,(void *)&pplfunc_range       , "range([f],l,[s])", "\\mathrm{range@<@0@>", "range([f],l,[s]) returns a vector of uniformly-spaced numbers between f and l, with stepsize s");
     ppl_addSystemFunc(d,"Re"            ,1,1,1,1,0,0,(void *)&pplfunc_real        , "Re(z)", "\\mathrm{Re}@<@1@>", "Re(z) returns the magnitude of the real part of z");
     ppl_addSystemFunc(d,"rgb"           ,3,3,1,1,1,1,(void *)&pplfunc_rgb         , "rgb(r,g,b)", "\\mathrm{rgb}@<@1,@2,@3@>", "rgb(r,g,b) returns a color with specified RGB components in the range 0-1");
+    ppl_addSystemFunc(d,"romanNumeral"  ,1,1,1,1,1,1,(void *)&pplfunc_romanNum    , "romanNum(n)", "\\mathrm{romanNum}@<@1@>", "romanNum(n) returns the Roman numeral representing the number n");
     ppl_addSystemFunc(d,"root"          ,2,2,1,1,0,1,(void *)&pplfunc_root        , "root(z,n)", "\\mathrm{root}@<@1,@2@>", "root(z,n) returns the nth root of z");
     ppl_addSystemFunc(d,"sec"           ,1,1,1,1,0,0,(void *)&pplfunc_sec         , "sec(z)", "\\mathrm{sec}@<@1@>", "sec(x) returns the secant of x. If x is dimensionless, it is assumed to be measured in radians");
     ppl_addSystemFunc(d,"sech"          ,1,1,1,1,0,0,(void *)&pplfunc_sech        , "sech(z)", "\\mathrm{sech}@<@1@>", "sech(x) returns the hyperbolic secant of x. x may either be a dimensionless number or may have units of angle");

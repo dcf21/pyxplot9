@@ -1,0 +1,4 @@
+print romanNumeral(2012)
+print call(romanNumeral,[2012])
+print pow(2,8)
+print call(pow,[2,8])

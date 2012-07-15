@@ -1,0 +1,7 @@
+myList = []
+for (i=1; i<12; i++)
+ {
+  if prime(i) { call myList.append(i) ; }
+ }
+while (myList) { print myList.pop(0) ; }
+

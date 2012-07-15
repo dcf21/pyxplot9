@@ -1,0 +1,12 @@
+animal = module()
+animal.info() = "I am a %s."%self.type
+animal.moreInfo() = "My name is %s."%self.name
+cat = animal()
+cat.type = "cat"
+subroutine cat.poke() { print "miaox!" ; }
+cat.moreInfo() = "My name is %s."%self.name
+tiddles = cat()
+tiddles.name = "tiddles"
+print tiddles.info()
+print tiddles.moreInfo()
+call tiddles.poke()

@@ -284,7 +284,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
          {
           dict   *d   = (dict *)(iter->auxil);
           pplObj *obj = (pplObj *)ppl_dictLookup(d , key);
-          imm = imm || iter->immutable;
+          imm = imm || iter->immutable || d->immutable;
           if ((obj==NULL) || (obj->objType==PPLOBJ_ZOM) || (obj->objType==PPLOBJ_GLOB)) { imm=1; continue; } // Named methods of prototypes are immutable
           pplObjCpy(stk-1 , obj , 1 , 0 , 1);
           (stk-1)->immutable = (stk-1)->immutable || imm;
@@ -310,10 +310,11 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
         int   t   = (stk-1)->objType;
         dict *d   = (dict *)((stk-1)->auxil);
         *lastOpAssign=0;
-        if ((stk-1)->immutable) { sprintf(context->errStat.errBuff,"Cannot modify variable in immutable namespace."); TBADD(ERR_INTERNAL); goto cleanup_on_error; }
+        if ((stk-1)->immutable) { sprintf(context->errStat.errBuff,"Cannot modify variable in immutable namespace."); TBADD(ERR_TYPE); goto cleanup_on_error; }
         if ((t==PPLOBJ_MOD)||(t==PPLOBJ_USER))
          {
           pplObj *obj = (pplObj *)ppl_dictLookup(d , key);
+          if (d->immutable) { sprintf(context->errStat.errBuff,"Cannot modify variable in immutable namespace."); TBADD(ERR_TYPE); goto cleanup_on_error; }
           if (obj==NULL)
            {
             pplObjZom(stk , 0); // Create a temporary zombie for now
@@ -616,6 +617,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
         if (t==0x40) // =
          {
           pplObjCpy(tmp, in, 0, 0, 1);
+          tmp->immutable = 0;
           ASSIGN;
          }
         else if (t==0x41) // +=

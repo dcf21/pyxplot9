@@ -1,0 +1,4 @@
+poem = "An aged thrush, frail, gaunt, and small, "
+poem+= "In blast-beruffled plume"
+wordList = poem.split()
+foreach word in wordList { print word ; }

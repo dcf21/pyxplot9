@@ -1,0 +1,3 @@
+s = {"name":"Sophie", "nationality":"British"}
+s["hometown"] = "Lode"
+s["birthYear"] = 1957

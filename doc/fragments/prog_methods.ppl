@@ -1,4 +1,4 @@
-print "hello".upper
-print "hello".upper()
-print "hello".methods
+print "Father, do you not see the Elfking?".upper
+print "Father, do you not see the Elfking?".upper()
+print "Father, do you not see the Elfking?".methods
 

@@ -1,0 +1,8 @@
+oldMan = module()
+oldMan.info() = "Barefoot on the ice, \n\
+he staggers back and forth"
+hurdyGurdyMan = oldMan()
+hurdyGurdyMan.moreInfo() = "With numb fingers \n\
+he plays the best he can."
+print hurdyGurdyMan.moreInfo()
+print hurdyGurdyMan.info()

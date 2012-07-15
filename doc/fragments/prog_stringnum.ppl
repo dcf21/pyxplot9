@@ -1,0 +1,3 @@
+print types.number("23")
+print types.number("1610 1643 1715 1774".split()[2])
+print types.number("978-0230200951"[4:])

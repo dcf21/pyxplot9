@@ -1,0 +1,1 @@
+foreach m in "".methods() { print m ; }

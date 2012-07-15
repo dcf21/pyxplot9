@@ -186,25 +186,24 @@ Earth mass are defined as units in Pyxplot.}
 
 \subpart{Graph plotting}
 
-At its simplest, plotting a graph simply involved following the {\tt plot}
-command with the name of a function of by plotted, e.g.:
+The simplest way to plot a graph in Pyxplot is simply to follow the {\tt plot}
+command with the name of a function to be plotted, e.g.:
 
 \begin{verbatim}
 plot sin(x)
 \end{verbatim}
 
-\noindent or by specifying the name of a \datafile:
+\noindent If a \datafile\ is to be plotted, its filename is put in place of a
+named function. In this example the fifth column of a \datafile\ is plotted
+against the second, only including those \datapoint s where the fourth column
+is larger than two:
 
 \begin{verbatim}
 plot 'data.dat' using 2:5 select $4>2
 \end{verbatim}
 
-\noindent In the example above, the fifth column of a \datafile\ is plotted
-against the second, only including those \datapoint s where the fourth column
-is larger than two.
-
-In the example below, ranges are specified for the axes, and three Bessel
-functions are plotted:
+In the example below, three Bessel functions are plotted over specified
+horizontal and vertical ranges:
 
 \begin{verbatim}
 plot [0:10][-0.5:1] besselJ(0,x), besselJ(1,x), besselJ(2,x)
@@ -214,21 +213,24 @@ plot [0:10][-0.5:1] besselJ(0,x), besselJ(1,x), besselJ(2,x)
 \end{center}
 
 \noindent With a little additional configuration, it is possible to produce
-three-dimensional plots like this (see Example~\ref{ex:surface-sinc}):
+three-dimensional plots like this (this example is taken from
+Section~\ref{sec:surfaces}; see Example~\ref{ex:surface-sinc}):
 
 \begin{center}
 \includegraphics[width=8cm]{examples/eps/ex_surface_sinc}
 \end{center}
 
-\noindent It is also possible to produce colormaps with custom color scales,
-such as this one that uses Pyxplot's in-built functions for converting
-wavelengths of light into colors:
+\noindent It is also possible to produce colormaps with custom color scales;
+this is documented in full in Section~\ref{sec:colormaps}.  Pyxplot includes
+functions for converting wavelengths of light into colors; they are used here
+to create a color map of the electromagnetic spectrum:
 
 \begin{center}
 \includegraphics[width=7cm]{examples/eps/ex_spectrum_1}
 \end{center}
 
-\noindent or this pair that demonstrate RGB color mixing:
+\noindent This pair of images demonstrate RGB color mixing (see
+Example~\ref{sec:colmap_custom}):
 
 \begin{center}
 \includegraphics[width=6cm]{examples/eps/ex_spectrum_colmix1}
@@ -237,16 +239,18 @@ wavelengths of light into colors:
 
 \subpart{Generating data tables}
 
-Pyxplot can also produce tables of data, using a similar syntax to that used
-for plotting graphs:
+Pyxplot can output tables of data to disk, using a similar syntax to that used
+for plotting graphs. The data can either be sampled from functions, or read in
+from another \datafile:
 
 \begin{verbatim}
 tabulate tan(x)
 \end{verbatim}
 
-\noindent One application of this is filter or re-format the contents of
-\datafile s; this example takes only the third and seventh columns out of a
-\datafile, and converts the latter from degrees into radians:
+\noindent A common application of the {\tt tabulate} command is filter or
+re-format the contents of \datafile s. For example, the command below takes
+only the third and seventh columns out of a \datafile, and converts the latter
+from degrees into radians:
 
 \begin{verbatim}
 tabulate 'data.dat' using 3:$7*unit(deg)/unit(rad)
@@ -318,9 +322,12 @@ line from -5,0 to 5,0
 \end{verbatim}
 
 \noindent These commands are described in detail in
-Chapter~\ref{ch:vector_graphics}. They interface neatly to the vector type in
-Pyxplot's mathematical environment, to ease geometric construction. For
-example, this example draws a big arrow at angle $\theta$ to the vertical:
+Chapter~\ref{ch:vector_graphics}. They interface neatly to the vector data type
+in Pyxplot's mathematical environment, to ease geometric construction. Thus, it
+is quite possible for mathematically-minded users to multiply transformation
+matrices with position vectors on the graphics canvas to calculate where
+objects should be drawn. The following example uses a rotation matrix to draw a
+big arrow at angle $\theta$ to the vertical:
 
 \begin{verbatim}
 rotate(a) = matrix( [[cos(a),-sin(a)], \

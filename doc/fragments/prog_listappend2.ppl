@@ -1,5 +1,5 @@
-a = [1,2,3]
-call a.append(4)
-call a.insert(0,"zero")
-call a.insert(-2,"foo")
+a = ["William I"]
+call a.extend(["William II","Henry I"])
+call a.insert(0,"Edgar II")
+call a.insert(0,"Edward the Confessor")
 print a

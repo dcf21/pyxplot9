@@ -1,0 +1,6 @@
+poem = "On the last sabbath day of 1879\n"
+poem+= "Which shall be remembered for a very long time."
+print poem[10]
+print poem[10:]
+print poem[:10]
+print poem[5:10]

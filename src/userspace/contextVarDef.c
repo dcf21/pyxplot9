@@ -81,13 +81,16 @@ void ppl_contextVarHierLookup(ppl_context *c, int srcLineN, int srcId, char *src
      }
     else if (!last)
      {
-      *out = (pplObj *)ppl_dictLookup((dict *)(*out)->auxil, name);
+      dict *d = (dict *)(*out)->auxil;
+      if (d->immutable) { sprintf(c->errStat.errBuff,"Cannot %s '%s'.",last?"modify the immutable variable":"set variables in the immutable namespace",name); TBADD(ERR_NAMESPACE,stkPos[pos+offset]); return; }
+      *out = (pplObj *)ppl_dictLookup(d, name);
       if ((*out)==NULL) { sprintf(c->errStat.errBuff,"No such variable, '%s'.",name); TBADD(ERR_NAMESPACE,stkPos[pos+offset]); return; }
       if (((*out)->objType!=PPLOBJ_DICT)&&((*out)->objType!=PPLOBJ_MOD)&&((*out)->objType!=PPLOBJ_USER)) { sprintf(c->errStat.errBuff,"Cannot reference members of object of type '%s'.",pplObjTypeNames[(*out)->objType]); TBADD(ERR_TYPE,stkPos[pos+offset]); return; }
      }
     else
      {
       dict *d = (dict *)(*out)->auxil;
+      if (d->immutable) { sprintf(c->errStat.errBuff,"Cannot %s '%s'.",last?"modify the immutable variable":"set variables in the immutable namespace",name); TBADD(ERR_NAMESPACE,stkPos[pos+offset]); return; }
       *out = (pplObj *)ppl_dictLookup((dict *)(*out)->auxil, name);
       if ((*out)==NULL)
        {

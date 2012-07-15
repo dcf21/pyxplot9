@@ -50,19 +50,25 @@ which can be called like a function to create a new object of the type. See
 Section~\ref{sec:functions_types} for details of the arguments accepted by each
 prototype.
 
-All objects in Pyxplot have methods that can be called on them, using the generic syntax:
+All objects in Pyxplot have methods that can be called on them, using the
+generic syntax:
 
 \begin{verbatim}
 object.methodName(arguments)
 \end{verbatim}
 
-\noindent For example:
+\noindent Some methods are common to all objects. For example, all objects have
+a method {\tt str()} which produces a string representation of the object, as
+used by the {\tt print} command. They also all have a {\tt methods()} method,
+which returns a list of the names of all of the methods available for the
+object. For example:
 
 \vspace{3mm}
 \input{fragments/tex/types_methods.tex}
 \vspace{3mm}
 
-\noindent The sections below list the methods of each data type.
+\noindent As the above examples show, printing a method object returns brief
+documentation about it. The sections below list the methods of each data type.
 
 \section{Methods common to all data types}
 \label{sec:common_methods}

@@ -1,0 +1,4 @@
+types.number()
+types.number(true)
+types.number(27)
+types.number("1.2e39")

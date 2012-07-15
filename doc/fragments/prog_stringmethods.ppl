@@ -1,5 +1,8 @@
 x="It was the best of times, it was the worst of times"
 print x.len()
+print x.split()[0:5]
+print x.splitOn(",")
+print x.find("worst")
 print x[0:24]
 print x[-25:0]
 print x.upper()

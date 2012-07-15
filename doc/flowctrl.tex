@@ -182,12 +182,13 @@ is used in conjunction with the {\tt break} and {\tt continue} statements which
 will be introduced in Section~\ref{sec:breakcontinue}.
 
 \section{Foreach loops}
+\label{sec:foreach}
 \indcmd{foreach}
 \index{wildcards}
 
-Foreach loops may be used to run a script block once for each item in a list.
-The list may either take the form of a list object, or a filename wildcard, as
-in the following examples:
+Foreach loops may be used to run a script block once for each item in a list or
+dictionary. Alternatively, if a string is supplied, it is treated as a filename
+wildcard, and all matching files are returned.
 
 \begin{verbatim}
 foreach x in [-1,pi,10]
@@ -230,6 +231,9 @@ foreach x in "foo_*.dat" "bar_*.dat"
   plot x using 1:2
  }
 \end{verbatim}
+
+If a dictionary is supplied to loop over, then the loop variable iterates over
+each of the keys in the dictionary.
 
 \section{Foreach datum loops}
 \label{sec:foreach_datum}

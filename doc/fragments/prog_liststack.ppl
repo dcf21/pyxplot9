@@ -1,3 +1,5 @@
 myList = []
-for (i=1; i<4; i++) { call myList.append(i**2) ; }
-while (myList.len()>0) { print myList.pop() ; }
+myList.append("opening wardrobe")
+myList.append("opening sock drawer")
+myList.append("taking of sock")
+while (myList.len()>0) { print "Undo "+myList.pop() ; }

@@ -64,6 +64,7 @@ void pplfunc_call        (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_ceil        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_chr         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_classOf     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_cmp         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_cmyk        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_conjugate   (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_copy        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
@@ -128,6 +129,7 @@ void pplfunc_raise       (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_range       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_rgb         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_real        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_romanNum    (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_root        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_sec         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_sech        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);

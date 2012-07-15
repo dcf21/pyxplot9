@@ -1,0 +1,7 @@
+b = []
+b.append([1797,1828,"Schubert"])
+b.append([1770,1827,"Beethoven"])
+b.append([1756,1791,"Mozart"])
+print b.sortOnElement(0) # Order of birth
+print b.sortOnElement(1) # Order of death
+print b.sortOnElement(2) # Alphabetical order

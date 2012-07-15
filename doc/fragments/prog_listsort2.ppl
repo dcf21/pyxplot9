@@ -1,0 +1,6 @@
+absCmp(a,b) = cmp(abs(a),abs(b))
+a = range(-8,8)
+print a
+a = a.list()
+print a.sortOn(absCmp)
+print a.sort()

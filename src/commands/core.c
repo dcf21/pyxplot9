@@ -444,6 +444,7 @@ void ppl_directive_varset(ppl_context *c, parserLine *pl, parserOutput *in, int 
     obj->refCount = 1;
     ppl_garbageObject(obj);
     pplObjCpy(obj, val, 0, om, 1);
+    obj->immutable = 0;
     obj->refCount = rc;
    }
   else // regular expression

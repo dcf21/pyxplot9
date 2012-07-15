@@ -66,6 +66,7 @@ namespace, are listed in subsections below.
 \funcdef{ceil($x$)}{returns the smallest integer value greater than or equal to $x$, where $x$ must be a dimensionless real number.}
 \funcdef{chr($x$)}{returns the character with numerical ASCII code $x$.}
 \funcdef{classOf($x$)}{returns the class prototype of the object x, where $x$ may be of any object type.}
+\funcdef{cmp($a,b$)}{returns $1$ if $a>b$, $-1$ if $a<b$ and zero if $a=b$.}
 \funcdef{cmyk($c,m,y,k$)}{returns a color object with the specified CMYK components in the range 0--1.}
 \funcdef{conjugate($z$)}{returns the complex conjugate of the complex number $z$, which may have any physical dimensions.}
 \funcdef{copy($o$)}{returns a copy of the data structure $o$, which may be of any object type. Nested data structures are not copied; see deepcopy($o$) for this.}
@@ -138,6 +139,7 @@ namespace, are listed in subsections below.
 \funcdef{range([$f$],$l$,[$s$])}{returns a vector of uniformly-spaced numbers between $f$ and $l$, with stepsize $s$. If not specified, $f=0$ and $s=1$. If two arguments are specified, these are interpreted as $f$ and $l$. The arguments may have any physical units, so long as they match.}
 \funcdef{Re($z$)}{returns the real part of the complex number $z$, which may have any physical units. The number returned shares the same physical units as $z$.}
 \funcdef{rgb($r,g,b$)}{returns a color object with specified RGB components in the range 0--1.}
+\funcdef{romanNumeral($x$)}{returns the Roman numeral representing the number $x$, for any positive dimensionless real input less than 10,000.}
 \funcdef{root($z,n$)}{returns the $n$th root of $z$. $z$ may be any complex number, and may have any physical dimensions. $n$ must be a dimensionless integer. When complex arithmetic is enabled, and whenever $z$ is positive, this function is entirely equivalent to {\tt pow(z,1/n)}. However, when $z$ is negative and complex arithmetic is disabled, the expression {\tt pow(z,1/n)} may not be evaluated, since it will in general have a small imaginary part for any finite-precision floating-point representation of $1/n$. The expression {\tt root(z,n)}, on the other hand, may be evaluated under such conditions, providing that $n$ is an odd integer.}
 \funcdef{sec($z$)}{returns the secant of $z$, where $z$ may be any complex number and must either have physical dimensions of angle or be a dimensionless number, in which case it is understood to be measured in radians.}
 \funcdef{sech($z$)}{returns the hyperbolic secant of $z$, where $z$ may be any complex number and must either have physical dimensions of angle or be a dimensionless number, in which case it is understood to be measured in radians.}
@@ -371,7 +373,7 @@ The \texttt{types} module contains prototype objects for each of Pyxplot's data 
 \protdef{types.matrix(...)}{{\bf none} -- returns a one-by-one zero matrix. \item {\bf a pair of numbers} -- returns a zero matrix of the specified dimensions. The first number is the number of rows, and the second the number of columns. \item {\bf a matrix} -- returns a copy of the supplied matrix. \item {\bf one or more vectors, or a list of vectors} -- converts the supplied vector(s) into the {\bf columns} of a new matrix object. \item {\bf one or more lists, or a list of lists} -- converts the supplied list(s) into the {\bf rows} of a new matrix object, providing all the elements are numerical and have matching units.}
 \protdef{types.module(...)}{{\bf none} -- returns an empty module. \item {\bf a module} -- returns a deep copy of the supplied module.}
 \protdef{types.null(...)}{{\bf none} -- returns a null object.}
-\protdef{types.number(...)}{{\bf none} -- returns zero. \item {\bf a number} -- returns that number. \item {\bf a boolean} -- returns zero or one. \item {\bf a date} -- returns a numerical Unix time.}
+\protdef{types.number(...)}{{\bf none} -- returns zero. \item {\bf a number} -- returns that number. \item {\bf a boolean} -- returns zero or one. \item {\bf a string} -- converts the string to a number if it is in a valid format, or returns an error if not.}
 \protdef{types.string(...)}{{\bf none} -- returns an empty string. \item {\bf any object} -- returns a string representation of the object.}
 \protdef{types.type(...)}{Cannot be called. New data types cannot be created except by instantiating modules.}
 \protdef{types.vector(...)}{{\bf none} -- returns the vector [0]. \item {\bf a number} -- returns a zero vector with the specified number of dimensions. \item {\bf a vector} -- returns a copy of the supplied vector. \item {\bf a list} -- converts the supplied list to a vector, providing all of its elements are numerical and have consistent units. \item {\bf a list of arguments} returns its arguments as a vector, providing they are all numerical and have consistent units.}
