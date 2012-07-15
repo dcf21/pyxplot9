@@ -1,0 +1,4 @@
+a = vector(10)*unit(m)
+print a
+a[5] = unit(inch)
+print a

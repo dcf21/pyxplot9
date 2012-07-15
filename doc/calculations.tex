@@ -84,7 +84,7 @@ mathematical constants which are accessible in the user's default namespace:
 \vspace{3mm}
 
 \noindent Others, such as physical constants, are of more specialist interest and are
-definted in modules. For example, the speed of light is defined in the module
+defined in modules. For example, the speed of light is defined in the module
 {\tt phy}:
 
 \vspace{3mm}
@@ -247,7 +247,7 @@ f(x) = 0
 f(x)[0:] = 1
 \end{verbatim}
 
-Similar effects may also be achieved using the terniary conditional {\tt ?:}
+Similar effects may also be achieved using the ternary conditional {\tt ?:}
 operator (see Section~\ref{sec:conditional_operator}), for example:
 
 \begin{verbatim}
@@ -1056,7 +1056,7 @@ Finally, this maximum could also be found using Pyxplot's built-in function {\tt
 
 Time-series data often need special consideration when intervals of days or
 months are spanned. It is not straightforward to convert a series of calendar
-dates into elapsed times between the datapoints.  Months have non-uniform
+dates into elapsed times between the \datapoint s.  Months have non-uniform
 lengths of the months, and some years have an extra leap day.
 
 To simplify the process of working with dates and times, Pyxplot has a {\tt
@@ -1285,23 +1285,22 @@ However, Pyxplot's default input filter for {\tt .log} files (see Section~\ref{s
 \vspace{3mm}\newline\noindent{\tt\footnotesize 127.0.0.1 - -~~[~14~~6~~2012~16~43~18~+0100~]~~"GET~~~HTTP 1.1" 200 484 "-" "Mozilla/5.0 (X11; Linux x86\_64) AppleWebKit/535.19 (KHTML, like Gecko) Ubuntu/12.04 Chromium/18.0.1025.151 Chrome/18.0.1025.151 Safari/535.19"}\vspace{3mm}\newline
 such that the day, month, year, hour, minute and second components of the date
 are contained in the 5th to 10th white-space-separated columns respectively.
-In the script below, the {\tt time\_\-julianday()} is then used to convert
-these components into Julian Days, and the \indcmdt{histogram} (see
+In the script below, the {\tt time.fromCalendar()} function and {\tt toUnix()} method are then used to convert
+these components into Unix times. The \indcmdt{histogram} (see
 Section~\ref{sec:histogram}) is used to sort each of the web accesses recorded
 in the Apache log file into hour-sized bins.  Because this may be a
 time-consuming process for large log files on busy servers, we use the
 \indcmdt{tabulate} (see Section~\ref{sec:tabulate}) to store the data into a
-temporary datafile on disk before deciding how to plot it:
+temporary \datafile on disk before deciding how to plot it:
 \nlscf
 \input{examples/tex/ex_apachelog_1.tex}
 \nlscf
 Having stored our histogram in the file {\tt apache.dat}, we
 now plot the resulting histogram, labelling the horizontal axis with the days
 of the week.  The commands used to achieve this will be introduced in
-Chapter~\ref{ch:plotting}. Note that the major axis ticks along the horizontal
-axis are placed not at integer Julian Days, which fall at midday on each day,
-but at ---$.5$, which falls at midnight on each day. Minor axis ticks are
-placed along the axis every quarter day, i.e.\ every six hours.
+Chapter~\ref{ch:plotting}. The major axis ticks along the horizontal axis are
+placed at daily intervals, and minor axis ticks are placed along the axis every
+quarter day, i.e.\ every six hours.
 \nlscf
 \input{examples/tex/ex_apachelog_2.tex}
 \nlscf

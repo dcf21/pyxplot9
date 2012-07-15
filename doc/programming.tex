@@ -282,7 +282,7 @@ the next chapter:
 Section~\ref{sec:string_methods}. As in {\tt python}, the {\tt strip()} method
 removes whitespace characters from the beginning and end of strings, and the
 {\tt split()} method splits a string up into whitespace-separated words. The
-{\tt splitOn(x)} method splits a string on all occurances of the sub-string
+{\tt splitOn(x)} method splits a string on all occurrences of the sub-string
 {\tt x}.  The following simple examples demonstrate the use of some of them:
 
 \vspace{3mm}
@@ -350,7 +350,7 @@ recognised by the =$\sim$ operator.
 
 \section{Lists}
 
-List objects hold ordered sequencies of other Pyxplot objects, which may
+List objects hold ordered sequences of other Pyxplot objects, which may
 include lists and dictionaries to create hierarchical data structures. They are
 created by enclosing a comma-separated list of objects by square brackets:
 
@@ -487,12 +487,11 @@ arbitrary list of arguments:
 \vspace{3mm}
 
 \subsection{List mapping and filtering}
+\label{sec:listfilter}
 
 \subsection{Vectors versus lists}
 
 common units. stored more efficiently.
-
-\subsection{Plotting data from lists}
 
 Data from lists can also be plotted onto graphs, but the list must first be
 converted into a vector. See~\ref{sec:vectors} for more information.
@@ -502,15 +501,129 @@ converted into a vector. See~\ref{sec:vectors} for more information.
 \section{Vectors and matrices}
 \label{sec:vectors}
 
-\subsection{Lists versus vectors}
+Vectors are similar to lists, except that all of their elements must be real
+numbers, and that all of the elements of any given vector must share common
+physical dimensions.  Vectors are stored much more efficiently in memory than
+lists, since information about the types and physical units of each of the
+elements need not be stored. In addition they support a wide range of vector
+and matrix arithmetic operations.
 
-\subsection{Vector and matrix algebra}
+For example, applying the addition {\tt +} operator to two lists concatenates
+the lists together, meanwhile the same operator applied to two vectors performs
+vector addition:
+
+\vspace{3mm}
+\input{fragments/tex/prog_vectoradd.tex}
+\vspace{3mm}
+
+In fact, whilst vectors do support the same {\tt append} and {\tt extend}
+methods as lists, to add either a single new element, or a list of new
+elements, to the end of the vector, these are very time consuming methods to
+run. It is much more efficient to create a vector of the desired length, and
+then to populate it with elements:
+
+\vspace{3mm}
+\input{fragments/tex/prog_vectorfill.tex}
+\vspace{3mm}
+
+As the above example demonstrates, the {\tt vector()} prototype can take not
+only a list or vector from which to make a vector object copy, but
+alternatively a single integer, which creates a zeroed vector of the specified
+length.
+
+Similarly, the {\tt matrix()} prototype can create a matrix from a list of
+lists, a list of vectors, a series of list arguments, a series of vector
+arguments, or two integers. In the final case, a zero matrix with the specified
+number of rows and columns is returned. If a matrix is specified as a series of
+vectors, these are taken to be the columns of the matrix; but if the matrix is
+specified as a series of lists, these are taken to be the rows of the matrix:
+
+\vspace{3mm}
+\input{fragments/tex/prog_matrixinit.tex}
+\vspace{3mm}
+
+Like vectors, matrices can have physical units, and adding two matrices together performs element-wise addition:
+
+\vspace{3mm}
+\input{fragments/tex/prog_matrixadd.tex}
+\vspace{3mm}
 
 \subsection{Dot and cross products}
 
-\subsection{Vector positions on the graphics canvas}
+The dot product of two vectors can be found simply by multiplying the two vectors together:
+
+\vspace{3mm}
+\input{fragments/tex/prog_vectoradd.tex}
+\vspace{3mm}
+
+\noindent
+The cross product of two vectors, which is only defined for pairs of three-element vectors, can be found by passing the two vectors to the {\tt cross(a,b)} function:
+
+\vspace{3mm}
+\input{fragments/tex/prog_vectorcross.tex}
+\vspace{3mm}
+
+
+\subsection{Matrix algebra}
+
+Matrices can be multiplied by one another and by vectors to perform matrix
+arithmetic. This not only allows matrix equations to be solved, but also allows
+transformation matrices to be applied to vector positions on the vector
+graphics canvas. All of Pyxplot's vector graphics commands, which will be
+described in detail in Chapter~\ref{ch:vector_graphics} can accept positions on
+the canvas as either comma-separated numerical components, or as vector
+objects. The following example demonstrates the use of a rotation matrix:
+
+\begin{verbatim}
+rotate(a) = matrix( [[cos(a),-sin(a)], \
+                     [sin(a), cos(a)] ] )
+pos = vector(0,5)*unit(cm)
+theta = 30*unit(deg)
+arrow from 0,0 to rotate(theta)*pos with linewidth 3
+\end{verbatim}
+
+In addition to matrix multiplication, other arithmetic operations are available
+via the methods of matrix objects. Their methods {\tt diagonal()} and {\tt
+symmetric()} return {\tt true} or {\tt false} as appropriate. Their {\tt size()}
+method returns the vector size of the matrix (rows, columns). Their {\tt det()}
+method returns the determinate of the matrix and their {\tt transpose()} method
+returns the matrix transpose.
+
+Among more complex operations, {\tt inv()} returns the inverse of a matrix,
+{\tt eigen\-values()} returns a vector of the matrix's eigen\-values, and {\tt
+eigen\-vectors()} returns a list of the matrix's corresponding eigen\-vectors.
 
 \subsection{Plotting data from vectors}
+
+Vectors can be used to pass calculated data to the \indcmdt{plot} for plotting.
+Instead of supplying the name of a \datafile, or a function to be plotted, a
+series of colon-separated vector objects should be passed to the
+\indcmdt{plot}. Each of the vectors should be the same length; the $n$th
+elements of each of the vectors are put together to form the columns of data
+for the $n$th \datapoint.
+
+The following example draws 100 random points on a graph:
+
+\begin{verbatim}
+N=100
+a=vector(N) ; b=vector(N)
+for i=0 to 99 { a[i]=random.random() ; }
+for i=0 to 99 { b[i]=random.random() ; }
+plot [0:1][0:1] a:b
+\end{verbatim}
+
+Vectors support the same {\tt filter()}, {\tt map()} and {\tt reduce()} methods
+as lists (see Section~\ref{sec:listfilter}), and these can prove especially
+useful for preparing data for plotting. The following example selects fifty
+random points along the $x$-axis, and uses them to plot $\sin(x)$:
+
+\begin{verbatim}
+N=50
+a=vector(N)
+for i=0 to 99 { a[i]=random.random() ; }
+b=a.map(sin)
+plot [0:1][0:1] a:b
+\end{verbatim}
 
 \section{Colors}
 

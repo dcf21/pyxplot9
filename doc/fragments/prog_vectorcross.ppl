@@ -1,0 +1,3 @@
+a = vector(1,4,1)
+b = vector(2,3,2)
+print cross(a,b)
