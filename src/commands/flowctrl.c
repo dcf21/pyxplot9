@@ -260,7 +260,7 @@ void ppl_directive_for(ppl_context *c, parserLine *pl, parserOutput *in, int int
       ppl_parserExecute(c, plc, NULL, interactive, iterDepth+1);
       if (c->errStat.status) { strcpy(c->errStat.errBuff,""); TBADD(ERR_GENERIC,"for loop"); goto cleanup; }
       while (c->stackPtr>stkLevelOld) { STACK_POP; }
-      if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; continue; }
+      if ((c->shellContinued)&&((c->shellBreakLevel==iterDepth)||(c->shellBreakLevel<0))) { c->shellContinued=0; c->shellBreakLevel=0; }
       if ((c->shellBroken)||(c->shellContinued)||(c->shellReturned)||(c->shellExiting)) break;
       if (endGot)
        {

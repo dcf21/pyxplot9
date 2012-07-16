@@ -171,11 +171,16 @@ The syntax
 for (a; b; c) { ... ; }
 \end{verbatim}
 
-is equivalent to
+\noindent is {\it almost} equivalent to
 
 \begin{verbatim}
 a; while (b) { ... ; c ; }
 \end{verbatim}
+
+\noindent with the single exception that {\tt continue} statements behave
+slightly differently.  In the C form of the \indcmdt{for}, the {\tt continue}
+statement executes the expression {\tt c} before the next iteration is started,
+even though the {\tt while} loop above would not.
 
 The optional {\tt loopname} which can be specified in the {\tt for} statement
 is used in conjunction with the {\tt break} and {\tt continue} statements which
