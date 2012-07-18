@@ -1,0 +1,4 @@
+factors = primeFactors(1001)
+print factors
+romanFactors = factors.map(romanNumeral)
+print romanFactors

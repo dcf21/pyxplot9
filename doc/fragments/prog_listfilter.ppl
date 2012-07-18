@@ -1,0 +1,4 @@
+txt = "once upon a time, there was a"
+list = txt.split()
+longWord(x) = x.len()>3
+print list.filter(longWord)

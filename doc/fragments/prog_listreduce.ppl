@@ -1,0 +1,3 @@
+multiply(x,y) = x*y
+factors = primeFactors(1001)
+print factors.reduce(multiply)
