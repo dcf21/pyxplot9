@@ -76,6 +76,7 @@ typedef struct dviInterpreterState
   list *fonts;               // The fonts currently defined
   postscriptState *output;   // The output postscript
   int special;               // A magic flag for special actions
+  int specialLen;            // Number of characters in special command
   char *spString;            // String to store special information
   list *colStack;            // Stack of colour items
   double *boundingBox;       // Current bounding box

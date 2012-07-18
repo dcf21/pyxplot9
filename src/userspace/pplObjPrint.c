@@ -232,7 +232,7 @@ void pplObjPrint(ppl_context *c, pplObj *o, char *oname, char *out, int outlen, 
          }
         strcpy(out+i,")");
         i+=strlen(out+i);
-        if (!o->dimensionless) sprintf(out+i, "*%s", unit);
+        if (!o->dimensionless) sprintf(out+i, "%s", unit);
        }
       else
        {

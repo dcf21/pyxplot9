@@ -76,6 +76,8 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_dictAppendCpy(d  , "euler"     , (void *)&v , sizeof(v)); // Euler constant
     v.real = (1.0+sqrt(5))/2.0;
     ppl_dictAppendCpy(d  , "goldenRatio", (void *)&v , sizeof(v)); // Golden Ratio
+    v.real = GSL_NAN;
+    ppl_dictAppendCpy(d  , "nan"       , (void *)&v , sizeof(v)); // nan
     v.real = 0.0;
     v.imag = 1.0;
     v.flagComplex = 1;

@@ -53,6 +53,7 @@
 #include "userspace/garbageCollector.h"
 #include "userspace/pplObj_fns.h"
 #include "userspace/pplObjCmp.h"
+#include "userspace/pplObjDump.h"
 #include "userspace/pplObjFunc.h"
 #include "userspace/pplObjMethods.h"
 #include "userspace/pplObjPrint.h"
@@ -1912,6 +1913,13 @@ static void pplmethod_fileClose(ppl_context *c, pplObj *in, int nArgs, int *stat
    }
  }
 
+static void pplmethod_fileDump(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplFile *f = (pplFile *)in[-1].self_this->auxil;
+  pplObjDump(c, &in[0], f->file);
+  return;
+ }
+
 static void pplmethod_fileEof(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   pplFile *f = (pplFile *)in[-1].self_this->auxil;
@@ -2177,6 +2185,7 @@ void pplObjMethodsInit(ppl_context *c)
 
   // File methods
   ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"close",0,0,1,1,1,1,(void *)pplmethod_fileClose,"close()", "\\mathrm{close}@<@>", "close() closes a file handle");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"dump",1,1,0,0,0,0,(void *)pplmethod_fileDump,"dump()", "\\mathrm{dump@<@0@>", "dump(x) writes a typeable ASCII representation of the object x to the file handle");
   ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"eof",0,0,1,1,1,1,(void *)pplmethod_fileEof,"eof()", "\\mathrm{eof}@<@>", "eof() returns a boolean flag to indicate whether the end of a file has been reached");
   ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"flush",0,0,1,1,1,1,(void *)pplmethod_fileFlush,"flush()", "\\mathrm{flush}@<@>", "flush() flushes any buffered data which has not yet physically been written to a file");
   ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"getPos",0,0,1,1,1,1,(void *)pplmethod_fileGetpos,"getPos()", "\\mathrm{getPos}@<@>", "getPos() returns a file handle's current position in a file");
@@ -2184,7 +2193,7 @@ void pplObjMethodsInit(ppl_context *c)
   ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"read",0,0,1,1,1,1,(void *)pplmethod_fileRead,"read()", "\\mathrm{read}@<@>", "read() returns the contents of a file as a string");
   ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"readline",0,0,1,1,1,1,(void *)pplmethod_fileReadline,"readline()", "\\mathrm{readline}@<@>", "readline() returns a single line of a file as a string");
   ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"readlines",0,0,1,1,1,1,(void *)pplmethod_fileReadlines,"readlines()", "\\mathrm{readlines}@<@>", "readlines() returns the lines of a file as a list of strings");
-  ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"setPos",1,1,1,1,1,1,(void *)pplmethod_fileSetpos,"setPos(x)", "\\mathrm{setPos}@<@>", "setPos(x) sets a file handle's current position in a file");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"setPos",1,1,1,1,1,1,(void *)pplmethod_fileSetpos,"setPos(x)", "\\mathrm{setPos}@<@0@>", "setPos(x) sets a file handle's current position in a file");
   ppl_addSystemMethod(pplObjMethods[PPLOBJ_FILE],"write",1,1,0,0,0,0,(void *)pplmethod_fileWrite,"write(x)", "\\mathrm{write}@<@0@>", "write(x) writes the string x to a file");
 
   // Exception methods

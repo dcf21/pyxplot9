@@ -142,7 +142,8 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
       case PPLOBJ_MOD:
       case PPLOBJ_USER:
         if      (nArgs==0) { pplObjModule(out,0,1,0); }
-        else if (nArgs==1) { if ((args[0].objType==PPLOBJ_MOD)||(args[0].objType==PPLOBJ_USER)) pplObjDeepCpy(out,&args[0],0,0,1);
+        else if (nArgs==1) { if ((args[0].objType==PPLOBJ_MOD)||(args[0].objType==PPLOBJ_USER)||(args[0].objType==PPLOBJ_DICT))
+                              { pplObjDeepCpy(out,&args[0],0,0,1); out->objType=PPLOBJ_MOD; }
                              else { sprintf(context->errStat.errBuff,"The first argument to the module/instance object constructor should be a module or instance; an object of type <%s> was supplied.",pplObjTypeNames[args[0].objType]); TBADD(ERR_TYPE); }
                            }
         else               { sprintf(context->errStat.errBuff,"The module/instance object constructor takes zero or one arguments; %d supplied.",nArgs); TBADD(ERR_TYPE); }

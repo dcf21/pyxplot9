@@ -112,7 +112,7 @@ int dviInterpretOperator(pplerr_context *ec, dviInterpreterState *interp, DVIOpe
   // Deal with the processing of DVI extensions (DIV_XXX/SPECIAL)
   if (interp->special > 0)
    {
-    if (op->op <= DVI_CHARMAX)
+    if ((op->op <= DVI_CHARMAX) && (interp->specialLen-->0))
      {
       return dviSpecialChar(ec, interp, op);
      } else {
@@ -549,6 +549,7 @@ int dviInOpSpecial1234(pplerr_context *ec, dviInterpreterState *interp, DVIOpera
   int spesh;
   spesh = op->op - DVI_SPECIAL1234+1;
   interp->special = spesh;
+  interp->specialLen = op->ul[0];
   interp->spString = (char *)ppl_memAlloc(SSTR_LENGTH);
   if (interp->spString==NULL) { ppl_error(ec, ERR_MEMORY, -1, -1,"Out of memory"); return DVIE_MEMORY; }
   *(interp->spString) = '\0';
