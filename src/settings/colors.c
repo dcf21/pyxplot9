@@ -77,32 +77,6 @@ int ppl_colorFromObj   (ppl_context *c, const pplObj *col, int *outcol, int *out
       palette_index1 = (k1-1)%j; while (palette_index1 < 0) palette_index1+=j;
       palette_index2 = (k2-1)%j; while (palette_index2 < 0) palette_index2+=j;
 
-// ALWAYS DO COLOR MIXING -- OTHERWISE CMYK COLORS MAY RENDER DIFFERENTLY FROM CMYK COLORS
-//
-//    if (w2<1e-3) // If weight for color 2 is very small, use color 1 (preserving original color space)
-//     {
-//      *outcol      = c->set->palette_current [palette_index1];
-//      *outcolspace = c->set->paletteS_current[palette_index1];
-//      *outcol1     = c->set->palette1_current[palette_index1];
-//      *outcol2     = c->set->palette2_current[palette_index1];
-//      *outcol3     = c->set->palette3_current[palette_index1];
-//      *outcol4     = c->set->palette4_current[palette_index1];
-//      if (USEcol    !=NULL) *USEcol      = (*outcol >0);
-//      if (USEcol1234!=NULL) *USEcol1234  = (*outcol==0);
-//     }
-//    else if (w1<1e-3) // If weight for color 1 is very small, use color 2 (preserving original color space)
-//     {
-//      *outcol      = c->set->palette_current [palette_index2];
-//      *outcolspace = c->set->paletteS_current[palette_index2];
-//      *outcol1     = c->set->palette1_current[palette_index2];
-//      *outcol2     = c->set->palette2_current[palette_index2];
-//      *outcol3     = c->set->palette3_current[palette_index2];
-//      *outcol4     = c->set->palette4_current[palette_index2];
-//      if (USEcol    !=NULL) *USEcol      = (*outcol >0);
-//      if (USEcol1234!=NULL) *USEcol1234  = (*outcol==0);
-//     }
-//    else // Otherwise do weighted color mixing in RGB space
-
        {
         double r1,g1,b1,r2,g2,b2;
         double i11,i12,i13,i14,i21,i22,i23,i24;
@@ -146,11 +120,9 @@ int ppl_colorFromObj   (ppl_context *c, const pplObj *col, int *outcol, int *out
         else if (s2==SW_COLSPACE_CMYK) pplcol_CMYKtoRGB(i21,i22,i23,i24,&r2,&g2,&b2);
         else                           pplcol_HSBtoRGB (i21,i22,i23,&r2,&g2,&b2);
         *outcol      = 0;
-        *outcolspace = SW_COLSPACE_RGB;
-        *outcol1     = r1*w1 + r2*w2;
-        *outcol2     = g1*w1 + g2*w2;
-        *outcol3     = b1*w1 + b2*w2;
-        *outcol4     = 0.0;
+        *outcolspace = SW_COLSPACE_CMYK;
+         pplcol_RGBtoCMYK(  r1*w1 + r2*w2  ,  g1*w1 + g2*w2  , b1*w1 + b2*w2  ,
+                          outcol1, outcol2, outcol3, outcol4);
         if (USEcol    !=NULL) *USEcol      = 0;
         if (USEcol1234!=NULL) *USEcol1234  = 1;
        }

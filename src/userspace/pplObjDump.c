@@ -47,6 +47,7 @@ void pplObjDump(ppl_context *c, pplObj *o, FILE *output)
   int t;
   const int NSigFigs = 17;
 
+  if (cancellationFlag) return;
   if (o==NULL) { fprintf(output, "types.null()"); return; }
   t = o->objType;
   switch (t)
@@ -97,6 +98,7 @@ void pplObjDump(ppl_context *c, pplObj *o, FILE *output)
       fprintf(output,"{");
       while ((item = (pplObj *)ppl_dictIterate(&iter, &key))!=NULL)
        {
+        if (cancellationFlag) break;
         if ((item->objType==PPLOBJ_GLOB) || (item->objType==PPLOBJ_ZOM)) continue; // Hide globals and zombies
         if (!first) fprintf(output,",");
         ppl_strEscapify(key, buffer);
@@ -118,6 +120,7 @@ void pplObjDump(ppl_context *c, pplObj *o, FILE *output)
 
       while ((item = (pplObj *)ppl_dictIterate(&iter, &key))!=NULL)
        {
+        if (cancellationFlag) break;
         if ((item->objType==PPLOBJ_GLOB) || (item->objType==PPLOBJ_ZOM)) continue; // Hide globals and zombies
         if (!first) fprintf(output,",");
         ppl_strEscapify(key, buffer);
@@ -136,6 +139,7 @@ void pplObjDump(ppl_context *c, pplObj *o, FILE *output)
       fprintf(output,"[");
       while ((item = (pplObj *)ppl_listIterate(&iter))!=NULL)
        {
+        if (cancellationFlag) break;
         if (!first) fprintf(output,",");
         pplObjDump(c, item, output);
         first=0;
@@ -156,6 +160,7 @@ void pplObjDump(ppl_context *c, pplObj *o, FILE *output)
 
       for(j=0; j<v->size; j++)
        {
+        if (cancellationFlag) break;
         if (j>0) fprintf(output,",");
         fprintf(output,"%s",ppl_numericDisplay(gsl_vector_get(v,j)*real, c->numdispBuff[0], NSigFigs, 0));
        }
@@ -178,10 +183,12 @@ void pplObjDump(ppl_context *c, pplObj *o, FILE *output)
 
         for(j=0; j<m->size1; j++)
          {
+          if (cancellationFlag) break;
           if (j>0) fprintf(output,",");
           fprintf(output,"[");
           for(k=0; k<m->size2; k++)
            {
+            if (cancellationFlag) break;
             if (k>0) fprintf(output,",");
             fprintf(output,"%s",ppl_numericDisplay(gsl_matrix_get(m,j,k)*real, c->numdispBuff[0], NSigFigs, 0));
            }

@@ -489,14 +489,51 @@ arbitrary list of arguments:
 \subsection{List mapping and filtering}
 \label{sec:listfilter}
 
+The methods {\tt filter(f)}, {\tt map(f)} and {\tt reduce(f)} can be used to
+perform actions on all of the members of a list in turn. {\tt filter(f)} takes
+a function of one argument as its argument, and returns a new list of all of
+the members {\tt x} of the original list for which {\tt f(x)} tests true. For
+example:
+
+\vspace{3mm}
+\input{fragments/tex/prog_listfilter.tex}
+\vspace{3mm}
+
+The method {\tt map(f)} also takes a function of one argument as its argument,
+and returns a list of the results {\tt f(x)} for each of the members {\tt x} of
+the original list. In other words, if {\tt f} were {\tt sin}, and the original
+list contained values of {\tt x}, the result would be a list of values of {\tt
+sin(x)}. This example converts a list of numbers into Roman numerals:
+
+\vspace{3mm}
+\input{fragments/tex/prog_listmap.tex}
+\vspace{3mm}
+
+The method {\tt reduce(f)} takes a pointer to a function of two arguments. It
+first calls $f(a,b)$ on the first two elements of the list, and then continues
+through the list calling $f(a,b)$ on the result and the next item in the list.
+The final result is returned:
+
+\vspace{3mm}
+\input{fragments/tex/prog_listreduce.tex}
+\vspace{3mm}
+
+
 \subsection{Vectors versus lists}
 
-common units. stored more efficiently.
+Vectors are similar to lists, except that all of their elements must be real
+numbers, and that all of the elements of any given vector must share common
+physical dimensions.  Vectors are stored much more efficiently in memory than
+lists, since information about the types and physical units of each of the
+elements need not be stored. In addition they support a wide range of vector
+and matrix arithmetic operations.
 
 Data from lists can also be plotted onto graphs, but the list must first be
 converted into a vector. See~\ref{sec:vectors} for more information.
 
 \section{Dictionaries}
+
+
 
 \section{Vectors and matrices}
 \label{sec:vectors}
@@ -803,6 +840,7 @@ Alternatively, if what is wanted is a temporary scratch space, the {\tt os.tmpfi
 The following methods are defined for file handles:
 
 \methdef{close()}{closes a file handle.}
+\methdef{dump($x$)}{stores a typeable ASCII representation of the object $x$ to a file. Note that this method has no checking for recursive hierarchical data structures.}
 \methdef{eof()}{returns a boolean flag to indicate whether the end of a file has been reached.}
 \methdef{flush()}{flushes any buffered data which has not yet physically been written to a file.}
 \methdef{getPos()}{returns a file handle's current position in a file.}
@@ -813,3 +851,17 @@ The following methods are defined for file handles:
 \methdef{setPos($x$)}{sets a file handle's current position in a file.}
 \methdef{write($x$)}{writes the string $x$ to a file.}
 
+\subsection{Storing data structures in text files}
+
+The {\tt dump(x)} method of file handles is provided as a means of writing a
+typeable ASCII representation of the object {\tt x} to file, for later recovery
+using the {\tt load} command. It is similar to the {\tt pickle()} function in
+Python.
+
+There is no limit to the depth to which it will traverse hierarchically nested
+data structures, and will produce output of infinite length if there is
+recursive nesting.
+
+Note that it is not able to store representations of function definitions or
+file handles, which are stored as null objects; class instances lose their
+relationship with their parents and are stored as free-standing modules.

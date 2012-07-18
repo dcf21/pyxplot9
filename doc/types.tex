@@ -132,6 +132,7 @@ Objects of type \texttt{boolean} have no methods other than those common to all 
 \label{sec:fileHandle_methods}
 
 \methdef{close()}{closes a file handle.}
+\methdef{dump($x$)}{stores a typeable ASCII representation of the object $x$ to a file. Note that this method has no checking for recursive hierarchical data structures.}
 \methdef{eof()}{returns a boolean flag to indicate whether the end of a file has been reached.}
 \methdef{flush()}{flushes any buffered data which has not yet physically been written to a file.}
 \methdef{getPos()}{returns a file handle's current position in a file.}
