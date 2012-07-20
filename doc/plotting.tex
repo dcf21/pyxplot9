@@ -382,7 +382,7 @@ bars are placed along the abscissa axis and how wide the bars are.  In the
 between the specified \datapoint s by default (see, for example,
 Figure~\ref{fig:ex_barchart2}a).  Alternatively, the widths of the bars may be
 set using the {\tt set boxwidth} command. In this case, all of the bars will be
-centred upon their specified $x$-coordinates, and have total widths equalling
+centered upon their specified $x$-coordinates, and have total widths equalling
 that specified in the \indcmdt{set boxwidth}. Consequently, there may be gaps
 between them, or they may overlap, as seen in Figure~\ref{fig:ex_barchart2}(b).
 
@@ -492,7 +492,7 @@ crosses.  These plot styles differ in their placement of the edges of each of
 the horizontal steps.  The \indpst{steps} plot style places the right-most edge
 of each step on the \datapoint\ it represents.  The \indpst{fsteps} plot style
 places the left-most edge of each step on the \datapoint\ it represents.  The
-\indpst{histeps} plot style centres each step upon the \datapoint\ it
+\indpst{histeps} plot style centers each step upon the \datapoint\ it
 represents.
 
 \subsection{Arrows}
@@ -764,7 +764,7 @@ y & = & (R + r\cos(v))\sin(u)  \\
 z & = & r\sin(v)  ,
 \end{eqnarray*}
 where $u$ and $v$ both run in the range $[0:2\pi]$, $R$ is the distance of the
-tube's centre from the centre of the torus, and $r$ is the radius of the tube.
+tube's center from the center of the torus, and $r$ is the radius of the tube.
 \nlscf
 \input{examples/tex/ex_torus_1.tex}
 \nlscf
@@ -829,7 +829,7 @@ set key top right
 
 The following recognised positional keywords are self-explanatory:
 \indkeyt{top}, \indkeyt{bottom}, \indkeyt{left}, \indkeyt{right},
-\indkeyt{xcentre} and \indkeyt{ycentre}. Any single instance of the
+\indkeyt{xcenter} and \indkeyt{ycenter}. Any single instance of the
 \indcmdt{set key} can be followed by one horizontal alignment keyword and one
 vertical alignment keyword; these keywords also affect the justification of the
 legend -- for example, the keyword \indkeyt{left} aligns the legend with its
@@ -839,18 +839,18 @@ Alternatively, the position of the legend can be indicated using one of the
 keywords \indkeyt{outside}, \indkeyt{below} or \indkeyt{above}. These cannot be
 combined with the horizontal and vertical alignment keywords above, and are
 used to indicate that the legend should be placed, respectively, outside the
-plot on its right side, centred beneath the plot, and centred above the plot.
+plot on its right side, centered beneath the plot, and centered above the plot.
 
 Two comma-separated positional offset coordinates may be specified following
 any of the named positions listed above to fine-tune the position of the legend
 -- the first value is assumed to be a horizontal offset and the second a
 vertical offset. Either may have units of length, or, if they are
-dimensionless, are assumed to be measured in centimetres, as the following
+dimensionless, are assumed to be measured in centimeters, as the following
 examples demonstrate:
 
 \begin{verbatim}
 set key bottom left 0.0 -2
-set key top xcentre 2*unit(mm),2*unit(mm)
+set key top xcenter 2*unit(mm),2*unit(mm)
 \end{verbatim}
 
 By default, entries in the legend are automatically sorted into an appropriate
@@ -954,7 +954,7 @@ thereafter no data with any other physical dimensions may be plotted against
 that axis. When the axis comes to be drawn, Pyxplot makes a decision about
 which physical unit should be used to label the axis. For example, in the
 default SI system and with no preferred unit of length set, axes with units of
-length might be displayed in millimetres, metres or kilometres depending upon
+length might be displayed in millimeters, meters or kilometers depending upon
 their scales.
 
 The chosen unit is indicated in one of three styles in the axis label, selected
@@ -1446,7 +1446,7 @@ specifies that the position is to be measured along the $n\,$th horizontal or
 vertical axis -- for example, {\tt axis3}.\indcmd{set arrow} This allows the
 graph to be measured with reference to any arbitrary axis on plots which make
 use of large numbers of parallel axes (see Section~\ref{sec:multiple_axes}).
-The \indcot{page} and \indcot{graph} systems both measure in centimetres from
+The \indcot{page} and \indcot{graph} systems both measure in centimeters from
 the origin of the graph. In the following example, we use these specifiers, and
 specify coordinates using variables rather than doing so explicitly:
 
@@ -1519,8 +1519,8 @@ set textcolor blue
 \index{text!alignment}\index{alignment!text}By default, each label's specified
 position corresponds to its bottom left corner. This alignment may be changed
 with the \indcmdts{set texthalign} and \indcmdts{set textvalign} commands. The
-former takes the options \indkeyt{left}, \indkeyt{centre} or \indkeyt{right},
-and the latter takes the options \indkeyt{bottom}, \indkeyt{centre} or
+former takes the options \indkeyt{left}, \indkeyt{center} or \indkeyt{right},
+and the latter takes the options \indkeyt{bottom}, \indkeyt{center} or
 \indkeyt{top}, for example:
 
 \begin{verbatim}

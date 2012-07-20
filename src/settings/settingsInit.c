@@ -55,7 +55,7 @@ void pplset_makedefault(ppl_context *context)
   int    Nchars,i,gotPaperSize;
   double PaperWidth, PaperHeight;
   pplObj tempval;
-  char   ConfigFname[FNAME_LENGTH];
+  char   ConfigFname[FNAME_LENGTH], *ConfigFnamePtr = &ConfigFname[0];
   char  *PaperSizePtr;
   ppl_settings *s = context->set;
   pplerr_context *se = &context->errcontext;
@@ -398,7 +398,7 @@ void pplset_makedefault(ppl_context *context)
      {
       if (DEBUG) ppl_log(&context->errcontext,"Failed to open /etc/papersize.");
      } else {
-      ppl_file_readline(LocalePipe, ConfigFname, FNAME_LENGTH); // Should be a papersize name
+      ppl_file_readline(LocalePipe, &ConfigFnamePtr, NULL, FNAME_LENGTH); // Should be a papersize name
       ppl_PaperSizeByName(ConfigFname, &PaperHeight, &PaperWidth);
       if (PaperHeight > 0)
        {
@@ -424,11 +424,11 @@ void pplset_makedefault(ppl_context *context)
      {
       if (DEBUG) ppl_log(&context->errcontext,"Failed to open a pipe to the locale command.");
      } else {
-      ppl_file_readline(LocalePipe, ConfigFname, FNAME_LENGTH); // Should read LC_PAPER
-      ppl_file_readline(LocalePipe, ConfigFname, FNAME_LENGTH); // Should quote the default paper height
+      ppl_file_readline(LocalePipe, &ConfigFnamePtr, NULL, FNAME_LENGTH); // Should read LC_PAPER
+      ppl_file_readline(LocalePipe, &ConfigFnamePtr, NULL, FNAME_LENGTH); // Should quote the default paper height
       PaperHeight = ppl_getFloat(ConfigFname, &Nchars);
       if (Nchars != strlen(ConfigFname)) goto LC_PAPERSIZE_DONE;
-      ppl_file_readline(LocalePipe, ConfigFname, FNAME_LENGTH); // Should quote the default paper width
+      ppl_file_readline(LocalePipe, &ConfigFnamePtr, NULL, FNAME_LENGTH); // Should quote the default paper width
       PaperWidth  = ppl_getFloat(ConfigFname, &Nchars);
       if (Nchars != strlen(ConfigFname)) goto LC_PAPERSIZE_DONE;
       if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Read papersize %f x %f", PaperWidth, PaperHeight); ppl_log(&context->errcontext,NULL); }

@@ -130,6 +130,7 @@ char *ppl_getMonthName(ppl_context *ct, int i)
 
 char *ppl_getWeekDayName(ppl_context *ct, int i)
  {
+  if (i<0) i+=7;
   switch (i)
    {
     case  0: return "Monday";

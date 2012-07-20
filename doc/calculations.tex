@@ -22,16 +22,15 @@
 
 \chapter{Performing calculations}
 
-The previous chapter described how Pyxplot can be used to plot data directly
-from \datafile s onto graphs. Often, however, calculations need to be performed
-on data before they are plotted. This chapter describes the mathematical
-environment which Pyxplot provides for performing calculations either upon
-single numerical values or upon whole datasets.  For simplicity, most of the
-examples in this chapter will act upon single numerical values, displaying the
-results using the {\tt print} command, thus using Pyxplot essentially as a
-desktop calculator. In subsequent chapters, more examples will be given of the
-use of Pyxplot's mathematical environment to analyse whole datasets and produce
-plots.
+Often calculations need to be performed on data before they are plotted. This
+chapter and the next describe the mathematical environment which Pyxplot
+provides for working either with single numerical values, or upon whole
+datasets.
+
+Most of the examples in this chapter act on single numerical values, displaying
+the results using the {\tt print} command, demonstrating how Pyxplot may be
+used as a desktop calculator. The next chapter will extend this to use of
+Pyxplot's mathematical environment to analyse whole datasets and produce plots.
 
 \section{Variables}
 
@@ -39,12 +38,12 @@ Variables can be assigned to hold numerical values using syntax of the form
 
 \begin{verbatim} a = 5.2 * sqrt(64) \end{verbatim}
 
-\noindent which may optionally be written as\indcmd{let}
+\noindent which may optionally be written in longhand as\indcmd{let}
 
 \begin{verbatim} let a = 5.2 * sqrt(64) \end{verbatim}
 
-\noindent Numerical variables can subsequently be used by name in mathematical
-expressions, as in the example:
+\noindent Variables can subsequently be used by name in mathematical
+expressions, for example:
 
 \begin{verbatim} print a / sqrt(64) \end{verbatim}
 
@@ -53,39 +52,38 @@ no value -- using syntax of the form:
 
 \begin{verbatim} a = \end{verbatim}
 
-Variables can also hold non-numeric data, such as strings, colors, dates, lists and dictionaries. The syntax for defining many of these data structures is similar to that used by python, for example:
+Variables can also hold non-numeric data, such as strings, colors, dates, lists
+and dictionaries. The syntax for defining many of these data structures is
+similar to that used by python, for example:
 
 \begin{verbatim}
 myList = [8,2,1,7]
-myDict = {'john':27 , 'fred':14, 'lisa':myList}
+myDict = {'john':27 , 'fred':14 , 'lisa':myList}
 myDate = time.fromCalendar(2012,7,1,14,30,0)
 \end{verbatim}
 
 \noindent More information about Pyxplot's data types can be found in Chapter~\ref{chap:progDataTypes}.
 
 A list of all of the variables which are currently defined can be obtained by
-typing {\tt show variables}\indcmd{show variables}. By default, a long
-list is returned, as some constants are pre-defined by Pyxplot. In
-Section~\ref{sec:stringvars}, we will see that variables can also be set to
-hold string values -- i.e.\ to hold pieces of text -- and that such variables
-can have great power in allowing the user to auto-generate titles and labels
-for graphs.
+typing {\tt show variables}\indcmd{show variables}. Some constants are
+pre-defined by Pyxplot, and so a number of variables are listed even if none
+have been set by the user.
 
 \section{Physical constants} \label{sec:constants} \index{physical
 constants}\index{constants}
 
-A wide range of mathematical and physical constants are pre-defined by default.
-A complete list of these can be found Chapter~\ref{ch:constants}.  Some of
-these, for example, {\tt e}, {\tt pi} and {\tt goldenRatio} are standard
-mathematical constants which are accessible in the user's default namespace:
+Many mathematical and physical constants are pre-defined in Pyxplot.  A
+complete list of these can be found Chapter~\ref{ch:constants}.  Some of these,
+for example, {\tt e}, {\tt pi} and {\tt goldenRatio} are standard mathematical
+constants which are accessible in the user's default namespace:
 
 \vspace{3mm}
 \input{fragments/tex/calc_pi.tex}
 \vspace{3mm}
 
-\noindent Others, such as physical constants, are of more specialist interest and are
-defined in modules. For example, the speed of light is defined in the module
-{\tt phy}:
+\noindent Others, such as physical constants, are of more specialist interest
+and are defined in modules. For example, the speed of light is defined in the
+physics module {\tt phy}:
 
 \vspace{3mm}
 \input{fragments/tex/calc_c.tex}
@@ -94,7 +92,7 @@ defined in modules. For example, the speed of light is defined in the module
 Most of the pre-defined physical constants, such as this one, make use of
 Pyxplot's native ability to keep track of the physical units of quantities and
 to convert them between different unit systems -- for example, between inches
-and centimetres.  This will be explained in more detail in
+and centimeters.  This will be explained in more detail in
 Section~\ref{sec:units}.
 
 To list all of the functions and variables defined in a module such as {\tt phy}, type
@@ -112,11 +110,12 @@ phy
 
 \section{Functions} \label{sec:functions}
 
-Many standard functions are pre-defined within Pyxplot's
-mathematical environment, ranging from trigonometric functions to
-specialised functions such as the phase of the Moon on any given day or the
-size of the Universe in the $\Uplambda_\mathrm{CDM}$ cosmological model. As with constants, common functions
-are defined in the user's default namespace, for example
+Many standard mathematical and operating system functions are pre-defined
+within Pyxplot's mathematical environment. These range from everyday examples
+like trigonometric functions, to very specialised functions; there is even a
+function to return the phase of the Moon on any given day. As with the
+mathematical constant, common functions are defined in the user's default
+namespace, for example
 
 \vspace{3mm}
 \input{fragments/tex/calc_exp.tex}
@@ -128,17 +127,23 @@ are defined in the user's default namespace, for example
 print ast.moonPhase( time.now() )
 \end{verbatim}
 
-\noindent which returns the present phase of the Moon in radians.
+\noindent which returns the present phase of the Moon in radians, and
 
-A complete list of these can be found in Chapter~\ref{ch:function_list}.
-Another quick way to find out more information about a function is the print
-the function object, for example:
+\begin{verbatim}
+print os.path.filesize("/var/log/kern.log")
+\end{verbatim}
+
+\noindent which returns the size of a file (in units of bytes, of course!).
+
+A complete list of these functioned, sorted by module, can be found in
+Chapter~\ref{ch:function_list}.  Another quick way to find out some more
+information about a function is the print the function object, for example:
 
 \vspace{3mm}
 \input{fragments/tex/calc_log.tex}
 \vspace{3mm}
 
-\noindent All, of Pyxplot's built-in constants, functions and modules are
+All, of Pyxplot's built-in constants, functions and modules are
 contained in the module {\tt defaults}, which can also be printed to view its
 contents:
 
@@ -146,8 +151,14 @@ contents:
 print defaults
 \end{verbatim}
 
-The user can define his own functions to equal any algebraic expressions using
-a similar syntax to that used to declare new variables, as in the examples:
+\noindent It is possible to access {\tt pi}, for example, as {\tt defaults.pi},
+though in practice this syntax is very rarely needed. All of the objects in the
+{\tt defaults} module are always accessible by name (i.e.\ they are always in
+any namespace), unless another local or global variable exists with the same
+name.
+
+The user can define his own algebraic function definitions using a similar
+syntax to that used to declare new variables, as in the examples:
 
 \begin{verbatim}
 f()    = pi
@@ -229,7 +240,7 @@ spliced function.
 
 When a function takes more than one argument, multiple ranges can be specified,
 one for each argument. Any of the limits can be left blank if there is no
-upper- or lower-limit upon the value of that particular argument. In the
+upper or lower limit upon the value of that particular argument. In the
 following example, the function {\tt f(a,b,c)} would only be defined when all
 of {\tt a}, {\tt b} and {\tt c} were in the range $-1 \to 1$:
 
@@ -357,6 +368,19 @@ be re-enabled by typing: \indcmd{set numeric errors explicit}
 set numeric errors explicit
 \end{verbatim}
 
+Having turned off the display of numerical errors, it may be useful to use the
+\indcmdt{assert} to throw an error message if a calculation has failed in an
+unrecoverable way that the user really ought to know about:
+
+\begin{verbatim}
+assert x>0 "Cannot continue with negative x"
+\end{verbatim}
+
+The {\tt assert} command should be followed by an algebraic expression which
+must be true for execution to continue. If it is false, an error results.
+Optionally, an error message can be included, as above, to tell the user what
+the problem is.
+
 \section{Working with complex numbers}
 \label{sec:complex_numbers}
 \index{complex numbers}
@@ -364,10 +388,10 @@ set numeric errors explicit
 In all of the examples given thus far, algebraic expressions have only been
 allowed to return real numbers: Pyxplot has not been handling any complex
 numbers. Since there are many circumstances in which the data being analysed
-may be known for certain to be real, complex arithmetic is disabled by default.
-Expressions such as {\tt sqrt(-1)} will return either an error or {\tt NaN}.
-The most obvious example of this is the built-in variable {\tt i}, which is set
-to equal {\tt sqrt(-1)}:
+may be known for certain to be real, complex arithmetic is disabled in Pyxplot
+by default.  Expressions such as {\tt sqrt(-1)} will return either an error or
+{\tt NaN}.  The most obvious example of this is the built-in variable {\tt i},
+which is set to equal {\tt sqrt(-1)}:
 
 \vspace{3mm}
 \noindent\texttt{pyxplot> \textbf{print i}}\newline
@@ -388,7 +412,7 @@ set numeric complex
 set numeric real
 \end{verbatim}
 
-\noindent Once complex arithmetic is enabled, many of Pyxplot's built-in
+\noindent Once complex arithmetic has been enabled, many of Pyxplot's built-in
 mathematical functions accept complex input arguments, including the logarithm
 function, all of the trigonometric functions, and the exponential function.  A
 complete list of functions which accept complex inputs can be found in
@@ -416,13 +440,13 @@ i=sqrt(-1)
 $\sqrt{-1}$, thus allowing him to use any other letter, e.g.\ {\tt j}, to
 represent the imaginary component of a number.
 
-Several built-in functions are provided for performing manipulations on complex
-numbers. The \indfunt{Re(z)} and \indfunt{Im(z)} functions return respectively
-the real and imaginary parts of a complex number $z$, the \indfunt{arg(z)}
-function returns the complex argument of $z$, and the \indfunt{abs(z)} function
-returns the modulus of $z$.  The \indfunt{conjugate(z)} command returns the
-complex conjugate of $z$. The following lines of code demonstrate the use of
-these functions:
+Several built-in functions are provided for manipulating complex numbers. The
+\indfunt{Re(z)} and \indfunt{Im(z)} functions return respectively the real and
+imaginary parts of a complex number $z$. The \indfunt{arg(z)} function returns
+the complex argument of $z$. And the \indfunt{abs(z)} function returns the
+modulus of $z$.  The \indfunt{conjugate(z)} command returns the complex
+conjugate of $z$. The following lines of code demonstrate the use of these
+functions:
 
 \vspace{3mm}
 \input{fragments/tex/calc_complex.tex}
@@ -432,26 +456,29 @@ these functions:
 \label{sec:units}
 \index{physical units}\index{units}
 
-Pyxplot has extensive facilities for handling data with a range of physical
-units. These features make it a powerful desktop tool for converting
-measurements between different systems of units -- for example, between
-imperial and metric units -- and for doing simple back-of-the-envelope
-calculations.
+Pyxplot, and all its mathematical functions, have native support for numbers to
+have physical units. This means, for example, that multiplying two lengths
+yields an area, and taking passing a selection of lengths to the {\tt max(...)}
+function returns the longest of the lengths supplied.
 
-All numerical variables in Pyxplot have not only a magnitude, but also a
-physical unit associated with them. In the case of a pure number such as~2, the
-quantity is said to be dimensionless. The special function \indfunt{unit()} is
-used to specify the physical unit associated with a quantity. For example, the
-expression
+This makes it a powerful desktop tool for converting measurements between
+different systems of units -- for example, between imperial and metric units --
+or for doing physical calculations.
+
+The special function \indfunt{unit()} is used to specify the physical unit
+associated with a quantity. For example, the expression
 
 \begin{verbatim}
 print 2*unit(s)
 \end{verbatim}
 
 \noindent takes the number~2 and multiplies it by the unit {\tt s}, which is
-the SI abbreviation for seconds.  The resulting quantity then has dimensions of
-time, and could, for example, be divided by the unit {\tt hr} to find the
-dimensionless number of hours in two seconds:
+the SI abbreviation for seconds. Technically, the function {\tt unit(s)}
+returns a numeric object equal to one second.
+
+The resulting quantity above, which has dimensions of time, could then, for
+example, be divided by the unit {\tt hr} to find the dimensionless number of
+hours in two seconds:
 
 \begin{verbatim}
 print 2*unit(s)/unit(hr)
@@ -464,8 +491,8 @@ units, can be used as in
 print 2*unit(miles/hour)
 \end{verbatim}
 
-\noindent or, in many cases, have their own explicit abbreviations, in this
-case {\tt mph}:
+\noindent In many cases, commonly-used units such units have their own explicit
+abbreviations, in this case {\tt mph}:
 
 \begin{verbatim}
 print 2*unit(mph)
@@ -483,19 +510,20 @@ arithmetic.}, as in the example:
 \input{fragments/tex/calc_units.tex}
 \vspace{3mm}
 
-\noindent As these examples also demonstrate, units may be referred to by either
-their abbreviated or full names, and each of these may be used in either their
-singular or plural forms.  A complete list of all of the units which Pyxplot
-recognises by default, together with all of their recognised names can be found
-in Appendix~\ref{ch:unit_list}.
+\noindent As the examples above have demonstrated, units may be referred to by
+either their abbreviated or full names, and each of these may be used in either
+their singular or plural forms. For example, {\tt s}, {\tt second}, and {\tt
+seconds} are all valid and equivalent. A complete list of all of the units
+which Pyxplot recognises by default, together with all of their recognised
+names can be found in Appendix~\ref{ch:unit_list}.
 
-SI units may also be preceded with SI prefixes\index{units!SI prefixes}, as in
+SI units may be preceded with SI prefixes\index{units!SI prefixes}, as in
 the examples\footnote{As the first of these examples demonstrates, the letter
 {\tt u} is used as a Roman-alphabet substitute for the Greek letter $\upmu$.}:
 
 \begin{verbatim}
 a = 2*unit(um)
-a = 2*unit(micrometres)
+a = 2*unit(micrometers)
 \end{verbatim}
 
 When quantities with physical units are substituted into algebraic expressions,
@@ -528,6 +556,10 @@ entirely new base units such as numbers of CPU cycles or man-hours of labour.
 \subsection{Treatment of angles in Pyxplot}
 \label{sec:angles}
 \index{units!angle}\index{angles, handling of}
+
+There are a small number of cases where Pyxplot's handling of units does not
+completely follow normal (i.e.\ SI) conventions, which require further
+explanation. The most obvious such case is its handling of angles.
 
 By convention, the SI system of units does not have a base unit of angle:
 instead, the radian is considered to be a dimensionless unit.  There are some
@@ -576,46 +608,51 @@ set unit angle nodimensionless
 
 \noindent Note that even when inverse trigonometric functions are set to return
 dimensionless outputs, expressions such as {\tt unit(rad)+1} are still
-dimensionally incorrect. Functions such as {\tt sin(x)} and {\tt exp(x)}, which
+dimensionally incorrect. Functions such as {\tt sin(x)} and {\tt exp(x)}
 can always accept inputs which are either dimensionless, or have units of
 angle.
 
 \subsection{Converting between different temperature scales}
 \index{temperature conversions}\index{units!temperature}
 
-Pyxplot's facilities for converting quantities between different physical units
-include the ability to convert temperatures between different temperature
-scales, for example, between $^\circ\mathrm{C}$, $^\circ\mathrm{F}$ and K.
-However, these conversions have some subtleties, unique to temperature
-conversions, which mean that they should be used with some caution. Consider
-the following two questions:
+Pyxplot can convert temperatures between different temperature scales, for
+example between $^\circ\mathrm{C}$, $^\circ\mathrm{F}$ and K.  However, these
+conversions have some subtleties which are unique to temperature conversions.
+This means they should be used with some caution.
+
+Consider the following two questions:
 \begin{itemize}
 \item How many Kelvin corresponds to a temperature of $20^\circ$C?
 \item How many Kelvin corresponds to a temperature {\it rise} of $20^\circ$C?
 \end{itemize}
 The answers to these two questions are 293\,K and 20\,K respectively: although
 we are converting from $20^\circ$C in both cases, the corresponding number of
-Kelvin depends upon whether we are talking about an {\it absolute} temperature
+Kelvin depends whether we are talking about an {\it absolute} temperature
 or a {\it relative} temperature. A heat capacity of 1\,J/$^\circ$C equals
 1\,J/K, even though a temperature of $1^\circ$C does not equal a temperature of
 1\,K.
 
 The cause of this problem, and the reason why it rarely affects any physical
 units other than temperatures is that there exists such a thing as absolute
-temperature. Distances, for example, are very rarely absolute: they measure
-relative distance gaps between points. Occasionally people might choose to
-express all their displacements relative to a particular origin, but they
-wouldn't expect Pyxplot to be able to convert these into displacements from
-another origin. But they might expect it to be able to convert temperatures
-between Celsius and Fahrenheit, even though the problem of doing so is
-equivalent.
+temperature.
 
-Times are occasionally expressed as absolute quantities: the year
-{\footnotesize AD}\,1453, for example, implicitly corresponds to a period of
-1453 years after the Christian epoch, and so similar problems would arise in
-trying to convert such a year into the Muslim calendar, which counts from the
-year {\footnotesize AD}\,622.\footnote{Pyxplot can, incidentally, make this
-conversion, as will be seen in Section~\ref{sec:time_series}.}
+Take the example of distances. Distances are almost always relative: they
+measure distance gaps between points. Occasionally people might choose to
+express positions as distance from some particular origin. But if scheme A
+involved measuring in meters from New York, and scheme B involved measuring in
+feet from Chicago, they wouldn't expect Pyxplot to convert between the two
+systems.
+
+The problem of converting between temperature systems is just like this. One
+system measures distance in degrees Fahrenheit away from 0$^\circ\mathrm{F}$;
+another the distance in degrees Celsius away from
+0$^\circ\mathrm{C}$.\footnote{There is one other common example of this
+problem. Times are expressed as absolute quantities when dates are written
+down. The year {\footnotesize AD}\,1453 implicitly corresponds to a period of
+1453 years after the Christian epoch. So, similar problems arise when trying to
+convert such a year into the Muslim calendar, which counts from the year
+{\footnotesize AD}\,622. Pyxplot can, incidentally, make this conversion, using
+date objects, as will be seen in Section~\ref{sec:time_series}.}
 
 As Pyxplot cannot distinguish between absolute and relative temperatures, it
 takes a safe approach of performing algebra consistently with any unit of
@@ -639,15 +676,13 @@ print 98*unit(oF / oC)
 \end{dontdo}
 
 Note that such a conversion always assumes that the temperatures supplied are
-{\it absolute} temperatures. Pyxplot has no facility for converting relative
+{\bf absolute} temperatures. Pyxplot has no facility for converting relative
 temperatures between different scales. This must be done manually.
 
-The conversion of derived units of temperature, such as $\mathrm{J}/\mathrm{K}$ or
-$^\circ\mathrm{C}^2$, to derived units of other temperature scales, such as
+The conversion of derived units of temperature, such as $\mathrm{J}/\mathrm{K}$
+or $^\circ\mathrm{C}^2$, to derived units of other temperature scales, such as
 $\mathrm{J}/^\circ\mathrm{F}$ or $\mathrm{K}^2$, is not permitted, since in
-general these conversions are ill-defined. For example, a temperature squared
-measured in $^\circ\mathrm{C}^2$ has the same value for $\pm
-x^\circ\mathrm{C}$, but would have different values in $\mathrm{K}^2$.
+general these conversions are ill-defined.
 
 The moral of this story is: pick what unit of temperature you want to work in,
 convert all of your temperatures to that scale, and then stick to it.
@@ -666,25 +701,25 @@ create a temperature conversion scale.
 \section{Configuring how numbers are displayed}
 \label{sec:unitdisp}
 
-\subsection{Units}
+\subsection{Display of physical units}
 
-Before quantities which are not dimensionless are displayed, Pyxplot searches
-through its database of physical units looking for the most appropriate unit,
-or combination of units, in which to represent them.  By default, SI units, or
-combinations of SI units, are chosen for preference, and SI prefixes such as
-milli- or kilo- are applied where appropriate. This behaviour can, however, be
-extensively configured.
+When displaying quantities that have physical units, Pyxplot searches through
+its database of known units looking for the most appropriate unit, or
+combination of units, to use.  By default, SI units, or combinations of SI
+units, are chosen for preference, and SI prefixes such as milli- or kilo- are
+applied where appropriate. This behaviour can, however, be extensively
+configured.
 
 The most general configuration option allows one of several {\it units
 schemes}\index{units!unit schemes} to be selected, each of which comprises a
 list of units which are deemed to be members of the particular scheme. For
 example, in the CGS unit scheme\index{CGS units}\index{units!CGS}, all lengths
-are displayed in centimetres, all masses are displayed in grammes, all energies
+are displayed in centimeters, all masses are displayed in grammes, all energies
 are displayed in ergs, and so forth.  In the imperial unit
 scheme\index{imperial units}\index{units!imperial}, quantities are displayed in
-British imperial units -- inches, pounds, pints, and so forth -- and in the US
-unit scheme, US customary units are used. The current unit scheme can be
-changed using the \indcmdt{set unit scheme}:
+British imperial units -- inches, pounds, pints, and so forth. In the US unit
+scheme, US customary units are used. The current unit scheme can be changed
+using the \indcmdt{set unit scheme}:
 
 \vspace{3mm}
 \input{fragments/tex/calc_numdisp.tex}
@@ -719,8 +754,8 @@ For example, a study of Jupiter-like planets might express masses in Jupiter
 masses, rather than kilograms. A study of the luminosities of stars might
 express powers in units of solar luminosities, rather than watts. And a
 cosmology paper might express distances in parsecs. This level of control is
-made available through the \indcmdt{set unit of}, and the three examples just
-given would be achieved using the following commands:
+made available through the \indcmdt{set unit of}. The three examples just given
+could be achieved using the following commands:
 \begin{verbatim}
 set unit of mass Mjupiter
 set unit of power solar_luminosity
@@ -738,9 +773,9 @@ set unit of mass Mpluto
 
 The \indcmdt{set unit preferred} offers a slightly more flexible way of
 achieving the same result. Whereas the \indcmdt{set unit of} can only operate
-on named quantities such as lengths and powers, and cannot act upon compound
-units such as {\tt W/Hz}, the \indcmdt{set unit preferred} can act upon any
-unit or combination of units:
+on named quantities such as lengths, areas and powers, and cannot act upon
+compound units such as {\tt W/Hz}, the \indcmdt{set unit preferred} can act
+upon any unit or combination of units:
 \begin{verbatim}
 set unit preferred parsec
 set unit preferred W/Hz
@@ -749,7 +784,7 @@ set unit preferred N*m
 The latter two examples are particularly useful when working with spectral
 densities (powers per unit frequency) or torques (forces multiplied by
 distances). Unfortunately, both of these units are dimensionally equal to
-energies, and so are displayed by Pyxplot in Joules by default. The above
+energies, and so are displayed by Pyxplot in joules by default. The above
 statement overrides such behaviour. Having set a particular unit to be
 preferred, this can be unset as in the following example:
 \begin{verbatim}
@@ -782,7 +817,7 @@ final digits are zeros or nines.
 
 This is generally a helpful convention: Pyxplot's internal arithmetic is
 generally accurate to around 16 significant figures, and so it is quite
-conceivable that a calculation which is supposed to return, say $1$, may in
+conceivable that a calculation which is supposed to return, say, $1$, may in
 fact return 0.999\,999\,999\,999\,999\,9. Likewise, when complex arithmetic is
 enabled, routines which are expected to return real numbers may in fact return
 results with imaginary parts at the level of one part in $10^{16}$.  By
@@ -815,7 +850,7 @@ displayed on a one-by-one basis, as in the examples:
 Pyxplot's default convention of displaying numbers in a format such as
 
 \begin{verbatim}
-(2+3i) metres
+(2+3i) meters
 \end{verbatim}
 
 \noindent is well-suited for creating text which is readable by human users, but
@@ -909,14 +944,14 @@ both the {\tt x}- and {\tt y}-axes in fractions of $\pi$:
 
 \section{Solving systems of equations}
 
-The \indcmdt{solve} can be used to solve simple systems of one or more
+The \indcmdt{solve} can be used to solve systems of one or more simultaneous
 equations numerically. It takes as its arguments a comma-separated list of the
 equations which are to be solved, and a comma-separated list of the variables
 which are to be found. The latter should be prefixed by the word {\tt
 via}, to separate it from the list of equations:
 
 \begin{verbatim}
-solve <equation 1>,... via <variable 1>, ...
+solve <equation 1>, ... via <variable 1>, ...
 \end{verbatim}
 
 Note that the time taken by the solver dramatically increases with the number
@@ -1054,15 +1089,17 @@ Finally, this maximum could also be found using Pyxplot's built-in function {\tt
 \section{Working with time-series data}
 \label{sec:time_series}
 
-Time-series data often need special consideration when intervals of days or
-months are spanned. It is not straightforward to convert a series of calendar
-dates into elapsed times between the \datapoint s.  Months have non-uniform
-lengths of the months, and some years have an extra leap day.
+Time-series data need to be handled carefully, since it is not straightforward
+to convert a series of calendar dates into elapsed times between the \datapoint
+s. The problems are especially difficult for series that span many weeks, since
+months have non-uniform lengths and some years have an extra leap day. But even
+shorter time series are complicated by hours and minutes being non-decimal
+fractions of days.
 
-To simplify the process of working with dates and times, Pyxplot has a {\tt
-date} object type.  Pyxplot provides a range of pre-defined functions, in the
-{\tt time} module, for creating and manipulating {\tt date} objects. The
-functions for creating {\tt date} objects are as follows:
+To simplify the process of working with dates and times, Pyxplot has native
+{\tt date} object type, together with pre-defined functions in the {\tt time}
+module for creating and manipulating such objects. The functions for creating
+{\tt date} objects are as follows:
 
 \funcdef{time.fromCalendar($year,month,day,hour,min,sec$)}{creates a date
 object from the specified calendar date. It takes six inputs: the year, the
@@ -1070,17 +1107,87 @@ month number (1--12), the day of the month (1--31), the hour of day (0--24),
 the number of minutes (0--59), and the number of seconds (0--59). To enter
 dates before {\footnotesize AD}\,1, a year of~$0$ should be passed to indicate
 1\,{\footnotesize BC}, $-1$ should be passed to indicate the year
-2\,{\footnotesize BC}, and so forth. The \texttt{set calendar} command is used
+2\,{\footnotesize BC}, and so forth. The \texttt{set calendar} command may be used
 to change the current calendar.}
 \funcdef{time.fromJD($t$)}{creates a date object from the specified numerical Julian date.}
 \funcdef{time.fromMJD($t$)}{creates a date object from the specified numerical modified Julian date.}
 \funcdef{time.fromUnix($t$)}{creates a date object from the specified numerical Unix time.}
+
+Also, the function {\tt time.now()}\indfun{time.now()}, which takes no
+arguments, returns a {\tt date} object corresponding to the current system
+clock time, as in the following example:
+
+\vspace{3mm}
+\noindent\texttt{pyxplot> \textbf{print time.now()}}\newline
+\noindent\texttt{Sat 2012 Jun 16 15:12:39}
+\vspace{3mm}
 
 The following example creates a date object representing midnight on 1st January 2000:
 
 \vspace{3mm}
 \input{fragments/tex/calc_date1.tex}
 \vspace{3mm}
+
+Once created, it is possible to add numbers with physical units of time to
+dates, as in the following example:
+
+\vspace{3mm}
+\input{fragments/tex/calc_date3.tex}
+\vspace{3mm}
+
+Standard string representations of calendar dates can be produced with the {\tt
+print} command.  It is also possible to use the string substitution operator,
+as in {\tt "\%s"\%(date)}, or the {\tt str} method of {\tt date} objects, as in
+{\tt date.str()}.  In addition, the {\tt time.string} function can be used to
+choose a custom display format for the date:
+
+\funcdef{time.string($t,format$)}{returns a string representation of the specified date object $t$. The second input is optional, and may be used to control the format of the output. If no format string is provided, then the format \newline\noindent{\tt "\%a \%Y \%b \%d \%H:\%M:\%S"}\newline\noindent is used. In such format strings, the following tokens are substituted for various parts of the date:
+\begin{longtable}{|>{\columncolor{LightGrey}}l|>{\columncolor{LightGrey}}l|}
+\hline \endfoot
+\hline
+Token & Value \\
+\hline \endhead
+{\tt \%\%} & A literal \% sign.\\
+{\tt \%a} & Three-letter abbreviated weekday name.\\
+{\tt \%A} & Full weekday name.\\
+{\tt \%b} & Three-letter abbreviated month name.\\
+{\tt \%B} & Full month name.\\
+{\tt \%C} & Century number, e.g. 21 for the years 2000-2100.\\
+{\tt \%d} & Day of month.\\
+{\tt \%H} & Hour of day, in range~00-23.\\
+{\tt \%I} & Hour of day, in range~01-12.\\
+{\tt \%k} & Hour of day, in range~0-23.\\
+{\tt \%l} & Hour of day, in range~1-12.\\
+{\tt \%m} & Month number, in range~01-12.\\
+{\tt \%M} & Minute, in range~00-59.\\
+{\tt \%p} & Either {\tt am} or {\tt pm}.\\
+{\tt \%S} & Second, in range~00-59.\\
+{\tt \%y} & Last two digits of year number.\\
+{\tt \%Y} & Year number.\\
+\end{longtable}}
+
+Several functions are provided for converting {\tt date} objects back into various numerical forms of timekeeping and components of calendar dates:
+
+\methdef{toDayOfMonth()}{returns the day of the month of a date object in the current calendar.}
+\methdef{toDayWeekName()}{returns the name of the day of the week of a date object.}
+\methdef{toDayWeekNum()}{returns the day of the week (1--7) of a date object.}
+\methdef{toHour()}{returns the integer hour component (0--23) of a date object.}
+\methdef{toJD()}{converts a date object to a numerical Julian date.}
+\methdef{toMinute()}{returns the integer minute component (0--59) of a date object.}
+\methdef{toMJD()}{converts a date object to a modified Julian date.}
+\methdef{toMonthName()}{returns the name of the month in which a date object falls.}
+\methdef{toMonthNum()}{returns the number (1--12) of the month in which a date object falls.}
+\methdef{toSecond()}{returns the seconds component (0--60) of a date object, including the non-integer component.}
+\methdef{toUnix()}{converts a date object to a Unix time.}
+\methdef{toYear()}{returns the year in which a date object falls in the current calendar.}
+
+For example:
+
+\vspace{3mm}
+\input{fragments/tex/calc_date2.tex}
+\vspace{3mm}
+
+\subsection{Calendars}
 
 By default, the {\tt time.fromCalendar} function makes a transition from the
 Julian calendar to the Gregorian calendar at midnight on 14th~September 1752
@@ -1126,66 +1233,6 @@ used to convert dates between calendar dates and Julian Day numbers.}
 \label{tab:calendars}
 \end{table}
 
-Once created, it is possible to add numbers with physical units of time to
-dates, as in the following example:
-
-\vspace{3mm}
-\input{fragments/tex/calc_date3.tex}
-\vspace{3mm}
-
-Standard string representations of calendar dates can be produced with the {\tt
-print} command.  It is also possible to use the string substitution operator,
-as in {\tt "\%s"\%(date)}, or the {\tt str} method of {\tt date} objects, as in
-{\tt date.str()}.  In addition, the {\tt time.string} function can be used to
-choose a custom display format for the date:
-
-\funcdef{time.string($t,format$)}{returns a string representation of the specified date object $t$. The second input is optional, and may be used to control the format of the output. If no format string is provided, then the format \newline\noindent{\tt "\%a \%Y \%b \%d \%H:\%M:\%S"}\newline\noindent is used. In such format strings, the following tokens are substituted for various parts of the date:
-\begin{longtable}{|>{\columncolor{LightGrey}}l|>{\columncolor{LightGrey}}l|}
-\hline \endfoot
-\hline
-Token & Value \\
-\hline \endhead
-{\tt \%\%} & A literal \% sign.\\
-{\tt \%a} & Three-letter abbreviated weekday name.\\
-{\tt \%A} & Full weekday name.\\
-{\tt \%b} & Three-letter abbreviated month name.\\
-{\tt \%B} & Full month name.\\
-{\tt \%C} & Century number, e.g. 21 for the years 2000-2100.\\
-{\tt \%d} & Day of month.\\
-{\tt \%H} & Hour of day, in range~00-23.\\
-{\tt \%I} & Hour of day, in range~01-12.\\
-{\tt \%k} & Hour of day, in range~0-23.\\
-{\tt \%l} & Hour of day, in range~1-12.\\
-{\tt \%m} & Month number, in range~01-12.\\
-{\tt \%M} & Minute, in range~00-59.\\
-{\tt \%p} & Either {\tt am} or {\tt pm}.\\
-{\tt \%S} & Second, in range~00-59.\\
-{\tt \%y} & Last two digits of year number.\\
-{\tt \%Y} & Year number.\\
-\end{longtable}}
-
-
-Several functions are provided for converting {\tt date} objects back into various numerical forms of timekeeping and components of calendar dates:
-
-\methdef{toDayOfMonth()}{returns the day of the month of a date object in the current calendar.}
-\methdef{toDayWeekName()}{returns the name of the day of the week of a date object.}
-\methdef{toDayWeekNum()}{returns the day of the week (1--7) of a date object.}
-\methdef{toHour()}{returns the integer hour component (0--23) of a date object.}
-\methdef{toJD()}{converts a date object to a numerical Julian date.}
-\methdef{toMinute()}{returns the integer minute component (0--59) of a date object.}
-\methdef{toMJD()}{converts a date object to a modified Julian date.}
-\methdef{toMonthName()}{returns the name of the month in which a date object falls.}
-\methdef{toMonthNum()}{returns the number (1--12) of the month in which a date object falls.}
-\methdef{toSecond()}{returns the seconds component (0--60) of a date object, including the non-integer component.}
-\methdef{toUnix()}{converts a date object to a Unix time.}
-\methdef{toYear()}{returns the year in which a date object falls in the current calendar.}
-
-For example:
-
-\vspace{3mm}
-\input{fragments/tex/calc_date2.tex}
-\vspace{3mm}
-
 Optionally, the \indcmdt{set calendar} can be used to set different calendars
 to use when converting calendar dates into {\tt date} objects, and when
 converting in the opposite direction. This is useful when converting data from
@@ -1197,15 +1244,6 @@ set calendar in Julian out Gregorian      # change both
 show calendar               # show calendars currently being used
 \end{verbatim}
 
-Finally, the function {\tt time.now()}\indfun{time.now()}, which takes no
-arguments, returns a {\tt date} object corresponding to the current system
-clock time, as in the following example:
-
-\vspace{3mm}
-\noindent\texttt{pyxplot> \textbf{print time.now()}}\newline
-\noindent\texttt{Sat 2012 Jun 16 15:12:39}
-\vspace{3mm}
-
 \example{ex:tolstoy}{Calculating the date of Leo Tolstoy's birth}{
 The Russian novelist Leo Tolstoy was born on 28th~August~$1828$ and died on
 7th~November~$1910$ in the Russian calendar. What dates do these correspond to
@@ -1216,10 +1254,10 @@ in the Western calendar?
 
 \subsection{Time intervals}
 
-The time interval between two date objects can be found by subtracting the two
-objects, as demonstrated in the following example which calculates the interval
-between Albert Einstein's birth and death. The result is returned as a
-numerical object with physical dimensions of time:
+The time interval between two date objects can be found by subtracting one from
+the other.  The following example calculates the time interval between Albert
+Einstein's birth and death. The result is returned as a numerical object with
+physical dimensions of time:
 
 \vspace{3mm}
 \input{fragments/tex/calc_date4.tex}

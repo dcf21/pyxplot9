@@ -24,12 +24,11 @@
 \chapter{Working with data}
 \label{ch:numerics}
 
-In this chapter, we return to Pyxplot's commands for acting upon data stored in
-files. First, we review some of the features which are common to all of the
-commands which act upon \datafile s, and then we move on to introduce each
-command in turn. We leave the {\tt plot} command, which was introduced in
-Chapter~\ref{ch:first_steps}, to be described in more detail in
-Chapter~\ref{ch:plotting}.
+This chapter returns to Pyxplot's commands for acting on data stored in files.
+It first reviews some of the common features of the commands which act upon
+\datafile s, and then moves on to describe each command in turn. We leave the
+{\tt plot} command, which was introduced in Chapter~\ref{ch:first_steps}, to be
+described in more detail in Chapter~\ref{ch:plotting}.
 
 \section{Input filters}
 \label{sec:filters}
@@ -731,29 +730,51 @@ drawn to coincide with the bins into which the data were sorted.
 
 \section{Random data generation}
 
-Pyxplot has a range of mathematical functions which draw random samples from a
-variety of probability distributions. These are:
+Pyxplot has functions for generating random numbers from a variety of common
+probability distributions. These functions are in the {\tt random} module:
 
 \begin{itemize}
-\item {\tt random()} -- returns a random real number between 0 and~1.
-\indfun{random()}
-\item {\tt random\_binomial($p,n$)} -- returns a random sample from a binomial distribution with $n$ independent trials and a success probability $p$.
-\indfun{random\_\-binomial($p,n$)}
-\item {\tt random\_chisq($\nu$)} -- returns a random sample from a $\chi$-squared distribution with $\nu$ degrees of freedom.
-\indfun{random\_\-chisq($\nu$)}
-\item {\tt random\_gaussian($\sigma$)} -- returns a random sample from a Gaussian (normal) distribution of standard deviation $\sigma$ and centred upon zero.
-\indfun{random\_\-gaussian($\sigma$)}
-\item {\tt random\_lognormal($\zeta,\sigma$)} -- returns a random sample from the log normal distribution centred on $\zeta$, and of width $\sigma$.
-\indfun{random\_\-lognormal($\zeta,\sigma$)}
-\item {\tt random\_poisson($n$)} -- returns a random integer from a Poisson distribution with mean $n$.
-\indfun{random\_\-poisson($n$)}
-\item {\tt random\_tdist($\nu$)} -- returns a random sample from a $t$-distribution with $\nu$ degrees of freedom.
-\indfun{random\_\-tdist($\nu$)}
+\item {\tt random.random()} -- returns a random real number between 0 and~1.
+\indfun{random.random()}
+\item {\tt random.binomial($p,n$)} -- returns a random sample from a binomial distribution with $n$ independent trials and a success probability $p$.
+\indfun{random.binomial($p,n$)}
+\item {\tt random.chisq($\nu$)} -- returns a random sample from a $\chi$-squared distribution with $\nu$ degrees of freedom.
+\indfun{random.chisq($\nu$)}
+\item {\tt random.gaussian($\sigma$)} -- returns a random sample from a Gaussian (normal) distribution of standard deviation $\sigma$ and centred upon zero.
+\indfun{random.gaussian($\sigma$)}
+\item {\tt random.lognormal($\zeta,\sigma$)} -- returns a random sample from the log normal distribution centred on $\zeta$, and of width $\sigma$.
+\indfun{random.lognormal($\zeta,\sigma$)}
+\item {\tt random.poisson($n$)} -- returns a random integer from a Poisson distribution with mean $n$.
+\indfun{random.poisson($n$)}
+\item {\tt random.tdist($\nu$)} -- returns a random sample from a $t$-distribution with $\nu$ degrees of freedom.
+\indfun{random.tdist($\nu$)}
 \end{itemize}
 
 \noindent These functions all rely upon a common underlying random number
-generator, whose seed may be set using the \indcmdt{set seed}, which should be
-followed by any integer.
+generator\footnote{The gsl library's default random number generator, {\tt
+gsl\_\-rng\_\-default} is used. As of version~1.15, this maps to {\tt
+gsl\_\-rng\_\-mt19937} with a default seed of zero. The various probability
+distributions above are sampled using the functions {\tt
+gsl\_\-ran\_\-binomial} and similar.}, whose seed may be set using the
+\indcmdt{set seed}, which should be followed by any integer. The sequence of
+random samples generated is always the same after setting any particular seed.
+
+When Pyxplot starts, the seed is implicitly set to zero. {\bf This means that
+Pyxplot always produces the same series of random numbers when restarted.} This
+series can be reproduced by typing:
+\begin{verbatim}
+set seed 0
+\end{verbatim}
+
+\noindent For applications where this repeatability is undesirable, the
+following command may help, using the system clock as a random seed:
+\begin{verbatim}
+set seed time.now().toUnix()
+\end{verbatim}
+
+\noindent This gives a different sequence of random numbers each second.
+However, the user is advised to consider carefully whether this is sufficient
+for the particular application being implemented.
 
 \example{ex:random}{Using random numbers to estimate the value of $\pi$}{
 Pyxplot's functions for generating random numbers are most commonly used for

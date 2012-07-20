@@ -109,6 +109,7 @@ void ppl_interactiveSession(ppl_context *context)
         add_history(line_ptr);
         context->historyNLinesWritten++;
         len = strlen(line_ptr)+1;
+        if ((context->inputLineBufferLen>LSTR_LENGTH) && (len<LSTR_LENGTH)) { free(context->inputLineBuffer); ppl_inputInit(context); }
         if (len > context->inputLineBufferLen) { context->inputLineBuffer = (char *)realloc(context->inputLineBuffer, len); context->inputLineBufferLen=len; }
         if (context->inputLineBuffer == NULL) break;
         strcpy(context->inputLineBuffer, line_ptr);
@@ -122,9 +123,9 @@ void ppl_interactiveSession(ppl_context *context)
         if (context->inputLineAddBuffer!=NULL) { strcpy(prompt,".......> "); }
         else                                   { snprintf(prompt,16,"%s.......",ps->prompt); strcpy(prompt+7, "> "); }
         printf("%s",prompt);
-        if (fgets(context->inputLineBuffer,LSTR_LENGTH-1,stdin)==NULL) { break; }
+        if (fgets(context->inputLineBuffer,context->inputLineBufferLen-1,stdin)==NULL) { break; }
         sigint_longjmp=0;
-        context->inputLineBuffer[LSTR_LENGTH-1]='\0';
+        context->inputLineBuffer[context->inputLineBufferLen-1]='\0';
        }
 #endif
      }
@@ -132,8 +133,8 @@ void ppl_interactiveSession(ppl_context *context)
      {
       ppl_error_setstreaminfo(&context->errcontext, linenumber, "piped input");
       if ((feof(stdin)) || (ferror(stdin))) break;
-      ppl_file_readline(stdin, context->inputLineBuffer, LSTR_LENGTH-1);
-      context->inputLineBuffer[LSTR_LENGTH-1]='\0';
+      ppl_file_readline(stdin, &context->inputLineBuffer, &context->inputLineBufferLen, 0);
+      context->inputLineBuffer[context->inputLineBufferLen-1]='\0';
       linenumber++;
      }
     if ((!cancellationFlag)&&(!context->shellExiting)&&(!context->shellBroken)&&(!context->shellContinued)&&(!context->shellReturned))
@@ -186,7 +187,9 @@ void ppl_processScript(ppl_context *context, char *input, int iterDepth)
    {
     ppl_error_setstreaminfo(&context->errcontext, linenumber, filename_description);
     if ((feof(infile)) || (ferror(infile))) break;
-    ppl_file_readline(infile, context->inputLineBuffer, context->inputLineBufferLen);
+    if (context->inputLineBufferLen>LSTR_LENGTH) { free(context->inputLineBuffer); ppl_inputInit(context); }
+    if (context->inputLineBuffer == NULL) { ppl_error(&context->errcontext,ERR_MEMORY,-1,-1,"Out of memory."); break; }
+    ppl_file_readline(infile, &context->inputLineBuffer, &context->inputLineBufferLen, 0);
     linenumber++;
     status = ppl_processLine(context, ps, context->inputLineBuffer, 0, iterDepth);
     ppl_error_setstreaminfo(&context->errcontext, -1, "");

@@ -533,7 +533,34 @@ converted into a vector. See~\ref{sec:vectors} for more information.
 
 \section{Dictionaries}
 
+Dictionaries, also known as associative arrays or content-addressable memories
+in other programming languages, store collections of objects, each of which has
+a unique name (or key). Objects are addressed by name, rather than by number:
 
+\vspace{3mm}
+\input{fragments/tex/prog_dictinit.tex}
+\vspace{3mm}
+
+As the first line of this example shows, dictionaries can be created by
+enclosing a list of key--value pairs in curly brackets. As in python, a colon
+separates each key from its corresponding value, while the list of key--value
+pairs are comma-separated. That is, the general syntax is:
+\begin{verbatim}
+{ key1:value1 , key2:value2 , ... }
+\end{verbatim}
+
+It is also possible to generate an empty dictionary, as {\tt \{\}}. Items can
+later be referenced or assigned by name, where the name is placed in square
+brackets after the name of the dictionary. Items can be deleted with the
+dictionary's {\tt delete(key)} method.
+
+It is not an error to assign an item to a name which is already defined in the
+dictionary; the new assignment overwrites the old object with that name. It is,
+however, an error to attempt to access a key which is not defined in the
+dictionary. The method {\tt hasKey(key)} may be used to test whether a key is
+defined before attempting to access it.
+
+Unlike in python, keys {\bf must} be strings.
 
 \section{Vectors and matrices}
 \label{sec:vectors}

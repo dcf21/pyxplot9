@@ -973,6 +973,7 @@ void ppl_parserLineInit(parserLine **in, int srcLineN, long srcId, char *srcFnam
 void ppl_parserLineFree(parserLine *in)
  {
   parserLine *item = in;
+  if (in==NULL) return;
   if ( __sync_sub_and_fetch(&in->refCount,1) > 0) return;
   while (item != NULL)
    {

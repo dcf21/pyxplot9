@@ -1,0 +1,7 @@
+myDict = {'red':colors.red, 'green':colors.green}
+myDict['blue'] = colors.blue
+print myDict['green']
+call myDict.delete('green')
+call myDict.delete('blue')
+myDict['purple'] = colors.purple
+print myDict

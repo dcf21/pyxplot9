@@ -1124,7 +1124,7 @@ void eps_plot_LegendIcon(EPSComm *x, int i, canvas_plotdesc *pd, double xpos, do
   if ((style==SW_STYLE_POINTS) || (style==SW_STYLE_LINESPOINTS) || (style==SW_STYLE_STARS) || (style==SW_STYLE_DOTS))
    {
     double final_pointsize = pd->ww_final.pointsize;
-    if (style==SW_STYLE_DOTS ) final_pointsize *= 0.05; // Dots are 1/20th size of points
+    if (style==SW_STYLE_DOTS ) { final_pointsize *= 0.05; if (final_pointsize < 0.25) final_pointsize=0.25; } // Dots are 1/20th size of points
     if (style==SW_STYLE_STARS) final_pointsize =  1;
     eps_core_SetColor(x, &pd->ww_final, 1);
     eps_core_SetLinewidth(x, EPS_DEFAULT_LINEWIDTH * pd->ww_final.pointlinewidth, 1, 0);

@@ -653,7 +653,7 @@ void ppldata_fromFile(ppl_context *c, dataTable **out, char *filename, int wildc
   long         file_linenumber    = 0;
   long         itemsOnLine;
   FILE        *filtered_input=NULL;
-  char         linebuffer[LSTR_LENGTH], *lineptr=linebuffer, *cptr;
+  char         linebuffer[LSTR_LENGTH], *lineptr=linebuffer, *linebufferPtr=&linebuffer[0], *cptr;
 
   int i, j, k, l, m;
 
@@ -725,7 +725,7 @@ void ppldata_fromFile(ppl_context *c, dataTable **out, char *filename, int wildc
   while (readFromCommandLine || ( (!ferror(filtered_input)) && (!feof(filtered_input)) ))
    {
     if (cancellationFlag) break;
-    if (!readFromCommandLine) ppl_file_readline(filtered_input, linebuffer, LSTR_LENGTH);
+    if (!readFromCommandLine) ppl_file_readline(filtered_input, &linebufferPtr, NULL, LSTR_LENGTH);
     else                      lineptr = ppldata_fetchFromSpool(dataSpool);
 
     if (readFromCommandLine && (lineptr==NULL                                     )) break; // End of file reached

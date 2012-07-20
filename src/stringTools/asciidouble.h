@@ -30,7 +30,7 @@ unsigned char ppl_dblApprox(double a, double b, double err);
 double ppl_getFloat                 (const char *str, int *Nchars);
 int    ppl_validFloat               (const char *str, int *end);
 char  *ppl_numericDisplay           (double in, char *output, int SigFig, int latex);
-void   ppl_file_readline            (FILE *file, char *output, int MaxLength);
+void   ppl_file_readline            (FILE *file, char **output, int *MaxLenPtr, int MaxLength);
 void   ppl_getWord                  (char *out, const char *in, int max);
 char  *ppl_nextWord                 (char *in);
 char  *ppl_friendlyTimestring       ();

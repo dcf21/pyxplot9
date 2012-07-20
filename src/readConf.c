@@ -72,6 +72,7 @@ static void _ReadConfig_FetchValue(char *line, char *out)
 static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
  {
   char   linebuffer[LSTR_LENGTH], setkey[LSTR_LENGTH], setvalue[LSTR_LENGTH], ColorName[SSTR_LENGTH], *StringScan;
+  char  *linebufferPtr = &linebuffer[0];
   char   errtext[LSTR_LENGTH];
   FILE  *infile;
   int    state=-1;
@@ -90,7 +91,7 @@ static void ppl_readConfigFile(ppl_context *c, char *ConfigFname)
   while ((!feof(infile)) && (!ferror(infile)))
    {
     linecounter++;
-    ppl_file_readline(infile, linebuffer, LSTR_LENGTH);
+    ppl_file_readline(infile, &linebufferPtr, NULL, LSTR_LENGTH);
     ppl_strStrip(linebuffer, linebuffer);
     if                       (linebuffer[0] == '\0')                    continue;
     else if (ppl_strCmpNoCase(linebuffer, "[settings]" )==0) {state= 1; continue;}

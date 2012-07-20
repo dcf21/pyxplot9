@@ -25,31 +25,34 @@
 
 \label{ch:introduction}
 
-{\sc Pyxplot} is a multi-purpose scientific scripting language, graph plotting
-tool, vector graphics suite, and data processing package.  Its interface is
-designed so that common tasks -- e.g., plotting labelled graphs of data --
-should be accessible via short, simple and intuitive commands. At the same
-time, these commands also take many optional settings which allow their output
-to be fine-tuned into a wide range of different styles, appropriate for
-inclusion in reports, talks or academic journals.
+Pyxplot is a multi-purpose graph plotting tool, scientific scripting language,
+vector graphics suite, and data processing package.  Its interface is designed
+to make common tasks -- e.g., plotting labelled graphs of data -- accessible
+via short, simple, intuitive commands.
+
+But these commands also take many optional settings, allowing their output to
+be fine-tuned into styles appropriate for reports, talks or academic journals.
+Pyxplot is simple enough to be used without prior programming experience, but
+powerful enough that programmers can extensively configure and script it.
 
 \noindent{\bf A scientific scripting language}
 
-Pyxplot has all the features of a scripting language: string manipulation,
-modules and classes. Numbers have physical units, and calculations
-automatically return results in appropriate units. \Datafile s can
-straightforwardly be converted between physical units. Pyxplot natively handles
-dictionaries, lists, dates and file handles. It also supports vector and matrix
-algebra, can integrate or differentiate expressions, and numerically solve
-systems of equations.
+Pyxplot doesn't just plot graphs. It's a scripting language in which variables
+can have physical units. Calculations automatically return results in an
+appropriate unit, whether that be kilograms, joules or lightyears.  \Datafile s
+can straightforwardly be converted from one set of units to another. Meanwhile
+Pyxplot has all the other features of a scripting language: string
+manipulation, lists, dictionaries, modules, classes and file handles.  It also
+supports vector and matrix algebra, can integrate or differentiate expressions,
+and can numerically solve systems of equations.
 
 \noindent{\bf A vector graphics suite}
 
-The graphical canvas isn't just for plotting graphs. Circles, polygons and
-ellipses can be drawn using simple commands. Colors are a native type of object
+The graphical canvas isn't just for plotting graphs on. Circles, polygons and
+ellipses can be drawn build vector graphics. Colors are a native type of object
 for easy customisation. For the mathematically minded, Pyxplot's canvas
-interfaces cleanly to its vector math environment, making geometric
-construction easy.
+interfaces cleanly with its vector math environment, so that geometric
+construction is easy.
 
 \noindent{\bf A data processing package}
 
@@ -65,8 +68,9 @@ used for plotting simple graphs in the two programs are virtually identical.
 Gnuplot users will have a head start with Pyxplot -- simple \gnuplot\ scripts
 will often run in Pyxplot with minimal modification -- though the syntax used
 for advanced plotting tasks often differs. Although Pyxplot's programming and
-mathematical environment is hugely extended over \gnuplot's, we have followed
-the latter's preference for short simple command line syntax.
+mathematical environment is hugely extended over \gnuplot's to provide a
+scripting language and vector graphics environment, we have followed the
+latter's preference for short simple command line syntax.
 
 \section{The structure of this manual}
 
@@ -80,10 +84,10 @@ to be of more specialist interest.
 
 \section{An introductory tour}
 
-This section provide a flavour of the wide range of tasks for which Pyxplot can
-be used. It is not the place for detailed explanation of the syntax of Pyxplot
-commands -- that will come in following sections -- but most of the examples
-will work if pasted directly into a Pyxplot command prompt.
+This section provide an overview of the wide range of tasks for which Pyxplot
+can be used. Detailed explanations of the syntax of Pyxplot commands will
+follow in later chapters, but most of the examples here will work if pasted
+directly at a Pyxplot command prompt.
 
 \subpart{The mathematical environment}
 
@@ -100,26 +104,28 @@ print defaults
 show functions
 \end{verbatim}
 
-\noindent Pyxplot's built-in functions live in a module called {\tt defaults}
-whose members may be listed by {\tt print}ing the module object. Alternatively,
-the {\tt show} command is Pyxplot's interactive documentation system.
+\noindent Pyxplot is an object-orientated language, and its built-in functions
+live in a module called {\tt defaults}.  Its members may be listed by {\tt
+print}ing the module object. Alternatively, the {\tt show} command is Pyxplot's
+interactive documentation system.
 
 Taking as an example the built-in function {\tt log10(x)}, samples may be taken
-from it as in almost any other programming language:
+from it as in almost any other programming language. The {\tt defaults} module
+is special in that its functions are always accessible to the user's namespace:
 
 \vspace{3mm}
 \input{fragments/tex/intro_print1.tex}
 \vspace{3mm}
 
-\noindent While this returns numerical data, other functions return a variety
-of data types. For example, the {\tt primeFactors} function returns a list:
+\noindent This function returns numerical data, but Pyxplot has other data
+types too.  For example, the {\tt primeFactors} function returns a list:
 
 \vspace{3mm}
 \input{fragments/tex/intro_print2.tex}
 \vspace{3mm}
 
-\noindent the {\tt rgb(r,g,b)} function returns a color object for use in
-Pyxplot vector graphics commands:
+\noindent The {\tt rgb(r,g,b)} function returns a color object, which can be
+used in Pyxplot's vector graphics commands:
 
 \vspace{3mm}
 \input{fragments/tex/intro_print3.tex}
@@ -132,8 +138,8 @@ Unix time:
 \input{fragments/tex/intro_print4.tex}
 \vspace{3mm}
 
-Pyxplot also comes with many built-in physical constants. Many of them live in
-the physics module, {\tt phy}, for example, the speed of light:
+Many commonly-used physical constants are also built into Pyxplot. Many of them
+live in the physics module, {\tt phy}. For example, the speed of light:
 
 \vspace{3mm}
 \input{fragments/tex/intro_print5.tex}
@@ -195,7 +201,7 @@ plot sin(x)
 
 \noindent If a \datafile\ is to be plotted, its filename is put in place of a
 named function. In this example the fifth column of a \datafile\ is plotted
-against the second, only including those \datapoint s where the fourth column
+against the second, including only those \datapoint s where the fourth column
 is larger than two:
 
 \begin{verbatim}
@@ -370,7 +376,7 @@ with a copy of his public domain code for converting bitmap images into
 PostScript, which we used in the implementation of the {\tt image} command and
 the {\tt colormap} plot style. Matthew Smith provided C implementations of the
 Airy functions and the Riemann zeta function for general complex inputs, and
-helped to test Pyxplot's mathematical environment. Zolt\'an V\"or\"os worked on
+helped test Pyxplot's mathematical environment. Zolt\'an V\"or\"os worked on
 our development team from 2010 until 2011.  John Walker has published public
 domain code implementing RGB rendering of the electromagnetic spectrum, which
 we use in the {\tt colors.\-wave\-length()} function.

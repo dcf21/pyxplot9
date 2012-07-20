@@ -11,42 +11,41 @@ For documentation and more information, see <http://www.pyxplot.org.uk>.
 
 1. INTRODUCTION
 
-Pyxplot is a multi-purpose scientific scripting language, graph plotting tool,
+Pyxplot is a multi-purpose graph plotting tool, scientific scripting language,
 vector graphics suite, and data processing package.  Its interface is designed
-so that common tasks -- e.g., plotting labelled graphs of data -- should be
-accessible via short, simple and intuitive commands. At the same time, these
-commands also take many optional settings which allow their output to be
-fine-tuned into a wide range of different styles, appropriate for inclusion in
-reports, talks or academic journals.
+to make common tasks -- e.g., plotting labelled graphs of data -- accessible
+via short, simple, intuitive commands.
 
-A scientific scripting language
--------------------------------
+But these commands also take many optional settings, allowing their output to
+be fine-tuned into styles appropriate for reports, talks or academic journals.
+Pyxplot is simple enough to be used without prior programming experience, but
+powerful enough that programmers can extensively configure and script it.
 
-Pyxplot has all the features of a scripting language: string manipulation, 
-modules and classes. Numbers have physical units, and calculations
-automatically return results in appropriate units. Datafiles can
-straightforwardly be converted between physical units. Pyxplot natively handles
-dictionaries, lists, dates and file handles. It also supports vector and matrix
-algebra, can integrate or differentiate expressions, and numerically solve 
-systems of equations.
+A SCIENTIFIC SCRIPTING LANGUAGE
 
-A vector graphics suite
------------------------
+Pyxplot doesn't just plot graphs. It's a scripting language in which variables
+can have physical units. Calculations automatically return results in an
+appropriate unit, whether that be kilograms, joules or lightyears.  Data files
+can straightforwardly be converted from one set of units to another. Meanwhile
+Pyxplot has all the other features of a scripting language: string
+manipulation, lists, dictionaries, modules, classes and file handles.  It also
+supports vector and matrix algebra, can integrate or differentiate expressions,
+and can numerically solve systems of equations.
 
-The graphical canvas isn't just for plotting graphs. Circles, polygons and 
-ellipses can be drawn using simple commands. Colors are a native type of object
+A VECTOR GRAPHICS SUITE
+
+The graphical canvas isn't just for plotting graphs on. Circles, polygons and
+ellipses can be drawn build vector graphics. Colors are a native type of object
 for easy customisation. For the mathematically minded, Pyxplot's canvas
-interfaces cleanly to its vector math environment, making geometric
-construction easy.
+interfaces cleanly with its vector math environment, so that geometric
+construction is easy.
 
-A data processing package
--------------------------
+A DATA PROCESSING PACKAGE
 
 Pyxplot can interpolate data, find best fit lines, and compile histograms. It
 can Fourier transform data, calculate statistics, and output results to new
-datafiles. Where fine control is needed, custom code can be used to process
+\datafile s. Where fine control is needed, custom code can be used to process
 every data point in a file.
-
 
 Examples of the graphical output produced by Pyxplot can be found on the
 Pyxplot website: <http://www.pyxplot.org.uk/>.

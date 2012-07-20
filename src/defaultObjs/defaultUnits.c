@@ -1125,6 +1125,17 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].exponent[UNIT_LENGTH]=2;
   unit_pos++;
 
+  unit_database[unit_pos].nameAs     = "rood"; // rood
+  unit_database[unit_pos].nameAp     = "roods";
+  unit_database[unit_pos].nameLs     = unit_database[unit_pos].nameAs;
+  unit_database[unit_pos].nameLp     = unit_database[unit_pos].nameAp;
+  unit_database[unit_pos].nameFs     = "rood";
+  unit_database[unit_pos].nameFp     = "roods";
+  unit_database[unit_pos].quantity   = "area";
+  unit_database[unit_pos].multiplier = GSL_CONST_MKSA_ACRE*0.25;
+  unit_database[unit_pos].exponent[UNIT_LENGTH]=2;
+  unit_pos++;
+
   unit_database[unit_pos].nameAs     = "are"; // are
   unit_database[unit_pos].nameAp     = "ares";
   unit_database[unit_pos].nameLs     = unit_database[unit_pos].nameAs;
@@ -1439,7 +1450,7 @@ void ppl_makeDefaultUnits(ppl_context *context)
   unit_database[unit_pos].comment    = "US customary";
   unit_database[unit_pos].quantity   = "volume";
   unit_database[unit_pos].multiplier = GSL_CONST_MKSA_CUP;
-  //unit_database[unit_pos].us         = 1;
+  unit_database[unit_pos].us         = 1;
   unit_database[unit_pos].exponent[UNIT_LENGTH]=3;
   unit_pos++;
 

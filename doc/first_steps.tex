@@ -24,33 +24,31 @@
 \chapter{First steps with Pyxplot}
 \label{ch:first_steps}
 
-This chapter provides an overview of the commands used to produce simple plots
-in Pyxplot. The commands it covers have very similar syntax to \gnuplot's
-plotting commands, and have already used the latter you may find that you can
-skim over this chapter. An approximate list of those features of \gnuplot\
-which are either not supported, or which are substantially different in
-Pyxplot, can be found in Appendix~\ref{ch:gnuplot_diffs}.
+This chapter provides an overview of the commands used to produce plots in
+Pyxplot. The commands it covers have very similar syntax to \gnuplot; if you
+have used \gnuplot\ in the past, you can find an approximate list of
+differences between Pyxplot and \gnuplot\ in Appendix~\ref{ch:gnuplot_diffs}.
 
-Chapter~\ref{ch:plotting} will extend the material of this chapter to provide a
-complete guide to Pyxplot's plot styles.
+The introduction to plotting provided by this chapter will be extended in
+Chapter~\ref{ch:plotting}, which is a complete guide to Pyxplot's plot styles.
 
 \section{Getting started}
 
 The simplest way to start Pyxplot is to type {\tt pyxplot} at a shell prompt.
-This starts an interactive session, and a Pyxplot command-line prompt into
-which commands can be typed will appear. Pyxplot can be exited either by typing
-\indcmdts{exit} or \indcmdts{quit}, or by pressing CTRL-D. Various switches can
+This starts an interactive session, and produces a Pyxplot command-line prompt
+into which commands can be typed. Pyxplot can be exited either by typing
+\indcmdts{exit}, \indcmdts{quit}, or by pressing CTRL-D. Various switches can
 be specified on the shell command line to modify Pyxplot's behaviour; these are
-listed in Box~\ref{box:CommandSwitches}.  Of especial interest may be the
+listed in Box~\ref{box:CommandSwitches}.  Of particular interest may be the
 switches {\tt -c} and {\tt -m}, which change between the use of
 color-highlighted (default) and non-colored text.
 
-Typing commands into interactive terminals will probably be a sufficient way to
-drive Pyxplot to begin with, but as the number of commands required to set up
-plots grows with the complexity of the task, it is likely to become rapidly
-more preferable to store these commands in text files called scripts.  Once
-such a script has been written, it can be executed automatically by passing the
-filename of the command script to Pyxplot on the shell command line, for
+Typing commands into interactive terminals is likely to be a sufficient way for
+a beginner to drive Pyxplot, but as tasks grow more complicated, more commands
+are needed to set up plots. It is likely to become preferable to store
+these commands in text files called {\it scripts}.  Once such a script has been
+written, it can be executed automatically by passing the filename of the
+command script to Pyxplot on the shell command line, for
 example:\index{command-line syntax}
 
 \begin{verbatim}
@@ -72,10 +70,10 @@ modify its behaviour:\index{command line syntax}
 \end{tabular}
 }
 
-\noindent In this case, Pyxplot would execute the commands in the file {\tt
-foo.ppl} and then exit. By convention, we choose to affix the suffix {\tt
+\noindent In this case, Pyxplot executes the commands in the file {\tt
+foo.ppl} and then exits. By convention, we affix the suffix {\tt
 .ppl} to the filenames of all Pyxplot command scripts. This is not strictly
-necessary, but allows Pyxplot scripts to be easily distinguished from other
+necessary, but it allows Pyxplot scripts to be easily distinguished from other
 text files in a filing system. The filenames of several command scripts may be
 passed to Pyxplot on a single command line, indicating that they should be
 executed in sequence, as in the example:
@@ -86,9 +84,8 @@ pyxplot foo1.ppl foo2.ppl foo3.ppl
 
 It is also possible to have a single Pyxplot session alternate between running
 command scripts autonomously and allowing the user to enter commands
-interactively between the running of the scripts. There are two ways of doing
-this.  Pyxplot can be passed the magic filename {\tt --} on the command line,
-as in the example
+interactively. There are two ways of doing this.  Pyxplot can be passed the
+magic filename {\tt --} on the command line, as in the example
 
 \begin{verbatim}
 pyxplot foo1.ppl -- foo2.ppl
@@ -110,9 +107,9 @@ using the \indcmdt{load}, as in the example:
 \noindent This example would have the same effect as typing the contents of the
 file {\tt foo.ppl} into the present interactive terminal.
 
-The \indcmdt{save} may assist in producing Pyxplot command scripts: it stores a
-history of the commands which have been typed into the present interactive
-session to file.
+The \indcmdt{save} may assist in producing Pyxplot command scripts: it stores
+to a text file a history of the commands which have been typed into the present
+interactive session.
 
 \boxout{The storage of command histories in Pyxplot.}{box:CommandHistory}{
 When Pyxplot is used interactively, its command-line environment is based upon
@@ -139,7 +136,7 @@ only displays the last $n$ commands, e.g.:\vspace{3mm}
 \label{sec:first_plots}
 
 The core graph-plotting command of Pyxplot is the \indcmdt{plot}. The following
-simple example would plot the trigonometric function $\sin(x)$:
+simple example plots the trigonometric function $\sin(x)$:
 
 \begin{verbatim}
 plot sin(x)
@@ -149,22 +146,21 @@ plot sin(x)
 \includegraphics[width=8cm]{examples/eps/ex_intro_sine}
 \end{center}
 
-\noindent This is one of a large number of mathematical functions which are
-built into Pyxplot; a complete alphabetical list of them can be found in
-Chapter~\ref{ch:function_list}.
+\noindent This is one of a large number of standard mathematical functions
+which are built into Pyxplot; a complete alphabetical list of them can be found
+in Chapter~\ref{ch:function_list}.
 
-As well as plotting functions, it is also possible to plot data stored in
-files. The following would plot data from a file {\tt data.dat}, taking the
-$x$-coordinate of each point from the first column of the \datafile, and the
-$y$-coordinate from the second.  The \datafile\ is assumed to be in plain text
-format\footnote{If the filename of a \datafile\ ends with a {\tt .gz} suffix,
-it is assuming to be gzipped plaintext, and is decoded accordingly. Other
-formats of \datafile\ can be opened with the use of input filters; see
-Section~\ref{sec:filters}.}, with columns separated by whitespace and/or
-commas\footnote{This format is compatible with the Comma Separated Values (CSV)
-format produced by many applications such as Microsoft Excel.}\index{csv
-files}\index{spreadsheets, importing data from}\index{Microsoft
-Excel}\index{gzip}:
+It is also possible to plot data stored in files. The following would plot data
+from a file {\tt data.dat}, taking the $x$-coordinate of each point from the
+first column of the \datafile, and the $y$-coordinate from the second.  The
+\datafile\ is assumed to be in plain text format\footnote{If the filename of a
+\datafile\ ends with a {\tt .gz} suffix, it is assuming to be gzipped
+plaintext, and is decoded accordingly. Other formats of \datafile\ can be
+opened with the use of input filters; see Section~\ref{sec:filters}.}, with
+columns separated by whitespace and/or commas\footnote{This format is
+compatible with the Comma Separated Values (CSV) format produced by many
+applications such as Microsoft Excel.}\index{csv files}\index{spreadsheets,
+importing data from}\index{Microsoft Excel}\index{gzip}:
 
 \begin{verbatim}
 plot 'data.dat'
@@ -270,15 +266,11 @@ example, the expression {\tt x**y**z} is evaluated as {\tt (x**(y**z))}.}
 \label{tab:operators_table}
 \end{table}
 
-%\example{ex:introduction}{An example}{
-%Here, we have an example.
-%}
-
 \section{Comments}
 
-As in any programming language, it is good practice to include comments in
-Pyxplot command scripts to explain what each command or block of commands is
-doing. Comment lines should begin with a hash character, as in the
+As in any programming language, it is good practice to include comments in your
+code, to help other people (including yourself!) to work out what's going on.
+Comment lines in Pyxplot scripts should begin with a hash character, as in the
 example\index{comment lines}\index{command scripts!comment lines}
 
 \begin{verbatim}
@@ -297,21 +289,21 @@ ignored.
 
 \section{Splitting long commands}
 
-Long commands may be split over multiple lines in scripts provided that each
-line of the command is terminated with a backslash character, whereupon the
-following line will be appended to it, as in this example:
+Long commands may be split over multiple lines, provided that each line of the
+command is terminated with a backslash character, whereupon the following line
+will be appended to it. For example:
 
 \vspace{3mm}
 \input{fragments/tex/fs_longline.tex}
 \vspace{3mm}
 
-\noindent Such lines splits will be used extensively in this manual where
-command lines are longer than the width of the page.
+\noindent Such lines splits are often used in this manual where command lines
+are longer than the width of the page.
 
 \section{Printing text}
 
 Pyxplot's \indcmdt{print} can be used to display strings and the results of
-calculations on the terminal, as in the following examples:
+calculations, as in the following examples:
 
 \vspace{3mm}
 \input{fragments/tex/fs_print1.tex}
@@ -327,9 +319,10 @@ variable {\tt a} and the function {\tt f(a)} in the middle of a text string:
 
 Strings can be enclosed either in single ({\tt '}) or double ({\tt "}) quotes.
 Strings may also be enclosed by three quote characters in a row: either {\tt
-'''} or {\tt """}. Special care needs to be taken when using apostrophes or
-quotes in single-quote delimited strings, as these characters may be
-misinterpreted as string delimiters, as in the example:
+\textquoteright\textquoteright\textquoteright} or {\tt """}. Special care needs
+to be taken when using apostrophes or quotes in single-quote delimited strings,
+as these characters may be misinterpreted as string delimiters, as in the
+example:
 
 \begin{dontdo}
 'Robert's data'
@@ -338,7 +331,7 @@ misinterpreted as string delimiters, as in the example:
 \noindent This easiest way to avoid such problems is to use three quotes:
 
 \begin{dodo}
-'''Robert's data'''
+\textquoteright\textquoteright\textquoteright Robert's data\textquoteright\textquoteright\textquoteright
 \end{dodo}
 
 Special characters such as tabs and newlines can be inserted into strings using
@@ -351,7 +344,7 @@ split over three lines:
 \vspace{3mm}
 
 Sometimes these escape codes can be rather annoying, especially when entering
-\LaTeX control codes, which all begin with backslash characters. Rather than
+\LaTeX\ control codes, which all begin with backslash characters. Rather than
 having to escape every backslash, it is generally easier to prefix the string
 with the character {\tt r}, which turns off all escape codes:
 
@@ -442,7 +435,7 @@ contain apostrophe, quote and backslash characters.  It is recommended that
 characters turned off, for example:
 
 \begin{dodo}
-set xlabel r"""\textrm{J\"org's data}"""
+set xlabel r"""$\backslash$textrm\{J$\backslash$"org's data\}"""
 \end{dodo}
 
 The reason for recommending this syntax is demonstrated by the examples below,
@@ -459,7 +452,7 @@ set xlabel 'My plot's X axis'
 set xlabel "J$\backslash$"org's data"
 \end{dontdo}
 
-\noindent the backslash before the " character will be interpreted as a Pyxplot escape character; it will not be passed to \LaTeX, and a \LaTeX error will result. There are similar problems with
+\noindent the backslash before the " character will be interpreted as a Pyxplot escape character; it will not be passed to \LaTeX, and a \LaTeX\ error will result. There are similar problems with
 
 \begin{dontdo}
 set xlabel "2 $\backslash$times 3"
@@ -475,9 +468,11 @@ set xlabel "J\\\"org's data"
 \noindent this syntax is messy, especially in the last example where three backslashes are needed. It is much neater to use:\index{backslash character}\index{accented characters}
 
 \begin{dodo}
-set xlabel r"""2 $\backslash$times 3"""
+set xlabel r"""2 $\backslash$times 3"""\\
 set xlabel r"""J$\backslash$"org's data"""
 \end{dodo}
+
+\subsection{Removing labels and titles}
 
 Having set labels and titles, they may be removed thus:
 
@@ -512,9 +507,9 @@ example:
 show title
 \end{verbatim}
 
-\noindent Alternatively, several settings may be requested at once, or all
-settings beginning with a certain string of characters can be queried, as in
-the following two examples:
+\noindent Alternatively, several settings may be queried at once, or all
+settings beginning with a certain string of characters can be listed, as in the
+following two examples:
 
 \begin{verbatim}
 show xlabel ylabel key
@@ -545,13 +540,13 @@ Table~\ref{tab:show_keywords}.
 \label{tab:show_keywords}
 \end{table}
 
-Generally, the \indcmdt{show} displays each setting in the form of a
+Generally, the \indcmdt{show} displays each setting in the form of a typeable
 \indcmdt{set} which could be used to set that setting, together with a comment
 to briefly explain what effect the setting has. This means that the output can
 be pasted directly into another Pyxplot terminal to copy settings from one
-session to another. However, it should be noted that some settings, such as
-{\tt papersize} are only pastable once the \indcmdt{set numerics typeable} has
-been issued, for reasons which will be explained in Section~\ref{sec:pastable}.
+session to another. However, some settings such as {\tt papersize} are only
+pastable once the \indcmdt{set numerics typeable} has been issued, for reasons
+which will be explained in Section~\ref{sec:pastable}.
 
 When a color-highlighted interactive session is used, settings which have been
 changed are highlighted in yellow, whilst those settings which are unchanged
@@ -572,8 +567,8 @@ plot 'data.dat' using 3:5
 \noindent This example would plot the contents of the fifth column of the file
 {\tt data.dat} on the vertical axis, against the contents of the third column
 on the horizontal axis. As mentioned above, columns in \datafile s can be
-separated using whitespace and/or commas.  Algebraic expressions may also be
-used in place of column numbers, as in the example:
+separated by whitespace and/or commas.  Algebraic expressions may also be used
+in place of column numbers, as in the example:
 
 \begin{verbatim}
 plot 'data.dat' using (3+$1+$2):(2+$3)
@@ -663,8 +658,8 @@ $e$ & Plot only up to the $e\,$th line within each block. \\
 $f$ & Plot only up to the $f\,$th block within each index block. \\
 \end{longtable}
 
-\noindent Any or all of these values can be omitted, and so the following would
-both be valid statements:
+\noindent Any or all of these values can be omitted, and so the following are
+both valid statements:
 
 \begin{verbatim}
 plot 'data.dat' index 1 every 2:3
@@ -672,13 +667,14 @@ plot 'data.dat' index 1 every ::3
 \end{verbatim}
 
 \noindent The first would plot only every other \datapoint\ from every third
-data block; the second from the third line onwards within each data block.
+data block. The second would plot data from the third line onwards within every
+data block.
 
 \index{comment lines!in datafiles}
 Comment lines may be included in \datafile s by prefixing them with a hash
 character. Such lines are completely ignored by Pyxplot and do not count
 towards the one or two blank lines required to separate blocks and index
-blocks.  It is usually good practice to include comment lines at the top of
+blocks.  It is often good practice to include comment lines at the top of
 \datafile s to indicate their date and source. In
 Section~\ref{sec:special_comments} we will see that Pyxplot can read metadata
 from some comment lines which follow particular syntax.
@@ -688,9 +684,9 @@ from some comment lines which follow particular syntax.
 \index{globbing}\index{wildcards}\index{datafiles!globbing}
 
 The wildcards {\tt *} and {\tt ?} may be used in filenames supplied to the
-\indcmdt{plot} to plot many \datafile s at once. The following, for example,
-would plot all \datafile s in the current directory with a {\tt .dat} suffix,
-using the same plot options:
+\indcmdt{plot} to plot many \datafile s at once. The following command, for
+example, plots all \datafile s in the current directory with a {\tt .dat}
+suffix, using the same plot options:
 
 \begin{verbatim}
 plot '*.dat' with linewidth 2
@@ -726,7 +722,7 @@ plot 'data.dat' index 1 using rows 1:2
 \end{verbatim}
 
 \noindent For completeness, the syntax {\tt using} \indkeyt{columns} is also
-accepted, specifying that columns should be plotted against one another as
+accepted, specifying that columns should be plotted against one another, as
 happens by default:
 
 \begin{verbatim}
@@ -757,7 +753,7 @@ values in every other column, between columns~3 and~9.
 
 The final modifier which the {\tt plot} command takes to allow the user to
 specify which subset(s) of a \datafile\ should be plotted is \indmodt{select}.
-This can be used to plot only those \datapoint s in a \datafile\ which specify
+This can be used to plot only those \datapoint s in a \datafile\ which satisfy
 some given criterion, as in the following examples:
 
 \begin{verbatim}
@@ -771,11 +767,12 @@ recognised by Pyxplot, including logical operators, was given in
 Table~\ref{tab:operators_table}.
 
 When plotting using \indpst{lines} to connect the \datapoint s (see
-Section~\ref{sec:plotting_styles}), the default behaviour is for the lines not
-to be broken if a set of \datapoint s are removed by the {\tt select} modifier.
-However, this behaviour is sometimes undesirable.  To cause the plotted line to
-break when points are removed the \indmodt{discontinuous}\ modifier is supplied
-after the {\tt select} modifier, as in the example
+Section~\ref{sec:plotting_styles} for more information about Pyxplot's plotting
+styles), the default behaviour is for the lines not to be broken if a set of
+\datapoint s are removed by the {\tt select} modifier.  However, this behaviour
+is sometimes undesirable.  To cause the plotted line to break when points are
+removed the \indmodt{discontinuous}\ modifier is supplied after the {\tt
+select} modifier, as in the example
 
 \begin{verbatim}
 plot sin(x) select ($2>0) discontinuous
@@ -813,21 +810,21 @@ replot [0:1][0:1]
 By default, when Pyxplot is used interactively, all plots are displayed on the
 screen. It is also possible to produce PostScript output, to be read into other
 programs or embedded into \LaTeX\ documents, as well as a variety of other
-graphical formats. The \indcmdt{set terminal}\footnote{Gnuplot users should
-note that the syntax of the {\tt set terminal} command in Pyxplot is somewhat
-different from that used by Gnuplot; see Section~\ref{sec:set_terminal}.} is
-used to specify the output format that is required, and the \indcmdt{set
-output} is used to specify the file to which output should be directed. For
-example,
+graphical formats such as jpeg and png. The \indcmdt{set
+terminal}\footnote{Gnuplot users should note that the syntax of the {\tt set
+terminal} command in Pyxplot is somewhat different from that used by Gnuplot;
+see Section~\ref{sec:set_terminal}.} is used to specify the output format that
+is required, and the \indcmdt{set output} is used to specify the file to which
+output should be directed. For example,
 
 \begin{verbatim}
-set terminal postscript
-set output 'myplot.eps'
+set terminal pdf
+set output 'myplot.pdf'
 plot 'datafile.dat'
 \end{verbatim}
 
-\noindent would output a PostScript plot of data from the file {\tt datafile.dat} to the file
-{\tt myplot.eps}.
+\noindent would output a PDF plot of data from the file {\tt datafile.dat} to the file
+{\tt myplot.pdf}, which could be opened in Adobe Reader.
 
 The \indcmdt{set terminal} can also be used to configure various output options
 within each supported file format.  For example, the following commands would
@@ -894,7 +891,7 @@ transparent backgrounds, see Chapter~\ref{ch:image_formats}.
 The widths of plots may be set by means of two commands -- {\tt set
 size}\indcmd{set size} and {\tt set width}\indcmd{set width}. Both are
 equivalent, and should be followed by the desired width measured in
-centimetres, for example:
+centimeters, for example:
 
 \begin{verbatim}
 set width 20
@@ -912,14 +909,15 @@ set size ratio 3.0
 \noindent The command {\tt set size noratio} returns to Pyxplot's default
 aspect ratio of the golden ratio, i.e.\ $\left((1+\sqrt{5})/2\right)^{-1}$. The
 special command {\tt set size square}\indcmd{set size square} sets the aspect
-ratio to unity.
+ratio to unity (i.e.\ square).
 
 \section{Plotting styles}
 \label{sec:plotting_styles}
 
 By default, data from files are plotted with points and functions are plotted
-with lines. However, either kinds of data can be plotted in a variety of ways.
-To plot a function with points, for example, the following syntax is used:
+with lines. However, either kinds of data can be plotted in a variety of {\it
+plot styles}.  To plot a function with points, for example, the following
+syntax is used:
 
 \begin{verbatim}
 plot sin(x) with points
@@ -988,14 +986,15 @@ style used when functions are plotted.
 By default, Pyxplot automatically scales axes to some sensible range which
 contains all of the plotted data. However, it is possible for the user to
 override this and set his own range.\index{axes!setting ranges} This can be
-done directly from the plot command, by following the word {\tt plot} with the
-syntax {\tt [minimum:maximum]}.\footnote{An alternative valid syntax is to
-replace the colon with the word {\tt to}: {\tt [minimum to maximum]}.} The
-first specified range applies to the {\tt x}-axis, and the second to the {\tt
-y}-axis.\footnote{As will be discussed in Section~\ref{sec:multiple_axes}, if
-further ranges are specified, they apply to the {\tt x2}-axis, then the {\tt
-y2}-axis, and so forth.} In the following example, the first three cylindrical
-Bessel functions are plotted in the range $0<x<10$:
+done directly from the {\tt plot} command, by following the word {\tt plot}
+with the syntax {\tt [minimum:maximum]}.\footnote{An alternative valid syntax
+is to replace the colon with the word {\tt to}, i.e.\ {\tt [minimum to
+maximum]}.} The first specified range applies to the {\tt x}-axis, and the
+second to the {\tt y}-axis.\footnote{As will be discussed in
+Section~\ref{sec:multiple_axes}, if further ranges are specified, they apply to
+the {\tt x2}-axis, then the {\tt y2}-axis, and so forth.} In the following
+example, the first three cylindrical Bessel functions are plotted in the range
+$0<x<10$:
 
 \begin{verbatim}
 plot [0:10][-0.5:1] besselJ(0,x), besselJ(1,x), besselJ(2,x)
@@ -1008,7 +1007,7 @@ plot [0:10][-0.5:1] besselJ(0,x), besselJ(1,x), besselJ(2,x)
 three Legendre polynomials:
 
 \begin{verbatim}
-set key xcentre
+set key xcenter
 plot [-1:1][:] legendreP(2,x), legendreP(4,x), legendreP(6,x)
 \end{verbatim}
 \begin{center}
@@ -1016,7 +1015,7 @@ plot [-1:1][:] legendreP(2,x), legendreP(4,x), legendreP(6,x)
 \end{center}
 
 \noindent Here, we have used the {\tt set key} command to specify that the
-plot's legend should be horizontally aligned in the centre of the plot, to
+plot's legend should be horizontally aligned in the center of the plot, to
 complement the symmetry of the Legendre polynomials. This command will be
 described more fully in Section~\ref{sec:legends}.
 
@@ -1105,9 +1104,9 @@ $\theta$.
 
 In addition to this {\it Users' Guide}, Pyxplot also has a \indcmdt{help},
 which provides a hierarchical source of information. Typing {\tt help} alone
-gives a brief introduction to the help system, as well as a list of topics on
-which help is available. To display help on any given topic, type {\tt help}
-followed by the name of the topic. For example,
+gives a brief introduction to the help system, as well as a list of topics
+about which help is available. To display help on any given topic, type {\tt
+help} followed by the name of the topic. For example,
 
 \begin{verbatim}
 help datafile
@@ -1120,7 +1119,7 @@ help datafile
 help plot
 \end{verbatim}
 
-\noindent provides information on the {\tt plot} command.  Some topics have
+\noindent provides information about the {\tt plot} command.  Some topics have
 sub-topics, which are listed at the end of each page. To view them, add further
 words to the end of your help request -- an example might be
 

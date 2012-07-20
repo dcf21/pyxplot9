@@ -71,6 +71,9 @@ scripts which are to be watched.  Full documentation can be found in:
   \-V, \-\-version: Display version number
 .SH AUTHORS
 %s.
+.SH BUGS AND USER FORUMS
+To report bugs in Pyxplot, or to meet other Pyxplot users in our forums, please
+visit us on sourceforge: <http://sourceforge.net/projects/pyxplot/>.
 .SH CREDITS
 Matthew Smith, Michael Rutter, Zoltan Voros and John Walker have all
 contributed code to Pyxplot.  We welcome bug reports, which can be submitted to

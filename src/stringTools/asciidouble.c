@@ -224,18 +224,34 @@ unsigned char ppl_dblApprox(double a, double b, double err)
 
 /* ppl_file_readline(): This remarkably useful function forwards a file to the next newline */
 
-void ppl_file_readline(FILE *file, char *output, int MaxLength)
+void ppl_file_readline(FILE *file, char **output, int *MaxLenPtr, int MaxLength)
 {
  char c = '\x07';
- char *outputscan = output;
  int i=0;
 
- while (((int)c != '\n') && (!feof(file)) && (!ferror(file)))
+
+ if (MaxLenPtr != NULL)
   {
-   if (cancellationFlag) break;
-   if ((fscanf(file,"%c",&c)>=0) && ((c>31)||(c==9)) && (i<MaxLength-2)) { i++; *(outputscan++) = c; } // ASCII 9 is a tab
+   MaxLength = *MaxLenPtr;
+   while (((int)c != '\n') && (!feof(file)) && (!ferror(file)))
+    {
+     if (cancellationFlag) break;
+     if (i>MaxLength-4) { char *new = realloc(*output, MaxLength*=2); if (new==NULL) break; *output=new; }
+     if ( (fscanf(file,"%c",&c)>=0) && ((c>31)||(c==9)) ) { (*output)[i++]=c; } // ASCII 9 is a tab
+    }
+   *MaxLenPtr = MaxLength;
+   (*output)[i]='\0';
   }
-  *(outputscan++) = '\0';
+ else
+  {
+   char *outputscan = *output;
+   while (((int)c != '\n') && (!feof(file)) && (!ferror(file)))
+    {
+     if (cancellationFlag) break;
+     if ((fscanf(file,"%c",&c)>=0) && ((c>31)||(c==9)) && (i<MaxLength-2)) { i++; *(outputscan++) = c; } // ASCII 9 is a tab
+    }
+   *(outputscan++) = '\0';
+  }
 }
 
 /* ppl_getWord(): This returns the first word (terminated by any whitespace). Maximum <max> characters. */
@@ -441,6 +457,7 @@ void ppl_strWordWrap(const char *in, char *out, int width)
     if (strncmp(in+i, "\\rab"    , 4)==0) {i+=3; out[j++]='>'; continue;}
     if (strncmp(in+i, "\\VERSION", 8)==0) {i+=7; strcpy(out+j,VERSION); j+=strlen(out+j); continue;}
     if (strncmp(in+i, "\\DATE"   , 5)==0) {i+=4; strcpy(out+j,DATE   ); j+=strlen(out+j); continue;}
+    if (strncmp(in+i, "Elephants", 9)==0) {i+=8; out[j++]='#'; continue;}
     out[j++] = in[i];
    }
   out[j]='\0';

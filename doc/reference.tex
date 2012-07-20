@@ -111,7 +111,7 @@ arc [ item <id> ] [at] <vector> radius <length>
 
 Arcs (curves with constant radius of curvature, that is, segments of circles)
 may be drawn on multiplot canvases using the \indcmdt{arc}.  The {\tt at}
-modifier specifies the coordinates of the centre of curvature, from which all
+modifier specifies the coordinates of the center of curvature, from which all
 points on the arc are at the distance given following the {\tt radius} modifier.
 The angles {\tt start} and {\tt finish}, measured clockwise from the vertical,
 control where the arc begins and ends.  For example, the command
@@ -120,7 +120,7 @@ control where the arc begins and ends.  For example, the command
 arc at 0,0 radius 2 from 90 to 270
 \end{verbatim}
 
-\noindent would draw a semi-circle beneath the line $x=0$, centred on the
+\noindent would draw a semi-circle beneath the line $x=0$, centered on the
 origin with radius $2\,\mathrm{cm}$.  The usual style modifiers for lines may
 be passed after the keyword {\tt with}; if the {\tt fillcolor} modifier is
 specified then the arc will be filled to form a pie-chart slice.
@@ -213,8 +213,8 @@ specified using similar options to those accepted by the {\tt plot} command.
 
 The second syntax allows two pairs of coordinates to be specified.  Pyxplot
 will then draw a rectangular box with opposing corners at the specified
-locations.  If an angle is specified the box will be rotated about its centre.
-Hence the following two commands both draw a square box centred on the origin:
+locations.  If an angle is specified the box will be rotated about its center.
+Hence the following two commands both draw a square box centered on the origin:
 
 \begin{verbatim}
 box from -1, -1 to 1,1
@@ -304,7 +304,7 @@ circle [ item <id> ] [at] <vector> radius <length>
 \end{verbatim}
 
 The \indcmdt{circle} is used to draw circles on multiplot canvases.  The
-coordinates of the circle's centre and its radius are specified. The {\tt with}
+coordinates of the circle's center and its radius are specified. The {\tt with}
 modifier allows the style of the circle to be specified using similar options
 to those accepted by the {\tt plot} command.  The example
 
@@ -312,7 +312,7 @@ to those accepted by the {\tt plot} command.  The example
 circle at 2,2 radius 1 with color red fillcolor blue
 \end{verbatim}
 
-\noindent would draw a red circle of unit radius filled in blue, centred
+\noindent would draw a red circle of unit radius filled in blue, centered
 $2\,\mathrm{cm}$ above and to the right of the origin.
 
 All vector graphics objects placed on multiplot canvases receive unique
@@ -436,38 +436,38 @@ of the ellipse may be specified in many different ways, by specifying
 \begin{enumerate}[(i)]
 \item the position of two corners of the smallest rectangle which can enclose
 the ellipse when its major axis is horizontal, together with an optional
-counter-clockwise rotation angle, applied about the centre of the ellipse.
+counter-clockwise rotation angle, applied about the center of the ellipse.
 For example:
 
 \begin{verbatim}
 ellipse from 0,0 to 4,1 rot 70
 \end{verbatim}
 
-\item the position of both the centre and one of the foci of the ellipse,
+\item the position of both the center and one of the foci of the ellipse,
 together with any one of the following additional pieces of information: the
 ellipse's major axis length, its semi-major axis length, its minor axis length,
 its semi-minor axis length, its eccentricity, its latus rectum, or its
 semi-latus rectum.  For example:
 
 \begin{verbatim}
-ellipse focus 0,0 centre 2,2 majoraxis 4
-ellipse focus 0,0 centre 2,2 minoraxis 4
-ellipse focus 0,0 centre 2,2 ecc 0.5
-ellipse focus 0,0 centre 2,2 LatusRectum 6
-ellipse focus 0,0 centre 2,2 slr 3
+ellipse focus 0,0 center 2,2 majoraxis 4
+ellipse focus 0,0 center 2,2 minoraxis 4
+ellipse focus 0,0 center 2,2 ecc 0.5
+ellipse focus 0,0 center 2,2 LatusRectum 6
+ellipse focus 0,0 center 2,2 slr 3
 \end{verbatim}
 
-\item the position of either the centre or one of the foci of the ellipse,
+\item the position of either the center or one of the foci of the ellipse,
 together with any two of the following additional pieces of information: the
 ellipse's major axis length, its semi-major axis length, its minor axis length,
 its semi-minor axis length, its eccentricity, its latus rectum, or its
 semi-latus rectum. An optional counter-clockwise rotation angle may also be
-specified, applied about either the centre or one of the foci of the ellipse,
+specified, applied about either the center or one of the foci of the ellipse,
 whichever is specified. If no rotation angle is given, then the major axis of
 the ellipse is horizontal.  For example:
 
 \begin{verbatim}
-ellipse centre 0,0 majoraxis 4 minoraxis 4
+ellipse center 0,0 majoraxis 4 minoraxis 4
 \end{verbatim}
 \end{enumerate}
 
@@ -508,7 +508,7 @@ onto multiplot canvases.  The {\tt at} modifier can be used to specify where
 the image should be placed on the vector graphics canvas; if it is not, then
 the image is placed at the origin. The settings {\tt texthalign} and {\tt
 textvalign} determined how the image is aligned relatively to this reference
-point -- for example, whether its bottom left corner or its centre is placed at
+point -- for example, whether its bottom left corner or its center is placed at
 the reference point.
 
 The {\tt rotate} modifier can be used to rotate the image by any angle,
@@ -883,7 +883,7 @@ should be multiplied by the bin width used.
 
 Second, if the function produced by the {\tt histogram} command is plotted
 using the {\tt plot} command, samples are automatically taken not at evenly
-spaced intervals along the ordinate axis, but at the centres of each bin. If
+spaced intervals along the ordinate axis, but at the centers of each bin. If
 the \indpst{boxes} plot style is used, the box boundaries are be conveniently
 drawn to coincide with the bins into which the data were sorted.
 
@@ -960,7 +960,7 @@ detected.  The {\tt at} modifier can be used to specify where the image should
 be placed on the vector graphics canvas; if it is not, then the image is placed
 at the origin. The settings {\tt texthalign} and {\tt textvalign} determined
 how the image is aligned relatively to this reference point -- for example,
-whether its bottom left corner or its centre is placed at the reference point.
+whether its bottom left corner or its center is placed at the reference point.
 
 The {\tt rotate} modifier can be used to rotate images by any angle, measured
 in degrees counter-clockwise.  The {\tt width} or {\tt height} modifiers can be
@@ -1927,7 +1927,7 @@ set boxwidth 2
 set boxwidth -2
 \end{verbatim}
 
-\noindent would set all of the bars to have differing widths, centred upon
+\noindent would set all of the bars to have differing widths, centered upon
 their specified horizontal positions, such that their interfaces occur at the
 horizontal midpoints between them. The specified width may have any physical
 units, but must be real and finite.
@@ -2324,7 +2324,7 @@ set key bottom left
 \end{verbatim}
 
 Recognised positions are {\tt top}, {\tt bottom}, {\tt left}, {\tt right}, {\tt
-below}, {\tt above}, {\tt outside}, {\tt xcentre} and {\tt ycentre}. In
+below}, {\tt above}, {\tt outside}, {\tt xcenter} and {\tt ycenter}. In
 addition, if none of these options quite achieve the desired position, a
 horizontal and vertical offset may be specified as a comma-separated pair after
 any of the positional keywords above.  The first value is assumed to be the
@@ -3354,7 +3354,7 @@ in Section~\ref{sec:color_names} can be used, or a numbered color from the prese
 \subsection{texthalign}\indcmd{set texthalign}
 
 \begin{verbatim}
-set texthalign ( left | centre | right )
+set texthalign ( left | center | right )
 \end{verbatim}
 
 The setting {\tt texthalign} controls how text labels are justified
@@ -3364,7 +3364,7 @@ using the {\tt text} command. Three options are available:
 
 \begin{verbatim}
 set texthalign left
-set texthalign centre
+set texthalign center
 set texthalign right
 \end{verbatim}
 
@@ -3372,7 +3372,7 @@ set texthalign right
 \subsection{textvalign}\indcmd{set textvalign}
 
 \begin{verbatim}
-set textvalign ( bottom | centre | top )
+set textvalign ( bottom | center | top )
 \end{verbatim}
 
 The setting {\tt textvalign} controls how text labels are justified vertically
@@ -3382,7 +3382,7 @@ plots using the {\tt set label} command, and upon text items created using the
 
 \begin{verbatim}
 set textvalign bottom
-set textvalign centre
+set textvalign center
 set textvalign top
 \end{verbatim}
 
