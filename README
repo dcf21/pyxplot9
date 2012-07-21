@@ -35,8 +35,8 @@ and can numerically solve systems of equations.
 A VECTOR GRAPHICS SUITE
 
 The graphical canvas isn't just for plotting graphs on. Circles, polygons and
-ellipses can be drawn build vector graphics. Colors are a native type of object
-for easy customisation. For the mathematically minded, Pyxplot's canvas
+ellipses can be drawn to build vector graphics. Colors are a native type of
+object for easy customisation. For the mathematically minded, Pyxplot's canvas
 interfaces cleanly with its vector math environment, so that geometric
 construction is easy.
 

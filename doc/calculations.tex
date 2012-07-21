@@ -1190,12 +1190,18 @@ For example:
 \subsection{Calendars}
 
 By default, the {\tt time.fromCalendar} function makes a transition from the
-Julian calendar to the Gregorian calendar at midnight on 14th~September 1752
-(Gregorian calendar), when Britain and the British Empire switched calendars.
-Thus, dates between 2nd~September and 14th~September 1752 are not valid input
-dates, since they days never occurred in the British calendar. This behaviour
-may be changed using the \indcmdt{set calendar}, which offers a choice of nine
-different calendars listed in Table~\ref{tab:calendars}.
+old Julian calendar to the new Gregorian calendar at midnight on 14th~September
+1752 (Gregorian calendar), when Britain and the British Empire switched
+calendars.  Thus, dates between 2nd~September and 14th~September 1752 are not
+valid input dates, since they days never occurred in the British calendar.
+
+This behaviour may be changed using the \indcmdt{set calendar}, which offers a
+choice of nine different calendars listed in Table~\ref{tab:calendars}. Most of
+the these calendars differ only in the date on which the transition is made
+between the old (Julian) calendar and the new (Gregorian) calendar.
+
+The exceptions are the Hebrew and Islamic calendars, which have entirely
+different systems of months.
 
 \begin{table}
 \begin{center}

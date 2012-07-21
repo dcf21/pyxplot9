@@ -25,16 +25,15 @@
 \label{chap:progDataTypes}
 
 This chapter describes Pyxplot's built-in object types, which include lists,
-dictionaries, vectors, matrices and file handles. A comprehensive list of all
-of Pyxplot's object types can be found in Chapter~\ref{ch:types_list}, which
-also lists the methods available in each object type.
+dictionaries, vectors, matrices and file handles.
 
 All objects in Pyxplot, including numbers, have {\it methods}, which act on or
-return information about the object.  Some methods are common to all objects:
-for example, the {\tt str()} method which returns a string representation of
-the object (as used by the {\tt print} command). All objects have a method
-called {\tt methods()}, which returns a list of the names of all of methods of
-that object:
+return information about the object. Some methods are common to all objects.
+For example, they all have a method {\tt str()} which returns a string
+representation of the object (as used by the {\tt print} command). All objects
+also have a method called {\tt methods()}, which returns a list of the names of
+all of methods of that object. These methods can be called as follows (we don't
+show the output, as it is long):
 
 \begin{verbatim}
 print pi.str()
@@ -42,16 +41,23 @@ print "My son, it's a wisp of fog.".methods()
 \end{verbatim}
 
 \noindent Methods are like functions in that printing them returns brief
-documentation about them:
+documentation about them, as we demonstrate below on two methods of string
+objects:
 
 \vspace{3mm}
 \input{fragments/tex/prog_methods.tex}
 \vspace{3mm}
 
+The following sections describe each of Pyxplot's types in turn, and the
+methods that can be applied to each of them.  A comprehensive list of all of
+Pyxplot's object types can be found in Chapter~\ref{ch:types_list}, which also
+lists the methods available in each object type.
+
 \section{Instantiating objects}
 
 A list of all of Pyxplot's built-in object types can be found in the {\tt
-types} module, which contains the {\tt object prototypes} for each type:
+types} module, which contains the {\it object prototypes} for each type. Its
+contents are as follows:
 
 \vspace{3mm}
 \input{fragments/tex/prog_types.tex}
@@ -60,16 +66,18 @@ types} module, which contains the {\tt object prototypes} for each type:
 \noindent These object prototypes can be called like functions to produce an
 instance of each data type. Each prototype can take various different kinds of
 argument; for example, the {\tt number} prototype can take a {\tt number}, {\tt
-boolean} or a {\tt string} from which to create a number:
+boolean} or a {\tt string} from which to create a number. For example:
 
 \vspace{3mm}
 \input{fragments/tex/prog_types2.tex}
 \vspace{3mm}
 
 \noindent Full documentation of the types of inputs supported by each prototype
-are listed in Section~\ref{sec:functions_types}.
+are listed in the Reference Manual, in Section~\ref{sec:functions_types}.
 
-In many cases there are much more succinct ways of creating objects of each type. For example, lists can be creating by enclosing a comma-separated list of elements in square brackets:
+In many cases there are much more succinct ways of creating objects of each
+type. For example, lists can be creating by enclosing a comma-separated list of
+elements in square brackets:
 
 \vspace{3mm}
 \input{fragments/tex/prog_types3.tex}
@@ -88,9 +96,10 @@ In many cases there are much more succinct ways of creating objects of each type
 
 Strings can be enclosed either in single ({\tt '}) or double ({\tt "}) quotes.
 Strings may also be enclosed by three quote characters in a row: either {\tt
-'''} or {\tt """}. Special care needs to be taken when using apostrophes or
-quotes in single-quote delimited strings, as these characters may be
-misinterpreted as string delimiters, as in the example:
+\textquoteright\textquoteright\textquoteright} or {\tt """}. Special care needs
+to be taken when using apostrophes or quotes in single-quote delimited strings,
+as these characters may be misinterpreted as string delimiters, as in the
+example:
 
 \begin{dontdo}
 'Robert's data'
@@ -99,7 +108,7 @@ misinterpreted as string delimiters, as in the example:
 \noindent This easiest way to avoid such problems is to use three quotes:
 
 \begin{dodo}
-'''Robert's data'''
+\textquoteright\textquoteright\textquoteright Robert's data\textquoteright\textquoteright\textquoteright
 \end{dodo}
 
 Special characters such as tabs and newlines can be inserted into strings using
@@ -112,7 +121,7 @@ split over three lines:
 \vspace{3mm}
 
 Sometimes these escape codes can be rather annoying, especially when entering
-\LaTeX control codes, which all begin with backslash characters. Rather than
+\LaTeX\ control codes, which all begin with backslash characters. Rather than
 having to escape every backslash, it is generally easier to prefix the string
 with the character {\tt r}, which turns off all escape codes:
 
@@ -162,17 +171,20 @@ Strings can be concatenated together using the {\tt +} operator:
 \label{sec:stringsubop}
 
 Most string manipulations are performed using the string substitution operator,
-{\tt \%}\index{\% operator@{\tt \%} operator}. This operator should be preceded
-by a format string, such as {\tt x=\%f}, in which tokens such as {\tt \%f} mark
-places where numbers and strings should be substituted. The substitution
-operator is followed by a bracketed list of the quantities which should be
-substituted in place of these tokens in the format string. This behaviour is
-similar to that of the Python programming language's \% operator\footnote{As in
-Python, the brackets are optional when only one item is being substituted. For
-example, {\tt '\%d'\%2} is equivalent to {\tt '\%d'\%(2)}.} and of the {\tt
-printf} statement in C.  For example, to concatenate the two strings contained
-in the variables {\tt a} and {\tt b} into a single string variable {\tt c}, one
-would issue the command:\index{string operators!concatenation}
+{\tt \%}\index{\% operator@{\tt \%} operator}, which performs a similar role to
+the {\tt sprintf} statement in C.
+
+This operator should be preceded by a format string, such as {\tt 'x=\%f'}, in
+which tokens such as {\tt \%f} mark places where numbers and strings should be
+substituted. The substitution operator is followed by a bracketed list of the
+quantities which should be substituted in place of these tokens. This behaviour
+is similar to that of the Python programming language's \% operator\footnote{As
+in Python, the brackets are optional when only one item is being substituted.
+For example, {\tt '\%d'\%2} is equivalent to {\tt '\%d'\%(2)}.}
+
+For example, to concatenate the two strings contained in the variables {\tt a}
+and {\tt b} into a single string variable {\tt c}, one would issue the
+command:\index{string operators!concatenation}
 
 \begin{verbatim}
 c = "%s%s"%(a,b)
@@ -182,14 +194,15 @@ One application of this operator might be to label plots with the title of the
 \datafile\ being plotted, as in the following example:
 \begin{verbatim}
 filename="data_file.dat"
-title=r"A plot of the data in {\tt %s}."%(filename)
+title=r"A plot of the data in {\tt %s}."%filename
 set title title
 plot filename
 \end{verbatim}
 
 The syntax of the substitution tokens placed in the format string is similar to
-that used by many other languages and is as follows. All substitution tokens
-begin with a {\tt \%} character, after which there may be placed, in order:
+that used by many other languages (including C and Python).  All substitution
+tokens begin with a {\tt \%} character, after which there may be placed, in
+order:
 
 \begin{enumerate}
 \item An optional minus sign, to specify that the substituted item should be left-justified.
@@ -201,12 +214,7 @@ begin with a {\tt \%} character, after which there may be placed, in order:
 
 \noindent The conversion character is a single character which specifies what
 kind of substitution should take place. Its possible values are listed in
-Table~\ref{tab:conversion_chars}. Note that where numerical quantities with
-physical units are provided, the physical units are not displayed unless the
-{\tt \%s} token is used. Although it is not an error to pass a quantity with
-physical units to, for example, the {\tt \%f} substitution token, it is good
-practice to divide the quantity by a suitable unit first to make it
-dimensionless, to be certain of the unit in which it will be displayed.
+Table~\ref{tab:conversion_chars}.
 
 \begin{table}
 \begin{center}
@@ -240,7 +248,7 @@ to be substituted, as happens in C's {\tt printf} command:
 \subsection{Converting strings to numbers}
 
 Strings which contain numerical data can be converted to numbers by passing
-them to the object {\tt types.number()}, as in the example:
+them to the object {\tt types.number()}, as in the examples:
 
 \vspace{3mm}
 \input{fragments/tex/prog_stringnum.tex}
@@ -260,9 +268,9 @@ Segments of strings can be cut out by using square brackets to slice the string:
 \input{fragments/tex/prog_stringslice.tex}
 \vspace{3mm}
 
-\noindent If a single number is placed in the square brackets, and single
+\noindent If a single number is placed in the square brackets, a single
 character is taken out of the string. If two colon-separated numbers are
-specified, {\tt [x:y]} then the substring from character position {\tt x} up to
+specified, {\tt [x:y]}, then the substring from character position {\tt x} up to
 but not including {\tt y} is returned. If either {\tt x} or {\tt y} are
 omitted, then the start or end of the string is used respectively. If either
 number of negative, then it counts from the end of the string, $-1$ being the
@@ -279,11 +287,11 @@ the next chapter:
 \vspace{3mm}
 
 \noindent Full documentation of them can be found in
-Section~\ref{sec:string_methods}. As in {\tt python}, the {\tt strip()} method
+Section~\ref{sec:string_methods}. As in Python, the {\tt strip()} method
 removes whitespace characters from the beginning and end of strings, and the
 {\tt split()} method splits a string up into whitespace-separated words. The
 {\tt splitOn(x)} method splits a string on all occurrences of the sub-string
-{\tt x}.  The following simple examples demonstrate the use of some of them:
+{\tt x}.  The following examples demonstrate the use of some of them:
 
 \vspace{3mm}
 \input{fragments/tex/prog_stringmethods.tex}
@@ -300,7 +308,7 @@ operator\index{string operators!search and replace}\footnote{Programmers with
 experience of {\tt perl} will recognise this syntax.}, =$\sim$\index{=$\sim$
 operator}, which takes a regular expression with a syntax similar to that
 expected by the shell command {\tt sed}\index{sed shell command@{\tt sed} shell
-command} and applies it to the relevant string variable.\footnote{Regular
+command} and applies it to the specified string variable.\footnote{Regular
 expression syntax is a massive subject, and is beyond the scope of this manual.
 The official GNU documentation for the {\tt sed} command is heavy reading, but
 there are many more accessible tutorials on the web.}\index{regular
@@ -352,7 +360,9 @@ recognised by the =$\sim$ operator.
 
 List objects hold ordered sequences of other Pyxplot objects, which may
 include lists and dictionaries to create hierarchical data structures. They are
-created by enclosing a comma-separated list of objects by square brackets:
+created by enclosing a comma-separated list of objects by square brackets.
+
+For example:
 
 \begin{verbatim}
 a = [10,colors.green,"bottles"]
@@ -406,13 +416,14 @@ first item added to the stack is the first one to be popped:
 \input{fragments/tex/prog_listbuffer.tex}
 \vspace{3mm}
 
-\noindent In the final line, we make use of the fact that a list tests true if
-it contains any items, or false if it is empty.
+\noindent The function {\tt prime(x)} returns true if {\tt x} is a prime
+number, and false otherwise. In the final line, we make use of the fact that a
+list tests true if it contains any items, or false if it is empty.
 
 \subsection{Sorting lists}
 
 Methods are provided for sorting data in lists. The simplest of these is the
-{\tt sort()} method, which sorts the members of a list into order of ascending
+{\tt sort()} method, which sorts the members into order of ascending
 value.\footnote{Non-numeric items are assigned arbitrary but consistent values
 for the purposes of sorting.  Booleans are always lower-valued than numbers,
 but numbers are lower-valued than lists. Longer lists are always higher valued
@@ -480,7 +491,7 @@ example iterates over the words in a sentence:
 \subsection{Calling functions with lists of arguments}
 
 The \indfunt{call($f,a$)} function can be used to call a function with an
-arbitrary list of arguments:
+arbitrary list of arguments. For example:
 
 \vspace{3mm}
 \input{fragments/tex/prog_listcall.tex}
@@ -509,7 +520,7 @@ sin(x)}. This example converts a list of numbers into Roman numerals:
 \input{fragments/tex/prog_listmap.tex}
 \vspace{3mm}
 
-The method {\tt reduce(f)} takes a pointer to a function of two arguments. It
+The method {\tt reduce(f)} takes a function of two arguments as its argument. It
 first calls $f(a,b)$ on the first two elements of the list, and then continues
 through the list calling $f(a,b)$ on the result and the next item in the list.
 The final result is returned:
@@ -617,7 +628,7 @@ Like vectors, matrices can have physical units, and adding two matrices together
 The dot product of two vectors can be found simply by multiplying the two vectors together:
 
 \vspace{3mm}
-\input{fragments/tex/prog_vectoradd.tex}
+\input{fragments/tex/prog_vectordot.tex}
 \vspace{3mm}
 
 \noindent
@@ -634,9 +645,9 @@ Matrices can be multiplied by one another and by vectors to perform matrix
 arithmetic. This not only allows matrix equations to be solved, but also allows
 transformation matrices to be applied to vector positions on the vector
 graphics canvas. All of Pyxplot's vector graphics commands, which will be
-described in detail in Chapter~\ref{ch:vector_graphics} can accept positions on
-the canvas as either comma-separated numerical components, or as vector
-objects. The following example demonstrates the use of a rotation matrix:
+described in detail in Chapter~\ref{ch:vector_graphics}, can accept positions
+as either comma-separated numerical components, or as vector objects. The
+following example demonstrates the use of a rotation matrix:
 
 \begin{verbatim}
 rotate(a) = matrix( [[cos(a),-sin(a)], \
@@ -658,6 +669,7 @@ Among more complex operations, {\tt inv()} returns the inverse of a matrix,
 eigen\-vectors()} returns a list of the matrix's corresponding eigen\-vectors.
 
 \subsection{Plotting data from vectors}
+\label{sec:vectorplot}
 
 Vectors can be used to pass calculated data to the \indcmdt{plot} for plotting.
 Instead of supplying the name of a \datafile, or a function to be plotted, a
@@ -810,12 +822,12 @@ More information on the manipulation of {\tt date} objects can be found in Secti
 
 \section{Modules and classes}
 
-Modules provide a convenient way to group functions and variables together,
-just as Pyxplot's built-in functions are grouped into modules such as {\tt os}
-and {\tt random}.  New modules can be created by calling the {\tt module}
-object, which is a synonym for {\tt types.module}. Once created, a module is
-like a dictionary, except that its elements can be accessed both as {\tt
-module[item]} and more commonly as {\tt module.item}:
+Modules provide a convenient way to group functions and variables together.
+Pyxplot's default functions are grouped into modules such as {\tt os} and {\tt
+random}.  New modules can be created by calling the {\tt module} object, which
+is a synonym for {\tt types.module}. Once created, a module is like a
+dictionary, except that its elements can be accessed both as {\tt module[item]}
+and more commonly as {\tt module.item}. For example:
 
 \vspace{3mm}
 \input{fragments/tex/prog_mod1.tex}
@@ -846,8 +858,8 @@ of {\tt animal}.
 
 \section{File handles}
 
-File handles provide a means of reading data directly from text files in
-Pyxplot scripts, or of writing data to files. Files are opened using the {\tt
+File handles provide a means of reading data directly from text files, or of
+writing data or logging information to files. Files are opened using the {\tt
 open()} function:
 
 \vspace{2mm}
@@ -859,10 +871,8 @@ open()} function:
 Alternatively, if what is wanted is a temporary scratch space, the {\tt os.tmpfile()} function should be used:
 
 \vspace{2mm}
-\funcdef{os.tmpfile()}{returns a file handle for a temporary file.}
+\funcdef{os.tmpfile()}{returns a file handle for a temporary file. The resulting file handle is open for both reading and writing.}
 \vspace{4mm}
-
-\noindent The resulting file handle is open for both reading and writing.
 
 The following methods are defined for file handles:
 

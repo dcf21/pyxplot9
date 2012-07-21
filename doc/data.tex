@@ -25,20 +25,43 @@
 \label{ch:numerics}
 
 This chapter returns to Pyxplot's commands for acting on data stored in files.
-It first reviews some of the common features of the commands which act upon
-\datafile s, and then moves on to describe each command in turn. We leave the
+Chapter~\ref{ch:first_steps} has already introduced the {\tt plot} command,
+which draws graphs, but there are also commands for tabulating data to new
+\datafile s, for computing histograms, for interpolating data, and for taking
+Fourier transforms.
+
+Section~\ref{sec:plot_datafiles} has already introduced the options which can
+be used to select data from particular columns or which satisfy particular
+criteria: {\tt using}, {\tt index}, {\tt every} and {\tt select}.  These
+options are universal to all of Pyxplot's commands which operate on data sets.
+In all cases, data sets can be read from files, sampled from functions, or
+specified as a colon-separated list of vectors (see
+Section~\ref{sec:vectorplot}).
+
+This chapter begins by describing other common features of these commands,
+before moving on to describe each command in turn. It leaves the details of the
 {\tt plot} command, which was introduced in Chapter~\ref{ch:first_steps}, to be
-described in more detail in Chapter~\ref{ch:plotting}.
+described in full detail in Chapter~\ref{ch:plotting}.
 
 \section{Input filters}
 \label{sec:filters}
 
 By default, Pyxplot expects \datafile s to be in a simple plaintext format
-which is described in Section~\ref{sec:plot_datafiles}. Input filters provide a
-mechanism by which \datafile s in arbitrary formats can be read into Pyxplot.
-For each filter, a filename wildcard is supplied, and the filter is then applied to
-all \datafile s whose filenames match this wildcard. For example, by default
-Pyxplot has five input filters installed, as the {\tt show filters} command
+which is described in Section~\ref{sec:plot_datafiles}. However, input filters
+provide a mechanism by which \datafile s in arbitrary formats can be read.
+
+An input filter is specified to act on all \datafile s that match some
+filename pattern. For example, a filter could be defined to act on all
+\datafile s called {\tt *.txt} or {\tt *.dat}. The filter itself takes the form
+of a program which is launched by Pyxplot whenever a matching \datafile\ is
+read.  The program is passed the filename of the \datafile\ as a command line
+argument immediately following any arguments specified in the filter's
+definition. It is then expected to return the data contained in the file to
+Pyxplot in plaintext format using its {\tt stdout} stream. Any errors which
+such a program returns to {\tt stderr} are passed to the user as error
+messages.
+
+Pyxplot has five input filters built-in, as the {\tt show filters} command
 reveals:
 
 \begin{verbatim}
@@ -49,28 +72,28 @@ set filter "ftp://*"  "/usr/bin/wget -O -"
 set filter "http://*" "/usr/bin/wget -O -"
 \end{verbatim}
 
-Each filter takes the form of a program which is launched by Pyxplot whenever a
-\datafile\ with matching filename is read. The program is passed the filename of
-the \datafile\ as a command line argument immediately following any arguments
-specified in the filter's definition. It is then expected to return the data
-contained in the file to Pyxplot in plaintext format using its {\tt stdout}
-stream. Any errors which such a program returns to {\tt stderr} are passed to
-the user as error messages.
-
-The above set of filters allows Pyxplot to read data from gzipped plaintext
-\datafile s, data tables in FITS format\index{FITS format}, and from \datafile
-s available over the web via HTTP\index{HTTP} or FTP\index{FTP}. Finally, a
-filter is provided for converting textual dates in log files into numbers
+The above set of filters allow Pyxplot to read data from gzipped plaintext
+\datafile s, from \datafile s available over the web via HTTP\index{HTTP} or
+FTP\index{FTP}, and data tables in FITS format\index{FITS format}.  A filter is
+also provided for converting textual dates in log files into numbers
 representing days, months and years. To add to this list of filters, it is
-necessary to write a short program or shell script, and the simple filters
-provided in Pyxplot's source code for {\tt .log} and {.fits} files may provide
-a useful model.
+necessary to write a short program or shell script; the simple filters provided
+in Pyxplot's source code for {\tt .log} and {.fits} files may provide a useful
+model.
+
+The filter can then be installed using the syntax
+
+\begin{verbatim}
+set filter <filenameWildcard> <shellCommand>
+\end{verbatim}
+
 
 \section{Reading data from a pipe}
 
-Pyxplot usually reads data from files, but it is also possible to read data
-from pipes from other processes if these are directed to Pyxplot's standard
-input stream.  To do this, one uses the magic filename {\tt -}:
+Pyxplot usually reads data from files, or samples it from functions. However,
+it is also possible to read data {\it piped}\index{pipes} into it from other
+processes if these are directed to Pyxplot's standard input stream, {\tt
+stdin}\index{stdin}.  To do this, the magic filename {\tt -} is used:
 
 \begin{verbatim}
 plot '-' with lines
@@ -78,13 +101,15 @@ plot '-' with lines
 
 This makes it possible to call Pyxplot from within another program and pass it
 data to plot without ever storing the data on disk. Whilst this facility has
-great power, the authors would urge caution in this practice.  Whilst it is
-tempting to write programs which both perform calculations and plot the results
-immediately, this can make it difficult to replot graphs later. A few months
-after the event, when the need arises to replot the same data in a different
-form or in a different style, remembering how to use a sizable program can
-prove tricky -- especially if the person struggling to do so is not you! But a
-simple \datafile\ is quite straightforward to plot time and again.
+great power, it should be used with caution.
+
+It is often very tempting to write programs which both perform calculations and
+plot the results immediately, but this can make it difficult to replot graphs
+later. A few months after the event, when the need arises to replot the same
+data in a different form or in a different style, remembering how to use a
+sizable program can prove tricky -- especially if the person struggling to do
+so is not you! But a simple \datafile\ is quite straightforward to plot time
+and again.
 
 \section{Including data within command scripts}
 
@@ -92,7 +117,7 @@ It is also possible to embed data directly within Pyxplot scripts, which may be
 useful when a small number of markers are wanted at particular pre-defined
 positions on a graph, or when it is desirable to roll a Pyxplot script and the
 data it takes into a single file for easy storage or transmission. To do this,
-one uses the magic filename {\tt --} and terminates the data with the string
+one uses the magic filename {\tt \--\--} and terminates the data with the string
 {\tt END}:
 
 \begin{verbatim}
@@ -150,48 +175,50 @@ Section~\ref{sec:set_axisunitstyle}).
 \label{sec:tabulate}
 
 Pyxplot's \indcmdt{tabulate} is similar to its {\tt plot} command, but instead
-of plotting a series of \datapoint s onto a graph, it writes them to \datafile
-s. This can be used to produce text files containing samples of functions, to
-rearrange/filter the columns in \datafile s, to change the units in which data
-are expressed in \datafile s, and so forth.  The following example would produce
-a \datafile\ called {\tt gamma.dat} containing a list of values of the gamma
-function:
+of plotting a series of \datapoint s onto a graph, it writes them to a
+\datafile. It can be used to produce text files containing samples of
+functions, to rearrange/filter the columns in \datafile s, to produce a copy of
+a \datafile\ using different physical units, and so on.
+
+The following example would produce a \datafile\ called {\tt gamma.dat}
+containing a list of values of the gamma function:
 
 \begin{verbatim}
 set output 'gamma.dat'
 tabulate [1:5] gamma(x)
 \end{verbatim}
 
-\noindent Multiple functions may be tabulated into the same file, either by
-using the \indmodt{using} modifier, as in the example
+One way to tabulate multiple functions into a common file is with the
+\indmodt{using} modifier, as in the example
 
 \begin{verbatim}
 tabulate [0:2*pi] sin(x):cos(x):tan(x) using 1:2:3:4
 \end{verbatim}
 
-\noindent or by placing them in a comma-separated list, as in the {\tt plot}
-command:
+\noindent This tabulates the supplied functions horizontally alongside one
+another in a series of columns. As many expressions may be supplied to the
+\indmodt{using} modifier as columns are wanted.
+
+Alternatively, if a series on functions or \datafile s are listed in a
+comma-separated list (as is done in the {\tt plot} command to plot multiple
+datasets), the functions are tabulated one after another in a series of index
+blocks separated by double linefeeds (see Section~\ref{sec:plot_datafiles}):
 
 \begin{verbatim}
 tabulate [0:2*pi] sin(x), cos(x), tan(x)
 \end{verbatim}
 
-In the former case, the functions are tabulated horizontally alongside one
-another in a series of columns. In the latter case, the functions are tabulated
-one after another in a series of index blocks separated by double linefeeds
-(see Section~\ref{sec:plot_datafiles}).
-
-The {\tt samples} setting can be used to control the number of points that are
-produced when tabulating functions, in the same way that it controls the {\tt
-plot} command:\indcmd{set samples}
+The \indcmdt{set samples} can be used to control the number of points that are
+listed when tabulating functions, in the same way that it controls the number
+of data points drawn by the {\tt plot} command:
 
 \begin{verbatim}
 set samples 200
 \end{verbatim}
 
-\noindent If the abscissa axis is set to be logarithmic then the points at which
-functions are evaluated are spaced logarithmically, otherwise they are spaced
-linearly.
+\noindent If the abscissa axis is set to be logarithmic then the functions are
+evaluated at logarithmically-space points along the axis; otherwise, they are
+samples at linearly-spaced points.
 
 The \indmodt{select}, \indmodt{using} and \indmodt{every} modifiers operate in
 the same manner in the {\tt tabulate} command as in the {\tt plot} command.
@@ -204,15 +231,21 @@ set output 'filtered.dat'
 tabulate 'input.dat' using 3:6:9 select (asin($4)>0)
 \end{verbatim}
 
-The numerical display format used in each column of the output file is chosen
-automatically to preserve accuracy whilst simultaneously being as easily human
-readable as possible.  Thus, columns which contain only integers are displayed
-as such, and scientific notation is only used in columns which contain very
-large or very small values.  If desired, however, a format statement may be
-specified using the {\tt with format} specifier. The syntax for this is similar
-to that expected by the string substitution operator ({\tt \%}; see
-Section~\ref{sec:stringsubop}). As an example, to tabulate the values of $x^2$
-to very many significant figures with some additional text, one could use:
+The numerical display format used for each column of the output file is
+automatically chosen to preserve accuracy whilst simultaneously being as easily
+human readable as possible.  Thus, columns which contain only integers are
+displayed as such, and scientific notation is only used in columns which
+contain very large or very small values.
+
+If desired, however, a custom format may be specified using the {\tt with
+format} modifier. This can be used both to specify text to appear in between
+the columns of data, and to specify the format of the data itself using tokens
+such as {\tt \%.5f}, as used by Pyxplot's string substitution operator ({\tt
+\%}; see Section~\ref{sec:stringsubop}), and the {\tt sprintf} statement of
+many other programming languages.
+
+For example, to tabulate the values of $x^2$ to very many significant figures
+with some additional text, one could use:
 
 \begin{verbatim}
 tabulate x**2 with format "x = %f ; x**2 = %27.20e"
@@ -226,10 +259,33 @@ x = 0.833333 ; x**2 =  6.94444444444442421371e-01
 x = 1.666667 ; x**2 =  2.77777777777778167589e+00
 \end{verbatim}
 
+There is flexibility as to how many substitution tokens appear in the format
+specification.  If the number of tokens is fewer than the number of columns of
+data, then the format is repeated until all the columns have been printed.
+Thus, the command
+
+\begin{verbatim}
+tabulate x**2 with format "%.3f "
+\end{verbatim}
+
+\noindent might produce the output:
+
+\begin{verbatim}
+0.000 0.000
+0.833 0.694
+1.667 2.778
+\end{verbatim}
+
+\noindent Note that the space character at the end of the format is important
+to ensure that there is a gap between the columns.
+
+If formats are supplied for more columns than are present, then the final
+columns are padded with {\tt nan} (not a number).
+
 The data produced by the {\tt tabulate} command can be sorted in order of any
-arbitrary metric by supplying an expression after the {\tt sortby} modifier;
-where such expressions are supplied, the data are sorted in order from the
-smallest value of the expression to the largest.
+arbitrary metric by supplying an expression after the {\tt sortby} modifier.
+The data are sorted in order from the lowest value of this expression to the
+highest.
 
 
 \section{Function fitting}
@@ -252,19 +308,21 @@ fit f() 'data.dat' index 1 using 2:3 via a,b
 \end{verbatim}
 
 \noindent The first line specifies the functional form which is to be used.
-The coefficients within this function, {\tt a} and {\tt b}, which are to be
-varied during the fitting process are listed after the keyword \indkeyt{via}
+The coefficients of this function, {\tt a} and {\tt b}, which are to be
+varied during the fitting process, are listed after the keyword \indkeyt{via}
 in the {\tt fit} command.  The modifiers \indmodt{index}, \indmodt{every},
-\indmodt{select} and \indmodt{using} have the same meanings in the {\tt fit}
-command as in the {\tt plot} command. When fitting a function of $n$
-variables, at least $n+1$ columns (or rows -- see
-Section~\ref{sec:horizontal_datafiles}) of data must be specified after the {\tt using}
-modifier. By default, the first $n+1$ columns are used. These correspond to the
-values of each of the $n$ arguments to the function, plus finally the value which
-the output from the function is aiming to match.  If an additional column is
-specified, then this is taken to contain the standard error in the value that
-the output from the function is aiming to match, and can be used to weight the
-\datapoint s which are being used to constrain the fit.
+\indmodt{select} and \indmodt{using} have the same meanings as in the {\tt plot} command.
+
+When a function of $n$ variables is being fit, at least $n+1$ columns (or rows
+-- see Section~\ref{sec:horizontal_datafiles}) of data must be specified after
+the {\tt using} modifier. By default, the first $n+1$ columns are used. These
+correspond to the values of each of the $n$ arguments to the function, plus
+finally the value which the output from the function is aiming to match.
+
+If an additional column is specified, then this is taken to contain the
+standard error in the value that the output from the function is aiming to
+match, and can be used to weight the \datapoint s which are being used to
+constrain the fit.
 
 As an example, below we generate a \datafile\ containing samples of a square
 wave using the {\tt tabulate} command and fit the first three terms of a
@@ -308,6 +366,10 @@ b = 50
 fit f() 'data.dat' index 1 using 2:3 via a,b
 \end{verbatim}
 
+\noindent If any of the fitting coefficients are not dimensionless -- that is,
+they have physical units such as meters or seconds -- then an initial value
+with the appropriate units {\it must} be specified.
+
 A few points are worth noting:
 
 \begin{itemize}
@@ -347,8 +409,10 @@ fit f() 'data.dat' via a
 
 The \indcmdt{interpolate} can be used to generate a special function within
 Pyxplot's mathematical environment which interpolates a set of \datapoint s
-supplied from a \datafile. Either one- or two-dimensional interpolation is
-possible.
+supplied from a \datafile. As with other commands, data can also be supplied
+from functions, or from a colon-separated list of vectors (see
+Section~\ref{sec:vectorplot}). Either one- or two-dimensional interpolation is
+possible. Two-dimensional interpolation is described in the next section.
 
 In the case of one-dimensional interpolation, various different types of
 interpolation are supported: linear interpolation, power law interpolation,
@@ -356,39 +420,13 @@ polynomial interpolation, cubic spline interpolation and akima spline
 interpolation. Stepwise interpolation returns the value of the datapoint
 nearest to the requested point in argument space. The use of polynomial
 interpolation with large datasets is strongly discouraged, as polynomial fits
-tend to show severe oscillations between \datapoint s.  Except in the case of
-stepwise interpolation, extrapolation is not permitted; if an attempt is made
-to evaluate an interpolated function beyond the limits of the \datapoint s
-which it interpolates, Pyxplot returns an error or value of not-a-number.
+tend to show severe oscillations between \datapoint s.
 
-In the case of two-dimensional interpolation, the type of interpolation to be
-used is set using the {\tt interpolate} modifier to the \indcmdt{set samples},
-and may be changed at any time after the interpolation function has been
-created.  The options available are nearest neighbor interpolation -- which is
-the two-dimensional equivalent of stepwise interpolation, inverse square
-interpolation -- which returns a weighted average of the supplied \datapoint s,
-using the inverse squares of their distances from the requested point in
-argument space as weights, and Monaghan Lattanzio interpolation, which uses the
-weighting function (Monaghan \& Lattanzio 1985)
-\begin{eqnarray*}
-w(x) & = 1 - \nicefrac{3}{2}v^2 + \nicefrac{3}{4}v^3 & \,\mathrm{for~}0\leq v\leq 1 \\
-     & = \nicefrac{1}{4}(2-v)^3                      & \,\mathrm{for~}1\leq v\leq 2
-\end{eqnarray*}
-where $v=r/h$ for $h=\sqrt{A/n}$, $A$ is the product
-$(x_\mathrm{max}-x_\mathrm{min})(y_\mathrm{max}-y_\mathrm{min})$ and $n$ is the
-number of input datapoints. These are selected as follows:
-
-\begin{verbatim}
-set samples interpolate nearestNeighbor
-set samples interpolate inverseSquare
-set samples interpolate monaghanLattanzio
-\end{verbatim}
-
-Finally, data can be imported from graphical images in bitmap ({\tt .bmp})
-format to produce a function of two arguments returning a value in the
-range~$0\to1$ which represents the data in one of the image's three color
-channels. The two arguments are the horizontal and vertical position within the
-bitmap image, as measured in pixels.
+Except in the case of stepwise interpolation, extrapolation is not permitted;
+if an attempt is made to evaluate an interpolated function beyond the limits of
+the \datapoint s which it interpolates, Pyxplot returns an error or value of
+not-a-number.  This behaviour can be configured using the \indcmdt{set numeric
+errors quiet} (see Section~\ref{sec:num_errs}).
 
 The \indcmdt{interpolate} has similar syntax to the \indcmdt{fit}:
 
@@ -417,7 +455,7 @@ plot [min:max] f(x)-g(x)
 
 \noindent Note that it is advisable to supply a range to the {\tt plot} command
 in this example: because the two datasets have been turned into continuous
-functions, the {\tt plot} command has to guess a range over which to plot them
+functions, the {\tt plot} command has to guess a range over which to plot them,
 unless one is explicitly supplied.
 
 The \indcmdt{spline} is an alias for {\tt interpolate spline}; the following
@@ -451,15 +489,63 @@ The resulting plot is shown below:
 \centerline{\includegraphics[width=\textwidth]{examples/eps/ex_interpolation}}
 }
 
+\subsection{Two-dimensional interpolation}
+
+In the case of two-dimensional interpolation, the type of interpolation to be
+used is set using the {\tt interpolate} modifier to the \indcmdt{set samples},
+and may be changed at any time after the interpolation function has been
+created.  The options available are nearest neighbor interpolation -- which is
+the two-dimensional equivalent of stepwise interpolation, inverse square
+interpolation -- which returns a weighted average of the supplied \datapoint s,
+using the inverse squares of their distances from the requested point in
+argument space as weights, and Monaghan Lattanzio interpolation, which uses the
+weighting function (Monaghan \& Lattanzio 1985)
+\begin{eqnarray*}
+w(x) & = 1 - \nicefrac{3}{2}v^2 + \nicefrac{3}{4}v^3 & \,\mathrm{for~}0\leq v\leq 1 \\
+     & = \nicefrac{1}{4}(2-v)^3                      & \,\mathrm{for~}1\leq v\leq 2
+\end{eqnarray*}
+where $v=r/h$ for $h=\sqrt{A/n}$, $A$ is the product
+$(x_\mathrm{max}-x_\mathrm{min})(y_\mathrm{max}-y_\mathrm{min})$ and $n$ is the
+number of input datapoints. These are selected as follows:
+
+\begin{verbatim}
+set samples interpolate nearestNeighbor
+set samples interpolate inverseSquare
+set samples interpolate monaghanLattanzio
+\end{verbatim}
+
+The following example creates a function {\tt quad\-ra\-pole(x,y)} which interpolates a quadrapole:
+
+\begin{verbatim}
+set samples interpolate inverseSquare
+interpolate 2d quadrapole() '--'
+-1 -1  1
+-1  1 -1
+ 1 -1 -1
+ 1  1  1
+END
+\end{verbatim}
+
+Finally, data can be imported from graphical images in bitmap ({\tt .bmp})
+format to produce a function of two arguments returning a value in the
+range~$0\to1$ which represents the data in one of the image's three color
+channels. The two arguments are the horizontal and vertical position within the
+bitmap image, as measured in pixels. This is done using syntax of the form:
+
+\begin{verbatim}
+interpolate 2d bmp_b blue() 'myImg.bmp'
+\end{verbatim}
+
 \section{Fourier transforms}
 
 The {\tt fft} and {\tt ifft} commands\indcmd{fft}\indcmd{ifft} take Fourier
-transforms and inverse Fourier transforms respectively of data supplied either
-from a file or from a function. In each case, a regular grid of abscissa values
-must be specified on which to take the discrete Fourier transform, which can
-extend over an arbitrary number of dimensions. The following example
-demonstrates the syntax of these commands as applied to a two-dimensional
-top-hat function:
+transforms and inverse Fourier transforms respectively of data. As with other
+commands, data can be supplied from a \datafile, from functions, or from a
+colon-separated list of vectors (see Section~\ref{sec:vectorplot}). In each
+case, a regular grid of abscissa values must be specified on which to take the
+discrete Fourier transform, which can extend over an arbitrary number of
+dimensions. The following example demonstrates the syntax of these commands as
+applied to a two-dimensional top-hat function:
 
 \begin{verbatim}
 step(x,y) = tophat(x,0.2) * tophat(y,0.4)
@@ -659,10 +745,10 @@ Triangular   & $\displaystyle w(n) = \left( \frac{2}{N_x} \right) \left( \frac{N
 \section{Histograms}
 \label{sec:histogram}
 
-The \indcmdt{histogram} takes a single column of data from a file and produces
-a function that represents the frequency distribution of the supplied data
-values. The output function consists of a series of discrete intervals which we
-term {\it bins}. Within each interval the output function has a constant value,
+The \indcmdt{histogram} takes a single column of data and produces a function
+that represents the frequency distribution of the supplied data values. The
+output function consists of a series of discrete intervals which we term {\it
+bins}. Within each interval the output function has a constant value,
 determined such that the area under each interval -- i.e.\ the integral of the
 function over each interval -- is equal to the number of datapoints found
 within that interval.  The following simple example
@@ -740,7 +826,7 @@ probability distributions. These functions are in the {\tt random} module:
 \indfun{random.binomial($p,n$)}
 \item {\tt random.chisq($\nu$)} -- returns a random sample from a $\chi$-squared distribution with $\nu$ degrees of freedom.
 \indfun{random.chisq($\nu$)}
-\item {\tt random.gaussian($\sigma$)} -- returns a random sample from a Gaussian (normal) distribution of standard deviation $\sigma$ and centred upon zero.
+\item {\tt random.gaussian($\sigma$)} -- returns a random sample from a Gaussian (normal) distribution of standard deviation $\sigma$ and centred on zero.
 \indfun{random.gaussian($\sigma$)}
 \item {\tt random.lognormal($\zeta,\sigma$)} -- returns a random sample from the log normal distribution centred on $\zeta$, and of width $\sigma$.
 \indfun{random.lognormal($\zeta,\sigma$)}
@@ -750,7 +836,7 @@ probability distributions. These functions are in the {\tt random} module:
 \indfun{random.tdist($\nu$)}
 \end{itemize}
 
-\noindent These functions all rely upon a common underlying random number
+\noindent These functions all rely on a common underlying random number
 generator\footnote{The gsl library's default random number generator, {\tt
 gsl\_\-rng\_\-default} is used. As of version~1.15, this maps to {\tt
 gsl\_\-rng\_\-mt19937} with a default seed of zero. The various probability

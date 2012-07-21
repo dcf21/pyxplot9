@@ -4,5 +4,5 @@ print x.split()[0:5]
 print x.splitOn(",")
 print x.find("worst")
 print x[0:24]
-print x[-25:0]
+print x[-25:]
 print x.upper()

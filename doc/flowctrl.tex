@@ -133,14 +133,13 @@ for (<initialise>; <criterion>; <step>)
   <code>
 \end{verbatim}
 
-\noindent Here, {\tt <code>} may be substituted by any block on Pyxplot command
-enclosed in braces \{\}. The closing brace must be on a new line after the last
-command of the block.
+\noindent Here, {\tt <code>} may be substituted by any block of Pyxplot
+commands enclosed in braces \{\}. The closing brace must be on a new line after
+the last command of the block.
 
 The first form is similar to how the \indcmdt{for} works in BASIC.  The first
-time that the script block is executed, the variable named at the start of the
-{\tt for} statement has the value given for {\tt start}.  Upon each iteration
-of the loop, this is incremented by amount {\tt step}. The loop finishes when
+time that the script block is executed, {\tt variable} has the value {\tt start}. Upon each iteration
+of the loop, it is incremented by amount {\tt step}. The loop finishes when
 the value exceeds {\tt end}. If {\tt step} is negative, then {\tt end} is
 required to be less than or equal to {\tt start}. A step size of zero is
 considered to be an error.  The iterator variable can have any physical
@@ -158,8 +157,9 @@ for x = 0 to 10 step 2
 
 In the C form of the \indcmdt{for}, three expressions are provided, separated
 by semicolons. These are evaluated (a) when the loop initialises, (b) as a
-boolean test of whether the loop should continue iterating, and (c) on each
-loop to increment/decrement variables as required. For example:
+boolean test of whether the loop should continue iterating, and (c) at the end
+of each iteration, usually to increment/decrement variables as required. For
+example:
 
 \begin{verbatim}
 for (i=1,j=1; i<=256; i*=2,j++) { print "%3d %3d"%(j,i); }
@@ -193,18 +193,19 @@ will be introduced in Section~\ref{sec:breakcontinue}.
 
 Foreach loops may be used to run a script block once for each item in a list or
 dictionary. Alternatively, if a string is supplied, it is treated as a filename
-wildcard, and all matching files are returned.
+wildcard, and all matching files are returned. For example:
 
 \begin{verbatim}
 foreach x in [-1,pi,10]
- {
-  print x
- }
+ { print x ; }
 
 foreach x in "*.dat"
- {
-  print x
- }
+ { print x ; }
+
+myDict = { 'a':1 , 'b':2 }
+foreach x in myDict
+ { print x ; }
+
 \end{verbatim}
 
 The first of these loops would iterate three times, with the variable {\tt x}
@@ -247,7 +248,7 @@ Foreach datum loops are similar to foreach loops in that they run a script
 block once for each item in a list.  In this case, however, the list in
 question is the list of \datapoint s in a \datafile, samples of a function, or
 values in a vector. The syntax of the \indcmdt{foreach datum} is similar to
-that of the commands met in the previous chapter for acting upon \datafile s:
+that of the commands met in the previous chapter for acting on \datafile s:
 the standard modifiers {\tt every}, {\tt index}, {\tt select} and {\tt using}
 can be used to select which columns of the \datafile, and which subset of the
 datapoints, should be used:
@@ -325,7 +326,7 @@ before each repetition. If it tests false, then the loop finishes.  The latter
 case is very similar, except that the supplied algebraic expression is tested
 immediately {\it after} each repetition. Thus, the former example may never
 actually execute the supplied script block if the looping criterion tests false
-upon the first iteration, but the latter example is always guaranteed to run
+on the first iteration, but the latter example is always guaranteed to run
 its script block at least once.
 
 The following example would continue looping indefinitely until stopped by the
@@ -357,7 +358,7 @@ following pair of examples:
 \vspace{3mm}
 
 Note that if several loops are nested, the {\tt break} and {\tt continue}
-statements only act upon the innermost loop. If either statement is encountered
+statements only act on the innermost loop. If either statement is encountered
 outside of a loop structure, an error results. Optionally, the {\tt for}, {\tt
 foreach}, {\tt do} and {\tt while} commands may be supplied with a name for the
 loop, prefixed by the word {\tt loopname}, as in the examples:
@@ -371,7 +372,7 @@ foreach i in "*.dat" loopname DatafileLoop
 
 \noindent When loops are given such names, the {\tt break} and {\tt continue}
 statements may be followed by the name of the loop to be broken out of,
-allowing the user to act upon loops other than the innermost one.
+allowing the user to act on loops other than the innermost one.
 
 \section{The conditional operator}
 \label{sec:conditional_operator}
@@ -380,7 +381,7 @@ The conditional operator provides a compact means of inserting conditional
 expressions.  Following the syntax of C, it takes three arguments and is
 written as {\tt a ? b : c}. The first argument, {\tt a} is a truth criterion to
 be tested. If the criterion is true, then the operator returns its second
-argument, {\tt b} as its output. Otherwise, the function's third argument {\tt
+argument {\tt b} as its output. Otherwise, the function's third argument {\tt
 c} is returned.
 
 \vspace{2mm}
@@ -459,7 +460,7 @@ this example, we define a Pyxplot subroutine to produce such a map as a
 function of $c=x+iy$, and then plot the resulting map using the {\tt colormap}
 plot style (see Section~\ref{sec:colormaps}).  To make the fractal prettier --
 it contains, after all, only three colors as strictly defined -- we vary the
-brightness of each point depending upon how many iterations are required before
+brightness of each point depending on how many iterations are required before
 the series ventures within a distance of $|z_n-r_i|<10^{-2}$ of any of the
 roots $r_i$.
 
@@ -647,10 +648,17 @@ example,
 set xlabel '`ls`'
 \end{dontdo}
 
-\noindent will not work. The best way to do this would be:
+\noindent will not work. One way to do this would be
+
+\begin{verbatim}
+set xlabel `echo "'" ; ls ; echo "'"`
+\end{verbatim}
+
+\noindent a better way would be to use the {\tt os.system} or {\tt os.popen} functions:
 
 \begin{dodo}
-set xlabel `echo "'" ; ls ; echo "'"`
+fileList = os.popen("ls","r").read()\newline
+set xlabel fileList
 \end{dodo}
 
 Note that it is not possible to change the current working directory by sending
