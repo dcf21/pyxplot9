@@ -160,7 +160,7 @@ void eps_plot_WithWordsFromUsingItems(ppl_context *c, withWords *ww, double *Dat
 
   if (ww->EXPfillcolor != NULL)
    {
-    ppl_colorFromObj(c, &ObjRow[j--], &ww->color, &ww->Col1234Space, &ww->EXPcolor, &ww->color1, &ww->color2, &ww->color3, &ww->color4, &ww->USEcolor, &ww->USEcolor1234);
+    ppl_colorFromObj(c, &ObjRow[j--], &ww->fillcolor, &ww->FillCol1234Space, &ww->EXPfillcolor, &ww->fillcolor1, &ww->fillcolor2, &ww->fillcolor3, &ww->fillcolor4, &ww->USEfillcolor, &ww->USEfillcolor1234);
    }
 
   if (ww->EXPcolor != NULL)

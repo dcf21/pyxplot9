@@ -25,42 +25,41 @@
 \label{ch:plotting}
 
 This part of the manual provides a complete description of Pyxplot's commands
-for producing graphs and vector graphics. This chapter provides a systematic
-survey of how the appearance of plots can be configured, extending the brief
-overview of the \indcmdt{plot} given in Chapter~\ref{ch:first_steps}.
-Subsequent chapters describe how to produce graphical output in a range of
-image formats (Chapter~\ref{ch:image_formats}), how to produce galleries of
-multiple plots side-by-side, and how to produce more sophisticated vector
-graphics (Chapter~\ref{ch:vector_graphics}).
+for producing graphs and vector graphics. This chapter extends the overview of
+the \indcmdt{plot} in Chapter~\ref{ch:first_steps}, providing a systematic
+description of how the appearance of plots can be configured.  Subsequent
+chapters describe how to produce graphical output in a range of image formats
+(Chapter~\ref{ch:image_formats}), how to produce galleries of multiple plots
+side-by-side, and how to produce more sophisticated vector graphics
+(Chapter~\ref{ch:vector_graphics}).
 
 \section{The {\tt with} modifier}
 \label{sec:with_modifier}
 
 In Chapter~\ref{ch:first_steps} an overview of the syntax of the \indcmdt{plot}
-was provided, including a description of the {\tt every}, {\tt index}, {\tt
-select} and {\tt using} modifiers which can be used to control {\it which}
-data, read from a \datafile\ or sampled from a function, should be plotted. The
-{\tt with} modifier controls {\it how} data should be plotted. For example, the
-statement
+was provided, including the {\tt every}, {\tt index}, {\tt select} and {\tt
+using} modifiers, which can be used to control {\it which} data should be
+plotted. The {\tt with} modifier controls {\it how} data should be plotted. For
+example, the statement
 \begin{verbatim}
 plot "data.dat" index 1 using 4:5 with lines
 \end{verbatim}
-specifies that data should be plotted using lines connecting each \datapoint\ to
-its neighbors. More generally, the {\tt with} modifier can be followed by a
-range of settings which fine-tune the manner in which the data are displayed;
-for example, the statement
+specifies that data should be plotted with lines connecting each \datapoint\ to
+its neighbors. We term the keyword {\tt lines} a {\it plot style}. The {\tt
+with} modifier can also be followed by a variety of settings which fine-tune
+aspects of how data are displayed.  For example, the statement
 \begin{verbatim}
 plot "data.dat" with lines linewidth 2.0
 \end{verbatim}
-would use twice the default width of line.
+would connect \datapoint s with a line of twice the default width.
 
-In the following section, a complete list of all of Pyxplot's plot styles --
-i.e.\ all of the words which may be used in place of {\tt lines} -- will be
-given. In this section, we list all of the modifiers such as {\tt line\-width}
-which may be used to alter the exact appearance of these plot styles, which are
-as follows:
+The next section will provide a complete list of all of Pyxplot's plot styles
+-- i.e.\ the words which may be used in place of {\tt lines}. First we list all
+of the modifiers such as {\tt line\-width} which may be used to alter the exact
+appearance of these plot styles. These are as follows:
+
 \begin{itemize}
-\item \indmodt{color} -- used to select the color in which the dataset is to be plotted. It should be followed either by a number, to select a color from the present palette (see Section~\ref{sec:palette}), by a recognised color name, a complete list of which can be found in Section~\ref{sec:color_names}, or by a color object, such as may be created by the functions {\tt gray(g)}, {\tt rgb(r,g,b)}, {\tt cmyk(c,m,y,k)} or {\tt hsb(h,s,b)}. This modifier may also be spelt {\tt colour}.\index{colors!setting for datasets}
+\item \indmodt{color} -- used to select the color in which the dataset is to be plotted. It should be followed either by a number, to select a color from the present palette (see Section~\ref{sec:palette}); by a recognised color name, a complete list of which can be found in Section~\ref{sec:color_names}; or by a color object, such as may be created by the functions {\tt gray(g)}, {\tt rgb(r,g,b)}, {\tt cmyk(c,m,y,k)} or {\tt hsb(h,s,b)}. This modifier may also be spelt {\tt colour}.\index{colors!setting for datasets}
 \item \indmodt{fillcolor} -- used to select the color in which the dataset is filled. The color may be specified using any of the styles listed for {\tt color}. May also be spelt {\tt fillcolour}.
 \item \indmodt{linetype} -- used to numerically select the type of line -- for example, solid, dotted, dashed, etc.\ -- which should be used by line-based plot styles. A complete list of Pyxplot's numbered line types can be found in Chapter~\ref{ch:linetypes_table}. May be abbreviated {\tt lt}.
 \item \indmodt{linewidth} -- used to select the width of line which should be used by line-based plot styles, where unity represents the default width. May be abbreviated {\tt lw}.
@@ -80,10 +79,13 @@ plot 'datafile' using 1:2 with lp col 1 lw 2 ps 3
 
 \noindent Where modifiers take numerical values, expressions of the form {\tt
 \$2+1}, similar to those supplied to the {\tt using} modifier, may be used to
-indicate that each datapoint should be displayed in a different style or in a
-different color. The following example would plot a \datafile\ with {\tt
-points}, drawing the position of each point from the first two columns of the
-supplied \datafile\ and the size of each point from the third column:
+read numbers from the supplied data set. In this case, each datapoint will be
+displayed in a different style or in a different color (in the example given,
+depending on the values in the second column of the supplied data).
+
+The following example would plot a \datafile\ with {\tt points}, drawing the
+position of each point from the first two columns of the supplied \datafile\
+and the size of each point from the third column:
 \begin{verbatim}
 plot 'datafile' using 1:2 with points pointsize $3
 \end{verbatim}
@@ -92,7 +94,7 @@ Not all of these modifiers are applicable to all of Pyxplot's plot styles. For
 example, the {\tt line\-width} modifier has no effect on plot styles which do
 not draw lines between datapoints. Where modifiers are applied to plot styles
 for which they have no defined effect, the modifier has no effect, but no error
-results.  Table~\ref{tab:style_modifiers} lists which modifiers act upon which
+results.  Table~\ref{tab:style_modifiers} lists which modifiers act on which
 plot styles.
 
 \begin{table}
@@ -110,13 +112,17 @@ options for how it may be specified.  A selection of widely-used colors may be
 specified by name, for example {\tt red} and {\tt blue}. A complete list of
 such colors may be found in Section~\ref{sec:color_names}. Alternatively, an
 object of type {\tt color} may be provided, such as {\tt rgb(0,1,0)}, {\tt
-hsb(0.5,0.5,0.5)}, {\tt gray(0.2)}, {\tt colors.green + colors.red}, {\tt
+hsb(0.5,0.5,0.5)}, {\tt gray(0.2)}, {\tt colors.green + colors.red}, or {\tt
 colors.yellow - colors.green}.
 
-The third option is a specified a numbered color from Pyxplot's {\it palette}.
+The third option is to specify a numbered color from Pyxplot's {\it palette}.
 By default, this contains a series of visually distinctive colors which are,
 insofar as possible, also distinctive to users with most common forms of color
-blindness.  The first color is number~1, the second number~2, and so forth. As
+blindness:
+
+\centerline{\includegraphics[width=\textwidth]{examples/eps/ex_palettelist}}
+
+The first color is number~1, the second number~2, and so forth. As
 well as being accessible by number, these colors also form the default series
 which Pyxplot chooses for successive datasets when their colors are not
 individually specified.
@@ -131,7 +137,7 @@ set palette brickRed, limeGreen, cadetBlue
 
 \noindent The palette is treated as a cyclic list, and so in the above example,
 color number~4 would map to {\tt brickRed}, as would color numbers~1 and~8. The
-default palette which Pyxplot uses upon startup may be changed by setting up a
+default palette which Pyxplot uses on startup may be changed by setting up a
 configuration file, as described in Chapter~\ref{ch:configuration}.
 
 If a non-integer color is requested from the palette, for example color~1.5,
@@ -160,16 +166,18 @@ plot "datafile"
 \end{verbatim}
 In each case, the normal default values of these settings are~1. The default
 values of the {\tt color}, {\tt linetype} and {\tt pointtype} settings depend
-upon whether the current graphic output device is set to produce color or
-monochrome output (see Chapter~\ref{sec:set_terminal}). In the former case
-(color output), the colors of each of the comma-separated datasets plotted on
-a graph are drawn sequentially from the currently-selected palette, all lines
-are drawn as solid lines ({\tt line\-type~1}), and the symbols used to draw
-each dataset are drawn sequentially from Pyxplot's available point types. In
-the latter case (monochrome output), all datasets are plotted in black and
+whether the current graphic output device is set to produce color or
+monochrome output (see Chapter~\ref{sec:set_terminal}).
+
+In the case of color output, the colors of each of the comma-separated datasets
+plotted on a graph are drawn sequentially from the currently-selected palette,
+and all lines are drawn as solid lines ({\tt line\-type~1}). The symbols used
+to draw each dataset are drawn sequentially from Pyxplot's available point
+types. In the case of monochrome output, all datasets are plotted in black and
 both the line types and point types used to draw each dataset are drawn
-sequentially from Pyxplot's available options. The following simple example
-demonstrates this:
+sequentially from Pyxplot's available options.
+
+The following simple example demonstrates this:
 \begin{verbatim}
 set terminal color
 plot [][6:0] 1 with lp, 2 with lp, 3 w lp, 4 w lp, 5 w lp
@@ -181,10 +189,11 @@ replot
 \section{Pyxplot's plot styles}
 \label{sec:list_of_plotstyles}
 
-This section provides an exhaustive list of all of Pyxplot's {\it plot styles},
-which we place into a series of groups for clarity.
-Table~\ref{tab:plot_style_columns} summarises the columns of data expected by
-each of the plot styles when used on two- and three-dimensional plots.
+This section provides a complete list of Pyxplot's {\it plot styles}, arranged
+into groups for clarity.  Table~\ref{tab:plot_style_columns} summarises the
+columns of data expected by each plot style when used on two- and
+three-dimensional plots. The following sections describe each of these plot
+styles in turn.
 
 \begin{table}
 \begin{tabular}{|rll|}
@@ -236,15 +245,15 @@ each of the plot styles when used on two- and three-dimensional plots.
 \subsection{Lines and points}
 
 The following is a list of Pyxplot's simplest plot styles, all of which take
-two (or three) columns of input data on 2D (or 3D) plots, representing the
-$x$-, $y$- (and $z$-)coordinates of the positions of each point:
+two columns of input data on 2D plots (three columns on 3D plots), which
+represent the $x$-, $y$- (and $z$-)coordinates of the positions of each point:
 \begin{itemize}
 \item \indpst{dots} -- places a small dot at each datum.
 \item \indpst{lines} -- connects adjacent \datapoint s with straight lines.
 \item \indpst{linespoints} -- a combination of both lines and points.
 \item \indpst{lowerlimits} -- places a lower-limit sign (\includegraphics{examples/eps/ex_lowerlimit}) at each datum.\index{lower-limit datapoints}
 \item \indpst{points} -- places a marker symbol at each datum.
-\item \indpst{stars} -- similar to {\tt points}, but uses a different set of marker symbols, based upon the stars drawn in Johann Bayer's highly ornate star atlas {\it Uranometria} of 1603.
+\item \indpst{stars} -- similar to {\tt points}, but uses a different set of marker symbols, based on the stars drawn in Johann Bayer's highly ornate star atlas {\it Uranometria} of 1603.
 \item \indpst{upperlimits} -- places an upper-limit sign (\includegraphics{examples/eps/ex_upperlimit}) at each datum.\index{upper-limit datapoints}
 \end{itemize}
 
@@ -304,10 +313,10 @@ indicating the uncertainties in either their vertical or horizontal positions:
 \item \indpst{yerrorbars}
 \item \indpst{xerrorbars}
 \end{itemize}
-Both of these plot styles take three (or four) columns of input data on 2D (or
-3D) plots, the first two (or three) of which represent the $x$-, $y$- (and
-$z$-)coordinates of the central position of each errorbar, and the last of
-which represents the uncertainty in either the $x$- and $y$-coordinate. The
+Both of these take three columns of input data on 2D plots (or four on
+3D plots). The first two (or three) of these represent the $x$-, $y$- (and
+$z$-) coordinates of the central position of each errorbar, while the last
+represents the uncertainty in either the $x$- and $y$-coordinate. The
 plot style \indpst{errorbars} is an alias for \indpst{yerrorbars}.
 Additionally, the following plot style allows datapoints to be plotted with
 both horizontal and vertical errorbars:
@@ -315,10 +324,10 @@ both horizontal and vertical errorbars:
 \item \indpst{xyerrorbars}
 \end{itemize}
 This plot style takes four (or five) columns of data as input, the first two
-(or three) of which represent the $x$-, $y$- (and $z$-)coordinates of the
-central position of each errorbar, the last but one of which gives the
-uncertainty in the $x$-coordinate, and the last of which gives the uncertainty
-in the $y$-coordinate.
+(or three) of which represent the $x$-, $y$- (and $z$-) coordinates of the
+central position of each errorbar. The last but one column gives the
+uncertainty in the $x$-coordinate, and the last column gives the uncertainty in
+the $y$-coordinate.
 
 Each of the plot styles listed above has a corresponding partner which takes
 minimum and maximum limits for each errorbar, equivalent to writing
@@ -346,17 +355,17 @@ The following plot styles allow regions of graphs to be shaded with color:
 \item \indpst{shadedregion}
 \end{itemize}
 
-Both of these plot styles fill specified regions of graphs with the selected
+Both fill specified regions of graphs with the selected
 {\tt fillcolor} and draw a line around the boundary of the region with the
-selected {\tt color}, {\tt linetype} and {\tt linewidth}. They differ in the
-format in which they expect the input data to be arranged. The
-\indpst{yerrorshaded} plot style is similar to the \indpst{yerrorrange} plot
-style, and expects three columns of data, specifying respectively the
-$x$-coordinate and the minimum and maximum extremes of the vertical errorbar on
-each \datapoint.  The region contained between the upper and lower limits of
-these error bars is filled with color.  Note that the \datapoint s must be
-sorted in order of either increasing or decreasing $x$-coordinate for sensible
-behaviour.
+selected {\tt color}, {\tt linetype} and {\tt linewidth}.
+
+They differ in the format in which they expect the input data to be arranged.
+The \indpst{yerrorshaded} plot style is similar to the \indpst{yerrorrange}
+plot style: it expects three columns of data, specifying the $x$-coordinate and
+the minimum and maximum extremes of the vertical errorbar on each \datapoint.
+The region contained between the upper and lower limits of these error bars is
+filled with color.  Note that the \datapoint s must be sorted in order of
+either increasing or decreasing $x$-coordinate for sensible behaviour.
 
 The \indpst{shadedregion} plot style takes only two columns of input data,
 specifying the $x$- and $y$-coordinates of a series of \datapoint s which are
@@ -382,7 +391,7 @@ bars are placed along the abscissa axis and how wide the bars are.  In the
 between the specified \datapoint s by default (see, for example,
 Figure~\ref{fig:ex_barchart2}a).  Alternatively, the widths of the bars may be
 set using the {\tt set boxwidth} command. In this case, all of the bars will be
-centered upon their specified $x$-coordinates, and have total widths equalling
+centered on their specified $x$-coordinates, and have total widths equalling
 that specified in the \indcmdt{set boxwidth}. Consequently, there may be gaps
 between them, or they may overlap, as seen in Figure~\ref{fig:ex_barchart2}(b).
 
@@ -482,18 +491,20 @@ steps associated with each supplied \datapoint:
 \item \indpst{fsteps}
 \item \indpst{histeps}
 \end{itemize}
-Each of these styles takes two columns of data as input containing the $x$- and
+Each of these styles takes two columns of data, containing the $x$- and
 $y$-coordinates of each \datapoint.  They expect identically-formatted data
 regardless of whether they are used on two- and three-dimensional plots; in the
-latter case, the steps are drawn in the plane $z=0$.  An example of their
-appearance  is shown in Figures~\ref{fig:ex_barchart1}(d), (e) and (f); for
-clarity, the positions of each of the supplied \datapoint s are marked by red
-crosses.  These plot styles differ in their placement of the edges of each of
-the horizontal steps.  The \indpst{steps} plot style places the right-most edge
-of each step on the \datapoint\ it represents.  The \indpst{fsteps} plot style
+latter case, the steps are drawn in the plane $z=0$.
+
+An example of their appearance  is shown in Figures~\ref{fig:ex_barchart1}(d),
+(e) and (f); for clarity, the positions of each of the supplied \datapoint s
+are marked by red crosses.
+
+These plot styles differ in their placement of the edges of each of the
+horizontal steps.  The \indpst{steps} plot style places the right-most edge of
+each step on the \datapoint\ it represents.  The \indpst{fsteps} plot style
 places the left-most edge of each step on the \datapoint\ it represents.  The
-\indpst{histeps} plot style centers each step upon the \datapoint\ it
-represents.
+\indpst{histeps} plot style centers each step on the \datapoint\ it represents.
 
 \subsection{Arrows}
 
@@ -561,7 +572,7 @@ They are discussed in detail in Sections~\ref{sec:colormaps},
 
 \section{Labelling datapoints}
 
-The {\tt label} modifier to the {\tt plot} command may be used to render text
+The {\tt label} modifier to the {\tt plot} command may be used to add text
 labels next to datapoints, as in the following examples:
 \begin{verbatim}
 set samples 8
@@ -575,9 +586,9 @@ which are to be used as labels, as in the second example above, syntax such as
 {\tt "\%s"\%(\$3)} must be used to explicitly read the data as strings rather
 than as numerical quantities.  As Pyxplot treats any whitespace as separating
 columns of data, such labels cannot contain spaces, though \LaTeX's {\tt
-$\sim$} character can be used to achieve a space.
+$\sim$} character (a non-breaking space) can be used to achieve a space.
 
-Datapoints can be labelled when plotted in any of the following plot styles:
+Data points can be labelled when plotted in any of the following plot styles:
 {\tt arrows} (and similar styles), {\tt dots}, {\tt errorbars} (and similar
 styles), {\tt errorrange} (and similar styles), {\tt impulses}, {\tt
 linespoints}, {\tt lowerlimits}, {\tt points}, {\tt stars} and {\tt
@@ -638,7 +649,7 @@ would correspond to the range of the plot's horizontal axis. The result might
 be particularly unexpected if the above were attempted with an autoscaling
 horizontal axis -- Pyxplot would find itself autoscaling the {\tt x}-axis range
 to the spread of values of $f(x)$, but find that this itself changed depending
-upon the range of the {\tt x}-axis. In this case, the user should have used the
+on the range of the {\tt x}-axis. In this case, the user should have used the
 {\tt parametric} plot option described in the next section.
 
 \section{Plotting parametric functions}
@@ -701,7 +712,7 @@ y & = & r_1 \cos(t) + r_2 \cos(t r_1 / r_2) \\
 \end{eqnarray*}
 which are simply the sum of two circular motions with angular velocities
 inversely proportional to their radii. The complexity of the resulting
-spirograph pattern depends upon how rapidly the rods return to their starting
+spirograph pattern depends on how rapidly the rods return to their starting
 configuration; if the two chosen angular speeds for the rods have a large
 lowest common multiple, then a highly complicated pattern will result. In the
 example below, we pick a ratio of $8:15$:
@@ -718,9 +729,10 @@ intricate patterns.
 
 Pyxplot can also plot datasets which can be parameterised in terms of two free
 parameters $u$ and $v$. This is most often useful in conjunction with the {\tt
-surface} plot style, allowing any $(u,v)$-surface to be plotted. However, it
-also works in conjunction with any other plot style, allowing, for example,
-$(u,v)$-grids of points to be constructed.
+surface} plot style, allowing any $(u,v)$-surface to be plotted (see
+Section~\ref{sec:surfaces} for details of the {\tt surface} plot style).
+However, it also works in conjunction with any other plot style, allowing, for
+example, $(u,v)$-grids of points to be constructed.
 
 As in the case of parametric lines above, the range of values that each free
 parameter should take must be specified. This can be done using the \indcmd{set
@@ -912,7 +924,7 @@ commands are typed in succession, the second may not entirely negate the first:
 
 \begin{verbatim}
 set x3label 'foo'
-unset x3label 'foo'
+unset x3label
 \end{verbatim}
 
 \noindent If an {\tt x3}-axis did not previously exist, then the first will
@@ -954,7 +966,7 @@ thereafter no data with any other physical dimensions may be plotted against
 that axis. When the axis comes to be drawn, Pyxplot makes a decision about
 which physical unit should be used to label the axis. For example, in the
 default SI system and with no preferred unit of length set, axes with units of
-length might be displayed in millimeters, meters or kilometers depending upon
+length might be displayed in millimeters, meters or kilometers depending on
 their scales.
 
 The chosen unit is indicated in one of three styles in the axis label, selected
@@ -1057,8 +1069,8 @@ drawn in blue:
 set axescolor blue
 \end{verbatim}
 
-\noindent Any of the color names listed in Section~\ref{sec:color_names} can
-be used.
+\noindent Any of the color names listed in Section~\ref{sec:color_names} can be
+used, as can any object of type {\tt color}, e.g.\ {\tt rgb(0.2,0.1,0.8)}.
 
 \subsection{Specifying where ticks should appear along axes}
 
@@ -1096,7 +1108,12 @@ between the specified limits. The {\tt <minimum>} and {\tt <maximum>} values
 are optional; if only one value is specified then it is taken to be the step
 size between ticks. If two values are specified, then the first is taken to be
 {\tt <minimum>}. In the case of logarithmic axes, {\tt <increment>} is applied
-as a multiplicative step size.
+as a multiplicative step size, and should be dimensionless. For example:
+\begin{verbatim}
+set xtics 0,1,10 # Ticks at 0,1,2,...,10
+set log x
+set xtics 2,2  # Ticks at 2,4,8,16 ...
+\end{verbatim}
 
 Alternatively, if a bracketed list of quoted tick labels and tick positions are
 provided, then ticks can be placed on an axis manually and each given its own
@@ -1160,7 +1177,7 @@ set yformat "%s$^\prime$"%(y/unit(feet))
 The first example specifies that ordinate values should be displayed to two
 decimal places along the {\tt x}-axis; the second specifies that distances should
 be displayed in feet along the {\tt y}-axis. Note that the dummy variable used to
-represent the ordinate value is {\tt x}, {\tt y} or {\tt z} depending upon the
+represent the ordinate value is {\tt x}, {\tt y} or {\tt z} depending on the
 direction of the axis, but that the dummy variable used in the {\tt set
 x2format} command is still {\tt x}. The following pair of examples both have
 the equivalent effect of returning the {\tt x2}-axis to its default system of
@@ -1181,7 +1198,7 @@ plot [-pi:2*pi] sin(x)
 
 Note that where possible, Pyxplot intelligently changes the positions along
 axes where it places the ticks to reflect significant points in the chosen
-labelling system.  The extent to which this is possible depends upon the format
+labelling system.  The extent to which this is possible depends on the format
 string supplied. It is generally easier when continuous-varying numerical
 values are substituted into strings, rather than discretely-varying values or
 strings. Thus, rather than
@@ -1199,13 +1216,14 @@ set xformat "\%d"\%(x)
 \noindent and rather than
 
 \begin{dontdo}
-set xformat "\%s"\%time\_string(x)
+set xformat "\%s"\%date.str()
 \end{dontdo}
 
 \noindent the following is preferred
 
 \begin{dodo}
-set xformat "\%d/\%02d/\%d"\%(time\_day(x), $\backslash$\newline time\_monthnum(x),time\_daymonth(x))
+set xformat "\%d/\%02d/\%d"\%(date.toDayOfMonth(), $\backslash$\newline
+date.toMonthNum(), date.toYear())
 \end{dodo}
 
 \subsubsection{Changing the slant of axis labels}
@@ -1261,11 +1279,11 @@ implement the formulae shown above for the frequency and energy of photons of
 light as a function of their wavelength:
 \begin{verbatim}
 set xrange [200*unit(nm):unit(800*nm)]
-set axis x2 linked x1 using phy_c/x
-set axis x3 linked x2 using phy_h*x
+set axis x2 linked x1 using phy.c/x
+set axis x3 linked x2 using phy.h*x
 \end{verbatim}
 As in the {\tt set xformat} command, a dummy variable of {\tt x}, {\tt y} or
-{\tt z} is used in the linkage expression depending upon the direction of the
+{\tt z} is used in the linkage expression depending on the direction of the
 axis being linked to, but a dummy variable of {\tt x} is still used when
 linking to, for example, the {\tt x2} axis.
 
@@ -1371,11 +1389,12 @@ minor axis ticks respectively. The following example would set the minor grid
 lines on a graph to be drawn in blue:
 
 \begin{verbatim}
+set gridmajcolor gray70
 set gridmincolor blue
 \end{verbatim}
 
 \noindent Any of the color names listed in Section~\ref{sec:color_names} can
-be used.
+be used, as can any object of type {\tt color}.
 
 \section{Clipping behaviour}
 
@@ -1429,8 +1448,8 @@ arrow heads, or with two arrow heads.  \indkeyt{twoway} is an alias for
 set arrow 1 from 0,0 to 1,1 with twoway
 \end{verbatim}
 
-\noindent Line types and colors can also be specified after the keyword {\tt
-with}, as in the example:
+\noindent Line types, line widths and colors can also be specified after the
+keyword {\tt with}, as in the example:
 
 \begin{verbatim}
 set arrow 1 from 0,0 to 1,1 with nohead \
@@ -1495,12 +1514,19 @@ modifier.  For example, the following would produce a green label at the origin:
 set label 2 'This label is green' at 0, 0 with color green
 \end{verbatim}
 
-\index{fontsize}\index{text!size} The size of the text in such labels can be set
-globally using the \indcmdt{set fontsize}. This applies not only to the {\tt
-set label} command, but also to plot titles, axis labels, keys, etc. The value
-supplied should be a multiplicative factor greater than zero; a
-value of~{\tt 2} would cause text to be rendered at twice its normal size, and
-a value of~{\tt 0.5} would cause text to be rendered at half its normal size.
+\index{fontsize}\index{text!size} The size of the text can be set using the {\tt with fontsize} modifier:
+
+\begin{verbatim}
+set label 3 'A Big Blue Label' at 0,0 with col blue fontsize 4
+\end{verbatim}
+
+\noindent
+Alternatively, it may be set globally using the \indcmdt{set fontsize}. This
+applies not only to the {\tt set label} command, but also to plot titles, axis
+labels, keys, etc. The value supplied should be a multiplicative factor greater
+than zero; a value of~{\tt 2} would cause text to be rendered at twice its
+normal size, and a value of~{\tt 0.5} would cause text to be rendered at half
+its normal size.
 
 \index{text!color}\index{colors!text} The \indcmdt{set textcolor} can be
 used to globally set the color of all text output, and applies to all of the
@@ -1576,23 +1602,31 @@ Color maps provide a graphical means of producing two-dimensional
 representations of $(x,y,z)$ surfaces, or equivalently of producing maps of the
 values $z(x,y)$ of functions of two variables. Each point in the $(x,y)$ plane
 is assigned a color which indicates the value $z$ associated with that point.
-In this section, we refer to the third coordinate as $c$ rather than
+In this section, we refer to the third coordinate as $c_1$ rather than
 $z$, to distinguish it from the third axes of three-dimensional
 plots\footnote{When color maps are plotted on three-dimensional graphs, they
 appear in a flat plane on one of the back faces of the plot selected using the
-{\tt axes} modifier to the {\tt plot} command, and the {\tt c}-axes associated
-with each are entirely independent of the plot's {\tt z}-axis.}.
+{\tt axes} modifier to the {\tt plot} command, and the $c_1$-axis associated
+with each are entirely independent of the plot's $z$-axis.}.
 
 In the following simple example, a color map of the complex argument of the
 Riemann zeta function $\zeta(z)$ is produced, taking the $(x,y)$ plane to be an
-Argand plane in which each point corresponds to a value of $z$, with $x$ being
-the real axis, and $y$ being the imaginary axis:
+Argand plane, with $x$ being the real axis, and $y$ being the imaginary axis.
+Each point in the plane has an associated value of $c_1$.
 
 \vspace{2mm}
 \input{examples/tex/ex_zeta_arg_1.tex}
 \vspace{2mm}
 
 \centerline{\includegraphics[width=8cm]{examples/eps/ex_zeta_arg}}
+
+The \indcmdt{set c1range} sets the range of values of $c_1$ to be assigned
+colors between black and white. By default, the lowest and highest values of
+$c_1$ found in the color map is assigned to black and white.
+
+The \indcmdt{set c1format} controls the format of the axis labels placed along
+the color scale bar on the right-hand side of the plot. In this case, they are
+marked as multiples of $\pi$.
 
 The \indcmdt{set samples grid} sets the dimensions of the grid of samples -- or
 pixels -- used to render the color map. If either value is replaced with an
@@ -1603,7 +1637,7 @@ If a \datafile\ is supplied to the {\tt colormap} plot style, then the
 datapoints need not lie on the specified regular grid, but are first re-sampled
 onto this grid using the interpolation method specified using the \indcmdt{set
 samples interpolate} (see Section~\ref{sec:spline_command}). Three methods are
-available. {\tt nearest\-Neigh\-bor} uses the values of $c_1$\ldots$c_4$
+available. {\tt nearest\-Neigh\-bor} uses the value of $c_1$
 associated with the datapoint closest to each grid point, producing color maps
 which look like Voronoi diagrams. {\tt inverse\-Square} interpolation returns a
 weighted average of the supplied \datapoint s, using the inverse squares of
@@ -1623,26 +1657,29 @@ input datapoints:
 \subsection{Custom color mappings}
 \label{sec:colmap_custom}
 
-The default mapping used between values of $c$ and color is a grayscale
-mapping. This is scaled such that the smallest value of $c$ in the map
-corresponds to black, and largest value corresponds to white. More generally,
-however, the user can supply any algebraic expressions for converting values of
-$c$ into colors.  Moreover, these custom color mappings need not be
-one-parameter mappings depending only upon a single variable $c$, but can
+The default mapping used between values of $c_1$ and color is a grayscale
+mapping. This is scaled such that the smallest value of $c_1$ in the map
+corresponds to black, and largest value corresponds to white.
+
+Alternatively, the user can supply any algebraic expressions for converting
+values of $c_1$ into colors.  Moreover, these custom color mappings need not be
+one-parameter mappings depending only on a single variable $c_1$, but can
 depend on up to four quantities $c_1$, $c_2$, $c_3$ and $c_4$. This makes it
 possible, for example, to represent both the amplitude and complex phase of a
 quantity in a single color map.
 
-Pyxplot's \indpst{colormap} plot style takes between three and seven columns
-of data, which may be supplied either from one or more function(s), or from a
+Pyxplot's \indpst{colormap} plot style takes between three and seven columns of
+data, which may be supplied either from one or more function(s), or from a
 \datafile. If data is read from a \datafile, then the first two columns of
 output data are assumed to contain the respective positions of each datapoint
 along the $x$-axis and the $y$-axis. The next column contains the value $c_1$,
 and may be followed by up to three further optional values $c_2$, $c_3$ and
-$c_4$. In the case where one or more function(s) are supplied, they are assumed
-to be functions of both $x$ and $y$, and are sampled at a grid of points in the
+$c_4$.
+
+In the case where one or more function(s) are supplied, they are assumed to be
+functions of both $x$ and $y$, and are sampled at a grid of points in the
 $(x,y)$ plane; the first supplied function returns the value $c_1$, and may be
-followed by up to three further optional functions.
+followed by up to three further optional functions for $c_2$, $c_3$ and $c_4$..
 
 The color mapping is set using the \indcmdt{set colormap}, which takes an
 algebraic expression which should be a function of the variables {\tt c1}, {\tt
@@ -1786,6 +1823,10 @@ c1format} command, which is similar in syntax to the {\tt set xformat} command
 (see Section~\ref{sec:set_xformat}), but which uses {\tt c} as its dummy
 variable.
 
+The positions of the ticks along color scale bars may be set using the
+\indcmdt{set c1tics} command, which has similar syntax to the {\tt set xtics}
+command.
+
 \example{ex:mandelbrot}{An image of the Mandelbrot set}{
 The Mandelbrot set is a set of points in the complex plane whose boundary forms
 a fractal with a Hausdorff dimension of two.  A point $c$ in the complex plane
@@ -1798,7 +1839,7 @@ subject to the starting condition $z_0=0$, remains bounded.
 The map of this set of points has become a widely-used image of the power of
 chaos theory to produce complicated structure out of simple algorithms. To
 produce a more pleasing image, points in the complex plane are often colored
-differently, depending upon how many iterations $n$ of the above series are
+differently, depending on how many iterations $n$ of the above series are
 required for $|z_n|$ to exceed~2. This is the point of no return, beyond which
 it can be shown that $|z_{n+1}|>|z_n|$ and that divergence is guaranteed. In
 numerical implementations of the above iteration, in the absence of any better
@@ -1821,12 +1862,12 @@ returns an integer in the range $0\leq i\leq m$.
 
 Contour maps are similar to color maps, but instead of coloring the whole
 $(x,y)$ plane, lines are drawn to indicate paths of constant $c(x,y)$. The
-number of contours drawn, and the values $c$ that they correspond to, is set
+number of contours drawn, and the values $c_1$ that they correspond to, is set
 using the \indcmdt{set contour}, which has the following syntax:
 
 \begin{verbatim}
 set contours [ ( <number> |
-               \( <value> {, <value>} \) ) ]
+               \( { <value> } \) ) ]
              [ (label | nolabel) ]
 \end{verbatim}
 
@@ -1854,7 +1895,10 @@ set c1range [*:*]
 
 Alternatively, an explicit list of the values of $c$ for which contours should
 be drawn may be specified to the \indcmdt{set contour} as a ()-bracketed
-comma-separated list.
+comma-separated list. For example:
+\begin{verbatim}
+set contours (0,5,10,20,40)
+\end{verbatim}
 
 If the option {\tt label} is specified to the \indcmdt{set contour}, then each
 contour is labelled with the value of $c$ that it corresponds to. If the option

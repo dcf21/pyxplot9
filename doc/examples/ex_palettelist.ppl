@@ -1,4 +1,4 @@
-# ex_spectrum_bbcol.ppl
+# ex_palettelist.ppl
 #
 # The code in this file is part of Pyxplot
 # <http://www.pyxplot.org.uk>
@@ -23,25 +23,34 @@
 
 # Call common initialisation script
 reset
-title = "ex_spectrum_bbcol"
+title = "ex_palettelist"
 load "examples/fig_init.ppl"
 
-# BEGIN
-set log x
-set linear y
-set nokey
-set nocolkey
-set size ratio 0.2
-set noytics
-set xlabel 'Temperature'
-set noylabel
-f(lambda) = phy.Bv(phy.c/lambda,c1) / (c1 / unit(6000*K))**4
-set colmap colors.spectrum(f,3e3)
-set sample grid 200x2
-set c1range norenorm
-set title 'Colors of blackbodies of different temperatures'
-plot [unit(2000*K):unit(20000*K)] x with colormap
-# END
+set multiplot
+set nodisplay
+set texthal cent
+set textval cent
+
+bh = unit(1.3*cm)
+bw = unit(2.7*cm)
+
+pal = ["black", "red", "blue", "magenta", "cyan", "brown", "salmon", "gray", "green", "navyBlue", "periwinkle", "pineGreen", "seaGreen", "greenYellow", "orange", "carnationPink", "plum"]
+palLen = pal.len()
+
+for (i=0; i<palLen; i++)
+ {
+  ypos  = -floor(i/6);
+  xpos  = i%6;
+  col   = pal[i]
+  colObj= colors[col]
+  bac   = (colObj.componentsRGB().norm()>1.2) ? colors.black : colors.white
+  box from bw*xpos,bh*ypos to bw*(xpos+1),bh*(ypos+1) with fillcol colObj
+  text r"\parbox{5cm}{\centerline{\bf %d}\centerline{\bf %s}}"%(i+1,col) at bw*(xpos+0.5),bh*(ypos+0.5) with col bac
+ }
+
+# Now that we are finished preparing multiplot, turn display on
+set display
+refresh
 
 # Call common cleanup script
 load "examples/fig_end.ppl"
