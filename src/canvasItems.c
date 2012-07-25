@@ -1693,8 +1693,8 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
    const int p3 = ptab[PARSE_INDEX_use_columns];
    if ((p1>0)&&(stk[stkbase+p1].objType==PPLOBJ_NUM)) { new->IndexSet=1; new->index=(int)round(stk[stkbase+p1].real); }
    else                                               { new->IndexSet=0; new->index=-1; }
-   if      ((p2>0)&&(stk[stkbase+p2].objType==PPLOBJ_NUM)) { new->UsingRowCols = DATAFILE_ROW; }
-   else if ((p3>0)&&(stk[stkbase+p3].objType==PPLOBJ_NUM)) { new->UsingRowCols = DATAFILE_COL; }
+   if      ((p2>0)&&(stk[stkbase+p2].objType==PPLOBJ_STR)) { new->UsingRowCols = DATAFILE_ROW; }
+   else if ((p3>0)&&(stk[stkbase+p3].objType==PPLOBJ_STR)) { new->UsingRowCols = DATAFILE_COL; }
    else                                                    { new->UsingRowCols = DATAFILE_COL; }
   }
 
@@ -1733,7 +1733,7 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
   if ((new->filename!=NULL) && ((strcmp(new->filename,"-")==0) || (strcmp(new->filename,"--")==0)))
    {
     int              status=0, errCount=DATAFILE_NERRS, nObjs=0;
-    pplExpr        **UsingList = new->UsingList;
+    pplExpr        **UsingList;
     int              NUsing = new->NUsing;
     unsigned char    autoUsingList=0;
     const int        linespoints = new->ww.USElinespoints ? new->ww.linespoints :
@@ -1741,8 +1741,10 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
     int              NExpect = (NExpectIn>0) ? NExpectIn : eps_plot_styles_NDataColumns(&c->errcontext, linespoints, ci->ThreeDim);
     char            *errbuff = (char *)malloc(LSTR_LENGTH);
 
-    if (errbuff==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory (X)."); free(new); return 1; }
+    UsingList = (pplExpr **)malloc( (USING_ITEMS_MAX+8) * sizeof(pplExpr *) );
+    if ((errbuff==NULL) || (UsingList==NULL)) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1,"Out of memory (X)."); free(new); return 1; }
 
+    memcpy(UsingList, new->UsingList, NUsing*sizeof(pplExpr *)); 
     new->ww.linespoints    = linespoints; // Fix plot style, so that number of expected columns doesn't later change with DataStyle
     new->ww.USElinespoints = 1;
 
@@ -1753,10 +1755,10 @@ static int ppl_getPlotData(ppl_context *c, parserLine *pl, parserOutput *in, can
       if ((listlen>=3)&&(listlen<=6)) NExpect=listlen;
      }
 
-    if (eps_plot_AddUsingItemsForWithWords(c, &new->ww, &NExpect, &autoUsingList, &UsingList, &NUsing, &nObjs, errbuff)) { free(new); ppl_error(&c->errcontext,ERR_GENERIC, -1, -1, errbuff); return 1; } // Add extra using items for, e.g. "linewidth $3".
-    if (NExpect != NUsing) { sprintf(c->errcontext.tempErrStr, "The supplied using ... clause contains the wrong number of items. We need %d columns of data, but %d have been supplied.", NExpect, NUsing); ppl_error(&c->errcontext,ERR_SYNTAX,-1,-1,NULL); return 1; }
+    if (eps_plot_AddUsingItemsForWithWords(c, &new->ww, &NExpect, &autoUsingList, &UsingList, &NUsing, &nObjs, errbuff)) { free(new); ppl_error(&c->errcontext,ERR_GENERIC, -1, -1, errbuff); free(errbuff); free(UsingList); return 1; } // Add extra using items for, e.g. "linewidth $3".
+    if (NExpect != NUsing) { sprintf(c->errcontext.tempErrStr, "The supplied using ... clause contains the wrong number of items. We need %d columns of data, but %d have been supplied.", NExpect, NUsing); ppl_error(&c->errcontext,ERR_SYNTAX,-1,-1,NULL); free(errbuff); free(UsingList); return 1; }
     ppldata_fromFile(c, &new->PersistentDataTable, new->filename, 0, NULL, dataSpool, new->index, UsingList, autoUsingList, NExpect, nObjs, new->label, new->SelectCriterion, NULL, new->UsingRowCols, new->EveryList, new->continuity, 1, &status, errbuff, &errCount, iterDepth);
-    free(errbuff);
+    free(errbuff); free(UsingList);
    }
 
 

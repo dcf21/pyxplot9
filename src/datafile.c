@@ -474,10 +474,10 @@ void ppldata_RotateRawData(ppl_context *c, rawDataTable **in, dataTable *out, pp
 
     while ((blk!=NULL)&&(Ncols<MAX_DATACOLS))
      {
-      char *s = blk->text[i];
       file_linenumber[0]=-1;
       for (i=0; ((i<blk->blockPosition)&&(Ncols<MAX_DATACOLS)); i++)
        {
+        char *s = blk->text[i];
         if (s==NULL)
          {
           rowData[Ncols]=" ";
@@ -487,13 +487,15 @@ void ppldata_RotateRawData(ppl_context *c, rawDataTable **in, dataTable *out, pp
         else
          {
           int caught=0, p=0;
-          for ( ; ((!caught) && (s[p]!='\0')) ; p++)
+          for ( ; (s[p]!='\0') ; p++)
            {
             if      (s[p]<=' ') { hadspace[Ncols] = 1; }
             else if (s[p]==',') { p++; while ((s[p]!='\0')&&(s[p]<=' ')) { p++; } caught=1; hadspace[Ncols] = hadcomma[Ncols] = 1; }
             else                { if (hadspace[Ncols] && !hadcomma[Ncols]) { caught=1; } hadspace[Ncols] = hadcomma[Ncols] = 0; }
+            if (caught) break;
            }
 
+          blk->text[i] += p;
           if (!caught)
            {
             rowData[Ncols]=" ";

@@ -440,13 +440,17 @@ void eps_plot_ReadAccessibleData(EPSComm *x)
     // If plotting a datafile, can read in data now, so do so
     if ((pd->function == 0) || (pd->parametric == 1))
      {
-      pplExpr       **UsingList = pd->UsingList;
+      pplExpr       **UsingList;
       unsigned char   autoUsingList = 0;
       int             NUsing = pd->NUsing;
       int             nObjs = 0;
       int             errCount = DATAFILE_NERRS;
       int             status = 0;
       int             NExpect = eps_plot_styles_NDataColumns(&c->errcontext, pd->ww_final.linespoints, x->current->ThreeDim);
+
+      UsingList = (pplExpr **)ppl_memAlloc( (USING_ITEMS_MAX+8) * sizeof(pplExpr *) );
+      if (UsingList == NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1, "Out of memory."); *(x->status) = 1; return; }
+      memcpy(UsingList, pd->UsingList, NUsing*sizeof(pplExpr *));
 
       if (pd->ww_final.linespoints==SW_STYLE_COLORMAP)
        {
@@ -615,11 +619,15 @@ void eps_plot_SampleFunctions(EPSComm *x)
       int              NUsing        = pd->NUsing;
       int              nObjs         = 0;
       unsigned char    autoUsingList = 0;
-      pplExpr        **UsingList     = pd->UsingList;
+      pplExpr        **UsingList;
 
       OrdinateAxis = &axissets[pd->axis1xyz][pd->axis1];
       prev_RangeFinalised    = axissets[pd->axis1xyz][pd->axis1].RangeFinalised;
       prev_TickListFinalised = axissets[pd->axis1xyz][pd->axis1].TickListFinalised;
+
+      UsingList = (pplExpr **)ppl_memAlloc( (USING_ITEMS_MAX+8) * sizeof(pplExpr *) );
+      if (UsingList == NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1, "Out of memory."); *(x->status) = 1; return; }
+      memcpy(UsingList, pd->UsingList, NUsing*sizeof(pplExpr *));
 
       if (pd->ww_final.linespoints==SW_STYLE_COLORMAP)
        {

@@ -88,13 +88,15 @@ void eps_pie_ReadAccessibleData(EPSComm *x)
   dataBlock       *blk;
 
   if (pd==NULL) return;
-  UsingList=pd->UsingList;
   NUsing=pd->NUsing;
+  UsingList = (pplExpr **)ppl_memAlloc( (USING_ITEMS_MAX+8) * sizeof(pplExpr *) );
+  if (UsingList == NULL) { ppl_error(&c->errcontext,ERR_MEMORY, -1, -1,"Out of memory. (A)"); *(x->status) = 1; return; }
+  memcpy(UsingList, pd->UsingList, NUsing*sizeof(pplExpr *));
 
   // Malloc pointer to data table where data to be plotted will be stored
   x->current->plotdata      = (dataTable **)ppl_memAlloc(1 * sizeof(dataTable *));
   x->current->DatasetTextID = (int *)ppl_memAlloc(1 * sizeof(int));
-  if (x->current->plotdata == NULL) { ppl_error(&c->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); *(x->status) = 1; return; }
+  if (x->current->plotdata == NULL) { ppl_error(&c->errcontext,ERR_MEMORY, -1, -1,"Out of memory. (B)"); *(x->status) = 1; return; }
 
   // Merge together with words to form a final set
   eps_withwords_default(x, &ww_default, &x->current->settings, 1, 0, 0, 0, c->set->term_current.color==SW_ONOFF_ON);
@@ -117,11 +119,11 @@ void eps_pie_ReadAccessibleData(EPSComm *x)
     int      end=0,ep=0,es=0;
     char     ascii[] = "\"Item %d\"%($0)";
     pplExpr *exptmp=NULL;
-    ppl_expCompile(c,0,0,"",ascii,&end,0,0,0,&exptmp,&ep,&es,c->errcontext.tempErrStr);
-    if (es || c->errStat.status) { ppl_tbClear(c); ppl_error(&c->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); *(x->status) = 1; return; }
+    ppl_expCompile(c,0,0,"",ascii,&end,1,0,0,&exptmp,&ep,&es,c->errcontext.tempErrStr);
+    if (es || c->errStat.status) { ppl_tbClear(c); ppl_error(&c->errcontext,ERR_MEMORY, -1, -1,"Out of memory. (C)"); *(x->status) = 1; return; }
     LabelExpr = pplExpr_tmpcpy(exptmp);
     pplExpr_free(exptmp);
-    if (LabelExpr==NULL) { ppl_error(&c->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); *(x->status) = 1; return; }
+    if (LabelExpr==NULL) { ppl_error(&c->errcontext,ERR_MEMORY, -1, -1,"Out of memory. (D)"); *(x->status) = 1; return; }
    }
 
   if (eps_plot_AddUsingItemsForWithWords(c, &pd->ww_final, &NExpect, &autoUsingList, &UsingList, &NUsing, &nObjs, c->errcontext.tempErrStr)) { ppl_error(&c->errcontext,ERR_GENERIC, -1, -1, NULL); *(x->status) = 1; return; } // Add extra using items for, e.g. "linewidth $3".
@@ -192,11 +194,11 @@ void eps_pie_YieldUpText(EPSComm *x)
     char     ascii[]="\"%.0f\\%% %s\"%(percentage,label)";
     int      end=0,ep=0,es=0;
     pplExpr *exptmp=NULL;
-    ppl_expCompile(c,0,0,"",ascii,&end,0,0,0,&exptmp,&ep,&es,c->errcontext.tempErrStr);
-    if (es || c->errStat.status) { ppl_tbClear(c); ppl_error(&c->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); *(x->status) = 1; return; }
+    ppl_expCompile(c,0,0,"",ascii,&end,1,0,0,&exptmp,&ep,&es,c->errcontext.tempErrStr);
+    if (es || c->errStat.status) { ppl_tbClear(c); ppl_error(&c->errcontext,ERR_MEMORY, -1, -1,"Out of memory. (E)"); *(x->status) = 1; return; }
     formatExpr = pplExpr_tmpcpy(exptmp);
     pplExpr_free(exptmp);
-    if (formatExpr==NULL) { ppl_error(&c->errcontext,ERR_MEMORY, -1, -1,"Out of memory"); *(x->status) = 1; return; }
+    if (formatExpr==NULL) { ppl_error(&c->errcontext,ERR_MEMORY, -1, -1,"Out of memory. (F)"); *(x->status) = 1; return; }
    }
 
   // Labels of pie wedges
