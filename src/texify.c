@@ -375,15 +375,19 @@ void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out
      }
     else if ((o=='G')||(o=='T')||(o=='V')) // variable name
      {
+      int mathrm = (o=='T')||(o=='V');
+      int ei=i, ej=j;
+      while ((ej<tlen)&&(tokenBuff[ej]+'@'==o)) { ei++; ej+=3; }
+      if ( ((tokenBuff[ej]+'@'=='P')&&in[ei]=='(') || (tokenBuff[ej]+'@'=='R') ) mathrm = 1;
       if ((o=='G')&&((j<1)||(tokenBuff[j-3]+'@'!='R')))
        {
-        int       ei=i, ej=j, bi, cp[16], ncp, cbp;
+        int       bi, cp[16], ncp, cbp;
         char      dummyVar[FNAME_LENGTH], dummyVarGreek[FNAME_LENGTH], *fname, *latex;
         dictItem *dptr;
         pplFunc  *fnobj;
         void     *ldptr;
-        while ((ej<tlen)&&(tokenBuff[ej]+'@'==o)) { ei++; ej+=3; }
         if ((ej>=tlen)||((tokenBuff[ej]+'@'!='P')&&(tokenBuff[ej]+'@'!='B'))) goto variableName; // function not called with () afterwards; int_d is followed by B, not P
+        if ((tokenBuff[ej]+'@'=='P')&&(in[ei]!='(')) goto variableName;
         ppl_dictLookupWithWildcard(c->namespaces[0],in+i,dummyVar,FNAME_LENGTH,&dptr);
         if (dptr==NULL) goto variableName; // function was not in the default namespace
         fname = dptr->key;
@@ -458,8 +462,10 @@ void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out
 
       // If variable name is not a recognised function name, print name as a variable name
 variableName:
+      if (mathrm) { snprintf(out+k, outlen-k, "\\mathrm{"); k+=strlen(out+k); }
       ppl_texify_MakeGreek(in+i, out+k, outlen-k, mathMode, textRm);
       k+=strlen(out+k);
+      if (mathrm) { snprintf(out+k, outlen-k, "}"); k+=strlen(out+k); }
       FFW_TOKEN;
      }
     else if (o=='I') // unary operator
