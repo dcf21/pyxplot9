@@ -36,27 +36,32 @@
 
      to be written.
 
-   - Incompatibilities with Pyxplot 0.8. The extensions to Pyxplot in version
-     0.9 mean that some minor changes to syntax have been necessary. These
-     include:
+   - INCOMPATIBILITIES WITH PYXPLOT 0.8.
 
-      - Variables with names beginning phy now live in a module called phy.
-        They may be accessed as, for example, phy.c. Similarly, random number
-        generating functions now live in a module called random; statistics
-        functions in a module called stats; time-handling functions in time;
-        operating system functions in os; and astronomy functions in ast.
+	- Some functions and variables have been renamed. Variables whose names used
+	  to begin phy_ now live in a module called phy. They may be accessed as,
+     for example, phy.c. Similarly, random number generating functions now live
+     in a module called random; statistics functions in a module called stats;
+     time-handling functions in time; operating system functions in os; and
+     astronomy functions in ast. The contents of these modules can be listed by
+     typing, for example, print phy.
 
-      - Colors, which used to be specified as rgb0.2:0.3:0.4 should now be
-        specified using the rgb(r,g,b) functions, as rgb(0.2,0.3,0.4).
+	- Custom colors, which used to be specified using syntax such as
+	  rgb0.2:0.3:0.4, should now be specified using the rgb(r,g,b) functions,
+     as, for example, rgb(0.2,0.3,0.4). Custom colors can now be stored in
+     variables for later use.
 
-      - The range of escape characters have been increased, so that, for
-        example, \n is a newline and \t a tab. Where these escape sequenced
-        appear in latex command strings, the easiest approach is the prepend
-        the string with the character r to disable escape character expansion,
-        as in r’2 \times 3’.
+	- The range of escape characters which can be used in strings has been
+	  increased, so that, for example, \n is a newline and \t a tab. As in
+     python, prepending the string with the character r disables all escape
+     character expansion. As backslashes are common characters in latex command
+     strings, the easiest approach is to always prepend latex strings with an r.
+     As in python, triple quotes, e.g.\ r"""2 \times 3""" can be used where
+     required.
 
-      - The Pyxplot 0.8 syntax foreach i in (1,2,3) should now be written
-        foreach i in [1,2,3]. Square brackets are used to delimit lists.
+	- In the foreach command, square brackets should be used to delimit lists of
+	  items to iterate over. The Pyxplot 0.8 syntax foreach i in (1,2,3) should
+     now be written foreach i in [1,2,3].
 
 2011 Jan  7: Pyxplot 0.8.4
    - Two-dimensional parametric grid plotting implemented.

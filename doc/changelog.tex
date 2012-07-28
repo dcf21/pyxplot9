@@ -52,10 +52,10 @@ In addition, Pyxplot's range of operators has been extended to include most of t
 The extensions to Pyxplot in version 0.9 mean that some minor changes to syntax have been necessary. These include:
 
 \begin{itemize}
-\item Variables with names beginning {\tt phy\_} now live in a module called {\tt phy}. They may be accessed as, for example, {\tt phy.c}. Similarly, random number generating functions now live in a module called {\tt random}; statistics functions in a module called {\tt stats}; time-handling functions in {\tt time}; operating system functions in {\tt os}; and astronomy functions in {\tt ast}.
-\item Colors, which used to be specified as {\tt rgb0.2:0.3:0.4} should now be specified using the {\tt rgb(r,g,b)} functions, as {\tt rgb(0.2,0.3,0.4)}.
-\item The range of escape characters have been increased, so that, for example, {\tt $\backslash$n} is a newline and {\tt $\backslash$t} a tab. Where these escape sequenced appear in \LaTeX\ command strings, the easiest approach is the prepend the string with the character {\tt r} to disable escape character expansion, as in {\tt r'2 $\backslash$times 3'}.
-\item The Pyxplot 0.8 syntax {\tt foreach i in (1,2,3)} should now be written {\tt foreach i in [1,2,3]}. Square brackets are used to delimit lists.
+\item Some functions and variables have been renamed. Variables whose names used to begin {\tt phy\_} now live in a module called {\tt phy}. They may be accessed as, for example, {\tt phy.c}. Similarly, random number generating functions now live in a module called {\tt random}; statistics functions in a module called {\tt stats}; time-handling functions in {\tt time}; operating system functions in {\tt os}; and astronomy functions in {\tt ast}. The contents of these modules can be listed by typing, for example, {\tt print phy}.
+\item Custom colors, which used to be specified using syntax such as {\tt rgb0.2:0.3:0.4}, should now be specified using the {\tt rgb(r,g,b)} functions, as, for example, {\tt rgb(0.2,0.3,0.4)}. Custom colors can now be stored in variables for later use (see Section~\ref{sec:colorObjects}).
+\item The range of escape characters which can be used in strings has been increased, so that, for example, {\tt $\backslash$n} is a newline and {\tt $\backslash$t} a tab. As in python, prepending the string with the character {\tt r} disables all escape character expansion. As backslashes are common characters in latex command strings, the easiest approach is to always prepend latex strings with an {\tt r}. As in python, triple quotes, e.g.\ {\tt r"""2 $\backslash$times 3"""} can be used where required (see Section~\ref{sec:latex_incompatibility}).
+\item In the {\tt foreach} command, square brackets should be used to delimit lists of items to iterate over. The Pyxplot 0.8 syntax {\tt foreach i in (1,2,3)} should now be written {\tt foreach i in [1,2,3]} (see Section~\ref{sec:foreach}).
 \end{itemize}
 
 \subsection*{2011 Jan 7: Pyxplot 0.8.4}
