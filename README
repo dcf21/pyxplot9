@@ -16,10 +16,11 @@ vector graphics suite, and data processing package.  Its interface is designed
 to make common tasks -- e.g., plotting labelled graphs of data -- accessible
 via short, simple, intuitive commands.
 
-These commands also take many optional settings, allowing their output to be
-fine-tuned into styles appropriate for printed publications, talks or websites.
-Pyxplot is simple enough to be used without prior programming experience, but
-powerful enough that programmers can extensively configure and script it.
+But these commands also take many optional settings, allowing their output to
+be fine-tuned into styles appropriate for printed publications, talks or
+websites.  Pyxplot is simple enough to be used without prior programming
+experience, but powerful enough that programmers can extensively configure and
+script it.
 
 A SCIENTIFIC SCRIPTING LANGUAGE
 
