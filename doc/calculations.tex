@@ -24,12 +24,9 @@
 
 Often calculations need to be performed on data before they are plotted. This
 chapter and the next describe the mathematical environment which Pyxplot
-provides for working either with single numerical values, or upon whole
-datasets.
-
-Most of the examples in this chapter act on single numerical values, displaying
-the results using the {\tt print} command, demonstrating how Pyxplot may be
-used as a desktop calculator. The next chapter will extend this to use of
+provides.  Most of the examples in this chapter act on single numerical values,
+displaying the results using the {\tt print} command, demonstrating how Pyxplot
+may be used as a desktop calculator. The next chapter will extend this to use of
 Pyxplot's mathematical environment to analyse whole datasets and produce plots.
 
 \section{Variables}
@@ -130,7 +127,7 @@ print ast.moonPhase( time.now() )
 \noindent which returns the present phase of the Moon in radians, and
 
 \begin{verbatim}
-print os.path.filesize("/var/log/kern.log")
+print os.path.filesize("/etc/passwd")
 \end{verbatim}
 
 \noindent which returns the size of a file (in units of bytes, of course!).
@@ -515,7 +512,7 @@ either their abbreviated or full names, and each of these may be used in either
 their singular or plural forms. For example, {\tt s}, {\tt second}, and {\tt
 seconds} are all valid and equivalent. A complete list of all of the units
 which Pyxplot recognises by default, together with all of their recognised
-names can be found in Appendix~\ref{ch:unit_list}.
+names, can be found in Appendix~\ref{ch:unit_list}.
 
 SI units may be preceded with SI prefixes\index{units!SI prefixes}, as in
 the examples\footnote{As the first of these examples demonstrates, the letter
@@ -753,7 +750,7 @@ quantities in any particular piece of work where non-standard units are used.
 For example, a study of Jupiter-like planets might express masses in Jupiter
 masses, rather than kilograms. A study of the luminosities of stars might
 express powers in units of solar luminosities, rather than watts. And a
-cosmology paper might express distances in parsecs. This level of control is
+cosmology paper might express distances in megaparsecs. This level of control is
 made available through the \indcmdt{set unit of}. The three examples just given
 could be achieved using the following commands:
 \begin{verbatim}
@@ -1152,7 +1149,7 @@ Token & Value \\
 {\tt \%A} & Full weekday name.\\
 {\tt \%b} & Three-letter abbreviated month name.\\
 {\tt \%B} & Full month name.\\
-{\tt \%C} & Century number, e.g. 21 for the years 2000-2100.\\
+{\tt \%C} & Century number, e.g. 21 for the years 2000-2099.\\
 {\tt \%d} & Day of month.\\
 {\tt \%H} & Hour of day, in range~00-23.\\
 {\tt \%I} & Hour of day, in range~01-12.\\

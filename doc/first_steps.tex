@@ -208,60 +208,60 @@ only the value of the final comma-separated expression.
 \hline
 {\bf Symbol} & {\bf Description} & {\bf Operator Associativity} \\
 \hline % level 2
-{\tt **} & Algebraic exponentiation & right \\
+{\tt **} & Algebraic exponentiation & right-to-left \\
 \hline % level 3
-{\tt -} & Unary minus sign & right \\
-{\tt --} & Unary decrement & right \\
-{\tt +} & Unary plus sign & right \\
-{\tt ++} & Unary increment & right \\
-{\tt not~~!} & Logical not & right \\
-{\tt $\sim$} & Unary one's complement & right \\
+{\tt -} & Unary minus sign & right-to-left \\
+{\tt --} & Unary decrement & right-to-left \\
+{\tt +} & Unary plus sign & right-to-left \\
+{\tt ++} & Unary increment & right-to-left \\
+{\tt not~~!} & Logical not & right-to-left \\
+{\tt $\sim$} & Unary one's complement & right-to-left \\
 \hline % level 5
-{\tt *} & Algebraic multiplication & left \\
-{\tt /} & Algebraic division & left \\
-{\tt \%} & Modulo operator & left \\
+{\tt *} & Algebraic multiplication & left-to-right \\
+{\tt /} & Algebraic division & left-to-right \\
+{\tt \%} & Modulo operator & left-to-right \\
 \hline % level 6
-{\tt +} & Algebraic sum & left \\
-{\tt -} & Algebraic subtraction & left \\
+{\tt +} & Algebraic sum & left-to-right \\
+{\tt -} & Algebraic subtraction & left-to-right \\
 \hline % level 7
-{\tt <<} & Left binary shift & left \\
-{\tt >>} & Right binary shift & left \\
+{\tt <<} & Left binary shift & left-to-right \\
+{\tt >>} & Right binary shift & left-to-right \\
 \hline % level 8
-{\tt <} & Magnitude comparison & right \\
-{\tt >} & Magnitude comparison & right \\
-{\tt <=} & Magnitude comparison & right \\
-{\tt >=} & Magnitude comparison & right \\
+{\tt <} & Magnitude comparison & right-to-left \\
+{\tt >} & Magnitude comparison & right-to-left \\
+{\tt <=} & Magnitude comparison & right-to-left \\
+{\tt >=} & Magnitude comparison & right-to-left \\
 \hline % level 9
-{\tt ==~~<>} & Equality comparison & right \\
-{\tt !=} & Equality comparison & right \\
+{\tt ==~~<>} & Equality comparison & right-to-left \\
+{\tt !=} & Equality comparison & right-to-left \\
 \hline % level 11
-{\tt \&} & Binary and & left \\
+{\tt \&} & Binary and & left-to-right \\
 \hline % level 12
-{\tt \^{}} & Binary exclusive or & left \\
+{\tt \^{}} & Binary exclusive or & left-to-right \\
 \hline % level 13
-{\tt |} & Binary or & left \\
+{\tt |} & Binary or & left-to-right \\
 \hline % level 14
-{\tt and~~\&\&} & Logical and & left \\
+{\tt and~~\&\&} & Logical and & left-to-right \\
 \hline % level 15
-{\tt or~~||} & Logical or & left \\
+{\tt or~~||} & Logical or & left-to-right \\
 \hline % level 16
-{\tt ?:} & Ternary conditional & right \\
+{\tt ?:} & Ternary conditional & right-to-left \\
 \hline % level 17
-{\tt =} & Assignment operator & right \\
-{\tt += -= *=  } & Assignment operators & right \\
+{\tt =} & Assignment operator & right-to-left \\
+{\tt += -= *=  } & Assignment operators & right-to-left \\
 {\tt /= \%= \&=} & & \\
 {\tt \^{}= |=  } & & \\
 {\tt <<= >>=   } & & \\
 \hline % level 18
-{\tt ,} & Comma separator & left \\
+{\tt ,} & Comma separator & left-to-right \\
 \hline
 \end{tabular}
 \end{center}
 \caption{A list of mathematical operators which Pyxplot recognises, in order of
 descending precedence. Items separated by horizontal rules are of differing
-precedence; those not separated by horizontal rules are of equivalent
+precedence; those not separated by horizontal rules are of equal
 precedence. The third column indicates whether strings of operators are
-evaluated from left to right (left), or from right to left (right). For
+evaluated from left to right, or from right to left.  For
 example, the expression {\tt x**y**z} is evaluated as {\tt (x**(y**z))}.}
 \label{tab:operators_table}
 \end{table}
@@ -419,10 +419,10 @@ great flexibility, but means that care needs to be taken to escape any of
 $\sim$.
 
 Two built-in functions provide some assistance in generating \LaTeX\ labels.
-The \indfunt{texify()} takes as its argument a string containing a mathematical
-expression, and returns a \LaTeX\ representation of it.  The
-\indfunt{texifyText()} takes as its argument a text string, and returns a
-\LaTeX\ representation of it, with any necessary escape characters added. For
+The \indfunt{texify()} function takes as its argument a string containing a
+mathematical expression, and returns a \LaTeX\ representation of it.  The
+\indfunt{texifyText()} function takes as its argument a text string, and returns
+a \LaTeX\ representation of it, with any necessary escape characters added. For
 example:
 
 \vspace{3mm}
@@ -677,7 +677,7 @@ towards the one or two blank lines required to separate blocks and index
 blocks.  It is often good practice to include comment lines at the top of
 \datafile s to indicate their date and source. In
 Section~\ref{sec:special_comments} we will see that Pyxplot can read metadata
-from some comment lines which follow particular syntax.
+from some comment lines which follow a particular syntax.
 
 \section{Plotting many \datafile s at once}
 
@@ -915,7 +915,7 @@ ratio to unity (i.e.\ square).
 \label{sec:plotting_styles}
 
 By default, data from files are plotted with points and functions are plotted
-with lines. However, either kinds of data can be plotted in a variety of {\it
+with lines. However, either kind of data can be plotted in a variety of {\it
 plot styles}.  To plot a function with points, for example, the following
 syntax is used:
 
