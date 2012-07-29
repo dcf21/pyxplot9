@@ -41,7 +41,7 @@ files.sort()
 for eps in files:
   print "Converting example <%s> to pdf..."%os.path.split(eps)[1]
   pdf = re.sub(r"\.eps",".pdf",eps)
-  png = re.sub(r"\.eps",".png",eps)
+  #png = re.sub(r"\.eps",".png",eps)
   os.system("gs -dQUIET -dSAFER -P- -dBATCH -dNOPAUSE -dEPSCrop -sDEVICE=pdfwrite -sOutputFile=%s %s"%(pdf,eps))
-  os.system("gs -dQUIET -dSAFER -P- -dBATCH -dNOPAUSE -dEPSCrop -sDEVICE=png16m -r72 -dGraphicsAlphaBits=4 -dTextAlphaBits=4 -sOutputFile=%s %s"%(png,eps))
+  #os.system("gs -dQUIET -dSAFER -P- -dBATCH -dNOPAUSE -dEPSCrop -sDEVICE=png16m -r72 -dGraphicsAlphaBits=4 -dTextAlphaBits=4 -sOutputFile=%s %s"%(png,eps))
 
