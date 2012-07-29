@@ -16,8 +16,8 @@ vector graphics suite, and data processing package.  Its interface is designed
 to make common tasks -- e.g., plotting labelled graphs of data -- accessible
 via short, simple, intuitive commands.
 
-But these commands also take many optional settings, allowing their output to
-be fine-tuned into styles appropriate for reports, talks or academic journals.
+These commands also take many optional settings, allowing their output to be
+fine-tuned into styles appropriate for printed publications, talks or websites.
 Pyxplot is simple enough to be used without prior programming experience, but
 powerful enough that programmers can extensively configure and script it.
 
@@ -25,26 +25,27 @@ A SCIENTIFIC SCRIPTING LANGUAGE
 
 Pyxplot doesn't just plot graphs. It's a scripting language in which variables
 can have physical units. Calculations automatically return results in an
-appropriate unit, whether that be kilograms, joules or lightyears.  Data files
-can straightforwardly be converted from one set of units to another. Meanwhile
-Pyxplot has all the other features of a scripting language: string
-manipulation, lists, dictionaries, modules, classes and file handles.  It also
-supports vector and matrix algebra, can integrate or differentiate expressions,
-and can numerically solve systems of equations.
+appropriate unit, whether that be kilograms, joules or lightyears.  Datafiles
+can be converted straightforwardly from one set of units to another. Meanwhile
+Pyxplot has all the other features of a scripting language: flow control and
+branching, string manipulation, complex data types, an object-oriented class
+structure and straightforward file I/O.  It also supports vector and matrix
+algebra, can integrate or differentiate expressions, and can numerically solve
+systems of equations.
 
 A VECTOR GRAPHICS SUITE
 
 The graphical canvas isn't just for plotting graphs on. Circles, polygons and
-ellipses can be drawn to build vector graphics. Colors are a native type of
-object for easy customisation. For the mathematically minded, Pyxplot's canvas
+ellipses can be drawn to build vector graphics. Colors are a native object type
+for easy customisation. For the mathematically minded, Pyxplot's canvas
 interfaces cleanly with its vector math environment, so that geometric
 construction is easy.
 
 A DATA PROCESSING PACKAGE
 
-Pyxplot can interpolate data, find best fit lines, and compile histograms. It
+Pyxplot can interpolate data, find best-fit lines, and compile histograms. It
 can Fourier transform data, calculate statistics, and output results to new
-\datafile s. Where fine control is needed, custom code can be used to process
+datafiles. Where fine control is needed, custom code can be used to process
 every data point in a file.
 
 Examples of the graphical output produced by Pyxplot can be found on the

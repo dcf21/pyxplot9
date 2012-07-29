@@ -30,11 +30,12 @@
 Pyxplot is a multi-purpose graph plotting tool, scientific scripting language,
 vector graphics suite, and data processing package.  Its interface is designed
 to make common tasks -- e.g., plotting labelled graphs of data -- accessible
-via short, simple, intuitive commands. These commands also take many optional
-settings, allowing their output to be fine-tuned into styles appropriate for
-printed publications, talks or websites.  Pyxplot is simple enough to be used
-without prior programming experience, but powerful enough that programmers can
-extensively configure and script it.
+via short, simple, intuitive commands.
+
+These commands also take many optional settings, allowing their output to be
+fine-tuned into styles appropriate for printed publications, talks or websites.
+Pyxplot is simple enough to be used without prior programming experience, but
+powerful enough that programmers can extensively configure and script it.
 
 \noindent{\bf A scientific scripting language}
 
@@ -44,7 +45,7 @@ appropriate unit, whether that be kilograms, joules or lightyears.  \Datafile s
 can be converted straightforwardly from one set of units to another. Meanwhile
 Pyxplot has all the other features of a scripting language: flow control and
 branching, string manipulation, complex data types, an object-oriented class
-structure and straightforward file IO.  It also supports vector and matrix
+structure and straightforward file I/O.  It also supports vector and matrix
 algebra, can integrate or differentiate expressions, and can numerically solve
 systems of equations.
 
@@ -101,7 +102,7 @@ show functions
 \end{verbatim}
 
 The {\tt show} command is Pyxplot's interactive documentation system; to obtain
-a list of things that can be shewn type
+a list of things that can be shown type
 
 \begin{verbatim}
 show
@@ -375,7 +376,7 @@ command syntax is intentionally very similar, to the point of backwards
 compatibility in many cases. Even when designing the entirely new parts of
 Pyxplot's syntax, we have followed \gnuplot's preference for short simple
 command-line syntax.  Early versions of Pyxplot utilised the PyX\index{PyX}
-graphics library for Python; we have retained many of its better features in our
+graphics library for Python, and we have borrowed many ideas from it in our new
 output engine.
 
 Several people have contributed code to Pyxplot. Michael Rutter provided us 
