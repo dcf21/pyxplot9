@@ -1079,6 +1079,10 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
             if (fill) depth += 1e-6*fabs(depth);
             sprintf(epsbuff, "newpath %.2f %.2f moveto %.2f %.2f lineto %.2f %.2f lineto %.2f %.2f lineto closepath %s\n", x1,y1,x2,y2,x3,y3,x4,y4,fill?"eofill":"stroke");
             ThreeDimBuffer_writeps(x, depth, pd->ww_final.linetype, pd->ww_final.linewidth, 0.0, 1, last_colstr, epsbuff);
+            eps_core_BoundingBox(x, x1, y1, pd->ww_final.linewidth * EPS_DEFAULT_LINEWIDTH);
+            eps_core_BoundingBox(x, x2, y2, pd->ww_final.linewidth * EPS_DEFAULT_LINEWIDTH);
+            eps_core_BoundingBox(x, x3, y3, pd->ww_final.linewidth * EPS_DEFAULT_LINEWIDTH);
+            eps_core_BoundingBox(x, x4, y4, pd->ww_final.linewidth * EPS_DEFAULT_LINEWIDTH);
            }
          }
      }

@@ -182,7 +182,7 @@ void  pplcsp_main(ppl_context *context)
    {
     struct timespec waitperiod, waitedperiod;
     waitperiod.tv_sec  = 0;
-    waitperiod.tv_nsec = PyxplotRunning ? 100000000 : 1000000000; // After pyxplot has quit, reduce polling rate to once a second. Why not?
+    waitperiod.tv_nsec = PyxplotRunning ? 100000000 : 500000000; // After pyxplot has quit, reduce polling rate to twice a second. Why not?
     nanosleep(&waitperiod,&waitedperiod); // Wake up every 100ms
     pplcsp_checkForNewCommands(context); // Check for orders from Pyxplot
     if (PyxplotRunning && (getppid()==1)) // We've been orphaned and adopted by init
