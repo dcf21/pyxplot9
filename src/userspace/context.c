@@ -60,7 +60,10 @@ ppl_context *ppl_contextInit()
   ppl_dollarOp_deconfig(out);
   out->dollarStat.lastFilename[0]='\0';
 
-  out->errStat.status = out->errStat.tracebackDepth = 0; ppl_tbClear(out);
+  out->errStat.status = out->errStat.tracebackDepth = 0;
+  out->errStat.errPosExpr = out->errStat.oldErrPosExpr = -1;
+  out->errStat.errPosCmd  = out->errStat.oldErrPosCmd  = -1;
+  ppl_tbClear(out);
 
   out->canvas_items = NULL;
   out->replotFocus  = -1;
