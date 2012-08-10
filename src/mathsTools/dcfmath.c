@@ -109,3 +109,13 @@ int ppl_dblSort(const void *a, const void *b)
   return 0;
  }
 
+int ppl_gcd(int a, int b)
+ {
+  while (b>0)
+   {
+    int tmp = a%b;
+    a=b;
+    b=tmp;
+   }
+  return a;
+ }

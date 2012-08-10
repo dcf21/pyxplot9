@@ -60,8 +60,8 @@
 void pplfunc_binomialPDF  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "binomialPDF(k,p,n)";
-  CHECK_NEEDINT(in[0] , "k", "function's first parameter must be");
-  CHECK_NEEDINT(in[2] , "n", "function's 3rd  parameter must be");
+  CHECK_NEEDINT(in[0] , "k", "function's first argument must be");
+  CHECK_NEEDINT(in[2] , "n", "function's third argument must be");
   OUTPUT.real = gsl_ran_binomial_pdf((unsigned int)in[0].real, in[1].real, (unsigned int)in[2].real);
   CHECK_OUTPUT_OKAY;
  }
@@ -69,8 +69,8 @@ void pplfunc_binomialPDF  (ppl_context *c, pplObj *in, int nArgs, int *status, i
 void pplfunc_binomialCDF  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "binomialCDF(k,p,n)";
-  CHECK_NEEDINT(in[0] , "k", "function's first parameter must be");
-  CHECK_NEEDINT(in[2] , "n", "function's 3rd  parameter must be");
+  CHECK_NEEDINT(in[0] , "k", "function's first argument must be");
+  CHECK_NEEDINT(in[2] , "n", "function's third argument must be");
   OUTPUT.real = gsl_cdf_binomial_P((unsigned int)in[0].real, in[1].real, (unsigned int)in[2].real);
   CHECK_OUTPUT_OKAY;
  }

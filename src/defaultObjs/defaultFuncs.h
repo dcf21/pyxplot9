@@ -90,6 +90,7 @@ void pplfunc_factors     (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_finite      (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_floor       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_gamma       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_gcd         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_globals     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_gray        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_heaviside   (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
@@ -106,6 +107,7 @@ void pplfunc_jacobi_dn   (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_jacobi_sn   (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_lambert_W0  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_lambert_W1  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_lcm         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_ldexp       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_legendreP   (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_legendreQ   (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);

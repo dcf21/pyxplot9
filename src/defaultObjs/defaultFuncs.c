@@ -743,6 +743,23 @@ void pplfunc_gamma       (ppl_context *c, pplObj *in, int nArgs, int *status, in
   CHECK_OUTPUT_OKAY;
  }
 
+void pplfunc_gcd         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *FunctionDescription = "gcd(x,...)";
+  int i, out;
+  for (i=0; i<nArgs; i++) { if (round(in[i].real)<1) in[i].real=-1; CHECK_NEEDINT(in[i] , "x", "function's requires arguments to be"); }
+  out = ppl_gcd((int)round(in[0].real), (int)round(in[1].real));
+  for (i=2; i<nArgs; i++) out = ppl_gcd(out, (int)round(in[i].real));
+  OUTPUT.real = out;
+  CHECK_OUTPUT_OKAY;
+ }
+
+void pplfunc_globals     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  pplObjDict(&OUTPUT, 0, 1, c->namespaces[1]);
+  __sync_add_and_fetch(&c->namespaces[1]->refCount,1);
+ }
+
 void pplfunc_gray        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   pplObjColor(&OUTPUT,0,SW_COLSPACE_RGB,in[0].real,in[0].real,in[0].real,0);
@@ -820,12 +837,6 @@ void pplfunc_hypot       (ppl_context *c, pplObj *in, int nArgs, int *status, in
   ppl_unitsDimCpy(&OUTPUT, in);
  }
 
-void pplfunc_globals     (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
- {
-  pplObjDict(&OUTPUT, 0, 1, c->namespaces[1]);
-  __sync_add_and_fetch(&c->namespaces[1]->refCount,1);
- }
-
 void pplfunc_imag        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "Im(z)";
@@ -874,10 +885,40 @@ void pplfunc_lambert_W1  (ppl_context *c, pplObj *in, int nArgs, int *status, in
   CHECK_OUTPUT_OKAY;
  }
 
+void pplfunc_lcm         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char   *FunctionDescription = "lcm(x,...)";
+  int     i, gcd, lcm_i, zero=0;
+  double  lcm;
+  for (i=0; i<nArgs; i++) { if (round(in[i].real)<1) zero=1; CHECK_NEEDINT(in[i] , "x", "function's requires arguments to be"); }
+  if (zero) { OUTPUT.real=0; return; }
+  gcd = ppl_gcd((int)round(in[0].real), (int)round(in[1].real));
+  lcm = 1.0 / ((double)gcd) * round(in[0].real) * round(in[1].real);
+  if (lcm > INT_MAX)
+   {
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_OVERFLOW; sprintf(errText, "Integer overflow in the %s function.",FunctionDescription); return; }
+    else { NULL_OUTPUT; }
+   }
+  lcm_i = (int)round(lcm);
+  for (i=2; i<nArgs; i++)
+   {
+    gcd = ppl_gcd(lcm_i, (int)round(in[i].real));
+    lcm = 1.0 / ((double)gcd) * lcm * round(in[i].real);
+    if (lcm > INT_MAX)
+     {
+      if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_OVERFLOW; sprintf(errText, "Integer overflow in the %s function.",FunctionDescription); return; }
+      else { NULL_OUTPUT; }
+     }
+    lcm_i = (int)round(lcm);
+   }
+  OUTPUT.real = lcm;
+  CHECK_OUTPUT_OKAY;
+ }
+
 void pplfunc_ldexp       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "ldexp(x,y)";
-  CHECK_NEEDSINT(in[1], "y", "function's second parameter must be");
+  CHECK_NEEDSINT(in[1], "y", "function's second argument must be");
   OUTPUT.real = ldexp(in[0].real, (int)in[1].real);
   CHECK_OUTPUT_OKAY;
  }
@@ -885,7 +926,7 @@ void pplfunc_ldexp       (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_legendreP   (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "legendreP(l,x)";
-  CHECK_NEEDINT(in[0] , "l", "function's first parameter must be");
+  CHECK_NEEDINT(in[0] , "l", "function's first argument must be");
   OUTPUT.real = gsl_sf_legendre_Pl((int)in[0].real, in[1].real);
   CHECK_OUTPUT_OKAY;
  }
@@ -893,7 +934,7 @@ void pplfunc_legendreP   (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_legendreQ   (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "legendreQ(l,x)";
-  CHECK_NEEDINT(in[0] , "l", "function's first parameter must be");
+  CHECK_NEEDINT(in[0] , "l", "function's first argument must be");
   OUTPUT.real = gsl_sf_legendre_Ql((int)in[0].real, in[1].real);
   CHECK_OUTPUT_OKAY;
  }

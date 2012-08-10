@@ -95,9 +95,11 @@ namespace, are listed in subsections below.
 \funcdef{finite($x$)}{returns one if $x$ is a finite number, and zero otherwise.}
 \funcdef{floor($x$)}{returns the largest integer value smaller than or equal to $x$, where $x$ must be a dimensionless real number.}
 \funcdef{gamma($x$)}{evaluates the gamma function $\Gamma(x)$, where $x$ must be a dimensionless real number.}
+\funcdef{gcd(...)}{returns the greatest common divisor (a.k.a.\ highest common factor) of its arguments, which should be dimensionless non-zero positive integers.}
 \funcdef{globals()}{returns a dictionary of all currently-defined global variables.}
 \funcdef{gray($x$)}{returns color object representing a shade of gray with brightness $x$ in the range 0--1.}
 \funcdef{grey($x$)}{returns color object representing a shade of gray with brightness $x$ in the range 0--1.}
+\funcdef{hcf(...)}{returns the highest common factor (a.k.a.\ greatest common divisor) of its arguments, which should be dimensionless non-zero positive integers.}
 \funcdef{heaviside($x$)}{returns the Heaviside function, defined to be one for $x\geq0$ and zero otherwise. $x$ must be a dimensionless real number.}
 \funcdef{hsb($h,s,b$)}{returns color object with specified hue, saturation and brightness in the range 0--1.}
 \funcdef{hyperg\_0F1($c,x$)}{evaluates the hypergeometric function $_0F_1(c,x)$. All inputs must be dimensionless real numbers. For reference, the implementation used is GSL's {\tt gsl\_sf\_hyperg\_0F1} function.}
@@ -113,6 +115,7 @@ namespace, are listed in subsections below.
 \funcdef{jacobi\_sn($u,m$)}{evaluates a Jacobi elliptic function; it returns the value $\sin\phi$ where $\phi$ is defined by the integral \begin{displaymath} \int_{0}^{\phi}\frac{\mathrm{d}\theta}{\sqrt{1-m\sin^2\theta}}.\end{displaymath}}
 \funcdef{lambert\_W0($x$)}{evaluates the principal real branch of the Lambert~W function, for which $W>-1$ when $x<0$.}
 \funcdef{lambert\_W1($x$)}{evaluates the secondary real branch of the Lambert~W function, for which $W<-1$ when $x<0$.}
+\funcdef{lcm(...)}{returns the lowest common multiple of its arguments, which should be dimensionless positive integers.}
 \funcdef{ldexp($x,y$)}{returns $x$ times $2^y$ for integer y, where both $x$ and $y$ must be real.}
 \funcdef{legendreP($l,x$)}{evaluates the $l$th Legendre polynomial at $x$, where $l$ must be a positive dimensionless real integer and $x$ must be a real dimensionless number.}
 \funcdef{legendreQ($l,x$)}{evaluates the $l$th Legendre function at $x$, where $l$ must be a positive dimensionless real integer and $x$ must be a real dimensionless number.}

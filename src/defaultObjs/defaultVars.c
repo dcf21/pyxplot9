@@ -330,17 +330,19 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"finite"        ,1,1,1,0,0,0,(void *)&pplfunc_finite      , "finite(z)", "\\mathrm{finite}@<@1@>", "finite(x) returns true if x is a finite number, and false otherwise");
     ppl_addSystemFunc(d,"floor"         ,1,1,1,1,1,1,(void *)&pplfunc_floor       , "floor(x)", "\\mathrm{floor}@<@1@>", "floor(x) returns the largest integer value smaller than or equal to x");
     ppl_addSystemFunc(d,"gamma"         ,1,1,1,1,1,1,(void *)&pplfunc_gamma       , "gamma(x)", "\\mathrm{\\Gamma}@<@1@>", "gamma(x) evaluates the gamma function at x");
+    ppl_addSystemFunc(d,"gcd"           ,2,1e9,1,1,1,1,(void *)&pplfunc_gcd       , "gcd(x,...)", "\\mathrm{gcd}@<@0@>", "gcd(x,...) returns the greatest common divisor (a.k.a. highest common factor) of its arguments, which should be dimensionless non-zero integers");
     ppl_addSystemFunc(d,"globals"       ,0,0,1,1,1,1,(void *)&pplfunc_globals     , "globals()", "\\mathrm{globals}@<@>", "globals() returns a dictionary of all currently-defined global variables");
     ppl_addSystemFunc(d,"gray"          ,1,1,1,1,1,1,(void *)&pplfunc_gray        , "gray(x)", "\\mathrm{gray}@<@1@>", "gray(x) returns a shade of gray with brightness x in the range 0-1");
     ppl_addSystemFunc(d,"grey"          ,1,1,1,1,1,1,(void *)&pplfunc_gray        , "grey(x)", "\\mathrm{grey}@<@1@>", "grey(x) returns a shade of grey with brightness x in the range 0-1");
     ppl_addSystemFunc(d,"heaviside"     ,1,1,1,1,1,0,(void *)&pplfunc_heaviside   , "heaviside(x)", "\\mathrm{heaviside}@<@1@>", "heaviside(x) returns the Heaviside function, defined to be one for x>=0 and zero otherwise");
+    ppl_addSystemFunc(d,"hcf"           ,2,1e9,1,1,1,1,(void *)&pplfunc_gcd       , "hcf(x,...)", "\\mathrm{hcf}@<@0@>", "hcf(x,...) returns the highest common factor (a.k.a. greatest common divisor) of its arguments, which should be dimensionless non-zero integers");
     ppl_addSystemFunc(d,"hsb"           ,3,3,1,1,1,1,(void *)&pplfunc_hsb         , "hsb(h,s,b)", "\\mathrm{hsb}@<@1,@2,@3@>", "hsb(h,s,b) returns a color with specified hue, saturation and brightness in the range 0-1");
     ppl_addSystemFunc(d,"hyperg_0F1"    ,2,2,1,1,1,1,(void *)&pplfunc_hyperg_0F1  , "hyperg_0F1(c,x)", "\\mathrm{hyperg\\_}_0\\mathrm{F}_1}@<@1,@2@>", "hyperg_0F1(c,x) evaluates the hypergeometric function 0F1(c,x)");
     ppl_addSystemFunc(d,"hyperg_1F1"    ,3,3,1,1,1,1,(void *)&pplfunc_hyperg_1F1  , "hyperg_1F1(a,b,x)", "\\mathrm{hyperg\\_}_1\\mathrm{F}_1}@<@1,@2,@3@>", "hyperg_1F1(a,b,x) evaluates the confluent hypergeometric function 1F1(a,b,x)");
     ppl_addSystemFunc(d,"hyperg_2F0"    ,3,3,1,1,1,1,(void *)&pplfunc_hyperg_2F0  , "hyperg_2F0(a,b,x)", "\\mathrm{hyperg\\_}_2\\mathrm{F}_0}@<@1,@2,@3@>", "hyperg_2F0(a,b,x) evaluates the hypergeometric function 2F0(a,b,x)");
     ppl_addSystemFunc(d,"hyperg_2F1"    ,4,4,1,1,1,1,(void *)&pplfunc_hyperg_2F1  , "hyperg_2F1(a,b,c,x)", "\\mathrm{hyperg\\_}_2\\mathrm{F}_1}@<@1,@2,@3,@4@>", "hyperg_2F1(a,b,c,x) evaluates the Gauss hypergeometric function 2F1(a,b,c,x)");
     ppl_addSystemFunc(d,"hyperg_U"      ,3,3,1,1,1,1,(void *)&pplfunc_hyperg_U    , "hyperg_U(a,b,x)", "\\mathrm{hyperg\\_U}@<@1,@2,@3@>", "hyperg_U(a,b,x) evaluates the confluent hypergeometric function U(m,n,x)");
-    ppl_addSystemFunc(d,"hypot"         ,0,1e9,1,1,0,0,(void *)&pplfunc_hypot     , "hypot(x,...)", "\\mathrm{hypot}@<@1,@2@>", "hypot(x,...) returns the quadrature sum of its arguments");
+    ppl_addSystemFunc(d,"hypot"         ,0,1e9,1,1,0,0,(void *)&pplfunc_hypot     , "hypot(x,...)", "\\mathrm{hypot}@<@0@>", "hypot(x,...) returns the quadrature sum of its arguments");
     ppl_addSystemFunc(d,"Im"            ,1,1,1,1,0,0,(void *)&pplfunc_imag        , "Im(z)", "\\mathrm{Im}@<@1@>", "Im(z) returns the magnitude of the imaginary part of z");
     ppl_addMagicFunction(d, "int_d", 3, "int_d...(e,min,max)", "\\int_{@2}^{@3}@<@1@>\\,\\mathrm{d}@?", "int_d<v>(e,min,max) numerically integrates an expression e wrt <v> between min and max");
     ppl_addSystemFunc(d,"jacobi_cn"     ,2,2,1,1,1,1,(void *)&pplfunc_jacobi_cn   , "jacobi_cn(u,m)", "\\mathrm{jacobi\\_cn}@<@1,@2@>", "jacobi_cn(u,m) returns the Jacobi elliptic function cn(u,m)");
@@ -348,6 +350,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"jacobi_sn"     ,2,2,1,1,1,1,(void *)&pplfunc_jacobi_sn   , "jacobi_sn(u,m)", "\\mathrm{jacobi\\_sn}@<@1,@2@>", "jacobi_sn(u,m) returns the Jacobi elliptic function sn(u,m)");
     ppl_addSystemFunc(d,"lambert_W0"    ,1,1,1,1,1,1,(void *)&pplfunc_lambert_W0  , "lambert_W0(x)", "\\mathrm{lambert\\_W0}@<@1@>", "lambert_W0(x) returns the principal branch of the Lambert W function");
     ppl_addSystemFunc(d,"lambert_W1"    ,1,1,1,1,1,1,(void *)&pplfunc_lambert_W1  , "lambert_W1(x)", "\\mathrm{lambert\\_W1}@<@1@>", "lambert_W1(x) returns the secondary branch of the Lambert W function");
+    ppl_addSystemFunc(d,"lcm"           ,2,1e9,1,1,1,1,(void *)&pplfunc_lcm       , "lcm(x,...)", "\\mathrm{lcm}@<@0@>", "lcm(x,...) returns the lowest common multiple of its arguments, which should be dimensionless positive integers");
     ppl_addSystemFunc(d,"ldexp"         ,2,2,1,1,1,1,(void *)&pplfunc_ldexp       , "ldexp(x,y)", "\\mathrm{ldexp}@<@1,@2@>", "ldexp(x,y) returns x times 2 to the power of an integer y");
     ppl_addSystemFunc(d,"legendreP"     ,2,2,1,1,1,1,(void *)&pplfunc_legendreP   , "legendreP(l,x)", "\\mathrm{legendreP}@<@1,@2@>", "legendreP(l,x) evaluates the lth Legendre polynomial at x");
     ppl_addSystemFunc(d,"legendreQ"     ,2,2,1,1,1,1,(void *)&pplfunc_legendreQ   , "legendreQ(l,x)", "\\mathrm{legendreQ}@<@1,@2@>", "legendreQ(l,x) evaluates the lth Legendre function at x");

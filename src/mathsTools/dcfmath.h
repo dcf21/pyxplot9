@@ -37,6 +37,7 @@ void   ppl_logRaster(double *out, double min, double max, int Nsteps);
 double ppl_degs     (double rad);
 double ppl_rads     (double degrees);
 int    ppl_dblSort  (const void *a, const void *b);
+int    ppl_gcd      (int a, int b);
 
 #endif
 
