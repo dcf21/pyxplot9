@@ -36,8 +36,8 @@ typedef struct traceback {
 
 typedef struct errStatus {
   int  errType, status, tracebackDepth;
-  char errMsgExpr[LSTR_LENGTH]; long sourceIdExpr; int errPosExpr;
-  char errMsgCmd [LSTR_LENGTH]; long sourceIdCmd;  int errPosCmd;
+  char errMsgExpr[LSTR_LENGTH]; long sourceIdExpr; int errPosExpr, oldErrPosExpr;
+  char errMsgCmd [LSTR_LENGTH]; long sourceIdCmd;  int errPosCmd , oldErrPosCmd;
   char errBuff[LSTR_LENGTH];
   traceback tbLevel[TB_MAXLEVEL];
  } errStatus;

@@ -36,8 +36,10 @@ void ppl_tbClear(ppl_context *c)
    }
   c->errStat.status = c->errStat.tracebackDepth = 0;
   c->errStat.errType = -1;
+  if (c->errStat.errPosCmd !=-1) c->errStat.oldErrPosCmd  = c->errStat.errPosCmd;
+  if (c->errStat.errPosExpr!=-1) c->errStat.oldErrPosExpr = c->errStat.errPosExpr;
   c->errStat.errPosCmd = c->errStat.errPosExpr = -1;
-  c->errStat.errMsgExpr[0] = c->errStat.errMsgCmd[0] = c->errStat.errBuff[0];
+  c->errStat.errBuff[0] = '\0';
   c->errStat.sourceIdExpr = c->errStat.sourceIdCmd = -1;
   return;
  }

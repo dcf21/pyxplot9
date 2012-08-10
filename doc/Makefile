@@ -51,28 +51,40 @@ $(EX_FRAGDIR)/timestamp: $(FRAGFILES) $(PYXPLOT) .pyxplotrc
 
 pyxplot-plain.pdf: pyxplot-plain.ps
 	echo "Making plain pdf documentation..."
-	ps2pdf $< $@ > /dev/null 2> /dev/null
+	ps2pdf $< $@
 
 # Dependency on pyxplot-plain.dvi is a fudge so that 'make -j' doesn't parallelise pdflatex and latex
 pyxplot.pdf: $(SOURCES) pyxplot-plain.dvi
 	echo "Making hyperref pdf documentation..."
 	rm -f *.aux *.idx *.ilg *.ind *.lob *.loe *.lof *.toc
-	pdflatex pyxplot > /dev/null 2> /dev/null
-	pdflatex pyxplot > /dev/null 2> /dev/null
-	pdflatex pyxplot > /dev/null 2> /dev/null
-	makeindex pyxplot.idx > /dev/null 2> /dev/null
-	pdflatex pyxplot > /dev/null 2> /dev/null
+	pdflatex pyxplot
+	pdflatex pyxplot
+	pdflatex pyxplot
+	makeindex pyxplot.idx
+	pdflatex pyxplot
 
 %.ps: %.dvi
 	echo "Making postscript documentation..."
-	dvips -Pcmz -Pamz $< -o $@ > /dev/null 2> /dev/null
+	dvips -Pcmz -Pamz $< -o $@
 
 pyxplot-plain.dvi: $(SOURCES) $(EX_EPSDIR)/timestamp $(EX_TEXDIR)/timestamp $(EX_FRAGDIR)/timestamp
 	echo "Compiling documentation..."
 	rm -f *.aux *.idx *.ilg *.ind *.lob *.loe *.lof
-	latex pyxplot-plain.tex > /dev/null 2> /dev/null
-	latex pyxplot-plain.tex > /dev/null 2> /dev/null
-	latex pyxplot-plain.tex > /dev/null 2> /dev/null
-	makeindex pyxplot-plain.idx > /dev/null 2> /dev/null
-	latex pyxplot-plain.tex > /dev/null 2> /dev/null
+	latex pyxplot-plain.tex
+	latex pyxplot-plain.tex
+	latex pyxplot-plain.tex
+	makeindex pyxplot-plain.idx
+	latex pyxplot-plain.tex
+
+EPSTESTFILES = $(EX_EPSDIR)/ex_axistics.eps $(EX_EPSDIR)/ex_barchart2.eps $(EX_EPSDIR)/ex_lenses.eps $(EX_EPSDIR)/ex_surface_polynomial.eps
+
+test-examples: $(EX_EPSDIR)/timestamp
+	for e in $(EPSTESTFILES); do \
+	   ls -l $$e; \
+	   if [ ! -s "$$e" ]; then \
+			echo "$$e has zero length; tests failed"; exit 2; \
+	   fi \
+	done
+
+.PHONY: test-examples
 

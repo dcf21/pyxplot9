@@ -39,7 +39,7 @@ CWD=$(shell pwd)
 VERSION_MAJ = 0
 VERSION_MIN = 9
 VERSION_REV = 1
-DATE    = xx/xx/xxxx
+DATE    = 15/08/2012
 
 COMPILE = $(CC) -Wall -g `xml2-config --cflags` `gsl-config --cflags` -c -I $(CWD)/src
 LIBS    = $(LINK_FFTW) `xml2-config --libs` `gsl-config --libs` $(LINK_READLINE) -lz -lpng $(LINK_KPATHSEA) -lm
@@ -55,13 +55,54 @@ LOCAL_OBJDIR = obj
 LOCAL_DOCDIR = doc
 LOCAL_BINDIR = bin
 
-PPL_FILES   = canvasItems.c children.c commands/core.c commands/eqnsolve.c commands/fft.c commands/fit.c commands/flowctrl.c commands/funcset.c commands/help.c commands/histogram.c commands/interpolate.c commands/interpolate_2d_engine.c commands/set.c commands/show.c commands/tabulate.c coreUtils/backup.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/getPasswd.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c datafile.c datafile_rasters.c defaultObjs/airyFuncs.c defaultObjs/defaultFuncs.c defaultObjs/defaultUnits.c defaultObjs/defaultVars.c defaultObjs/moduleAst.c defaultObjs/moduleColor.c defaultObjs/moduleFractals.c defaultObjs/moduleOs.c defaultObjs/modulePhy.c defaultObjs/moduleRandom.c defaultObjs/moduleStats.c defaultObjs/moduleTime.c defaultObjs/zetaRiemann.c epsMaker/bmp_a85.c epsMaker/bmp_bmpread.c epsMaker/bmp_gifread.c epsMaker/bmp_jpegread.c epsMaker/bmp_optimise.c epsMaker/bmp_pngread.c epsMaker/canvasDraw.c epsMaker/dvi_font.c epsMaker/dvi_interpreter.c epsMaker/dvi_read.c epsMaker/eps_arrow.c epsMaker/eps_box.c epsMaker/eps_circle.c epsMaker/eps_core.c epsMaker/eps_ellipse.c epsMaker/eps_eps.c epsMaker/eps_image.c epsMaker/eps_piechart.c epsMaker/eps_plot.c epsMaker/eps_plot_axespaint.c epsMaker/eps_plot_canvas.c epsMaker/eps_plot_colormap.c epsMaker/eps_plot_contourmap.c epsMaker/eps_plot_filledregion.c epsMaker/eps_plot_gridlines.c epsMaker/eps_plot_labelsarrows.c epsMaker/eps_plot_legend.c epsMaker/eps_plot_linedraw.c epsMaker/eps_plot_linkedaxes.c epsMaker/eps_plot_styles.c epsMaker/eps_plot_threedimbuff.c epsMaker/eps_plot_ticking_auto2.c epsMaker/eps_plot_ticking_auto3.c epsMaker/eps_plot_ticking_auto.c epsMaker/eps_plot_ticking.c epsMaker/eps_point.c epsMaker/eps_polygon.c epsMaker/eps_settings.c epsMaker/eps_style.c epsMaker/eps_text.c epsMaker/kpse_wrap.c expressions/dollarOp.c expressions/expCompile.c expressions/expEval.c expressions/expEvalCalculus.c expressions/expEvalOps.c expressions/expEvalSlice.c expressions/fnCall.c expressions/traceback.c input.c mathsTools/dcfmath.c parser/cmdList.c parser/parserCompile.c parser/parserExecute.c parser/parserInit.c parser/parserShell.c pyxplot.c readConf.c settings/arrows.c settings/axes.c settings/colors.c settings/epsColors.c settings/labels.c settings/papersizes.c settings/settingsInit.c settings/settingTypes.c settings/textConstants.c settings/withWords.c stringTools/asciidouble.c texify.c userspace/calendars.c userspace/context.c userspace/contextVarDef.c userspace/garbageCollector.c userspace/pplObj.c userspace/pplObjCmp.c userspace/pplObjDump.c userspace/pplObjFunc.c userspace/pplObjMethods.c userspace/pplObjPrint.c userspace/unitsArithmetic.c userspace/unitsDisp.c
+PPL_FILES   = canvasItems.c children.c commands/core.c commands/eqnsolve.c commands/fft.c commands/fit.c commands/flowctrl.c commands/funcset.c \
+commands/help.c commands/histogram.c commands/interpolate.c commands/interpolate_2d_engine.c commands/set.c commands/show.c commands/tabulate.c \
+coreUtils/backup.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/getPasswd.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c \
+datafile.c datafile_rasters.c defaultObjs/airyFuncs.c defaultObjs/defaultFuncs.c defaultObjs/defaultUnits.c defaultObjs/defaultVars.c \
+defaultObjs/moduleAst.c defaultObjs/moduleColor.c defaultObjs/moduleFractals.c defaultObjs/moduleOs.c defaultObjs/modulePhy.c \
+defaultObjs/moduleRandom.c defaultObjs/moduleStats.c defaultObjs/moduleTime.c defaultObjs/zetaRiemann.c epsMaker/bmp_a85.c epsMaker/bmp_bmpread.c \
+epsMaker/bmp_gifread.c epsMaker/bmp_jpegread.c epsMaker/bmp_optimise.c epsMaker/bmp_pngread.c epsMaker/canvasDraw.c epsMaker/dvi_font.c \
+epsMaker/dvi_interpreter.c epsMaker/dvi_read.c epsMaker/eps_arrow.c epsMaker/eps_box.c epsMaker/eps_circle.c epsMaker/eps_core.c \
+epsMaker/eps_ellipse.c epsMaker/eps_eps.c epsMaker/eps_image.c epsMaker/eps_piechart.c epsMaker/eps_plot.c epsMaker/eps_plot_axespaint.c \
+epsMaker/eps_plot_canvas.c epsMaker/eps_plot_colormap.c epsMaker/eps_plot_contourmap.c epsMaker/eps_plot_filledregion.c epsMaker/eps_plot_gridlines.c \
+epsMaker/eps_plot_labelsarrows.c epsMaker/eps_plot_legend.c epsMaker/eps_plot_linedraw.c epsMaker/eps_plot_linkedaxes.c epsMaker/eps_plot_styles.c \
+epsMaker/eps_plot_threedimbuff.c epsMaker/eps_plot_ticking_auto2.c epsMaker/eps_plot_ticking_auto3.c epsMaker/eps_plot_ticking_auto.c \
+epsMaker/eps_plot_ticking.c epsMaker/eps_point.c epsMaker/eps_polygon.c epsMaker/eps_settings.c epsMaker/eps_style.c epsMaker/eps_text.c \
+epsMaker/kpse_wrap.c expressions/dollarOp.c expressions/expCompile.c expressions/expEval.c expressions/expEvalCalculus.c expressions/expEvalOps.c \
+expressions/expEvalSlice.c expressions/fnCall.c expressions/traceback.c input.c mathsTools/dcfmath.c parser/cmdList.c parser/parserCompile.c \
+parser/parserExecute.c parser/parserInit.c parser/parserShell.c pyxplot.c readConf.c settings/arrows.c settings/axes.c settings/colors.c \
+settings/epsColors.c settings/labels.c settings/papersizes.c settings/settingsInit.c settings/settingTypes.c settings/textConstants.c \
+settings/withWords.c stringTools/asciidouble.c texify.c userspace/calendars.c userspace/context.c userspace/contextVarDef.c \
+userspace/garbageCollector.c userspace/pplObj.c userspace/pplObjCmp.c userspace/pplObjDump.c userspace/pplObjFunc.c userspace/pplObjMethods.c \
+userspace/pplObjPrint.c userspace/unitsArithmetic.c userspace/unitsDisp.c
 
-PPL_HEADERS = canvasItems.h children.h commands/core.h commands/eqnsolve.h commands/fft.h commands/fit.h commands/flowctrl.h commands/funcset.h commands/help.h commands/histogram.h commands/interpolate.h commands/interpolate_2d_engine.h commands/set.h commands/show.h commands/tabulate.h coreUtils/backup.h coreUtils/dict.h coreUtils/errorReport.h coreUtils/getPasswd.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h datafile.h datafile_rasters.h defaultObjs/airyFuncs.h defaultObjs/defaultFuncs.h defaultObjs/defaultFuncsMacros.h defaultObjs/moduleAst.h defaultObjs/moduleColor.h defaultObjs/moduleFractals.h defaultObjs/moduleOs.h defaultObjs/modulePhy.h defaultObjs/moduleRandom.h defaultObjs/moduleStats.h defaultObjs/moduleTime.h defaultObjs/zetaRiemann.h epsMaker/bmp_a85.h epsMaker/bmp_bmpread.h epsMaker/bmp_gifread.h epsMaker/bmp_image.h epsMaker/bmp_jpegread.h epsMaker/bmp_optimise.h epsMaker/bmp_pngread.h epsMaker/canvasDraw.h epsMaker/dvi_font.h epsMaker/dvi_interpreter.h epsMaker/dvi_read.h epsMaker/eps_arrow.h epsMaker/eps_comm.h epsMaker/eps_box.h epsMaker/eps_circle.h epsMaker/eps_core.h epsMaker/eps_ellipse.h epsMaker/eps_eps.h epsMaker/eps_image.h epsMaker/eps_piechart.h epsMaker/eps_plot.h epsMaker/eps_plot_axespaint.h epsMaker/eps_plot_canvas.h epsMaker/eps_plot_colormap.h epsMaker/eps_plot_contourmap.h epsMaker/eps_plot_filledregion.h epsMaker/eps_plot_gridlines.h epsMaker/eps_plot_labelsarrows.h epsMaker/eps_plot_legend.h epsMaker/eps_plot_linedraw.h epsMaker/eps_plot_linkedaxes.h epsMaker/eps_plot_styles.h epsMaker/eps_plot_threedimbuff.h epsMaker/eps_plot_ticking_auto2.h epsMaker/eps_plot_ticking_auto3.h epsMaker/eps_plot_ticking_auto.h epsMaker/eps_plot_ticking.h epsMaker/eps_point.h epsMaker/eps_polygon.h epsMaker/eps_settings.h epsMaker/eps_style.h epsMaker/eps_text.h epsMaker/kpse_wrap.h expressions/dollarOp.h expressions/expCompile.h expressions/expCompile_fns.h expressions/expEval.h expressions/expEvalCalculus.h expressions/expEvalOps.h expressions/expEvalSlice.h expressions/fnCall.h expressions/traceback.h expressions/traceback_fns.h input.h mathsTools/dcfmath.h parser/cmdList.h parser/parser.h pplConstants.h pyxplot.h readConf.h settings/arrows.h settings/arrows_fns.h settings/axes_fns.h settings/colors.h settings/epsColors.h settings/labels.h settings/labels_fns.h settings/papersizes.h settings/settings.h settings/settings_fns.h settings/settingTypes.h settings/textConstants.h settings/withWords.h settings/withWords_fns.h stringTools/asciidouble.h stringTools/strConstants.h texify.h userspace/calendars.h userspace/context.h userspace/contextVarDef.h userspace/garbageCollector.h userspace/pplObj.h userspace/pplObj_fns.h userspace/pplObjCmp.h userspace/pplObjDump.h userspace/pplObjFunc.h userspace/pplObjFunc_fns.h userspace/pplObjMethods.h userspace/pplObjPrint.h userspace/pplObjUnits.h userspace/unitsArithmetic.h userspace/unitsDisp.h
+PPL_HEADERS = canvasItems.h children.h commands/core.h commands/eqnsolve.h commands/fft.h commands/fit.h commands/flowctrl.h commands/funcset.h \
+commands/help.h commands/histogram.h commands/interpolate.h commands/interpolate_2d_engine.h commands/set.h commands/show.h commands/tabulate.h \
+coreUtils/backup.h coreUtils/dict.h coreUtils/errorReport.h coreUtils/getPasswd.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h \
+datafile.h datafile_rasters.h defaultObjs/airyFuncs.h defaultObjs/defaultFuncs.h defaultObjs/defaultFuncsMacros.h defaultObjs/moduleAst.h \
+defaultObjs/moduleColor.h defaultObjs/moduleFractals.h defaultObjs/moduleOs.h defaultObjs/modulePhy.h defaultObjs/moduleRandom.h \
+defaultObjs/moduleStats.h defaultObjs/moduleTime.h defaultObjs/zetaRiemann.h epsMaker/bmp_a85.h epsMaker/bmp_bmpread.h epsMaker/bmp_gifread.h \
+epsMaker/bmp_image.h epsMaker/bmp_jpegread.h epsMaker/bmp_optimise.h epsMaker/bmp_pngread.h epsMaker/canvasDraw.h epsMaker/dvi_font.h \
+epsMaker/dvi_interpreter.h epsMaker/dvi_read.h epsMaker/eps_arrow.h epsMaker/eps_comm.h epsMaker/eps_box.h epsMaker/eps_circle.h epsMaker/eps_core.h \
+epsMaker/eps_ellipse.h epsMaker/eps_eps.h epsMaker/eps_image.h epsMaker/eps_piechart.h epsMaker/eps_plot.h epsMaker/eps_plot_axespaint.h \
+epsMaker/eps_plot_canvas.h epsMaker/eps_plot_colormap.h epsMaker/eps_plot_contourmap.h epsMaker/eps_plot_filledregion.h epsMaker/eps_plot_gridlines.h \
+epsMaker/eps_plot_labelsarrows.h epsMaker/eps_plot_legend.h epsMaker/eps_plot_linedraw.h epsMaker/eps_plot_linkedaxes.h epsMaker/eps_plot_styles.h \
+epsMaker/eps_plot_threedimbuff.h epsMaker/eps_plot_ticking_auto2.h epsMaker/eps_plot_ticking_auto3.h epsMaker/eps_plot_ticking_auto.h \
+epsMaker/eps_plot_ticking.h epsMaker/eps_point.h epsMaker/eps_polygon.h epsMaker/eps_settings.h epsMaker/eps_style.h epsMaker/eps_text.h \
+epsMaker/kpse_wrap.h expressions/dollarOp.h expressions/expCompile.h expressions/expCompile_fns.h expressions/expEval.h expressions/expEvalCalculus.h \
+expressions/expEvalOps.h expressions/expEvalSlice.h expressions/fnCall.h expressions/traceback.h expressions/traceback_fns.h input.h \
+mathsTools/dcfmath.h parser/cmdList.h parser/parser.h pplConstants.h pyxplot.h readConf.h settings/arrows.h settings/arrows_fns.h settings/axes_fns.h \
+settings/colors.h settings/epsColors.h settings/labels.h settings/labels_fns.h settings/papersizes.h settings/settings.h settings/settings_fns.h \
+settings/settingTypes.h settings/textConstants.h settings/withWords.h settings/withWords_fns.h stringTools/asciidouble.h stringTools/strConstants.h \
+texify.h userspace/calendars.h userspace/context.h userspace/contextVarDef.h userspace/garbageCollector.h userspace/pplObj.h userspace/pplObj_fns.h \
+userspace/pplObjCmp.h userspace/pplObjDump.h userspace/pplObjFunc.h userspace/pplObjFunc_fns.h userspace/pplObjMethods.h userspace/pplObjPrint.h \
+userspace/pplObjUnits.h userspace/unitsArithmetic.h userspace/unitsDisp.h
 
-PPLW_FILES   = helpers/pyxplot_watch.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c stringTools/asciidouble.c settings/settingTypes.c
+PPLW_FILES   = helpers/pyxplot_watch.c coreUtils/dict.c coreUtils/errorReport.c coreUtils/list.c coreUtils/memAlloc.c coreUtils/stringList.c \
+stringTools/asciidouble.c settings/settingTypes.c
 
-PPLW_HEADERS =                         coreUtils/dict.h coreUtils/errorReport.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h stringTools/asciidouble.h settings/settingTypes.h
+PPLW_HEADERS =                         coreUtils/dict.h coreUtils/errorReport.h coreUtils/list.h coreUtils/memAlloc.h coreUtils/stringList.h \
+stringTools/asciidouble.h settings/settingTypes.h
 
 FITSHELP_FILES   = helpers/pyxplot_fitshelper.c stringTools/asciidouble.c
 FITSHELP_HEADERS =                              stringTools/asciidouble.h stringTools/strConstants.h
@@ -109,15 +150,15 @@ src/parser/cmdList.c: src/parser/cmdList.h
 
 $(LOCAL_OBJDIR)/%.o:         $(LOCAL_SRCDIR)/%.c $(ALL_HFILES)
 	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/commands $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/defaultObjs $(LOCAL_OBJDIR)/epsMaker $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
-	$(COMPILE) $(CFLAGS) $(OPTIMISATION) $(NODEBUG) $(NOINSTALL_SWITCHES) $< -o $@
+	$(COMPILE) $(CFLAGS) $(CPPFLAGS) $(OPTIMISATION) $(NODEBUG) $(NOINSTALL_SWITCHES) $< -o $@
 
 $(LOCAL_OBJDIR)/%.debug.o:   $(LOCAL_SRCDIR)/%.c $(ALL_HFILES)
 	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/commands $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/defaultObjs $(LOCAL_OBJDIR)/epsMaker $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
-	$(COMPILE) $(CFLAGS) $(OPTIMISATION) $(DEBUG)   $(DEBUG_SWITCHES)     $< -o $@
+	$(COMPILE) $(CFLAGS) $(CPPFLAGS) $(OPTIMISATION) $(DEBUG)   $(DEBUG_SWITCHES)     $< -o $@
 
 $(LOCAL_OBJDIR)/%.install.o: $(LOCAL_SRCDIR)/%.c $(ALL_HFILES)
 	mkdir -p $(LOCAL_OBJDIR) $(LOCAL_OBJDIR)/commands $(LOCAL_OBJDIR)/coreUtils $(LOCAL_OBJDIR)/defaultObjs $(LOCAL_OBJDIR)/epsMaker $(LOCAL_OBJDIR)/expressions $(LOCAL_OBJDIR)/helpers $(LOCAL_OBJDIR)/mathsTools $(LOCAL_OBJDIR)/parser $(LOCAL_OBJDIR)/settings $(LOCAL_OBJDIR)/stringTools $(LOCAL_OBJDIR)/userspace
-	$(COMPILE) $(CFLAGS) $(OPTIMISATION) $(NODEBUG) $(INSTALL_SWITCHES)   $< -o $@
+	$(COMPILE) $(CFLAGS) $(CPPFLAGS) $(OPTIMISATION) $(NODEBUG) $(INSTALL_SWITCHES)   $< -o $@
 
 #
 # Make the pyxplot binaries
@@ -195,15 +236,18 @@ $(LOCAL_OBJDIR)/pyxplot_watch.1: buildScripts/manpage_pyxplot_watch.py
 #
 
 install: all
-	install -d ${SRCDIR} ${BINDIR} ${BINDIR_PRIVATE} ${DOCDIR} ${MANDIR}
+	install -d ${SRCDIR} ${BINDIR} ${BINDIR_PRIVATE} ${MANDIR}
 	install -m644 ${LOCAL_SRCDIR}/help.xml                   ${SRCDIR}
 	install -m755 ${LOCAL_BINDIR}/install/pyxplot            ${BINDIR}/pyxplot
 	install -m755 ${LOCAL_BINDIR}/install/pyxplot_watch      ${BINDIR}/pyxplot_watch
 	install -m755 ${LOCAL_BINDIR}/install/pyxplot_fitshelper ${BINDIR_PRIVATE}/pyxplot_fitshelper
 	install -m755 ${LOCAL_BINDIR}/install/pyxplot_timehelper ${BINDIR_PRIVATE}/pyxplot_timehelper
-	install -m644 doc/*.tex doc/pyxplot.pdf                  ${DOCDIR}
 	install -m644 $(LOCAL_OBJDIR)/pyxplot.1                  ${MANDIR}/pyxplot.1
 	install -m644 $(LOCAL_OBJDIR)/pyxplot_watch.1            ${MANDIR}/pyxplot_watch.1
+
+install-doc:
+	install -d ${DOCDIR}
+	install -m644 doc/*.tex doc/pyxplot.pdf                  ${DOCDIR}
 
 
 #

@@ -65,7 +65,7 @@ static void expEval_stringSubs(ppl_context *context, pplExpr *inExpr, int charpo
   int        outlen = 65536;
   int        inP    = 0;
   int        outP   = 0;
-  int        inP2, requiredArgs, l, arg1i, arg2i;
+  int        inP2, requiredArgs, l, arg1i=0, arg2i=0;
   char      *out    = (char *)malloc(outlen);
 
   if (out==NULL) { strcpy(context->errStat.errBuff, "Out of memory."); TBADD(ERR_MEMORY); return; }
@@ -174,7 +174,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
   int   j=0;
   int   initialStackPtr=0;
   int   charpos=0;
-  void *in = inExpr->bytecode;
+  pplExprBytecode *in = inExpr->bytecode;
 
   if (iterDepth > MAX_RECURSION_DEPTH) { strcpy(context->errStat.errBuff,"Maximum recursion depth exceeded."); TBADD(ERR_OVERFLOW); return NULL; }
 
@@ -187,10 +187,10 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
    {
     pplObj *stk     = &context->stack[context->stackPtr];
     int     pos     = j; // Position of start of instruction
-    int     len     = *(int *)(in+j); // length of bytecode instruction with data
-    int     o       = (int)(*(unsigned char *)(in+j+2*sizeof(int)  )); // Opcode number
-    charpos = *(int *)(in+j+sizeof(int)); // character position of token (for error reporting)
-    j+=2*sizeof(int)+1; // Leave j pointing to first data item after opcode
+    int     len     = in[j].len; // length of bytecode instruction with data
+    int     o       = in[j].opcode; // Opcode number
+    char   *charaux = (char *)&(in[j+1]);
+    charpos         = in[j].charpos; // character position of token (for error reporting)
 
     if (cancellationFlag) { strcpy(context->errStat.errBuff,"Operation cancelled."); charpos=0; TBADD(ERR_INTERRUPT); goto cleanup_on_error; }
     if (context->stackPtr > ALGEBRA_STACK-4) { strcpy(context->errStat.errBuff,"Stack overflow."); charpos=0; TBADD(ERR_MEMORY); goto cleanup_on_error; }
@@ -201,17 +201,17 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
         break;
       case 1: // Numeric literal
         *lastOpAssign=0;
-        pplObjNum(stk , 0 , *(double *)(in+j) , 0);
+        pplObjNum(stk , 0 , in[j].auxil.d , 0);
         stk->refCount=1;
         context->stackPtr++;
         break;
       case 2: // String literal
        {
-        int l = strlen((char *)(in+j));
+        int l = strlen(charaux);
         char *out;
         *lastOpAssign=0;
         if ((out = (char *)malloc(l+1))==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_MEMORY); goto cleanup_on_error; }
-        strcpy(out , (char *)(in+j));
+        strcpy(out , charaux);
         pplObjStr(stk , 0 , 1 , out);
         stk->refCount=1;
         context->stackPtr++;
@@ -220,7 +220,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
       case 3: // Lookup value
        {
         int i , got=0;
-        char *key = (char *)(in+j);
+        char *key = charaux;
         *lastOpAssign=0;
         for (i=context->ns_ptr ; i>=0 ; i=(i>1)?1:i-1)
          {
@@ -240,7 +240,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
       case 4: // Lookup value (pointer)
        {
         int i;
-        char *key = (char *)(in+j);
+        char *key = charaux;
         *lastOpAssign=0;
         for (i=context->ns_ptr ; ; i=1)
          {
@@ -265,7 +265,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
        }
       case 5: // Dereference value
        {
-        char   *key     = (char *)(in+j);
+        char   *key     = charaux;
         pplObj *in      = stk-1;
         pplObj *in_cpy  = NULL;
         pplObj *iter    = in;
@@ -306,7 +306,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
        }
       case 6: // Dereference value (pointer)
        {
-        char *key = (char *)(in+j);
+        char *key = charaux;
         int   t   = (stk-1)->objType;
         dict *d   = (dict *)((stk-1)->auxil);
         *lastOpAssign=0;
@@ -340,7 +340,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
        {
         int       status=0, errType=-1;
         const int getPtr = (o==16);
-        const int mode   = (int)*(unsigned char *)(in+j);
+        const int mode   = in[j].auxil.i;
         const int range  = (mode & 1) == 0;
         const int maxset = (mode & 2) != 0;
         const int minset = (mode & 4) != 0;
@@ -367,7 +367,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
       case 8: // Make dict
        {
         int k;
-        int len = *(int *)(in+j);
+        int len = in[j].auxil.i;
         dict *d = ppl_dictInit(1);
         *lastOpAssign=0;
         if (d==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_INTERNAL); goto cleanup_on_error; }
@@ -389,7 +389,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
       case 9: // Make list
        {
         int k;
-        int len = *(int *)(in+j);
+        int len = in[j].auxil.i;
         list *l = ppl_listInit(1);
         *lastOpAssign=0;
         if (l==NULL) { sprintf(context->errStat.errBuff,"Out of memory."); TBADD(ERR_INTERNAL); goto cleanup_on_error; }
@@ -409,7 +409,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
        }
       case 10: // Execute function call
        {
-        int nArgs = *(int *)(in+j);
+        int nArgs = in[j].auxil.i;
         *lastOpAssign=0;
         ppl_fnCall(context, inExpr, charpos, nArgs, dollarAllowed, iterDepth);
         if (context->errStat.status) goto cleanup_on_error;
@@ -417,7 +417,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
        }
       case 11: // Operator
        {
-        int t = (int)*(unsigned char *)(in+j);
+        int t = in[j].auxil.i;
         *lastOpAssign=0;
         pplObjNum(stk, 0, 0, 0);
         stk->refCount=1;
@@ -579,7 +579,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
        }
       case 12: // assignment operator
        {
-        int     t  = (int)*(unsigned char *)(in+j);
+        int     t  = in[j].auxil.i;
         pplObj *o  = stk-2;
         pplObj *in = stk-1;
         pplObj *tmp= stk;
@@ -688,7 +688,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
        }
       case 13: // increment and decrement operators
        {
-        int     t = (int)*(unsigned char *)(in+j);
+        int     t = in[j].auxil.i;
         pplObj *o = stk-1;
         *lastOpAssign=1;
         if (context->stackPtr < 1)    { sprintf(context->errStat.errBuff,"Too few items on stack for -- or ++ operator."); TBADD(ERR_INTERNAL); goto cleanup_on_error; }
@@ -716,7 +716,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
        }
       case 14: // string substitution
        {
-        int Nsubs  = *(int *)(in+j);
+        int Nsubs  = in[j].auxil.i;
         int i;
         if (context->stackPtr < Nsubs+1) { sprintf(context->errStat.errBuff,"Too few items on stack for string substitution operator."); TBADD(ERR_INTERNAL); goto cleanup_on_error; }
         if ((stk-Nsubs-1)->objType != PPLOBJ_STR) { sprintf(context->errStat.errBuff,"Attempt to apply string substitution operator to a non-string."); TBADD(ERR_TYPE); goto cleanup_on_error; }
@@ -764,7 +764,7 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
         *lastOpAssign=0;
         CAST_TO_BOOL(stk-1);
         branch = (stk-1)->real == 0;
-        if (branch) { len = *(int *)(in+j+1)-pos; if (*(unsigned char *)(in+j)) { STACK_POP; } }
+        if (branch) { len = in[j].auxil.i-pos; if (in[j].flag) { STACK_POP; } }
         else        { STACK_POP; }
         break;
        }
@@ -774,14 +774,14 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
         *lastOpAssign=0;
         CAST_TO_BOOL(stk-1);
         branch = (stk-1)->real != 0;
-        if (branch) { len = *(int *)(in+j+1)-pos; if (*(unsigned char *)(in+j)) { STACK_POP; } }
+        if (branch) { len = in[j].auxil.i-pos; if (in[j].flag) { STACK_POP; } }
         else        { STACK_POP; }
         break;
        }
       case 19: // goto
        {
         *lastOpAssign=0;
-        len = *(int *)(in+j)-pos;
+        len = in[j].auxil.i-pos;
         break;
        }
       case 20: // make boolean

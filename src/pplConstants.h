@@ -24,7 +24,7 @@
 
 // Context buffer lengths
 
-#define ALGEBRA_MAXLEN    65536 /* Size of buffer for tokenising input expressions */
+#define ALGEBRA_MAXLEN     2048 /* Size of buffer for tokenising input expressions */
 #define ALGEBRA_STACK      1024 /* Stack size */
 #define CONTEXT_DEPTH       256 /* Maximum number of stacked local namespaces */
 

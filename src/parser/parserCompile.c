@@ -47,6 +47,16 @@
 #include "userspace/garbageCollector.h"
 #include "userspace/pplObj_fns.h"
 
+#define PARSE_TBADD(X,Y,Z) \
+ { \
+  ppl_tbAdd(c,srcLineN,srcId,srcFname,1,X,Y,Z,""); \
+  if ( (c->errStat.errPosExpr==-1) && (c->errStat.oldErrPosExpr == c->algebraErrPos) && (c->algebraErrPos >= 0) && (c->algebraErrPos>=(Y)) ) \
+   { \
+    c->errStat.errPosExpr   = c->algebraErrPos; \
+    c->errStat.sourceIdExpr = srcId; \
+   } \
+ }
+
 static char *strDup(const char *in, int N)
  {
   char *out = (char *)malloc(N+1);
@@ -193,7 +203,7 @@ repLoopCleanup:
        {
         status=0;
         sprintf(c->errStat.errBuff,"Bad node type coming out of code block.");
-        ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_INTERNAL,0,line,"");
+        PARSE_TBADD(ERR_INTERNAL,0,line);
        }
       goto cleanup;
      }
@@ -206,7 +216,7 @@ repLoopCleanup:
     parserLine *output=NULL;
     ppl_parserLineInit(&output,srcLineN,srcId,srcFname,line);
     output->stackLen = node->listLen;
-    if (output==NULL) { sprintf(c->errStat.errBuff,"Out of memory."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_MEMORY,0,line,""); return 0; }
+    if (output==NULL) { sprintf(c->errStat.errBuff,"Out of memory."); PARSE_TBADD(ERR_MEMORY,0,line); return 0; }
     ppl_parserStatAdd(s, blockDepth, output);
    }
 
@@ -580,6 +590,7 @@ finished_looking_for_tabcomp:
                {
                 pplExpr_free(expr);
                 ppl_tbAdd(c,srcLineN,srcId,srcFname,0,errType,errPos+*linepos,line,"");
+                c->algebraErrPos = errPos+*linepos;
                 status=0;
                 goto item_cleanup;
                }
@@ -858,7 +869,7 @@ cleanup:
      {
       snprintf(c->errStat.errBuff,LSTR_LENGTH,"At this point, was expecting %s.",s->expectingList);
       c->errStat.errBuff[LSTR_LENGTH-1] = '\0';
-      ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,s->eLlinePos,line,"");
+      PARSE_TBADD(ERR_SYNTAX,s->eLlinePos,line);
      }
    }
 
@@ -1020,7 +1031,8 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
   int           obLen = LSTR_LENGTH, obPos;
   char         *outbuff = NULL;
 
-  if (blockDepth > MAX_RECURSION_DEPTH) { strcpy(c->errStat.errBuff,"Maximum recursion depth exceeded."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_OVERFLOW,0,line,""); ppl_parserStatReInit(s); return 1; }
+  c->algebraErrPos = c->errStat.oldErrPosExpr = c->errStat.oldErrPosCmd = -1;
+  if (blockDepth > MAX_RECURSION_DEPTH) { strcpy(c->errStat.errBuff,"Maximum recursion depth exceeded."); PARSE_TBADD(ERR_OVERFLOW,0,line); ppl_parserStatReInit(s); return 1; }
 
   // Deal with macros and ` ` substitutions
   if (!expandMacros)
@@ -1030,11 +1042,11 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
     if (containsMacros && (s!=NULL) && !fail) // If we're not expanding macros at this stage, flag this parserLine as containing macros, and exit
      {
       const int bd = ppl_max(blockDepth,s->blockDepth);
-      if (s->waitingForBrace) { sprintf(c->errStat.errBuff,"Cannot process a macro on the same line as the opening brace of a loop."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,0,line,""); ppl_parserStatReInit(s); return 1; }
+      if (s->waitingForBrace) { sprintf(c->errStat.errBuff,"Cannot process a macro on the same line as the opening brace of a loop."); PARSE_TBADD(ERR_SYNTAX,0,line); ppl_parserStatReInit(s); return 1; }
       parserLine *output=NULL;
       if ((s->stk[blockDepth][0]==NULL)&&(blockDepth==0)) ppl_parserStatReInit(s);
       ppl_parserLineInit(&output, srcLineN, srcId, srcFname, line);
-      if (output==NULL) { sprintf(c->errStat.errBuff,"Out of memory."); ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_MEMORY,0,line,""); ppl_parserStatReInit(s); return 1; }
+      if (output==NULL) { sprintf(c->errStat.errBuff,"Out of memory."); PARSE_TBADD(ERR_MEMORY,0,line); ppl_parserStatReInit(s); return 1; }
       output->stackLen       = 0;
       output->containsMacros = 1;
       ppl_parserStatAdd(s, bd, output);
@@ -1149,7 +1161,7 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
         else if (outbuff!=NULL) { free(outbuff); outbuff=NULL; }
        }
      }
-    if (fail) { ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,0,line,""); ppl_parserStatReInit(s); return 1; }
+    if (fail) { PARSE_TBADD(ERR_SYNTAX,0,line); ppl_parserStatReInit(s); return 1; }
    }
 
   // If we are returning to add more code into a codeblock, do that now
@@ -1197,6 +1209,7 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
       parserLine *new = s->pl[blockDepth];
       parserLine *old = new->prev;
       ppl_tbClear(c);
+      c->errStat.oldErrPosExpr = c->errStat.oldErrPosCmd = c->algebraErrPos = -1;
       ppl_parserLineFree(new);
       s->pl[blockDepth]=old;
       if (old!=NULL) old->next=NULL;
@@ -1216,7 +1229,7 @@ int ppl_parserCompile(ppl_context *c, parserStatus *s, int srcLineN, long srcId,
 
   // We have not found a match to this command
   sprintf(c->errStat.errBuff, "Unrecognised command.");
-  ppl_tbAdd(c,srcLineN,srcId,srcFname,1,ERR_SYNTAX,0,line,"");
+  PARSE_TBADD(ERR_SYNTAX,0,line);
   if (outbuff!=NULL) free(outbuff);
   ppl_parserStatReInit(s);
   return 1;

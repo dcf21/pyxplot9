@@ -70,6 +70,7 @@ typedef struct ppl_context_struc
   long int  historyNLinesWritten;
   int       termtypeSetInConfigfile;
   int       replotFocus;
+  int       algebraErrPos;
 
   // CSP status
   char      pplcsp_ghostView_fname[FNAME_LENGTH];
@@ -84,9 +85,10 @@ typedef struct ppl_context_struc
   dollarStatus dollarStat;
 
   // Buffers for parsing and evaluating expressions
-  unsigned char tokenBuff[ALGEBRA_MAXLEN];
-  pplObj        stack    [ALGEBRA_STACK];
-  int           stackPtr;
+  pplTokenCode   *tokenBuff;   int tokenBuffLen;
+  pplExprPStack  *parserStack; int parserStackLen;
+  pplObj          stack    [ALGEBRA_STACK];
+  int             stackPtr;
 
   // Settings
   ppl_settings *set;

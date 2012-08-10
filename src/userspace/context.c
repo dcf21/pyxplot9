@@ -64,7 +64,10 @@ ppl_context *ppl_contextInit()
 
   out->canvas_items = NULL;
   out->replotFocus  = -1;
+  out->algebraErrPos = -1;
 
+  out->tokenBuff = NULL;   out->tokenBuffLen = 0;
+  out->parserStack = NULL; out->parserStackLen = 0;
   out->stackPtr = 0;
   out->willBeInteractive = 1;
   out->inputLineBuffer = NULL;

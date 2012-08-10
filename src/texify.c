@@ -39,10 +39,10 @@
 #include "texify.h"
 
 #define FFW_TOKEN \
-   while ((j<tlen)&&(tokenBuff[j]+'@'==o)) { i++; j+=3; }
+   while ((i<tlen)&&(tokenBuff[i].state==o)) { i++; }
 
 #define FFW_N(n) \
-   { i+=n; j+=3*n; }
+   { i+=n; }
 
 #define ENTER_PLAINTEXT \
    if ( *textRm  ) { *textRm  =0; snprintf(out+k, outlen-k, "}"); k+=strlen(out+k); } \
@@ -156,13 +156,13 @@ void ppl_texify_string(char *in, char *out, int inlen, int outlen)
 
 void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out, int outlen, int *mm_in, int *tr_in)
  {
-  unsigned char *tokenBuff;
+  pplTokenCode  *tokenBuff;
   const int      allowCommaOperator = (inlen<0);
   const int      equalsAllowed      = 1;
   const int      dollarAllowed      = 1;
   int            errPos=-1, errType, tlen;
   char           errbuff[LSTR_LENGTH];
-  int           *stkpos, i, j, k, lastOpMultDiv=0;
+  int           *stkpos, i, k, lastOpMultDiv=0;
 
   int            mm=0, tr=0;
   int           *mathMode = (mm_in==NULL) ? &mm : mm_in;
@@ -177,10 +177,10 @@ void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out
   if (tlen  <=0) { *end=0; return; }
 
   // Backup tokenised version
-  tokenBuff = (unsigned char *)malloc(tlen);
+  tokenBuff = (pplTokenCode *)malloc(tlen * sizeof(pplTokenCode));
   if (tokenBuff==NULL) { *end=0; return; }
-  memcpy(tokenBuff, c->tokenBuff, tlen);
-  if (inlen>=0) tlen = ppl_min(tlen, 3*inlen);
+  memcpy(tokenBuff, c->tokenBuff, tlen*sizeof(pplTokenCode));
+  if (inlen>=0) tlen = ppl_min(tlen, inlen);
 
   // Malloc buffer for storing stack positions of numerical constants
   stkpos = (int *)malloc(tlen*sizeof(int));
@@ -189,24 +189,24 @@ void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out
 
   // Evaluate numerical constants
   k = c->stackPtr;
-  for (i=j=0; j<tlen; i++, j+=3)
-   if (tokenBuff[j] == (unsigned char)('L'-'@'))
+  for (i=0; i<tlen; i++)
+   if (tokenBuff[i].state == (unsigned char)'L')
     {
      if (k > ALGEBRA_STACK-4) { free(stkpos); free(tokenBuff); strcpy(out, "stack overflow"); return; }
      pplObjNum(&c->stack[k], 0, ppl_getFloat(in+i,NULL), 0);
-     while ((tokenBuff[j] == (unsigned char)('L'-'@')) && (j<tlen)) { stkpos[i++]=k; j+=3; } // ffw over constant
+     while ((tokenBuff[i].state == (unsigned char)'L') && (i<tlen)) { stkpos[i++]=k; } // ffw over constant
      k++;
     }
 
   // Evaluate the unit() function (but not after a ., and only if followed by () )
-  for (i=j=0; j<tlen; i++, j+=3)
-   if ((tokenBuff[j] == (unsigned char)('G'-'@')) && ((j<1)||((tokenBuff[j-3] != (unsigned char)('R'-'@'))&&(tokenBuff[j-3] != (unsigned char)('G'-'@')))))
+  for (i=0; i<tlen; i++)
+   if ((tokenBuff[i].state == (unsigned char)'G') && ((i<1)||((tokenBuff[i-1].state != (unsigned char)'R')&&(tokenBuff[i-1].state != (unsigned char)'G'))))
     {
-     int    ei=i, ej=j, upos, p, q=0, errpos=-1;
+     int    ei=i, upos, p, q=0, errpos=-1;
      pplObj val;
      if (k > ALGEBRA_STACK-4) { free(stkpos); free(tokenBuff); strcpy(out, "stack overflow"); return; }
-     while ((tokenBuff[ej] == (unsigned char)('G'-'@')) && (ej<tlen)) { ej+=3; ei++; } // ffw over function name
-     if (tokenBuff[ej] != (unsigned char)('P'-'@')) continue; // we don't have function arguments
+     while ((tokenBuff[ei].state == (unsigned char)'G') && (ei<tlen)) { ei++; } // ffw over function name
+     if (tokenBuff[ei].state != (unsigned char)'P') continue; // we don't have function arguments
      if ((ei-i<4)||(strncmp(in+i,"unit",4)!=0)) continue; // function isn't called unit
      for (p=i+4; p<ei; p++) if ((isalnum(in[p]))||(in[p]=='_')) break;
      if (p<ei) continue; // function has trailing matter
@@ -217,40 +217,39 @@ void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out
      if (errpos>=0) continue;
      if (in[upos+q]!=')') continue;
      ei = ei+(1+q);
-     ej = ej+(1+q)*3;
-     if (tokenBuff[ej] != (unsigned char)('P'-'@')) continue; // we don't have closing bracket
-     ei++; ej+=3;
-     while ((tokenBuff[ej] == (unsigned char)('P'-'@')) && (in[i]<=' ') && (in[i]>='\0') && (ej<tlen)) { ej+=3; ei++; } // ffw over function arguments
+     if (tokenBuff[ei].state != (unsigned char)'P') continue; // we don't have closing bracket
+     ei++;
+     while ((tokenBuff[ei].state == (unsigned char)'P') && (in[i]<=' ') && (in[i]>='\0') && (ei<tlen)) { ei++; } // ffw over function arguments
      memcpy(&c->stack[k], &val, sizeof(pplObj));
 
      // Clean up
-     for ( ; j<ej ; i++,j+=3 ) { stkpos[i]=k; }
+     for ( ; i<ei ; i++ ) { stkpos[i]=k; }
      k++;
     }
 
   // Evaluate minus signs if literal is right argument
-  for (i=j=0; j<tlen; i++, j+=3)
-   if ((tokenBuff[j] == (unsigned char)('I'-'@')) && ((j<1)||(tokenBuff[j-3] != (unsigned char)('I'-'@'))))
+  for (i=0; i<tlen; i++)
+   if ((tokenBuff[i].state == (unsigned char)'I') && ((i<1)||(tokenBuff[i-1].state != (unsigned char)'I')))
     if (in[i]=='-')
      {
-      int ei=i, ej=j, sp;
-      while ((tokenBuff[ej] == (unsigned char)('I'-'@')) && (ej<tlen)) { ej+=3; ei++; } // ffw over minus sign
-      if ((ej>=tlen)||(stkpos[ei]<0)) continue; // right argument is not literal or unit() function
+      int ei=i, sp;
+      while ((tokenBuff[ei].state == (unsigned char)'I') && (ei<tlen)) { ei++; } // ffw over minus sign
+      if ((ei>=tlen)||(stkpos[ei]<0)) continue; // right argument is not literal or unit() function
       sp = stkpos[ei];
       c->stack[sp].real*=-1;
       if (c->stack[sp].flagComplex) c->stack[sp].imag*=-1;
-      for ( ; j<ej ; i++,j+=3 ) { stkpos[i]=sp; }
+      for ( ; i<ei ; i++ ) { stkpos[i]=sp; }
      }
 
   // Evaluate ** operator if unit() is left argument
-  for (i=j=0; j<tlen; i++, j+=3)
-   if ((tokenBuff[j] == (unsigned char)('J'-'@')) && (j>0) && (tokenBuff[j-3] == (unsigned char)('P'-'@')) && (stkpos[i-1]>=0))
+  for (i=0; i<tlen; i++)
+   if ((tokenBuff[i].state == (unsigned char)'J') && (i>0) && (tokenBuff[i-1].state == (unsigned char)'P') && (stkpos[i-1]>=0))
     if ((in[i]=='*')&&(in[i+1]=='*'))
      {
-      int ei=i, ej=j, sp1, sp2, stat=0, errpos=-1;
+      int ei=i, sp1, sp2, stat=0, errpos=-1;
       pplObj val;
-      while ((tokenBuff[ej] == (unsigned char)('J'-'@')) && (ej<tlen)) { ej+=3; ei++; } // ffw over binary operator
-      if ((ej>=tlen)||(stkpos[ei]<0)) continue; // right argument is not a literal
+      while ((tokenBuff[ei].state == (unsigned char)'J') && (ei<tlen)) { ei++; } // ffw over binary operator
+      if ((ei>=tlen)||(stkpos[ei]<0)) continue; // right argument is not a literal
       sp1 = stkpos[i-1];
       sp2 = stkpos[ei];
       val.refCount   = 1;
@@ -259,21 +258,21 @@ void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out
       ppl_uaPow(c, &c->stack[sp1], &c->stack[sp2], &val, &stat, &errpos, c->errcontext.tempErrStr);
       if ((stat)||(errpos>=0)) continue;
       memcpy(&c->stack[sp1], &val, sizeof(pplObj));
-      for ( ; j<ej           ; i++,j+=3 ) { stkpos[i]=sp1; }
-      for ( ; stkpos[i]==sp2 ; i++,j+=3 ) { stkpos[i]=sp1; }
+      for ( ; i<ei           ; i++ ) { stkpos[i]=sp1; }
+      for ( ; stkpos[i]==sp2 ; i++ ) { stkpos[i]=sp1; }
      }
 
   // Evaluate * and / operators if unit() is either argument
-  for (i=j=0; j<tlen; i++, j+=3)
-   if ((tokenBuff[j] == (unsigned char)('J'-'@')) && (j>0) && (stkpos[i-1]>=0))
+  for (i=0; i<tlen; i++)
+   if ((tokenBuff[i].state == (unsigned char)'J') && (i>0) && (stkpos[i-1]>=0))
     if ( ((in[i]=='*')&&(in[i+1]!='*')) || (in[i]=='/') )
      {
-      int ei=i, ej=j, sp1, sp2, stat=0, errpos=-1, gotUnit;
+      int ei=i, sp1, sp2, stat=0, errpos=-1, gotUnit;
       pplObj val;
-      gotUnit = (tokenBuff[j-3] == (unsigned char)('P'-'@'));
-      while ((tokenBuff[ej] == (unsigned char)('J'-'@')) && (ej<tlen)) { ej+=3; ei++; } // ffw over binary operator
-      if ((ej>=tlen)||(stkpos[ei]<0)) continue; // right argument is not a literal
-      gotUnit = gotUnit || (tokenBuff[ej] == (unsigned char)('G'-'@'));
+      gotUnit = (tokenBuff[i-1].state == (unsigned char)'P');
+      while ((tokenBuff[ei].state == (unsigned char)'J') && (ei<tlen)) { ei++; } // ffw over binary operator
+      if ((ei>=tlen)||(stkpos[ei]<0)) continue; // right argument is not a literal
+      gotUnit = gotUnit || (tokenBuff[ei].state == (unsigned char)'G');
       if (!gotUnit) continue; // neither side is a unit()
       sp1 = stkpos[i-1];
       sp2 = stkpos[ei];
@@ -284,15 +283,15 @@ void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out
       else            ppl_uaDiv(c, &c->stack[sp1], &c->stack[sp2], &val, &stat, &errpos, c->errcontext.tempErrStr);
       if ((stat)||(errpos>=0)) continue;
       memcpy(&c->stack[sp1], &val, sizeof(pplObj));
-      for ( ; j<ej           ; i++,j+=3 ) { stkpos[i]=sp1; }
-      for ( ; stkpos[i]==sp2 ; i++,j+=3 ) { stkpos[i]=sp1; }
+      for ( ; i<ei           ; i++ ) { stkpos[i]=sp1; }
+      for ( ; stkpos[i]==sp2 ; i++ ) { stkpos[i]=sp1; }
      }
 
   // Produce tex output
-  for (i=j=k=0; j<tlen; )
+  for (i=k=0; i<tlen; )
    {
     int  opMultDiv=0;
-    char o = tokenBuff[j]+'@'; // Get tokenised markup state code
+    char o = tokenBuff[i].state; // Get tokenised markup state code
     ENTER_MATHMODE;
     if (stkpos[i]>=0)
      {
@@ -311,13 +310,13 @@ void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out
         snprintf(out+k, outlen-k, "%s", u);
         k+=strlen(out+k);
        }
-      while ((j<tlen)&&(stkpos[i]>=0)) { i++; j+=3; }
+      while ((i<tlen)&&(stkpos[i]>=0)) { i++; }
      }
     else if (o=='B') // Process a string literal
      {
-      int  ei, ej, l;
+      int  ei, l;
       char quoteType=in[i];
-      for (ei=i,ej=j ; ((ej<tlen)&&(tokenBuff[ej]+'@'==o)) ; ei++,ej+=3);
+      for (ei=i ; ((ei<tlen)&&(tokenBuff[ei].state==o)) ; ei++);
       l = ei-i;
       while ((l>1)&&(in[i+l-1]>='\0')&&(in[i+l-1]<=' ')) l--; // Strip trailing spaces
       if ((quoteType=='\'')||(quoteType=='\"')) { l-=2; i++; }
@@ -331,7 +330,7 @@ void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out
       else if (quoteType=='\"') snprintf(out+k, outlen-k, "''");
       k+=strlen(out+k);
       ENTER_MATHMODE;
-      i=ei; j=ej;
+      i=ei;
      }
     else if (o=='C') // string substitution operator
      {
@@ -362,32 +361,31 @@ void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out
           else           { out[k-2]='\\'; out[k-1]='}'; out[bracketOpenPos[bracketLevel]-2]='\\'; out[bracketOpenPos[bracketLevel]-1]='{'; }
          }
        }
-      i++; j+=3;
+      i++;
      }
     else if ((o=='F')||(o=='H')) // -- or ++ operators
      {
       if (in[i]=='-') { ENTER_TEXTRM; snprintf(out+k, outlen-k, "{\\tiny \\raisebox{0.8pt}{\\kern-0.1pt --\\kern0.5pt --}}"); }
       if (in[i]=='+') { ENTER_TEXTRM; snprintf(out+k, outlen-k, "{\\tiny \\raisebox{0.8pt}{\\kern-0.2pt +\\kern-0.2pt +}}"); }
       k+=strlen(out+k);
-      i++; j+=3;
-      i++; j+=3;
-      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[j]+'@'==o)) { FFW_N(1); }
+      i++; i++;
+      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[i].state==o)) { FFW_N(1); }
      }
     else if ((o=='G')||(o=='T')||(o=='V')) // variable name
      {
       int mathrm = (o=='T')||(o=='V');
-      int ei=i, ej=j;
-      while ((ej<tlen)&&(tokenBuff[ej]+'@'==o)) { ei++; ej+=3; }
-      if ( ((tokenBuff[ej]+'@'=='P')&&in[ei]=='(') || (tokenBuff[ej]+'@'=='R') ) mathrm = 1;
-      if ((o=='G')&&((j<1)||(tokenBuff[j-3]+'@'!='R')))
+      int ei=i;
+      while ((ei<tlen)&&(tokenBuff[ei].state==o)) { ei++; }
+      if ( ((tokenBuff[ei].state=='P')&&in[ei]=='(') || (tokenBuff[ei].state=='R') ) mathrm = 1;
+      if ((o=='G')&&((i<1)||(tokenBuff[i-1].state!='R')))
        {
-        int       bi, cp[16], ncp, cbp;
+        int       j, bi, cp[16], ncp, cbp;
         char      dummyVar[FNAME_LENGTH], dummyVarGreek[FNAME_LENGTH], *fname, *latex;
         dictItem *dptr;
         pplFunc  *fnobj;
         void     *ldptr;
-        if ((ej>=tlen)||((tokenBuff[ej]+'@'!='P')&&(tokenBuff[ej]+'@'!='B'))) goto variableName; // function not called with () afterwards; int_d is followed by B, not P
-        if ((tokenBuff[ej]+'@'=='P')&&(in[ei]!='(')) goto variableName;
+        if ((ei>=tlen)||((tokenBuff[ei].state!='P')&&(tokenBuff[ei].state!='B'))) goto variableName; // function not called with () afterwards; int_d is followed by B, not P
+        if ((tokenBuff[ei].state=='P')&&(in[ei]!='(')) goto variableName;
         ppl_dictLookupWithWildcard(c->namespaces[0],in+i,dummyVar,FNAME_LENGTH,&dptr);
         if (dptr==NULL) goto variableName; // function was not in the default namespace
         fname = dptr->key;
@@ -457,7 +455,6 @@ void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out
 
         // Carry on work after function
         i = bi+cbp+1;
-        j = 3*i;
        }
 
       // If variable name is not a recognised function name, print name as a variable name
@@ -480,7 +477,7 @@ variableName:
       else if (MARKUP_MATCH("not")) { ENTER_TEXTRM; snprintf(out+k, outlen-k, " not "); FFW_N(3); }
       else if (MARKUP_MATCH("NOT")) { ENTER_TEXTRM; snprintf(out+k, outlen-k, " not "); FFW_N(3); }
       k+=strlen(out+k);
-      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[j]+'@'==o)) { FFW_N(1); }
+      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[i].state==o)) { FFW_N(1); }
      }
     else if (o=='J') // a binary operator
      {
@@ -510,44 +507,44 @@ variableName:
       else if (MARKUP_MATCH("|"  )) { snprintf(out+k, outlen-k, "\\,|\\,"); FFW_N(1); }
       else if (MARKUP_MATCH(","  )) { snprintf(out+k, outlen-k, ","); FFW_N(1); }
       k+=strlen(out+k);
-      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[j]+'@'==o)) { FFW_N(1); }
+      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[i].state==o)) { FFW_N(1); }
      }
     else if (o=='K') // a terniary operator
      {
       if      (MARKUP_MATCH("?")) { snprintf(out+k, outlen-k, "\\,?\\,"); FFW_N(1); }
       else if (MARKUP_MATCH(":")) { snprintf(out+k, outlen-k, ":"); FFW_N(1); }
       k+=strlen(out+k);
-      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[j]+'@'==o)) { FFW_N(1); }
+      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[i].state==o)) { FFW_N(1); }
      }
     else if ((o=='M')||(o=='Q')) // list literal
      {
       if (in[i]=='[') snprintf(out+k, outlen-k, "\\left[");
       if (in[i]==']') snprintf(out+k, outlen-k, "\\right]");
       k+=strlen(out+k);
-      i++; j+=3;
-      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[j]+'@'==o)) { FFW_N(1); }
+      i++;
+      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[i].state==o)) { FFW_N(1); }
      }
     else if (o=='N') // dictionary literal
      {
       if (in[i]=='{') snprintf(out+k, outlen-k, "\\left\\{");
       if (in[i]=='}') snprintf(out+k, outlen-k, "\\right\\}");
       k+=strlen(out+k);
-      i++; j+=3;
-      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[j]+'@'==o)) { FFW_N(1); }
+      i++;
+      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[i].state==o)) { FFW_N(1); }
      }
     else if (o=='O') // dollar operator
      {
       if (in[i]=='$') snprintf(out+k, outlen-k, "\\$");
       k+=strlen(out+k);
-      i++; j+=3;
-      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[j]+'@'==o)) { FFW_N(1); }
+      i++;
+      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[i].state==o)) { FFW_N(1); }
      }
     else if (o=='R') // dot operator
      {
       if (in[i]=='.') snprintf(out+k, outlen-k, ".");
       k+=strlen(out+k);
-      i++; j+=3;
-      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[j]+'@'==o)) { FFW_N(1); }
+      i++;
+      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[i].state==o)) { FFW_N(1); }
      }
     else if (o=='S') // assignment operator
      {
@@ -564,7 +561,7 @@ variableName:
       else if (MARKUP_MATCH(">>=")) { snprintf(out+k, outlen-k, "\\gg="); FFW_N(3); }
       else if (MARKUP_MATCH("**=")) { snprintf(out+k, outlen-k, "\\,*\\kern-1.5pt *\\kern-1.5pt="); FFW_N(3); }
       k+=strlen(out+k);
-      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[j]+'@'==o)) { FFW_N(1); }
+      while ((in[i]>='\0')&&(in[i]<=' ')&&(tokenBuff[i].state==o)) { FFW_N(1); }
      }
     else // unknown token
      {

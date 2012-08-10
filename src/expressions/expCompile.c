@@ -82,7 +82,14 @@
 
 #define MARKUP_MATCH(A) (strncmp(in+scanpos,A,strlen(A))==0)
 
-#define PGE_OVERFLOW { *errPos = scanpos; *errType=ERR_OVERFLOW; strcpy(errText, "Algebraic expression too long"); *end = -1; return; }
+#define PGE_OVERFLOW \
+ { \
+  context->tokenBuffLen *= 2; \
+  context->tokenBuff     = (pplTokenCode *)realloc(context->tokenBuff, context->tokenBuffLen * sizeof(pplTokenCode)); \
+  if (context->tokenBuff == NULL) { *errPos = scanpos; *errType=ERR_OVERFLOW; strcpy(errText, "Algebraic expression too long"); *end = -1; return; } \
+  out = context->tokenBuff + outOffset; \
+  buffSize = context->tokenBuffLen - outOffset; \
+ }
 
 #define NEWSTATE(L,O,P) \
  { \
@@ -92,9 +99,10 @@
   precedence=P; \
   for (i=0;i<L;i++) \
    { \
-    out[outpos++]=(unsigned char)(state-'@'); \
-    out[outpos++]=opcode; \
-    out[outpos++]=precedence; \
+    out[outpos].state      = state; \
+    out[outpos].opcode     = opcode; \
+    out[outpos].precedence = precedence; \
+    outpos++; \
     if (outpos>=buffSize) PGE_OVERFLOW; \
    } \
   scanpos+=L; \
@@ -102,16 +110,17 @@
 
 #define SAMESTATE \
  { \
-  out[outpos++]=(unsigned char)(state-'@'); \
-  out[outpos++]=opcode; \
-  out[outpos++]=precedence; \
+  out[outpos].state      = state; \
+  out[outpos].opcode     = opcode; \
+  out[outpos].precedence = precedence; \
+  outpos++; \
   if (outpos>=buffSize) PGE_OVERFLOW; \
   scanpos++; \
  }
 
 #define FFWSTATE(L) \
  { \
-  outpos  += 3*(L); \
+  outpos  += (L); \
   scanpos += (L); \
  }
 
@@ -122,10 +131,31 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
   char           state='A', trialstate;
   int            scanpos=0, outpos=0, oldpos, trialpos;
   unsigned char  opcode=0, precedence=0;
-  unsigned char *out = context->tokenBuff + outOffset;
-  const int      buffSize = ALGEBRA_MAXLEN - outOffset;
+  pplTokenCode  *out;
+  int            buffSize;
   int            expOp = 0; // Was last named function one which acts on an expression -- e.g. unit() or int_dx()?
   int            extraArg = 0; // Was last named function one which has a variable name encoded in it -- i.e. int_dx() or diff_dx()?
+
+  if ( (outOffset==0) && (context->tokenBuffLen > ALGEBRA_MAXLEN) )
+   {
+    free(context->tokenBuff);
+    context->tokenBuff    = NULL;
+    context->tokenBuffLen = 0;
+   }
+
+  if (context->tokenBuff == NULL)
+   {
+    context->tokenBuff    = (pplTokenCode *)malloc(ALGEBRA_MAXLEN * sizeof(pplTokenCode));
+    context->tokenBuffLen = ALGEBRA_MAXLEN;
+   }
+
+  if (context->tokenBuff == NULL)
+   {
+    *errPos = 0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory"); *end = -1; return;
+   }
+
+  out = context->tokenBuff + outOffset;
+  buffSize = context->tokenBuffLen - outOffset;
 
   while (state!='U')
    {
@@ -185,11 +215,11 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
             if (*errPos>=0) { *errPos+=k; return; }
             if (m!=j) { *errPos = m+k; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at end of expression."); *end=-1; *outlen=0; return; }
            }
-          else out[outpos+2] = out[outpos+1] = 0;
+          else out[outpos].depth = 0;
           FFWSTATE(j); // Fast-forward to closing bracket
-          if (extraStrArg) { if (++(out[outpos+2])==0) out[outpos+1]++; }
-          if (extraArg)    { if (++(out[outpos+2])==0) out[outpos+1]++; }
-          NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
+          if (extraStrArg) out[outpos].depth++;
+          if (extraArg)    out[outpos].depth++;
+          NEWSTATE(1,0,0); // Record the one character closing bracket
           extraArg=0;
           expOp=0;
          }
@@ -356,14 +386,14 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
              }
             if (m!=j) { *errPos = m+k; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
            }
-          else out[outpos+2] = out[outpos+1] = 0;
+          else out[outpos].depth = 0;
           FFWSTATE(j); // Fast-forward to closing bracket
           if (trialstate=='Q')
            {
-            out[outpos+1] = (((minSet<<1) + maxSet)<<1) + !slice;
-            out[outpos+2] = 0;
+            out[outpos].opcode     = (((minSet<<1) + maxSet)<<1) + !slice;
+            out[outpos].precedence = 0;
            }
-          NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
+          NEWSTATE(1, out[outpos].opcode, out[outpos].precedence); // Record the one character closing bracket
          }
        }
       else if (trialstate=='N') // a dictionary literal
@@ -382,9 +412,9 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
             if (*errPos>=0) { *errPos+=k; return; }
             if (m!=j) { *errPos = m+k; *errType=ERR_SYNTAX; strcpy(errText, "Unexpected trailing matter at end of expression"); *end=-1; *outlen=0; return; }
            }
-          else out[outpos+2] = out[outpos+1] = 0;
+          else out[outpos].depth = 0;
           FFWSTATE(j); // Fast-forward to closing bracket
-          NEWSTATE(1,out[outpos+1],out[outpos+2]); // Record the one character closing bracket
+          NEWSTATE(1,0,0); // Record the one character closing bracket
          }
        }
       else if (trialstate=='O') // a dollar sign
@@ -422,12 +452,13 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
     *errPos = -1;
     *errType = 0;
     *errText='\0';
-    out[outpos]=0;
-    if      (isDict)        { out[outpos+1] = nDictItems >>8; out[outpos+2] = nDictItems &255; }
-    else if (collectCommas) { out[outpos+1] = nCommaItems>>8; out[outpos+2] = nCommaItems&255; }
-    else                    { out[outpos+1] = 0;              out[outpos+2] = 0;               }
-    outpos+=3;
-    *end = scanpos;
+    out[outpos].state  = '@';
+    out[outpos].opcode = 0;
+    if      (isDict)        { out[outpos].depth = nDictItems; }
+    else if (collectCommas) { out[outpos].depth = nCommaItems; }
+    else                    { out[outpos].depth = 0; }
+    outpos++;
+    *end    = scanpos;
     *outlen = outpos;
     return;
    }
@@ -473,12 +504,13 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
 
 void ppl_tokenPrint(ppl_context *context, char *in, int len)
  {
-  unsigned char *tdat = context->tokenBuff;
-  int            i,j;
-  for (i=0    ; i<len; i++     ) printf("  %c" ,in[i]);        printf("\n");
-  for (i=0,j=0; i<len; i++,j+=3) printf("  %c" ,'@'+tdat[j]);  printf("\n");
-  for (i=0,j=1; i<len; i++,j+=3) printf(" %02x",(int)tdat[j]); printf("\n");
-  for (i=0,j=2; i<len; i++,j+=3) printf(" %02x",(int)tdat[j]); printf("\n");
+  pplTokenCode  *tdat = context->tokenBuff;
+  int            i;
+  for (i=0; i<len; i++) printf("  %c" ,in[i]);                   printf("\n");
+  for (i=0; i<len; i++) printf("  %c" ,tdat[i].state);           printf("\n");
+  for (i=0; i<len; i++) printf(" %02x",(int)tdat[i].opcode);     printf("\n");
+  for (i=0; i<len; i++) printf(" %02x",(int)tdat[i].precedence); printf("\n");
+  for (i=0; i<len; i++) printf(" %02x",(int)tdat[i].depth);      printf("\n");
   return;
  }
 
@@ -488,51 +520,47 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
 
 #define GET_POINTER \
  { \
-  if (lastoutpos<0) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not find variable name preceding assignment operator."); *end=-1; return; } \
-  if      (*(unsigned char *)(out+lastoutpos+2*sizeof(int))==3) *(unsigned char *)(out+lastoutpos+2*sizeof(int))=4; \
-  else if (*(unsigned char *)(out+lastoutpos+2*sizeof(int))==5) *(unsigned char *)(out+lastoutpos+2*sizeof(int))=6; \
-  else if (*(unsigned char *)(out+lastoutpos+2*sizeof(int))==7) \
+  if (lastoutpos<0) { *errPos=tpos; *errType=ERR_INTERNAL; strcpy(errText, "Could not find variable name preceding assignment operator."); *end=-1; return; } \
+  if      (out[lastoutpos].opcode==3) out[lastoutpos].opcode=4; \
+  else if (out[lastoutpos].opcode==5) out[lastoutpos].opcode=6; \
+  else if (out[lastoutpos].opcode==7) \
    { \
-    int f = (int)*(unsigned char *)(out+lastoutpos+2*sizeof(int)+1); \
-    if (!(f&1)) { *errPos=ipos; *errType=ERR_SYNTAX; strcpy(errText, "Cannot apply an assignment operator to the output of a slice operator."); *end=-1; return; } \
-    *(unsigned char *)(out+lastoutpos+2*sizeof(int))=16; \
+    int f = out[lastoutpos].auxil.i; \
+    if (!(f&1)) { *errPos=tpos; *errType=ERR_SYNTAX; strcpy(errText, "Cannot apply an assignment operator to the output of a slice operator."); *end=-1; return; } \
+    out[lastoutpos].opcode=16; \
    } \
  }
 
 #define POP_STACK \
  { \
   char opType; \
-  while (opType = (stackpos>2) ? *(stack-stackpos+3) : '!'  ,  (opType=='o')||(opType=='a')||(opType=='$')) /* while the stack is not empty and has an operator at the top */ \
+  while (opType = (stackpos>0) ? (stack[stackpos-1].opType) : '!'  ,  (opType=='o')||(opType=='a')||(opType=='$')) /* while the stack is not empty and has an operator at the top */ \
    { \
-    int stackprec = *(stack-stackpos+1); \
+    int stackprec = stack[stackpos-1].precedence; \
     if ((stackprec==2)&&(precedence==3)) stackprec=4; /* Magic treatment of x**-1 */ \
     if ( ((!rightAssoc)&&(precedence>=stackprec)) || ((rightAssoc)&&(precedence>stackprec)) ) /* pop operators with higher precedence from stack */ \
      { \
-      const unsigned char stacko   = *(stack-stackpos+2); /* operator number of the stack object */ \
-      const int           charpos  = *(int *)(stack-stackpos+4); \
-      unsigned char bytecode = 0; \
+      const unsigned char stacko   = stack[stackpos-1].opcode; /* operator number of the stack object */ \
+      const int           charpos  = stack[stackpos-1].charpos; \
+      int                 bytecode = 0; \
       if      (opType=='a' ) bytecode = 12; /* assignment operator */ \
       else if (opType=='$' ) bytecode = 15; /* dollar operator */ \
       else if (stacko==0x40) bytecode = 14; /* string subst operator */ \
       else if (stacko==0x23) bytecode = 13; /* ++ lval operator */ \
       else if (stacko==0x24) bytecode = 13; /* -- lval operator */ \
       else                   bytecode = 11; /* other operator */ \
-      if      (stacko==0x5A) { int o=*(int *)(stack-stackpos+4+sizeof(int)); BYTECODE_OP(20); BYTECODE_ENDOP; *(int *)(out+o)=outpos; stackpos-=sizeof(int); } /* || operator */ \
-      else if (stacko==0x5B) { int o=*(int *)(stack-stackpos+4+sizeof(int)); BYTECODE_OP(20); BYTECODE_ENDOP; *(int *)(out+o)=outpos; stackpos-=sizeof(int); } /* && operator */ \
-      else if (stacko==0xFE) { int o=*(int *)(stack-stackpos+4+sizeof(int));                                  *(int *)(out+o)=outpos; stackpos-=sizeof(int); } /* ?: operator, closing : */ \
+      if      (stacko==0x5A) { int o=stack[stackpos-1].outpos; BYTECODE_OP(20); BYTECODE_ENDOP; out[o].auxil.i=outpos; } /* || operator */ \
+      else if (stacko==0x5B) { int o=stack[stackpos-1].outpos; BYTECODE_OP(20); BYTECODE_ENDOP; out[o].auxil.i=outpos; } /* && operator */ \
+      else if (stacko==0xFE) { int o=stack[stackpos-1].outpos;                                  out[o].auxil.i=outpos; } /* ?: operator, closing : */ \
       else if (stacko!=0x5F) /* null operations get ignored (e.g. commas that collect items) */ \
        { \
-        const int ipos = charpos; \
+        const int tpos = charpos; \
         BYTECODE_OP(bytecode); \
-        *(unsigned char *)(out+outpos++) = stacko; \
-        if ((opType=='o')&&(stacko==0x40)) \
-         { \
-          *(int *)(out+outpos-1) = 1; /* string substitution operator with only one subst item (not a bracketed list) */ \
-          outpos += sizeof(int)-1; \
-         } \
+        out[outpos].auxil.i = stacko; \
+        if ((opType=='o')&&(stacko==0x40)) out[outpos].auxil.i = 1; /* string substitution operator with only one subst item (not a bracketed list) */ \
         BYTECODE_ENDOP; \
        } \
-      stackpos-=3+sizeof(int); /* pop stack */ \
+      stackpos--; /* pop stack */ \
      } \
     else break; \
    } \
@@ -541,34 +569,33 @@ void ppl_tokenPrint(ppl_context *context, char *in, int len)
 #define BYTECODE_OP_POS(X,P) \
  { \
   lastoutpos = outpos; \
-  *(int *)(out+outpos) = 0; /* Set length of instruction equals zero for the moment */ \
-  outpos += sizeof(int); /* Save a place for the length of this instruction */ \
-  *(int *)(out+outpos) = P; /* Store character position of token for error reporting */ \
-  outpos += sizeof(int); \
-  *(unsigned char *)(out+outpos++) = (X); \
+  out[outpos].len = 0; /* Set length of instruction equals zero for the moment */ \
+  out[outpos].charpos = P; /* Store character position of token for error reporting */ \
+  out[outpos].opcode = X; \
  }
 
 #define BYTECODE_OP(X) \
  { \
-  BYTECODE_OP_POS(X,ipos); \
+  BYTECODE_OP_POS(X,tpos); \
  }
 
 #define BYTECODE_ENDOP \
  { \
-  *(int *)(out+lastoutpos) = outpos - lastoutpos; /* Write the length of the bytecode instruction we've just written */ \
+  outpos++; \
+  out[lastoutpos].len = outpos - lastoutpos; /* Write the length of the bytecode instruction we've just written */ \
  }
 
 void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFname, char *in, int *end, int dollarAllowed, int equalsAllowed, int allowCommaOperator, pplExpr **outExpr, int *errPos, int *errType, char *errText)
  {
-  unsigned char *stack = context->tokenBuff + ALGEBRA_MAXLEN - 1;
-  unsigned char *tdata = context->tokenBuff;
-  int            stackpos = 0;
-  int            stacklen;
-  int            tpos, ipos;
-  int            tlen;
-  int            outpos = 0, lastoutpos = -1;
-  void          *out;
-  int            outlen=8192;
+  pplExprPStack   *stack;
+  pplTokenCode    *tdata;
+  int              stackpos = 0;
+  int              stacklen;
+  int              tpos;
+  int              tlen;
+  int              outpos = 0, lastoutpos = -1;
+  pplExprBytecode *out;
+  int              outlen = 512;
 
   // malloc output structure
   *outExpr = (pplExpr *)calloc(1,sizeof(pplExpr));
@@ -577,64 +604,94 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
   (*outExpr)->srcId    = srcId;
   (*outExpr)->srcLineN = srcLineN;
   (*outExpr)->srcFname = (char *)malloc(strlen(srcFname)+1);
-  out = (*outExpr)->bytecode = malloc(outlen);
+  out = (*outExpr)->bytecode = malloc(outlen * sizeof(pplExprBytecode));
   if (((*outExpr)->bytecode==NULL)||((*outExpr)->srcFname==NULL)) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); *end=-1; return; }
   strcpy((*outExpr)->srcFname , srcFname);
 
   // First tokenise expression
   ppl_expTokenise(context, in, end, dollarAllowed, equalsAllowed, allowCommaOperator, 0, 0, 0, &tlen, errPos, errType, errText);
   if (*errPos >= 0) return;
-  stacklen = ALGEBRA_MAXLEN - tlen;
+  tdata = context->tokenBuff;
+  //ppl_tokenPrint(context, in, tlen);
+
+  // Make stack
+  if (context->parserStackLen > 1024)
+   {
+    free(context->parserStack);
+    context->parserStack    = NULL;
+    context->parserStackLen = 0;
+   }
+
+  if (context->parserStack == NULL)
+   {
+    context->parserStackLen = 1024;
+    context->parserStack    = (pplExprPStack *)malloc(context->parserStackLen * sizeof(pplExprPStack));
+   }
+
+  if (context->parserStack == NULL)
+   {
+    *errPos = 0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory"); *end = -1; return;
+   }
+
+  stack    = context->parserStack;
+  stacklen = context->parserStackLen;
+
+  // Copy ASCII expression into expression object
   (*outExpr)->ascii = (char *)malloc(*end+1);
   if ((*outExpr)->ascii==NULL) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); *end=-1; return; }
   strncpy((*outExpr)->ascii, in, *end);
   (*outExpr)->ascii[*end]='\0';
 
   // The stacking-yard algorithm
-  for ( tpos=ipos=0; tpos<tlen; )
+  for ( tpos=0; tpos<tlen; )
    {
-    char o = tdata[tpos]+'@'; // Get tokenised markup state code
+    char o = tdata[tpos].state; // Get tokenised markup state code
 
     // Expand space for bytecode as necessary
-    if (outlen - outpos < 1024) { outlen+=8192; out=(*outExpr)->bytecode=realloc(out,outlen); if (out==NULL) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); *end=-1; return; } }
+    if (outlen - outpos < 256)
+     {
+      outlen+=2048;
+      out = (*outExpr)->bytecode = realloc(out, outlen*sizeof(pplExprBytecode));
+      if (out==NULL) { *errPos=0; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); *end=-1; return; }
+     }
 
     if (o=='B') // Process a string literal
      {
       int  i;
-      char quoteType=in[ipos];
-      char *oc = (char *)out;
+      char quoteType=in[tpos];
+      char *oc = (char *)(out+outpos+1);
+      int   ol = 0;
       BYTECODE_OP(2); // bytecode op 2
-      if ((quoteType=='r') && ((in[ipos+1]=='\'') || (in[ipos+1]=='\"')) )
+      if ((quoteType=='r') && ((in[tpos+1]=='\'') || (in[tpos+1]=='\"')) )
        {
         int offset=2, tripleQuote=0;
-        quoteType=in[ipos+1];
-        if ((in[ipos+2]==quoteType)&&(in[ipos+3]==quoteType)) { offset=4; tripleQuote=1; }
-        for ( i=ipos+offset ;
+        quoteType=in[tpos+1];
+        if ((in[tpos+2]==quoteType)&&(in[tpos+3]==quoteType)) { offset=4; tripleQuote=1; }
+        for ( i=tpos+offset ;
               ( ((!tripleQuote) &&  (in[i]!=quoteType)) ||
                 (  tripleQuote  && ((in[i]!=quoteType)||(in[i+1]!=quoteType)||(in[i+2]!=quoteType)) ) );
               i++
             )
          {
           if (in[i]=='\0') { *errPos=i; *errType=ERR_INTERNAL; strcpy(errText, "Unexpected end of string."); *end=-1; return; }
-          oc[outpos++] = in[i];
+          oc[ol++] = in[i];
          }
        }
       else if ((quoteType!='\'')&&(quoteType!='"')) // Unquoted string
        {
-        while ((tpos<tlen) && (tdata[tpos]+'@' == o))
+        while ((tpos<tlen) && (tdata[tpos].state == o))
          {
-          oc[outpos++] = in[ipos];
-          tpos+=3; ipos++;
+          oc[ol++] = in[tpos++];
           if (tpos>=tlen) break;
          }
-        if ((outpos>0)&&(oc[outpos-1]==',')) outpos--;
+        if ((ol>0)&&(oc[ol-1]==',')) ol--;
        }
       else
        {
         int offset=1, tripleQuote=0;
-        if ((in[ipos+1]==quoteType)&&(in[ipos+2]==quoteType)) { offset=3; tripleQuote=1; }
+        if ((in[tpos+1]==quoteType)&&(in[tpos+2]==quoteType)) { offset=3; tripleQuote=1; }
 
-        for ( i=ipos+offset ;
+        for ( i=tpos+offset ;
               ( ((!tripleQuote) &&  (in[i]!=quoteType)) ||
                 (  tripleQuote  && ((in[i]!=quoteType)||(in[i+1]!=quoteType)||(in[i+2]!=quoteType)) ) );
               i++
@@ -644,141 +701,139 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
           if (in[i]=='\\')
            switch (in[i+1])
             {
-             case '?' : oc[outpos++]='\?'; i++; break;
-             case '\'': oc[outpos++]='\''; i++; break;
-             case '\"': oc[outpos++]='\"'; i++; break;
-             case '\\': oc[outpos++]='\\'; i++; break;
-             case 'a' : oc[outpos++]='\a'; i++; break;
-             case 'b' : oc[outpos++]='\b'; i++; break;
-             case 'f' : oc[outpos++]='\f'; i++; break;
-             case 'n' : oc[outpos++]='\n'; i++; break;
-             case 'r' : oc[outpos++]='\r'; i++; break;
-             case 't' : oc[outpos++]='\t'; i++; break;
-             case 'v' : oc[outpos++]='\v'; i++; break;
-             default  : oc[outpos++] = in[i]; break;
+             case '?' : oc[ol++]='\?'; i++; break;
+             case '\'': oc[ol++]='\''; i++; break;
+             case '\"': oc[ol++]='\"'; i++; break;
+             case '\\': oc[ol++]='\\'; i++; break;
+             case 'a' : oc[ol++]='\a'; i++; break;
+             case 'b' : oc[ol++]='\b'; i++; break;
+             case 'f' : oc[ol++]='\f'; i++; break;
+             case 'n' : oc[ol++]='\n'; i++; break;
+             case 'r' : oc[ol++]='\r'; i++; break;
+             case 't' : oc[ol++]='\t'; i++; break;
+             case 'v' : oc[ol++]='\v'; i++; break;
+             default  : oc[ol++] = in[i]; break;
             }
-          else { oc[outpos++] = in[i]; }
+          else { oc[ol++] = in[i]; }
          }
        }
-      oc[outpos++] = '\0';
+      oc[ol++] = '\0';
+      outpos += 1 + (ol/sizeof(pplExprBytecode));
       BYTECODE_ENDOP;
      }
     else if ( (o=='C') || (o=='H') || (o=='I') || (o=='J') || (o=='K') || (o=='S') ) // Process an operator
      {
-      unsigned char opCode     = tdata[tpos+1];
-      unsigned char precedence = tdata[tpos+2];
-      unsigned char rightAssoc = ((opCode & 0x80) != 0) || (o=='S'); // All assignment operators (S) are right-left associative
+      unsigned char opcode     = tdata[tpos].opcode;
+      int           precedence = tdata[tpos].precedence;
+      int           rightAssoc = ((opcode & 0x80) != 0) || (o=='S'); // All assignment operators (S) are right-left associative
       POP_STACK;
 
       // : operator part of ? : ... pop the ? from the stack now
-      if ((o=='K')&&(opCode==0xFE))
+      if ((o=='K')&&(opcode==0xFE))
        {
         int o,precedence=999;
         POP_STACK;
-        if ( (stackpos<3) || (*(stack-stackpos+3)!='t') ) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match : to a ? in the ternary operator."); *end=-1; return; }
-        o=*(int *)(stack-stackpos+4+sizeof(int));
-        *(int *)(out+o)=outpos + 1+3*sizeof(int);
-        stackpos-=3+2*sizeof(int); // pop ? from stack
+        if ( (stackpos<1) || (stack[stackpos-1].opType!='t') ) { *errPos=tpos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match : to a ? in the ternary operator."); *end=-1; return; }
+        o = stack[stackpos-1].outpos;
+        out[o].auxil.i = outpos+1;
+        stackpos--; // pop ? from stack
        }
 
-      if      ((o=='S')&&(opCode==0x40)) { GET_POINTER; } // Turn variable lookup into pointer lookup now, because assignment operators are binary and operand is guaranteed to be the last thing on the stack
-      else if ((o=='J')&&(opCode==0x5A)) { BYTECODE_OP(17); *(char *)(out+outpos++) = 0; *(int *)(stack-stackpos-sizeof(int)+1)=outpos; stackpos+=sizeof(int); outpos+=sizeof(int); BYTECODE_ENDOP; } // && operator compiles to if false goto else pop
-      else if ((o=='J')&&(opCode==0x5B)) { BYTECODE_OP(18); *(char *)(out+outpos++) = 0; *(int *)(stack-stackpos-sizeof(int)+1)=outpos; stackpos+=sizeof(int); outpos+=sizeof(int); BYTECODE_ENDOP; } // || operator compiles to if true  goto else pop
-      else if ((o=='K')&&(opCode==0xFD)) { BYTECODE_OP(17); *(char *)(out+outpos++) = 1; *(int *)(stack-stackpos-sizeof(int)+1)=outpos; stackpos+=sizeof(int); outpos+=sizeof(int); BYTECODE_ENDOP; } // ? operator -- if false goto
-      else if ((o=='K')&&(opCode==0xFE)) { BYTECODE_OP(19);                              *(int *)(stack-stackpos-sizeof(int)+1)=outpos; stackpos+=sizeof(int); outpos+=sizeof(int); BYTECODE_ENDOP; } // : operator -- goto
+      if      ((o=='S')&&(opcode==0x40)) { GET_POINTER; } // Turn variable lookup into pointer lookup now, because assignment operators are binary and operand is guaranteed to be the last thing on the stack
+      else if ((o=='J')&&(opcode==0x5A)) { BYTECODE_OP(17); out[outpos].flag = 0; stack[stackpos].outpos=outpos; BYTECODE_ENDOP; } // && operator compiles to if false goto else pop
+      else if ((o=='J')&&(opcode==0x5B)) { BYTECODE_OP(18); out[outpos].flag = 0; stack[stackpos].outpos=outpos; BYTECODE_ENDOP; } // || operator compiles to if true  goto else pop
+      else if ((o=='K')&&(opcode==0xFD)) { BYTECODE_OP(17); out[outpos].flag = 1; stack[stackpos].outpos=outpos; BYTECODE_ENDOP; } // ? operator -- if false goto
+      else if ((o=='K')&&(opcode==0xFE)) { BYTECODE_OP(19);                       stack[stackpos].outpos=outpos; BYTECODE_ENDOP; } // : operator -- goto
 
-      if (stackpos>stacklen-32) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
-      *(int*)(stack-stackpos-sizeof(int)+1) = ipos;
-      stackpos+=sizeof(int);
-
-      if      (o=='S')       *(stack-stackpos-0) = 'a'; // push operator onto stack
-      else if (opCode==0xFD) *(stack-stackpos-0) = 't';
-      else                   *(stack-stackpos-0) = 'o';
-      *(stack-stackpos-1) = opCode;
-      *(stack-stackpos-2) = precedence;
-      stackpos+=3;
+      if (stackpos>stacklen-4) { *errPos = tpos; *errType=ERR_OVERFLOW; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
+      stack[stackpos].charpos = tpos;
+      if      (o=='S')       stack[stackpos].opType = 'a'; // push operator onto stack
+      else if (opcode==0xFD) stack[stackpos].opType = 't';
+      else                   stack[stackpos].opType = 'o';
+      stack[stackpos].opcode = opcode;
+      stack[stackpos].precedence = precedence;
+      stackpos++;
      }
     else if ( (o=='D') || (o=='E') || (o=='P') ) // Process ( )
      {
-      char bracketType=in[ipos];
+      char bracketType=in[tpos];
       if (bracketType=='(') // open (
        {
-        if (stackpos>stacklen-64) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
-        *(int*)(stack-stackpos-sizeof(int)+1) = ipos;
-        stackpos+=sizeof(int);
-        *(stack-stackpos-0) = '('; // push bracket onto stack
-        *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
-        stackpos+=3;
+        if (stackpos>stacklen-4) { *errPos = tpos; *errType=ERR_OVERFLOW; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
+        stack[stackpos].charpos    = tpos;
+        stack[stackpos].opType     = '('; // push bracket onto stack
+        stack[stackpos].opcode     = 0;
+        stack[stackpos].precedence = 0;
+        stackpos++;
        }
       else // close )
        {
-        unsigned char rightAssoc = 0;
-        unsigned char precedence = 255;
+        int rightAssoc = 0;
+        int precedence = 255;
         int startpos;
         POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
-        if ( (stackpos<3) || (*(stack-stackpos+3)!='(') ) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match ) to an (."); *end=-1; return; }
-        startpos = *(int *)(stack-stackpos+4);
-        stackpos-=3+sizeof(int); // pop bracket
+        if ( (stackpos<1) || (stack[stackpos-1].opType!='(') ) { *errPos=tpos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match ) to an (."); *end=-1; return; }
+        startpos = stack[stackpos-1].charpos;
+        stackpos--; // pop bracket
         if (o=='D') // apply string substitution operator straight away
          {
-          if ( (stackpos<3) || (*(stack-stackpos+2)!=0x40)) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match string substituion () to a %."); *end=-1; return; }
-          stackpos-=3+sizeof(int); // pop stack
+          if ( (stackpos<1) || (stack[stackpos-1].opcode!=0x40)) { *errPos=tpos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match string substituion () to a %."); *end=-1; return; }
+          stackpos--; // pop stack
           BYTECODE_OP_POS(14,startpos); // bytecode 14 -- string substitution operator
-          *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of string substitutions; stored with closing bracket in bytecode is number of collected ,-separated items
-          outpos += sizeof(int);
+          out[outpos].auxil.i = (int)tdata[tpos].depth; // store the number of string substitutions; stored with closing bracket in bytecode is number of collected ,-separated items
           BYTECODE_ENDOP;
          }
         else if (o=='P') // make function call
          {
           BYTECODE_OP_POS(10,startpos); // bytecode 10 -- function call
-          *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of function arguments; stored with closing bracket in bytecode is number of collected ,-separated items
-          outpos += sizeof(int);
+          out[outpos].auxil.i = (int)tdata[tpos].depth; // store the number of function arguments; stored with closing bracket in bytecode is number of collected ,-separated items
           BYTECODE_ENDOP;
          }
        }
      }
     else if (o=='F') // a postfix ++ or -- operator
      {
-      unsigned char rightAssoc = (tdata[tpos+1] & 0x80) != 0;
-      unsigned char precedence = tdata[tpos+2];
+      int rightAssoc = (tdata[tpos].opcode & 0x80) != 0;
+      int precedence =  tdata[tpos].precedence;
       POP_STACK;
       BYTECODE_OP(13);
-      *(unsigned char *)(out+outpos++) = tdata[tpos+1];
+      out[outpos].auxil.i = tdata[tpos].opcode;
       BYTECODE_ENDOP;
      }
     else if ( (o=='G') || (o=='T') || (o=='V') ) // a variable name or field dereferenced with the . operator
      {
+      char *strout = (char *)(out+outpos+1);
+      int   slen   = 0;
       if      (o=='G') BYTECODE_OP(3) // foo -- op 3: variable lookup "foo"
       else if (o=='T') BYTECODE_OP(5) // foo.bar -- op 5: dereference "bar"
       else             BYTECODE_OP(2) // $foo -- push "foo" onto stack as a string constant
-      while ((tpos<tlen) && (tdata[tpos]+'@' == o))
+      while ((tpos<tlen) && (tdata[tpos].state == o))
        {
-        if ((!isalnum(in[ipos])) && (in[ipos]!='_')) break;
-        *(char *)(out+outpos++) = in[ipos];
-        tpos+=3; ipos++;
+        if ((!isalnum(in[tpos])) && (in[tpos]!='_')) break;
+        strout[slen++] = in[tpos++];
         if (tpos>=tlen) break;
        }
-      *(unsigned char *)(out+outpos++) = '\0';
+      strout[slen++] = '\0';
+      outpos += 1 + (slen/sizeof(pplExprBytecode));
       BYTECODE_ENDOP;
      }
     else if (o=='L') // a numeric literal
      {
       BYTECODE_OP(1);
-      *(double *)(out+outpos) = ppl_getFloat(in+ipos,NULL);
-      outpos += sizeof(double);
+      out[outpos].auxil.d = ppl_getFloat(in+tpos,NULL);
       BYTECODE_ENDOP;
      }
     else if (o=='M') // list literal
      {
-      char bracketType=in[ipos];
+      char bracketType=in[tpos];
       if (bracketType=='[') // open [
        {
-        if (stackpos>stacklen-64) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
-        *(int*)(stack-stackpos-sizeof(int)+1) = ipos;
-        stackpos+=sizeof(int);
-        *(stack-stackpos-0) = '['; // push bracket onto stack
-        *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
-        stackpos+=3;
+        if (stackpos>stacklen-4) { *errPos = tpos; *errType=ERR_OVERFLOW; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
+        stack[stackpos].charpos    = tpos;
+        stack[stackpos].opType     = '['; // push bracket onto stack
+        stack[stackpos].opcode     = 0;
+        stack[stackpos].precedence = 0;
+        stackpos++;
        }
       else // close ]
        {
@@ -786,50 +841,48 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
         unsigned char precedence = 255;
         int startpos;
         POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
-        if ( (stackpos<3) || (*(stack-stackpos+3)!='[') ) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match ] to an [."); *end=-1; return; }
-        startpos = *(int *)(stack-stackpos+4);
-        stackpos-=3+sizeof(int); // pop bracket
+        if ( (stackpos<1) || (stack[stackpos-1].opType!='[') ) { *errPos=tpos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match ] to an [."); *end=-1; return; }
+        startpos = stack[stackpos-1].charpos;
+        stackpos--; // pop bracket
         BYTECODE_OP_POS(9,startpos); // bytecode 9 -- make list
-        *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of list items; stored with closing bracket in bytecode is number of collected ,-separated items
-        outpos += sizeof(int);
+        out[outpos].auxil.i = tdata[tpos].depth; // store the number of list items; stored with closing bracket in bytecode is number of collected ,-separated items
         BYTECODE_ENDOP;
        }
      }
     else if (o=='N') // dictionary literal
      {
-      char bracketType=in[ipos];
+      char bracketType=in[tpos];
       if (bracketType=='{') // open {
        {
-        if (stackpos>stacklen-64) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
-        *(int*)(stack-stackpos-sizeof(int)+1) = ipos;
-        stackpos+=sizeof(int);
-        *(stack-stackpos-0) = '{'; // push bracket onto stack
-        *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
-        stackpos+=3;
+        if (stackpos>stacklen-64) { *errPos = tpos; *errType=ERR_OVERFLOW; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
+        stack[stackpos].charpos    = tpos;
+        stack[stackpos].opType     = '{'; // push bracket onto stack
+        stack[stackpos].opcode     = 0;
+        stack[stackpos].precedence = 0;
+        stackpos++;
        }
       else // close }
        {
-        unsigned char rightAssoc = 0;
-        unsigned char precedence = 255;
+        int rightAssoc = 0;
+        int precedence = 255;
         int startpos;
         POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
-        if ( (stackpos<3) || (*(stack-stackpos+3)!='{') ) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match } to an {."); *end=-1; return; }
-        startpos = *(int *)(stack-stackpos+4);
-        stackpos-=3+sizeof(int); // pop bracket
+        if ( (stackpos<1) || (stack[stackpos-1].opType!='{') ) { *errPos=tpos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match } to an {."); *end=-1; return; }
+        startpos = stack[stackpos-1].charpos;
+        stackpos--; // pop bracket
         BYTECODE_OP_POS(8,startpos); // bytecode 8 -- make dict
-        *(int *)(out+outpos) = (int)256*(tdata[tpos+1]) + tdata[tpos+2]; // store the number of list items; stored with closing bracket in bytecode is number of collected ,-separated items
-        outpos += sizeof(int);
+        out[outpos].auxil.i = tdata[tpos].depth; // store the number of list items; stored with closing bracket in bytecode is number of collected ,-separated items
         BYTECODE_ENDOP;
        }
      }
     else if (o=='O') // a dollar operator
      {
-      if (stackpos>stacklen-32) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
-      *(int*)(stack-stackpos-sizeof(int)+1) = ipos;
-      stackpos+=sizeof(int);
-      *(stack-stackpos-0) = '$'; // push dollar onto stack
-      *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
-      stackpos+=3;
+      if (stackpos>stacklen-4) { *errPos = tpos; *errType=ERR_OVERFLOW; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
+      stack[stackpos].charpos    = tpos;
+      stack[stackpos].opType     = '$'; // push bracket onto stack
+      stack[stackpos].opcode     = 0;
+      stack[stackpos].precedence = 0;
+      stackpos++;
      }
     else if (o=='R') // a dot dereference
      {
@@ -837,48 +890,47 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
      }
     else if (o=='Q') // array dereference or slice
      {
-      char bracketType=in[ipos];
+      char bracketType=in[tpos];
       if (bracketType=='[') // open dereference brackets
        {
-        if (stackpos>stacklen-64) { *errPos = ipos; *errType=ipos; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
-        *(int*)(stack-stackpos-sizeof(int)+1) = ipos;
-        stackpos+=sizeof(int);
-        *(stack-stackpos-0) = '<'; // push bracket onto stack
-        *(stack-stackpos-1) = *(stack-stackpos-2) = 0;
-        stackpos+=3;
+        if (stackpos>stacklen-4) { *errPos = tpos; *errType=ERR_OVERFLOW; strcpy(errText, "Stack overflow whilst parsing algebraic expression."); *end=-1; return; }
+        stack[stackpos].charpos    = tpos;
+        stack[stackpos].opType     = '<'; // push slice onto stack
+        stack[stackpos].opcode     = 0;
+        stack[stackpos].precedence = 0;
+        stackpos++;
        }
       else // close ]
        {
-        unsigned char rightAssoc = 0;
-        unsigned char precedence = 255;
+        int rightAssoc = 0;
+        int precedence = 255;
         int startpos;
         POP_STACK; // Pop the stack of all operators (fake operator above with very low precedence)
-        if ( (stackpos<3) || (*(stack-stackpos+3)!='<') ) { *errPos=ipos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match ] to an [."); *end=-1; return; }
-        startpos = *(int *)(stack-stackpos+4);
-        stackpos-=3+sizeof(int); // pop bracket
+        if ( (stackpos<1) || (stack[stackpos-1].opType!='<') ) { *errPos=tpos; *errType=ERR_INTERNAL; strcpy(errText, "Could not match ] to an [."); *end=-1; return; }
+        startpos = stack[stackpos-1].charpos;
+        stackpos--; // pop bracket
         BYTECODE_OP_POS(7,startpos); // bytecode 7 -- slice object
-        *(unsigned char *)(out+outpos) = tdata[tpos+1]; // flags to distinguish [x], [x:], [:x], [x:y] and [:]
-        outpos += 1;
+        out[outpos].auxil.i = tdata[tpos].opcode; // flags to distinguish [x], [x:], [:x], [x:y] and [:]
         BYTECODE_ENDOP;
        }
      }
-    while ((tpos<tlen) && (tdata[tpos]+'@' == o))
+    while ((tpos<tlen) && (tdata[tpos].state == o))
      {
-      tpos+=3; ipos++;
+      tpos++;
       if (tpos>=tlen) break;
-      if ((o=='D') && ((in[ipos]=='(')||(in[ipos]==')'))) break; // Empty list ( ) of function arguments
-      if ((o=='E') && ((in[ipos]=='(')||(in[ipos]==')'))) break; // Empty list ( ) of function arguments
-      if ((o=='P') && ((in[ipos]=='(')||(in[ipos]==')'))) break; // Empty list ( ) of function arguments
-      if ((o=='M') && ((in[ipos]=='[')||(in[ipos]==']'))) break; // Empty list [ ] is two tokens
-      if ((o=='Q') && ((in[ipos]=='[')||(in[ipos]==']'))) break; // Empty list [ ] is two tokens
-      if ((o=='N') && ((in[ipos]=='{')||(in[ipos]=='}'))) break; // Empty dictionary { } is two tokens
+      if ((o=='D') && ((in[tpos]=='(')||(in[tpos]==')'))) break; // Empty list ( ) of function arguments
+      if ((o=='E') && ((in[tpos]=='(')||(in[tpos]==')'))) break; // Empty list ( ) of function arguments
+      if ((o=='P') && ((in[tpos]=='(')||(in[tpos]==')'))) break; // Empty list ( ) of function arguments
+      if ((o=='M') && ((in[tpos]=='[')||(in[tpos]==']'))) break; // Empty list [ ] is two tokens
+      if ((o=='Q') && ((in[tpos]=='[')||(in[tpos]==']'))) break; // Empty list [ ] is two tokens
+      if ((o=='N') && ((in[tpos]=='{')||(in[tpos]=='}'))) break; // Empty dictionary { } is two tokens
      }
    }
 
   // Clean up stack
   {
-   unsigned char rightAssoc = 0;
-   unsigned char precedence = 255;
+   int rightAssoc = 0;
+   int precedence = 255;
    POP_STACK;
   }
 
@@ -890,8 +942,8 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
 
   // Store final return
   BYTECODE_OP(0);
-  (*outExpr)->bcLen = outpos;
   BYTECODE_ENDOP;
+  (*outExpr)->bcLen = outpos * sizeof(pplExprBytecode);
 
   // Optimise gotos that point directly at other gotos
    {
@@ -901,18 +953,18 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
       int i;
       for (optimised=i=0 ; ; i+=*(int *)(out+i))
        {
-        int o=(int)(*(unsigned char *)(out+i+2*sizeof(int))); // Opcode number
+        int o = out[i].opcode; // Opcode number
         if ((o==17)||(o==18))
          {
-          int o2    = (int)(*(unsigned char *)(out+i+1+2*sizeof(int)));
-          int to    = *(int *)(out+i+2+2*sizeof(int));
-          int to_o  = (int)(*(unsigned char *)(out+to+0+2*sizeof(int))); // Opcode branching to
-          int to_o2 = (int)(*(unsigned char *)(out+to+1+2*sizeof(int)));
+          int o2    = out[i ].flag;
+          int to    = out[i ].auxil.i;
+          int to_o  = out[to].opcode; // Opcode branching to
+          int to_o2 = out[to].flag;
           if ((to_o!=17)&&(to_o!=18)) to_o2=-1; // this shouldn't be necessary, but optimisation of the below code makes valgrind unhappy
-          if ((o==17)&&(o2==0)&&(to_o==17)&&(to_o2==0)) { *(int *)(out+i+2+2*sizeof(int)) = *(int *)(out+to+2+2*sizeof(int)); optimised=1; }
-          if ((o==18)&&(o2==0)&&(to_o==18)&&(to_o2==0)) { *(int *)(out+i+2+2*sizeof(int)) = *(int *)(out+to+2+2*sizeof(int)); optimised=1; }
-          if ((o==17)         &&(to_o==19)            ) { *(int *)(out+i+2+2*sizeof(int)) = *(int *)(out+to+1+2*sizeof(int)); optimised=1; }
-          if ((o==18)         &&(to_o==19)            ) { *(int *)(out+i+2+2*sizeof(int)) = *(int *)(out+to+1+2*sizeof(int)); optimised=1; }
+          if ((o==17)&&(o2==0)&&(to_o==17)&&(to_o2==0)) { out[i].auxil.i = out[to].auxil.i; optimised=1; }
+          if ((o==18)&&(o2==0)&&(to_o==18)&&(to_o2==0)) { out[i].auxil.i = out[to].auxil.i; optimised=1; }
+          if ((o==17)         &&(to_o==19)            ) { out[i].auxil.i = out[to].auxil.i; optimised=1; }
+          if ((o==18)         &&(to_o==19)            ) { out[i].auxil.i = out[to].auxil.i; optimised=1; }
          }
         else if (o==0) break;
        }
@@ -920,7 +972,7 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
     while (optimised);
    }
 
-  // ppl_reversePolishPrint(context, *outExpr);
+  //ppl_reversePolishPrint(context, *outExpr);
   return;
  }
 
@@ -930,16 +982,14 @@ void ppl_reversePolishPrint(ppl_context *context, pplExpr *expIn)
  {
   int   j=0;
   char  op[32],optype[32],arg[1024];
-  void *in = expIn->bytecode;
+  pplExprBytecode *in = expIn->bytecode;
 
   while (1)
    {
     int pos     = j; // Position of start of instruction
-    int len     = *(int *)(in+j            ); // length of bytecode instruction with data
-    int charpos = *(int *)(in+j+sizeof(int)); // character position of token (for error reporting)
-    int o       = (int)(*(unsigned char *)(in+j+2*sizeof(int)  )); // Opcode number
-    int t       = (int)(*(unsigned char *)(in+j+2*sizeof(int)+1)); // First data item after opcode
-    j+=2*sizeof(int)+1; // Leave j pointing to first data item after opcode
+    int len     = in[j].len    ; // length of bytecode instruction with data
+    int charpos = in[j].charpos; // character position of token (for error reporting)
+    int o       = in[j].opcode ; // Opcode number
     switch (o)
      {
       case 0:
@@ -950,36 +1000,36 @@ void ppl_reversePolishPrint(ppl_context *context, pplExpr *expIn)
       case 1:
         strcpy (op,     "push");
         strcpy (optype, "numeric");
-        sprintf(arg,    "%.2e", *(double *)(in+j));
+        sprintf(arg,    "%.2e", in[j].auxil.d);
         break;
       case 2:
         strcpy (op,     "push");
         strcpy (optype, "string");
-        sprintf(arg,    "\"%s\"", (char *)(in+j));
+        sprintf(arg,    "\"%s\"", (char *)&(in[j+1]));
         break;
       case 3:
         strcpy (op,     "lookup");
         strcpy (optype, "value");
-        sprintf(arg,    "\"%s\"", (char *)(in+j));
+        sprintf(arg,    "\"%s\"", (char *)&(in[j+1]));
         break;
       case 4:
         strcpy (op,     "lookup");
         strcpy (optype, "pointer");
-        sprintf(arg,    "\"%s\"", (char *)(in+j));
+        sprintf(arg,    "\"%s\"", (char *)&(in[j+1]));
         break;
       case 5:
         strcpy (op,     "deref");
         strcpy (optype, "value");
-        sprintf(arg,    "\"%s\"", (char *)(in+j));
+        sprintf(arg,    "\"%s\"", (char *)&(in[j+1]));
         break;
       case 6:
         strcpy (op,     "deref");
         strcpy (optype, "pointer");
-        sprintf(arg,    "\"%s\"", (char *)(in+j));
+        sprintf(arg,    "\"%s\"", (char *)&(in[j+1]));
         break;
       case 7:
        {
-        int f = (int)*(unsigned char *)(in+j);
+        int f = in[j].auxil.i;
         strcpy (op,     "slice");
         strcpy (optype, "value");
         if       (f & 1)     strcpy(arg,    "[--]"   );
@@ -997,19 +1047,21 @@ void ppl_reversePolishPrint(ppl_context *context, pplExpr *expIn)
       case 8:
         strcpy (op,     "make");
         strcpy (optype, "dict");
-        sprintf(arg,    "%d items", *(int *)(in+j));
+        sprintf(arg,    "%d items", in[j].auxil.i);
         break;
       case 9:
         strcpy (op,     "make");
         strcpy (optype, "list");
-        sprintf(arg,    "%d items", *(int *)(in+j));
+        sprintf(arg,    "%d items", in[j].auxil.i);
         break;
       case 10:
         strcpy (op,     "call");
         strcpy (optype, "");
-        sprintf(arg,    "%d args", *(int *)(in+j));
+        sprintf(arg,    "%d args", in[j].auxil.i);
         break;
       case 11:
+       {
+        int t = in[j].auxil.i;
         strcpy (op,     "op");
         if      (((t>>5)&3)==1) strcpy (optype, "unary");
         else if (((t>>5)&3)==2) strcpy (optype, "binary");
@@ -1044,7 +1096,10 @@ void ppl_reversePolishPrint(ppl_context *context, pplExpr *expIn)
         else if (t==0x5F) strcpy (arg, "nop (collect -- error: should have been optimised out)" );
         else              strcpy (arg, "??? (error: unknown opcode)");
         break;
+       }
       case 12:
+       {
+        int t = in[j].auxil.i;
         strcpy (op,     "op");
         strcpy (optype, "assign");
         if      (t==0x40) strcpy (arg, "="  );
@@ -1061,7 +1116,10 @@ void ppl_reversePolishPrint(ppl_context *context, pplExpr *expIn)
         else if (t==0x4B) strcpy (arg, "**=");
         else              strcpy (arg, "???");
         break;
+       }
       case 13:
+       {
+        int t = in[j].auxil.i;
         strcpy (op,     "op");
         strcpy (optype, "unary");
         if      (t==0x21) { strcpy (arg, "-- (post-eval)"); }
@@ -1069,10 +1127,11 @@ void ppl_reversePolishPrint(ppl_context *context, pplExpr *expIn)
         else if (t==0x23) { strcpy (arg, "-- (pre-eval)"); }
         else              { strcpy (arg, "++ (pre-eval)"); }
         break;
+       }
       case 14:
         strcpy (op,     "op");
         strcpy (optype, "binary");
-        sprintf(arg,    "string subst (%d items)", *(int *)(in+j));
+        sprintf(arg,    "string subst (%d items)", in[j].auxil.i);
         break;
       case 15:
         strcpy (op,     "op");
@@ -1082,17 +1141,17 @@ void ppl_reversePolishPrint(ppl_context *context, pplExpr *expIn)
       case 17:
         strcpy (op,     "branch if");
         strcpy (optype, "false");
-        sprintf(arg,    "to %d (%s)", *(int *)(in+j+1), (*(unsigned char *)(in+j)) ? "pop conditional" : "pop conditional; push FALSE on branch");
+        sprintf(arg,    "to %d (%s)", in[j].auxil.i, in[j].flag ? "pop conditional" : "pop conditional; push FALSE on branch");
         break;
       case 18:
         strcpy (op,     "branch if");
         strcpy (optype, "true");
-        sprintf(arg,    "to %d (%s)", *(int *)(in+j+1), (*(unsigned char *)(in+j)) ? "pop conditional" : "pop conditional; push TRUE on branch");
+        sprintf(arg,    "to %d (%s)", in[j].auxil.i, in[j].flag ? "pop conditional" : "pop conditional; push TRUE on branch");
         break;
       case 19:
         strcpy (op,     "branch");
         strcpy (optype, "goto");
-        sprintf(arg,    "%d", *(int *)(in+j));
+        sprintf(arg,    "%d", in[j].auxil.i);
         break;
       case 20:
         strcpy (op,     "make");

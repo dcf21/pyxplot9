@@ -28,5 +28,21 @@ typedef struct pplExpr {
   char *ascii; void *bytecode; int bcLen;
  } pplExpr;
 
+typedef struct pplTokenCode {
+  unsigned char  state, opcode, precedence;
+  unsigned short depth;
+ } pplTokenCode;
+
+typedef struct pplExprPStack {
+  unsigned char opType, opcode, precedence;
+  int charpos, outpos;
+ } pplExprPStack;
+
+typedef struct pplExprBytecode {
+  int len, charpos, opcode;
+  unsigned char flag;
+  union { int i; double d; } auxil;
+ } pplExprBytecode;
+
 #endif
 
