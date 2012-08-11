@@ -30,7 +30,7 @@ typedef struct pplExpr {
 
 typedef struct pplTokenCode {
   unsigned char  state, opcode, precedence;
-  unsigned short depth;
+  unsigned int   depth;
  } pplTokenCode;
 
 typedef struct pplExprPStack {

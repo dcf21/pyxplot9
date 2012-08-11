@@ -28,6 +28,7 @@
 #include "coreUtils/memAlloc.h"
 #include "mathsTools/dcfmath.h"
 #include "expressions/expCompile_fns.h"
+#include "expressions/expEval.h"
 #include "settings/settingTypes.h"
 #include "stringTools/strConstants.h"
 #include "stringTools/asciidouble.h"
@@ -192,7 +193,8 @@ void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out
   for (i=0; i<tlen; i++)
    if (tokenBuff[i].state == (unsigned char)'L')
     {
-     if (k > ALGEBRA_STACK-4) { free(stkpos); free(tokenBuff); strcpy(out, "stack overflow"); return; }
+     STACK_MUSTHAVE(c,4);
+     if (c->stackFull) { free(stkpos); free(tokenBuff); strcpy(out, "stack overflow"); return; }
      pplObjNum(&c->stack[k], 0, ppl_getFloat(in+i,NULL), 0);
      while ((tokenBuff[i].state == (unsigned char)'L') && (i<tlen)) { stkpos[i++]=k; } // ffw over constant
      k++;
@@ -204,7 +206,8 @@ void ppl_texify_generic(ppl_context *c, char *in, int inlen, int *end, char *out
     {
      int    ei=i, upos, p, q=0, errpos=-1;
      pplObj val;
-     if (k > ALGEBRA_STACK-4) { free(stkpos); free(tokenBuff); strcpy(out, "stack overflow"); return; }
+     STACK_MUSTHAVE(c,4);
+     if (c->stackFull) { free(stkpos); free(tokenBuff); strcpy(out, "stack overflow"); return; }
      while ((tokenBuff[ei].state == (unsigned char)'G') && (ei<tlen)) { ei++; } // ffw over function name
      if (tokenBuff[ei].state != (unsigned char)'P') continue; // we don't have function arguments
      if ((ei-i<4)||(strncmp(in+i,"unit",4)!=0)) continue; // function isn't called unit

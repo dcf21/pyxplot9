@@ -164,7 +164,8 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, char *dirName, int intera
       else
        {
         // Atom is an expression: evaluate it
-        int lastOpAssign=0, passed=0, j=0, k=0, p=0;
+        const int stkLevelOld = c->stackPtr;
+        int       lastOpAssign=0, passed=0, j=0, k=0, p=0;
         pplObj *val = ppl_expEval(c, item->expr, &lastOpAssign, 1, iterDepth+1);
         if (c->errStat.status)
          {
@@ -329,6 +330,7 @@ void ppl_parserExecute(ppl_context *c, parserLine *in, char *dirName, int intera
 
         // Copy value produced by atom
         pplObjCpy(&stk[item->stackOutPos], val, 0, 0, 1);
+        STACK_CLEAN;
        }
 gotTypeCexpression:
       stkCharPos[item->stackOutPos] = item->linePos;

@@ -791,7 +791,8 @@ static void pplmethod_vectorFilter(ppl_context *c, pplObj *in, int nArgs, int *s
   pplFunc     *fi;
   pplExpr      dummy;
 
-  if (c->stackPtr > ALGEBRA_STACK-4) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
+  STACK_MUSTHAVE(c,4);
+  if (c->stackFull) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
 
   if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
   fi = (pplFunc *)in[0].auxil;
@@ -924,7 +925,8 @@ static void pplmethod_vectorMap(ppl_context *c, pplObj *in, int nArgs, int *stat
   pplFunc    *fi;
   pplExpr     dummy;
 
-  if (c->stackPtr > ALGEBRA_STACK-4) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
+  STACK_MUSTHAVE(c,4);
+  if (c->stackFull) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
 
   if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
   fi = (pplFunc *)in[0].auxil;
@@ -1021,7 +1023,8 @@ static void pplmethod_vectorReduce(ppl_context *c, pplObj *in, int nArgs, int *s
   pplObj      val, val2;
   pplFunc    *fi;
 
-  if (c->stackPtr > ALGEBRA_STACK-4) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
+  STACK_MUSTHAVE(c,4);
+  if (c->stackFull) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
 
   if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
   fi = (pplFunc *)in[0].auxil;
@@ -1183,7 +1186,8 @@ static void pplmethod_listFilter(ppl_context *c, pplObj *in, int nArgs, int *sta
   listIterator *li = ppl_listIterateInit(l);
   pplExpr  dummy;
 
-  if (c->stackPtr > ALGEBRA_STACK-4) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
+  STACK_MUSTHAVE(c,4);
+  if (c->stackFull) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
 
   if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
   fi = (pplFunc *)in[0].auxil;
@@ -1291,7 +1295,8 @@ static void pplmethod_listMap(ppl_context *c, pplObj *in, int nArgs, int *status
   pplExpr  dummy;
   listIterator *li = ppl_listIterateInit(l);
 
-  if (c->stackPtr > ALGEBRA_STACK-4) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
+  STACK_MUSTHAVE(c,4);
+  if (c->stackFull) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
 
   if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
   fi = (pplFunc *)in[0].auxil;
@@ -1407,7 +1412,8 @@ static void pplmethod_listReduce(ppl_context *c, pplObj *in, int nArgs, int *sta
   pplFunc  *fi;
   listIterator *li = ppl_listIterateInit(l);
 
-  if (c->stackPtr > ALGEBRA_STACK-4) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
+  STACK_MUSTHAVE(c,4);
+  if (c->stackFull) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
 
   if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
   fi = (pplFunc *)in[0].auxil;
@@ -1572,7 +1578,8 @@ static void pplmethod_listSortOnCustom(ppl_context *c, pplObj *in, int nArgs, in
   int      fail;
   listIterator *li = ppl_listIterateInit(l);
 
-  if (c->stackPtr > ALGEBRA_STACK-4) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
+  STACK_MUSTHAVE(c,4);
+  if (c->stackFull) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
 
   if (in[0].objType != PPLOBJ_FUNC) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The %s method requires a function object as its first argument. Supplied object is of type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
   fi = (pplFunc *)in[0].auxil;

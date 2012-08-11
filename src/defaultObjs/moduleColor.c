@@ -39,6 +39,7 @@
 #include <gsl/gsl_math.h>
 
 #include "expressions/expCompile.h"
+#include "expressions/expEval.h"
 #include "expressions/fnCall.h"
 #include "settings/settings.h"
 #include "stringTools/asciidouble.h"
@@ -244,7 +245,8 @@ void pplfunc_colSpectrum(ppl_context *c, pplObj *in, int nArgs, int *status, int
   norm = in[1].real;
 
   // Check there's enough space on the stack
-  if (c->stackPtr > ALGEBRA_STACK-4) { *status=1; *errType=ERR_MEMORY; sprintf(errText, "stack overflow in the colors.spectrum function."); return; }
+  STACK_MUSTHAVE(c,4);
+  if (c->stackFull) { *status=1; *errType=ERR_MEMORY; sprintf(errText, "stack overflow in the colors.spectrum function."); return; }
 
   for (i=0; i<N_CIE_STEPS; i++)
    {

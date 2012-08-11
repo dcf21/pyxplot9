@@ -92,6 +92,35 @@
    } \
  }
 
+#define STACK_REQUEST(C,N) \
+ { \
+  C->stackFull=0; \
+  if (C->stackPtr > C->stackSize-1024-N) \
+   { \
+    int newStackSize = 2*C->stackSize; \
+    pplObj *newStack = (pplObj *)realloc(C->stack , newStackSize * sizeof(pplObj)); \
+    if (newStack != NULL) { C->stack=newStack; C->stackSize=newStackSize; } \
+    else                    C->stackFull=1; \
+   } \
+ }
+
+#define STACK_MUSTHAVE(C,N) \
+ { \
+  C->stackFull = (C->stackPtr > C->stackSize-4-N); \
+ }
+
+#define STACK_REINIT(C) \
+ { \
+  while (context->stackPtr>0) { STACK_POP; } \
+ \
+  if (C->stackSize > STACK_DEFAULT) \
+   { \
+    int newStackSize = 2*C->stackSize; \
+    pplObj *newStack = (pplObj *)malloc(newStackSize * sizeof(pplObj)); \
+    if (newStack != NULL) { free(C->stack); C->stack=newStack; C->stackSize=newStackSize; } \
+   } \
+ }
+
 pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, int dollarAllowed, int iterDepth);
 
 #endif

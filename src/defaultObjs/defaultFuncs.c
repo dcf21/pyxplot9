@@ -421,7 +421,8 @@ void pplfunc_call        (ppl_context *c, pplObj *in, int nArgs, int *status, in
   argList = (list *)in[1].auxil;
   li      = ppl_listIterateInit(argList);
 
-  if (c->stackPtr > ALGEBRA_STACK-4-argList->length) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
+  STACK_MUSTHAVE(c,argList->length);
+  if (c->stackFull) { *status=1; *errType=ERR_TYPE; strcpy(errText,"Stack overflow."); return; }
 
   // Dummy expression object with dummy line number information
   dummy.srcLineN = 0;

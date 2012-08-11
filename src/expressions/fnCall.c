@@ -628,7 +628,8 @@ void ppl_fnCall(ppl_context *context, pplExpr *inExpr, int inExprCharPos, int nA
            }
 
           // Check that there's enough space on the stack
-          if (stkp+nArgs+1 > ALGEBRA_STACK-4) { strcpy(context->errStat.errBuff,"Stack overflow."); TBADD(ERR_MEMORY); goto cleanup; }
+          STACK_MUSTHAVE(context,nArgs+1);
+          if (context->stackFull) { strcpy(context->errStat.errBuff,"Stack overflow."); TBADD(ERR_MEMORY); goto cleanup; }
           if (context->ns_ptr > CONTEXT_DEPTH-2) { strcpy(context->errStat.errBuff,"Stack overflow."); TBADD(ERR_MEMORY); goto cleanup; }
 
           // Consider entering a new local namespace if function is within a module

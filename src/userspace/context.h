@@ -87,7 +87,8 @@ typedef struct ppl_context_struc
   // Buffers for parsing and evaluating expressions
   pplTokenCode   *tokenBuff;   int tokenBuffLen;
   pplExprPStack  *parserStack; int parserStackLen;
-  pplObj          stack    [ALGEBRA_STACK];
+  pplObj         *stack;
+  int             stackSize, stackFull;
   int             stackPtr;
 
   // Settings

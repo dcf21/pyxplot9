@@ -179,13 +179,13 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
   if (iterDepth > MAX_RECURSION_DEPTH) { strcpy(context->errStat.errBuff,"Maximum recursion depth exceeded."); TBADD(ERR_OVERFLOW); return NULL; }
 
   // If at bottom iteration depth, clean up stack now if there is any left-over junk
-  if (iterDepth==0) while (context->stackPtr>0) { STACK_POP; }
+  if (iterDepth==0) { STACK_REINIT(context); }
   initialStackPtr = context->stackPtr;
   *lastOpAssign=0;
 
   while (1)
    {
-    pplObj *stk     = &context->stack[context->stackPtr];
+    pplObj *stk;
     int     pos     = j; // Position of start of instruction
     int     len     = in[j].len; // length of bytecode instruction with data
     int     o       = in[j].opcode; // Opcode number
@@ -193,7 +193,10 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
     charpos         = in[j].charpos; // character position of token (for error reporting)
 
     if (cancellationFlag) { strcpy(context->errStat.errBuff,"Operation cancelled."); charpos=0; TBADD(ERR_INTERRUPT); goto cleanup_on_error; }
-    if (context->stackPtr > ALGEBRA_STACK-4) { strcpy(context->errStat.errBuff,"Stack overflow."); charpos=0; TBADD(ERR_MEMORY); goto cleanup_on_error; }
+    if (initialStackPtr==0) { STACK_REQUEST (context,4); } // allowed to realloc stack
+    else                    { STACK_MUSTHAVE(context,4); } // not allowed to realloc stack; will change pointers in calling layers
+    if (context->stackFull) { strcpy(context->errStat.errBuff,"Stack overflow."); charpos=0; TBADD(ERR_MEMORY); goto cleanup_on_error; }
+    stk = &context->stack[context->stackPtr];
 
     switch (o)
      {
@@ -797,7 +800,10 @@ pplObj *ppl_expEval(ppl_context *context, pplExpr *inExpr, int *lastOpAssign, in
     j = pos+len;
    }
   if (context->stackPtr <= 0) { sprintf(context->errStat.errBuff,"Unexpected empty stack at end of evaluation."); charpos=0; TBADD(ERR_INTERNAL); goto cleanup_on_error; }
-  if (context->stackPtr != initialStackPtr+1) ppl_warning(&context->errcontext, ERR_INTERNAL, "Unexpected junk on stack in expEval.");
+  if (context->stackPtr != initialStackPtr+1)
+   {
+    ppl_warning(&context->errcontext, ERR_INTERNAL, "Unexpected junk on stack in expEval.");
+   }
   return &context->stack[context->stackPtr-1];
 
   cast_fail:

@@ -137,7 +137,8 @@ static double fitResidual(fitComm *p)
   accumulator = 0.0; // Add up sum of square residuals
 
   // Check there's enough space on the stack
-  if (c->stackPtr > ALGEBRA_STACK-4-p->NArgs) { strcpy(errText, "stack overflow in the fit command."); return GSL_NAN; }
+  STACK_MUSTHAVE(c,p->NArgs);
+  if (c->stackFull) { strcpy(errText, "stack overflow in the fit command."); return GSL_NAN; }
 
   for (j=0; j<p->NDataPoints; j++) // Loop over all of the data points in the file that we're fitting
    {

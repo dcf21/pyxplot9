@@ -69,9 +69,14 @@ ppl_context *ppl_contextInit()
   out->replotFocus  = -1;
   out->algebraErrPos = -1;
 
+  out->stackSize = STACK_DEFAULT;
+  out->stack     = (pplObj *)malloc(STACK_DEFAULT * sizeof(pplObj));
+  out->stackPtr  = 0;
+  out->stackFull = 0;
+  if (out->stack==NULL) { free(out); return NULL; }
+
   out->tokenBuff = NULL;   out->tokenBuffLen = 0;
   out->parserStack = NULL; out->parserStackLen = 0;
-  out->stackPtr = 0;
   out->willBeInteractive = 1;
   out->inputLineBuffer = NULL;
   out->inputLineAddBuffer = NULL;

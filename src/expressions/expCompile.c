@@ -120,6 +120,7 @@
 
 #define FFWSTATE(L) \
  { \
+  while (outpos+L>=buffSize) PGE_OVERFLOW; \
   outpos  += (L); \
   scanpos += (L); \
  }
