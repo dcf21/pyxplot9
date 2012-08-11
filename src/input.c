@@ -168,17 +168,22 @@ void ppl_processScript(ppl_context *context, char *input, int iterDepth)
   int           shellBreakableOld  = context->shellBreakable;
   int           shellReturnableOld = context->shellReturnable;
 
+  char   *oldInputLineBuffer    = context->inputLineBuffer;
+  int     oldInputLineBufferLen = context->inputLineBufferLen;
+  char   *oldInputLineAddBuffer = context->inputLineAddBuffer;
+
   if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Processing input from the script file '%s'.", input); ppl_log(&context->errcontext, NULL); }
   ppl_unixExpandUserHomeDir(&context->errcontext, input, context->errcontext.session_default.cwd, full_filename);
   sprintf(filename_description, "file '%s'", input);
   if ((infile=fopen(full_filename,"r")) == NULL)
    {
     sprintf(context->errcontext.tempErrStr, "Could not find command file '%s'. Skipping on to next command file.", full_filename); ppl_error(&context->errcontext, ERR_FILE, -1, -1, NULL);
-    return;
+    goto restore;
    }
 
+  ppl_inputInit(context);
   ppl_parserStatInit(&ps,&pl);
-  if ( (ps==NULL) || (context->inputLineBuffer == NULL) ) { ppl_error(&context->errcontext,ERR_MEMORY,-1,-1,"Out of memory."); return; }
+  if ( (ps==NULL) || (context->inputLineBuffer == NULL) ) { ppl_error(&context->errcontext,ERR_MEMORY,-1,-1,"Out of memory."); goto restore; }
 
   context->shellExiting    = 0;
   context->shellBreakable  = 0;
@@ -218,6 +223,12 @@ void ppl_processScript(ppl_context *context, char *input, int iterDepth)
   fclose(infile);
   ppl_parserStatFree(&ps);
   pplcsp_checkForGvOutput(context);
+
+restore:
+  if (context->inputLineBuffer!=NULL) free(context->inputLineBuffer);
+  context->inputLineBuffer    = oldInputLineBuffer;
+  context->inputLineBufferLen = oldInputLineBufferLen;
+  context->inputLineAddBuffer = oldInputLineAddBuffer;
   return;
  }
 

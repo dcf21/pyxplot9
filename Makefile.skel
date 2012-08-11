@@ -45,7 +45,7 @@ COMPILE = $(CC) -Wall -g `xml2-config --cflags` `gsl-config --cflags` -c -I $(CW
 LIBS    = $(LINK_FFTW) `xml2-config --libs` `gsl-config --libs` $(LINK_READLINE) -lz -lpng $(LINK_KPATHSEA) -lm
 LINK    = $(CC) -Wall -g
 
-OPTIMISATION = -O2
+OPTIMISATION = -O0
 
 DEBUG   = -D DEBUG=1 -D MEMDEBUG1=1 -D MEMDEBUG2=0
 NODEBUG = -D DEBUG=0 -D MEMDEBUG1=0 -D MEMDEBUG2=0
