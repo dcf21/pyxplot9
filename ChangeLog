@@ -3,9 +3,6 @@
      Raspberry Pi. It fixes SIGBUS errors in Pyxplot's math engine when run on
      armhf architectures.
 
-   - Version 0.9.1 is a minor update to fix SIGBUS errors in Pyxplot's math
-     engine when run on a Raspberry Pi.
-
 2012 Aug  1: Pyxplot 0.9.0
    - Version 0.9 is a major update. Many new data types have been introduced,
      each of which has methods which can be called in an object-orientated
