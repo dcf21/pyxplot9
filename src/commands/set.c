@@ -516,6 +516,12 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
       sg->c1format = (void *)pplExpr_cpy((pplExpr *)command[PARSE_set_c1format_format_string].auxil);
       sg->c1formatset = 1;
      }
+    if (command[PARSE_set_c1format_auto_format].objType == PPLOBJ_STR)
+     {
+      if (sg->c1format != NULL) pplExpr_free((pplExpr *)sg->c1format);
+      sg->c1format = NULL;
+      sg->c1formatset = 0;
+     }
     if (command[PARSE_set_c1format_orient].objType == PPLOBJ_STR)
      {
       sg->c1TickLabelRotation = ppl_fetchSettingByName(&c->errcontext, (char *)command[PARSE_set_c1format_orient].auxil, SW_TICLABDIR_INT, SW_TICLABDIR_STR);
@@ -2024,6 +2030,10 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
          {
           if (a->format != NULL) pplExpr_free((pplExpr *)a->format);
           a->format = (void *)pplExpr_cpy((pplExpr *)command[PARSE_set_xformat_format_string].auxil);
+         }
+        if (command[PARSE_set_xformat_auto_format].objType == PPLOBJ_STR)
+         {
+          if (a->format != NULL) { pplExpr_free((pplExpr *)a->format); a->format=NULL; }
          }
         if (command[PARSE_set_xformat_orient].objType == PPLOBJ_STR)
          {
