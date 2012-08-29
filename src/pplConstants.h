@@ -25,7 +25,7 @@
 // Context buffer lengths
 
 #define ALGEBRA_MAXLEN     2048 /* Size of buffer for tokenising input expressions */
-#define STACK_DEFAULT      2048 /* Stack size */
+#define STACK_DEFAULT      4096 /* Stack size */
 #define CONTEXT_DEPTH       256 /* Maximum number of stacked local namespaces */
 
 #define DUMMYVAR_MAXLEN      16 /* Maximum number of characters in a dummy variable name for integration / differentiation */

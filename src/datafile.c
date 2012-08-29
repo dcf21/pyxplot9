@@ -370,7 +370,7 @@ void ppldata_ApplyUsingList(ppl_context *c, dataTable *out, pplExpr **usingExprs
     int      fail = 0;
     pplExpr *ex   = selectExpr;
     ppldata_UsingConvert(c, ex, columns_str, columns_val, Ncols, filename, file_linenumber, file_linenumbers, linenumber_count, block_count, index_number, usingRowCol, colHeads, NcolHeads, colUnits, NcolUnits, &fail, errtext, iterDepth);
-    if (fail) { FAIL; }
+    if (fail) { STACK_CLEAN; FAIL; }
     CAST_TO_BOOL(stkObj);
     if (stkObj->real == 0) { STACK_CLEAN; *discontinuity=(continuity==DATAFILE_DISCONTINUOUS); *status=0; return; }
     STACK_CLEAN;
@@ -383,10 +383,11 @@ void ppldata_ApplyUsingList(ppl_context *c, dataTable *out, pplExpr **usingExprs
     char    *labIn  = NULL;
     pplExpr *ex     = labelExpr;
     ppldata_UsingConvert(c, ex, columns_str, columns_val, Ncols, filename, file_linenumber, file_linenumbers, linenumber_count, block_count, index_number, usingRowCol, colHeads, NcolHeads, colUnits, NcolUnits, &fail, errtext, iterDepth);
-    if (fail) { FAIL; }
+    if (fail) { STACK_CLEAN; FAIL; }
     if (stkObj->objType!=PPLOBJ_STR)
      {
       sprintf(errtext, "%s:%ld: Label expression '%s' did not evaluate to a string, but to type <%s>.", filename, file_linenumber, ex->ascii, pplObjTypeNames[stkObj->objType]);
+      STACK_CLEAN;
       FAIL;
      }
     labIn   = (char *)stkObj->auxil;
@@ -403,17 +404,19 @@ void ppldata_ApplyUsingList(ppl_context *c, dataTable *out, pplExpr **usingExprs
     const int  idx    = outObj ? (i-out->Ncolumns_real) : i;
     pplExpr   *ex     = usingExprs[i];
     ppldata_UsingConvert(c, ex, columns_str, columns_val, Ncols, filename, file_linenumber, file_linenumbers, linenumber_count, block_count, index_number, usingRowCol, colHeads, NcolHeads, colUnits, NcolUnits, &fail, errtext, iterDepth);
-    if (fail) { FAIL; }
+    if (fail) { STACK_CLEAN; FAIL; }
     if (!outObj)
      {
       if ((stkObj->objType!=PPLOBJ_NUM)&&(stkObj->objType!=PPLOBJ_BOOL)&&(stkObj->objType!=PPLOBJ_DATE))
        {
         sprintf(errtext, "%s:%ld: Data item calculated from expression '%s' was not a number, but had type <%s>.", filename, file_linenumber, ex->ascii, pplObjTypeNames[stkObj->objType]);
+        STACK_CLEAN;
         FAIL;
        }
       if ((stkObj->objType==PPLOBJ_NUM) && (stkObj->flagComplex))
        {
         sprintf(errtext, "%s:%ld: Data item calculated from expression '%s' was a complex number.", filename, file_linenumber, ex->ascii);
+        STACK_CLEAN;
         FAIL;
        }
       if (out->Nrows==0)
@@ -427,11 +430,13 @@ void ppldata_ApplyUsingList(ppl_context *c, dataTable *out, pplExpr **usingExprs
         if (out->firstEntries[i].objType != stkObj->objType)
          {
           sprintf(errtext, "%s:%ld: Data item calculated from expression '%s' has inconsistent types, including <%s> and <%s>.", filename, file_linenumber, ex->ascii, pplObjTypeNames[out->firstEntries[i].objType], pplObjTypeNames[stkObj->objType]);
+          STACK_CLEAN;
           FAIL;
          }
         if ( (out->firstEntries[i].objType==PPLOBJ_NUM) && (!ppl_unitsDimEqual(&out->firstEntries[i], stkObj)) )
          {
           sprintf(errtext, "%s:%ld: Data item calculated from expression '%s' has inconsistent physical units, including <%s> and <%s>.", filename, file_linenumber, ex->ascii, ppl_printUnit(c, &out->firstEntries[i], NULL, NULL, 0, 1, 0), ppl_printUnit(c, stkObj, NULL, NULL, 1, 1, 0));
+          STACK_CLEAN;
           FAIL;
          }
        }
