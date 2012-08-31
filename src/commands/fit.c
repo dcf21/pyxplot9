@@ -409,8 +409,8 @@ void ppl_directive_fit(ppl_context *c, parserLine *pl, parserOutput *in, int int
     {
      pplObj dummyTemp;
      ppl_contextGetVarPointer(c, fitVars[i], &varObj[i], &dummyTemp);
-     if (dummyTemp.objType==PPLOBJ_NUM) { ppl_unitsDimCpy(varObj[i],&dummyTemp); }
-     else                               { pplObjNum(varObj[i],0,0,0); }
+     if (dummyTemp.objType==PPLOBJ_NUM) { pplObjCpy(varObj[i],&dummyTemp,0,1,1); }
+     else                               { pplObjNum(varObj[i],0,1,0); }
      dummyTemp.amMalloced=0;
      ppl_garbageObject(&dummyTemp);
     }
