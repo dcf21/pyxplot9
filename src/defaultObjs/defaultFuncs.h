@@ -133,6 +133,7 @@ void pplfunc_rgb         (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_real        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_romanNum    (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_root        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
+void pplfunc_round       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_sec         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_sech        (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);
 void pplfunc_sgn         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText);

@@ -377,6 +377,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d,"rgb"           ,3,3,1,1,1,1,(void *)&pplfunc_rgb         , "rgb(r,g,b)", "\\mathrm{rgb}@<@1,@2,@3@>", "rgb(r,g,b) returns a color with specified RGB components in the range 0-1");
     ppl_addSystemFunc(d,"romanNumeral"  ,1,1,1,1,1,1,(void *)&pplfunc_romanNum    , "romanNum(n)", "\\mathrm{romanNum}@<@1@>", "romanNum(n) returns the Roman numeral representing the number n");
     ppl_addSystemFunc(d,"root"          ,2,2,1,1,0,1,(void *)&pplfunc_root        , "root(z,n)", "\\mathrm{root}@<@1,@2@>", "root(z,n) returns the nth root of z");
+    ppl_addSystemFunc(d,"round"         ,1,1,1,1,1,1,(void *)&pplfunc_round       , "round(x)", "\\mathrm{round}@<@1@>", "round(x) returns the nearest integer value to x. If x is exactly half way between integers, it is rounded away from zero");
     ppl_addSystemFunc(d,"sec"           ,1,1,1,1,0,0,(void *)&pplfunc_sec         , "sec(z)", "\\mathrm{sec}@<@1@>", "sec(x) returns the secant of x. If x is dimensionless, it is assumed to be measured in radians");
     ppl_addSystemFunc(d,"sech"          ,1,1,1,1,0,0,(void *)&pplfunc_sech        , "sech(z)", "\\mathrm{sech}@<@1@>", "sech(x) returns the hyperbolic secant of x. x may either be a dimensionless number or may have units of angle");
     ppl_addSystemFunc(d,"sgn"           ,1,1,1,1,1,1,(void *)&pplfunc_sgn         , "sgn(x)", "\\mathrm{sgn}@<@1@>", "sgn(x) returns 1 if x is greater than zero, -1 if x is less than zero, and 0 if x equals zero");

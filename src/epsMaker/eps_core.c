@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <gsl/gsl_math.h>
 
 #include "coreUtils/errorReport.h"
 #include "settings/epsColors.h"
@@ -61,7 +62,9 @@ void eps_core_SetColor(EPSComm *x, withWords *ww, unsigned char WritePS)
   // Color may be specified as a named color, or as RGB components, or may not be specified at all, in which case we use black
   if      (ww->USEcolor1234)
    {
-    if      (ww->Col1234Space==SW_COLSPACE_RGB ) sprintf(x->CurrentColor, "%.3f %.3f %.3f setrgbcolor", ww->color1, ww->color2, ww->color3);
+    if      ( (!gsl_finite(ww->color1)) || (!gsl_finite(ww->color2)) || (!gsl_finite(ww->color3)) ) { sprintf(x->CurrentColor, "0 0 0 setrgbcolor"); }
+    else if ( (ww->Col1234Space==SW_COLSPACE_CMYK) && (!gsl_finite(ww->color4)) ) { sprintf(x->CurrentColor, "0 0 0 setrgbcolor"); }
+    else if (ww->Col1234Space==SW_COLSPACE_RGB ) sprintf(x->CurrentColor, "%.3f %.3f %.3f setrgbcolor", ww->color1, ww->color2, ww->color3);
     else if (ww->Col1234Space==SW_COLSPACE_HSB ) sprintf(x->CurrentColor, "%.3f %.3f %.3f sethsbcolor", ww->color1, ww->color2, ww->color3);
     else if (ww->Col1234Space==SW_COLSPACE_CMYK) sprintf(x->CurrentColor, "%.3f %.3f %.3f %.3f setcmykcolor", ww->color1, ww->color2, ww->color3, ww->color4);
     else    ppl_error(&x->c->errcontext,ERR_INTERNAL,-1,-1,"Illegal setting for color space switch.");

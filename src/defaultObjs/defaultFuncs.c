@@ -1362,6 +1362,13 @@ void pplfunc_root        (ppl_context *c, pplObj *in, int nArgs, int *status, in
   CHECK_OUTPUT_OKAY;
  }
 
+void pplfunc_round       (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
+ {
+  char *FunctionDescription = "round(x)";
+  OUTPUT.real = round(in[0].real);
+  CHECK_OUTPUT_OKAY;
+ }
+
 void pplfunc_sec         (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "sec(z)";
