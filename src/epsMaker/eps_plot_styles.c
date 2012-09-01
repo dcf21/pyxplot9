@@ -570,11 +570,13 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
         // label point if instructed to do so
         if ((blk->text[j] != NULL) && (blk->text[j][0] != '\0'))
          {
-          char *text=NULL;
+          char *text = NULL;
+          const double xsp = (x->current->settings.TextVAlign == SW_VALIGN_CENT) ? 1.7 : 1.1;
+          const double ysp = (x->current->settings.TextHAlign == SW_HALIGN_CENT) ? 1.7 : 1.1;
           if ((last_colstr==NULL)||(strcmp(last_colstr,x->CurrentColor)!=0)) { last_colstr = (char *)ppl_memAlloc(strlen(x->CurrentColor)+1); if (last_colstr==NULL) break; strcpy(last_colstr, x->CurrentColor); }
           canvas_EPSRenderTextItem(x, &text, x->LaTeXpageno++,
-             xpos/M_TO_PS - (x->current->settings.TextHAlign - SW_HALIGN_CENT) * final_pointsize * eps_PointSize[pt] * EPS_DEFAULT_PS / M_TO_PS * 1.1,
-             ypos/M_TO_PS + (x->current->settings.TextVAlign - SW_VALIGN_CENT) * final_pointsize * eps_PointSize[pt] * EPS_DEFAULT_PS / M_TO_PS * 1.1,
+             xpos/M_TO_PS - (x->current->settings.TextHAlign - SW_HALIGN_CENT) * final_pointsize * eps_PointSize[pt] * EPS_DEFAULT_PS / M_TO_PS * xsp,
+             ypos/M_TO_PS + (x->current->settings.TextVAlign - SW_VALIGN_CENT) * final_pointsize * eps_PointSize[pt] * EPS_DEFAULT_PS / M_TO_PS * ysp,
              x->current->settings.TextHAlign, x->current->settings.TextVAlign, x->CurrentColor, x->current->settings.FontSize, 0.0, NULL, NULL);
           if (text!=NULL) ThreeDimBuffer_writeps(x, depth, 1, 1, 0, 1, last_colstr, text);
          }
