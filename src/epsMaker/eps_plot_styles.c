@@ -571,8 +571,8 @@ int  eps_plot_dataset(EPSComm *x, dataTable *data, int style, unsigned char Thre
         if ((blk->text[j] != NULL) && (blk->text[j][0] != '\0'))
          {
           char *text = NULL;
-          const double xsp = (x->current->settings.TextVAlign == SW_VALIGN_CENT) ? 1.7 : 1.1;
-          const double ysp = (x->current->settings.TextHAlign == SW_HALIGN_CENT) ? 1.7 : 1.1;
+          const double xsp = (x->current->settings.TextVAlign == SW_VALIGN_CENT) ? 1.7 : 1.13;
+          const double ysp = (x->current->settings.TextHAlign == SW_HALIGN_CENT) ? 1.7 : 1.13;
           if ((last_colstr==NULL)||(strcmp(last_colstr,x->CurrentColor)!=0)) { last_colstr = (char *)ppl_memAlloc(strlen(x->CurrentColor)+1); if (last_colstr==NULL) break; strcpy(last_colstr, x->CurrentColor); }
           canvas_EPSRenderTextItem(x, &text, x->LaTeXpageno++,
              xpos/M_TO_PS - (x->current->settings.TextHAlign - SW_HALIGN_CENT) * final_pointsize * eps_PointSize[pt] * EPS_DEFAULT_PS / M_TO_PS * xsp,

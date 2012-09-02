@@ -102,9 +102,11 @@ void eps_point_RenderEPS(EPSComm *x)
     // Label point if it is labelled
     if ((x->current->text != NULL) && (x->current->text[0]!='\0'))
      {
+      const double xsp = (x->current->settings.TextVAlign == SW_VALIGN_CENT) ? 1.7 : 1.13;
+      const double ysp = (x->current->settings.TextHAlign == SW_HALIGN_CENT) ? 1.7 : 1.13;
       canvas_EPSRenderTextItem(x, NULL, pageno,
-              x->current->xpos - (x->current->settings.TextHAlign - SW_HALIGN_CENT) * ww.pointsize * eps_PointSize[pt] * EPS_DEFAULT_PS / M_TO_PS * 1.1,
-              x->current->ypos + (x->current->settings.TextVAlign - SW_VALIGN_CENT) * ww.pointsize * eps_PointSize[pt] * EPS_DEFAULT_PS / M_TO_PS * 1.1,
+              x->current->xpos - (x->current->settings.TextHAlign - SW_HALIGN_CENT) * ww.pointsize * eps_PointSize[pt] * EPS_DEFAULT_PS / M_TO_PS * xsp,
+              x->current->ypos + (x->current->settings.TextVAlign - SW_VALIGN_CENT) * ww.pointsize * eps_PointSize[pt] * EPS_DEFAULT_PS / M_TO_PS * ysp,
               x->current->settings.TextHAlign, x->current->settings.TextVAlign, x->CurrentColor, x->current->settings.FontSize, 0.0, NULL, NULL);
      }
    }
