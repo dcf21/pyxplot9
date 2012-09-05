@@ -742,6 +742,12 @@ int showMinor = 0;
     ppl_directive_show3(c, out+i, itemSet, 1, interactive, "textVAlign", buf, (c->set->graph_default.TextVAlign==sg->TextVAlign), "Selects the vertical alignment of text labels");
     i += strlen(out+i) ; p=1;
    }
+  if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "timezone",1)>=0))
+   {
+    ppl_strEscapify(c->set->term_current.timezone, buf);
+    ppl_directive_show3(c, out+i, itemSet, 1, interactive, "timezone", buf, ((strcmp(c->set->graph_default.title,sg->title)==0)&&(c->set->graph_default.TitleXOff.real==sg->TitleXOff.real)&&(c->set->graph_default.TitleYOff.real==sg->TitleYOff.real)), "The default timezone used by date objects");
+    i += strlen(out+i) ; p=1;
+   }
   if ((ppl_strAutocomplete(word, "settings", 1)>=0) || (ppl_strAutocomplete(word, "title", 1)>=0))
    {
     ppl_strEscapify(sg->title, buf); k = strlen(buf);

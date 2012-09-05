@@ -34,11 +34,11 @@ may provide a useful reference for \gnuplot\ users.
 
 \section{The typesetting of text}
 
-Pyxplot renders all text labels automatically in the \LaTeX\ typesetting
+Pyxplot renders all text labels automatically in the \latexdcf\ typesetting
 environment. This brings many advantages: it produces neater labels than the
 default typesetting engine used by \gnuplot, makes it straightforward to label
 graphs with mathematical expressions, and moreover makes it straightforward
-when importing graphs into \LaTeX\ documents to match the fonts used in figures
+when importing graphs into \latexdcf\ documents to match the fonts used in figures
 with those used in the main text of the document.  It does, however, also
 necessarily introduce some incompatibility with \gnuplot.  Some strings which
 are valid in \gnuplot\ are not valid in Pyxplot (see
@@ -49,36 +49,36 @@ example,\index{latex}
 set xlabel 'x\^{}2'
 \end{dontdo}
 
-\noindent is a valid label in \gnuplot, but is not valid input for \LaTeX\ and
-therefore fails in Pyxplot.  In Pyxplot, it needs to be written in \LaTeX\
+\noindent is a valid label in \gnuplot, but is not valid input for \latexdcf\ and
+therefore fails in Pyxplot.  In Pyxplot, it needs to be written in \latexdcf\
 mathmode as:
 
 \begin{dodo}
 set xlabel '\$x\^{}2\$'
 \end{dodo}
 
-\noindent A useful introduction to \LaTeX's syntax can be found in Tobias
+\noindent A useful introduction to \latexdcf's syntax can be found in Tobias
 Oetiker's\index{Tobias Oetiker} excellent free tutorial, {\it The Not So Short
-Guide to \LaTeX\ $2\epsilon$}\index{Not So Short Guide to \LaTeX\ $2\epsilon$,
+Guide to \latexdcf\ $2\epsilon$}\index{Not So Short Guide to \latexdcf\ $2\epsilon$,
 The}, which is available for free download from:
 
 \noindent \url{http://www.ctan.org/tex-archive/info/lshort/english/lshort.pdf}
 
-Two built-in functions provide some assistance in generating \LaTeX\ labels.
+Two built-in functions provide some assistance in generating \latexdcf\ labels.
 The \indfunt{texify()} takes as its argument a string containing a mathematical
-expression, and returns a \LaTeX\ representation of it.  The
+expression, and returns a \latexdcf\ representation of it.  The
 \indfunt{texifyText()} takes as its argument a text string, and returns a
-\LaTeX\ representation of it, with any necessary escape characters added. For
+\latexdcf\ representation of it, with any necessary escape characters added. For
 example:
 
 \vspace{3mm}
 \input{fragments/tex/fs_texify.tex}
 \vspace{3mm}
-Two built-in functions provide some assistance in generating \LaTeX\ labels.
+Two built-in functions provide some assistance in generating \latexdcf\ labels.
 The \indfunt{texify()} takes as its argument a string containing a mathematical
-expression, and returns a \LaTeX\ representation of it.  The
+expression, and returns a \latexdcf\ representation of it.  The
 \indfunt{texifyText()} takes as its argument a text string, and returns a
-\LaTeX\ representation of it, with any necessary escape characters added. For
+\latexdcf\ representation of it, with any necessary escape characters added. For
 example:
 
 \vspace{3mm}

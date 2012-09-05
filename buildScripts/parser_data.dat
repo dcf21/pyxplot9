@@ -171,6 +171,7 @@ set@2:directive                      terminal@1:set_option = ( < x11_singlewindo
 set@2:directive { item@1 %d:editno } < textcolor@5:set_option | textcolour@5:set_option:textcolor > = %c:color
 set@2:directive { item@1 %d:editno } texthalign@5:set_option = < left@1:left | centre@1:center | center@1:center | middle@1:center | right@1:right >
 set@2:directive { item@1 %d:editno } textvalign@5:set_option = < top@1:top | centre@1:center | center@1:center | middle@1:center | bottom@1:bottom >
+set@2:directive                      timezone@3:set_option = %q:timezone
 set@2:directive { item@1 %d:editno } title@2:set_option = < %q:title > { %p:offset }
 set@2:directive { item@1 %d:editno } trange@2:set_option = { [@n:range { %u:min } < :@n | to@n > { %u:max } ]@n } { reverse@1:reverse }
 set@2:directive                      unit@1:set_option = ( angle@1 < dimensionless@1:angle:on | nodimensionless@1:angle:off > ~ display@1 ( < abbreviated@1:abbrev:on | noabbreviated@3:abbrev:off | full@1:abbrev:off | nofull@3:abbrev:on > ~ < prefix@1:prefix:on | noprefix@3:prefix:off > ) ~ scheme@1 < si@2:scheme:SI | cgs@1:scheme:CGS | ancient@1:scheme:ANCIENT | imperial@1:scheme:IMPERIAL | uscustomary@1:scheme:USCustomary | planck@1:scheme:PLANCK | natural@1:scheme:PLANCK > ~ [ of@1 %s:quantity %v:unit ]:preferred_units, ~ preferred@2 %e:preferred_unit ~ nopreferred@3 %e:unpreferred_unit )

@@ -301,6 +301,7 @@ will be appended to it. For example:
 are longer than the width of the page.
 
 \section{Printing text}
+\label{sec:text_escaping}
 
 Pyxplot's \indcmdt{print} can be used to display strings and the results of
 calculations, as in the following examples:
@@ -334,40 +335,37 @@ example:
 \textquoteright\textquoteright\textquoteright Robert's data\textquoteright\textquoteright\textquoteright
 \end{dodo}
 
+\noindent Alternatively, the {\tt $\backslash$} character may be used to escape
+quote characters. Two backslashes characters -- {\tt $\backslash\backslash$} --
+produce a literal backslash:
+
+\begin{dodo}
+'Robert$\backslash$'s data'\newline
+"I typed $\backslash\backslash$' to get an apostrophe"
+\end{dodo}
+
 Special characters such as tabs and newlines can be inserted into strings using
-escape codes such as {\tt $\backslash$t} and {\tt $\backslash$n}; see
-Table~\ref{tab:escape_sequences} for a list of these. The following string is
-split over three lines:
+escape codes, but these are disabled by default. This is because \latexdcf\
+uses the backslash as its own escape character, and strings in Pyxplot are
+commonly used to contain \latexdcf\ commands. So, by default the only escape
+characters that Pyxplot expands are {\tt $\backslash$\textquoteright}, {\tt
+$\backslash$"} and {\tt $\backslash\backslash$}.
+
+The use of other escape characters may be enabled by prefixing a string with
+the character {\tt e}, as in the example {\tt e'$\backslash$t'} for a tab
+character.  See Table~\ref{tab:escape_sequences} for a complete list of escape
+codes available. For example, the following string is split over three lines:
 
 \vspace{3mm}
 \input{fragments/tex/fs_print4.tex}
 \vspace{3mm}
 
-Sometimes these escape codes can be rather annoying, especially when entering
-\LaTeX\ control codes, which all begin with backslash characters. Rather than
-having to escape every backslash, it is generally easier to prefix the string
-with the character {\tt r}, which turns off all escape codes:
+Alternatively, strings may be prefixed with the character {\tt r} to turn off
+all escape codes, including for quote characters:
 
 \vspace{3mm}
 \input{fragments/tex/fs_print5.tex}
 \vspace{3mm}
-
-It is usually neater to use the string substitution operator, {\tt \%}\index{\%
-operator@{\tt \%} operator}\index{string operators!substitution}.  The operator
-is preceded by a format string, in which the places where numbers and strings
-are to be substituted are marked by tokens such as {\tt \%e} and {\tt \%s}. The
-substitution operator is followed by a ()-bracketed list of the quantities
-which are to be substituted into the format string. This behaviour is similar
-to that of python's \% operator, and of the {\tt printf} command in C, as the
-following examples demonstrate:
-
-\vspace{3mm}
-\input{fragments/tex/fs_print3.tex}
-\vspace{3mm}
-
-The detailed behaviour of the string substitution operator, and a full list of
-the substitution tokens which it accepts, are given in
-Section~\ref{sec:stringsubop}.
 
 \begin{table}
 \begin{center}
@@ -393,12 +391,32 @@ Section~\ref{sec:stringsubop}.
 \label{tab:escape_sequences}
 \end{table}
 
+When many items are being printed together on a line, they can be concatenated
+together using the {\tt +} operator as above, but it is usually neater to use
+the string substitution operator, {\tt \%}\index{\% operator@{\tt \%}
+operator}\index{string operators!substitution}.  The operator is preceded by a
+format string, in which the places where numbers and strings are to be
+substituted are marked by tokens such as {\tt \%e} and {\tt \%s}.
+
+The substitution operator is followed by a ()-bracketed list of the quantities
+which are to be substituted into the format string. This behaviour is similar
+to that of python's \% operator, and of the {\tt printf} command in C, as the
+following examples demonstrate:
+
+\vspace{3mm}
+\input{fragments/tex/fs_print3.tex}
+\vspace{3mm}
+
+The detailed behaviour of the string substitution operator, and a full list of
+the substitution tokens which it accepts, are given in
+Section~\ref{sec:stringsubop}.
+
 \section{Axis labels and titles}
 \label{sec:latex_incompatibility}
 
-Labels can be added to the axes of a plot, and a title put at the top.  Labels
-should be placed between either single (') or double (") quotes, as in the
-following example script:
+Labels can be added to the axes of a plot, and a title put at the top. As with
+any other strings (see the previous section), labels should be enclosed in
+either single (') or double (") quotes, as in the following example script:
 
 \begin{verbatim}
 set xlabel "Horizontal axis"
@@ -412,30 +430,30 @@ plot
 \end{center}
 
 \noindent These labels and title -- in fact, all text labels which are ever
-produced by Pyxplot -- are rendered using the \LaTeX\ typesetting system, and
-so any \LaTeX\ commands can be used to produce custom formatting. This allows
+produced by Pyxplot -- are rendered using the \latexdcf\ typesetting system, and
+so any \latexdcf\ commands can be used to produce custom formatting. This allows
 great flexibility, but means that care needs to be taken to escape any of
-\LaTeX's reserved characters -- i.e. $\backslash$~\&~\%~\#~\{~\}~\$~\_~\^{} or
+\latexdcf's reserved characters -- i.e. $\backslash$~\&~\%~\#~\{~\}~\$~\_~\^{} or
 $\sim$.
 
-Two built-in functions provide some assistance in generating \LaTeX\ labels.
+Two built-in functions provide some assistance in generating \latexdcf\ labels.
 The \indfunt{texify()} function takes as its argument a string containing a
-mathematical expression, and returns a \LaTeX\ representation of it.  The
+mathematical expression, and returns a \latexdcf\ representation of it.  The
 \indfunt{texifyText()} function takes as its argument a text string, and returns
-a \LaTeX\ representation of it, with any necessary escape characters added. For
+a \latexdcf\ representation of it, with any necessary escape characters added. For
 example:
 
 \vspace{3mm}
 \input{fragments/tex/fs_texify.tex}
 \vspace{3mm}
 
-Special care needs to be taken when typesetting \LaTeX\ expressions that
-contain apostrophe, quote and backslash characters.  It is recommended that
-\LaTeX\ expressions be enclosed in triple quotes, as raw strings with escape
-characters turned off, for example:
+Special care needs to be taken when typesetting \latexdcf\ expressions that
+contain apostrophe or quote characters, as these are the string delimiters used
+by Pyxplot. For ease, it is recommended that \latexdcf\ expressions be enclosed in
+triple quotes:
 
 \begin{dodo}
-set xlabel r"""$\backslash$textrm\{J$\backslash$"org's data\}"""
+set xlabel """$\backslash$textrm\{J$\backslash$"org's data\}"""
 \end{dodo}
 
 The reason for recommending this syntax is demonstrated by the examples below,
@@ -452,25 +470,32 @@ set xlabel 'My plot's X axis'
 set xlabel "J$\backslash$"org's data"
 \end{dontdo}
 
-\noindent the backslash before the " character will be interpreted as a Pyxplot escape character; it will not be passed to \LaTeX, and a \LaTeX\ error will result. There are similar problems with
-
-\begin{dontdo}
-set xlabel "2 $\backslash$times 3"
-\end{dontdo}
-
-\noindent where the \texttt{$\backslash$t} will be turned into a tab character. Whilst it is possible to write
+\noindent the backslash before the " character, intended to be the \latexdcf\
+control string for an umlaut ({\tt $\backslash$"o}), will instead be
+interpreted as a Pyxplot escape character. It will not be passed to \latexdcf,
+and a \latexdcf\ error will result. Whilst it is possible to write
 
 \begin{verbatim}
-set xlabel "2 \\times 3"
 set xlabel "J\\\"org's data"
 \end{verbatim}
 
-\noindent this syntax is messy, especially in the last example where three backslashes are needed. It is much neater to use:\index{backslash character}\index{accented characters}
+\noindent this syntax is messy, as the backslashes are confusing to the eye. It
+is much neater to use (see Section~\ref{sec:text_escaping} for an explanation
+of string escaping):\index{backslash character}\index{accented characters}
 
 \begin{dodo}
-set xlabel r"""2 $\backslash$times 3"""\\
 set xlabel r"""J$\backslash$"org's data"""
 \end{dodo}
+
+There are similar problems with
+
+\begin{dontdo}
+set xlabel e"2 $\backslash$times 3"
+\end{dontdo}
+
+\noindent where the \texttt{$\backslash$t} will be turned into a tab character,
+because extended escape characters are enabled. This string could be made legal
+by removing the {\tt e} prefix (see Section~\ref{sec:text_escaping}).
 
 \subsection{Removing labels and titles}
 
@@ -809,7 +834,7 @@ replot [0:1][0:1]
 
 By default, when Pyxplot is used interactively, all plots are displayed on the
 screen. It is also possible to produce PostScript output, to be read into other
-programs or embedded into \LaTeX\ documents, as well as a variety of other
+programs or embedded into \latexdcf\ documents, as well as a variety of other
 graphical formats such as jpeg and png. The \indcmdt{set
 terminal}\footnote{Gnuplot users should note that the syntax of the {\tt set
 terminal} command in Pyxplot is somewhat different from that used by Gnuplot;

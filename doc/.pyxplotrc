@@ -143,3 +143,5 @@ palette = black, red, blue, magenta, cyan, brown, salmon, gray, green, navyBlue,
 [latex]
 preamble =
 
+[script]
+set timezone "UTC"

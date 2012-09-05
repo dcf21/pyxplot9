@@ -473,34 +473,52 @@ static void pplmethod_strLen(ppl_context *c, pplObj *in, int nArgs, int *status,
 
 // Date methods
 
+#define TZ_INIT \
+ double offset; \
+ { \
+  if ((nArgs>0)&&(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The function %s requires a string as its first argument; supplied argument had type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; } \
+  if (nArgs>0) ppl_calendarTimezoneSet(c, 1, (char*)in[0].auxil); \
+  else         ppl_calendarTimezoneSet(c, 0, NULL              ); \
+  ppl_calendarTimezoneOffset(c, t->real, NULL, &offset); \
+  ppl_calendarTimezoneUnset(c); \
+ }
+
 static void pplmethod_dateToDayOfMonth(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
+  char *FunctionDescription = "toDayOfMonth(<timezone>)";
   int year, month, day, hour, minute; double second;
   pplObj *t = in[-1].self_this;
-  ppl_fromUnixTime(c,t->real,&year,&month,&day,&hour,&minute,&second,status,errText);
+  TZ_INIT;
+  ppl_fromUnixTime(c,t->real+offset,&year,&month,&day,&hour,&minute,&second,status,errText);
   if (*status) { *errType=ERR_RANGE; return; }
   pplObjNum(&OUTPUT,0,day,0);
  }
 
 static void pplmethod_dateToDayWeekName(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
+  char *FunctionDescription = "toDayWeekName(<timezone>)";
   pplObj *t = in[-1].self_this;
   char *tmp;
-  COPYSTR(tmp , ppl_getWeekDayName(c, floor( fmod(t->real/3600/24+3 , 7))));
+  TZ_INIT;
+  COPYSTR(tmp , ppl_getWeekDayName(c, floor( fmod((t->real+offset)/3600/24+3 , 7))));
   pplObjStr(&OUTPUT,0,1,tmp);
  }
 
 static void pplmethod_dateToDayWeekNum(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
+  char *FunctionDescription = "toDayWeekNum(<timezone>)";
   pplObj *t = in[-1].self_this;
-  pplObjNum(&OUTPUT,0,floor( fmod(t->real/3600/24+4 , 7))+1,0);
+  TZ_INIT;
+  pplObjNum(&OUTPUT,0,floor( fmod((t->real+offset)/3600/24+4 , 7))+1,0);
  }
 
 static void pplmethod_dateToHour(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
+  char *FunctionDescription = "toHour(<timezone>)";
   int year, month, day, hour, minute; double second;
   pplObj *t = in[-1].self_this;
-  ppl_fromUnixTime(c,t->real,&year,&month,&day,&hour,&minute,&second,status,errText);
+  TZ_INIT;
+  ppl_fromUnixTime(c,t->real+offset,&year,&month,&day,&hour,&minute,&second,status,errText);
   if (*status) { *errType=ERR_RANGE; return; }
   pplObjNum(&OUTPUT,0,hour,0);
  }
@@ -513,9 +531,11 @@ static void pplmethod_dateToJD(ppl_context *c, pplObj *in, int nArgs, int *statu
 
 static void pplmethod_dateToMinute(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
+  char *FunctionDescription = "toMinute(<timezone>)";
   int year, month, day, hour, minute; double second;
   pplObj *t = in[-1].self_this;
-  ppl_fromUnixTime(c,t->real,&year,&month,&day,&hour,&minute,&second,status,errText);
+  TZ_INIT;
+  ppl_fromUnixTime(c,t->real+offset,&year,&month,&day,&hour,&minute,&second,status,errText);
   if (*status) { *errType=ERR_RANGE; return; }
   pplObjNum(&OUTPUT,0,day,0);
  }
@@ -528,10 +548,12 @@ static void pplmethod_dateToMJD(ppl_context *c, pplObj *in, int nArgs, int *stat
 
 static void pplmethod_dateToMonthName(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
+  char *FunctionDescription = "toMonthName(<timezone>)";
   int year, month, day, hour, minute; double second;
   char *tmp;
   pplObj *t = in[-1].self_this;
-  ppl_fromUnixTime(c,t->real,&year,&month,&day,&hour,&minute,&second,status,errText);
+  TZ_INIT;
+  ppl_fromUnixTime(c,t->real+offset,&year,&month,&day,&hour,&minute,&second,status,errText);
   if (*status) { *errType=ERR_RANGE; return; }
   COPYSTR(tmp, ppl_getMonthName(c,month));
   pplObjStr(&OUTPUT,0,1,tmp);
@@ -539,34 +561,44 @@ static void pplmethod_dateToMonthName(ppl_context *c, pplObj *in, int nArgs, int
 
 static void pplmethod_dateToMonthNum(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
+  char *FunctionDescription = "toMonthNum(<timezone>)";
   int year, month, day, hour, minute; double second;
   pplObj *t = in[-1].self_this;
-  ppl_fromUnixTime(c,t->real,&year,&month,&day,&hour,&minute,&second,status,errText);
+  TZ_INIT;
+  ppl_fromUnixTime(c,t->real+offset,&year,&month,&day,&hour,&minute,&second,status,errText);
   if (*status) { *errType=ERR_RANGE; return; }
   pplObjNum(&OUTPUT,0,month,0);
  }
 
 static void pplmethod_dateToSecond(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
+  char *FunctionDescription = "toSecond(<timezone>)";
   int year, month, day, hour, minute; double second;
   pplObj *t = in[-1].self_this;
-  ppl_fromUnixTime(c,t->real,&year,&month,&day,&hour,&minute,&second,status,errText);
+  TZ_INIT;
+  ppl_fromUnixTime(c,t->real+offset,&year,&month,&day,&hour,&minute,&second,status,errText);
   if (*status) { *errType=ERR_RANGE; return; }
   pplObjNum(&OUTPUT,0,second,0);
  }
 
 static void pplmethod_dateToStr(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  char  *FunctionDescription = "str(<s>)";
+  char  *FunctionDescription = "str(<s>,<timezone>)";
   pplObj *t = in[-1].self_this;
-  char  *format=NULL, *out=NULL;
+  char  *format=NULL, *out=NULL, timezone[FNAME_LENGTH];
+  double offset;
   if ((nArgs>0)&&(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The function %s requires a string as its first argument; supplied argument had type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
+  if ((nArgs>1)&&(in[1].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The function %s requires a string as its second argument; supplied argument had type <%s>.", FunctionDescription, pplObjTypeNames[in[1].objType]); return; }
   out = (char *)malloc(8192);
   if (out==NULL) { *status=1; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); return; }
 
   if (nArgs>0) format = (char *)in[0].auxil; // Format specified
   else         format = NULL;                // Format not specified
-  ppl_dateString(c, out, t->real, format, status, errText);
+  if (nArgs>1) ppl_calendarTimezoneSet(c, 1, (char*)in[1].auxil);
+  else         ppl_calendarTimezoneSet(c, 0, NULL              );
+  ppl_calendarTimezoneOffset(c, t->real, timezone, &offset);
+  ppl_dateString(c, out, t->real+offset, format, timezone, status, errText);
+  ppl_calendarTimezoneUnset(c);
   if (*status) { *errType=ERR_NUMERICAL; return; }
   pplObjStr(&OUTPUT,0,1,out);
  }
@@ -579,9 +611,11 @@ static void pplmethod_dateToUnix(ppl_context *c, pplObj *in, int nArgs, int *sta
 
 static void pplmethod_dateToYear(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
+  char *FunctionDescription = "toYear(<timezone>)";
   int year, month, day, hour, minute; double second;
   pplObj *t = in[-1].self_this;
-  ppl_fromUnixTime(c,t->real,&year,&month,&day,&hour,&minute,&second,status,errText);
+  TZ_INIT;
+  ppl_fromUnixTime(c,t->real+offset,&year,&month,&day,&hour,&minute,&second,status,errText);
   if (*status) { *errType=ERR_RANGE; return; }
   pplObjNum(&OUTPUT,0,year,0);
  }
@@ -2110,19 +2144,19 @@ void pplObjMethodsInit(ppl_context *c)
   ppl_addSystemMethod(pplObjMethods[PPLOBJ_STR],"upper"     ,0,0,1,1,1,1,(void *)&pplmethod_strUpper     , "upper()", "\\mathrm{upper}@<@>", "upper() converts a string to uppercase");
 
   // Date methods
-  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toDayOfMonth",0,0,1,1,1,1,(void *)pplmethod_dateToDayOfMonth, "toDayOfMonth()", "\\mathrm{toDayOfMonth}@<@>", "toDayOfMonth() returns the day of the month of a date object in the current calendar");
-  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toDayWeekName",0,0,1,1,1,1,(void *)pplmethod_dateToDayWeekName, "toDayWeekName()", "\\mathrm{toDayWeekName}@<@>", "toDayWeekName() returns the name of the day of the week of a date object");
-  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toDayWeekNum",0,0,1,1,1,1,(void *)pplmethod_dateToDayWeekNum, "toDayWeekNum()", "\\mathrm{toDayWeekNum}@<@>", "toDayWeekNum() returns the day of the week (1-7) of a date object");
-  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toHour",0,0,1,1,1,1,(void *)pplmethod_dateToHour, "toHour()", "\\mathrm{toHour}@<@>", "toHour() returns the integer hour component (0-23) of a date object");
-  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toJD",0,0,1,1,1,1,(void *)pplmethod_dateToJD, "toJD()", "\\mathrm{toJD}@<@>", "toJD() converts a date object to a numerical Julian date");
-  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toMinute",0,0,1,1,1,1,(void *)pplmethod_dateToMinute, "toMinute()", "\\mathrm{toMinute}@<@>", "toMinute() returns the integer minute component (0-59) of a date object");
-  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toMJD",0,0,1,1,1,1,(void *)pplmethod_dateToMJD, "toMJD()", "\\mathrm{toMJD}@<@>", "toMJD() converts a date object to a modified Julian date");
-  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toMonthName",0,0,1,1,1,1,(void *)pplmethod_dateToMonthName, "toMonthName()", "\\mathrm{toMonthName}@<@>", "toMonthName() returns the name of the month in which a date object falls");
-  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toMonthNum",0,0,1,1,1,1,(void *)pplmethod_dateToMonthNum, "toMonthNum()", "\\mathrm{toMonthNum}@<@>", "toMonthNum() returns the number (1-12) of the month in which a date object falls");
-  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toSecond",0,0,1,1,1,1,(void *)pplmethod_dateToSecond, "toSecond()", "\\mathrm{toSecond}@<@>", "toSecond() returns the seconds component (0.0-60.0) of a date object");
-  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"str",0,1,0,0,0,0,(void *)pplmethod_dateToStr, "str(<s>)", "\\mathrm{str}@<@0@>", "str(<s>) converts a date object to a string with an optional format string");
-  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toUnix",0,0,1,1,1,1,(void *)pplmethod_dateToUnix, "toUnix()", "\\mathrm{toUnix}@<@>", "toUnix() converts a date object to a Unix time");
-  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toYear",0,0,1,1,1,1,(void *)pplmethod_dateToYear, "toYear()", "\\mathrm{toYear}@<@>", "toYear() returns the year in which a date object falls in the current calendar");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toDayOfMonth",0,1,0,0,0,0,(void *)pplmethod_dateToDayOfMonth, "toDayOfMonth(<timezone>)", "\\mathrm{toDayOfMonth}@<@0@>", "toDayOfMonth(<timezone>) returns the day of the month of a date object in the current calendar");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toDayWeekName",0,1,0,0,0,0,(void *)pplmethod_dateToDayWeekName, "toDayWeekName(<timezone>)", "\\mathrm{toDayWeekName}@<@0@>", "toDayWeekName(<timezone>) returns the name of the day of the week of a date object");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toDayWeekNum",0,1,0,0,0,0,(void *)pplmethod_dateToDayWeekNum, "toDayWeekNum(<timezone>)", "\\mathrm{toDayWeekNum}@<@0@>", "toDayWeekNum(<timezone>) returns the day of the week (1-7) of a date object");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toHour",0,1,0,0,0,0,(void *)pplmethod_dateToHour, "toHour(<timezone>)", "\\mathrm{toHour}@<@0@>", "toHour(<timezone>) returns the integer hour component (0-23) of a date object");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toJD",0,0,0,0,0,0,(void *)pplmethod_dateToJD, "toJD()", "\\mathrm{toJD}@<@>", "toJD() converts a date object to a numerical Julian date");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toMinute",0,1,0,0,0,0,(void *)pplmethod_dateToMinute, "toMinute(<timezone>)", "\\mathrm{toMinute}@<@0@>", "toMinute(<timezone>) returns the integer minute component (0-59) of a date object");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toMJD",0,0,0,0,0,0,(void *)pplmethod_dateToMJD, "toMJD()", "\\mathrm{toMJD}@<@>", "toMJD() converts a date object to a modified Julian date");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toMonthName",0,1,0,0,0,0,(void *)pplmethod_dateToMonthName, "toMonthName(<timezone>)", "\\mathrm{toMonthName}@<@0@>", "toMonthName(<timezone>) returns the name of the month in which a date object falls");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toMonthNum",0,1,0,0,0,0,(void *)pplmethod_dateToMonthNum, "toMonthNum(<timezone>)", "\\mathrm{toMonthNum}@<@0@>", "toMonthNum(<timezone>) returns the number (1-12) of the month in which a date object falls");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toSecond",0,1,0,0,0,0,(void *)pplmethod_dateToSecond, "toSecond(<timezone>)", "\\mathrm{toSecond}@<@0@>", "toSecond(<timezone>) returns the seconds component (0.0-60.0) of a date object");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"str",0,2,0,0,0,0,(void *)pplmethod_dateToStr, "str(<s>,<timezone>)", "\\mathrm{str}@<@0@>", "str(<s>,<timezone>) converts a date object to a string with an optional format string");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toUnix",0,0,0,0,0,0,(void *)pplmethod_dateToUnix, "toUnix()", "\\mathrm{toUnix}@<@>", "toUnix() converts a date object to a Unix time");
+  ppl_addSystemMethod(pplObjMethods[PPLOBJ_DATE],"toYear",0,1,0,0,0,0,(void *)pplmethod_dateToYear, "toYear(<timezone>)", "\\mathrm{toYear}@<@0@>", "toYear(<timezone>) returns the year in which a date object falls in the current calendar");
 
   // Color methods
   ppl_addSystemMethod(pplObjMethods[PPLOBJ_COL],"componentsCMYK",0,0,1,1,1,1,(void *)pplmethod_colCompCMYK, "componentsCMYK()", "\\mathrm{componentsCMYK}@<@>", "componentsCMYK() returns a vector CMYK representation of a color");

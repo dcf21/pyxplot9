@@ -585,7 +585,7 @@ plot 'datafile' using 1:2 label "%s"%($3)
 which are to be used as labels, as in the second example above, syntax such as
 {\tt "\%s"\%(\$3)} must be used to explicitly read the data as strings rather
 than as numerical quantities.  As Pyxplot treats any whitespace as separating
-columns of data, such labels cannot contain spaces, though \LaTeX's {\tt
+columns of data, such labels cannot contain spaces, though \latexdcf's {\tt
 $\sim$} character (a non-breaking space) can be used to achieve a space.
 
 Data points can be labelled when plotted in any of the following plot styles:
@@ -1482,7 +1482,7 @@ set arrow 1 from first  x0, first  y0 \
 \subsection{Text labels}
 
 Text labels may be placed on plots using the \indcmdt{set label}. As with all
-textual labels in Pyxplot, these are rendered in \LaTeX:
+textual labels in Pyxplot, these are rendered in \latexdcf:
 
 \begin{verbatim}
 set label 1 'Hello World' at 0,0

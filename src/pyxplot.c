@@ -87,7 +87,9 @@ int main(int argc, char **argv)
   // Initialise sub-modules
   ppl_PaperSizeInit();
   context = ppl_contextInit();
+  setenv("TZ","UTC",1);
   if (DEBUG) ppl_log(&context->errcontext,"Initialising Pyxplot.");
+  if (DEBUG) { sprintf(context->errcontext.tempErrStr, "Detected timezone <%s>.", context->set->term_default.timezone); ppl_log(&context->errcontext,NULL); }
   ppl_memAlloc_MemoryInit(&context->errcontext, &ppl_error, &ppl_log);
   if (!ppl_inputInit(context)) ppl_fatal(&context->errcontext, __FILE__, __LINE__, "Out of memory." );
   ppltxt_init();

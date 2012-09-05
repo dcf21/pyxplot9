@@ -170,7 +170,8 @@ void ppl_expTokenise(ppl_context *context, char *in, int *end, int dollarAllowed
        {
         char quoteType;
         int  raw=0;
-        if ( (in[scanpos]=='r') && ((in[scanpos+1]=='\'') || (in[scanpos+1]=='"')) ) { raw=1; NEWSTATE(1,0,0); }
+        if ( (in[scanpos]=='r') && ((in[scanpos+1]=='\'') || (in[scanpos+1]=='"')) ) { raw=1; NEWSTATE(1,0,0); } // r'hello' is raw string
+        if ( (in[scanpos]=='e') && ((in[scanpos+1]=='\'') || (in[scanpos+1]=='"')) ) { raw=0; NEWSTATE(1,0,0); } // e'hello' is string with extended escapes
         if ( (in[scanpos]==(quoteType='\'')) || (in[scanpos]==(quoteType='"')) )
          {
           int j=1, tripleQuote=0;
@@ -663,7 +664,7 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
       char *oc = (char *)(out+outpos+1);
       int   ol = 0;
       BYTECODE_OP(2); // bytecode op 2
-      if ((quoteType=='r') && ((in[tpos+1]=='\'') || (in[tpos+1]=='\"')) )
+      if ((quoteType=='r') && ((in[tpos+1]=='\'') || (in[tpos+1]=='\"')) ) // r'hello' raw string
        {
         int offset=2, tripleQuote=0;
         quoteType=in[tpos+1];
@@ -678,20 +679,11 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
           oc[ol++] = in[i];
          }
        }
-      else if ((quoteType!='\'')&&(quoteType!='"')) // Unquoted string
+      else if ((quoteType=='e') && ((in[tpos+1]=='\'') || (in[tpos+1]=='\"')) ) // e'hello' string with extended escaping
        {
-        while ((tpos<tlen) && (tdata[tpos].state == o))
-         {
-          oc[ol++] = in[tpos++];
-          if (tpos>=tlen) break;
-         }
-        if ((ol>0)&&(oc[ol-1]==',')) ol--;
-       }
-      else
-       {
-        int offset=1, tripleQuote=0;
-        if ((in[tpos+1]==quoteType)&&(in[tpos+2]==quoteType)) { offset=3; tripleQuote=1; }
-
+        int offset=2, tripleQuote=0;
+        quoteType=in[tpos+1];
+        if ((in[tpos+2]==quoteType)&&(in[tpos+3]==quoteType)) { offset=4; tripleQuote=1; }
         for ( i=tpos+offset ;
               ( ((!tripleQuote) &&  (in[i]!=quoteType)) ||
                 (  tripleQuote  && ((in[i]!=quoteType)||(in[i+1]!=quoteType)||(in[i+2]!=quoteType)) ) );
@@ -713,6 +705,38 @@ void ppl_expCompile(ppl_context *context, int srcLineN, long srcId, char *srcFna
              case 'r' : oc[ol++]='\r'; i++; break;
              case 't' : oc[ol++]='\t'; i++; break;
              case 'v' : oc[ol++]='\v'; i++; break;
+             default  : oc[ol++] = in[i]; break;
+            }
+          else { oc[ol++] = in[i]; }
+         }
+       }
+      else if ((quoteType!='\'')&&(quoteType!='"')) // Unquoted string
+       {
+        while ((tpos<tlen) && (tdata[tpos].state == o))
+         {
+          oc[ol++] = in[tpos++];
+          if (tpos>=tlen) break;
+         }
+        if ((ol>0)&&(oc[ol-1]==',')) ol--;
+       }
+      else // a string of the form 'hello' with only quote characters escaped
+       {
+        int offset=1, tripleQuote=0;
+        if ((in[tpos+1]==quoteType)&&(in[tpos+2]==quoteType)) { offset=3; tripleQuote=1; }
+
+        for ( i=tpos+offset ;
+              ( ((!tripleQuote) &&  (in[i]!=quoteType)) ||
+                (  tripleQuote  && ((in[i]!=quoteType)||(in[i+1]!=quoteType)||(in[i+2]!=quoteType)) ) );
+              i++
+            )
+         {
+          if (in[i]=='\0') { *errPos=i; *errType=ERR_INTERNAL; strcpy(errText, "Unexpected end of string."); *end=-1; return; }
+          if (in[i]=='\\')
+           switch (in[i+1])
+            {
+             case '\'': oc[ol++]='\''; i++; break;
+             case '\"': oc[ol++]='\"'; i++; break;
+             case '\\': oc[ol++]='\\'; i++; break;
              default  : oc[ol++] = in[i]; break;
             }
           else { oc[ol++] = in[i]; }

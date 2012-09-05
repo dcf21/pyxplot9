@@ -45,6 +45,7 @@ typedef struct pplset_terminal {
  char   PaperName[FNAME_LENGTH];
  char   LatexPreamble[FNAME_LENGTH];
  char   ViewerCmd[FNAME_LENGTH];
+ char   timezone[FNAME_LENGTH];
  } pplset_terminal;
 
 typedef struct pplset_tics {

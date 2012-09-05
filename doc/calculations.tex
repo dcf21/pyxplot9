@@ -855,7 +855,7 @@ Pyxplot's default convention of displaying numbers in a format such as
 \noindent is well-suited for creating text which is readable by human users, but
 is less well-suited for creating text which can be copied and pasted into
 another calculation in another Pyxplot terminal, or for creating text which
-could be used in a \LaTeX\ text label on a plot. For this reason, the
+could be used in a \latexdcf\ text label on a plot. For this reason, the
 \indcmdt{set numerics display} allows the user to choose between three
 different ways in which numbers can be displayed:
 
@@ -866,7 +866,7 @@ different ways in which numbers can be displayed:
 The first case is the default way in which Pyxplot displays numbers. The second
 case produces text which forms a valid algebraic expression which could be
 pasted into another Pyxplot calculation. The final case produces a string of
-\LaTeX\ text which could be used as a label on a plot.
+\latexdcf\ text which could be used as a label on a plot.
 
 \section{Numerical integration and differentiation}
 
@@ -1088,40 +1088,83 @@ Finally, this maximum could also be found using Pyxplot's built-in function {\tt
 \section{Working with time-series data}
 \label{sec:time_series}
 
-Time-series data need to be handled carefully, since it is not straightforward
-to convert a series of calendar dates into elapsed times between the \datapoint
-s. The problems are especially difficult for series that span many weeks, since
-months have non-uniform lengths and some years have an extra leap day. But even
-shorter time series are complicated by hours and minutes being non-decimal
-fractions of days.
+Time-series data need to be handled carefully. If times and dates are specified
+in local time, then conversions may be necessarily between timezones,
+especially around the beginning and end of daylight saving time.
+
+Even when this it not an issue, months have different lengths and leap years
+have an extra day, which mean it is not straightforward to convert a series of
+calendar dates into elapsed times between the \datapoint s.
+
+On a more basic level, even time expressed in hours and minutes are complicated
+by being expressed as non-decimal fractions of days.
 
 To simplify the process of working with dates and times, Pyxplot has native
 {\tt date} object type, together with pre-defined functions in the {\tt time}
-module for creating and manipulating such objects. The functions for creating
-{\tt date} objects are as follows:
+module for creating and manipulating such objects.  A date object represents a
+specific moment in time, and can be created from a time and date specified in
+any arbitrary timezone. It is then possible to read out the time and date
+components of this date object in any other arbitrary timezone.
 
-\funcdef{time.fromCalendar($year,month,day,hour,min,sec$)}{creates a date
-object from the specified calendar date. It takes six inputs: the year, the
-month number (1--12), the day of the month (1--31), the hour of day (0--24),
-the number of minutes (0--59), and the number of seconds (0--59). To enter
-dates before {\footnotesize AD}\,1, a year of~$0$ should be passed to indicate
+The functions for creating {\tt date} objects are as follows:
+
+\vspace{2mm}\noindent{\tt time.fromCalendar(year,month,day,hour,min,sec,<timezone>)}\vspace{2mm}
+
+\noindent This function creates a date object from the specified calendar date.
+It takes six compulsary numerical inputs: the year, the month number (1--12),
+the day of the month (1--31), the hour of day (0--24), the number of minutes
+(0--59), and the number of seconds (0--59). To enter dates before
+{\footnotesize AD}\,1, a year of~$0$ should be passed to indicate
 1\,{\footnotesize BC}, $-1$ should be passed to indicate the year
-2\,{\footnotesize BC}, and so forth. The \texttt{set calendar} command may be used
-to change the current calendar.}
-\funcdef{time.fromJD($t$)}{creates a date object from the specified numerical Julian date.}
-\funcdef{time.fromMJD($t$)}{creates a date object from the specified numerical modified Julian date.}
-\funcdef{time.fromUnix($t$)}{creates a date object from the specified numerical Unix time.}
+2\,{\footnotesize BC}, and so forth.
 
-Also, the function {\tt time.now()}\indfun{time.now()}, which takes no
-arguments, returns a {\tt date} object corresponding to the current system
-clock time, as in the following example:
+A timezone may optionally be specified as the final argument to the function.
+If no timezone is specified, then the default is used, which may be set using
+the {\tt set timezone} command. The timezone should be specified as a location string,
+of the form {\tt Europe/London}, {\tt America/New\_York} or {\tt
+Australia/Perth}, as used by the {\tt tz database}. A complete list of
+available timezones can be found here:
+\url{http://en.wikipedia.org/wiki/List_of_tz_database_time_zones}.
+
+Daylight saving time will be applied as appropriate for the specified location.
+Note that strings such as {\tt GMT}, {\tt EDT} or {\tt CEST} are {\it not}
+allowed as timezones; a {\it location} should be specified.
+
+If universal time is used, the timezone may be specified as {\tt UTC}.
+
+\vspace{2mm}\noindent{\tt time.fromUnix(t)}\vspace{2mm}
+
+\noindent This function creates a date object from the specified numerical Unix time -- i.e.\ the number of seconds ellapsed since midnight on 1st January 1970 UTC.
+
+\vspace{2mm}\noindent{\tt time.fromJD(t)}\vspace{2mm}
+
+\noindent This function creates a date object from the specified numerical
+Julian date.
+
+\vspace{2mm}\noindent{\tt time.fromMJD(t)}\vspace{2mm}
+
+\noindent This function creates a date object from the
+specified numerical modified Julian date.
+
+\vspace{2mm}\noindent{\tt time.now()}\vspace{2mm}
+
+This function takes no arguments, returns a {\tt date} object corresponding to
+the current system clock time, as in the following example:
 
 \vspace{3mm}
 \noindent\texttt{pyxplot> \textbf{print time.now()}}\newline
-\noindent\texttt{Sat 2012 Jun 16 15:12:39}
+\noindent\texttt{Tue 2012 Sep 4 20:57:00 UTC}\newline
+\noindent\texttt{pyxplot> \textbf{set timezone "America/Los\_Angeles"}}\newline
+\noindent\texttt{pyxplot> \textbf{print time.now()}}\newline
+\noindent\texttt{Tue 2012 Sep 4 13:57:41 PDT}\newline
 \vspace{3mm}
 
-The following example creates a date object representing midnight on 1st January 2000:
+Note that the date object created by the {\tt time.now()} function is identical
+regardless of timezone, but it is {\it displayed} differently depending upon
+the current timezone.
+
+The following example creates a date object representing midnight on 1st
+January 2000, in universal time, and in Western Australian time:
 
 \vspace{3mm}
 \input{fragments/tex/calc_date1.tex}
@@ -1137,10 +1180,15 @@ dates, as in the following example:
 Standard string representations of calendar dates can be produced with the {\tt
 print} command.  It is also possible to use the string substitution operator,
 as in {\tt "\%s"\%(date)}, or the {\tt str} method of {\tt date} objects, as in
-{\tt date.str()}.  In addition, the {\tt time.string} function can be used to
-choose a custom display format for the date:
+{\tt date.str()}.
 
-\funcdef{time.string($t,format$)}{returns a string representation of the specified date object $t$. The second input is optional, and may be used to control the format of the output. If no format string is provided, then the format \newline\noindent{\tt "\%a \%Y \%b \%d \%H:\%M:\%S"}\newline\noindent is used. In such format strings, the following tokens are substituted for various parts of the date:
+In addition, the {\tt time.string} function can be used to choose a custom
+display format for the date, or to specify the timezone in which the date
+should be displayed. Its arguments are as follows:
+
+\vspace{2mm}\noindent{\tt time.string(t,<format>,<timezone>)}\vspace{2mm}
+
+\noindent This function returns a string representation of the specified date object $t$. The second argument is optional, and may be used to control the format of the output. If no format string is provided, then the format \newline\noindent{\tt "\%a \%Y \%b \%d \%H:\%M:\%S \%Z"}\newline\noindent is used. In such format strings, the following tokens are substituted for various parts of the date:
 \begin{longtable}{|>{\columncolor{LightGrey}}l|>{\columncolor{LightGrey}}l|}
 \hline \endfoot
 \hline
@@ -1163,22 +1211,35 @@ Token & Value \\
 {\tt \%S} & Second, in range~00-59.\\
 {\tt \%y} & Last two digits of year number.\\
 {\tt \%Y} & Year number.\\
-\end{longtable}}
+{\tt \%Z} & Timezone name (e.g. UTC, CEST, EDT). \\
+\end{longtable}
 
-Several functions are provided for converting {\tt date} objects back into various numerical forms of timekeeping and components of calendar dates:
+The third argument is also optional, and specifies the timezone that the time
+should be displayed in. As above, this should be specified in the form {\tt
+Europe/London}, {\tt America/New\_York} or {\tt Australia/Perth}, as used by
+the {\tt tz database}. A complete list of available timezones can be found
+here: \url{http://en.wikipedia.org/wiki/List_of_tz_database_time_zones}.  If
+universal time is used, the timezone may be specified as {\tt UTC}. If no
+timezone is specified, the default is used as set in the {\tt set timezone}
+command.
 
-\methdef{toDayOfMonth()}{returns the day of the month of a date object in the current calendar.}
-\methdef{toDayWeekName()}{returns the name of the day of the week of a date object.}
-\methdef{toDayWeekNum()}{returns the day of the week (1--7) of a date object.}
-\methdef{toHour()}{returns the integer hour component (0--23) of a date object.}
+Several functions are provided for converting {\tt date} objects back into
+various numerical forms of timekeeping and components of calendar dates, which
+are listed below. Where appropriate, an optional timezone may be specified to
+obtain a calendar date for a particular location:
+
+\methdef{toDayOfMonth($<timezone>$)}{returns the day of the month of a date object in the current calendar.}
+\methdef{toDayWeekName($<timezone>$)}{returns the name of the day of the week of a date object.}
+\methdef{toDayWeekNum($<timezone>$)}{returns the day of the week (1--7) of a date object.}
+\methdef{toHour($<timezone>$)}{returns the integer hour component (0--23) of a date object.}
 \methdef{toJD()}{converts a date object to a numerical Julian date.}
-\methdef{toMinute()}{returns the integer minute component (0--59) of a date object.}
+\methdef{toMinute($<timezone>$)}{returns the integer minute component (0--59) of a date object.}
 \methdef{toMJD()}{converts a date object to a modified Julian date.}
-\methdef{toMonthName()}{returns the name of the month in which a date object falls.}
-\methdef{toMonthNum()}{returns the number (1--12) of the month in which a date object falls.}
-\methdef{toSecond()}{returns the seconds component (0--60) of a date object, including the non-integer component.}
+\methdef{toMonthName($<timezone>$)}{returns the name of the month in which a date object falls.}
+\methdef{toMonthNum($<timezone>$)}{returns the number (1--12) of the month in which a date object falls.}
+\methdef{toSecond($<timezone>$)}{returns the seconds component (0--60) of a date object, including the non-integer component.}
 \methdef{toUnix()}{converts a date object to a Unix time.}
-\methdef{toYear()}{returns the year in which a date object falls in the current calendar.}
+\methdef{toYear($<timezone>$)}{returns the year in which a date object falls in the current calendar.}
 
 For example:
 
@@ -1243,10 +1304,10 @@ to use when converting calendar dates into {\tt date} objects, and when
 converting in the opposite direction. This is useful when converting data from
 one calendar to another. The syntax used to do this is as follows:
 \begin{verbatim}
-set calendar in Julian      # only applies to time_julianday()
-set calendar out Gregorian  # does not apply to time_julianday()
-set calendar in Julian out Gregorian      # change both
-show calendar               # show calendars currently being used
+set calendar in Julian     # only applies to time.fromCalendar()
+set calendar out Gregorian # does not apply to time.fromCalendar()
+set calendar in Julian out Gregorian   # change both
+show calendar              # show calendars currently being used
 \end{verbatim}
 
 \example{ex:tolstoy}{Calculating the date of Leo Tolstoy's birth}{

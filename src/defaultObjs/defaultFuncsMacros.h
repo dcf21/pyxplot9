@@ -72,6 +72,27 @@
    } \
  }
 
+#define CHECK_NEEDSREAL(X, VAR) \
+ { \
+  if ((X).flagComplex) \
+   { \
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_TYPE; sprintf(c->errStat.errBuff,"The %s requires real arguments; argument %s is complex.",FunctionDescription,VAR); return; } \
+    else                                                          { NULL_OUTPUT; } \
+   } \
+ \
+  if (!(X).dimensionless) \
+   { \
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_TYPE; sprintf(errText,"The %s requires dimensionless arguments; argument %s has dimensions of <%s>.",FunctionDescription,VAR,ppl_printUnit(c, &(X), NULL, NULL, 1, 1, 0)); return; } \
+    else                                                          { NULL_OUTPUT; } \
+   } \
+ \
+  if ((!gsl_finite((X).real)) || (!gsl_finite((X).imag))) \
+   { \
+    if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_TYPE; sprintf(errText,"The %s requires finite arguments; argument %s is not finite.",FunctionDescription,VAR); return; } \
+    else                                                          { NULL_OUTPUT; } \
+   } \
+ }
+
 #define NAN_CHECK_FAIL \
  { \
   if (c->set->term_current.ExplicitErrors == SW_ONOFF_ON) { *status = 1; *errType=ERR_RANGE; sprintf(errText, "The function %s has received a non-finite input.",FunctionDescription); return; } \

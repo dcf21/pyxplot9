@@ -1,1 +1,1 @@
-print 'the moon,\nthe moon,\nThey danced by the light of the moon.'
+print e'the moon,\nthe moon,\nThey danced by the light of the moon.'

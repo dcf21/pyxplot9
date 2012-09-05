@@ -544,7 +544,7 @@ angles of triangles, taking as its inputs the lengths of the three sides of the
 triangle to be drawn and the position of its lower-left corner. The subroutine
 calculates the positions of the three vertices of the triangle and then labels
 them. We use Pyxplot's automatic handling of physical units to generate the
-\LaTeX\ strings required to label the side lengths in centimetres and the
+\latexdcf\ strings required to label the side lengths in centimetres and the
 angles in degrees. We use Pyxplot's {\tt arc} command to draw angle symbols in
 the three corners of a triangle.
 \nlscf
@@ -733,10 +733,10 @@ are too narrow for this.
 \section{LaTeX and Pyxplot}
 
 The \indcmdt{text} can straightforwardly be used to render simple one-line
-\LaTeX\index{latex} strings, but sometimes the need arises to place more
+\latexdcf\index{latex} strings, but sometimes the need arises to place more
 substantial blocks of text onto a plot. For this purpose, it can be useful to
-use the \LaTeX\ {\tt parbox} or {\tt minipage} environments\footnote{Remember,
-any valid \LaTeX\ string can be passed to the \indcmdt{text} and \indcmdt{set
+use the \latexdcf\ {\tt parbox} or {\tt minipage} environments\footnote{Remember,
+any valid \latexdcf\ string can be passed to the \indcmdt{text} and \indcmdt{set
 label}.}. For example:
 
 \input{examples/tex/ex_text1_1.tex}

@@ -1,1 +1,9 @@
 print time.fromCalendar(2000,1,1,0,0,0)
+a = time.fromCalendar(2000,1,1,0,0,0,"Australia/Perth")
+print a # Note that this does not use Australian time
+set timezone "Pacific/Chatham"
+print a
+set timezone "Antarctica/South_Pole"
+print a
+print a.toYear() # at the south pole
+print a.toYear("Europe/London")

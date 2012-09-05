@@ -91,9 +91,9 @@ become predefined in Pyxplot's mathematical environment, for example
 sinc(x) = sin(x)/(x)
 \end{verbatim}
 \item {\tt latex} -- contains a single setting {\tt preamble}, which is
-prefixed to the beginning of all \LaTeX\ text items, before the {\tt
+prefixed to the beginning of all \latexdcf\ text items, before the {\tt
 \textbackslash begin\{document\}} statement. It can be used to define custom
-\LaTeX\ macros or to include packages using the {\tt \textbackslash
+\latexdcf\ macros or to include packages using the {\tt \textbackslash
 includepackage\{\}} command.  The preamble can be also changed using the
 \indcmdt{set preamble}.
 \item {\tt script} -- can contain a list of \indcmdt{set}s, using the same
@@ -978,10 +978,10 @@ where
 \begin{longtable}{p{3.4cm}p{9cm}}
 {\tt l\_sing} & is the long singular name of the unit, e.g.\ {\tt metre}.\\
 {\tt s\_sing} & is the short singular name of the unit, e.g.\ {\tt m}.\\
-{\tt lt\_sing} & is the singular name of the unit to be used in \LaTeX.\\
+{\tt lt\_sing} & is the singular name of the unit to be used in \latexdcf.\\
 {\tt l\_plur} & is the long plural name of the unit, e.g.\ {\tt metres}.\\
 {\tt s\_plur} & is the short plural name of the unit, e.g.\ {\tt m}.\\
-{\tt lt\_plur} & is the plural name of the unit to be used in \LaTeX.\\
+{\tt lt\_plur} & is the plural name of the unit to be used in \latexdcf.\\
 {\tt quantity\_name} & is the physical quantity which the unit measures, e.g.\ {\tt length}.\\
 {\tt definition} & is a definition of the unit in terms of other units which
 Pyxplot already recognises, e.g.\ {\tt 0.001*km}. The syntax used is identical
@@ -994,7 +994,7 @@ metre/m/m/metres/m/m:length=0.001*km
 
 Not all of the various names which a unit may have need to be specified. If
 plural names are not specified then they are assumed to be the same as the
-singular names. If short and/or \LaTeX names are not specified they are assumed
+singular names. If short and/or \latexdcf\ names are not specified they are assumed
 to be the same as the long name. If the definition is left blank then the unit
 is assumed to be a new base unit which is not related to any pre-existing
 units.

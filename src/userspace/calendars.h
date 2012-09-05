@@ -35,7 +35,11 @@ double ppl_islamicToUnixTime  (ppl_context *ct, int year, int month, int day, in
 void   ppl_islamicFromUnixTime(ppl_context *ct, double UT, int *year, int *month, int *day, int *status, char *errText);
 double ppl_toUnixTime         (ppl_context *ct, int year, int month, int day, int hour, int min, int sec, int *status, char *errText);
 void   ppl_fromUnixTime       (ppl_context *ct, double UT, int *year, int *month, int *day, int *hour, int *min, double *sec, int *status, char *errText);
-void   ppl_dateString         (ppl_context *ct, char *out, double UT, const char *format, int *status, char *errText);
+void   ppl_dateString         (ppl_context *ct, char *out, double UT, const char *format, const char *timezone, int *status, char *errText);
 void   ppl_timeDiffStr        (ppl_context *ct, char *out, double UT1, double UT2, const char *format, int *status, char *errText);
+
+void   ppl_calendarTimezoneSet        (ppl_context *ct, int specified, char *tz);
+void   ppl_calendarTimezoneUnset      (ppl_context *ct);
+void   ppl_calendarTimezoneOffset     (ppl_context *ct, double unixTime, char *tzNameOut, double *offset);
 
 #endif

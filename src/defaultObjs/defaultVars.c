@@ -455,7 +455,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     // Time module
     ppl_dictAppendCpy(d  , "time", pplObjModule(&m,1,1,1) , sizeof(v));
     d2 = (dict *)m.auxil;
-    ppl_addSystemFunc(d2,"fromCalendar"  ,6,6,1,1,1,1,(void *)&pplfunc_timefromCalendar, "fromCalendar(year,month,day,hour,min,sec)", "\\mathrm{fromCalendar@<@1@>", "fromCalendar(year,month,day,hour,min,sec) creates a date object from the specified calendar date. See also 'set calendar'");
+    ppl_addSystemFunc(d2,"fromCalendar"  ,6,7,0,0,0,0,(void *)&pplfunc_timefromCalendar, "fromCalendar(year,month,day,hour,min,sec)", "\\mathrm{fromCalendar@<@1@>", "fromCalendar(year,month,day,hour,min,sec) creates a date object from the specified calendar date. See also 'set calendar'");
     ppl_addSystemFunc(d2,"fromJD"        ,1,1,1,1,1,1,(void *)&pplfunc_timefromJD  , "fromJD(t)", "\\mathrm{fromJD}@<@1@>", "fromJD(t) creates a date object from the specified Julian date");
     ppl_addSystemFunc(d2,"fromMJD"       ,1,1,1,1,1,1,(void *)&pplfunc_timefromMJD , "fromMJD(t)", "\\mathrm{fromMJD}@<@1@>", "fromMJD(t) creates a date object from the specified modified Julian date");
     ppl_addSystemFunc(d2,"fromUnix"      ,1,1,1,1,1,1,(void *)&pplfunc_timefromUnix, "fromUnix(t)", "\\mathrm{fromUnix}@<@1@>", "fromUnix(t) creates a date object from the specified unix time");
@@ -464,7 +464,7 @@ void ppl_makeDefaultVars(ppl_context *out)
     ppl_addSystemFunc(d2,"now"           ,0,0,1,1,1,1,(void *)&pplfunc_timenow     , "now()", "\\mathrm{now}@<@>", "now() returns a date object representing the current time");
     ppl_addSystemFunc(d2,"sleep"         ,1,1,1,1,1,0,(void *)&pplfunc_sleep       , "sleep(t)", "\\mathrm{sleep}@<@1@>", "sleep(t) sleeps for t seconds, or for time period t if it has dimensions of time");
     ppl_addSystemFunc(d2,"sleepUntil"    ,1,1,0,0,0,0,(void *)&pplfunc_sleepUntil  , "sleepUntil(d)", "\\mathrm{sleepUntil}@<@1@>", "sleepUntil(d) sleeps until the specified date and time. Its argument should be a date object");
-    ppl_addSystemFunc(d2,"string"        ,1,2,0,0,0,0,(void *)&pplfunc_timestring  , "string(t,<s>)", "\\mathrm{string}@<@0@>", "string(t,<s>) returns a string representation of the date object t; a format string may optionally be supplied");
+    ppl_addSystemFunc(d2,"string"        ,1,3,0,0,0,0,(void *)&pplfunc_timestring  , "string(t,<s>)", "\\mathrm{string}@<@0@>", "string(t,<s>) returns a string representation of the date object t; a format string may optionally be supplied");
    }
 
   return;

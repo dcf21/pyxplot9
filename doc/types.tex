@@ -99,19 +99,29 @@ Objects of type \texttt{boolean} have no methods other than those common to all 
 \section{The \texttt{date} type}
 \label{sec:date_methods}
 
-\methdef{str(...)}{converts a date object to a string with an optional format string supplied as an argument (see the {\tt time.string()} function).}
-\methdef{toDayOfMonth()}{returns the day of the month of a date object in the current calendar.}
-\methdef{toDayWeekName()}{returns the name of the day of the week of a date object.}
-\methdef{toDayWeekNum()}{returns the day of the week (1--7) of a date object.}
-\methdef{toHour()}{returns the integer hour component (0--23) of a date object.}
+For more information about manipulating dates in Pyxplot, see
+Section~\ref{sec:time_series}.  For more information about manipulating times
+and dates in Pyxplot, see Section~\ref{sec:time_series}. Many of the methods
+listed below take an optional timezone string as their final argument. This
+should be specified in the form {\tt Europe/London}, {\tt America/New\_York} or
+{\tt Australia/Perth}, as used by the {\tt tz database}. A complete list of
+available timezones can be found here:
+\url{http://en.wikipedia.org/wiki/List_of_tz_database_time_zones}.  If
+universal time is used, the timezone may be specified as {\tt UTC}.
+
+\methdef{str($<format>,<timezone>$)}{converts a date object to a string with an optional format string supplied as an argument (see the {\tt time.string()} function).}
+\methdef{toDayOfMonth($<timezone>$)}{returns the day of the month of a date object in the current calendar.}
+\methdef{toDayWeekName($<timezone>$)}{returns the name of the day of the week of a date object.}
+\methdef{toDayWeekNum($<timezone>$)}{returns the day of the week (1--7) of a date object.}
+\methdef{toHour($<timezone>$)}{returns the integer hour component (0--23) of a date object.}
 \methdef{toJD()}{converts a date object to a numerical Julian date.}
-\methdef{toMinute()}{returns the integer minute component (0--59) of a date object.}
+\methdef{toMinute($<timezone>$)}{returns the integer minute component (0--59) of a date object.}
 \methdef{toMJD()}{converts a date object to a modified Julian date.}
-\methdef{toMonthName()}{returns the name of the month in which a date object falls.}
-\methdef{toMonthNum()}{returns the number (1--12) of the month in which a date object falls.}
-\methdef{toSecond()}{returns the seconds component (0--60) of a date object, including the non-integer component.}
+\methdef{toMonthName($<timezone>$)}{returns the name of the month in which a date object falls.}
+\methdef{toMonthNum($<timezone>$)}{returns the number (1--12) of the month in which a date object falls.}
+\methdef{toSecond($<timezone>$)}{returns the seconds component (0--60) of a date object, including the non-integer component.}
 \methdef{toUnix()}{converts a date object to a Unix time.}
-\methdef{toYear()}{returns the year in which a date object falls in the current calendar.}
+\methdef{toYear($<timezone>$)}{returns the year in which a date object falls in the current calendar.}
 
 \section{The \texttt{dictionary} type}
 \label{sec:dictionary_methods}

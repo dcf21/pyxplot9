@@ -1,1 +1,1 @@
-print r'the moon,\nthe moon,\nThey danced by the light of the moon.'
+print r'''I escaped the quote by typing \'.'''

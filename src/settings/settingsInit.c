@@ -57,6 +57,7 @@ void pplset_makedefault(ppl_context *context)
   pplObj tempval;
   char   ConfigFname[FNAME_LENGTH], *ConfigFnamePtr = &ConfigFname[0];
   char  *PaperSizePtr;
+  char  *tz;
   ppl_settings *s = context->set;
   pplerr_context *se = &context->errcontext;
 
@@ -120,6 +121,10 @@ void pplset_makedefault(ppl_context *context)
   s->term_default.UnitAngleDimless    = SW_ONOFF_ON;
   s->term_default.viewer              = SW_VIEWER_GV;
   strcpy(s->term_default.ViewerCmd, "");
+  tz = getenv("TZ");
+  if (tz!=NULL) strncpy(s->term_default.timezone , getenv("TZ"), FNAME_LENGTH);
+  else          strncpy(s->term_default.timezone , "", FNAME_LENGTH);
+  s->term_default.timezone[FNAME_LENGTH-1]='\0';
 
   // Default Graph Settings, used when these values are not changed by any configuration files
   s->graph_default.aspect                = 1.0;

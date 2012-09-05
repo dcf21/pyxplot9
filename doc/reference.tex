@@ -1345,7 +1345,7 @@ plot 'datafile' using 1:2 label "%s"%($3)
 which are to be used as labels, as in the second example above, syntax such as 
 {\tt "\%s"\%(\$3)} must be used to explicitly read the data as strings rather
 than as numerical quantities.  As Pyxplot treats any whitespace as separating
-columns of data, such labels cannot contain spaces, though \LaTeX's {\tt
+columns of data, such labels cannot contain spaces, though \latexdcf's {\tt
 $\sim$} character can be used to achieve a space.
 
 Datapoints can be labelled when plotted in any of the following plot styles:
@@ -2198,7 +2198,7 @@ value of~{\tt 0.5} would cause text to be rendered at half its normal size.
 The default value is one.
 
 As an alternative, font sizes can be specified with coarser granulation
-directly in the \LaTeX\ text of labels, as in the example:
+directly in the \latexdcf\ text of labels, as in the example:
 
 \begin{verbatim}
 set xlabel '\Large This is a BIG label'
@@ -2771,7 +2771,7 @@ for {\tt quiet}.
 \item The setting {\tt display} changes the format in which numbers are
 displayed on the terminal.  Setting the option to {\tt typeable} causes the
 numbers to be printed in a form suitable for pasting back into Pyxplot
-commands.  The setting {\tt latex} causes \LaTeX-compatible output to be
+commands.  The setting {\tt latex} causes \latexdcf-compatible output to be
 generated.  The setting {\tt natural} generates concise, human-readable output
 which has neither of the above properties.
 
@@ -2921,7 +2921,7 @@ set preamble <text>
 \end{verbatim}
 
 The setting {\tt preamble} changes the text of the preamble that is passed to
-\LaTeX\ prior to the rendering of each text item on the current multiplot
+\latexdcf\ prior to the rendering of each text item on the current multiplot
 canvas.  This allows, for example, different packages to be loaded by default
 and user-defined macros to be set up, as in the examples:
 
@@ -3198,7 +3198,7 @@ allows for the production of immediately-printable output.
 Sends output to Encapsulated PostScript ({\tt eps}) files.  The filename to
 which output should be sent can be set using the {\tt set output} command; the
 default is {\tt pyxplot.eps}.  This terminal produces images suitable for
-including in, for example, \LaTeX\ documents.
+including in, for example, \latexdcf\ documents.
 
 
 \subsubsection{gif}\index{set terminal command!gif modifier@{\tt gif} modifier}
@@ -3386,6 +3386,32 @@ set textvalign center
 set textvalign top
 \end{verbatim}
 
+
+\subsection{timezone}\indcmd{set timezone}
+
+\begin{verbatim}
+set timezone <timezone>
+\end{verbatim}
+
+The \indcmdt{set timezone} sets the name of the default timezone that Pyxplot
+uses when handling date objects. It should take the form of a {\tt tz database}
+timezone name, for example {\tt Europe/London}. A complete list of these can be
+found here: \url{http://en.wikipedia.org/wiki/List_of_tz_database_time_zones}.
+If no timezone is specified, then the default set using the {\tt set timezone}
+command is used. If universal time is required, {\tt UTC} may be specified as
+the timezone. For example:
+
+\begin{verbatim}
+set timezone Europe/Paris
+set timezone Australia/Perth
+set timezone America/New_York
+set timezone Antarctica/South_Pole
+set timezone UTC
+\end{verbatim}
+
+Note that it is {\it not} permitted to set a timezone such as {\tt GMT}, {\tt
+EDT} or {\tt CEST}; a place should be specified, and Pyxplot will use the local
+time from that location.
 
 \subsection{title}\indcmd{set title}
 
@@ -4073,7 +4099,7 @@ text 'A purple label' at 0, 0 with color purple
 
 Outside of multiplot mode, the text command can be used to produce images
 consisting simply of one single text item. This can be useful for importing
-\LaTeX ed equations as gif images into slideshow programs such as Microsoft
+\latexdcf ed equations as gif images into slideshow programs such as Microsoft
 Powerpoint which are incapable of producing such neat mathematical notation
 by themselves.
 

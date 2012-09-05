@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 #include <gsl/gsl_math.h>
 
@@ -379,7 +380,7 @@ double ppl_toUnixTime(ppl_context *ct, int year, int month, int day, int hour, i
 
   JD = 365.0*year - 679004.0 + 2400000.5 + b + floor(30.6001*(month+1)) + day;
   JD = 86400.0 * (JD - 2440587.5);
-  DayFraction = fabs(hour)*24*60 + fabs(min)*60 + fabs(sec);
+  DayFraction = fabs(hour)*3600 + fabs(min)*60 + fabs(sec);
   return JD + DayFraction;
  }
 
@@ -419,13 +420,13 @@ void ppl_fromUnixTime(ppl_context *ct, double UT, int *year, int *month, int *da
 
 // String representations of dates
 
-void ppl_dateString(ppl_context *ct, char *out, double UT, const char *format, int *status, char *errText)
+void ppl_dateString(ppl_context *ct, char *out, double UT, const char *format, const char *timezone, int *status, char *errText)
  {
   int     j=0,k=0;
   int     year, month, day, hour, min;
   double  sec;
 
-  if (format==NULL) format="%a %Y %b %d %H:%M:%S";
+  if (format==NULL) format="%a %Y %b %d %H:%M:%S %Z";
   *status=0;
   ppl_fromUnixTime(ct, UT, &year, &month, &day, &hour, &min, &sec, status, errText);
   if (*status) return;
@@ -453,6 +454,7 @@ void ppl_dateString(ppl_context *ct, char *out, double UT, const char *format, i
       case 'S': sprintf(out+k, "%02d", (int)sec); break;
       case 'y': sprintf(out+k, "%d", year%100); break;
       case 'Y': sprintf(out+k, "%d", year); break;
+      case 'Z': sprintf(out+k, "%s", timezone); break;
       default: { *status=1; sprintf(errText,"Format string supplied to convert date to string contains unrecognised substitution token '%%%c'.",format[j+1]); return; }
      }
     j++;
@@ -494,6 +496,34 @@ void ppl_timeDiffStr(ppl_context *ct, char *out, double UT1, double UT2, const c
     k += strlen(out + k);
    }
   out[k]='\0'; // Null terminate string
+  return;
+ }
+
+void ppl_calendarTimezoneSet(ppl_context *ct, int specified, char *tz)
+ {
+  if (specified) setenv("TZ",tz,1);
+  else           setenv("TZ",ct->set->term_current.timezone,1);
+  return;
+ }
+
+void ppl_calendarTimezoneUnset(ppl_context *ct)
+ {
+  setenv("TZ","UTC",1);
+  return;
+ }
+
+void ppl_calendarTimezoneOffset(ppl_context *ct, double unixTime, char *tzNameOut, double *offset)
+ {
+  struct tm *t;
+  int        out=0,i;
+  for (i=0;i<2;i++)
+   {
+    time_t in = (time_t)(unixTime-out);
+    t = localtime(&in);
+    out = (int)t->tm_gmtoff;
+   }
+  if (offset   !=NULL) *offset=out;
+  if (tzNameOut!=NULL) strcpy(tzNameOut, t->tm_zone);
   return;
  }
 

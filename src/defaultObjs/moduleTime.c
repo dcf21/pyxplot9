@@ -68,15 +68,26 @@ void pplfunc_timefromMJD (ppl_context *c, pplObj *in, int nArgs, int *status, in
 void pplfunc_timefromCalendar(ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
   char *FunctionDescription = "fromCalendar(year,month,day,hour,min,sec)";
-  double t;
+  double t, offset;
+  CHECK_NEEDSREAL(in[0], "year" );
+  CHECK_NEEDSREAL(in[1], "month");
+  CHECK_NEEDSREAL(in[2], "day"  );
+  CHECK_NEEDSREAL(in[3], "hour" );
+  CHECK_NEEDSREAL(in[4], "min"  );
+  CHECK_NEEDSREAL(in[5], "sec"  );
   CHECK_NEEDSINT(in[0], "year" ,"function's first input (year) must be an integer");
   CHECK_NEEDINT (in[1], "month", "function's second input (month) must be an integer");
   CHECK_NEEDINT (in[2], "day"  , "function's third input (day) must be an integer");
   CHECK_NEEDINT (in[3], "hour" , "function's fourth input (hours) must be an integer");
   CHECK_NEEDINT (in[4], "min"  , "function's fifth input (minutes) must be an integer");
   CHECK_NEEDINT (in[5], "sec"  , "function's sixth input (seconds) must be an integer");
+  if ((nArgs>6)&&(in[6].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The function %s requires a string as its seventh argument; supplied argument had type <%s>.", FunctionDescription, pplObjTypeNames[in[6].objType]); return; }
+  if (nArgs>6) ppl_calendarTimezoneSet(c, 1, (char*)in[6].auxil);
+  else         ppl_calendarTimezoneSet(c, 0, NULL              );
   t = ppl_toUnixTime(c, (int)in[0].real, (int)in[1].real, (int)in[2].real, (int)in[3].real, (int)in[4].real, (int)in[5].real, status, errText);
-  pplObjDate(&OUTPUT,0,t);
+  ppl_calendarTimezoneOffset(c, t, NULL, &offset);
+  ppl_calendarTimezoneUnset(c);
+  pplObjDate(&OUTPUT,0,t-offset);
   CHECK_OUTPUT_OKAY;
  }
 
@@ -143,17 +154,23 @@ void pplfunc_timenow     (ppl_context *c, pplObj *in, int nArgs, int *status, in
 
 void pplfunc_timestring  (ppl_context *c, pplObj *in, int nArgs, int *status, int *errType, char *errText)
  {
-  char  *FunctionDescription = "string(t,<s>)";
-  char  *format=NULL, *out=NULL;
+  char  *FunctionDescription = "string(t,<s>,<timezone>)";
+  char  *format=NULL, *out=NULL, timezone[FNAME_LENGTH];
+  double offset;
   if (in[0].objType!=PPLOBJ_DATE) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The function %s requires a date as its first argument; supplied argument had type <%s>.", FunctionDescription, pplObjTypeNames[in[0].objType]); return; }
   if ((nArgs>1)&&(in[1].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The function %s requires a string as its second argument; supplied argument had type <%s>.", FunctionDescription, pplObjTypeNames[in[1].objType]); return; }
+  if ((nArgs>2)&&(in[2].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText, "The function %s requires a string as its third argument; supplied argument had type <%s>.", FunctionDescription, pplObjTypeNames[in[2].objType]); return; }
 
   out = (char *)malloc(8192);
   if (out==NULL) { *status=1; *errType=ERR_MEMORY; strcpy(errText, "Out of memory."); return; }
 
   if (nArgs>1) format = (char *)in[1].auxil; // Format specified
   else         format = NULL;                // Format not specified
-  ppl_dateString(c, out, in[0].real, format, status, errText);
+  if (nArgs>2) ppl_calendarTimezoneSet(c, 1, (char*)in[2].auxil);
+  else         ppl_calendarTimezoneSet(c, 0, NULL              );
+  ppl_calendarTimezoneOffset(c, in[0].real, timezone, &offset);
+  ppl_dateString(c, out, in[0].real+offset, format, timezone, status, errText);
+  ppl_calendarTimezoneUnset(c);
   if (*status) { *errType=ERR_NUMERICAL; return; }
   pplObjStr(&OUTPUT,0,1,out);
  }

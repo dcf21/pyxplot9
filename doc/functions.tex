@@ -155,8 +155,8 @@ namespace, are listed in subsections below.
 \funcdef{sum(...)}{returns the sum of its arguments, which be of any object type, and may have any physical units, so long as it is possible to add them together.}
 \funcdef{tan($z$)}{returns the tangent of $z$, where $z$ may be any complex number and must either have physical dimensions of angle or be a dimensionless number, in which case it is understood to be measured in radians.}
 \funcdef{tanh($z$)}{returns the hyperbolic tangent of $z$, where $z$ may be any complex number and must either have physical dimensions of angle or be a dimensionless number, in which case it is understood to be measured in radians.}
-\funcdef{texify($s$)}{takes a string representation of an algebraic expression as its input, e.g. ``\texttt{(x/3)**2}'', and returns a \LaTeX\ representation of it.}
-\funcdef{texifyText($s$)}{returns a string of \LaTeX\ text corresponding to the supplied text string, with any reserved characters escaped.}
+\funcdef{texify($s$)}{takes a string representation of an algebraic expression as its input, e.g. ``\texttt{(x/3)**2}'', and returns a \latexdcf\ representation of it.}
+\funcdef{texifyText($s$)}{returns a string of \latexdcf\ text corresponding to the supplied text string, with any reserved characters escaped.}
 \funcdef{tophat($x,\sigma$)}{returns one if $|x| \leq |\sigma|$, and zero otherwise. Both inputs must be real, but may have any physical dimensions so long as they match.}
 \funcdef{typeOf($o$)}{returns the type of the object $o$.}
 \funcdef{unit(\ldots)}{multiplies a number by a physical unit. The string inside the brackets should consist of a string of the names of physical units, multiplied together with the {\tt *} operator, divided using the {\tt /} operator, or raised by numeric powers using the {\tt \^{}} operator. The list may be commenced with a numeric constant, for example: {\tt unit(2*m\^{}2/s)}.}
@@ -291,9 +291,16 @@ The \texttt{stats} module contains statistical functions:
 
 \subsection{The \texttt{time} module}
 
-The \texttt{time} module contains functions for handling objects of type \texttt{date}:
+The \texttt{time} module contains functions for handling objects of type
+\texttt{date}. For more information about manipulating times and dates in
+Pyxplot, see Section~\ref{sec:time_series}. Many of the functions below take an
+optional timezone string as their final argument. This should be specified in
+the form {\tt Europe/London}, {\tt America/New\_York} or {\tt Australia/Perth},
+as used by the {\tt tz database}. A complete list of available timezones can be
+found here: \url{http://en.wikipedia.org/wiki/List_of_tz_database_time_zones}.
+If universal time is used, the timezone may be specified as {\tt UTC}.
 
-\funcdef{time.fromCalendar($year,month,day,hour,min,sec$)}{creates a date object from the specified calendar date. See also the \texttt{set calendar} command to change the current calendar.}
+\funcdef{time.fromCalendar($year,month,day,hour,min,sec,<timezone>$)}{creates a date object from the specified calendar date. See also the \texttt{set calendar} and \texttt{set timezone} commands to change the current calendar and timezone.}
 \funcdef{time.fromJD($t$)}{creates a date object from the specified numerical Julian date.}
 \funcdef{time.fromMJD($t$)}{creates a date object from the specified numerical modified Julian date.}
 \funcdef{time.fromUnix($t$)}{creates a date object from the specified numerical Unix time.}
@@ -318,7 +325,7 @@ Token & Value \\
 \funcdef{time.now()}{creates a date object representing the current time.}
 \funcdef{time.sleep($t$)}{sleeps for $t$ seconds, or for time period $t$ if it has dimensions of time.}
 \funcdef{time.sleepUntil($t$)}{sleeps until the specified date and time. Its argument should be a date object.}
-\funcdef{time.string($t,format$)}{returns a string representation of the specified date object $t$. The second input is optional, and may be used to control the format of the output. If no format string is provided, then the format \newline\noindent{\tt "\%a \%Y \%b \%d \%H:\%M:\%S"}\newline\noindent is used. In such format strings, the following tokens are substituted for various parts of the date:
+\funcdef{time.string($t,<format>,<timezone>$)}{returns a string representation of the specified date object $t$. The second input is optional, and may be used to control the format of the output. If no format string is provided, then the format \newline\noindent{\tt "\%a \%Y \%b \%d \%H:\%M:\%S"}\newline\noindent is used. In such format strings, the following tokens are substituted for various parts of the date:
 \begin{longtable}{|>{\columncolor{LightGrey}}l|>{\columncolor{LightGrey}}l|}
 \hline \endfoot
 \hline

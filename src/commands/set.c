@@ -1693,6 +1693,16 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
          { if (!m) { tics_rm(&a->tics); IDE tics_cp(&a->tics,&ad->tics); } tics_rm(&a->ticsM); IDE tics_cp(&a->ticsM,&ad->ticsM); } }
      }
    }
+  else if (strcmp_set && (strcmp(setoption,"timezone")==0)) /* set timezone */
+   {
+    char *tempstr = (char *)command[PARSE_set_timezone_timezone].auxil;
+    snprintf(c->set->term_current.timezone, FNAME_LENGTH, "%s", tempstr);
+    c->set->term_current.timezone[FNAME_LENGTH-1]='\0';
+   }
+  else if (strcmp_unset && (strcmp(setoption,"timezone")==0)) /* unset timezone */
+   {
+    strcpy(c->set->term_current.timezone, c->set->term_default.timezone);
+   }
   else if (strcmp_set && (strcmp(setoption,"title")==0)) /* set title */
    {
     if (command[PARSE_set_title_title].objType==PPLOBJ_STR)
