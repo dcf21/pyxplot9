@@ -48,12 +48,6 @@ void ppl_tbAdd(ppl_context *c, int srcLineN, long srcId, char *srcFname, int cmd
  {
   int i = c->errStat.tracebackDepth;
 
-  if (DEBUG)
-   {
-    sprintf(c->errcontext.tempErrStr, "Error in %s at position %d: '%s'.", cmdOrExpr?"command":"expression", errPos, c->errStat.errBuff);
-    ppl_log(&c->errcontext, NULL);
-   }
-
   if ((!cmdOrExpr) || (i==0))
    {
     traceback *t = &c->errStat.tbLevel[i];
