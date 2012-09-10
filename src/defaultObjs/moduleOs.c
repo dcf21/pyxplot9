@@ -155,12 +155,14 @@ void pplfunc_osGlob(ppl_context *c, pplObj *in, int nArgs, int *status, int *err
   pplObj     v;
   list      *l;
   char      *tmp;
+  char       escaped[FNAME_LENGTH], *raw=(char*)in[0].auxil;
   int        i,j;
   if ((nArgs!=1)||(in[0].objType!=PPLOBJ_STR)) { *status=1; *errType=ERR_TYPE; sprintf(errText,"The os.glob() function requires a single string argument."); return; }
   if (pplObjList(&OUTPUT,0,1,NULL)==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); return; }
   v.refCount=1;
   l = (list *)OUTPUT.auxil;
-  if (wordexp((char*)in[0].auxil, &w, 0) != 0) return; // No matches; return empty list
+  { int j,k; for (j=k=0; ((raw[j]!='\0')&&(k<FNAME_LENGTH-1)); ) { if (raw[j]==' ') escaped[k++]='\\'; escaped[k++]=raw[j++]; } escaped[k++]='\0'; }
+  if (wordexp(escaped, &w, 0) != 0) return; // No matches; return empty list
   for (i=0; i<w.we_wordc; i++)
    {
     if (glob(w.we_wordv[i], 0, NULL, &g) != 0) continue;

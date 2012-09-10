@@ -258,7 +258,6 @@ void eps_plot_ReadAccessibleData(EPSComm *x)
   canvas_plotdesc  *pd;
   canvas_plotrange *pr;
   pplset_axis      *axis, *axissets[3];
-  char              errbuffer[LSTR_LENGTH];
   withWords         ww_default;
   double           *ordinate_raster, *ordinate2_raster, size[3], ScreenSize[3], ScreenBearing[3];
 
@@ -552,7 +551,7 @@ void eps_plot_ReadAccessibleData(EPSComm *x)
         pd->GridXSize = Nsamples;
         pd->GridYSize = Nsamples2;
        }
-      if (status) { ppl_error(&c->errcontext,ERR_GENERIC, -1, -1, errbuffer); x->current->plotdata[i]=NULL; }
+      if (status) { ppl_error(&c->errcontext,ERR_GENERIC, -1, -1, NULL); x->current->plotdata[i]=NULL; }
       else
        {
         // Update axes to reflect usage

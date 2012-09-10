@@ -69,7 +69,8 @@ void eps_image_RenderEPS(EPSComm *x)
    {
     wordexp_t wordExp;
     glob_t    globData;
-    char     *fName = x->current->text;
+    char      fName[FNAME_LENGTH];
+    { int j,k; for (j=k=0; ((x->current->text[j]!='\0')&&(k<FNAME_LENGTH-1)); ) { if (x->current->text[j]==' ') fName[k++]='\\'; fName[k++]=x->current->text[j++]; } fName[k++]='\0'; }
     if ((wordexp(fName, &wordExp, 0) != 0) || (wordExp.we_wordc <= 0)) { sprintf(x->c->errcontext.tempErrStr, "Could not open file '%s'.", fName); ppl_error(&x->c->errcontext, ERR_FILE, -1, -1, NULL); return; }
     if ((glob(wordExp.we_wordv[0], 0, NULL, &globData) != 0) || (globData.gl_pathc <= 0)) { sprintf(x->c->errcontext.tempErrStr, "Could not open file '%s'.", fName); ppl_error(&x->c->errcontext, ERR_FILE, -1, -1, NULL); wordfree(&wordExp); return; }
     wordfree(&wordExp);

@@ -145,10 +145,11 @@ void ppl_directive_cd(ppl_context *c, parserLine *pl, parserOutput *in)
 
   while (stk[pos].objType == PPLOBJ_NUM)
    {
-    char *dirName;
+    char *raw, dirName[FNAME_LENGTH];
     pos = (int)round(stk[pos].real);
     if (pos<=0) break;
-    dirName = (char *)stk[pos+PARSE_cd_directory_path].auxil;
+    raw = (char *)stk[pos+PARSE_cd_directory_path].auxil;
+    { int j,k; for (j=k=0; ((raw[j]!='\0')&&(k<FNAME_LENGTH-1)); ) { if (raw[j]==' ') dirName[k++]='\\'; dirName[k++]=raw[j++]; } dirName[k++]='\0'; }
 
     if ((wordexp(dirName, &wordExp, 0) != 0) || (wordExp.we_wordc <= 0)) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Could not enter directory '%s'.", dirName); TBADD(ERR_FILE,in->stkCharPos[pos+PARSE_cd_directory_path]); return; }
     if ((glob(wordExp.we_wordv[0], 0, NULL, &globData) != 0) || (globData.gl_pathc <= 0)) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Could not enter directory '%s'.", dirName); TBADD(ERR_FILE,in->stkCharPos[pos+PARSE_cd_directory_path]); wordfree(&wordExp); return; }
@@ -260,9 +261,12 @@ void ppl_directive_load(ppl_context *c, parserLine *pl, parserOutput *in, int in
   int     i   = 0;
   int     j   = 0;
   pplObj *stk = in->stk;
-  char   *fn  = (char *)stk[PARSE_load_filename].auxil;
+  char   *raw = (char *)stk[PARSE_load_filename].auxil;
+  char    fn[FNAME_LENGTH];
   wordexp_t     wordExp;
   glob_t        globData;
+  { int j,k; for (j=k=0; ((raw[j]!='\0')&&(k<FNAME_LENGTH-1)); ) { if (raw[j]==' ') fn[k++]='\\'; fn[k++]=raw[j++]; } fn[k++]='\0'; }
+
 
   if ((wordexp(fn, &wordExp, 0) != 0) || (wordExp.we_wordc <= 0)) { snprintf(c->errStat.errBuff, LSTR_LENGTH, "Could not access file '%s'.", fn); TBADD(ERR_FILE,in->stkCharPos[PARSE_load_filename]); return; }
   for (j=0; (j<wordExp.we_wordc)&&(!cancellationFlag); j++)

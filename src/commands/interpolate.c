@@ -263,8 +263,10 @@ void ppl_directive_interpolate(ppl_context *c, parserLine *pl, parserOutput *in,
     {
      wordexp_t wordExp;
      glob_t    globData;
-     if ((wordexp(filenameOut, &wordExp, 0) != 0) || (wordExp.we_wordc <= 0)) { sprintf(c->errStat.errBuff, "Could not open file '%s'.", filenameOut); TBADD2(ERR_FILE,0); return; }
-     if ((glob(wordExp.we_wordv[0], 0, NULL, &globData) != 0) || (globData.gl_pathc <= 0)) { sprintf(c->errStat.errBuff, "Could not open file '%s'.", filenameOut); TBADD2(ERR_FILE,0); wordfree(&wordExp); return; }
+     char      escaped[FNAME_LENGTH];
+     { int j,k; for (j=k=0; ((filenameOut[j]!='\0')&&(k<FNAME_LENGTH-1)); ) { if (filenameOut[j]==' ') escaped[k++]='\\'; escaped[k++]=filenameOut[j++]; } escaped[k++]='\0'; }
+     if ((wordexp(escaped, &wordExp, 0) != 0) || (wordExp.we_wordc <= 0)) { sprintf(c->errStat.errBuff, "Could not open file '%s'.", escaped); TBADD2(ERR_FILE,0); return; }
+     if ((glob(wordExp.we_wordv[0], 0, NULL, &globData) != 0) || (globData.gl_pathc <= 0)) { sprintf(c->errStat.errBuff, "Could not open file '%s'.", escaped); TBADD2(ERR_FILE,0); wordfree(&wordExp); return; }
      wordfree(&wordExp);
      snprintf(filenameOut, FNAME_LENGTH, "%s", globData.gl_pathv[0]);
      filenameOut[FNAME_LENGTH-1]='\0';

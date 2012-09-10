@@ -1407,6 +1407,7 @@ int ppl_directive_image(ppl_context *c, parserLine *pl, parserOutput *in, int in
 static int ppl_getPlotFname(ppl_context *c, char *in, int wildcardMatchNumber, canvas_plotdesc *out)
  {
   int       i, C;
+  char      escaped[FNAME_LENGTH];
   wordexp_t wordExp;
   glob_t    globData;
   out->function=0;
@@ -1423,12 +1424,13 @@ static int ppl_getPlotFname(ppl_context *c, char *in, int wildcardMatchNumber, c
     strcpy(out->filename, in);
     return 0;
    }
-  if ((wordexp(in, &wordExp, 0) != 0) || (wordExp.we_wordc <= 0)) { sprintf(c->errcontext.tempErrStr, "Could not open file '%s'.", in); ppl_error(&c->errcontext,ERR_FILE,-1,-1,NULL); return 1; }
+  { int j,k; for (j=k=0; ((in[j]!='\0')&&(k<FNAME_LENGTH-1)); ) { if (in[j]==' ') escaped[k++]='\\'; escaped[k++]=in[j++]; } escaped[k++]='\0'; }
+  if ((wordexp(escaped, &wordExp, 0) != 0) || (wordExp.we_wordc <= 0)) { sprintf(c->errcontext.tempErrStr, "Could not open file '%s'.", escaped); ppl_error(&c->errcontext,ERR_FILE,-1,-1,NULL); return 1; }
   for (i=0; i<wordExp.we_wordc; i++)
    {
     if ((glob(wordExp.we_wordv[i], 0, NULL, &globData) != 0) || ((i==0)&&(globData.gl_pathc==0)))
      {
-      if (wildcardMatchNumber==0) { sprintf(c->errcontext.tempErrStr, "Could not open file '%s'.", in); ppl_error(&c->errcontext,ERR_FILE,-1,-1,NULL); }
+      if (wildcardMatchNumber==0) { sprintf(c->errcontext.tempErrStr, "Could not open file '%s'.", escaped); ppl_error(&c->errcontext,ERR_FILE,-1,-1,NULL); }
       return 1;
      }
     if (C>=globData.gl_pathc) { C-=globData.gl_pathc; globfree(&globData); continue; }
@@ -1440,7 +1442,7 @@ static int ppl_getPlotFname(ppl_context *c, char *in, int wildcardMatchNumber, c
     return 0;
    }
   wordfree(&wordExp);
-  if (wildcardMatchNumber==0) { sprintf(c->errcontext.tempErrStr, "Could not open file '%s'.", in); ppl_error(&c->errcontext,ERR_FILE,-1,-1,NULL); }
+  if (wildcardMatchNumber==0) { sprintf(c->errcontext.tempErrStr, "Could not open file '%s'.", escaped); ppl_error(&c->errcontext,ERR_FILE,-1,-1,NULL); }
   return 1;
  }
 

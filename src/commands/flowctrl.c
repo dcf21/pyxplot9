@@ -298,10 +298,12 @@ void ppl_directive_foreach(ppl_context *c, parserLine *pl, parserOutput *in, int
 
   if (iter->objType == PPLOBJ_STR) // Iterate over string: treat this as a filename to glob
    {
-    int i,j;
+    int       i,j;
     wordexp_t w;
     glob_t    g;
-    if (wordexp((char *)iter->auxil, &w, 0) != 0) goto cleanup; // No matches
+    char     *raw=(char *)iter->auxil, fName[FNAME_LENGTH];
+    { int j,k; for (j=k=0; ((raw[j]!='\0')&&(k<FNAME_LENGTH-1)); ) { if (raw[j]==' ') fName[k++]='\\'; fName[k++]=raw[j++]; } fName[k++]='\0'; }
+    if (wordexp(fName, &w, 0) != 0) goto cleanup; // No matches
     for (i=0; i<w.we_wordc && !FOREACH_STOP; i++)
      {
       if (glob(w.we_wordv[i], 0, NULL, &g) != 0) continue;

@@ -213,7 +213,8 @@ FILE *ppldata_LaunchCoProcess(ppl_context *c, char *filename, int wildcardMatchN
     int       i, done=0, C;
     wordexp_t wordExp;
     glob_t    globData;
-    char     *fName = filename;
+    char      fName[FNAME_LENGTH];
+    { int j,k; for (j=k=0; ((filename[j]!='\0')&&(k<FNAME_LENGTH-1)); ) { if (filename[j]==' ') fName[k++]='\\'; fName[k++]=filename[j++]; } fName[k++]='\0'; }
     if (wildcardMatchNumber<0) wildcardMatchNumber=0;
     C = wildcardMatchNumber;
     if ((wordexp(fName, &wordExp, 0) != 0) || (wordExp.we_wordc <= 0)) { sprintf(errtext, "Could not open file '%s'.", fName); if (DEBUG) ppl_log(&c->errcontext, errtext); return NULL; };
