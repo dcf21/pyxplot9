@@ -114,7 +114,8 @@ static void ppl_dictHashAdd(dict *in, const char *str, const int hash, dictItem 
 static dictItem *ppl_dictHashLookup(dict *in, const char *str, int slen, const int hash, int *clash)
  {
   dictHash **ptr = &in->hashTree;
- 
+
+  if (str==NULL) return NULL; 
   if (slen<=0) slen=strlen(str);
   *clash=0;
   while ((*ptr)!=NULL)
@@ -135,6 +136,7 @@ static dictItem *ppl_dictHashRemove(dict *in, const char *str, const int hash, i
  {
   dictHash **ptr = &in->hashTree;
 
+  if (str==NULL) return NULL; 
   *clash=0;
   while ((*ptr)!=NULL)
    {
@@ -176,6 +178,7 @@ int ppl_dictAppend(dict *in, const char *key, void *item)
   dictItem *ptr=NULL, *ptrnew=NULL, *prev=NULL;
   int       cmp = -1, hash;
 
+  if (key==NULL) return 1;
   ptr = in->first;
   while (ptr != NULL)
    {
@@ -214,6 +217,7 @@ int ppl_dictAppendCpy(dict *in, const char *key, void *item, int size)
   void     *cpy;
   int       cmp = -1, hash;
 
+  if (key==NULL) return 1;
   cpy = alloc(size);
   if (cpy==NULL) return 1;
   memcpy(cpy, item, size);
@@ -254,7 +258,9 @@ int ppl_dictAppendCpy(dict *in, const char *key, void *item, int size)
 
 void *ppl_dictLookup(dict *in, const char *key)
  {
-  int hash = ppl_dictHash(key, -1);
+  int hash;
+  if (key==NULL) return NULL;
+  hash = ppl_dictHash(key, -1);
   return ppl_dictLookupHash(in, key, hash);
  }
 
@@ -263,6 +269,7 @@ void *ppl_dictLookupHash(dict *in, const char *key, int hash)
   int       clash;
   dictItem *ptr;
 
+  if (key==NULL) return NULL;
   if (in==NULL) { return NULL; }
 
   // Check hash table
@@ -290,6 +297,7 @@ void ppl_dictLookupWithWildcard(dict *in, char *key, char *SubsString, int SubsM
   char     *magicFns[] = { "diff_d", "int_d" , NULL };
   dictItem *ptr;
 
+  if (key==NULL) { *ptrout=NULL; return; }
   SubsString[0]='\0';
   if (in==NULL) { *ptrout=NULL; return; }
 
@@ -342,6 +350,7 @@ int ppl_dictContains(dict *in, const char *key)
  {
   int hash, clash;
   dictItem *ptr;
+  if (key==NULL) return 0;
   if (in==NULL) return 0;
 
   // Check hash table
@@ -364,6 +373,7 @@ int ppl_dictRemoveKey(dict *in, const char *key)
   int hash, clash;
   dictItem *ptr;
 
+  if (key==NULL) return 1;
   if (in==NULL) return 1;
 
   // Check hash table

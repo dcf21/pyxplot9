@@ -516,6 +516,7 @@ void ppl_directive_fordata(ppl_context *c, parserLine *pl, parserOutput *in, int
           if (minSet[k]&&(obj->real<min[k])) inRange=0;
           if (maxSet[k]&&(obj->real>max[k])) inRange=0;
          }
+        if (obj->auxil==NULL) { inRange=0; } // NULL strings are bad
         om=varObj[k]->amMalloced;
         rc=varObj[k]->refCount;
         varObj[k]->amMalloced=0;

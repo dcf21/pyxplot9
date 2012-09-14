@@ -72,6 +72,7 @@ void ppl_garbageList(list *l)
 void ppl_garbageObject(pplObj *o)
  {
   int objType;
+  if (o==NULL) return;
   if ( __sync_sub_and_fetch(&o->refCount,1) > 0) return;
   objType = o->objType; o->objType = PPLOBJ_ZOM; // Object is now a zombie
   if (o->self_lval!=NULL) { ppl_garbageObject(o->self_lval); o->self_lval=NULL; }
