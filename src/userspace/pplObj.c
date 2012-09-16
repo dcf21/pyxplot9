@@ -434,12 +434,12 @@ pplObj *pplObjCpy(pplObj *out, pplObj *in, unsigned char lval, unsigned char out
   out->refCount   = rc;
   out->amMalloced = outMalloced;
   out->immutable  = in->immutable && ((t==PPLOBJ_EXP)||(t==PPLOBJ_BYT)||(t==PPLOBJ_LIST)||(t==PPLOBJ_VEC)||(t==PPLOBJ_MAT)||(t==PPLOBJ_DICT)||(t==PPLOBJ_MOD)||(t==PPLOBJ_USER)||(t==PPLOBJ_FILE)||(t==PPLOBJ_FUNC)||(t==PPLOBJ_TYPE));
-  if (in->auxil==NULL) { out->auxilMalloced = 0; return out; } 
 
   switch(in->objType)
    {
     case PPLOBJ_STR:
     case PPLOBJ_EXC: // copy string value
+      if (in->auxil==NULL) { out->auxilMalloced = 0; return out; } 
       if (useMalloc) out->auxil = (void *)malloc      (in->auxilLen);
       else           out->auxil = (void *)ppl_memAlloc(in->auxilLen);
       if (out->auxil==NULL) { out->objType=PPLOBJ_ZOM; return NULL; }
