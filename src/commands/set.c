@@ -1779,26 +1779,36 @@ void ppl_directive_set(ppl_context *c, parserLine *pl, parserOutput *in, int int
      {
       int i;
       char *buf = (char *)ppl_memAlloc(LSTR_LENGTH);
-      PreferredUnit *pu, *pui;
+      PreferredUnit *pu;
       if (buf==NULL) { ppl_error(&c->errcontext, ERR_MEMORY, -1, -1, "Out of memory."); }
       else
        for (i=0; i<2; i++)
         {
          int errpos=-1;
-         listIterator *listiter;
          if (i==0) { if (!got2) continue; tempstr=tempstr2; }
          else      { if (!got3) continue; tempstr=tempstr3; }
          ppl_newPreferredUnit(c, &pu, tempstr, 0, &errpos, buf);
          if (errpos>=0) { ppl_error(&c->errcontext, ERR_NUMERICAL,-1,-1,buf); continue; }
 
          // Remove any preferred unit which is dimensionally equal to new preferred unit
-         listiter = ppl_listIterateInit(c->unit_PreferredUnits);
-         while (listiter != NULL)
-          {
-           pui = (PreferredUnit *)listiter->data;
-           ppl_listIterate(&listiter);
-           if (ppl_unitsDimEqual(&pui->value , &pu->value) && (pui->value.tempType == pu->value.tempType))
-             ppl_listRemove(c->unit_PreferredUnits, (void *)pui );
+         {
+          int didWork=1;
+          while (didWork)
+           {
+            listIterator *listiter = ppl_listIterateInit(c->unit_PreferredUnits);
+            didWork = 0;
+            while (listiter != NULL)
+             {
+              PreferredUnit *pui = (PreferredUnit *)listiter->data;
+              if (ppl_unitsDimEqual(&pui->value , &pu->value) && (pui->value.tempType == pu->value.tempType))
+               {
+                ppl_listRemove(c->unit_PreferredUnits, (void *)pui );
+                didWork=1;
+                break;
+               }
+              ppl_listIterate(&listiter);
+             }
+           }
           }
 
          // Add new preferred unit

@@ -288,10 +288,18 @@ int eps_plot_LinkedAxisLinkUsing(EPSComm *X, pplset_axis *out, pplset_axis *in)
     pplExpr *olu = (pplExpr *)out->linkusing;
 
     // Set value of x (or y/z)
-    *VarVal = in->DataUnit;
-    VarVal->imag        = 0.0;
-    VarVal->flagComplex = 0;
-    VarVal->real        = x;
+    {
+     int om = VarVal->amMalloced;
+     int rc = VarVal->refCount;
+     *VarVal = in->DataUnit;
+     VarVal->amMalloced  = om;
+     VarVal->refCount    = rc;
+     VarVal->self_lval   = NULL;
+     VarVal->self_this   = NULL;
+     VarVal->imag        = 0.0;
+     VarVal->flagComplex = 0;
+     VarVal->real        = x;
+    }
 
     // Generate a sample from the axis linkage function
     outVal = ppl_expEval(X->c, olu, &lOP, 0, X->iterDepth+1);
