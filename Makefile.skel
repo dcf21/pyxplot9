@@ -41,9 +41,9 @@ VERSION_MIN = 9
 VERSION_REV = 3
 DATE    = xx/xx/xxxx
 
-COMPILE = $(CC) -Wall -g `xml2-config --cflags` `gsl-config --cflags` -c -I $(CWD)/src
+COMPILE = $(CC) -std=gnu99 -Wall -g `xml2-config --cflags` `gsl-config --cflags` -c -I $(CWD)/src
 LIBS    = $(LINK_FFTW) `xml2-config --libs` `gsl-config --libs` $(LINK_READLINE) -lz -lpng $(LINK_KPATHSEA) -lm
-LINK    = $(CC) -Wall -g
+LINK    = $(CC) -std=gnu99 -Wall -g
 
 OPTIMISATION = -O2
 
