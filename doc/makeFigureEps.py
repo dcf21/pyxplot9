@@ -25,23 +25,30 @@ import glob,os,sys,re
 if len(sys.argv)>=2: pyxplot = sys.argv[1]
 else               : pyxplot = "../bin/pyxplot"
 
+if (len(sys.argv)>=3) and (sys.argv[2]=="test"): testing = True
+else                                           : testing = False
+
 os.system("rm -Rf examples/eps")
 os.system("mkdir  examples/eps")
 
-files = glob.glob("examples/ex_*.ppl")
+if testing: files = ["examples/%s.ppl"%i.strip() for i in open("examples.testlist")]
+else      : files = glob.glob("examples/ex_*.ppl")
+
 files.sort()
+
 for fname in files:
   print "Working on example <%s>..."%os.path.split(fname)[1]
   status = os.system("%s %s"%(pyxplot,fname))
   if (status): raise RuntimeError("pyxplot failed")
 
 # Make pdf and png versions of all figures
-files = glob.glob("examples/eps/*.eps")
-files.sort()
-for eps in files:
-  print "Converting example <%s> to pdf..."%os.path.split(eps)[1]
-  pdf = re.sub(r"\.eps",".pdf",eps)
-  #png = re.sub(r"\.eps",".png",eps)
-  os.system("gs -dQUIET -dSAFER -P- -dBATCH -dNOPAUSE -dEPSCrop -sDEVICE=pdfwrite -sOutputFile=%s %s"%(pdf,eps))
-  #os.system("gs -dQUIET -dSAFER -P- -dBATCH -dNOPAUSE -dEPSCrop -sDEVICE=png16m -r72 -dGraphicsAlphaBits=4 -dTextAlphaBits=4 -sOutputFile=%s %s"%(png,eps))
+if not testing:
+  files = glob.glob("examples/eps/*.eps")
+  files.sort()
+  for eps in files:
+    print "Converting example <%s> to pdf..."%os.path.split(eps)[1]
+    pdf = re.sub(r"\.eps",".pdf",eps)
+    #png = re.sub(r"\.eps",".png",eps)
+    os.system("gs -dQUIET -dSAFER -P- -dBATCH -dNOPAUSE -dEPSCrop -sDEVICE=pdfwrite -sOutputFile=%s %s"%(pdf,eps))
+    #os.system("gs -dQUIET -dSAFER -P- -dBATCH -dNOPAUSE -dEPSCrop -sDEVICE=png16m -r72 -dGraphicsAlphaBits=4 -dTextAlphaBits=4 -sOutputFile=%s %s"%(png,eps))
 
