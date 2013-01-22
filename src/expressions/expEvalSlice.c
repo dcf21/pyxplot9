@@ -146,7 +146,7 @@ void ppl_sliceItem (ppl_context *context, int getPtr, int *status, int *errType,
      {
       pplMatrix  *mob  = (pplMatrix *)called.auxil;
       gsl_matrix *min  = mob->m;
-      const int   minl = mob->sliceNext ? min->size2 : min->size1;
+      const int   minl = mob->sliceNext ? min->size1 : min->size2;
       int         p    = args[0].real;
       pplVector  *vo;
       if (p<0) p+=minl;
@@ -156,8 +156,8 @@ void ppl_sliceItem (ppl_context *context, int getPtr, int *status, int *errType,
       vo->refCount = 1;
       vo->raw  = NULL;
       vo->rawm = mob->raw; __sync_add_and_fetch(&mob->raw->refCount,1);
-      if (!mob->sliceNext) vo->view = gsl_matrix_column(min, p);
-      else                 vo->view = gsl_matrix_row   (min, p);
+      if (mob->sliceNext) vo->view = gsl_matrix_column(min, p);
+      else                vo->view = gsl_matrix_row   (min, p);
       vo->v = &vo->view.vector;
       out->objType = PPLOBJ_ZOM;
       out->refCount=1;
@@ -285,7 +285,7 @@ void ppl_sliceRange(ppl_context *context, int minset, int min, int maxset, int m
      {
       pplMatrix  *mob   = (pplMatrix *)called.auxil;
       gsl_matrix *matin = mob->m;
-      const int   minl  = mob->sliceNext ? matin->size2 : matin->size1;
+      const int   minl  = mob->sliceNext ? matin->size1 : matin->size2;
       pplMatrix  *mo;
       if (!minset)    min =0;
       else if (min<0) min+=minl;
@@ -297,8 +297,8 @@ void ppl_sliceRange(ppl_context *context, int minset, int min, int maxset, int m
       if (mo==NULL) { *status=1; *errType=ERR_MEMORY; sprintf(errText,"Out of memory."); goto fail; }
       mo->refCount = 1;
       mo->raw = mob->raw; __sync_add_and_fetch(&mob->raw->refCount,1);
-      if (mob->sliceNext) mo->view = gsl_matrix_submatrix(matin, min,  0 , max-min      , matin->size2);
-      else                mo->view = gsl_matrix_submatrix(matin,  0 , min, matin->size1 , max-min     );
+      if (!mob->sliceNext) mo->view = gsl_matrix_submatrix(matin, min,  0 , max-min      , matin->size2);
+      else                 mo->view = gsl_matrix_submatrix(matin,  0 , min, matin->size1 , max-min     );
       mo->sliceNext = !mob->sliceNext;
       mo->m = &mo->view.matrix;
       out->objType = PPLOBJ_ZOM;
