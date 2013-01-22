@@ -3,8 +3,8 @@
 // The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
-// Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2012 Ross Church
+// Copyright (C) 2006-2013 Dominic Ford <coders@pyxplot.org.uk>
+//               2008-2013 Ross Church
 //
 // $Id$
 //
@@ -27,8 +27,6 @@
 
 #define DATAFILE_ROW 24101
 #define DATAFILE_COL 24102
-
-#define USING_ITEMS_MAX 32
 
 #define MAX_DATACOLS 16384
 

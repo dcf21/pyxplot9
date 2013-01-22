@@ -3,8 +3,8 @@
 // The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
-// Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2012 Ross Church
+// Copyright (C) 2006-2013 Dominic Ford <coders@pyxplot.org.uk>
+//               2008-2013 Ross Church
 //
 // $Id$
 //
@@ -39,7 +39,7 @@
 #define MAX_PLOTSTYLES       128 // The maximum number of plot styles (e.g. plot sin(x) with style 23) which are be defined. Similar to 'with linestyle 23' in gnuplot
 #define MAX_AXES             128
 #define MAX_CONTOURS         128 // Maximum number of contours in 'set contour'
-#define USING_ITEMS_MAX       32
+#define USING_ITEMS_MAX       64
 #define FUNC_MAXARGS        1024
 
 // Axis linear interpolations

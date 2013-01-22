@@ -3,8 +3,8 @@
 // The code in this file is part of Pyxplot
 // <http://www.pyxplot.org.uk>
 //
-// Copyright (C) 2006-2012 Dominic Ford <coders@pyxplot.org.uk>
-//               2008-2012 Ross Church
+// Copyright (C) 2006-2013 Dominic Ford <coders@pyxplot.org.uk>
+//               2008-2013 Ross Church
 //
 // $Id$
 //
@@ -663,7 +663,7 @@ void canvas_EPSWrite(EPSComm *x)
   margin_top  = PAGEheight / 14;
   margin_left *= M_TO_PS;
   margin_top  *= M_TO_PS;
-  margin_bottom = 2*margin_top;
+  margin_bottom = margin_top;
 
   // Open output postscript file for writing
   if ((epsout=fopen(x->EPSFilename,"w"))==NULL) { sprintf(x->c->errcontext.tempErrStr, "Could not open file '%s' for writing.", x->EPSFilename); ppl_error(&x->c->errcontext, ERR_FILE, -1, -1, NULL); *(x->status)=1; return; }
@@ -931,8 +931,8 @@ void canvas_EPSEnlarge(EPSComm *x, char *transform)
   margin_top  = PAGEheight / 14;
   if (margin_left > 15e-3) margin_left = 15e-3; // mm
   if (margin_top  > 15e-3) margin_top  = 15e-3; // mm
-  margin_right  =   margin_left;
-  margin_bottom = 2*margin_top;
+  margin_right  = margin_left;
+  margin_bottom = margin_top;
 
   // Work out what scaling factors will make page fit
   scaling_x = (PAGEwidth  - margin_left - margin_right ) / EPSwidth  * M_TO_PS;
