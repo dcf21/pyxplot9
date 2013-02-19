@@ -681,7 +681,7 @@ void canvas_EPSWrite(EPSComm *x)
     fprintf(epsout, "%%%%BoundingBox: %d %d %d %d\n", (int)floor(margin_left), (int)floor(margin_bottom), (int)ceil(x->bb_right-x->bb_left+margin_left), (int)ceil(x->bb_top-x->bb_bottom+margin_bottom));
     fprintf(epsout, "%%%%HiResBoundingBox: %f %f %f %f\n", margin_left, margin_bottom, x->bb_right-x->bb_left+margin_left, x->bb_top-x->bb_bottom+margin_bottom);
    }
-  fprintf(epsout, "%%%%Creator: (Pyxplot %s)\n", VERSION);
+  fprintf(epsout, "%%%%Creator: (Pyxplot %s -- executing %s:%d)\n", VERSION, x->c->errcontext.error_input_filename, x->c->errcontext.error_input_linenumber);
   fprintf(epsout, "%%%%Title: (%s)\n", x->title);
   fprintf(epsout, "%%%%CreationDate: (%s)\n", ppl_strStrip(ppl_friendlyTimestring(), x->c->errcontext.tempErrStr));
   if (x->c->set->term_current.TermType == SW_TERMTYPE_PS) fprintf(epsout, "%%%%Pages: 1\n");
