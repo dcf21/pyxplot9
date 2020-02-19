@@ -260,3 +260,5 @@ clean:
 
 afresh: clean all
 
+test:
+	+$(MAKE) -C doc test-examples
