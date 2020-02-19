@@ -283,7 +283,20 @@ char *ppl_nextWord(char *in)
 char *ppl_friendlyTimestring()
  {
   time_t timenow;
-  timenow = time(NULL);
+  int override = 0;
+  char *source_date_epoch;
+  source_date_epoch = getenv("SOURCE_DATE_EPOCH");
+  if (source_date_epoch) {
+    errno = 0;
+    timenow = (time_t) strtol (source_date_epoch, NULL, 10);
+    if (errno == 0) {
+      override = 1;
+    }
+  }
+  if (override == 0) {
+    /* get current time */
+    timenow = time(NULL);
+  }
   return( ctime(&timenow) );
  }
 
