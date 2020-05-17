@@ -28,7 +28,7 @@ def processVarTable(vt, directive, setOption):
  if '%' in directive: return
  key = "%s_%s"%(directive,setOption)
  globalVarTable[key] = vt
- for name,pos in vt.iteritems():
+ for name,pos in list(vt.items()):
   if name not in globalVarNames: globalVarNames.append(name)
 
 def printVarTable():
@@ -36,7 +36,7 @@ def printVarTable():
  globalVarNames.sort()
  for i in range(len(globalVarNames)):
    f_h.write("#define PARSE_INDEX_%s %d\n"%(sanitize(globalVarNames[i]),i))
- keys = globalVarTable.keys()
+ keys = list(globalVarTable.keys())
  keys.sort()
  for k in keys:
    d = globalVarTable[k]
@@ -124,7 +124,7 @@ for line in f_in:
       parts = [ "]" , word[2:] , "" , "1" ]
       listsizes.append(varcount)
       varcount=stack.pop()
-      for key,item in varnames.iteritems(): stack_varnames[-1]["%s_%s"%(key,varname)] = item
+      for key,item in list(varnames.items()): stack_varnames[-1]["%s_%s"%(key,varname)] = item
       varnames=stack_varnames.pop()
     if varname=='directive': # Directive names are stored for use in #defines to convert variable names into output slot numbers
       if parts[2]=="": directive = parts[0]
@@ -139,7 +139,7 @@ for line in f_in:
       if   (parts[0]=="%p"): varcount += 2 # Position vectors require 2 or 3 slots
       elif (parts[0]=="%P"): varcount += 3
       else                 : varcount += 1 # Varcount keeps track of the slot number to place the next variable in
-    elif (parts[0] in ["%p","%P"]): print "Danger in command %s: sharing position variable name with other variables of different lengths"%directive
+    elif (parts[0] in ["%p","%P"]): print(("Danger in command %s: sharing position variable name with other variables of different lengths"%directive))
     outnum = varnames[varname]
     parts.append("%s"%outnum) # parts[4] = slot number
     if word.startswith("]:"):
@@ -152,10 +152,10 @@ for line in f_in:
   f_c.write("%d "%(varcount)) # First word on each statement definition line is the number of variables in the root slotspace
   f_c.write("%s\\n\\\n"%outline)
   processVarTable(vartable,directive,setoption)
-  for i,j in varnames.iteritems():
+  for i,j in list(varnames.items()):
    if '%' not in directive:
     key = "PARSE_%s_%s%s"%(directive,setoption,sanitize(i))
-    if (key in includeKeys) and (includeKeys[key]!=j): print "Repetition of key %s"%key
+    if (key in includeKeys) and (includeKeys[key]!=j): print(("Repetition of key %s"%key))
     includeKeys[key] = j
     f_h.write("#define %s %d\n"%(key,j)) # Write #defines to convert variable names into slot numbers
 

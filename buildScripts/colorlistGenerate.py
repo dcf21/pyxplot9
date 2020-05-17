@@ -98,7 +98,7 @@ for greylevel in range(0,101):
  color_list["grey%02d"%greylevel] = [0, 0, 0, float(100-greylevel)/100]
  color_list["gray%02d"%greylevel] = [0, 0, 0, float(100-greylevel)/100]
 
-color_names = color_list.keys()
+color_names = list(color_list.keys())
 color_names.sort()
 
 # Write ppl_colors.h

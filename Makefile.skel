@@ -135,12 +135,12 @@ DEBUG_SWITCHES      = $(COMMON_SWITCHES) -D SRCDIR=\"$(CWD)/$(LOCAL_SRCDIR)/\"  
 all: $(LOCAL_BINDIR)/pyxplot $(LOCAL_BINDIR)/pyxplot_watch $(LOCAL_BINDIR)/pyxplot_fitshelper $(LOCAL_BINDIR)/pyxplot_timehelper $(LOCAL_BINDIR)/debug/pyxplot $(LOCAL_BINDIR)/debug/pyxplot_watch $(LOCAL_BINDIR)/install/pyxplot $(LOCAL_BINDIR)/install/pyxplot_watch $(LOCAL_BINDIR)/install/pyxplot_fitshelper $(LOCAL_BINDIR)/install/pyxplot_timehelper $(LOCAL_OBJDIR)/pyxplot.1 $(LOCAL_OBJDIR)/pyxplot_watch.1
 
 src/settings/epsColors.h: buildScripts/colorlistGenerate.py
-	python buildScripts/colorlistGenerate.py
+	python3 buildScripts/colorlistGenerate.py
 
 src/settings/epsColors.c: src/settings/epsColors.h
 
 src/parser/cmdList.h: buildScripts/parser_data.py buildScripts/parser_data.dat
-	python buildScripts/parser_data.py
+	python3 buildScripts/parser_data.py
 
 src/parser/cmdList.c: src/parser/cmdList.h
 
@@ -224,11 +224,11 @@ $(LOCAL_BINDIR)/install/pyxplot_timehelper: $(LOCAL_SRCDIR)/helpers/pyxplot_time
 
 $(LOCAL_OBJDIR)/pyxplot.1: buildScripts/manpage_pyxplot.py
 	mkdir -p $(LOCAL_OBJDIR)
-	python buildScripts/manpage_pyxplot.py       ${DOCDIR}/pyxplot.pdf > $(LOCAL_OBJDIR)/pyxplot.1
+	python3 buildScripts/manpage_pyxplot.py       ${DOCDIR}/pyxplot.pdf > $(LOCAL_OBJDIR)/pyxplot.1
 
 $(LOCAL_OBJDIR)/pyxplot_watch.1: buildScripts/manpage_pyxplot_watch.py
 	mkdir -p $(LOCAL_OBJDIR)
-	python buildScripts/manpage_pyxplot_watch.py ${DOCDIR}/pyxplot.pdf > $(LOCAL_OBJDIR)/pyxplot_watch.1
+	python3 buildScripts/manpage_pyxplot_watch.py ${DOCDIR}/pyxplot.pdf > $(LOCAL_OBJDIR)/pyxplot_watch.1
 
 
 #
