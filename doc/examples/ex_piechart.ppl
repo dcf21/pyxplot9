@@ -37,9 +37,7 @@ END
 # END
 
 # Call common cleanup script
-set term pdf
-set output "examples/eps/%s.pdf"%(title)
-refresh
+load "examples/fig_end.ppl"
 
 
 title = "ex_piechart2" ; load "examples/fig_init.ppl"
@@ -54,7 +52,4 @@ END
 # END
 
 # Call common cleanup script
-set term pdf
-set output "examples/eps/%s.pdf"%(title)
-refresh
-
+load "examples/fig_end.ppl"
