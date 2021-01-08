@@ -276,10 +276,7 @@ fi
 # 16. CHECK TO SEE WHETHER THIS SYSTEM HAS LIBXML2 HEADERS
 
 echo $ECHO_N "Checking for libxml2-dev       ............. $ECHO_C"
-whichout=`which xml2-config 2> conf.stderr`
-rm -f conf.*
-if test "`echo $whichout | sed 's/\([a-z]*\).*/\1/'`" = "no" ; then whichout="" ; fi
-if test "$whichout" != "" ; then
+if pkg-config --exists libxml-2.0 ; then
  echo "YES"
 else
  echo "NO"
