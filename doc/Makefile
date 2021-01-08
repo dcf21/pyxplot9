@@ -38,15 +38,15 @@ clean:
 	rm -f *.pdf *.ps *.dvi *.aux *.idx *.ilg *.ind *.lob *.loe *.lof *.log *.out *.toc
 
 $(EX_EPSDIR)/timestamp: $(FIGFILES) $(PYXPLOT) .pyxplotrc
-	python makeFigureEps.py $(PYXPLOT)
+	python3 makeFigureEps.py $(PYXPLOT)
 	date > $(EX_EPSDIR)/timestamp
 
 $(EX_TEXDIR)/timestamp: $(FIGFILES) $(PYXPLOT) .pyxplotrc
-	python makeFigureTex.py
+	python3 makeFigureTex.py
 	date > $(EX_TEXDIR)/timestamp
 
 $(EX_FRAGDIR)/timestamp: $(FRAGFILES) $(PYXPLOT) .pyxplotrc
-	python makeFragmentTex.py
+	python3 makeFragmentTex.py
 	date > $(EX_FRAGDIR)/timestamp
 
 pyxplot-plain.pdf: pyxplot-plain.ps
@@ -77,7 +77,7 @@ pyxplot-plain.dvi: $(SOURCES) $(EX_EPSDIR)/timestamp $(EX_TEXDIR)/timestamp $(EX
 	latex pyxplot-plain.tex
 
 test-examples:
-	python makeFigureEps.py $(PYXPLOT) test
+	python3 makeFigureEps.py $(PYXPLOT) test
 	for item in `cat examples.testlist`; do \
 	   export e=$(EX_EPSDIR)/$${item}.eps; \
 	   ls -l $$e; \
