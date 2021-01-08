@@ -53,7 +53,7 @@ def line_texify(line,userInput):
 files = glob.glob("fragments/*.ppl")
 files.sort()
 for fname in files:
-  print "Converting fragment to latex <%s>..."%os.path.split(fname)[1]
+  print("Converting fragment to latex <%s>..."%os.path.split(fname)[1])
   out       = os.path.join("fragments","tex",os.path.split(fname)[1][:-4]+".tex")
   linecount = 0
   lines     = open(fname).readlines()
@@ -69,7 +69,7 @@ for fname in files:
       prompt = "......."
       continue
     prompt = "pyxplot"
-    sp = subprocess.Popen([pyxplot], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    sp = subprocess.Popen([pyxplot], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='UTF-8')
     o  = sp.communicate(input="\n".join([ ll.strip() for ll in lines[0:i+1]])) # returns (stdout,stderr)
     if (len(o[1])>0): raise RuntimeError("pyxplot failed: %s"%o[1])
     olines = o[0].strip().split('\n')

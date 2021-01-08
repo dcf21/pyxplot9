@@ -37,7 +37,7 @@ else      : files = glob.glob("examples/ex_*.ppl")
 files.sort()
 
 for fname in files:
-  print "Working on example <%s>..."%os.path.split(fname)[1]
+  print("Working on example <%s>..."%os.path.split(fname)[1])
   status = os.system("%s %s"%(pyxplot,fname))
   if (status): raise RuntimeError("pyxplot failed")
 
@@ -46,7 +46,7 @@ if not testing:
   files = glob.glob("examples/eps/*.eps")
   files.sort()
   for eps in files:
-    print "Converting example <%s> to pdf..."%os.path.split(eps)[1]
+    print("Converting example <%s> to pdf..."%os.path.split(eps)[1])
     pdf = re.sub(r"\.eps",".pdf",eps)
     #png = re.sub(r"\.eps",".png",eps)
     os.system("gs -dQUIET -dSAFER -P- -dBATCH -dNOPAUSE -dEPSCrop -sDEVICE=pdfwrite -sOutputFile=%s %s"%(pdf,eps))

@@ -79,7 +79,7 @@ def makeTeX(fname, counter, linelist):
 files = glob.glob("examples/ex_*.ppl")
 files.sort()
 for fname in files:
-  print "Converting example to latex <%s>..."%os.path.split(fname)[1]
+  print("Converting example to latex <%s>..."%os.path.split(fname)[1])
   buffer    = []
   buffering = False
   counter   = 1
