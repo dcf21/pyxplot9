@@ -643,6 +643,11 @@ int dviSpecialImplement(pplerr_context *ec, dviInterpreterState *interp)
    {
     if ((err=dviSpecialColourCommand(ec, interp, interp->spString+6))!=0) return err;
    }
+  // Test for a header string
+  else if (strncmp(interp->spString, "header=", 7) == 0)
+   {
+    if (DEBUG) { sprintf(ec->tempErrStr, "DVI: dvi special to load header ignored"); ppl_log(ec, NULL); }
+   }
   else
    {
     // Unhandled special command (e.g. includegraphics)
