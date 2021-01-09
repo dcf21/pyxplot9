@@ -26,4 +26,4 @@ jobs:
       run: make
 
     - name: test
-      run: make -C doc test-examples
+      run: make test
