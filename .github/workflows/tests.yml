@@ -17,7 +17,7 @@ jobs:
     - name: install build dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install fftw3-dev ghostscript imagemagick libcfitsio-dev libgsl-dev libkpathsea-dev libncurses-dev libpng-dev libreadline-dev libxml2-dev pkg-config python3 texlive-fonts-recommended texlive-latex-base texlive-latex-extra wget zlib1g-dev texlive-fonts-extra texlive-latex-recommended texlive-pstricks
+        sudo apt-get install libfftw3-dev ghostscript imagemagick libcfitsio-dev libgsl-dev libkpathsea-dev libncurses-dev libpng-dev libreadline-dev libxml2-dev pkg-config python3 texlive-fonts-recommended texlive-latex-base texlive-latex-extra wget zlib1g-dev texlive-fonts-extra texlive-latex-recommended texlive-pstricks
 
     - name: configure
       run: ./configure
