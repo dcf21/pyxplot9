@@ -175,7 +175,7 @@ $(LOCAL_BINDIR)/debug/pyxplot:   $(PPL_OBJECTS_DEBUG)
 
 $(LOCAL_BINDIR)/install/pyxplot: $(PPL_OBJECTS_INSTALL)
 	mkdir -p $(LOCAL_BINDIR)/install
-	echo "The files in this directory are binaries intended to be installed with 'make install'. They should not be used in their present location, as they contain hard-coded links to files which are created by the 'make install' step." > $(LOCAL_BINDIR)/debug/README
+	echo "The files in this directory are binaries intended to be installed with 'make install'. They should not be used in their present location, as they contain hard-coded links to files which are created by the 'make install' step." > $(LOCAL_BINDIR)/install/README
 	$(LINK) $(LDFLAGS) $(PPL_OBJECTS_INSTALL) $(LIBS) -o $(LOCAL_BINDIR)/install/pyxplot
 
 #
